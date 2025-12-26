@@ -119,6 +119,11 @@
 #include <suil/suil.h>
 #endif
 
+#ifdef HAVE_SRATOM
+#include <serd/serd.h>
+#include <sratom/sratom.h>
+#endif
+
 // Compatibility for old LV2
 #ifndef LV2_ATOM_CONTENTS_CONST
 #define LV2_ATOM_CONTENTS_CONST(type, atom) \
@@ -155,6 +160,7 @@ uint32_t      LV2Plugin::_ui_background_color  = 0x000000ff; // RGBA
 uint32_t      LV2Plugin::_ui_foreground_color  = 0xffffffff; // RGBA
 uint32_t      LV2Plugin::_ui_contrasting_color = 0x33ff33ff; // RGBA
 unsigned long LV2Plugin::_ui_transient_win_id  = 0;
+float         LV2Plugin::_ui_update_hz         = 25;
 
 
 class LV2World {
@@ -191,6 +197,7 @@ public:
 	LilvNode* lv2_connectionOptional;
 	LilvNode* lv2_designation;
 	LilvNode* lv2_enumeration;
+	LilvNode* lv2_enabled;
 	LilvNode* lv2_freewheeling;
 	LilvNode* lv2_inPlaceBroken;
 	LilvNode* lv2_isSideChain;
@@ -203,6 +210,7 @@ public:
 	LilvNode* lv2_sampleRate;
 	LilvNode* lv2_toggled;
 	LilvNode* midi_MidiEvent;
+	LilvNode* rdf_type;
 	LilvNode* rdfs_comment;
 	LilvNode* rdfs_label;
 	LilvNode* rdfs_range;
@@ -218,6 +226,7 @@ public:
 	LilvNode* units_unit;
 	LilvNode* units_render;
 	LilvNode* units_midiNote;
+	LilvNode* patch_readable;
 	LilvNode* patch_writable;
 	LilvNode* patch_Message;
 	LilvNode* opts_requiredOptions;
@@ -238,6 +247,10 @@ public:
 	LilvNode* inline_display_in_gui; // lv2:optionalFeature
 	LilvNode* inline_mixer_control; // lv2:PortProperty
 	LilvNode* export_interface; // lv2:extensionData
+#endif
+
+#ifdef HAVE_SRATOM
+	SerdEnv* serd_env;
 #endif
 
 private:
@@ -649,6 +662,10 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 		  sizeof(int32_t), atom_Bool, &_ui_style_flat },
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://kxstudio.sf.net/ns/lv2ext/props#TransientWindowId"),
 		  sizeof(int32_t), atom_Long, &_ui_transient_win_id },
+#if 0
+		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://lv2plug.in/ns/extensions/ui#updateRate"),
+		  sizeof(int32_t), atom_Float, &_ui_update_hz },
+#endif
 		{ LV2_OPTIONS_INSTANCE, 0, 0, 0, 0, NULL }
 	};
 
@@ -1010,7 +1027,8 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 		}
 	}
 
-	load_supported_properties(_property_descriptors);
+	load_supported_properties(_property_descriptors, true);
+	load_supported_properties(_ro_property_descriptors, false);
 	allocate_atom_event_buffers();
 
 	/* Load default state */
@@ -1915,6 +1933,25 @@ LV2Plugin::write_from_ui(uint32_t       index,
 		return false;
 	}
 
+#ifdef HAVE_SRATOM
+	if (DEBUG_ENABLED (DEBUG::LV2AtomFromUI)) {
+		Sratom* sratom = sratom_new (_uri_map.urid_map());
+		sratom_set_env(sratom, _world.serd_env);
+		const LV2_Atom* atom = (LV2_Atom const*)(body);
+		char* const str = sratom_to_turtle (sratom,
+				_uri_map.urid_unmap(),
+				"ardour:",
+				NULL,
+				NULL,
+				atom->type,
+				atom->size,
+				LV2_ATOM_BODY_CONST(atom));
+		DEBUG_TRACE (DEBUG::LV2AtomFromUI, string_compose ("Plugin[%1] <- UI: port %2 (%3 bytes)\n%4\n", name(), index, atom->size, str));
+		free (str);
+		sratom_free (sratom);
+	}
+#endif
+
 	Glib::Threads::Mutex::Lock lm (_slave_lock, Glib::Threads::TRY_LOCK);
 	if (lm.locked()) {
 		for (auto const& i : _slaves) {
@@ -2052,6 +2089,10 @@ LV2Plugin::get_property_descriptor(uint32_t id) const
 	if (p != _property_descriptors.end()) {
 		return p->second;
 	}
+	p = _ro_property_descriptors.find(id);
+	if (p != _ro_property_descriptors.end()) {
+		return p->second;
+	}
 	return Plugin::get_property_descriptor(id);
 }
 
@@ -2135,16 +2176,20 @@ load_parameter_descriptor(LV2World&            world,
 }
 
 void
-LV2Plugin::load_supported_properties(PropertyDescriptors& descs)
+LV2Plugin::load_supported_properties(PropertyDescriptors& descs, bool writable)
 {
 	LilvWorld*       lworld     = _world.world;
 	const LilvNode*  subject    = lilv_plugin_get_uri(_impl->plugin);
-	LilvNodes*       properties = lilv_world_find_nodes(
-		lworld, subject, _world.patch_writable, NULL);
+	LilvNodes*       properties = lilv_world_find_nodes(lworld, subject, writable ? _world.patch_writable : _world.patch_readable, NULL);
 	LILV_FOREACH(nodes, p, properties) {
-		// Get label and range
 		const LilvNode* prop  = lilv_nodes_get(properties, p);
-		LilvNode*       range = get_value(lworld, prop, _world.rdfs_range);
+		/* check if contrl is r/w */
+		if (!writable &&  lilv_world_ask(lworld, subject,_world.patch_writable, prop)) {
+			continue;
+		}
+
+		// Get label and range
+		LilvNode* range = get_value(lworld, prop, _world.rdfs_range);
 		if (!range) {
 			warning << string_compose(_("LV2<%1>: property <%2> has no range datatype, ignoring"),
 			                          name(), lilv_node_as_uri(prop)) << endmsg;
@@ -2493,36 +2538,48 @@ LV2Plugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const
 	LilvNodes* groups = lilv_port_get_value (_impl->plugin, pport, _world.groups_group);
 	if (lilv_nodes_size (groups) > 0) {
 		const LilvNode* group = lilv_nodes_get_first (groups);
-		LilvNodes* grouplabel = lilv_world_find_nodes (_world.world, group, _world.rdfs_label, NULL);
 
 		/* get the name of the port-group */
-		if (lilv_nodes_size (grouplabel) > 0) {
-			const LilvNode* grpname = lilv_nodes_get_first (grouplabel);
+		LilvNode* grpname = lilv_world_get (_world.world, group, _world.rdfs_label, NULL);
+		if (grpname) {
 			iod.group_name = lilv_node_as_string (grpname);
 			// TODO set iod.bus_number (nth group)
 		}
-		lilv_nodes_free (grouplabel);
+		lilv_node_free (grpname);
 
 		/* get all port designations.
 		 * we're interested in e.g. lv2:designation pg:right */
 		LilvNodes* designations = lilv_port_get_value (_impl->plugin, pport, _world.lv2_designation);
 		if (lilv_nodes_size (designations) > 0) {
 			/* get all pg:elements of the pg:group */
-			LilvNodes* group_childs = lilv_world_find_nodes (_world.world, group, _world.groups_element, NULL);
-			if (lilv_nodes_size (group_childs) > 0) {
-				/* iterate over all port designations .. */
-				LILV_FOREACH (nodes, i, designations) {
-					const LilvNode* designation = lilv_nodes_get (designations, i);
-					/* match the lv2:designation's element against the port-group's element */
-					LILV_FOREACH (nodes, j, group_childs) {
-						const LilvNode* group_element = lilv_nodes_get (group_childs, j);
-						LilvNodes* elem = lilv_world_find_nodes (_world.world, group_element, _world.lv2_designation, designation);
+			LilvNodes* elements = lilv_world_find_nodes (_world.world, group, _world.groups_element, NULL);
+			if (!elements) {
+				/* group itself doesn't have elements, try its classes (like pg:StereoGroup) */
+				LilvNodes* group_classes = lilv_world_find_nodes (_world.world, group, _world.rdf_type, NULL);
+				LILV_FOREACH (nodes, i, group_classes) {
+					const LilvNode* group_class = lilv_nodes_get (group_classes, i);
+					elements = lilv_world_find_nodes (_world.world, group_class, _world.groups_element, NULL);
+					if (elements) {
+						break;
+					}
+				}
+				lilv_nodes_free(group_classes);
+			}
+
+			/* iterate over all port designations .. */
+			LILV_FOREACH (nodes, i, designations) {
+				const LilvNode* designation = lilv_nodes_get (designations, i);
+				/* search the group for an element with the same designation as the port */
+				LILV_FOREACH (nodes, j, elements) {
+					const LilvNode* element = lilv_nodes_get (elements, j);
+					if (lilv_world_ask (_world.world, element, _world.lv2_designation, designation)) {
 						/* found it. Now look up the index (channel-number) of the pg:Element */
-						if (lilv_nodes_size (elem) > 0) {
-							LilvNodes* idx = lilv_world_find_nodes (_world.world, lilv_nodes_get_first (elem), _world.lv2_index, NULL);
-							if (lilv_node_is_int (lilv_nodes_get_first (idx))) {
-								iod.group_channel = lilv_node_as_int(lilv_nodes_get_first (idx));
-							}
+						LilvNode* idx = lilv_world_get (_world.world, element, _world.lv2_index, NULL);
+						const bool is_int = lilv_node_is_int(idx);
+						iod.group_channel = lilv_node_as_int(idx);
+						lilv_node_free(idx);
+						if (is_int) {
+							break;
 						}
 					}
 				}
@@ -2545,8 +2602,11 @@ LV2Plugin::describe_parameter(Evoral::Parameter which)
 
 		const LilvPort* port = lilv_plugin_get_port_by_index(_impl->plugin, which.id());
 
-		if (lilv_port_has_property(_impl->plugin, port, _world.ext_notOnGUI)) {
-			return X_("hidden");
+		if (lilv_port_has_property(_impl->plugin, port, _world.ext_notOnGUI)) { //
+			const LilvPort* bypass = lilv_plugin_get_port_by_designation(_impl->plugin, _world.lv2_InputPort, _world.lv2_enabled);
+			if (port != bypass) {
+				return X_("hidden");
+			}
 		}
 
 		const LilvPort* fwport = lilv_plugin_get_port_by_designation(_impl->plugin, _world.lv2_InputPort, _world.lv2_freewheeling);
@@ -2790,8 +2850,6 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 {
 	DEBUG_TRACE(DEBUG::LV2, string_compose("%1 run %2 offset %3\n", name(), nframes, offset));
 	Plugin::connect_and_run(bufs, start, end, speed, in_map, out_map, nframes, offset);
-
-	cycles_t then = get_cycles();
 
 	/* remain at zero during pre-roll at zero */
 	speed = end > 0 ? speed : 0;
@@ -3246,34 +3304,58 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 										const char* path          = (const char*)LV2_ATOM_BODY_CONST(value);
 										_property_values[prop_id] = Variant(Variant::PATH, path);
 									}
-									if (value->type == _uri_map.urids.atom_Float) {
+									else if (value->type == _uri_map.urids.atom_Float) {
 										const float* val          = (const float*)LV2_ATOM_BODY_CONST(value);
 										_property_values[prop_id] = Variant(Variant::FLOAT, *val);
+									}
+									else if (value->type == _uri_map.urids.atom_Bool) {
+										const float* val          = (const float*)LV2_ATOM_BODY_CONST(value);
+										_property_values[prop_id] = Variant(Variant::BOOL, *val);
 									}
 									// TODO add support for other props (Int, Bool, ..)
 
 									// TODO: This should emit the control's Changed signal
 									PropertyChanged(prop_id, _property_values[prop_id]);
 								} else {
+#ifndef NDEBUG
 									std::cerr << "warning: patch:Set for unknown property" << std::endl;
+#endif
 								}
 							} else {
+#ifndef NDEBUG
 								std::cerr << "warning: patch:Set for unsupported property" << std::endl;
+#endif
 							}
 						}
 					}
 				}
 
 				if (!_to_ui) continue;
+
+#ifdef HAVE_SRATOM
+				if (DEBUG_ENABLED (DEBUG::LV2AtomToUI)) {
+					Sratom* sratom = sratom_new (_uri_map.urid_map());
+					sratom_set_env(sratom, _world.serd_env);
+					LV2_Atom const* atom = (LV2_Atom*)(data - sizeof(LV2_Atom));
+					char* const str = sratom_to_turtle (sratom,
+							_uri_map.urid_unmap(),
+							"ardour:",
+							NULL,
+							NULL,
+							atom->type,
+							atom->size,
+							LV2_ATOM_BODY_CONST(atom));
+					DEBUG_TRACE (DEBUG::LV2AtomToUI, string_compose ("Plugin[%1] -> UI: port %2 (%3 bytes)\n%4\n", name(), port_index, atom->size, str));
+					free (str);
+					sratom_free (sratom);
+				}
+#endif
 				write_to_ui(port_index, URIMap::instance().urids.atom_eventTransfer,
 				            size + sizeof(LV2_Atom),
 				            data - sizeof(LV2_Atom));
 			}
 		}
 	}
-
-	cycles_t now = get_cycles();
-	set_cycles((uint32_t)(now - then));
 
 	// Update expected transport information for next cycle so we can detect changes
 	_next_cycle_speed = speed;
@@ -3333,23 +3415,10 @@ uint32_t
 LV2Plugin::designated_bypass_port ()
 {
 	const LilvPort* port = NULL;
-	LilvNode* designation = lilv_new_uri (_world.world, LV2_CORE_PREFIX "enabled");
-	port = lilv_plugin_get_port_by_designation (
-			_impl->plugin, _world.lv2_InputPort, designation);
-	lilv_node_free(designation);
+	port = lilv_plugin_get_port_by_designation (_impl->plugin, _world.lv2_InputPort, _world.lv2_enabled);
 	if (port) {
 		return lilv_port_get_index (_impl->plugin, port);
 	}
-#ifdef LV2_EXTENDED
-	/* deprecated on 2016-Sep-18 in favor of lv2:enabled */
-	designation = lilv_new_uri (_world.world, LV2_PROCESSING_URI__enable);
-	port = lilv_plugin_get_port_by_designation (
-			_impl->plugin, _world.lv2_InputPort, designation);
-	lilv_node_free(designation);
-	if (port) {
-		return lilv_port_get_index (_impl->plugin, port);
-	}
-#endif
 	return UINT32_MAX;
 }
 
@@ -3534,8 +3603,10 @@ LV2World::LV2World()
 	lv2_toggled            = lilv_new_uri(world, LV2_CORE__toggled);
 	lv2_designation        = lilv_new_uri(world, LV2_CORE__designation);
 	lv2_enumeration        = lilv_new_uri(world, LV2_CORE__enumeration);
+	lv2_enabled            = lilv_new_uri(world, LV2_CORE_PREFIX "enabled");
 	lv2_freewheeling       = lilv_new_uri(world, LV2_CORE__freeWheeling);
 	midi_MidiEvent         = lilv_new_uri(world, LILV_URI_MIDI_EVENT);
+	rdf_type               = lilv_new_uri(world, LILV_NS_RDF "type");
 	rdfs_comment           = lilv_new_uri(world, LILV_NS_RDFS "comment");
 	rdfs_label             = lilv_new_uri(world, LILV_NS_RDFS "label");
 	rdfs_range             = lilv_new_uri(world, LILV_NS_RDFS "range");
@@ -3551,6 +3622,7 @@ LV2World::LV2World()
 	units_hz               = lilv_new_uri(world, LV2_UNITS__hz);
 	units_midiNote         = lilv_new_uri(world, LV2_UNITS__midiNote);
 	units_db               = lilv_new_uri(world, LV2_UNITS__db);
+	patch_readable         = lilv_new_uri(world, LV2_PATCH__readable);
 	patch_writable         = lilv_new_uri(world, LV2_PATCH__writable);
 	patch_Message          = lilv_new_uri(world, LV2_PATCH__Message);
 	opts_requiredOptions   = lilv_new_uri(world, LV2_OPTIONS__requiredOption);
@@ -3571,6 +3643,14 @@ LV2World::LV2World()
 	bufz_nominalBlockLength  = lilv_new_uri(world, "http://lv2plug.in/ns/ext/buf-size#nominalBlockLength");
 	bufz_coarseBlockLength   = lilv_new_uri(world, "http://lv2plug.in/ns/ext/buf-size#coarseBlockLength");
 	state_loadDefaultState   = lilv_new_uri(world, LV2_STATE_PREFIX "loadDefaultState");
+
+#ifdef HAVE_SRATOM
+	serd_env = serd_env_new (NULL);
+	serd_env_set_prefix_from_strings(serd_env, (const uint8_t*)"patch", (const uint8_t*)LV2_PATCH_PREFIX);
+	serd_env_set_prefix_from_strings(serd_env, (const uint8_t*)"time", (const uint8_t*)LV2_TIME_PREFIX);
+	serd_env_set_prefix_from_strings(serd_env, (const uint8_t*)"xsd", (const uint8_t*)"http://www.w3.org/2001/XMLSchema#");
+#endif
+
 }
 
 LV2World::~LV2World()
@@ -3578,6 +3658,9 @@ LV2World::~LV2World()
 	if (!world) {
 		return;
 	}
+#ifdef HAVE_SRATOM
+	serd_env_free (serd_env);
+#endif
 	lilv_node_free(state_loadDefaultState);
 	lilv_node_free(bufz_coarseBlockLength);
 	lilv_node_free(bufz_nominalBlockLength);
@@ -3598,6 +3681,7 @@ LV2World::~LV2World()
 	lilv_node_free(patch_Message);
 	lilv_node_free(opts_requiredOptions);
 	lilv_node_free(patch_writable);
+	lilv_node_free(patch_readable);
 	lilv_node_free(units_hz);
 	lilv_node_free(units_midiNote);
 	lilv_node_free(units_db);
@@ -3613,9 +3697,11 @@ LV2World::~LV2World()
 	lilv_node_free(rdfs_comment);
 	lilv_node_free(rdfs_label);
 	lilv_node_free(rdfs_range);
+	lilv_node_free(rdf_type);
 	lilv_node_free(midi_MidiEvent);
 	lilv_node_free(lv2_designation);
 	lilv_node_free(lv2_enumeration);
+	lilv_node_free(lv2_enabled);
 	lilv_node_free(lv2_freewheeling);
 	lilv_node_free(lv2_toggled);
 	lilv_node_free(lv2_sampleRate);

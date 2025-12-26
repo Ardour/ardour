@@ -26,6 +26,7 @@
 
 #include "ardour/midi_region.h"
 
+#include "editing_context.h"
 #include "edit_note_dialog.h"
 #include "midi_view.h"
 #include "note_base.h"
@@ -43,8 +44,8 @@ using namespace Gtkmm2ext;
  *    @param n Notes to edit.
  */
 
-EditNoteDialog::EditNoteDialog (MidiView* rv, set<NoteBase*> n)
-	: ArdourDialog (_("Note"))
+EditNoteDialog::EditNoteDialog (Gtk::Window& parent, MidiView* rv, set<NoteBase*> n)
+	: ArdourDialog (parent, _("Note"))
 	, _region_view (rv)
 	, _events (n)
 	, _channel_all (_("Set selected notes to this channel"))
@@ -96,7 +97,7 @@ EditNoteDialog::EditNoteDialog (MidiView* rv, set<NoteBase*> n)
 	table->attach (_time_all, 2, 3, r, r + 1);
 	++r;
 
-	// XXXX _time_clock.set_session (_region_view->get_time_axis_view().session ());
+	_time_clock.set_session (_region_view->editing_context().session());
 	_time_clock.set_mode (AudioClock::BBT);
 
 	/* Calculate absolute position of the event on time timeline */
@@ -110,7 +111,7 @@ EditNoteDialog::EditNoteDialog (MidiView* rv, set<NoteBase*> n)
 	table->attach (_length_all, 2, 3, r, r + 1);
 	++r;
 
-	// XXXX _length_clock.set_session (_region_view->get_time_axis_view().session ());
+	_length_clock.set_session (_region_view->editing_context().session ());
 	_length_clock.set_mode (AudioClock::BBT);
 	_length_clock.set_duration (timecnt_t ((*_events.begin())->note()->length()), true);
 
@@ -228,15 +229,15 @@ EditNoteDialog::done (int r)
 
 	}
 
+	list<Evoral::event_id_t> notes;
+	for (set<NoteBase*>::iterator i = _events.begin(); i != _events.end(); ++i) {
+		notes.push_back ((*i)->note()->id());
+	}
+
 	if (had_change) {
 		_region_view->apply_note_diff ();
 	} else {
 		_region_view->abort_note_diff ();
-	}
-
-	list<Evoral::event_id_t> notes;
-	for (set<NoteBase*>::iterator i = _events.begin(); i != _events.end(); ++i) {
-		notes.push_back ((*i)->note()->id());
 	}
 
 	_region_view->select_notes (notes, true);

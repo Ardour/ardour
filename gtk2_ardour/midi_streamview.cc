@@ -30,7 +30,7 @@
 #include <gtkmm2ext/gtk_ui.h>
 
 #include "canvas/rectangle.h"
-#include "canvas/line_set.h"
+#include "canvas/rect_set.h"
 
 #include "ardour/midi_region.h"
 #include "ardour/midi_source.h"
@@ -64,7 +64,7 @@ using namespace Editing;
 
 MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 	: StreamView (tv)
-	, MidiViewBackground (_canvas_group)
+	, MidiViewBackground (_canvas_group, tv.editor())
 	, _updates_suspended (false)
 {
 	/* use a dedicated group for MIDI regions (on top of the grid and lines) */
@@ -92,6 +92,17 @@ MidiStreamView::~MidiStreamView ()
 	undisplay_track ();
 }
 
+InstrumentInfo*
+MidiStreamView::instrument_info() const
+{
+	std::shared_ptr<Route> r = _trackview.route();
+	if (!r) {
+		return nullptr;
+	}
+
+	return &r->instrument_info();
+}
+
 void
 MidiStreamView::parameter_changed (string const & param)
 {
@@ -111,11 +122,11 @@ MidiStreamView::create_region_view (std::shared_ptr<Region> r, bool /*wfd*/, boo
 	if (recording) {
 		region_view = new MidiRegionView (
 			_region_group, _trackview.editor(), _trackview, region,
-			_samples_per_pixel, MidiViewBackground::region_color(), recording,
+			_samples_per_pixel, StreamView::region_color, recording,
 			TimeAxisViewItem::Visibility(TimeAxisViewItem::ShowFrame));
 	} else {
 		region_view = new MidiRegionView (_region_group, _trackview.editor(), _trackview, region,
-		                                  _samples_per_pixel, MidiViewBackground::region_color());
+		                                  _samples_per_pixel, StreamView::region_color);
 	}
 
 	region_view->init (false);
@@ -196,7 +207,9 @@ MidiStreamView::display_region (MidiRegionView* region_view, bool)
 		return;
 	}
 
-	_range_dirty = update_data_note_range (source->model()->lowest_note(), source->model()->highest_note());
+	if (!source->model()->empty()) {
+		_range_dirty = update_data_note_range (source->model()->lowest_note(), source->model()->highest_note());
+	}
 
 	// Display region contents
 	region_view->display_model (source->model());
@@ -208,7 +221,7 @@ MidiStreamView::display_track (std::shared_ptr<Track> tr)
 {
 	StreamView::display_track (tr);
 
-	draw_note_lines();
+	setup_note_lines();
 
 	NoteRangeChanged(); /* EMIT SIGNAL*/
 }
@@ -421,7 +434,7 @@ MidiStreamView::update_rec_box ()
 	region->set_length (timecnt_t (_trackview.track()->current_capture_end () - _trackview.track()->current_capture_start()));
 
 	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rec_regions.back().second);
-	mrv->extend_active_notes ();
+	mrv->extend_unfinished_live_notes ();
 }
 
 
@@ -442,7 +455,7 @@ MidiStreamView::resume_updates ()
 {
 	_updates_suspended = false;
 
-	draw_note_lines ();
+	setup_note_lines ();
 	apply_note_range_to_children ();
 
 	_canvas_group->redraw ();
@@ -520,8 +533,3 @@ MidiStreamView::record_layer_check (std::shared_ptr<ARDOUR::Region> r, samplepos
 	check_record_layers (r, t);
 }
 
-double
-MidiStreamView::y_position () const
-{
-	return _trackview.y_position();
-}

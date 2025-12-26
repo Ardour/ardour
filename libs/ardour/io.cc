@@ -28,7 +28,6 @@
 #include <cmath>
 #include <vector>
 
-#include <unistd.h>
 #include <locale.h>
 #include <errno.h>
 
@@ -224,8 +223,8 @@ IO::remove_port (std::shared_ptr<Port> port, void* src)
 	ChanCount after = before;
 	after.set (port->type(), after.get (port->type()) - 1);
 
-	std::optional<bool> const r = PortCountChanging (after); /* EMIT SIGNAL */
-	if (r.value_or (false)) {
+	std::optional<int> const r = PortCountChanging (after); /* EMIT SIGNAL */
+	if (r.value_or (0)) {
 		return -1;
 	}
 
@@ -296,8 +295,8 @@ IO::add_port (string destination, void* src, DataType type)
 	ChanCount after = before;
 	after.set (type, after.get (type) + 1);
 
-	std::optional<bool> const r = PortCountChanging (after); /* EMIT SIGNAL */
-	if (r.value_or (false)) {
+	std::optional<int> const r = PortCountChanging (after); /* EMIT SIGNAL */
+	if (r.value_or (0)) {
 		return -1;
 	}
 

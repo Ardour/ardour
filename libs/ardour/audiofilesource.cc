@@ -26,10 +26,8 @@
 
 #include <vector>
 
-#include <sys/time.h>
 #include <sys/stat.h>
 #include <stdio.h> // for rename(), sigh
-#include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
 
@@ -251,10 +249,6 @@ AudioFileSource::set_state (const XMLNode& node, int version)
 void
 AudioFileSource::mark_streaming_write_completed (const WriterLock& lock, Temporal::timecnt_t const & duration)
 {
-	if (!writable()) {
-		return;
-	}
-
 	AudioSource::mark_streaming_write_completed (lock, duration);
 }
 

@@ -41,13 +41,20 @@
 #include "widgets/ardour_button.h"
 #include "widgets/ardour_icon.h"
 
+#include "ardour_ui.h"
 #include "audio_clip_editor.h"
 #include "audio_clock.h"
+#include "boundary.h"
 #include "editor_automation_line.h"
+#include "editor_cursors.h"
+#include "editor_drag.h"
 #include "control_point.h"
 #include "editor.h"
+#include "keyboard.h"
 #include "region_view.h"
+#include "timers.h"
 #include "ui_config.h"
+#include "verbose_cursor.h"
 
 #include "pbd/i18n.h"
 
@@ -60,340 +67,400 @@ using namespace ArdourWidgets;
 using std::max;
 using std::min;
 
-Glib::RefPtr<Gtk::ActionGroup> ClipEditorBox::clip_editor_actions;
-
 void
-ClipEditorBox::init ()
+AudioClipEditor::ClipMetric::get_marks (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t lower, int64_t upper, int maxchars) const
 {
-	Bindings* bindings = Bindings::get_bindings (X_("Clip Editing"));
-
-	register_clip_editor_actions (bindings);
-
-	//_track_canvas_viewport->canvas()->set_data ("ardour-bindings", midi_bindings);
+	ace.metric_get_minsec (marks, lower, upper, maxchars);
 }
 
-void
-ClipEditorBox::register_clip_editor_actions (Bindings* clip_editor_bindings)
-{
-	clip_editor_actions = ActionManager::create_action_group (clip_editor_bindings, X_("ClipEditing"));
-
-	/* two versions to allow same action for Delete and Backspace */
-
-	// ActionManager::register_action (clip_editor_actions, X_("zoom-in"), _("Zoom In"), sigc::mem_fun (*this, &ClipEditorBox::zoom_in));
-	// ActionManager::register_action (clip_editor_actions, X_("zoom-in"), _("Zoom In"), sigc::mem_fun (*this, &ClipEditorBox::zoom_out));
-}
-
-void
-AudioClipEditor::ClipBBTMetric::get_marks (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t lower, int64_t upper, int maxchars) const
-{
-	TriggerPtr trigger (tref.trigger());
-	if (!trigger) {
-		std::cerr << "No trigger\n";
-		return;
-	}
-
-	std::shared_ptr<AudioTrigger> at = std::dynamic_pointer_cast<AudioTrigger> (trigger);
-	if (!at) {
-		return;
-	}
-
-	ArdourCanvas::Ruler::Mark mark;
-
-	assert (at->segment_tempo() > 0.);
-
-	Temporal::Tempo tempo (at->segment_tempo(), at->meter().divisions_per_bar());
-
-	std::cerr << "get marks between " << lower << " .. " << upper << " with tempo " << tempo << " upp = " << units_per_pixel << std::endl;
-
-	samplecnt_t samples_per_beat = tempo.samples_per_note_type (TEMPORAL_SAMPLE_RATE);
-	int64_t beat_number = (lower + (samples_per_beat/2)) / samples_per_beat;
-	int64_t last = INT64_MIN;
-	const double scale = UIConfiguration::instance ().get_ui_scale ();
-
-	for (int64_t n = beat_number * samples_per_beat; n < upper; n += samples_per_beat) {
-		/* ensure at least a 15 pixel (scaled) gap between marks */
-		if (marks.empty() || (((n - last) / units_per_pixel) > (15. * scale))) {
-			mark.style    = ArdourCanvas::Ruler::Mark::Major;
-			mark.label    = string_compose ("%1", beat_number);
-			mark.position = n;
-			marks.push_back (mark);
-			beat_number++;
-			last = n;
-		}
-	}
-}
-
-AudioClipEditor::AudioClipEditor ()
-	: clip_metric (0)
-	, _spp (0)
+AudioClipEditor::AudioClipEditor (std::string const & name, bool with_transport)
+	: CueEditor (name, with_transport)
+	, overlay_text (nullptr)
+	, clip_metric (nullptr)
 	, scroll_fraction (0)
-	, current_line_drag (0)
-	, current_scroll_drag (0)
 {
-	const double scale = UIConfiguration::instance ().get_ui_scale ();
+	load_bindings ();
+	register_actions ();
 
-	frame       = new ArdourCanvas::Rectangle (root ());
-	frame->name = "audio clip editor frame";
-	frame->set_fill (false);
-	frame->Event.connect (sigc::mem_fun (*this, &AudioClipEditor::event_handler));
+	build_grid_type_menu ();
+	build_upper_toolbar ();
+	build_canvas ();
+	build_lower_toolbar ();
 
-	/* Scroll bar does not scroll and it outside the frame */
-
-	scroll_bar_trough = new ArdourCanvas::Rectangle (root ());
-	scroll_bar_handle = new ArdourCanvas::Rectangle (scroll_bar_trough);
-	scroll_bar_handle->set_outline (false);
-	scroll_bar_handle->set_corner_radius (5.);
-	scroll_bar_handle->Event.connect (sigc::mem_fun (*this, &AudioClipEditor::scroll_event_handler));
-	scroll_bar_handle->disable_scroll_translation ();
-
-	/* A scrolling container for our waves and lines etc. */
-
-	waves_container = new ArdourCanvas::ScrollGroup (frame, ScrollGroup::ScrollsHorizontally);
-	add_scroller (*waves_container);
-
-	ruler_container = new ArdourCanvas::Container (waves_container);
-	ruler           = new ArdourCanvas::Ruler (ruler_container, 0);
-	ruler->name     = "Clip Editor";
-	ruler->set_font_description (UIConfiguration::instance ().get_SmallerFont ());
-	ruler->set_fill_color (UIConfiguration::instance().color (X_("theme:bg1")));
-	ruler->set_outline_color (UIConfiguration::instance().color (X_("theme:contrasting less")));
-
-	/* the lines */
-
-	line_container = new ArdourCanvas::Container (waves_container);
-
-	const double line_width = 3.;
-
-	start_line = new Line (line_container);
-	start_line->set_outline_width (line_width * scale);
-	end_line = new Line (line_container);
-	end_line->set_outline_width (line_width * scale);
-	loop_line = new Line (line_container);
-	loop_line->set_outline_width (line_width * scale);
-
-	start_line->Event.connect (sigc::bind (sigc::mem_fun (*this, &AudioClipEditor::line_event_handler), start_line));
-	end_line->Event.connect (sigc::bind (sigc::mem_fun (*this, &AudioClipEditor::line_event_handler), end_line));
-	loop_line->Event.connect (sigc::bind (sigc::mem_fun (*this, &AudioClipEditor::line_event_handler), loop_line));
-
-	/* hide lines until there is a region */
-
-	line_container->hide ();
-
-	set_colors ();
+	set_action_defaults ();
 }
+
 
 AudioClipEditor::~AudioClipEditor ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
+	drop_grid ();
 	drop_waves ();
 	delete clip_metric;
 }
 
-bool
-AudioClipEditor::line_event_handler (GdkEvent* ev, ArdourCanvas::Line* l)
+void
+AudioClipEditor::set_action_defaults ()
 {
-	std::cerr << "event type " << Gtkmm2ext::event_type_string (ev->type) << " on line " << std::endl;
+	EC_LOCAL_TEMPO_SCOPE;
 
-	switch (ev->type) {
-		case GDK_BUTTON_PRESS:
-			current_line_drag = new LineDrag (*this, *l);
-			return true;
+	CueEditor::set_action_defaults ();
 
-		case GDK_BUTTON_RELEASE:
-			if (current_line_drag) {
-				current_line_drag->end (&ev->button);
-				delete current_line_drag;
-				current_line_drag = 0;
-				return true;
-			}
-			break;
+	if (grid_actions[Editing::GridTypeMinSec]) {
+		grid_actions[Editing::GridTypeMinSec]->set_active (false);
+		grid_actions[Editing::GridTypeMinSec]->set_active (true);
+	}
+}
 
-		case GDK_MOTION_NOTIFY:
-			if (current_line_drag) {
-				current_line_drag->motion (&ev->motion);
-				return true;
-			}
-			break;
+void
+AudioClipEditor::load_shared_bindings ()
+{
+	EC_LOCAL_TEMPO_SCOPE;
 
-		case GDK_KEY_PRESS:
-			return key_press (&ev->key);
+	/* Full shared binding loading must have preceded this in some other EditingContext */
+	assert (!need_shared_actions);
 
-		default:
-			break;
+	Bindings* b = Bindings::get_bindings (X_("Editing"));
+
+	/* Copy each  shared bindings but give them a new name, which will make them refer to actions
+	 * named after this EditingContext (ie. unique to this EC)
+	 */
+
+	Bindings* shared_bindings = new Bindings (editor_name(), *b);
+	register_common_actions (shared_bindings, editor_name());
+	shared_bindings->associate ();
+
+	/* Attach bindings to the canvas for this editing context */
+
+	bindings.push_back (shared_bindings);
+}
+
+void
+AudioClipEditor::pack_inner (Gtk::Box& box)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	/* No snap, no grid selections until elastic audio */
+	// box.pack_start (snap_box, false, false);
+	// box.pack_start (grid_box, false, false);
+}
+
+void
+AudioClipEditor::pack_outer (Gtk::Box& box)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	if (with_transport_controls) {
+		box.pack_start (play_box, false, false, 12);
+	}
+
+	box.pack_start (rec_box, false, false);
+}
+
+void
+AudioClipEditor::build_lower_toolbar ()
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	_toolbox.pack_start (*_canvas_hscrollbar, false, false);
+}
+
+void
+AudioClipEditor::build_canvas ()
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	_canvas.set_background_color (UIConfiguration::instance().color ("arrange base"));
+	_canvas.signal_event().connect (sigc::mem_fun (*this, &CueEditor::canvas_pre_event), false);
+	_canvas.use_nsglview (UIConfiguration::instance().get_nsgl_view_mode () == NSGLHiRes);
+
+	_canvas.PreRender.connect (sigc::mem_fun(*this, &EditingContext::pre_render));
+
+	/* scroll group for items that should not automatically scroll
+	 *  (e.g verbose cursor). It shares the canvas coordinate space.
+	*/
+	no_scroll_group = new ArdourCanvas::Container (_canvas.root());
+
+	h_scroll_group = new ArdourCanvas::ScrollGroup (_canvas.root(), ArdourCanvas::ScrollGroup::ScrollsHorizontally);
+	CANVAS_DEBUG_NAME (h_scroll_group, "audioclip h scroll");
+	_canvas.add_scroller (*h_scroll_group);
+
+
+	v_scroll_group = new ArdourCanvas::ScrollGroup (_canvas.root(), ArdourCanvas::ScrollGroup::ScrollsVertically);
+	CANVAS_DEBUG_NAME (v_scroll_group, "audioclip v scroll");
+	_canvas.add_scroller (*v_scroll_group);
+
+	hv_scroll_group = new ArdourCanvas::ScrollGroup (_canvas.root(),
+	                                                 ArdourCanvas::ScrollGroup::ScrollSensitivity (ArdourCanvas::ScrollGroup::ScrollsVertically|
+		                ArdourCanvas::ScrollGroup::ScrollsHorizontally));
+	CANVAS_DEBUG_NAME (hv_scroll_group, "audioclip hv scroll");
+	_canvas.add_scroller (*hv_scroll_group);
+
+	cursor_scroll_group = new ArdourCanvas::ScrollGroup (_canvas.root(), ArdourCanvas::ScrollGroup::ScrollsHorizontally);
+	CANVAS_DEBUG_NAME (cursor_scroll_group, "audioclip cursor scroll");
+	_canvas.add_scroller (*cursor_scroll_group);
+
+	/*a group to hold global rects like punch/loop indicators */
+	global_rect_group = new ArdourCanvas::Container (hv_scroll_group);
+	CANVAS_DEBUG_NAME (global_rect_group, "audioclip global rect group");
+
+        transport_loop_range_rect = new ArdourCanvas::Rectangle (global_rect_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, ArdourCanvas::COORD_MAX));
+	CANVAS_DEBUG_NAME (transport_loop_range_rect, "audioclip loop rect");
+	transport_loop_range_rect->hide();
+
+	/*a group to hold time (measure) lines */
+	time_line_group = new ArdourCanvas::Container (h_scroll_group);
+	CANVAS_DEBUG_NAME (time_line_group, "audioclip time line group");
+
+	n_timebars = 0;
+
+	clip_metric = new ClipMetric (*this);
+	main_ruler = new ArdourCanvas::Ruler (time_line_group, clip_metric, ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, timebar_height));
+	main_ruler->set_font_description (UIConfiguration::instance ().get_SmallerFont ());
+	main_ruler->set_fill_color (UIConfiguration::instance().color (X_("ruler base")));
+	main_ruler->set_outline_color (UIConfiguration::instance().color (X_("ruler text")));
+	n_timebars++;
+
+	main_ruler->Event.connect (sigc::mem_fun (*this, &CueEditor::ruler_event));
+
+	data_group = new ArdourCanvas::Container (hv_scroll_group);
+	CANVAS_DEBUG_NAME (data_group, "cue data group");
+
+	data_group->set_position (ArdourCanvas::Duple (_timeline_origin, timebar_height * n_timebars));
+	no_scroll_group->set_position (ArdourCanvas::Duple (_timeline_origin, timebar_height * n_timebars));
+	cursor_scroll_group->set_position (ArdourCanvas::Duple (_timeline_origin, timebar_height * n_timebars));
+	h_scroll_group->set_position (Duple (_timeline_origin, 0.));
+
+	// _playhead_cursor = new EditorCursor (*this, &Editor::canvas_playhead_cursor_event, X_("playhead"));
+	_playhead_cursor = new EditorCursor (*this, X_("playhead"));
+	_playhead_cursor->set_sensitive (UIConfiguration::instance().get_sensitize_playhead());
+	_playhead_cursor->set_color (UIConfiguration::instance().color ("play head"));
+	_playhead_cursor->canvas_item().raise_to_top();
+	h_scroll_group->raise_to_top ();
+
+	_canvas.set_name ("AudioClipCanvas");
+	_canvas.add_events (Gdk::POINTER_MOTION_HINT_MASK | Gdk::SCROLL_MASK | Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
+	_canvas.set_can_focus ();
+	_canvas_viewport.signal_size_allocate().connect (sigc::mem_fun(*this, &AudioClipEditor::canvas_allocate), false);
+
+	_toolbox.pack_start (_canvas_viewport, true, true);
+
+	/* the lines */
+
+	line_container = new ArdourCanvas::Container (data_group);
+	CANVAS_DEBUG_NAME (line_container, "audio clip line container");
+
+	start_line = new StartBoundaryRect (line_container);
+	start_line->set_outline_what (ArdourCanvas::Rectangle::RIGHT);
+	CANVAS_DEBUG_NAME (start_line, "start boundary rect");
+
+	end_line = new EndBoundaryRect (line_container);
+	end_line->set_outline_what (ArdourCanvas::Rectangle::LEFT);
+	CANVAS_DEBUG_NAME (end_line, "end boundary rect");
+
+	// loop_line = new Line (line_container);
+	// loop_line->set_outline_width (line_width * scale);
+
+	start_line->Event.connect (sigc::bind (sigc::mem_fun (*this, &AudioClipEditor::start_line_event_handler), start_line));
+	end_line->Event.connect (sigc::bind (sigc::mem_fun (*this, &AudioClipEditor::end_line_event_handler), end_line));
+	// loop_line->Event.connect (sigc::bind (sigc::mem_fun (*this, &AudioClipEditor::line_event_handler), loop_line));
+
+	/* hide lines until there is a region */
+
+	// line_container->hide ();
+
+	_verbose_cursor.reset (new VerboseCursor (*this));
+
+	set_colors ();
+}
+bool
+AudioClipEditor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	if (event->type != GDK_BUTTON_PRESS) {
+		return false;
+	}
+
+	switch (event->button.button) {
+	case 1:
+		return button_press_handler_1 (item, event, item_type);
+		break;
+
+	case 2:
+		return button_press_handler_2 (item, event, item_type);
+		break;
+
+	case 3:
+		break;
+
+	default:
+		return button_press_dispatch (&event->button);
+		break;
+
 	}
 
 	return false;
 }
 
 bool
-AudioClipEditor::scroll_event_handler (GdkEvent* ev)
+AudioClipEditor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
-	switch (ev->type) {
-		case GDK_BUTTON_PRESS:
-			current_scroll_drag = new ScrollDrag (*this);
-			current_scroll_drag->begin (&ev->button);
-			return true;
+	EC_LOCAL_TEMPO_SCOPE;
 
-		case GDK_BUTTON_RELEASE:
-			if (current_scroll_drag) {
-				current_scroll_drag->end (&ev->button);
-				delete current_scroll_drag;
-				current_scroll_drag = 0;
-				return true;
-			}
-			break;
+	switch (item_type) {
+	case ClipStartItem: {
+		ArdourCanvas::Rectangle* r = dynamic_cast<ArdourCanvas::Rectangle*> (item);
+		if (r) {
+			_drags->set (new ClipStartDrag (*this, *r), event);
+		}
+		return true;
+		break;
+	}
 
-		case GDK_MOTION_NOTIFY:
-			if (current_scroll_drag) {
-				current_scroll_drag->motion (&ev->motion);
-				return true;
-			}
-			break;
+	case ClipEndItem: {
+		ArdourCanvas::Rectangle* r = dynamic_cast<ArdourCanvas::Rectangle*> (item);
+		if (r) {
+			_drags->set (new ClipEndDrag (*this, *r), event);
+		}
+		return true;
+		break;
+	}
 
-		case GDK_KEY_PRESS:
-			return key_press (&ev->key);
-
-		default:
-			break;
+	default:
+		break;
 	}
 
 	return false;
+}
+
+bool
+AudioClipEditor::button_press_handler_2 (ArdourCanvas::Item*, GdkEvent*, ItemType)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	return true;
+}
+
+bool
+AudioClipEditor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	if (!Keyboard::is_context_menu_event (&event->button)) {
+
+		/* see if we're finishing a drag */
+
+		if (_drags->active ()) {
+			bool const r = _drags->end_grab (event);
+			if (r) {
+				/* grab dragged, so do nothing else */
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+bool
+AudioClipEditor::motion_handler (ArdourCanvas::Item*, GdkEvent* event, bool from_autoscroll)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	if (_drags->active ()) {
+		//drags change the snapped_cursor location, because we are snapping the thing being dragged, not the actual mouse cursor
+		return _drags->motion_handler (event, from_autoscroll);
+	}
+
+	return true;
+}
+
+bool
+AudioClipEditor::enter_handler (ArdourCanvas::Item* item, GdkEvent* ev, ItemType item_type)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	choose_canvas_cursor_on_entry (item_type);
+
+	return true;
+}
+
+bool
+AudioClipEditor::leave_handler (ArdourCanvas::Item* item, GdkEvent* ev, ItemType item_type)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	set_canvas_cursor (which_mode_cursor());
+
+	return true;
+}
+
+bool
+AudioClipEditor::start_line_event_handler (GdkEvent* ev, StartBoundaryRect* l)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	return typed_event (start_line, ev, ClipStartItem);
+}
+
+bool
+AudioClipEditor::end_line_event_handler (GdkEvent* ev, EndBoundaryRect* l)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	return typed_event (end_line, ev, ClipEndItem);
 }
 
 bool
 AudioClipEditor::key_press (GdkEventKey* ev)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	return false;
 }
 
 void
 AudioClipEditor::position_lines ()
 {
-	if (!audio_region) {
+	EC_LOCAL_TEMPO_SCOPE;
+
+	if (!_region) {
 		return;
 	}
 
-	start_line->set_x0 (sample_to_pixel (audio_region->start ().samples ()));
-	start_line->set_x1 (sample_to_pixel (audio_region->start ().samples ()));
+	double start_x1 = sample_to_pixel (_region->start().samples());
+	double end_x0 = start_x1 + sample_to_pixel (_region->length().samples());
 
-	end_line->set_x0 (sample_to_pixel (audio_region->end ().samples ()));
-	end_line->set_x1 (sample_to_pixel (audio_region->end ().samples ()));
-}
-
-double
-AudioClipEditor::sample_to_pixel (samplepos_t s)
-{
-	return round (s / _spp);
-}
-
-samplepos_t
-AudioClipEditor::pixel_to_sample (double p)
-{
-	return round (p * _spp);
-}
-
-AudioClipEditor::LineDrag::LineDrag (AudioClipEditor& ed, ArdourCanvas::Line& l)
-    : editor (ed)
-    , line (l)
-{
-	line.grab ();
-}
-
-void
-AudioClipEditor::LineDrag::begin (GdkEventButton* ev)
-{
-}
-
-void
-AudioClipEditor::LineDrag::end (GdkEventButton* ev)
-{
-	line.ungrab ();
-}
-
-void
-AudioClipEditor::LineDrag::motion (GdkEventMotion* ev)
-{
-	line.set_x0 (ev->x);
-	line.set_x1 (ev->x);
+	start_line->set (ArdourCanvas::Rect (0., 0., start_x1, _visible_canvas_height));
+	end_line->set_position (ArdourCanvas::Duple (end_x0, 0.));
+	end_line->set (ArdourCanvas::Rect (0., 0., ArdourCanvas::COORD_MAX, _visible_canvas_height));
 }
 
 void
 AudioClipEditor::set_colors ()
 {
-	set_background_color (UIConfiguration::instance ().color (X_("theme:bg")));
+	EC_LOCAL_TEMPO_SCOPE;
 
-	frame->set_outline_color (UIConfiguration::instance ().color (X_("neutral:midground")));
+	_canvas.set_background_color (UIConfiguration::instance ().color (X_("theme:bg")));
 
-	start_line->set_outline_color (UIConfiguration::instance ().color (X_("theme:contrasting clock")));
-	end_line->set_outline_color (UIConfiguration::instance ().color (X_("theme:contrasting alt")));
-	loop_line->set_outline_color (UIConfiguration::instance ().color (X_("theme:contrasting selection")));
+	start_line->set_fill_color (UIConfiguration::instance().color_mod ("cue editor start rect fill", "cue boundary alpha"));
+	start_line->set_outline_color (UIConfiguration::instance().color ("cue editor start rect outline"));
 
-	scroll_bar_trough->set_fill_color (UIConfiguration::instance ().color (X_("theme:bg")));
-	scroll_bar_trough->set_outline_color (UIConfiguration::instance ().color (X_("theme:contrasting less")));
-	scroll_bar_handle->set_fill_color (UIConfiguration::instance ().color (X_("theme:contrasting clock")));
+	end_line->set_fill_color (UIConfiguration::instance().color_mod ("cue editor end rect fill", "cue boundary alpha"));
+	end_line->set_outline_color (UIConfiguration::instance().color ("cue editor end rect outline"));
+
+	// loop_line->set_outline_color (UIConfiguration::instance ().color (X_("theme:contrasting selection")));
 
 	set_waveform_colors ();
 }
 
 void
-AudioClipEditor::scroll_changed ()
-{
-	if (!audio_region) {
-		return;
-	}
-
-	const double right_edge  = scroll_bar_handle->get ().x0;
-	const double avail_width = scroll_bar_trough->get ().width () - scroll_bar_handle->get ().width ();
-	scroll_fraction          = right_edge / avail_width;
-	scroll_fraction          = std::min (1., std::max (0., scroll_fraction));
-	const samplepos_t s      = llrintf (audio_region->source (0)->length ().samples () * scroll_fraction);
-
-	ruler->set_range (s, s + pixel_to_sample (frame->get().width() - 2.));
-
-	scroll_to (sample_to_pixel (s), 0);
-
-	queue_draw ();
-}
-
-AudioClipEditor::ScrollDrag::ScrollDrag (AudioClipEditor& e)
-    : editor (e)
-{
-	e.scroll_bar_handle->grab ();
-}
-
-void
-AudioClipEditor::ScrollDrag::begin (GdkEventButton* ev)
-{
-	last_x = ev->x;
-}
-
-void
-AudioClipEditor::ScrollDrag::end (GdkEventButton* ev)
-{
-	editor.scroll_bar_handle->ungrab ();
-	editor.scroll_changed ();
-}
-
-void
-AudioClipEditor::ScrollDrag::motion (GdkEventMotion* ev)
-{
-	ArdourCanvas::Rectangle& r (*editor.scroll_bar_handle);
-	const double             xdelta = ev->x - last_x;
-	ArdourCanvas::Rect       n (r.get ());
-	const double             handle_width = n.width ();
-	const double             avail_width  = editor.scroll_bar_trough->get ().width () - handle_width;
-
-	n.x0 = std::max (0., std::min (avail_width, n.x0 + xdelta));
-	n.x1 = n.x0 + handle_width;
-
-	r.set (n);
-	last_x = ev->x;
-
-	editor.scroll_changed ();
-}
-
-void
 AudioClipEditor::drop_waves ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	for (auto& wave : waves) {
 		delete wave;
 	}
@@ -402,22 +469,27 @@ AudioClipEditor::drop_waves ()
 }
 
 void
-AudioClipEditor::set_region (std::shared_ptr<AudioRegion> r, TriggerReference tr)
+AudioClipEditor::set_region (std::shared_ptr<Region> region)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
+	CueEditor::set_region (region);
+
+	if (_visible_pending_region) {
+		return;
+	}
+
 	drop_waves ();
 
-	audio_region = r;
+	if (!region) {
+		return;
+	}
 
-	/* Ruler has to reflect tempo of the region, so we have to recreate it
-	 * every time. Note that we retain ownership of the metric, and that
-	 * because the GUI is single-threaded, we can set it and delete it
-	 * safely here (there will be no calls to use it from within the
-	 * ruler).
-	 */
+	std::shared_ptr<AudioRegion> r (std::dynamic_pointer_cast<AudioRegion> (region));
 
-	delete clip_metric;
-	clip_metric = new ClipBBTMetric (tr);
-	ruler->set_metric (clip_metric);
+	if (!r) {
+		return;
+	}
 
 	uint32_t    n_chans = r->n_channels ();
 	samplecnt_t len;
@@ -426,6 +498,7 @@ AudioClipEditor::set_region (std::shared_ptr<AudioRegion> r, TriggerReference tr
 
 	for (uint32_t n = 0; n < n_chans; ++n) {
 		std::shared_ptr<Region> wr = RegionFactory::get_whole_region_for_source (r->source (n));
+
 		if (!wr) {
 			continue;
 		}
@@ -435,8 +508,8 @@ AudioClipEditor::set_region (std::shared_ptr<AudioRegion> r, TriggerReference tr
 			continue;
 		}
 
-		WaveView* wv = new WaveView (waves_container, war);
-		wv->set_channel (n);
+		WaveView* wv = new WaveView (data_group, war);
+		wv->set_channel (0);
 		wv->set_show_zero_line (false);
 		wv->set_clip_level (1.0);
 		wv->lower_to_bottom ();
@@ -444,91 +517,79 @@ AudioClipEditor::set_region (std::shared_ptr<AudioRegion> r, TriggerReference tr
 		waves.push_back (wv);
 	}
 
-	TriggerPtr trigger (tr.trigger());
-	std::shared_ptr<AudioTrigger> at = std::dynamic_pointer_cast<AudioTrigger> (trigger);
-	if (at) {
-		if (at->segment_tempo() == 0.) {
-			/* tempo unknown, hide ruler */
-			ruler->hide ();
-		} else {
-			ruler->show ();
-			ruler->set_range (0, pixel_to_sample (frame->get().width() - 2.));
-		}
-	} else {
-		ruler->hide ();
-	}
 	set_spp_from_length (len);
 	set_wave_heights ();
 	set_waveform_colors ();
 
-	line_container->show ();
+	// line_container->show ();
 	line_container->raise_to_top ();
+
+	set_session (&r->session ());
+	state_connection.disconnect ();
+
+	PBD::PropertyChange interesting_stuff;
+	region_changed (interesting_stuff);
+
+	region->PropertyChanged.connect (state_connection, invalidator (*this), std::bind (&AudioClipEditor::region_changed, this, _1), gui_context ());
+
+	maybe_set_from_rsu ();
 }
 
 void
-AudioClipEditor::on_size_allocate (Gtk::Allocation& alloc)
+AudioClipEditor::canvas_allocate (Gtk::Allocation& alloc)
 {
-	GtkCanvas::on_size_allocate (alloc);
+	EC_LOCAL_TEMPO_SCOPE;
 
-	ArdourCanvas::Rect r (1, 1, alloc.get_width () - 2, alloc.get_height () - 2);
-	frame->set (r);
+	_canvas.size_allocate (alloc);
 
-	const double ruler_height = 25.;
-	ruler->set (ArdourCanvas::Rect (2, 2, alloc.get_width() - 4, ruler_height));
+	_visible_canvas_width = alloc.get_width();
+	_visible_canvas_height = alloc.get_height();
 
-	const double scroll_bar_height      = 10.;
-	const double scroll_bar_width       = alloc.get_width () - 2;
-	const double scroll_bar_handle_left = scroll_bar_width * scroll_fraction;
+	/* no track header here, "track width" is the whole canvas */
+	_track_canvas_width = _visible_canvas_width;
 
-	scroll_bar_trough->set (ArdourCanvas::Rect (1, alloc.get_height () - scroll_bar_height, scroll_bar_width, alloc.get_height ()));
-	scroll_bar_handle->set (ArdourCanvas::Rect (scroll_bar_handle_left, scroll_bar_trough->get ().y0 + 1, scroll_bar_handle_left + 30., scroll_bar_trough->get ().y1 - 1));
+	main_ruler->set (ArdourCanvas::Rect (2, 2, alloc.get_width() - 4, timebar_height));
 
 	position_lines ();
+	update_fixed_rulers ();
 
-	start_line->set_y1 (frame->get ().height () - 2. - scroll_bar_height);
-	end_line->set_y1 (frame->get ().height () - 2. - scroll_bar_height);
-	loop_line->set_y1 (frame->get ().height () - 2. - scroll_bar_height);
+	start_line->set_y1 (_visible_canvas_height - 2.);
+	end_line->set_y1 (_visible_canvas_height - 2.);
+	// loop_line->set_y1 (_visible_canvas_height - 2.);
 
 	set_wave_heights ();
-}
 
-void
-AudioClipEditor::set_spp (double samples_per_pixel)
-{
-	_spp = samples_per_pixel;
+	catch_pending_show_region ();
 
-	clip_metric->units_per_pixel = _spp;
-
-	position_lines ();
-
-	for (auto& wave : waves) {
-		wave->set_samples_per_pixel (_spp);
-	}
+	update_grid ();
 }
 
 void
 AudioClipEditor::set_spp_from_length (samplecnt_t len)
 {
-	double available_width = frame->get ().width ();
-	double s               = floor (len / available_width);
+	EC_LOCAL_TEMPO_SCOPE;
 
-	set_spp (s);
+	if (_visible_canvas_width) {
+		set_samples_per_pixel (floor (len / _visible_canvas_width));
+	}
 }
 
 void
 AudioClipEditor::set_wave_heights ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (waves.empty ()) {
 		return;
 	}
 
 	uint32_t       n  = 0;
-	const Distance w  = frame->get ().height () - scroll_bar_trough->get ().height () - 2. - ruler->get().height();
+	const Distance w  = _visible_canvas_height - (n_timebars * timebar_height);
 	Distance       ht = w / waves.size ();
 
 	for (auto& wave : waves) {
 		wave->set_height (ht);
-		wave->set_y_position (ruler->get ().height () + (n * ht));
+		wave->set_y_position ((n_timebars * timebar_height) + (n * ht));
 		++n;
 	}
 }
@@ -536,6 +597,8 @@ AudioClipEditor::set_wave_heights ()
 void
 AudioClipEditor::set_waveform_colors ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	Gtkmm2ext::Color clip    = UIConfiguration::instance ().color ("clipped waveform");
 	Gtkmm2ext::Color zero    = UIConfiguration::instance ().color ("zero line");
 	Gtkmm2ext::Color fill    = UIConfiguration::instance ().color ("waveform fill");
@@ -549,86 +612,294 @@ AudioClipEditor::set_waveform_colors ()
 	}
 }
 
-bool
-AudioClipEditor::event_handler (GdkEvent* ev)
+Gtk::Widget&
+AudioClipEditor::contents ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
+	return _contents;
+}
+
+void
+AudioClipEditor::region_changed (const PBD::PropertyChange& what_changed)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+}
+
+void
+AudioClipEditor::set_samples_per_pixel (samplecnt_t spp)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	CueEditor::set_samples_per_pixel (spp);
+
+	clip_metric->units_per_pixel = samples_per_pixel;
+
+	position_lines ();
+
+	for (auto& wave : waves) {
+		wave->set_samples_per_pixel (samples_per_pixel);
+	}
+
+	horizontal_adjustment.set_upper (max_zoom_extent().second.samples() / samples_per_pixel);
+	horizontal_adjustment.set_page_size (current_page_samples()/ samples_per_pixel / 10);
+	horizontal_adjustment.set_page_increment (current_page_samples()/ samples_per_pixel / 20);
+	horizontal_adjustment.set_step_increment (current_page_samples() / samples_per_pixel / 100);
+}
+
+samplecnt_t
+AudioClipEditor::current_page_samples() const
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	return (samplecnt_t) _track_canvas_width * samples_per_pixel;
+}
+
+bool
+AudioClipEditor::canvas_enter_leave (GdkEventCrossing* ev)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
 	switch (ev->type) {
-		case GDK_BUTTON_PRESS:
-			break;
-		case GDK_ENTER_NOTIFY:
-			break;
-		case GDK_LEAVE_NOTIFY:
-			break;
-		default:
-			break;
+	case GDK_ENTER_NOTIFY:
+		if (ev->detail != GDK_NOTIFY_INFERIOR) {
+			_canvas.grab_focus ();
+			// ActionManager::set_sensitive (_midi_actions, true);
+			within_track_canvas = true;
+		}
+		break;
+	case GDK_LEAVE_NOTIFY:
+		if (ev->detail != GDK_NOTIFY_INFERIOR) {
+			// ActionManager::set_sensitive (_midi_actions, false);
+			within_track_canvas = false;
+			ARDOUR_UI::instance()->reset_focus (&_canvas_viewport);
+			gdk_window_set_cursor (_canvas_viewport.get_window()->gobj(), nullptr);
+		}
+	default:
+		break;
 	}
 	return false;
 }
 
-AudioClipEditorBox::AudioClipEditorBox ()
+void
+AudioClipEditor::begin_write ()
 {
-	_header_label.set_text (_("AUDIO Region Trimmer:"));
-	_header_label.set_alignment (0.0, 0.5);
+	EC_LOCAL_TEMPO_SCOPE;
 
-	zoom_in_button.set_icon (ArdourIcon::ZoomIn);
-	zoom_out_button.set_icon (ArdourIcon::ZoomOut);
-
-	zoom_in_button.signal_clicked.connect (sigc::mem_fun (*this, &AudioClipEditorBox::zoom_in_click));
-	zoom_out_button.signal_clicked.connect (sigc::mem_fun (*this, &AudioClipEditorBox::zoom_out_click));
-
-	header_box.pack_start (_header_label, false, false);
-	header_box.pack_start (zoom_in_button, false, false);
-	header_box.pack_start (zoom_out_button, false, false);
-
-	pack_start (header_box, false, false, 6);
-
-	editor = manage (new AudioClipEditor);
-	editor->set_size_request (600, 120);
-
-	pack_start (*editor, true, true);
-	editor->show ();
-}
-
-AudioClipEditorBox::~AudioClipEditorBox ()
-{
-	delete editor;
 }
 
 void
-AudioClipEditorBox::zoom_in_click ()
+AudioClipEditor::end_write ()
 {
-	editor->set_spp (editor->spp () / 2.);
+	EC_LOCAL_TEMPO_SCOPE;
+
 }
 
 void
-AudioClipEditorBox::zoom_out_click ()
+AudioClipEditor::set_overlay_text (std::string const & str)
 {
-	editor->set_spp (editor->spp () * 2.);
+	EC_LOCAL_TEMPO_SCOPE;
+
+	if (!overlay_text) {
+		overlay_text = new ArdourCanvas::Text (no_scroll_group);
+		Pango::FontDescription font ("Sans 200");
+		overlay_text->set_font_description (font);
+		overlay_text->set_color (0xff000088);
+		overlay_text->set ("0"); /* not shown, used for positioning math */
+		overlay_text->set_position (ArdourCanvas::Duple ((_visible_canvas_width / 2.0) - (overlay_text->text_width()/2.), (_visible_canvas_height / 2.0) - (overlay_text->text_height() / 2.)));
+	}
+
+	overlay_text->set (str);
+	show_overlay_text ();
 }
 
 void
-AudioClipEditorBox::set_region (std::shared_ptr<Region> r, TriggerReference tref)
+AudioClipEditor::show_overlay_text ()
 {
-	std::shared_ptr<AudioRegion> ar = std::dynamic_pointer_cast<AudioRegion> (r);
+	if (overlay_text) {
+		overlay_text->show ();
+	}
+}
 
-	if (!ar) {
+void
+AudioClipEditor::hide_overlay_text ()
+{
+	if (overlay_text) {
+		overlay_text->hide ();
+	}
+}
+
+void
+AudioClipEditor::show_count_in (std::string const & str)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+	set_overlay_text (str);
+}
+
+void
+AudioClipEditor::hide_count_in ()
+{
+	EC_LOCAL_TEMPO_SCOPE;
+	hide_overlay_text ();
+}
+
+bool
+AudioClipEditor::idle_data_captured ()
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	if (!ref.box()) {
+		return false;
+	}
+
+	CueEditor::idle_data_captured ();
+
+	return false;
+}
+
+void
+AudioClipEditor::maybe_update ()
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	ARDOUR::TriggerPtr playing_trigger;
+
+	if (ref.trigger()) {
+
+		/* Trigger editor */
+
+		playing_trigger = ref.box()->currently_playing ();
+
+		if (!playing_trigger) {
+
+			if (_drags->active() || !_track || !_track->triggerbox()) {
+				return;
+			}
+
+			if (_track->triggerbox()->record_enabled() == Recording) {
+				_playhead_cursor->set_position (data_capture_duration);
+			}
+
+			if (!_region) {
+				return;
+			}
+
+		} else {
+
+			if (playing_trigger->active ()) {
+				if (playing_trigger->the_region()) {
+
+					/* We can't know the precise sample
+					 * position because we may be
+					 * stretching. So figure out
+					 */
+					std::shared_ptr<ARDOUR::AudioTrigger> at (std::dynamic_pointer_cast<AudioTrigger> (playing_trigger));
+					if (at) {
+						const double f = playing_trigger->position_as_fraction ();
+						_playhead_cursor->set_position (playing_trigger->the_region()->start().samples() + (f * at->data_length()));
+					}
+				}
+			} else {
+				_playhead_cursor->set_position (0);
+			}
+		}
+
+	} else if (_region) {
+
+		/* Timeline region editor */
+
+		if (!_session) {
+			return;
+		}
+
+		samplepos_t pos = _session->transport_sample();
+		samplepos_t spos = _region->source_position().samples();
+		if (pos < spos) {
+			_playhead_cursor->set_position (0);
+		} else {
+			_playhead_cursor->set_position (pos - spos);
+		}
+
+	} else {
+		_playhead_cursor->set_position (0);
+	}
+
+	if (_session->transport_rolling() && follow_playhead() && !_scroll_drag) {
+		reset_x_origin_to_follow_playhead ();
+	}
+}
+
+void
+AudioClipEditor::unset_region ()
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	drop_waves ();
+
+	CueEditor::unset_region ();
+}
+
+void
+AudioClipEditor::unset_trigger ()
+{
+	EC_LOCAL_TEMPO_SCOPE;
+	CueEditor::unset_trigger ();
+}
+
+Gdk::Cursor*
+AudioClipEditor::which_canvas_cursor (ItemType type) const
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	Gdk::Cursor* cursor = which_mode_cursor ();
+
+	switch (type) {
+	case ClipEndItem:
+	case ClipStartItem:
+		cursor = _cursors->expand_left_right;
+		break;
+
+	default:
+		break;
+	}
+
+	return cursor;
+}
+
+void
+AudioClipEditor::compute_fixed_ruler_scale ()
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	if (_session == 0) {
 		return;
 	}
 
-	set_session (&r->session ());
-
-	state_connection.disconnect ();
-
-	_region = r;
-	editor->set_region (ar, tref);
-
-	PBD::PropertyChange interesting_stuff;
-	region_changed (interesting_stuff);
-
-	_region->PropertyChanged.connect (state_connection, invalidator (*this), std::bind (&AudioClipEditorBox::region_changed, this, _1), gui_context ());
+	set_minsec_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
 }
 
 void
-AudioClipEditorBox::region_changed (const PBD::PropertyChange& what_changed)
+AudioClipEditor::update_fixed_rulers ()
+{
+	EC_LOCAL_TEMPO_SCOPE;
+	compute_fixed_ruler_scale ();
+}
+
+void
+AudioClipEditor::snap_mode_chosen (Editing::SnapMode)
 {
 }
+
+void
+AudioClipEditor::grid_type_chosen (Editing::GridType gt)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	if (gt != Editing::GridTypeMinSec && grid_actions[gt] && grid_actions[gt]->get_active()) {
+		assert (grid_actions[Editing::GridTypeMinSec]);
+		grid_actions[Editing::GridTypeMinSec]->set_active (false);
+		grid_actions[Editing::GridTypeMinSec]->set_active (true);
+	}
+}
+

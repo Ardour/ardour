@@ -23,6 +23,8 @@
 
 #include <ytkmm/stock.h>
 
+#include "pbd/unwind.h"
+
 #include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/cell_renderer_color_selector.h"
@@ -51,7 +53,7 @@ using namespace PBD;
 using namespace Gtk;
 using Gtkmm2ext::Keyboard;
 
-EditorRouteGroups::EditorRouteGroups (Editor* e)
+EditorRouteGroups::EditorRouteGroups (Editor& e)
 	: EditorComponent (e)
 	, _in_row_change (false)
 	, _in_rebuild (false)
@@ -202,10 +204,10 @@ EditorRouteGroups::remove_selected ()
 
 	if ((iter = _model->get_iter (*i))) {
 
-		RouteGroup* rg = (*iter)[_columns.routegroup];
+		std::shared_ptr<RouteGroup> rg = (*iter)[_columns.routegroup];
 
 		if (rg) {
-			_session->remove_route_group (*rg);
+			_session->remove_route_group (rg);
 		}
 	}
 }
@@ -221,7 +223,7 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 {
 	TreeModel::Path path;
 	TreeIter iter;
-	RouteGroup* group = 0;
+	std::shared_ptr<RouteGroup> group;
 	TreeViewColumn* column;
 	int cellx;
 	int celly;
@@ -240,7 +242,7 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 	}
 
 	if (Keyboard::is_context_menu_event (ev)) {
-		_editor->_group_tabs->get_menu(group)->popup (1, ev->time);
+		_editor._group_tabs->get_menu(group)->popup (1, ev->time);
 		return true;
 	}
 
@@ -263,7 +265,7 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 		switch (color_dialog.run()) {
 			case RESPONSE_ACCEPT:
 				c = color_dialog.get_color_selection()->get_current_color();
-				GroupTabs::set_group_color (group, Gtkmm2ext::gdk_color_to_rgba (c));
+				GroupTabs::set_group_color (group->shared_from_this(), Gtkmm2ext::gdk_color_to_rgba (c));
 				break;
 
 			default:
@@ -356,13 +358,15 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 void
 EditorRouteGroups::row_change (const Gtk::TreeModel::Path&, const Gtk::TreeModel::iterator& iter)
 {
-	RouteGroup* group;
+	std::shared_ptr<RouteGroup> group;
 
 	if (_in_row_change) {
 		return;
 	}
 
-	if ((group = (*iter)[_columns.routegroup]) == 0) {
+	group = (*iter)[_columns.routegroup];
+
+	if (!group) {
 		return;
 	}
 
@@ -397,7 +401,7 @@ EditorRouteGroups::row_change (const Gtk::TreeModel::Path&, const Gtk::TreeModel
 }
 
 void
-EditorRouteGroups::add (RouteGroup* group)
+EditorRouteGroups::add (std::shared_ptr<RouteGroup> group)
 {
 	ENSURE_GUI_THREAD (*this, &EditorRouteGroups::add, group)
 	bool focus = false;
@@ -419,7 +423,7 @@ EditorRouteGroups::add (RouteGroup* group)
 	Gtkmm2ext::set_color_from_rgba (c, GroupTabs::group_color (group));
 	row[_columns.gdkcolor] = c;
 
-	_in_row_change = true;
+	PBD::Unwinder<bool> uw (_in_row_change, true);
 
 	row[_columns.routegroup] = group;
 
@@ -430,7 +434,8 @@ EditorRouteGroups::add (RouteGroup* group)
 		focus = true;
 	}
 
-	group->PropertyChanged.connect (_property_changed_connections, MISSING_INVALIDATOR, std::bind (&EditorRouteGroups::property_changed, this, group, _1), gui_context());
+	std::weak_ptr<RouteGroup> wg (group);
+	group->PropertyChanged.connect (_property_changed_connections, MISSING_INVALIDATOR, std::bind (&EditorRouteGroups::property_changed, this, wg, _1), gui_context());
 
 	if (focus) {
 		TreeViewColumn* col = _display.get_column (0);
@@ -440,7 +445,7 @@ EditorRouteGroups::add (RouteGroup* group)
 
 	_in_row_change = false;
 
-	_editor->_group_tabs->set_dirty ();
+	_editor._group_tabs->set_dirty ();
 }
 
 void
@@ -448,7 +453,7 @@ EditorRouteGroups::groups_changed ()
 {
 	ENSURE_GUI_THREAD (*this, &EditorRouteGroups::groups_changed);
 
-	_in_rebuild = true;
+	PBD::Unwinder<bool> uw (_in_rebuild, true);
 
 	/* just rebuild the while thing */
 
@@ -457,54 +462,57 @@ EditorRouteGroups::groups_changed ()
 	if (_session) {
 		_session->foreach_route_group (sigc::mem_fun (*this, &EditorRouteGroups::add));
 	}
-
-	_in_rebuild = false;
 }
 
 void
-EditorRouteGroups::property_changed (RouteGroup* group, const PropertyChange&)
+EditorRouteGroups::property_changed (std::weak_ptr<RouteGroup> wgroup, const PropertyChange&)
 {
-	assert(group);
-	_in_row_change = true;
+	std::shared_ptr<RouteGroup> group (wgroup.lock());
+	if (!group) {
+		return;
+	}
 
-	Gtk::TreeModel::Children children = _model->children();
+	{
+		PBD::Unwinder<bool> uw (_in_row_change, true);
 
-	for(Gtk::TreeModel::Children::iterator iter = children.begin(); iter != children.end(); ++iter) {
-		if (group == (*iter)[_columns.routegroup]) {
+		Gtk::TreeModel::Children children = _model->children();
 
-			/* we could check the PropertyChange and only set
-			 * appropriate fields. but the amount of saved by doing
-			 * that is pretty minimal, and this is nice and simple.
-			 */
+		for(Gtk::TreeModel::Children::iterator iter = children.begin(); iter != children.end(); ++iter) {
+			std::shared_ptr<RouteGroup> rg ((*iter)[_columns.routegroup]);
+			if (group == rg) {
 
-			(*iter)[_columns.text] = group->name();
-			(*iter)[_columns.gain] = group->is_gain ();
-			(*iter)[_columns.gain_relative] = group->is_relative ();
-			(*iter)[_columns.mute] = group->is_mute ();
-			(*iter)[_columns.solo] = group->is_solo ();
-			(*iter)[_columns.record] = group->is_recenable ();
-			(*iter)[_columns.monitoring] = group->is_monitoring ();
-			(*iter)[_columns.select] = group->is_select ();
-			(*iter)[_columns.active_shared] = group->is_route_active ();
-			(*iter)[_columns.active_state] = group->is_active ();
-			(*iter)[_columns.is_visible] = !group->is_hidden();
+				/* we could check the PropertyChange and only set
+				 * appropriate fields. but the amount of saved by doing
+				 * that is pretty minimal, and this is nice and simple.
+				 */
 
-			Gdk::Color c;
-			Gtkmm2ext::set_color_from_rgba (c, GroupTabs::group_color (group));
-			(*iter)[_columns.gdkcolor] = c;
+				(*iter)[_columns.text] = group->name();
+				(*iter)[_columns.gain] = group->is_gain ();
+				(*iter)[_columns.gain_relative] = group->is_relative ();
+				(*iter)[_columns.mute] = group->is_mute ();
+				(*iter)[_columns.solo] = group->is_solo ();
+				(*iter)[_columns.record] = group->is_recenable ();
+				(*iter)[_columns.monitoring] = group->is_monitoring ();
+				(*iter)[_columns.select] = group->is_select ();
+				(*iter)[_columns.active_shared] = group->is_route_active ();
+				(*iter)[_columns.active_state] = group->is_active ();
+				(*iter)[_columns.is_visible] = !group->is_hidden();
 
-			break;
+				Gdk::Color c;
+				Gtkmm2ext::set_color_from_rgba (c, GroupTabs::group_color (group));
+				(*iter)[_columns.gdkcolor] = c;
+
+				break;
+			}
 		}
 	}
 
-	_in_row_change = false;
-
-	for (TrackViewList::const_iterator i = _editor->get_track_views().begin(); i != _editor->get_track_views().end(); ++i) {
+	for (TrackViewList::const_iterator i = _editor.get_track_views().begin(); i != _editor.get_track_views().end(); ++i) {
 		if ((*i)->route_group() == group) {
 			if (group->is_hidden ()) {
-				_editor->hide_track_in_display (*i);
+				_editor.hide_track_in_display (*i);
 			} else {
-				_editor->show_track_in_display (*i);
+				_editor.show_track_in_display (*i);
 			}
 		}
 	}
@@ -513,7 +521,7 @@ EditorRouteGroups::property_changed (RouteGroup* group, const PropertyChange&)
 void
 EditorRouteGroups::name_edit (const std::string& path, const std::string& new_text)
 {
-	RouteGroup* group;
+	std::shared_ptr<RouteGroup> group;
 	TreeIter iter;
 
 	if ((iter = _model->get_iter (path))) {
@@ -544,12 +552,8 @@ EditorRouteGroups::set_session (Session* s)
 	if (_session) {
 
 		_session->route_group_added.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&EditorRouteGroups::add, this, _1), gui_context());
-		_session->route_group_removed.connect (
-			_session_connections, MISSING_INVALIDATOR, std::bind (&EditorRouteGroups::groups_changed, this), gui_context()
-			);
-		_session->route_groups_reordered.connect (
-			_session_connections, MISSING_INVALIDATOR, std::bind (&EditorRouteGroups::groups_changed, this), gui_context()
-			);
+		_session->route_group_removed.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&EditorRouteGroups::groups_changed, this), gui_context());
+		_session->route_groups_reordered.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&EditorRouteGroups::groups_changed, this), gui_context());
 	}
 
 	PBD::PropertyChange pc;
@@ -562,7 +566,7 @@ EditorRouteGroups::set_session (Session* s)
 void
 EditorRouteGroups::run_new_group_dialog ()
 {
-	return _editor->_group_tabs->run_new_group_dialog (0, false);
+	return _editor._group_tabs->run_new_group_dialog (0, false);
 }
 
 /** Called when a model row is deleted, but also when the model is
@@ -581,7 +585,7 @@ EditorRouteGroups::row_deleted (Gtk::TreeModel::Path const &)
 
 	/* Re-write the session's route group list so that the new order is preserved */
 
-	list<RouteGroup*> new_list;
+	RouteGroupList new_list;
 
 	Gtk::TreeModel::Children children = _model->children();
 	for (Gtk::TreeModel::Children::iterator i = children.begin(); i != children.end(); ++i) {

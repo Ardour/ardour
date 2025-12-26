@@ -154,7 +154,9 @@ public:
 	std::string captured_for() const { return _captured_for; }
 
 	bool get_segment_descriptor (TimelineRange const &, SegmentDescriptor&);
-	int set_segment_descriptor (SegmentDescriptor const &);
+	int set_segment_descriptor (SegmentDescriptor const &, bool replace = false);
+
+	void copy_segment_descriptors (Source const & other);
 
   protected:
 	DataType            _type;

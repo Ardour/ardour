@@ -17,8 +17,8 @@ UIConfiguration::build_metadata ()
 	VAR_META (X_("buggy-gradients"), _("appearance"), _("bugs"), _("tweaks"), _("kwirks"),  NULL);
 	VAR_META (X_("check-announcements"), _("check"), _("announcements"), _("phone"), _("home"),  NULL);
 	VAR_META (X_("clock-display-limit"), _("clock"), _("display"), _("limit"), _("length"), _("maximum"), _("duration"),  NULL);
-	VAR_META (X_("color-file"), _("theme"), _("colors"), _("appearance"), _("style"), _("themeing"),  NULL);
-	VAR_META (X_("color-regions-using-track-color"), _("theme"), _("colors"), _("appearance"), _("style"), _("themeing"),  NULL);
+	VAR_META (X_("color-file"), _("theme"), _("colors"), _("appearance"), _("style"), _("theming"),  NULL);
+	VAR_META (X_("color-regions-using-track-color"), _("theme"), _("colors"), _("appearance"), _("style"), _("theming"),  NULL);
 	VAR_META (X_("default-bindings"), _("shortcuts"), _("keys"), _("keybindings"), _("bindings"),  NULL);
 	VAR_META (X_("default-lower-midi-note"), _("MIDI"), _("low"), _("lowest"), _("lower"),  NULL);
 	VAR_META (X_("default-narrow_ms"), _("appearance"), _("width"), _("mixer"),  NULL);
@@ -117,6 +117,8 @@ UIConfiguration::build_metadata ()
 	VAR_META (X_("waveform-gradient-depth"), _("editor"), _("gradient"), _("blur"), _("contrast"), _("style"), _("waveform"),  NULL);
 	VAR_META (X_("waveform-scale"), _("waveform"), _("logarithmic"), _("logscale"), _("linear"),  NULL);
 	VAR_META (X_("waveform-shape"), _("waveform"), _("rectified"), _("half"), _("shape"), _("display"),  NULL);
+	VAR_META (X_("widget-prelight"), _("highlight"), _("mouse"), _("prelight"), _("hover"), _("indicate"),  NULL);
+	VAR_META (X_("drag-sensitivity"), _("drag"), _("sensitivity"), _("sensitive"), _("move"), _("threshold"),  NULL);
 	VAR_META (X_("auto-play"), _("transport"), _("autoplay"), _("automatically"), _("play"),  NULL);
 	VAR_META (X_("auto-return"), _("transport"), _("autoreturn"), _("automatically"), _("return"), _("go"), _("back"),  NULL);
 	VAR_META (X_("count-in"), _("transport"), _("count"), _("in"), _("count-in"),  NULL);

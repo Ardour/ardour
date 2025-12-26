@@ -59,9 +59,11 @@ setup_gtk_ardour_enums ()
 	StartupFSM::MainState startup_state;
 	StartupFSM::DialogID startup_dialog;
 	Gtk::ResponseType dialog_response;
+	Gtk::WindowPosition window_position;
 	AddRouteDialog::TypeWanted type_wanted;
 	NoteNameDisplay note_name_display;
 	MarkerClickBehavior marker_click_behavior;
+	RegionEditDisposition region_edit_disposition;
 
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -233,6 +235,13 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (RESPONSE_HELP);
 	REGISTER (dialog_response);
 
+	REGISTER_ENUM (WIN_POS_NONE);
+	REGISTER_ENUM (WIN_POS_CENTER);
+	REGISTER_ENUM (WIN_POS_MOUSE);
+	REGISTER_ENUM (WIN_POS_CENTER_ALWAYS);
+	REGISTER_ENUM (WIN_POS_CENTER_ON_PARENT);
+	REGISTER (window_position);
+
 	REGISTER_CLASS_ENUM (AddRouteDialog, AudioTrack);
 	REGISTER_CLASS_ENUM (AddRouteDialog, MidiTrack);
 	REGISTER_CLASS_ENUM (AddRouteDialog, AudioBus);
@@ -250,4 +259,10 @@ setup_gtk_ardour_enums ()
 	REGISTER_CLASS_ENUM (Editing, WithMIDNAM);
 	REGISTER_CLASS_ENUM (Editing, Never);
 	REGISTER (note_name_display);
+
+	REGISTER_ENUM(BottomPaneOnly);
+	REGISTER_ENUM(OpenBottomPane);
+	REGISTER_ENUM(PreferBottomPane);
+	REGISTER_ENUM(NeverBottomPane);
+	REGISTER (region_edit_disposition);
 }

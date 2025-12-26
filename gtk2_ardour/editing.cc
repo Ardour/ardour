@@ -191,5 +191,16 @@ const char *markerclickbehaviorstrs[] = {
 #undef MARKERCLICKBEHAVIOR
 #define MARKERCLICKBEHAVIOR(a) /*empty*/
 
+#undef REGIONEDITDISPOSITION
+#define REGIONEDITDISPOSITION(s) N_(#s),
+const char *regioneditdispositionstrs[] = {
+	#include "editing_syms.inc.h"
+	0
+};
+#undef REGIONEDITDISPOSITION
+#define REGIONEDITDISPOSITION(a) /*empty*/
+
+
+
 } // namespace Editing
 

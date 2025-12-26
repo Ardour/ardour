@@ -722,11 +722,13 @@ VideoTimeLine::find_xjadeo () {
 			<< endmsg;
 	}
 
+	volatile bool terminated = false;
+
 	if (found_xjadeo ()) {
 		ARDOUR::SystemExec version_check (_xjadeo_bin, X_("--version"), true);
 		xjadeo_version = "";
 		version_check.ReadStdout.connect_same_thread (*this, std::bind (&VideoTimeLine::xjadeo_readversion, this, _1 ,_2));
-		version_check.Terminated.connect_same_thread (*this, std::bind (&VideoTimeLine::xjadeo_readversion, this, "\n" ,1));
+		version_check.Terminated.connect_same_thread (*this, [&] { xjadeo_readversion ("\n",1); terminated = true;} );
 		if (version_check.start (ARDOUR::SystemExec::MergeWithStdin)) {
 			warning << _(
 					"Video-monitor 'xjadeo' cannot be launched."
@@ -742,8 +744,14 @@ VideoTimeLine::find_xjadeo () {
 #endif
 
 		int timeout = 300;
-		while (xjadeo_version.empty() && --timeout) {
+		while (!terminated && --timeout) {
 			Glib::usleep(10000);
+		}
+
+		if (!timeout) {
+			_xjadeo_bin = X_("");
+			warning << _("Video-monitor 'xjadeo' version detection timed out.") << endmsg;
+			return;
 		}
 
 		bool v_ok = false;
@@ -795,10 +803,13 @@ VideoTimeLine::find_harvid () {
 	if (harvid_bin.empty ()) {
 		return;
 	}
+
+	volatile bool terminated = false;
+
 	ARDOUR::SystemExec version_check (harvid_bin, X_("--version"), true);
 	harvid_version = "";
 	version_check.ReadStdout.connect_same_thread (*this, std::bind (&VideoTimeLine::harvid_readversion, this, _1 ,_2));
-	version_check.Terminated.connect_same_thread (*this, std::bind (&VideoTimeLine::harvid_readversion, this, "\n" ,1));
+	version_check.Terminated.connect_same_thread (*this, [&] { harvid_readversion ("\n",1); terminated = true;} );
 	if (version_check.start (ARDOUR::SystemExec::MergeWithStdin)) {
 		return;
 	}
@@ -810,8 +821,13 @@ VideoTimeLine::find_harvid () {
 #endif
 
 	int timeout = 300;
-	while (harvid_version.empty() && --timeout) {
+	while (!terminated && --timeout) {
 		Glib::usleep(10000);
+	}
+
+	if (!timeout) {
+		warning << _("Video-decoder 'harvid' version detection timed out.") << endmsg;
+		return;
 	}
 
 	size_t vo = harvid_version.find("harvid v");

@@ -56,6 +56,8 @@ protected:
 	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
 	void on_name_changed ();
 
+	static void child_destroyed (GtkWidget*, gpointer);
+
 private:
 	Glib::RefPtr<Gtk::Style> get_parent_style ();
 
@@ -79,6 +81,8 @@ private:
 	int  _alloc_y0;
 	bool _boxy;
 	bool _draw;
+
+	gulong _destroy_connection;
 };
 
 } // namespace ArdourWidgets

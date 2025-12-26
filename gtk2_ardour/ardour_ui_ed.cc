@@ -76,6 +76,8 @@
 #include "location_ui.h"
 #include "main_clock.h"
 #include "rc_option_editor.h"
+#include "rta_manager.h"
+#include "rta_window.h"
 #include "virtual_keyboard_window.h"
 
 #include <gtkmm2ext/application.h>
@@ -198,7 +200,7 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_action (main_actions, X_("Close"), _("Close"),  sigc::mem_fun(*this, &ARDOUR_UI::close_session));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (main_actions, X_("AddTrackBus"), _("Add Track, Bus or VCA..."), sigc::mem_fun(*this, &ARDOUR_UI::add_route));
+	act = ActionManager::register_action (main_actions, X_("AddTrackBus"), _("Add New Track, Bus, VCA or Foldback..."), sigc::mem_fun(*this, &ARDOUR_UI::add_route));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 	ActionManager::rec_sensitive_actions.push_back (act);
@@ -239,7 +241,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (main_actions, X_("SaveAs"), _("Save As..."), sigc::mem_fun(*this, &ARDOUR_UI::save_session_as));
+	act = ActionManager::register_action (main_actions, X_("SaveAs"), _("Save Session Copy As..."), sigc::mem_fun(*this, &ARDOUR_UI::save_session_as));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (main_actions, X_("Archive"), _("Archive..."), sigc::mem_fun(*this, &ARDOUR_UI::archive_session));
@@ -249,10 +251,16 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (main_actions, X_("SaveTemplate"), _("Save Template..."),  sigc::mem_fun(*this, &ARDOUR_UI::save_template));
+	act = ActionManager::register_action (main_actions, X_("SaveTemplate"), _("Create Session Template..."),  sigc::mem_fun(*this, &ARDOUR_UI::save_template));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (main_actions, X_("ManageTemplates"), _("Templates"), sigc::mem_fun(*this, &ARDOUR_UI::manage_templates));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (main_actions, X_("ExportStrips"), _("Save Mixer Strips..."), sigc::mem_fun (*this, &ARDOUR_UI::export_strips));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (main_actions, X_("ImportStrips"), _("Import Mixer Strips..."), sigc::mem_fun (*this, &ARDOUR_UI::import_strips));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (main_actions, X_("Metadata"), _("Metadata"));
@@ -324,6 +332,8 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 
+	act = ActionManager::register_action (transport_actions, X_("SpacebarAction"), _("Start/Stop"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::spacebar_action), false, false));
+	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (transport_actions, X_("ToggleRoll"), _("Start/Stop"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::toggle_roll), false, false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (transport_actions, X_("alternate-ToggleRoll"), _("Start/Stop"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::toggle_roll), false, false));
@@ -486,6 +496,9 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_toggle_action (transport_actions, X_("ToggleClick"), _("Click"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_click));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
+	act = ActionManager::register_toggle_action (transport_actions, X_("ToggleClickOnRec"), _("Click when Recording"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_click_on_rec));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::transport_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (transport_actions, X_("ToggleAutoInput"), _("Auto Input"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_auto_input));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
@@ -620,7 +633,7 @@ ARDOUR_UI::install_dependent_actions ()
 	act = ActionManager::register_action (common_actions, "jump-to-loop-end", _("Jump to Loop End"), sigc::bind(sigc::mem_fun(*editor, &PublicEditor::jump_to_loop_marker), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (common_actions, X_("addExistingAudioFiles"), _("Import"), sigc::mem_fun (*editor, &PublicEditor::external_audio_dialog));
+	act = ActionManager::register_action (common_actions, X_("addExistingAudioFiles"), _("Import Audio/MIDI files..."), sigc::mem_fun (*editor, &PublicEditor::external_audio_dialog));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 
@@ -1047,11 +1060,15 @@ ARDOUR_UI::save_ardour_state ()
 		if (location_ui) {
 			_session->add_instant_xml (location_ui->ui().get_state ());
 		}
+		if (rtawindow) {
+			_session->add_instant_xml (rtawindow->get_state ());
+		}
 		if (virtual_keyboard_window) {
 			XMLNode& vkstate (virtual_keyboard_window->get_state());
 			vkstate.add_child_nocopy (virtual_keyboard_window.get_state ());
 			_session->add_instant_xml (vkstate);
 		}
+		_session->add_instant_xml (RTAManager::instance()->get_state());
 	}
 
 	/* save current Window settings and sizes for new sessions */
@@ -1067,11 +1084,15 @@ ARDOUR_UI::save_ardour_state ()
 		if (location_ui) {
 			Config->add_instant_xml (location_ui->ui().get_state ());
 		}
+		if (rtawindow) {
+			Config->add_instant_xml (rtawindow->get_state ());
+		}
 		if (virtual_keyboard_window) {
 			XMLNode& vkstate (virtual_keyboard_window->get_state());
 			vkstate.add_child_nocopy (virtual_keyboard_window.get_state ());
 			Config->add_instant_xml (vkstate);
 		}
+		Config->add_instant_xml (RTAManager::instance()->get_state());
 	}
 
 	delete &enode;

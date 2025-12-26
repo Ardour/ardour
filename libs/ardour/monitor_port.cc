@@ -28,8 +28,6 @@
 #include "ardour/runtime_functions.h"
 #include "ardour/session.h"
 
-#define GAIN_COEFF_DELTA (1e-5)
-
 using namespace ARDOUR;
 using namespace std;
 

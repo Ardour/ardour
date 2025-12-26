@@ -200,7 +200,7 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 
 		} else {
 			try {
-				Source*                   src = new SndFileSource (s, node);
+				Source* src = new SndFileSource (s, node);
 				std::shared_ptr<Source> ret (src);
 				BOOST_MARK_SOURCE (ret);
 				if (setup_peakfile (ret, defer_peaks)) {
@@ -214,7 +214,7 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 
 #ifdef HAVE_COREAUDIO
 			try {
-				Source*                   src = new CoreAudioSource (s, node);
+				Source* src = new CoreAudioSource (s, node);
 				std::shared_ptr<Source> ret (src);
 				BOOST_MARK_SOURCE (ret);
 
@@ -252,13 +252,17 @@ SourceFactory::createExternal (DataType type, Session& s, const string& path,
 {
 	if (type == DataType::AUDIO) {
 		try {
-			Source*                   src = new SndFileSource (s, path, chn, flags);
+			AudioSource* src = new SndFileSource (s, path, chn, flags);
 			std::shared_ptr<Source> ret (src);
 			BOOST_MARK_SOURCE (ret);
 			if (setup_peakfile (ret, defer_peaks)) {
 				throw failed_constructor ();
 			}
 			ret->check_for_analysis_data_on_disk ();
+			{
+				Source::WriterLock lm (src->mutex ());
+				src->estimate_tempo ();
+			}
 			if (announce) {
 				SourceCreated (ret);
 			}
@@ -268,13 +272,17 @@ SourceFactory::createExternal (DataType type, Session& s, const string& path,
 
 #ifdef HAVE_COREAUDIO
 		try {
-			Source*                   src = new CoreAudioSource (s, path, chn, flags);
+			AudioSource* src = new CoreAudioSource (s, path, chn, flags);
 			std::shared_ptr<Source> ret (src);
 			BOOST_MARK_SOURCE (ret);
 			if (setup_peakfile (ret, defer_peaks)) {
 				throw failed_constructor ();
 			}
 			ret->check_for_analysis_data_on_disk ();
+			{
+				Source::WriterLock lm (src->mutex ());
+				src->estimate_tempo ();
+			}
 			if (announce) {
 				SourceCreated (ret);
 			}
@@ -415,8 +423,7 @@ SourceFactory::createFromPlaylist (DataType type, Session& s, std::shared_ptr<Pl
 					start = timecnt_t::zero (Temporal::AudioTime);
 				}
 
-				Source* src = new AudioPlaylistSource (s, orig, name, ap, chn, start, len, Source::Flag (0));
-
+				AudioSource* src = new AudioPlaylistSource (s, orig, name, ap, chn, start, len, Source::Flag (0));
 				std::shared_ptr<Source> ret (src);
 
 				if (setup_peakfile (ret, defer_peaks)) {
@@ -424,6 +431,10 @@ SourceFactory::createFromPlaylist (DataType type, Session& s, std::shared_ptr<Pl
 				}
 
 				ret->check_for_analysis_data_on_disk ();
+				{
+					Source::WriterLock lm (src->mutex ());
+					src->estimate_tempo ();
+				}
 				SourceCreated (ret);
 				return ret;
 			}

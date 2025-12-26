@@ -40,7 +40,7 @@ def build(bld):
                                    and bld.is_defined('HAVE_GLIBMM')
                                    and bld.is_defined('HAVE_GTHREAD'))
 
-    if bld.is_defined('HAVE_FFTW35F') and bld.env['build_target'] != 'mingw':
+    if bld.is_defined('HAVE_FFTW35F') and bld.env['build_target'] != 'mingw' and bld.env['build_target'] != 'msvc':
         bld.env['LIB_FFTW3F'] += ['fftw3f_threads']
 
     audiographer_sources = [

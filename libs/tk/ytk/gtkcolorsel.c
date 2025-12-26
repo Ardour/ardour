@@ -366,7 +366,18 @@ gtk_color_selection_init (GtkColorSelection *colorsel)
   color_sample_new (colorsel);
   gtk_container_add (GTK_CONTAINER (frame), priv->sample_area);
   gtk_box_pack_start (GTK_BOX (hbox), frame, TRUE, TRUE, 0);
-  
+
+#if !(defined(_WIN32)|| defined(__APPLE__))
+	/* hide eyedropper button -- which does not work on OSX:
+	 * " the problem is worse than just `not getting the color' though.
+	 *   The action doesn't actually complete, and window focus is in a
+	 *   `weird state' until you click inside the color-picker dialog twice;
+	 *   then it all seems back to normal (but no color got picked)"
+	 *
+	 * On Windows 7 it works only in Ardour's own Window, but mouse cursor
+	 * is offset, and it's virtually impossible to pick the correct color.
+	 */
+
   button = gtk_button_new ();
 
   gtk_widget_set_events (button, GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK);
@@ -380,6 +391,7 @@ gtk_color_selection_init (GtkColorSelection *colorsel)
 
   gtk_widget_set_tooltip_text (button,
                         _("Click the eyedropper, then click a color anywhere on your screen to select that color."));
+#endif
   
   top_right_vbox = gtk_vbox_new (FALSE, 6);
   gtk_box_pack_start (GTK_BOX (top_hbox), top_right_vbox, FALSE, FALSE, 0);

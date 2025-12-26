@@ -29,7 +29,6 @@
 #include <string>
 #include <climits>
 #include <cerrno>
-#include <unistd.h>
 #include <sys/stat.h>
 #include <time.h>
 #include <stdint.h>
@@ -363,61 +362,188 @@ write_audio_data_to_new_files (ImportableSource* source, ImportStatus& status,
 }
 
 static void
-write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
-                              vector<std::shared_ptr<Source> >& newfiles,
-                              bool split_midi_channels)
+write_midi_type0_data_to_one_file (Evoral::SMF* source, ImportStatus& status, size_t n, size_t nfiles, std::shared_ptr<SMFSource> smfs, bool split_midi_channels, int channel)
 {
-	uint32_t buf_size = 4;
-	uint8_t* buf      = (uint8_t*) malloc (buf_size);
+	uint32_t bufsize = 4;
+	uint8_t* buf     = (uint8_t*) malloc (bufsize);
+	Evoral::event_id_t ignored_note_id; /* imported files either don't have noted IDs or we ignore them */
 
-	status.progress = 0.0f;
-
-	bool type0 = source->smf_format()==0;
-
-	int total_files = newfiles.size();
+	Source::WriterLock target_lock (smfs->mutex());
+	smfs->mark_streaming_write_started (target_lock);
+	smfs->drop_model (target_lock);
 
 	try {
-		vector<std::shared_ptr<Source> >::iterator s = newfiles.begin();
 
-		int cur_chan = 0;
+		source->seek_to_start();
 
-		for (int i = 0; i < total_files; ++i) {
+		uint64_t t       = 0;
+		uint32_t delta_t = 0;
+		uint32_t size    = 0;
+		uint32_t written = 0;
 
-			int cur_track = i+1;  //first Track of a type-1 file is metadata only. Start importing sourcefiles at Track index 1
+		while (!status.cancel) {
 
-			if (split_midi_channels) {  //if splitting channels we will need to fill 16x sources.  empties will be disposed-of later
-				cur_track = 1 + (int) floor((float)i/16.f);  //calculate the Track needed for this sourcefile (offset by 1)
+			size = bufsize;
+
+			/* ret will be:
+
+			   < 0 : error/end-of-track
+			   0   : metadata event, size gives the byte count
+			   > 0 : regular event for our consideration
+
+			*/
+
+			int ret = source->read_event (&delta_t, &size, &buf, &ignored_note_id);
+
+			if (ret < 0) { // EOT
+				break;
 			}
 
-			std::shared_ptr<SMFSource> smfs = std::dynamic_pointer_cast<SMFSource> (*s);
-			if (!smfs) {
-				continue;  //should never happen.  The calling code should provide exactly the number of tracks&channels we need
+			if (size == 0) {
+				/* metadata not meant for us */
+				continue;
 			}
 
-			Source::WriterLock source_lock(smfs->mutex());
-
-			smfs->drop_model (source_lock);
-			if (type0) {
-				source->seek_to_start ();
-			} else {
-				source->seek_to_track (cur_track);
+			if (ret == 0) {
+				/* set note id, but we ignored it */
+				continue;
 			}
+
+			if (size > bufsize) {
+				bufsize = size;
+			}
+
+			t += delta_t;
+
+			/* if requested by user, each sourcefile gets only a single channel's data */
+
+			if (ret > 0 && split_midi_channels) {
+				uint8_t type = buf[0] & 0xf0;
+				uint8_t chan = buf[0] & 0x0f;
+				if (type >= 0x80 && type <= 0xE0) {
+					if (chan != channel) {
+						continue;
+					}
+				}
+			}
+
+			smfs->append_event_beats (
+				target_lock,
+				Evoral::Event<Temporal::Beats>(
+					Evoral::MIDI_EVENT,
+					Temporal::Beats::ticks_at_rate(t, source->ppqn()),
+					size,
+					buf));
+
+			written++;
+
+			if (status.progress < 0.99) {
+				status.progress += 0.01;
+			}
+		}
+
+		if (written) {
+
+			/* we wrote something */
+
+			smfs->mark_streaming_write_completed (target_lock, timecnt_t (source->duration()));
+
+			/* the streaming write that we've just finished
+			 * only wrote data to the SMF object, which is
+			 * ultimately an on-disk data structure. So now
+			 * we pull the data back from disk to build our
+			 * in-memory MidiModel version.
+			 */
+
+			smfs->load_model (target_lock, true);
+
+		} else {
+			info << string_compose (_("No usable MIDI data found for file %1 of %2"), n, nfiles) << endmsg;
+		}
+
+	} catch (exception& e) {
+		error << string_compose (_("MIDI file could not be written (best guess: %1)"), e.what()) << endmsg;
+	}
+
+	free (buf);
+
+}
+
+static bool
+track_contains_tempo_or_key_metadata (Evoral::SMF* source, int track)
+{
+	if (source->seek_to_track (track+1) != 0) {
+		return false;
+	}
+
+	uint8_t* buf     = (uint8_t*) malloc (4);
+	uint32_t delta_t = 0;
+	uint32_t size    = 4;
+	bool seen = false;
+	Evoral::event_id_t ignored_note_id; /* imported files either don't have noted IDs or we ignore them */
+
+	while (true) {
+		int ret = source->read_event (&delta_t, &size, &buf, &ignored_note_id);
+
+		if (ret < 0) { // EOT
+			break;
+		}
+
+		if (size == 0) {
+			/* meta event that is not for us */
+			continue;
+		}
+
+		if (Evoral::SMF::is_tempo_or_meter_related (buf, size)) {
+			seen  = true;
+			break;
+		}
+	}
+
+	free (buf);
+	return seen;
+}
+
+/* return true if only meta-data was found */
+static bool
+write_midi_type1_data_to_one_file (Evoral::SMF* source, ImportStatus& status, std::shared_ptr<SMFSource> smfs,
+                                   int track, bool split_midi_channels, int channel, int meta_track)
+{
+	uint32_t bufsize = 4;
+	uint8_t* buf     = (uint8_t*) malloc (bufsize);
+	bool meta_in_file  = false;
+	bool meta_in_track = false;
+	uint32_t written = 0;
+	Evoral::event_id_t ignored_note_id; /* imported files either don't have noted IDs or we ignore them */
+
+	/* libsmf starts counting tracks at one, not zero */
+	track++;
+	meta_track++;
+
+	/* Check track number is legal.
+	 */
+	if (track > source->num_tracks()) {
+		return false;
+	}
+
+	Source::WriterLock target_lock (smfs->mutex());
+	smfs->mark_streaming_write_started (target_lock);
+	smfs->drop_model (target_lock);
+
+	try {
+		/* Get metadata first */
+
+		if (meta_track > 0 && source->seek_to_track (meta_track) == 0) {
 
 			uint64_t t       = 0;
 			uint32_t delta_t = 0;
 			uint32_t size    = 0;
-			bool first = true;
 
 			while (!status.cancel) {
-				gint note_id_ignored; // imported files either don't have NoteID's or we ignore them.
 
-				size = buf_size;
+				size = bufsize;
 
-				int ret = source->read_event (&delta_t, &size, &buf, &note_id_ignored);
-
-				if (size > buf_size) {
-					buf_size = size;
-				}
+				int ret = source->read_event (&delta_t, &size, &buf, &ignored_note_id);
 
 				if (ret < 0) { // EOT
 					break;
@@ -425,76 +551,217 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 
 				t += delta_t;
 
-				if (ret == 0) { // Meta
+				if (size == 0) {
+					/* meta event that is not for us */
 					continue;
 				}
 
-				/* if requested by user, each sourcefile gets only a single channel's data */
-				if (split_midi_channels) {
-					uint8_t type = buf[0] & 0xf0;
-					uint8_t chan = buf[0] & 0x0f;
-					if (type >= 0x80 && type <= 0xE0) {
-						if (chan != cur_chan) {
-							continue;
-						}
-					}
+				if (size > bufsize) {
+					bufsize = size;
 				}
 
-				if (first) {
-					smfs->mark_streaming_write_started (source_lock);
-					first = false;
-				}
+				if (ret == 0) { // meta event
 
-				smfs->append_event_beats(
-					source_lock,
-					Evoral::Event<Temporal::Beats>(
-						Evoral::MIDI_EVENT,
-						Temporal::Beats::ticks_at_rate(t, source->ppqn()),
-						size,
-						buf));
+					meta_in_file = true;
+
+					smfs->append_event_beats (
+						target_lock,
+						Evoral::Event<Temporal::Beats>(
+							Evoral::MIDI_EVENT,
+							Temporal::Beats::ticks_at_rate(t, source->ppqn()),
+							size,
+							buf), true); /* allow meta-events */
+				}
 
 				if (status.progress < 0.99) {
 					status.progress += 0.01;
 				}
 			}
 
-			if (!first) {
+			if (meta_in_file || meta_in_track) {
+				smfs->end_track (target_lock);
+			}
+		}
 
-				/* we wrote something */
+		/* Now the actual track we're actually trying to write */
 
-				smfs->mark_streaming_write_completed (source_lock, timecnt_t (source->duration()));
+		uint64_t t = 0;
+		uint64_t our_t = 0;
 
-				/* the streaming write that we've just finished
-				 * only wrote data to the SMF object, which is
-				 * ultimately an on-disk data structure. So now
-				 * we pull the data back from disk to build our
-				 * in-memory MidiModel version.
-				 */
+		if (source->seek_to_track (track) == 0) {
 
-				smfs->load_model (source_lock, true);
+			uint32_t delta_t = 0;
+			uint32_t size    = 0;
 
-				if (status.cancel) {
+			while (!status.cancel) {
+				gint note_id_ignored; // imported files either don't have NoteID's or we ignore them.
+
+				size = bufsize;
+
+				int ret = source->read_event (&delta_t, &size, &buf, &note_id_ignored);
+
+				if (ret < 0) { // EOT
 					break;
 				}
 
-			} else {
-				info << string_compose (_("Track %1 of %2 contained no usable MIDI data"), i, total_files) << endmsg;
+				t += delta_t;
+
+				if (size == 0) {
+					/* meta event, not for us */
+					continue;
+				}
+
+				if (size > bufsize) {
+					bufsize = size;
+				}
+
+				if (ret > 0) { // non-meta event
+
+					/* if requested by user, each sourcefile gets only a single channel's data */
+
+					if (split_midi_channels) {
+						uint8_t type = buf[0] & 0xf0;
+						uint8_t chan = buf[0] & 0x0f;
+						if (type >= 0x80 && type <= 0xE0) {
+							if (chan != channel) {
+								continue;
+							}
+						}
+					}
+					smfs->append_event_beats (
+						target_lock,
+						Evoral::Event<Temporal::Beats>(
+							Evoral::MIDI_EVENT,
+							Temporal::Beats::ticks_at_rate(t, source->ppqn()),
+							size,
+							buf));
+
+					written++;
+					our_t = t;
+
+				}  else if (ret == 0 && track != meta_track) {
+
+					/* meta event on this track that was
+					 * not handled by the meta "pre-write"
+					 * above.
+					 */
+
+					meta_in_track = true;
+
+					smfs->append_event_beats (
+						target_lock,
+						Evoral::Event<Temporal::Beats>(
+							Evoral::MIDI_EVENT,
+							Temporal::Beats::ticks_at_rate(t, source->ppqn()),
+							size,
+							buf), true); /* allow meta-events */
+					our_t = t;
+				}
+
+				if (status.progress < 0.99) {
+					status.progress += 0.01;
+				}
 			}
 
-			++s; // next source
+		}
 
-			++cur_chan;
-			if (cur_chan > 15) {
-				cur_chan=0;
-			}
+		if (written == 0) {
+			our_t = 0;
+		}
+
+		smfs->mark_streaming_write_completed (target_lock, timecnt_t (Temporal::Beats::ticks_at_rate (our_t, source->ppqn())));
+
+		if (written) {
+
+			/* we wrote something other than meta-data */
+
+			/* the streaming write that we've just finished
+			 * only wrote data to the SMF object, which is
+			 * ultimately an on-disk data structure. So now
+			 * we pull the data back from disk to build our
+			 * in-memory MidiModel version.
+			 */
+
+			smfs->load_model (target_lock, true);
+
+		} else {
+			info << string_compose (_("Track %1 contained no usable MIDI data"), track) << endmsg;
 		}
 
 	} catch (exception& e) {
 		error << string_compose (_("MIDI file could not be written (best guess: %1)"), e.what()) << endmsg;
 	}
 
-	if (buf) {
-		free (buf);
+	free (buf);
+
+	return (meta_in_track || meta_in_file) && (written == 0);
+}
+
+static void
+write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
+                              vector<std::shared_ptr<Source> >& newsrcs,
+                              bool split_midi_channels)
+{
+	int channel;
+
+	status.progress = 0.0f;
+	size_t nfiles = newsrcs.size();
+	size_t n = 0;
+	int32_t meta_track = -1;
+
+	switch (source->smf_format()) {
+	case 0:
+		channel = 0;
+
+		for (auto & newsrc : newsrcs) {
+			std::shared_ptr<SMFSource> smfs = std::dynamic_pointer_cast<SMFSource> (newsrc);
+			assert (smfs);
+
+			write_midi_type0_data_to_one_file (source, status, n, nfiles, smfs, split_midi_channels, channel);
+
+			if (split_midi_channels) {
+				channel = (channel + 1) % 16;
+			}
+
+			if (status.cancel) {
+				break;
+			}
+
+			++n;
+		}
+		break;
+
+	case 1:
+		channel = 0;
+
+		for (uint16_t n = 0; n < source->num_tracks(); ++n) {
+			if (track_contains_tempo_or_key_metadata (source, n)) {
+				meta_track = n;
+				break;
+			}
+		}
+
+		for (auto & newsrc : newsrcs) {
+			std::shared_ptr<SMFSource> smfs = std::dynamic_pointer_cast<SMFSource> (newsrc);
+			assert (smfs);
+
+			bool meta_only = write_midi_type1_data_to_one_file (source, status, smfs, n, split_midi_channels, channel, meta_track);
+
+			if (split_midi_channels && !meta_only) {
+				channel = (channel + 1) % 16;
+			}
+
+			if (status.cancel) {
+				break;
+			}
+
+			++n;
+		}
+		break;
+
+	default:
+		error << string_compose (_("MIDI file has unsupported SMF format type %1"), source->smf_format()) << endmsg;
+		return;
 	}
 }
 
@@ -535,8 +802,8 @@ Session::deinterlace_midi_region (std::shared_ptr<MidiRegion> mr)
 
 		/* create new file paths for 16 potential channels of midi data */
 		vector<string> smf_names;
-		for (int i = 0; i<16; i++) {
-			smf_names.push_back(string_compose("-ch%1", i+1));
+		for (int i = 0; i < 16; i++) {
+			smf_names.push_back (string_compose ("-ch%1", i+1));
 		}
 		vector<string> new_paths = get_paths_for_new_sources (false, source_path, 16, smf_names, true);
 
@@ -654,8 +921,8 @@ Session::import_files (ImportStatus& status)
 					/* Type0: we should prepare filenames for up to 16 channels in the file; we will throw out the empty ones later */
 					if (status.split_midi_channels) {
 						num_channels = 16;
-						for (uint32_t i = 0; i<num_channels; i++) {
-							smf_names.push_back( string_compose ("ch%1", 1+i ) ); //chanX
+						for (uint32_t i = 0; i < num_channels; i++) {
+							smf_names.push_back (string_compose ("ch%1", 1+i ) ); //chanX
 						}
 					} else {
 						num_channels = 1;

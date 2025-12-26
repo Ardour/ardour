@@ -408,7 +408,7 @@ FPGUI::build_trns_action_combo (Gtk::ComboBox& cb, FaderPort::ButtonState bs)
 	actions.push_back (make_pair (string("Toggle Locations window"), string(X_("Window/toggle-locations"))));
 	actions.push_back (make_pair (string("Toggle Metronome"), string(X_("Transport/ToggleClick"))));
 	actions.push_back (make_pair (string("Toggle External Sync"), string(X_("Transport/ToggleExternalSync"))));
-	actions.push_back (make_pair (string("Toggle Follow Playhead"), string(X_("Editor/toggle-follow-playhead"))));
+	actions.push_back (make_pair (string("Toggle Follow Playhead"), string(X_("EditorEditing/toggle-follow-playhead"))));
 
 //	actions.push_back (make_pair (string("Set Playhead @pointer"), string(X_("Editor/set-playhead"))));
 

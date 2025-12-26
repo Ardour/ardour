@@ -13,6 +13,7 @@ main()
 {
 	if (!PBD::init ()) return 1;
 	Temporal::init ();
+	Temporal::reset ();
 
 	CppUnit::TestResult testresult;
 

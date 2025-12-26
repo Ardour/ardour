@@ -24,11 +24,13 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <vector>
 
 #include "temporal/domain_swap.h"
 #include "temporal/timeline.h"
 #include "temporal/range.h"
+#include "temporal/tempo.h"
 
 #include "pbd/undo.h"
 #include "pbd/signals.h"
@@ -77,6 +79,8 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<uint64_t>          reg_group;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              contents; // type doesn't matter here, used for signal only
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              region_fx; // type doesn't matter here, used for signal only
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              region_tempo; // type doesn't matter here, used for signal only
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              region_meter; // type doesn't matter here, used for signal only
 };
 
 class Playlist;
@@ -540,6 +544,13 @@ public:
 			method (std::weak_ptr<RegionFxPlugin> (i));
 		}
 	}
+
+	std::optional<Temporal::Tempo> tempo() const;
+	void set_tempo (Temporal::Tempo const &);
+	std::optional<Temporal::Meter> meter() const;
+	void set_meter (Temporal::Meter const &);
+
+	std::shared_ptr<Temporal::TempoMap> tempo_map() const;
 
 protected:
 	virtual XMLNode& state () const;

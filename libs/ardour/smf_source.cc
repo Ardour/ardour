@@ -25,11 +25,8 @@
 
 #include <vector>
 
-#include <sys/time.h>
 #include <sys/stat.h>
-#include <unistd.h>
 #include <errno.h>
-#include <regex.h>
 
 #include "pbd/file_utils.h"
 #include "pbd/stl_delete.h"
@@ -379,21 +376,20 @@ timecnt_t
 SMFSource::write_unlocked (const WriterLock&            lock,
                            MidiRingBuffer<samplepos_t>& source,
                            timepos_t const &            position,
-                           timecnt_t const &            cnt)
+                           timecnt_t const &            dur)
 {
 
 	if (!_writing) {
 		mark_streaming_write_started (lock);
 	}
 
-	samplepos_t        time;
-	const samplepos_t        pos_samples = position.samples();
-	const samplecnt_t        cnt_samples = cnt.samples();
+	samplepos_t       time;
+	const samplepos_t pos_samples = position.samples();
+	const samplecnt_t dur_samples = dur.samples();
 	Evoral::EventType type;
 	uint32_t          size;
-
-	size_t   buf_capacity = 4;
-	uint8_t* buf          = (uint8_t*)malloc(buf_capacity);
+	size_t            buf_capacity = 4;
+	uint8_t*          buf = (uint8_t*) malloc (buf_capacity);
 
 	if (_model && !_model->writing()) {
 		_model->start_write();
@@ -408,10 +404,12 @@ SMFSource::write_unlocked (const WriterLock&            lock,
 			break;
 		}
 
-		if ((cnt != timecnt_t::max (cnt.time_domain())) &&
-		    (time > pos_samples + _capture_length + cnt_samples)) {
+		if ((dur != timecnt_t::max (dur.time_domain())) &&
+		    (time > pos_samples + _capture_length + dur_samples)) {
 			/* The diskstream doesn't want us to write everything, and this
-			   event is past the end of this block, so we're done for now. */
+			   event is past the end of this block, so we're done
+			   for now.
+			*/
 			break;
 		}
 
@@ -441,21 +439,21 @@ SMFSource::write_unlocked (const WriterLock&            lock,
 		}
 		time -= pos_samples;
 
-		ev.set(buf, size, time);
-		ev.set_event_type(Evoral::MIDI_EVENT);
-		ev.set_id(Evoral::next_event_id());
+		ev.set (buf, size, time);
+		ev.set_event_type (Evoral::MIDI_EVENT);
+		ev.set_id (Evoral::next_event_id());
 
 		if (!(ev.is_channel_event() || ev.is_smf_meta_event() || ev.is_sysex())) {
 			continue;
 		}
 
-		append_event_samples(lock, ev, pos_samples);
+		append_event_samples (lock, ev, pos_samples);
 	}
 
 	Evoral::SMF::flush ();
 	free (buf);
 
-	return cnt;
+	return dur;
 }
 
 void
@@ -480,8 +478,7 @@ SMFSource::duration() const
 
 /** Append an event with a timestamp in beats */
 void
-SMFSource::append_event_beats (const WriterLock&   lock,
-                               const Evoral::Event<Temporal::Beats>& ev)
+SMFSource::_append_event_beats (const WriterLock& lock, const Evoral::Event<Temporal::Beats>& ev, bool allow_meta)
 {
 	if (!_writing || ev.size() == 0 || ev.is_realtime())  {
 		return;
@@ -519,20 +516,22 @@ SMFSource::append_event_beats (const WriterLock&   lock,
 		event_id = ev.id();
 	}
 
-	if (_model) {
-		_model->append (ev, event_id);
-	}
-
-	assert (!_length || (_length.time_domain() == Temporal::BeatTime));
-	_length  = timepos_t (max (_length.beats(), time));
-
 	const Temporal::Beats delta_time_beats = time - _last_ev_time_beats;
 	const uint32_t      delta_time_ticks = delta_time_beats.to_ticks(ppqn());
 
-	Evoral::SMF::append_event_delta (delta_time_ticks, ev.size(), ev.buffer(), event_id);
-	_last_ev_time_beats = time;
-	_flags = Source::Flag (_flags & ~Empty);
-	_flags = Source::Flag (_flags & ~Missing);
+	if (Evoral::SMF::append_event_delta (delta_time_ticks, ev.size(), ev.buffer(), event_id, allow_meta)) {
+
+		_last_ev_time_beats = time;
+		_flags = Source::Flag (_flags & ~Empty);
+		_flags = Source::Flag (_flags & ~Missing);
+
+		if (_model && !Evoral::SMF::is_meta (ev.buffer(), ev.size())) {
+			_model->append (ev, event_id);
+		}
+
+		assert (!_length || (_length.time_domain() == Temporal::BeatTime));
+		_length  = timepos_t (max (_length.beats(), time));
+	}
 }
 
 /** Append an event with a timestamp in samples (samplepos_t) */
@@ -569,28 +568,29 @@ SMFSource::append_event_samples (const WriterLock& lock,
 		event_id = ev.id();
 	}
 
-	if (_model) {
-		const Evoral::Event<Temporal::Beats> beat_ev (ev.event_type(),
-		                                              ev_time_beats,
-		                                              ev.size(),
-		                                              const_cast<uint8_t*>(ev.buffer()));
-		_model->append (beat_ev, event_id);
-	}
-
-	assert (!_length || (_length.time_domain() == Temporal::BeatTime));
-	_length = timepos_t (max (_length.beats(), ev_time_beats));
-
-	/* a distance measure that starts at @p _last_ev_time_samples (audio time) and
-	   extends for ev.time() (audio time)
+	/* a distance measure that holds the distance between ev.time() and
+	   _last_ev_time_samples (in audio time).
 	*/
-	const timecnt_t       delta_distance (timepos_t (ev.time()), timepos_t (_last_ev_time_samples));
+	const timecnt_t       delta_distance (timepos_t (ev.time() - _last_ev_time_samples), timepos_t (_last_ev_time_samples));
 	const Temporal::Beats delta_time_beats = delta_distance.beats ();
 	const uint32_t        delta_time_ticks = delta_time_beats.to_ticks(ppqn());
 
-	Evoral::SMF::append_event_delta (delta_time_ticks, ev.size(), ev.buffer(), event_id);
-	_last_ev_time_samples = ev.time();
-	_flags = Source::Flag (_flags & ~Empty);
-	_flags = Source::Flag (_flags & ~Missing);
+	if (Evoral::SMF::append_event_delta (delta_time_ticks, ev.size(), ev.buffer(), event_id) > 0) {;
+		_last_ev_time_samples = ev.time();
+		_flags = Source::Flag (_flags & ~Empty);
+		_flags = Source::Flag (_flags & ~Missing);
+
+		if (_model && !Evoral::SMF::is_meta (ev.buffer(), ev.size())) {
+			const Evoral::Event<Temporal::Beats> beat_ev (ev.event_type(),
+			                                              ev_time_beats,
+			                                              ev.size(),
+			                                              const_cast<uint8_t*>(ev.buffer()));
+			_model->append (beat_ev, event_id);
+		}
+
+		assert (!_length || (_length.time_domain() == Temporal::BeatTime));
+		_length = timepos_t (max (_length.beats(), ev_time_beats));
+	}
 }
 
 XMLNode&
@@ -630,6 +630,14 @@ SMFSource::mark_streaming_midi_write_started (const WriterLock& lock, NoteMode m
 
 	MidiSource::mark_streaming_midi_write_started (lock, mode);
 	Evoral::SMF::begin_write ();
+	_last_ev_time_beats  = Temporal::Beats();
+	_last_ev_time_samples = 0;
+}
+
+void
+SMFSource::end_track (const WriterLock& lock)
+{
+	Evoral::SMF::end_track ();
 	_last_ev_time_beats  = Temporal::Beats();
 	_last_ev_time_samples = 0;
 }
@@ -678,11 +686,6 @@ SMFSource::valid_midi_file (const string& file)
 bool
 SMFSource::safe_midi_file_extension (const string& file)
 {
-	static regex_t compiled_pattern;
-	static bool compile = true;
-	const int nmatches = 2;
-	regmatch_t matches[nmatches];
-
 	if (Glib::file_test (file, Glib::FILE_TEST_EXISTS)) {
 		if (!Glib::file_test (file, Glib::FILE_TEST_IS_REGULAR)) {
 			/* exists but is not a regular file */
@@ -690,17 +693,14 @@ SMFSource::safe_midi_file_extension (const string& file)
 		}
 	}
 
-	if (compile && regcomp (&compiled_pattern, "\\.[mM][iI][dD][iI]?$", REG_EXTENDED)) {
-		return false;
-	} else {
-		compile = false;
-	}
-
-	if (regexec (&compiled_pattern, file.c_str(), nmatches, matches, 0)) {
+	const size_t dot_pos = file.rfind ('.');
+	if (dot_pos == string::npos) {
 		return false;
 	}
 
-	return true;
+	std::string const ext = PBD::downcase (file.substr(dot_pos + 1));
+
+	return ext == "mid" || ext == "midi";
 }
 
 static bool compare_eventlist (
@@ -831,10 +831,9 @@ SMFSource::load_model_unlocked (bool force_reload)
 
 	eventlist.sort(compare_eventlist);
 
-	std::list< std::pair< Evoral::Event<Temporal::Beats>*, gint > >::iterator it;
-	for (it=eventlist.begin(); it!=eventlist.end(); ++it) {
-		_model->append (*it->first, it->second);
-		delete it->first;
+	for (auto & it : eventlist) {
+		_model->append (*it.first, it.second);
+		delete it.first;
 	}
 
 	/* Length ought to be based on data in the file (TrkEnd meta-event, not
@@ -860,12 +859,13 @@ SMFSource::load_model_unlocked (bool force_reload)
 
 	_model->set_duration (_length.beats());
 
-	// cerr << "----SMF-SRC-----\n";
-        // _playback_buf->dump (cerr);
-        // cerr << "----------------\n";
-
 	_model->end_write (Evoral::Sequence<Temporal::Beats>::ResolveStuckNotes, _length.beats());
 	_model->set_edited (false);
+
+#if 0
+	cerr << "----SMF-SRC----- " << name() << " - " << _length << " --\n";
+	_model->dump (cerr, _model->begin());
+#endif
 
 	free (buf);
 }

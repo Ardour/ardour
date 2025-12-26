@@ -146,7 +146,7 @@ PatchBankList::refill (std::shared_ptr<MIDI::Name::ChannelNameSet> cns, int cons
 			}
 			generic_banks.erase ((*bank)->number ());
 			std::string n = (*bank)->name ();
-			_bank_select.AddMenuElem (MenuElemNoMnemonic (n, sigc::bind (sigc::mem_fun (*this, &PatchBankList::select_bank), (*bank)->number ())));
+			_bank_select.add_menu_elem (MenuElemNoMnemonic (n, sigc::bind (sigc::mem_fun (*this, &PatchBankList::select_bank), (*bank)->number ())));
 			if ((*bank)->number () == b) {
 				_current_patch_bank = *bank;
 				_bank_select.set_text (n);
@@ -170,7 +170,7 @@ PatchBankList::refill (std::shared_ptr<MIDI::Name::ChannelNameSet> cns, int cons
 				n += " (...)";
 			}
 #endif
-			_bank_select.AddMenuElem (MenuElemNoMnemonic (n, sigc::bind (sigc::mem_fun (*this, &PatchBankList::select_bank), i->first)));
+			_bank_select.add_menu_elem (MenuElemNoMnemonic (n, sigc::bind (sigc::mem_fun (*this, &PatchBankList::select_bank), i->first)));
 			if (i->first == b) {
 				_bank_select.set_text (n);
 				bank_set = true;
@@ -180,7 +180,7 @@ PatchBankList::refill (std::shared_ptr<MIDI::Name::ChannelNameSet> cns, int cons
 
 	if (!_current_patch_bank && !bank_set) {
 		std::string n = string_compose (_("Bank %1"), b + 1);
-		_bank_select.AddMenuElem (MenuElemNoMnemonic (n, sigc::bind (sigc::mem_fun (*this, &PatchBankList::select_bank), b)));
+		_bank_select.add_menu_elem (MenuElemNoMnemonic (n, sigc::bind (sigc::mem_fun (*this, &PatchBankList::select_bank), b)));
 		_bank_select.set_text (n);
 	}
 
@@ -446,7 +446,7 @@ PatchChangeWidget::PatchChangeWidget (std::shared_ptr<ARDOUR::Route> r)
 		using namespace Gtkmm2ext;
 		char buf[8];
 		snprintf (buf, sizeof (buf), "%d", chn + 1);
-		_channel_select.AddMenuElem (MenuElemNoMnemonic (buf, sigc::bind (sigc::mem_fun (*this, &PatchChangeWidget::select_channel), chn)));
+		_channel_select.add_menu_elem (MenuElemNoMnemonic (buf, sigc::bind (sigc::mem_fun (*this, &PatchChangeWidget::select_channel), chn)));
 	}
 
 	_piano.set_monophonic (true);
@@ -855,15 +855,26 @@ PatchChangeTriggerWindow::reset (std::shared_ptr<Route> r, std::shared_ptr<MIDIT
 	/* only show tabs for the chans that this region uses */
 	Evoral::SMF::UsedChannels used = t->used_channels();
 	uint32_t first_used_chan = 15;
+	uint32_t used_cnt = 0;
+
 	for (uint32_t chn = 0; chn < 16; ++chn) {
 		if (used.test(chn)) {
 			if (chn < first_used_chan) {
 				first_used_chan = chn;
 			}
 			_w[chn]->show();
+			used_cnt++;
 		} else {
 			_w[chn]->hide();
 		}
+	}
+
+	if (used_cnt == 0) {
+		/* no channels in use - empty. So make everything visible */
+		for (uint32_t chn = 0; chn < 16; ++chn) {
+			_w[chn]->show ();
+		}
+		first_used_chan = 0;
 	}
 
 	for (uint32_t chn = 0; chn < 16; ++chn) {

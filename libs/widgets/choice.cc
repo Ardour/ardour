@@ -18,11 +18,14 @@
  */
 
 #include <ytkmm/label.h>
-#include <widgets/choice.h>
+
+#include "widgets/choice.h"
+#include "gtkmm2ext/ui_config.h"
 
 using namespace std;
 using namespace sigc;
 using namespace Gtk;
+using namespace Gtkmm2ext;
 using namespace ArdourWidgets;
 
 Choice::Choice (string title, string prompt, vector<string> choices, bool center)
@@ -34,7 +37,7 @@ Choice::Choice (string title, string prompt, vector<string> choices, bool center
 	if (center) {
 		set_position (Gtk::WIN_POS_CENTER);
 	} else {
-		set_position (Gtk::WIN_POS_MOUSE);
+		set_position (UIConfigurationBase::instance().get_default_window_position());
 	}
 
 	set_name ("ChoiceWindow");

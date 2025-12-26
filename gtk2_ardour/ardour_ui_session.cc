@@ -404,6 +404,8 @@ ARDOUR_UI::audio_midi_setup_reconfigure_done (int response, std::string path, st
 int
 ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& snap_name, std::string mix_template)
 {
+	PBD::Unwinder uw (_loading_session, true);
+
 	Session *new_session;
 	int retval = -1;
 
@@ -437,6 +439,7 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 		}
 		goto out;
 	}
+
 	catch (SessionException const& e) {
 		gchar* escaped_error_txt = 0;
 		stringstream ss;
@@ -465,6 +468,7 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 
 		goto out;
 	}
+
 	catch (ARDOUR::WrongProgram const & wp) {
 
 		std::string first_word = wp.creator.substr (0, wp.creator.find (' '));
@@ -480,6 +484,7 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 		msg.hide ();
 		goto out;
 	}
+
 	catch (Glib::Error const& e) {
 		const std::string& glib_what = e.what();
 		gchar* escaped_error_txt = 0;
@@ -511,6 +516,7 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 
 		goto out;
 	}
+
 	catch (...) {
 		gchar* escaped_error_txt = 0;
 		stringstream ss;
@@ -595,6 +601,15 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 		msg.hide ();
 	}
 
+	{
+		if (new_session) {
+			std::string rus_path = Glib::build_filename (new_session->session_directory().root_path(), "rus.xml");
+			region_ui_settings_manager.load (rus_path);
+		} else {
+			region_ui_settings_manager.clear ();
+		}
+	}
+
 
 	/* Now the session been created, add the transport controls */
 	new_session->add_controllable(roll_controllable);
@@ -607,6 +622,7 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 
 	set_session (new_session);
 
+
 	if (_session) {
 		_session->set_clean ();
 	}
@@ -615,6 +631,7 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 		Timers::TimerSuspender t;
 		flush_pending (10);
 	}
+
 
 	retval = 0;
 

@@ -52,6 +52,7 @@
 #include "keyboard.h"
 #include "public_editor.h"
 #include "route_sorter.h"
+#include "rta_manager.h"
 #include "utils.h"
 
 #include "pbd/i18n.h"
@@ -83,6 +84,7 @@ RouteListBase::RouteListBase ()
 	setup_col (append_toggle (_columns.visible, _columns.noop_true, sigc::mem_fun (*this, &RouteListBase::on_tv_visible_changed)), S_("Visible|V"), _("Track/Bus visible ?"));
 	setup_col (append_toggle (_columns.trigger, _columns.is_track, sigc::mem_fun (*this, &RouteListBase::on_tv_trigger_changed)),  S_("Cues|C"), _("Visible on Cues window ?"));
 	setup_col (append_toggle (_columns.active, _columns.activatable, sigc::mem_fun (*this, &RouteListBase::on_tv_active_changed)), S_("Active|A"),  _("Track/Bus active ?"));
+	setup_col (append_toggle (_columns.rta_enabled, _columns.active, sigc::mem_fun (*this, &EditorRoutes::on_tv_rta_enable_toggled)), S_("RTA|RA"),  _("Realtime Analyzer active?"));
 
 	append_col_input_active ();
 	append_col_rec_enable ();
@@ -374,6 +376,24 @@ RouteListBase::on_tv_solo_safe_toggled (std::string const& path_string)
 }
 
 void
+RouteListBase::on_tv_rta_enable_toggled (std::string const& path_string)
+{
+	Gtk::TreeModel::Row        row       = *_model->get_iter (Gtk::TreeModel::Path (path_string));
+	std::shared_ptr<Stripable> stripable = row[_columns.stripable];
+	std::shared_ptr<Route>     route     = std::dynamic_pointer_cast<Route> (stripable);
+
+	if (route) {
+		bool attached = RTAManager::instance ()->attached (route);
+		if (attached) {
+			RTAManager::instance ()->remove (route);
+		} else {
+			RTAManager::instance ()->attach (route);
+			ARDOUR_UI::instance()->show_realtime_analyzer ();
+		}
+	}
+}
+
+void
 RouteListBase::build_menu ()
 {
 	using namespace Menu_Helpers;
@@ -452,7 +472,7 @@ RouteListBase::on_tv_visible_changed (std::string const& path)
 			stripable->presentation_info ().set_hidden (hidden);
 
 			std::shared_ptr<Route> route = std::dynamic_pointer_cast<Route> (stripable);
-			RouteGroup*              rg    = route ? route->route_group () : 0;
+			std::shared_ptr<RouteGroup> rg (route ? route->route_group () : nullptr);
 			if (rg && rg->is_active () && rg->is_hidden ()) {
 				std::shared_ptr<RouteList> rl (rg->route_list ());
 				for (RouteList::const_iterator i = rl->begin (); i != rl->end (); ++i) {
@@ -582,6 +602,9 @@ RouteListBase::add_stripables (StripableList& slist)
 			if (route->is_surround_master ()) {
 				continue;
 			}
+			if (route->is_foldbackbus ()) {
+				continue;
+			}
 
 			row = *(_model->insert (insert_iter));
 
@@ -653,6 +676,7 @@ RouteListBase::add_stripables (StripableList& slist)
 
 		if (route) {
 			route->active_changed.connect (_stripable_connections, invalidator (_scroller), std::bind (&RouteListBase::queue_idle_update, this), gui_context ());
+			route->gui_changed.connect (_stripable_connections, invalidator (_scroller), std::bind (&RouteListBase::handle_gui_changes, this, _1), gui_context());
 		}
 		stripable->DropReferences.connect (_stripable_connections, invalidator (_scroller), std::bind (&RouteListBase::remove_strip, this, ws), gui_context ());
 	}
@@ -1151,9 +1175,11 @@ RouteListBase::idle_update_mute_rec_solo_etc ()
 		(*i)[_columns.solo_isolate_state]      = RouteUI::solo_isolate_active_state (stripable) ? 1 : 0;
 		(*i)[_columns.solo_safe_state]         = RouteUI::solo_safe_active_state (stripable) ? 1 : 0;
 		if (route) {
-			(*i)[_columns.active] = route->active ();
+			(*i)[_columns.active]      = route->active ();
+			(*i)[_columns.rta_enabled] = RTAManager::instance ()->attached (route);
 		} else {
-			(*i)[_columns.active] = true;
+			(*i)[_columns.active]      = true;
+			(*i)[_columns.rta_enabled] = false;
 		}
 
 		std::shared_ptr<Track> trk (std::dynamic_pointer_cast<Track> (route));
@@ -1179,6 +1205,14 @@ RouteListBase::idle_update_mute_rec_solo_etc ()
 	}
 
 	return false; // do not call again (until needed)
+}
+
+void
+RouteListBase::handle_gui_changes (std::string const& what)
+{
+	if (what == "rta") {
+		queue_idle_update ();
+	}
 }
 
 void

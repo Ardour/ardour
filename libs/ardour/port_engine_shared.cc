@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <regex.h>
+#include <regex>
 
 #include "pbd/error.h"
 
@@ -289,11 +289,14 @@ PortEngineSharedImpl::get_ports (
 	std::vector<std::string>& port_names) const
 {
 	int rv = 0;
-	regex_t port_regex;
+	std::regex port_regex;
 	bool use_regexp = false;
-	if (port_name_pattern.size () > 0) {
-		if (!regcomp (&port_regex, port_name_pattern.c_str (), REG_EXTENDED|REG_NOSUB)) {
+	if (!port_name_pattern.empty()) {
+		try {
+			port_regex.assign (port_name_pattern, std::regex::extended);
 			use_regexp = true;
+		} catch (const std::regex_error&) {
+			use_regexp = false;
 		}
 	}
 
@@ -301,14 +304,11 @@ PortEngineSharedImpl::get_ports (
 
 	for (auto const& port : *p) {
 		if ((port->type () == type) && flags == (port->flags () & flags)) {
-			if (!use_regexp || !regexec (&port_regex, port->name ().c_str (), 0, NULL, 0)) {
+			if (!use_regexp || std::regex_search (port->name(), port_regex)) {
 				port_names.push_back (port->name ());
 				++rv;
 			}
 		}
-	}
-	if (use_regexp) {
-		regfree (&port_regex);
 	}
 	return rv;
 }
@@ -837,6 +837,54 @@ PortEngineSharedImpl::process_connection_queue_locked (PortManager& mgr)
 		delete c;
 	}
 	_port_connection_queue.clear ();
+}
+
+XMLNode*
+PortEngineSharedImpl::get_state () const
+{
+	XMLNode* node (new XMLNode (X_("PortEngine")));
+	for (auto const& port : _system_inputs) {
+		assert (port->is_physical () && port->is_terminal ());
+		const std::set<BackendPortPtr>& connected_ports = port->get_connections ();
+		for (auto const& other : connected_ports) {
+			if (!other->is_physical () || !other->is_terminal ()) {
+				continue;
+			}
+			XMLNode* child = node->add_child (X_("HWConnection"));
+			child->set_property (X_("source"), port->name ());
+			child->set_property (X_("sink"), other->name ());
+		}
+	}
+	for (auto const& port : _system_midi_in) {
+		assert (port->is_physical () && port->is_terminal ());
+		const std::set<BackendPortPtr>& connected_ports = port->get_connections ();
+		for (auto const& other : connected_ports) {
+			if (!other->is_physical () || !other->is_terminal ()) {
+				continue;
+			}
+			XMLNode* child = node->add_child (X_("HWConnection"));
+			child->set_property (X_("source"), port->name ());
+			child->set_property (X_("sink"), other->name ());
+		}
+	}
+
+	return node;
+}
+
+int
+PortEngineSharedImpl::set_state (XMLNode const & node, int)
+{
+	assert (node.name() == X_("PortEngine"));
+	const XMLNodeList& children (node.children());
+	for (auto const* c : children) {
+		std::string src;
+		std::string dst;
+		if (c->name() != X_("HWConnection") || !c->get_property (X_("source"), src) || !c->get_property (X_("sink"), dst)) {
+			continue;
+		}
+		connect (src, dst);
+	}
+	return 0;
 }
 
 #ifndef NDEBUG

@@ -24,6 +24,7 @@
 #include <sstream>
 #include <vector>
 #include <climits>
+#include <regex>
 
 #include <stdint.h>
 
@@ -107,7 +108,7 @@ Strip::Strip (Surface& s, const std::string& name, int index, const map<MACKIE_N
 	, _controls_locked (false)
 	, _transport_is_rolling (false)
 	, _metering_active (true)
-	, _lcd2_available (true)
+	, _lcd2_available (false)
 	, _lcd2_label_pitch (7)
 	, _block_screen_redisplay_until (0)
 	, return_to_vpot_mode_display_at (UINT64_MAX)
@@ -127,9 +128,9 @@ Strip::Strip (Surface& s, const std::string& name, int index, const map<MACKIE_N
 	if (s.mcp().device_info().has_qcon_second_lcd()) {
 		_lcd2_available = true;
 
-		// The main unit has 9 faders under the second display.
+		// The Qcon Pro X has 9 faders under the second display.
 		// Extenders have 8 faders.
-		if (s.number() == s.mcp().device_info().master_position()) {
+		if (s.mcp().device_info().is_qcon() && s.number() == s.mcp().device_info().master_position()) {
 			_lcd2_label_pitch = 6;
 		}
 	}
@@ -232,6 +233,10 @@ Strip::set_stripable (std::shared_ptr<Stripable> r, bool /*with_messages*/)
 
 	_stripable->solo_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, std::bind (&Strip::notify_solo_changed, this), ui_context());
 	_stripable->mute_control()->Changed.connect(stripable_connections, MISSING_INVALIDATOR, std::bind (&Strip::notify_mute_changed, this), ui_context());
+	if (_stripable->is_monitor() || _stripable->is_surround_master()) {
+		_stripable->monitor_control()->cut_control()->Changed.connect(stripable_connections, MISSING_INVALIDATOR, std::bind (&Strip::notify_monitor_cut_changed, this), ui_context());
+	}
+	_stripable->MappedControlsChanged.connect (stripable_connections, MISSING_INVALIDATOR, std::bind (&Strip::notify_subview_type_changed, this), ui_context());
 
 	std::shared_ptr<AutomationControl> pan_control = _stripable->pan_azimuth_control();
 	if (pan_control) {
@@ -336,6 +341,26 @@ Strip::notify_mute_changed ()
 }
 
 void
+Strip::notify_monitor_cut_changed ()
+{
+	DEBUG_TRACE (DEBUG::MackieControl, "Monitor cut changed\n");
+	if ((_stripable->is_monitor() || _stripable->is_surround_master()) && _mute) {
+		_surface->write (_mute->set_state (_stripable->monitor_control()->cut_control()->get_value() ? 1.0 : 0.0));
+		if (_stripable->mute_control()->get_value() != _stripable->monitor_control()->cut_control()->get_value()) {
+			Controllable::GroupControlDisposition gcd;
+
+			if (_surface->mcp().main_modifier_state() & MackieControlProtocol::MODIFIER_SHIFT) {
+				gcd = Controllable::InverseGroup;
+			} else {
+				gcd = Controllable::UseGroup;
+			}
+
+			_stripable->mute_control()->set_value (_stripable->monitor_control()->cut_control()->get_value() ? 1.0 : 0.0, gcd);
+		}
+	}
+}
+
+void
 Strip::notify_record_enable_changed ()
 {
 	if (_stripable && _recenable)  {
@@ -343,6 +368,15 @@ Strip::notify_record_enable_changed ()
 		if (trk) {
 			_surface->write (_recenable->set_state (trk->rec_enable_control()->get_value() ? on : off));
 		}
+	}
+}
+
+void
+Strip::notify_subview_type_changed ()
+{
+	if (_stripable) {
+		_surface->mcp().subview()->init_params();
+		_surface->mcp().MackieControlProtocol::redisplay_subview_mode();
 	}
 }
 
@@ -692,6 +726,11 @@ Strip::handle_button (Button& button, ButtonState bs)
 					(*c)->set_value (new_value, gcd);
 				}
 
+				if (_stripable->is_monitor() || _stripable->is_surround_master()) {
+					std::shared_ptr<MonitorProcessor> mp = _stripable->monitor_control();
+					mp->set_cut_all (!mp->cut_all());
+				}
+
 			} else {
 				DEBUG_TRACE (DEBUG::MackieControl, "remove button on release\n");
 				_surface->mcp().remove_down_button ((AutomationType) control->parameter().type(), _surface->number(), _index);
@@ -702,10 +741,32 @@ Strip::handle_button (Button& button, ButtonState bs)
 }
 
 std::string
+Strip::remove_units (std::string s) {
+		s = std::regex_replace (s, std::regex(" kHz$"), "k");
+		s = std::regex_replace (s, std::regex(" Hz$"), "");
+		s = std::regex_replace (s, std::regex(" dB$"), "");
+		s = std::regex_replace (s, std::regex(" ms$"), "");
+		s = std::regex_replace (s, std::regex(" °$"), "");
+
+		// convert seconds to milliseconds
+		if (s.rfind(" s") != string::npos) {
+			char buf[32];
+			s = std::regex_replace (s, std::regex(" s$"), "");
+			if (sprintf(buf, "%2.0f", 1000.0*stof(s)) >= 0) {
+				s = std::string (buf);
+			} else {
+				DEBUG_TRACE (DEBUG::MackieControl, "couldn't convert string to float\n");
+			}
+		}
+
+		return s;
+}
+
+std::string
 Strip::format_parameter_for_display(
 		ARDOUR::ParameterDescriptor const& desc,
 		float val,
-		std::shared_ptr<ARDOUR::Stripable> stripable_for_non_mixbus_azimuth_automation,
+		std::shared_ptr<ARDOUR::Stripable> stripable_for_azimuth_automation,
 		bool& overwrite_screen_hold)
 {
 	std::string formatted_parameter_display;
@@ -729,18 +790,11 @@ Strip::format_parameter_for_display(
 		break;
 
 	case PanAzimuthAutomation:
-		if (Profile->get_mixbus()) {
-			// XXX no _stripable check?
-			snprintf (buf, sizeof (buf), "%2.1f", val);
-			formatted_parameter_display = buf;
-			overwrite_screen_hold = true;
-		} else {
-			if (stripable_for_non_mixbus_azimuth_automation) {
-				std::shared_ptr<AutomationControl> pa = stripable_for_non_mixbus_azimuth_automation->pan_azimuth_control();
-				if (pa) {
-					formatted_parameter_display = pa->get_user_string ();
-					overwrite_screen_hold = true;
-				}
+		if (stripable_for_azimuth_automation) {
+			std::shared_ptr<AutomationControl> pa = stripable_for_azimuth_automation->pan_azimuth_control();
+			if (pa) {
+				formatted_parameter_display = Profile->get_mixbus() ? remove_units(pa->get_user_string()) : pa->get_user_string();
+				overwrite_screen_hold = true;
 			}
 		}
 		break;
@@ -893,31 +947,44 @@ Strip::redisplay (PBD::microseconds_t now, bool force)
 		_block_screen_redisplay_until = 0;
 	}
 
+	bool changed = false;
+
 	if (force || (current_display[0] != pending_display[0])) {
 		_surface->write (display (0, 0, pending_display[0]));
 		current_display[0] = pending_display[0];
+		changed = true;
 	}
 
 	if (return_to_vpot_mode_display_at <= now) {
 		return_to_vpot_mode_display_at = UINT64_MAX;
 		return_to_vpot_mode_display ();
+		changed = true;
 	}
 
 	if (force || (current_display[1] != pending_display[1])) {
 		_surface->write (display (0, 1, pending_display[1]));
 		current_display[1] = pending_display[1];
+		changed = true;
 	}
 
 	if (_lcd2_available) {
 		if (force || (lcd2_current_display[0] != lcd2_pending_display[0])) {
 			_surface->write (display (1, 0, lcd2_pending_display[0]));
 			lcd2_current_display[0] = lcd2_pending_display[0];
+			changed = true;
 		}
 		if (force || (lcd2_current_display[1] != lcd2_pending_display[1])) {
 			_surface->write (display (1, 1, lcd2_pending_display[1]));
 			lcd2_current_display[1] = lcd2_pending_display[1];
+			changed = true;
 		}
 	}
+
+	/* The iCON V1-M cannot handle many messages in quick succession.
+	 *
+	 * A small delay is necessary to ensure none are skipped.
+	 */
+	if (_surface->mcp().device_info().is_v1m() && changed) { g_usleep(2500); }
 }
 
 void
@@ -991,6 +1058,12 @@ Strip::zero ()
 		lcd2_current_display[1] = string();
 
 	}
+
+	/* The iCON V1-M cannot handle many messages in quick succession.
+	 *
+	 * A small delay is necessary to ensure none are skipped.
+	 */
+	if (_surface->mcp().device_info().is_v1m()) { g_usleep(5000); }
 }
 
 MidiByteArray
@@ -1039,18 +1112,23 @@ Strip::display (uint32_t lcd_number, uint32_t line_number, const std::string& li
 		// code for display
 		retval << 0x13;
 
-		if (lcd_label_pitch == 6) {
-			if (_index == 0) {
-				add_left_pad_char = true;
-			}
-			else {
-				left_pad_offset = 1;
-			}
+		if (_index == 0 && lcd_label_pitch == 6) {
+			add_left_pad_char = true;
+		} else if (_index != 0) {
+			left_pad_offset = 1;
 		}
 	}
 
 	// offset (0 to 0x37 first line, 0x38 to 0x6f for second line)
-	retval << (_index * lcd_label_pitch + (line_number * 0x38) + left_pad_offset);
+	if (_surface->mcp().device_info().is_v1m() && lcd_number == 1) {
+		if (line_number == 0) {
+			retval << (_index * (lcd_label_pitch - 1) + (line_number * 0x38) + left_pad_offset);
+		} else {
+			retval << (_index * lcd_label_pitch + (line_number * 0x38));
+		}
+	} else {
+		retval << (_index * lcd_label_pitch + (line_number * 0x38) + left_pad_offset);
+	}
 
 	if (add_left_pad_char) {
 		retval << ' ';	// add the left pad space
@@ -1249,10 +1327,11 @@ Strip::subview_mode_changed ()
 	switch (_surface->mcp().subview()->subview_mode()) {
 	case Subview::None:
 		set_vpot_parameter (_pan_mode);
+		notify_panner_azi_changed();
 		/* need to show strip name again */
 		show_stripable_name ();
 		if (!_stripable) {
-			_surface->write (_vpot->set (0, true, Pot::wrap));
+			_surface->write (_vpot->set (0, false, Pot::wrap));
 			_surface->write (_fader->set_position (0.0));
 		}
 		notify_metering_state_changed ();

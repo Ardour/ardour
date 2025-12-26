@@ -75,9 +75,10 @@ public:
 	WaveView (Item*, std::shared_ptr<ARDOUR::AudioRegion>);
 	~WaveView ();
 
-	virtual void prepare_for_render (ArdourCanvas::Rect const& window_area) const;
+	void prepare_for_render (ArdourCanvas::Rect const& window_area) const;
+	bool needs_prepare_for_render () const { return true; }
 
-	virtual void render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
+	void render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
 
 	void compute_bounding_box () const;
 

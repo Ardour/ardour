@@ -40,8 +40,6 @@
 #include <dlfcn.h>
 #include <string.h>
 #include <time.h>
-#include <unistd.h>
-#include <sys/time.h>
 
 struct ERect{
     short top;

@@ -154,7 +154,7 @@ def configure(conf):
     autowaf.check_pkg(conf, 'pango', uselib_store='PANGO', atleast_version='1.20', mandatory=True)
     autowaf.check_pkg(conf, 'cairo', uselib_store='CAIRO', atleast_version='1.12', mandatory=True)
     autowaf.check_pkg(conf, 'pangocairo', uselib_store='PANGOCAIRO', mandatory=True)
-    if conf.env['build_target'] == 'mingw':
+    if conf.env['build_target'] == 'mingw' or conf.env['build_target'] == 'msvc':
         autowaf.check_pkg(conf, 'gio-windows-2.0', uselib_store='GIO-WINDOWS', mandatory=True)
     elif sys.platform != 'darwin':
         autowaf.check_pkg(conf, 'gio-unix-2.0', uselib_store='GIO-UNIX', mandatory=True)
@@ -164,6 +164,7 @@ def configure(conf):
                       lib='Xinerama', uselib_store="XINERAMA", define_name='HAVE_XFREE_XINERAMA',
                       execute = False, mandatory=False)
         autowaf.check_pkg(conf, 'xi', uselib_store='XINPUT2', mandatory=False, atleast_version='1.7.10')
+    conf.check(header_name='unistd.h', define_name='HAVE_UNISTD_H',mandatory=False)
 
 def build(bld):
     obj = bld.shlib(features = 'c cshlib')
@@ -186,7 +187,7 @@ def build(bld):
         obj.uselib   += ' OSX' # -framework Cocoa -framework CoreFoundation -framework ApplicationServices
         obj.includes += ['quartz', 'quartz/ydk', 'ydk/quartz']
         obj.export_includes += ['quartz']
-    elif bld.env['build_target'] == 'mingw':
+    elif bld.env['build_target'] == 'mingw' or bld.env['build_target'] == 'msvc':
         obj.source   = libydk_sources + libydk_win32_sources
         obj.cflags   += ['-mms-bitfields', '-Wl,--export-all-symbols']
         obj.uselib   += ' GIO-WINDOWS'

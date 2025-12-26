@@ -162,8 +162,10 @@ RecorderUI::RecorderUI ()
 	_scroller_base.signal_button_press_event().connect (sigc::mem_fun(*this, &RecorderUI::scroller_button_event));
 	_scroller_base.signal_button_release_event().connect (sigc::mem_fun(*this, &RecorderUI::scroller_button_event));
 	_scroller_base.set_size_request (-1, PX_SCALE (20));
-	_scroller_base.signal_expose_event ().connect (sigc::bind (sigc::ptr_fun (&ArdourWidgets::ArdourIcon::expose_with_text), &_scroller_base, ArdourWidgets::ArdourIcon::ShadedPlusSign,
-			_("Right-click or Double-click here\nto add Tracks")));
+
+	if (UIConfiguration::instance().get_render_plus_hints ()) {
+		_scroller_base.signal_expose_event ().connect (sigc::bind (sigc::ptr_fun (&ArdourWidgets::ArdourIcon::expose_with_text), &_scroller_base, ArdourWidgets::ArdourIcon::ShadedPlusSign, _("Right-click or Double-click here\nto add Tracks")));
+	}
 
 	/* LAYOUT */
 
@@ -252,6 +254,7 @@ RecorderUI::RecorderUI ()
 	set_tooltip (_remain_info_box, _("Remaining Time:  Recording time available on the current disk with currently armed tracks"));
 	set_tooltip (_duration_info_box, _("Duration: Length of the most recent (or current) recording take"));
 	set_tooltip (_btn_rec_forget, _("Delete the region AND the audio files of the last recording take"));
+	set_tooltip (_auto_input_button, _("Auto-input: when enabled, track input monitoring automatically follows transport state"));
 
 	/* show [almost] all */
 	_btn_rec_all.show ();
@@ -296,6 +299,7 @@ RecorderUI::RecorderUI ()
 	PresentationInfo::Change.connect (*this, invalidator (*this), std::bind (&RecorderUI::presentation_info_changed, this, _1), gui_context());
 	Config->ParameterChanged.connect (*this, invalidator (*this), std::bind (&RecorderUI::parameter_changed, this, _1), gui_context ());
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &RecorderUI::parameter_changed));
+	UIConfiguration::instance().DPIReset.connect (sigc::mem_fun (*this, &RecorderUI::dpi_reset));
 	//ARDOUR_UI::instance()->Escape.connect (*this, invalidator (*this), std::bind (&RecorderUI::escape, this), gui_context());
 
 	/* init */
@@ -506,6 +510,12 @@ RecorderUI::update_monitorstate (std::string pn, bool en)
 	if (im != _input_ports.end()) {
 		im->second->update_monitorstate (en);
 	}
+}
+
+void
+RecorderUI::dpi_reset ()
+{
+	start_updating ();
 }
 
 void
@@ -1129,6 +1139,9 @@ struct TrackRecordAxisSorter {
 void
 RecorderUI::presentation_info_changed (PBD::PropertyChange const& what_changed)
 {
+	if (!_session) {
+		return;
+	}
 	if (what_changed.contains (Properties::hidden)) {
 		update_rec_table_layout ();
 	} else if (what_changed.contains (Properties::order)) {
@@ -1272,7 +1285,7 @@ RecorderUI::new_track_for_port (DataType dt, string const& port_name)
 	d.add_button(Stock::CANCEL, RESPONSE_CANCEL);
 	d.add_button(Stock::OK, RESPONSE_OK);
 	d.set_default_response (RESPONSE_OK);
-	d.set_position (WIN_POS_MOUSE);
+	d.set_position (UIConfiguration::instance().get_default_window_position());
 	d.show_all ();
 
 	track_name_entry.signal_activate().connect (sigc::bind (sigc::mem_fun (d, &Dialog::response), RESPONSE_OK));
@@ -1310,7 +1323,7 @@ RecorderUI::new_track_for_port (DataType dt, string const& port_name)
 					ChanCount (DataType::MIDI, 1), ChanCount (DataType::MIDI, 1),
 					strict_io,
 					instrument_combo.selected_instrument (), (Plugin::PresetRecord*) 0,
-					(RouteGroup*) 0,
+					nullptr,
 					1, track_name, PresentationInfo::max_order, Normal, false);
 			r = tl.front ();
 		} catch (...) {

@@ -80,19 +80,23 @@ compiler_flags_dictionaries= {
         'pic': '-fPIC',
         # Flags required to compile C code with anonymous unions (only part of C11)
         'c-anonymous-union': '-fms-extensions',
+        # optional -zexecstack linkflag
+        'execstack': '',
+        # force C++17
+        'cxx17': ['-std=c++17'],
     },
     'msvc' : {
-        'debuggable' : ['/DDEBUG', '/Od', '/Zi', '/MDd', '/Gd', '/EHsc'],
+        'debuggable' : ['/DDEBUG', '/Od', '/Z7', '/MDd', '/Gd', '/EHsc'],
         'linker-debuggable' : ['/DEBUG', '/INCREMENTAL' ],
         'nondebuggable' : ['/DNDEBUG', '/Ob1', '/MD', '/Gd', '/EHsc'],
-        'profile' : '/Oy-',
+        'profile' : ['/Oy-'],
         'silence-unused-arguments' : '',
         'sse' : '',
         'xsaveintrin' : '',
         'fpmath-sse' : '',
         'xmmintrinsics' : '',
         'pipe' : '',
-        'full-optimization' : '/O2',
+        'full-optimization' : ['/O2'],
         'no-frame-pointer' : '',
         'fast-math' : '',
         'strength-reduce' : '',
@@ -113,6 +117,8 @@ compiler_flags_dictionaries= {
         'neon': '',
         'pic': '',
         'c-anonymous-union': '',
+        'execstack': '',
+        'cxx17': ['/std:c++17'],
     },
 }
 
@@ -329,6 +335,7 @@ children = [
         'libs/clearlooks-newer',
         'libs/zita-resampler',
         'libs/zita-convolver',
+        'libs/staffpad',
         # optionally external libraries
         'libs/fluidsynth',
         'libs/hidapi',
@@ -470,6 +477,11 @@ int main() { return 0; }''',
     # libraries
     conf.env['compiler_flags_dict'] = flags_dict
 
+    if compiler_name == 'msvc':
+        compiler_flags.extend(['/nologo', '/FS', '/bigobj', '/JMC', '/FC',
+                               '/diagnostics:column', '/Zc:__cplusplus'])
+        linker_flags.extend(['/guard:cf'])
+
     autowaf.set_basic_compiler_flags (conf,flags_dict)
 
     if conf.options.asan:
@@ -547,8 +559,8 @@ int main() { return 0; }''',
         linker_flags.append('--stdlib=libc++')
 
     if conf.options.cxx17 or platform == "darwin":
-        conf.check_cxx(cxxflags=["-std=c++17"])
-        cxx_flags.append('-std=c++17')
+        conf.check_cxx(cxxflags=flags_dict['cxx17'])
+        cxx_flags += flags_dict['cxx17']
 
     if conf.options.cxx17 or platform == "darwin":
         if platform == "darwin":
@@ -755,6 +767,13 @@ int main() { return 0; }''',
     # Do not use Boost.System library
     cxx_flags.append('-DBOOST_ERROR_CODE_HEADER_ONLY')
 
+    if platform == 'linux' and not conf.options.no_execstack:
+        if conf.check_cxx(linkflags=["-zexecstack"], mandatory = False, execute = False, msg = 'Checking for gcc/lld-style -zexecstack'):
+            flags_dict['execstack'] = "-zexecstack"
+        elif conf.check_cxx(linkflags=["-z execstack"], mandatory = False, execute = False, msg = 'Checking for clang execstack'):
+            flags_dict['execstack'] = "-z execstack"
+
+
     # use sparingly, prefer runtime profile
     if Options.options.program_name.lower().startswith('mixbus'):
         compiler_flags.append ('-DMIXBUS')
@@ -867,8 +886,6 @@ def options(opt):
                     help='Build with debugging for the STL')
     opt.add_option('--rt-alloc-debug', action='store_true', default=False, dest='rt_alloc_debug',
                     help='Build with debugging for memory allocation in the real-time thread')
-    opt.add_option('--pt-timing', action='store_true', default=False, dest='pt_timing',
-                    help='Build with logging of timing in the process thread(s)')
     opt.add_option('--denormal-exception', action='store_true', default=False, dest='denormal_exception',
                     help='Raise a floating point exception if a denormal is detected')
     opt.add_option('--test', action='store_true', default=False, dest='build_tests',
@@ -912,6 +929,8 @@ def options(opt):
                     help='Enable support to import PTS/PTF/PTX sessions')
     opt.add_option('--no-threaded-waveviews', action='store_true', default=False, dest='no_threaded_waveviews',
                     help='Disable threaded waveview rendering')
+    opt.add_option('--no-execstack', action='store_true', default=False, dest='no_execstack',
+                    help='Disable executable stack (may break some plugins)')
     opt.add_option('--no-futex-semaphore', action='store_true', default=False, dest='no_futex_semaphore',
                     help='Disable use of futex for semaphores (Linux only)')
     opt.add_option(
@@ -1107,11 +1126,10 @@ def configure(conf):
         conf.env.append_value('CXXFLAGS', '-I' + Options.options.boost_include)
 
     if Options.options.also_include != '':
-        conf.env.append_value('CXXFLAGS', '-I' + Options.options.also_include)
-        conf.env.append_value('CFLAGS', '-I' + Options.options.also_include)
+        conf.env.append_value('INCLUDES', [os.path.normpath(p) for p in Options.options.also_include.split(',')])
 
     if Options.options.also_libdir != '':
-        conf.env.append_value('LDFLAGS', '-L' + Options.options.also_libdir)
+        conf.env.append_value('LIBPATH', [os.path.normpath(p) for p in Options.options.also_libdir.split(',')])
 
     if Options.options.boost_sp_debug:
         conf.env.append_value('CXXFLAGS', '-DBOOST_SP_ENABLE_DEBUG_HOOKS')
@@ -1170,7 +1188,7 @@ def configure(conf):
                   define_name= 'HAVE_RUBBERBAND_3_0_0',
     fragment = '''
 #include <rubberband/RubberBandStretcher.h>
-#if RUBBERBAND_API_MAJOR_VERSION >= 2 && RUBBERBAND_API_MINOR_VERSION >= 7
+#if (RUBBERBAND_API_MAJOR_VERSION >= 2 && RUBBERBAND_API_MINOR_VERSION >= 7) || RUBBERBAND_API_MAJOR_VERSION >= 3
 int main () { return 0; }
 #else
 #error
@@ -1214,10 +1232,6 @@ int main () { int x = SFC_RF64_AUTO_DOWNGRADE; return 0; }
             conf.env.append_value('LIB', 'uuid')
         # needed for mingw64 packages, not harmful on normal mingw build
         conf.env.append_value('LIB', 'intl')
-        conf.check_cc(function_name='regcomp', header_name='regex.h',
-                      lib='regex', uselib_store="REGEX", define_name='HAVE_REGEX_H')
-        # TODO put this only where it is needed
-        conf.env.append_value('LIB', 'regex')
         # TODO this should only be necessary for a debug build
         conf.env.append_value('LIB', 'dbghelp')
 
@@ -1253,6 +1267,14 @@ int main () { return 0; }
         # see http://gareus.org/wiki/ardour_windows_gdk_and_cairo
         conf.env.append_value('CFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
         conf.env.append_value('CXXFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
+        conf.env.append_value('LIB', 'pthreadVC3')
+        conf.env.append_value('LIB', 'Ws2_32')
+        conf.env.append_value('LIB', 'Advapi32')
+        conf.env.append_value('LIB', 'Shell32')
+        conf.env.append_value('LIB', 'Winmm')
+        conf.env.append_value('LIB', 'Dbghelp')
+        conf.env.append_value('LIB', 'User32')
+        conf.env.append_value('LIB', 'Kernel32')
         # MORE STUFF PROBABLY NEEDED HERE
         conf.define ('WINDOWS', 1)
 
@@ -1319,7 +1341,7 @@ int main () { __int128 x = 0; return 0; }
     if opts.single_tests:
         conf.env['SINGLE_TESTS'] = opts.single_tests
     if not opts.no_windows_vst:
-        if Options.options.dist_target == 'mingw':
+        if Options.options.dist_target == 'mingw' or Options.options.dist_target == 'msvc':
             conf.define('WINDOWS_VST_SUPPORT', 1)
             conf.env['WINDOWS_VST_SUPPORT'] = True
         else:
@@ -1327,7 +1349,7 @@ int main () { __int128 x = 0; return 0; }
     if not opts.no_lxvst:
         if sys.platform == 'darwin':
             conf.env['LXVST_SUPPORT'] = False
-        elif Options.options.dist_target == 'mingw':
+        elif Options.options.dist_target == 'mingw' or Options.options.dist_target == 'msvc':
             conf.env['LXVST_SUPPORT'] = False
         else:
             conf.define('LXVST_SUPPORT', 1)
@@ -1339,9 +1361,6 @@ int main () { __int128 x = 0; return 0; }
     if opts.rt_alloc_debug:
         conf.define('DEBUG_RT_ALLOC', 1)
         conf.env['DEBUG_RT_ALLOC'] = True
-    if opts.pt_timing:
-        conf.define('PT_TIMING', 1)
-        conf.env['PT_TIMING'] = True
     if opts.denormal_exception:
         conf.define('DEBUG_DENORMAL_EXCEPTION', 1)
         conf.env['DEBUG_DENORMAL_EXCEPTION'] = True
@@ -1370,7 +1389,7 @@ int main () { __int128 x = 0; return 0; }
 
     if backends == ['']:
         backends = ['dummy']
-        autowaf.check_pkg(conf, 'jack', uselib_store='JACK', atleast_version='0.121.0', mandatory=False)
+        autowaf.check_pkg(conf, 'jack', uselib_store='JACK', atleast_version='1.9.10', mandatory=False)
         if conf.is_defined('HAVE_JACK'):
             backends += ['jack']
         if conf.is_defined('HAVE_PULSEAUDIO'):
@@ -1380,7 +1399,7 @@ int main () { __int128 x = 0; return 0; }
             backends += ['alsa']
         if sys.platform == 'darwin':
             backends += ['coreaudio']
-        if Options.options.dist_target == 'mingw':
+        if Options.options.dist_target == 'mingw' or Options.options.dist_target == 'msvc':
             backends += ['portaudio']
 
     if 'dummy' not in backends:
@@ -1407,8 +1426,12 @@ int main () { __int128 x = 0; return 0; }
         if re.search ("linux", sys.platform) is not None and Options.options.dist_target != 'mingw' and conf.env['BUILD_PABACKEND']:
             conf.fatal("lld is only for Linux builds")
         else:
-            conf.find_program ('lld')
-            conf.env.append_value('LINKFLAGS', '-fuse-ld=lld')
+            if Options.options.dist_target != 'msvc':
+                conf.find_program ('lld')
+                conf.env.append_value('LINKFLAGS', '-fuse-ld=lld')
+            else:
+                conf.find_program('lld-link', var='LINK')
+                conf.env.LINK_CXX = conf.env.LINK
 
     if re.search ("linux", sys.platform) is not None and Options.options.dist_target != 'mingw' and conf.env['BUILD_PABACKEND']:
         conf.fatal("PortAudio Backend is not for Linux")
@@ -1437,7 +1460,7 @@ int main () { __int128 x = 0; return 0; }
         sub_config_and_use(conf, 'libs/appleutility')
     elif re.search ("openbsd", sys.platform) is not None:
         pass
-    elif Options.options.dist_target != 'mingw':
+    elif Options.options.dist_target != 'mingw' and Options.options.dist_target != 'msvc':
         sub_config_and_use(conf, 'tools/sanity_check')
 
     # explicitly link against libm. This is possible on all POSIX systems
@@ -1517,7 +1540,6 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('NI-Maschine',           opts.maschine)
     write_config_text('OGG',                   conf.is_defined('HAVE_OGG'))
     write_config_text('Phone home',            conf.is_defined('PHONE_HOME'))
-    write_config_text('Process thread timing', conf.is_defined('PT_TIMING'))
     write_config_text('Program name',          opts.program_name)
     write_config_text('Samplerate',            conf.is_defined('HAVE_SAMPLERATE'))
     write_config_text('PT format',             conf.is_defined('PTFORMAT'))

@@ -94,6 +94,6 @@ def build(bld):
     obj.name         = 'libqm-dsp'
     obj.target       = 'qm-dsp'
     obj.vnum         = QM_DSP_VERSION
-    if bld.env['build_target'] != 'mingw':
+    if bld.env['build_target'] != 'mingw' and bld.env['build_target'] != 'msvc':
         obj.cxxflags += [ bld.env['compiler_flags_dict']['pic'] ]
         obj.cflags   += [ bld.env['compiler_flags_dict']['pic'] ]

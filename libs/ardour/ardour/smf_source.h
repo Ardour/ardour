@@ -52,7 +52,7 @@ public:
 		return safe_midi_file_extension(path);
 	}
 
-	void append_event_beats (const WriterLock& lock, const Evoral::Event<Temporal::Beats>& ev);
+	void _append_event_beats (const WriterLock& lock, const Evoral::Event<Temporal::Beats>& ev, bool allow_meta);
 	void append_event_samples (const WriterLock& lock, const Evoral::Event<samplepos_t>& ev, samplepos_t source_start);
 
 	void update_length (timepos_t const & dur);
@@ -63,6 +63,7 @@ public:
 	void mark_midi_streaming_write_completed (const WriterLock& lock,
 	                                          Evoral::Sequence<Temporal::Beats>::StuckNoteOption,
 	                                          Temporal::timecnt_t const & duration);
+	void end_track (const WriterLock&);
 
 	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);

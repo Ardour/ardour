@@ -56,6 +56,7 @@ IOPlug::IOPlug (Session& s, std::shared_ptr<Plugin> p, bool pre)
 	if (_plugin) {
 		setup ();
 		set_name (p->get_info()->name);
+		_plugin->activate ();
 	}
 	_input.reset (new IO (_session, io_name (), IO::Input));
 	_output.reset (new IO (_session, io_name (), IO::Output));
@@ -63,8 +64,8 @@ IOPlug::IOPlug (Session& s, std::shared_ptr<Plugin> p, bool pre)
 	/* do not allow to add/remove ports (for now).
 	 * when adding ports _buf will needs to be resized.
 	 */
-	_input->PortCountChanging.connect_same_thread (*this, [this](ChanCount) { return !_configuring_io; });
-	_output->PortCountChanging.connect_same_thread (*this, [this](ChanCount) { return !_configuring_io; });
+	_input->PortCountChanging.connect_same_thread (*this, [this](ChanCount) { return _configuring_io ? 0 : 1; });
+	_output->PortCountChanging.connect_same_thread (*this, [this](ChanCount) { return _configuring_io ? 0 : 1; });
 }
 
 IOPlug::~IOPlug ()
@@ -200,6 +201,8 @@ IOPlug::set_state (const XMLNode& node, int version)
 
 	Latent::set_state (node, version);
 
+	_plugin->activate ();
+
 	return 0;
 }
 
@@ -256,7 +259,8 @@ IOPlug::setup ()
 
 	 _plugin->reconfigure_io (_n_in, aux_in, _n_out);
 	 _plugin->ParameterChangedExternally.connect_same_thread (*this, std::bind (&IOPlug::parameter_changed_externally, this, _1, _2));
-	 _plugin->activate ();
+	 _plugin->PropertyChanged.connect_same_thread (*this, std::bind (&IOPlug::property_changed_externally, this, _1, _2));
+	 _plugin->ProcessorChange.connect_same_thread (*this, std::bind (&IOPlug::processor_change, this, _1));
 	 _plugin->set_insert (this, 0);
 }
 
@@ -372,6 +376,25 @@ IOPlug::parameter_changed_externally (uint32_t which, float val)
 	}
 }
 
+void
+IOPlug::property_changed_externally (uint32_t which, Variant val)
+{
+	std::shared_ptr<Evoral::Control>        c  = control (Evoral::Parameter (PluginPropertyAutomation, 0, which));
+	std::shared_ptr<PluginPropertyControl>  pc = std::dynamic_pointer_cast<PluginPropertyControl> (c);
+
+	if (pc) {
+		pc->catch_up_with_external_value (val.to_double ());
+	}
+}
+
+void
+IOPlug::processor_change (RouteProcessorChange const& rpc)
+{
+	if (rpc.type & RouteProcessorChange::PortNameChange) {
+		set_pretty_port_names ();
+	}
+}
+
 int
 IOPlug::set_block_size (pframes_t n_samples)
 {
@@ -388,21 +411,9 @@ IOPlug::ui_elements () const
 	return rv;
 }
 
-bool
-IOPlug::ensure_io ()
+void
+IOPlug::set_pretty_port_names ()
 {
-	PBD::Unwinder<bool> uw (_configuring_io, true);
-
-	/* must be called with process-lock held */
-	if (_input->ensure_io (_n_in, false, this) != 0) {
-		return false;
-	}
-	if (_output->ensure_io (_n_out, false, this) != 0) {
-		return false;
-	}
-
-	_bufs.ensure_buffers (ChanCount::max (_n_in, _n_out), _session.get_block_size ());
-
 	for (uint32_t i = 0; i < _n_in.n_audio (); ++i) {
 		const auto& pd (_plugin->describe_io_port (DataType::AUDIO, true, i));
 		std::string const pn = string_compose ("%1 %2 - %3", _("IO"), name (), pd.name);
@@ -423,17 +434,35 @@ IOPlug::ensure_io ()
 		std::string const pn = string_compose ("%1 %2 - %3", _("IO"), name (), pd.name);
 		_output->midi (i)->set_pretty_name (pn);
 	}
+}
 
-	 if (_pre) {
-		 for (uint32_t i = 0; i < _n_out.n_audio (); ++i) {
-			 std::string const& n = AudioEngine::instance ()->make_port_name_non_relative (_output->audio (i)->name ());
-			 _audio_input_ports.insert (make_pair (n, PortManager::AudioInputPort (24288))); // 2^19 ~ 1MB / port
-		 }
-		 for (uint32_t i = 0; i < _n_out.n_midi (); ++i) {
-			 std::string const& n = AudioEngine::instance ()->make_port_name_non_relative (_output->midi (i)->name ());
-			 _midi_input_ports.insert (make_pair (n, PortManager::MIDIInputPort (32)));
-		 }
-	 }
+bool
+IOPlug::ensure_io ()
+{
+	PBD::Unwinder<bool> uw (_configuring_io, true);
+
+	/* must be called with process-lock held */
+	if (_input->ensure_io (_n_in, false, this) != 0) {
+		return false;
+	}
+	if (_output->ensure_io (_n_out, false, this) != 0) {
+		return false;
+	}
+
+	_bufs.ensure_buffers (ChanCount::max (_n_in, _n_out), _session.get_block_size ());
+
+	set_pretty_port_names ();
+
+	if (_pre) {
+		for (uint32_t i = 0; i < _n_out.n_audio (); ++i) {
+			std::string const& n = AudioEngine::instance ()->make_port_name_non_relative (_output->audio (i)->name ());
+			_audio_input_ports.insert (make_pair (n, PortManager::AudioInputPort (24288))); // 2^19 ~ 1MB / port
+		}
+		for (uint32_t i = 0; i < _n_out.n_midi (); ++i) {
+			std::string const& n = AudioEngine::instance ()->make_port_name_non_relative (_output->midi (i)->name ());
+			_midi_input_ports.insert (make_pair (n, PortManager::MIDIInputPort (32)));
+		}
+	}
 	return true;
 }
 

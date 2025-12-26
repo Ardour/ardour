@@ -61,12 +61,11 @@ public:
 	Ruler (Item*, const Metric* m);
 	Ruler (Item*, const Metric* m, Rect const&);
 
-	virtual ~Ruler () {
-		delete _font_description;
-	}
+	virtual ~Ruler ();
 
 	void set_range (int64_t lower, int64_t upper);
 	void set_font_description (Pango::FontDescription);
+	void set_minor_font_description (Pango::FontDescription);
 	void set_metric (const Metric *);
 
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
@@ -85,6 +84,7 @@ private:
 	Gtkmm2ext::Color _divider_color_bottom;
 
 	Pango::FontDescription* _font_description;
+	Pango::FontDescription* _minor_font_description;
 	mutable std::vector<Mark> marks;
 	mutable bool _need_marks;
 };

@@ -24,18 +24,23 @@
 #include <climits>
 #include <set>
 #include <vector>
+#include <regex>
+
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #include <glib.h>
 #include "pbd/gstdio_compat.h"
 
 #if defined COMPILER_MINGW || defined COMPILER_MSVC
-#if defined COMPILER_MINGW
-#include <io.h> // For W_OK
-#include <windows.h>
-#endif
-#include <sys/utime.h>
-#else
-#include <utime.h>
+# include <windows.h>
+# include <sys/utime.h>
+# if defined COMPILER_MINGW
+#   include <io.h> // For W_OK
+# endif
+#else // not windows
+# include <utime.h>
 #endif
 
 #include <glibmm/convert.h>
@@ -54,10 +59,9 @@
 /* close(), read(), write() */
 #ifdef COMPILER_MSVC
 #include <io.h> // Microsoft's nearest equivalent to <unistd.h>
+#ifndef WAF_BUILD
 #include <ardourext/misc.h>
-#else
-#include <unistd.h>
-#include <regex.h>
+#endif
 #endif
 
 #include "pbd/compose.h"
@@ -240,8 +244,8 @@ static
 bool
 regexp_filter (const string& str, void *arg)
 {
-	regex_t* pattern = (regex_t*)arg;
-	return regexec (pattern, str.c_str(), 0, 0, 0) == 0;
+	std::regex* pattern = static_cast<std::regex*>(arg);
+	return std::regex_search(str, *pattern);
 }
 
 void
@@ -250,21 +254,11 @@ find_files_matching_regex (vector<string>& result,
                            const std::string& regexp,
                            bool recurse)
 {
-	int err;
-	char msg[256];
-	regex_t compiled_pattern;
-
-	if ((err = regcomp (&compiled_pattern, regexp.c_str(),
-			    REG_EXTENDED|REG_NOSUB))) {
-
-		regerror (err, &compiled_pattern,
-			  msg, sizeof (msg));
-
-		error << "Cannot compile soundfile regexp for use ("
-		      << msg
-		      << ")"
-		      << endmsg;
-
+	std::regex compiled_pattern;
+	try {
+		compiled_pattern = std::regex(regexp);
+	} catch (const std::regex_error& e) {
+		error << "Cannot compile soundfile regexp for use (" << e.what() << ")" << endmsg;
 		return;
 	}
 
@@ -274,8 +268,6 @@ find_files_matching_regex (vector<string>& result,
 	find_files_matching_filter (result, paths,
 	                            regexp_filter, &compiled_pattern,
 	                            true, true, recurse);
-
-	regfree (&compiled_pattern);
 }
 
 void
@@ -522,18 +514,24 @@ exists_and_writable (const std::string & p)
 	GStatBuf statbuf;
 
 	if (g_stat (p.c_str(), &statbuf) != 0) {
+		DEBUG_TRACE (DEBUG::FileUtils, string_compose("exists_and_writable stat '%1': failed\n", p));
 		/* doesn't exist - not writable */
 		return false;
 	} else {
+#ifndef PLATFORM_WINDOWS
+		/* Folders on Windows fail this test if they're on OneDrive */
+		DEBUG_TRACE (DEBUG::FileUtils, string_compose("exists_and_writable stat '%1': %2 \n", p, statbuf.st_mode));
 		if (!(statbuf.st_mode & S_IWUSR)) {
 			/* exists and is not writable */
 			return false;
 		}
+#endif
 		/* filesystem may be mounted read-only, so even though file
 		 * permissions permit access, the mount status does not.
 		 * access(2) seems like the best test for this.
 		 */
 		if (g_access (p.c_str(), W_OK) != 0) {
+			DEBUG_TRACE (DEBUG::FileUtils, string_compose("exists_and_writable g_access '%1': !W_OK\n", p));
 			return false;
 		}
 	}

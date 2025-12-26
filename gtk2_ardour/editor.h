@@ -199,10 +199,8 @@ public:
 	void hide_a_region (std::shared_ptr<ARDOUR::Region>);
 	void show_a_region (std::shared_ptr<ARDOUR::Region>);
 
-#ifdef USE_RUBBERBAND
-	std::vector<std::string> rb_opt_strings;
-	int rb_current_opt;
-#endif
+	std::vector<std::string> timefx_opt_strings;
+	int                      timefx_mode;
 
 	/* things that need to be public to be used in the main menubar */
 
@@ -231,7 +229,8 @@ public:
 
 	bool extend_selection_to_track (TimeAxisView&);
 
-	void edit_region_in_pianoroll_window ();
+	void edit_region_in_dedicated_window ();
+	void maybe_edit_region_in_bottom_pane (RegionView&);
 
 	void play_selection ();
 	void maybe_locate_with_edit_preroll (samplepos_t);
@@ -320,14 +319,6 @@ public:
 
 	void sequence_regions ();
 
-	/* playhead/screen stuff */
-
-	void set_stationary_playhead (bool yn);
-	void toggle_stationary_playhead ();
-	bool stationary_playhead() const { return _stationary_playhead; }
-
-	bool dragging_playhead () const { return _dragging_playhead; }
-
 	void toggle_zero_line_visibility ();
 	void set_summary ();
 	void set_group_tabs ();
@@ -353,12 +344,6 @@ public:
 	bool scroll_up_one_track (bool skip_child_views = false);
 	bool scroll_down_one_track (bool skip_child_views = false);
 
-	void scroll_left_step ();
-	void scroll_right_step ();
-
-	void scroll_left_half_page ();
-	void scroll_right_half_page ();
-
 	void select_topmost_track ();
 
 	void cleanup_regions ();
@@ -371,8 +356,6 @@ public:
 
 	double get_y_origin () const;
 	void reposition_and_zoom (samplepos_t, double);
-
-	void reset_x_origin_to_follow_playhead ();
 
 	void toggle_meter_updating();
 
@@ -408,8 +391,6 @@ public:
 	void get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) const;
 	void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<std::shared_ptr<Evoral::Note<Temporal::Beats> > > > >&) const;
 
-	void center_screen (samplepos_t);
-
 	TrackViewList axis_views_from_routes (std::shared_ptr<ARDOUR::RouteList>) const;
 
 	void set_snapped_cursor_position (Temporal::timepos_t const & pos);
@@ -420,7 +401,8 @@ public:
 	void abort_reversible_selection_op ();
 	void undo_selection_op ();
 	void redo_selection_op ();
-	void add_command (PBD::Command * cmd);
+	void add_command (PBD::Command* cmd);
+	void add_commands (std::vector<PBD::Command*> cmds);
 
 	PBD::HistoryOwner& history();
 
@@ -513,6 +495,8 @@ public:
 	void temporal_zoom_session ();
 	void temporal_zoom_extents ();
 
+	void find_and_display_track ();
+
 protected:
 	void map_transport_state ();
 	void map_position_change (samplepos_t);
@@ -529,6 +513,8 @@ protected:
 	void do_redo (uint32_t n);
 
 	Temporal::timepos_t _get_preferred_edit_position (Editing::EditIgnoreOption, bool use_context_click, bool from_outside_canvas);
+
+	void set_global_quantization (Editing::GridType);
 
 private:
 
@@ -572,6 +558,7 @@ private:
 	void on_samples_per_pixel_changed ();
 
 	Editing::MouseMode effective_mouse_mode () const;
+	void use_appropriate_mouse_mode_for_sections ();
 
 	Editing::MarkerClickBehavior marker_click_behavior;
 
@@ -768,6 +755,7 @@ private:
 	void initial_display ();
 	void add_stripables (ARDOUR::StripableList&);
 	void add_routes (ARDOUR::RouteList&);
+	void add_instrument_routes (ARDOUR::RouteList&);
 	void timeaxisview_deleted (TimeAxisView*);
 	void add_vcas (ARDOUR::VCAList&);
 
@@ -882,19 +870,6 @@ private:
 	void restore_ruler_visibility ();
 	void show_rulers_for_grid ();
 
-	enum MinsecRulerScale {
-		minsec_show_msecs,
-		minsec_show_seconds,
-		minsec_show_minutes,
-		minsec_show_hours,
-		minsec_show_many_hours
-	};
-
-	MinsecRulerScale minsec_ruler_scale;
-
-	samplecnt_t minsec_mark_interval;
-	gint minsec_mark_modulo;
-	gint minsec_nmarks;
 	void set_minsec_ruler_scale (samplepos_t, samplepos_t);
 
 	enum TimecodeRulerScale {
@@ -1018,8 +993,6 @@ private:
 
 	Gtk::HBox           toplevel_hpacker;
 
-	Gtk::HBox           bottom_hbox;
-
 	Gtk::Table          edit_packer;
 
 	Gtk::Adjustment     unused_adjustment; // yes, really; Gtk::Layout constructor requires refs
@@ -1096,7 +1069,6 @@ private:
 	sigc::connection _tvl_redisplay_connection;
 
 	sigc::connection super_rapid_screen_update_connection;
-	void center_screen_internal (samplepos_t, float);
 
 	void super_rapid_screen_update ();
 
@@ -1184,7 +1156,6 @@ private:
 	void remove_selected_regions ();
 	void remove_regions (const RegionSelection&, bool can_ripple, bool as_part_of_other_command);
 	void remove_clicked_region ();
-	void show_region_properties ();
 	void show_midi_list_editor ();
 	void rename_region ();
 	void duplicate_some_regions (RegionSelection&, float times);
@@ -1334,7 +1305,6 @@ private:
 
 	/* import & embed */
 	void external_audio_dialog ();
-	void session_import_dialog ();
 
 	/* PT import specific */
 	void external_pt_dialog ();
@@ -1490,8 +1460,6 @@ private:
 
 	ARDOUR::PlaylistSet motion_frozen_playlists;
 
-	bool _dragging_playhead;
-
 	void marker_drag_motion_callback (GdkEvent*);
 	void marker_drag_finished_callback (GdkEvent*);
 
@@ -1537,6 +1505,7 @@ private:
 	bool canvas_bbt_marker_event (GdkEvent* event,ArdourCanvas::Item*, BBTMarker*);
 	bool canvas_automation_track_event(GdkEvent* event, ArdourCanvas::Item*, AutomationTimeAxisView*);
 	bool canvas_note_event (GdkEvent* event, ArdourCanvas::Item*);
+	bool canvas_bg_event (GdkEvent* event, ArdourCanvas::Item*);
 
 	bool canvas_ruler_event (GdkEvent* event, ArdourCanvas::Item*, ItemType);
 	bool canvas_ruler_bar_event (GdkEvent* event, ArdourCanvas::Item*, ItemType, std::string const&);
@@ -1602,9 +1571,17 @@ private:
 
 	void set_visible_marker_types (MarkerBarType);
 	void set_visible_range_types (RangeBarType);
+	void maybe_show_instrument_plugin (std::shared_ptr<ARDOUR::MidiTrack> mt);
 
 protected:
 	void _commit_tempo_map_edit (Temporal::TempoMap::WritableSharedPtr&, bool with_update = false);
+	void automation_create_point_at_edit_point (bool with_guard_points);
+	void automation_raise_points ();
+	void automation_lower_points ();
+	void automation_move_points_later ();
+	void automation_move_points_earlier ();
+	void automation_begin_edit ();
+	void automation_end_edit ();
 
 private:
 	friend class DragManager;
@@ -1641,8 +1618,6 @@ private:
 
 	/* display control */
 
-	/// true if we scroll the tracks rather than the playhead
-	bool _stationary_playhead;
 	/// true if we are in fullscreen mode
 	bool _maximised;
 
@@ -1669,7 +1644,8 @@ private:
 	void marker_menu_edit ();
 	void marker_menu_remove ();
 	void marker_menu_rename ();
-	void rename_marker (ArdourMarker* marker);
+	void edit_marker (ArdourMarker* marker, bool with_scene);
+	bool edit_location (ARDOUR::Location& loc, bool with_scene, bool with_command);
 	void toggle_tempo_continues ();
 	void toggle_tempo_type ();
 	void ramp_to_next_tempo ();
@@ -1763,7 +1739,7 @@ private:
 	ArdourWidgets::ArdourButton smart_mode_button;
 	Glib::RefPtr<Gtk::ToggleAction> smart_mode_action;
 
-	void                     mouse_mode_toggled (Editing::MouseMode m);
+	void                     mouse_mode_chosen (Editing::MouseMode m);
 	void			 mouse_mode_object_range_toggled ();
 	bool                     ignore_mouse_mode_toggle;
 
@@ -1864,7 +1840,6 @@ private:
 	ArdourCanvas::Rectangle* transport_preroll_rect;
 	ArdourCanvas::Rectangle* transport_postroll_rect;
 
-	ARDOUR::Location* transport_loop_location();
 	ARDOUR::Location* transport_punch_location();
 
 	ARDOUR::Location* temp_location;
@@ -2061,6 +2036,11 @@ private:
 	Glib::RefPtr<Gtk::Action>              selection_undo_action;
 	Glib::RefPtr<Gtk::Action>              selection_redo_action;
 
+	Glib::RefPtr<Gtk::ToggleAction> show_editor_mixer_action;
+	Glib::RefPtr<Gtk::ToggleAction> show_editor_list_action;
+	Glib::RefPtr<Gtk::ToggleAction> show_editor_props_action;
+	Glib::RefPtr<Gtk::ToggleAction> show_touched_automation_action;
+
 	void history_changed ();
 
 	Editing::EditPoint _edit_point;
@@ -2160,7 +2140,7 @@ private:
 	void region_view_removed ();
 
 	EditorGroupTabs* _group_tabs;
-	void fit_route_group (ARDOUR::RouteGroup*);
+	void fit_route_group (std::shared_ptr<ARDOUR::RouteGroup>);
 
 	void step_edit_status_change (bool);
 	void start_step_editing ();
@@ -2196,7 +2176,6 @@ private:
 	/* RTAV Automation display option */
 	void toggle_show_touched_automation ();
 	void set_show_touched_automation (bool);
-	bool _show_touched_automation;
 
 	int time_fx (ARDOUR::RegionList&, Temporal::ratio_t ratio, bool pitching, bool fixed_end);
 	void toggle_sound_midi_notes ();
@@ -2291,6 +2270,10 @@ private:
 	void show_range_type (RangeBarType);
 	PBD::Signal<void()> VisibleMarkersChanged;
 	PBD::Signal<void()> VisibleRangesChanged;
+
+	std::map<Editing::GridType,Glib::RefPtr<Gtk::RadioAction> > quantization_actions;
+	void global_quantization_chosen (Editing::GridType);
+	bool bbt_to_grid (Temporal::BBT_Offset const & bbt, Editing::GridType& gt) const;
 
 	friend class RegionMoveDrag;
 	friend class TrimDrag;

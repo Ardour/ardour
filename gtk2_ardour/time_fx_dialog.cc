@@ -42,10 +42,8 @@
 #include "time_fx_dialog.h"
 #include "timers.h"
 
-#ifdef USE_RUBBERBAND
 #include <rubberband/RubberBandStretcher.h>
 using namespace RubberBand;
-#endif
 
 #include "pbd/i18n.h"
 
@@ -59,9 +57,9 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch, timecnt_t const & oldlen, tim
 	: ArdourDialog (X_("time fx dialog"))
 	, editor (e)
 	, pitching (pitch)
+	, stretch_opts_label (_("Contents"))
 	, quick_button (_("Quick but Ugly"))
 	, antialias_button (_("Skip Anti-aliasing"))
-	, stretch_opts_label (_("Contents"))
 	, precise_button (_("Minimize time distortion"))
 	, preserve_formants_button(_("Preserve Formants"))
 	, fixed_end (fixed_end)
@@ -102,11 +100,6 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch, timecnt_t const & oldlen, tim
 
 	upper_button_box.set_spacing (6);
 
-	l = manage (new Label (_("<b>Options</b>"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false ));
-	l->set_use_markup ();
-
-	upper_button_box.pack_start (*l, false, false);
-
 	/* if the ratio is already set, do not allow adjustment */
 
 	if (pitching) {
@@ -145,7 +138,7 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch, timecnt_t const & oldlen, tim
 		table->set_row_spacings	(6);
 		table->set_col_spacings	(12);
 
-#ifdef USE_RUBBERBAND
+		/* Rubberband */
 		vector<string> strings;
 		duration_clock = manage (new AudioClock (X_("stretch"), true, X_("stretch"), true, false, true, false, true));
 		duration_clock->set_session (e.session());
@@ -177,31 +170,31 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch, timecnt_t const & oldlen, tim
 
 		table->attach (stretch_opts_label, 0, 1, row, row+1, Gtk::FILL, Gtk::EXPAND, 0, 0);
 
-		set_popdown_strings (stretch_opts_selector, editor.rb_opt_strings);
+		set_popdown_strings (stretch_opts_selector, editor.timefx_opt_strings);
 		/* set default */
-		stretch_opts_selector.set_active_text (editor.rb_opt_strings[editor.rb_current_opt]);
+		stretch_opts_selector.set_active_text (editor.timefx_opt_strings[editor.timefx_mode]);
 		table->attach (stretch_opts_selector, 1, 2, row, row+1, Gtk::FILL, Gtk::EXPAND & Gtk::FILL, 0, 0);
 		row++;
 
-		table->attach (precise_button, 0, 2, row, row+1, Gtk::FILL, Gtk::EXPAND, 0, 0);
+		table->attach (precise_button, 1, 2, row, row+1, Gtk::FILL, Gtk::EXPAND, 0, 0);
 		row++;
 
 		duration_clock->ValueChanged.connect (sigc::mem_fun (*this, &TimeFXDialog::duration_clock_changed));
 		duration_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &TimeFXDialog::duration_adjustment_changed));
 
-#else
+		/* SoundTouch */
 		quick_button.set_name (N_("TimeFXButton"));
-		table->attach (quick_button, 1, 3, row, row+1, Gtk::FILL, Gtk::EXPAND, 0, 0);
+		table->attach (quick_button, 1, 2, row, row+1, Gtk::FILL, Gtk::EXPAND, 0, 0);
 		row++;
 
 		antialias_button.set_name (N_("TimeFXButton"));
-		table->attach (antialias_button, 1, 3, row, row+1, Gtk::FILL, Gtk::EXPAND, 0, 0);
-
-#endif
+		table->attach (antialias_button, 1, 2, row, row+1, Gtk::FILL, Gtk::EXPAND, 0, 0);
 
 		add_button (_("Stretch/Shrink"), Gtk::RESPONSE_ACCEPT);
 
 		upper_button_box.pack_start (*table, false, true);
+
+		stretch_opts_selector.signal_changed ().connect (sigc::mem_fun (*this, &TimeFXDialog::options_changed));
 	}
 
 	set_default_response (Gtk::RESPONSE_ACCEPT);
@@ -222,6 +215,7 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch, timecnt_t const & oldlen, tim
 	get_vbox()->pack_start (*vbox, false, false);
 
 	show_all_children ();
+	options_changed ();
 }
 
 void
@@ -330,4 +324,36 @@ TimeFXDialog::duration_clock_changed ()
 	PBD::Unwinder<bool> uw (ignore_adjustment_change, true);
 
 	duration_adjustment.set_value (100.0 * (duration_clock->current_duration() / original_length).to_double());
+}
+
+void
+TimeFXDialog::options_changed ()
+{
+	std::string txt = stretch_opts_selector.get_active_text ();
+	int mode = 4;
+	for (size_t i = 0; i < editor.timefx_opt_strings.size(); i++) {
+		if (txt == editor.timefx_opt_strings[i]) {
+			mode = i;
+			break;
+		}
+	}
+
+	precise_button.hide ();
+	quick_button.hide ();
+	antialias_button.hide ();
+
+	switch (mode) {
+#ifdef HAVE_SOUNDTOUCH
+		case 8:
+			quick_button.show ();
+			antialias_button.show ();
+			break;
+#endif
+		case 7:
+			break;
+		default:
+			precise_button.show ();
+			break;
+	}
+
 }

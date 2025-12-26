@@ -1361,6 +1361,8 @@ FaderPort8::build_well_known_processor_ctrls (std::shared_ptr<Stripable> s, int 
 			break;
 		case 2:
 			PUSH_BACK_NON_NULL ("Comp In", s->mapped_control (Comp_Enable));
+			PUSH_BACK_NON_NULL ("RMS/Peak", s->mapped_control (Comp_RMSPeak));
+			PUSH_BACK_NON_NULL ("Fast Attk", s->mapped_control (Comp_FastAttack));
 			PUSH_BACK_NON_NULL ("Threshold", s->mapped_control (Comp_Threshold));
 			PUSH_BACK_NON_NULL ("Makeup", s->mapped_control (Comp_Makeup));
 			PUSH_BACK_NON_NULL ("Mode", s->mapped_control (Comp_Mode));
@@ -1368,10 +1370,12 @@ FaderPort8::build_well_known_processor_ctrls (std::shared_ptr<Stripable> s, int 
 			PUSH_BACK_NON_NULL ("Attack", s->mapped_control (Comp_Attack));
 			PUSH_BACK_NON_NULL ("Release", s->mapped_control (Comp_Release));
 			PUSH_BACK_NON_NULL ("Emphasis", s->mapped_control (Comp_KeyFilterFreq));
+			PUSH_BACK_NON_NULL ("Mix", s->mapped_control (Comp_Mix));
 			break;
 		case 3:
 			PUSH_BACK_NON_NULL ("Gate In", s->mapped_control (Gate_Enable));
 			PUSH_BACK_NON_NULL ("Exp", s->mapped_control (Gate_Mode));
+			PUSH_BACK_NON_NULL ("Fast Attk", s->mapped_control (Gate_FastAttack));
 			PUSH_BACK_NON_NULL ("Threshold", s->mapped_control (Gate_Threshold));
 			PUSH_BACK_NON_NULL ("Depth", s->mapped_control (Gate_Depth));
 			PUSH_BACK_NON_NULL ("Attack", s->mapped_control (Gate_Attack));

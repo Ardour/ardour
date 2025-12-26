@@ -73,7 +73,7 @@ protected:
 	};
 	typedef typename RequestBuffer::rw_vector RequestBufferVector;
 
-#if defined(COMPILER_MINGW) && defined(PTW32_VERSION)
+#if defined(COMPILER_MINGW) && defined(__PTW32_VERSION)
 	struct pthread_cmp
 	{
 		bool operator() (const ptw32_handle_t& thread1, const ptw32_handle_t& thread2)

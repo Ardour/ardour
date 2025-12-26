@@ -39,6 +39,8 @@
 #include "ardour/session.h"
 #include "ardour/types.h"
 
+#include "temporal/bbt_time.h"
+
 #include "canvas/canvas.h"
 #include "canvas/pixbuf.h"
 
@@ -46,6 +48,7 @@
 
 #include "actions.h"
 #include "ardour_ui.h"
+#include "control_point.h"
 #include "editing.h"
 #include "editor.h"
 #include "gui_thread.h"
@@ -172,6 +175,7 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_menu_actions, X_("ZoomFocus"), _("Zoom Focus"));
 	ActionManager::register_action (editor_menu_actions, X_("ZoomMenu"), _("Zoom"));
 	ActionManager::register_action (editor_menu_actions, X_("LuaScripts"), _("Lua Scripts"));
+	ActionManager::register_action (editor_menu_actions, X_("GlobalQuantize"), _("Global Quantization"));
 
 	register_region_actions ();
 
@@ -184,17 +188,17 @@ Editor::register_actions ()
 
 	/* attachments visibility (editor-mixer-strip, bottom properties, sidebar list) */
 
-	act = ActionManager::register_toggle_action (editor_actions, "show-editor-list", _("Show Editor List"), sigc::mem_fun (*this, &Tabbable::att_right_button_toggled));
-	ActionManager::session_sensitive_actions.push_back (act);
-	right_attachment_button.set_related_action (act);
+	show_editor_list_action = ActionManager::register_toggle_action (editor_actions, "show-editor-list", _("Show Editor List"), sigc::mem_fun (*this, &Tabbable::att_right_button_toggled));
+	ActionManager::session_sensitive_actions.push_back (show_editor_list_action);
+	right_attachment_button.set_related_action (show_editor_list_action);
 
-	act = ActionManager::register_toggle_action (editor_actions, "show-editor-mixer", _("Show Editor Mixer"), sigc::mem_fun (*this, &Tabbable::att_left_button_toggled));
-	ActionManager::session_sensitive_actions.push_back (act);
-	left_attachment_button.set_related_action (act);
+	show_editor_mixer_action = ActionManager::register_toggle_action (editor_actions, "show-editor-mixer", _("Show Editor Mixer"), sigc::mem_fun (*this, &Tabbable::att_left_button_toggled));
+	ActionManager::session_sensitive_actions.push_back (show_editor_mixer_action);
+	left_attachment_button.set_related_action (show_editor_mixer_action);
 
-	act = ActionManager::register_toggle_action (editor_actions, "show-editor-props", _("Show Editor Properties Box"), sigc::mem_fun (*this, &Tabbable::att_bottom_button_toggled));
-	ActionManager::session_sensitive_actions.push_back (act);
-	bottom_attachment_button.set_related_action (act);
+	show_editor_props_action = ActionManager::register_toggle_action (editor_actions, "show-editor-props", _("Show Editor Properties Box"), sigc::mem_fun (*this, &Tabbable::att_bottom_button_toggled));
+	ActionManager::session_sensitive_actions.push_back (show_editor_props_action);
+	bottom_attachment_button.set_related_action (show_editor_props_action);
 
 	reg_sens (editor_actions, "playhead-to-next-region-boundary", _("Playhead to Next Region Boundary"), sigc::bind (sigc::mem_fun(*this, &Editor::cursor_to_next_region_boundary), true));
 	reg_sens (editor_actions, "playhead-to-next-region-boundary-noselection", _("Playhead to Next Region Boundary (No Track Selection)"), sigc::bind (sigc::mem_fun(*this, &Editor::cursor_to_next_region_boundary), false));
@@ -312,6 +316,7 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "fit_16_tracks", _("Fit 16 Tracks"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 16));
 	reg_sens (editor_actions, "fit_32_tracks", _("Fit 32 Tracks"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 32));
 	reg_sens (editor_actions, "fit_all_tracks", _("Fit All Tracks"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 0));
+	reg_sens (editor_actions, "fit_selected_tracks", _("Fit Selected Tracks"), sigc::mem_fun(*this, &Editor::fit_selection));
 
 	reg_sens (editor_actions, "zoom_10_ms", _("Zoom to 10 ms"), sigc::bind (sigc::mem_fun(*this, &Editor::set_zoom_preset), 10));
 	reg_sens (editor_actions, "zoom_100_ms", _("Zoom to 100 ms"), sigc::bind (sigc::mem_fun(*this, &Editor::set_zoom_preset), 100));
@@ -348,6 +353,8 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "set-loop-from-edit-range", _("Set Loop from Selection"), sigc::bind (sigc::mem_fun(*this, &Editor::set_loop_from_selection), false));
 	reg_sens (editor_actions, "set-punch-from-edit-range", _("Set Punch from Selection"), sigc::mem_fun(*this, &Editor::set_punch_from_selection));
 	reg_sens (editor_actions, "set-session-from-edit-range", _("Set Session Start/End from Selection"), sigc::mem_fun(*this, &Editor::set_session_extents_from_selection));
+
+	reg_sens (editor_actions, "find-and-display-stripable", _("Find & Display Track/Bus..."), sigc::mem_fun (*this, &Editor::find_and_display_track));
 
 	if (Profile->get_mixbus ()) {
 		reg_sens (editor_actions, "copy-paste-section", _("Copy/Paste Range Section to Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::cut_copy_section), CopyPasteSection));
@@ -469,13 +476,10 @@ Editor::register_actions ()
 		sigc::bind (sigc::mem_fun (*this, &Editor::move_range_selection_start_or_end_to_region_boundary), true, true)
 		);
 
-	toggle_reg_sens (editor_actions, "toggle-follow-playhead", _("Follow Playhead"), (sigc::mem_fun(*this, &Editor::toggle_follow_playhead)));
 	act = reg_sens (editor_actions, "remove-last-capture", _("Remove Last Capture"), (sigc::mem_fun(*this, &Editor::remove_last_capture)));
 	act = reg_sens (editor_actions, "tag-last-capture", _("Tag Last Capture"), (sigc::mem_fun(*this, &Editor::tag_last_capture)));
 
-	ActionManager::register_toggle_action (editor_actions, "toggle-stationary-playhead", _("Stationary Playhead"), (mem_fun(*this, &Editor::toggle_stationary_playhead)));
-
-	ActionManager::register_toggle_action (editor_actions, "show-touched-automation", _("Show Automation Lane on Touch"), (mem_fun(*this, &Editor::toggle_show_touched_automation)));
+	show_touched_automation_action = ActionManager::register_toggle_action (editor_actions, "show-touched-automation", _("Show Automation Lane on Touch"), (mem_fun(*this, &Editor::toggle_show_touched_automation)));
 
 	act = reg_sens (editor_actions, "insert-time", _("Insert Time"), (sigc::mem_fun(*this, &Editor::do_insert_time)));
 	ActionManager::track_selection_sensitive_actions.push_back (act);
@@ -542,8 +546,6 @@ Editor::register_actions ()
 		act->set_sensitive (false);
 	}
 
-	bind_mouse_mode_buttons ();
-
 	ActionManager::register_action (editor_actions, "step-mouse-mode", _("Step Mouse Mode"), sigc::bind (sigc::mem_fun(*this, &Editor::step_mouse_mode), true));
 
 	RadioAction::Group edit_point_group;
@@ -562,8 +564,6 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, "set-ripple-selected", _("Selected"), bind (mem_fun (*this, &Editor::set_ripple_mode), RippleSelected));
 	ActionManager::register_action (editor_actions, "set-ripple-all", _("All"), sigc::bind (sigc::mem_fun (*this, &Editor::set_ripple_mode), RippleAll));
 	ActionManager::register_action (editor_actions, "set-ripple-interview", S_("Interview"), sigc::bind (sigc::mem_fun (*this, &Editor::set_ripple_mode), RippleInterview));
-
-	register_grid_actions ();
 
 	ActionManager::register_toggle_action (editor_actions, X_("show-marker-lines"), _("Show Marker Lines"), sigc::mem_fun (*this, &Editor::toggle_marker_lines));
 
@@ -652,7 +652,7 @@ Editor::register_actions ()
 
 	ActionManager::register_action (rl_actions, X_("removeUnusedRegions"), _("Remove Unused"), sigc::mem_fun (*_regions, &EditorRegions::remove_unused_regions));
 
-	act = reg_sens (editor_actions, X_("addExistingPTFiles"), _("Import PT session"), sigc::mem_fun (*this, &Editor::external_pt_dialog));
+	act = reg_sens (editor_actions, X_("addExistingPTFiles"), _("Import PT session..."), sigc::mem_fun (*this, &Editor::external_pt_dialog));
 	ActionManager::write_sensitive_actions.push_back (act);
 
 	act = reg_sens (editor_actions, X_("LoudnessAssistant"), _("Loudness Assistant..."), sigc::bind (sigc::mem_fun (*this, &Editor::loudness_assistant), false));
@@ -662,10 +662,6 @@ Editor::register_actions ()
 
 	act = reg_sens (editor_actions, X_("addExternalAudioToRegionList"), _("Import to Source List..."), sigc::bind (sigc::mem_fun(*this, &Editor::add_external_audio_action), ImportAsRegion));
 	ActionManager::write_sensitive_actions.push_back (act);
-
-	act = ActionManager::register_action (editor_actions, X_("importFromSession"), _("Import from Session"), sigc::mem_fun(*this, &Editor::session_import_dialog));
-	ActionManager::write_sensitive_actions.push_back (act);
-
 
 	act = ActionManager::register_action (editor_actions, X_("bring-into-session"), _("Bring all media into session folder"), sigc::mem_fun(*this, &Editor::bring_all_sources_into_session));
 	ActionManager::write_sensitive_actions.push_back (act);
@@ -686,6 +682,42 @@ Editor::register_actions ()
 	smart_mode_button.set_related_action (smart_mode_action);
 	smart_mode_button.set_text (_("Smart"));
 	smart_mode_button.set_name ("mouse mode button");
+
+	RadioAction::Group global_quantize_group;
+
+	struct GTStrings {
+		Editing::GridType gt;
+		char const * const action_name;
+		char const * const menu_text;
+
+		GTStrings (Editing::GridType gtype, char const * const an, char const * const mt)
+			: gt (gtype), action_name (an), menu_text (mt) {}
+	};
+
+	/* Limited grid types for global quantization, for now */
+
+	std::vector<GTStrings> grid_types ({
+			{ GridTypeBar, X_("1-bar"), _("1 bar") },
+			{ GridTypeBeat, X_("quarter-note"), _("1/4 Note" ) },
+			{ GridTypeBeatDiv2, X_("eighth-note"), _("1/8 Note") },
+			{ GridTypeBeatDiv4, X_("sixteenth-note"), _("1/16 Note") },
+			{ GridTypeBeatDiv8, X_("thirtysecond-note"), _("1/32 Note") },
+			{ GridTypeBeatDiv16, X_("sixtyfourth-note"), _("1/64 Note") },
+			{ GridTypeBeatDiv32, X_("onetwentyeighth-note"), _("1/128 Note") }
+		});
+
+	for (auto & gts : grid_types) {
+		char buf[64];
+		snprintf (buf, sizeof (buf), X_("set-global-quantization-%s"), gts.action_name);
+		quantization_actions[gts.gt] = Glib::RefPtr<RadioAction>::cast_static (ActionManager::register_radio_action (editor_actions, global_quantize_group, buf, gts.menu_text, sigc::bind (sigc::mem_fun(*this, &Editor::global_quantization_chosen), gts.gt)));
+	}
+
+	Editing::GridType gt;
+	AnyTime at (Config->get_default_quantization());
+
+	if (at.type == AnyTime::BBT_Offset && bbt_to_grid (Config->get_default_quantization().bbt_offset, gt)) {
+		quantization_actions[gt]->set_active (true);
+	}
 }
 
 static void _lua_print (std::string s) {
@@ -693,6 +725,135 @@ static void _lua_print (std::string s) {
 	std::cout << "LuaInstance: " << s << "\n";
 #endif
 	PBD::info << "LuaInstance: " << s << endmsg;
+}
+
+bool
+Editor::bbt_to_grid (Temporal::BBT_Offset const & bbt, GridType& gt) const
+{
+	using namespace Temporal;
+
+	if (bbt.bars > 1) {
+		return false;
+	}
+
+	if (bbt == BBT_Offset (1, 0, 0)) {
+		gt = GridTypeBar;
+	} else if (bbt == BBT_Offset (0, 0, 60)) {
+		gt = GridTypeBeatDiv32;
+	} else if (bbt == BBT_Offset (0, 0, 69)) {
+		gt = GridTypeBeatDiv28;
+	} else if (bbt == BBT_Offset (0, 0, 80)) {
+		gt = GridTypeBeatDiv24;
+	} else if (bbt == BBT_Offset (0, 0, 96)) {
+		gt = GridTypeBeatDiv20;
+	} else if (bbt == BBT_Offset (0, 0, 120)) {
+		gt = GridTypeBeatDiv16;
+	} else if (bbt == BBT_Offset (0, 0, 137)) {
+		gt = GridTypeBeatDiv14;
+	} else if (bbt == BBT_Offset (0, 0, 160)) {
+		gt = GridTypeBeatDiv12;
+	} else if (bbt == BBT_Offset (0, 0, 192)) {
+		gt = GridTypeBeatDiv10;
+	} else if (bbt == BBT_Offset (0, 0, 240)) {
+		gt = GridTypeBeatDiv8;
+	} else if (bbt == BBT_Offset (0, 0, 274)) {
+		gt = GridTypeBeatDiv7;
+	} else if (bbt == BBT_Offset (0, 0, 320)) {
+		gt = GridTypeBeatDiv6;
+	} else if (bbt == BBT_Offset (0, 0, 384)) {
+		gt = GridTypeBeatDiv5;
+	} else if (bbt == BBT_Offset (0, 0, 480)) {
+		gt = GridTypeBeatDiv4;
+	} else if (bbt == BBT_Offset (0, 0, 640)) {
+		gt = GridTypeBeatDiv3;
+	} else if (bbt == BBT_Offset (0, 0, 960)) {
+		gt = GridTypeBeatDiv2;
+	} else if (bbt == BBT_Offset (0, 1, 0)) {
+		gt = GridTypeBeat;
+	} else {
+		return false;
+	}
+
+	return true;
+}
+
+void
+Editor::set_global_quantization (GridType gt)
+{
+	Temporal::BBT_Offset bbt;
+
+	switch (gt) {
+	case GridTypeBeatDiv32:
+		bbt.ticks = 60;
+		break;
+	case GridTypeBeatDiv28:
+		bbt.ticks = 69;
+		break;
+	case GridTypeBeatDiv24:
+		bbt.ticks = 80;
+		break;
+	case GridTypeBeatDiv20:
+		bbt.ticks = 96;
+		break;
+	case GridTypeBeatDiv16:
+		bbt.ticks = 120;
+		break;
+	case GridTypeBeatDiv14:
+		bbt.ticks = 137;
+		break;
+	case GridTypeBeatDiv12:
+		bbt.ticks = 160;
+		break;
+	case GridTypeBeatDiv10:
+		bbt.ticks = 192;
+		break;
+	case GridTypeBeatDiv8:
+		bbt.ticks = 240;
+		break;
+	case GridTypeBeatDiv7:
+		bbt.ticks = 274;
+		break;
+	case GridTypeBeatDiv6:
+		bbt.ticks = 320;
+		break;
+	case GridTypeBeatDiv5:
+		bbt.ticks = 384;
+		break;
+	case GridTypeBeatDiv4:
+		bbt.ticks = 480;
+		break;
+	case GridTypeBeatDiv3:
+		bbt.ticks = 640;
+		break;
+	case GridTypeBeatDiv2:
+		bbt.ticks = 960;
+		break;
+	case GridTypeBeat:
+		bbt.beats = 1;
+		break;
+	case GridTypeBar:
+		bbt.bars = 1;
+		break;
+
+	case GridTypeNone:
+	case GridTypeTimecode:
+	case GridTypeMinSec:
+	case GridTypeCDFrame:
+	default:
+		return;
+	}
+
+	Config->set_default_quantization (bbt);
+}
+
+void
+Editor::global_quantization_chosen (GridType gt)
+{
+	if (!quantization_actions[gt]->get_active()) {
+		return;
+	}
+
+	set_global_quantization (gt);
 }
 
 void
@@ -777,6 +938,8 @@ Editor::toggle_ruler_visibility ()
 	if (no_ruler_shown_update) {
 		return;
 	}
+
+	assert (_session);
 
 	update_ruler_visibility ();
 	store_ruler_visibility ();
@@ -1254,11 +1417,8 @@ Editor::register_region_actions ()
 	/* Open the list editor dialogue for the selected regions */
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions), "show-region-list-editor", _("List Editor..."), sigc::mem_fun (*this, &Editor::show_midi_list_editor));
 
-	/* Open the region properties dialogue for the selected regions */
-	register_region_action (_region_actions, RegionActionTarget (SelectedRegions), "show-region-properties", _("Properties..."), sigc::mem_fun (*this, &Editor::show_region_properties));
-
 	/* Edit the region in a separate region pianoroll window */
-	register_region_action (_region_actions, RegionActionTarget (SelectedRegions), "edit-region-pianoroll-window", _("Edit in separate window..."), sigc::mem_fun (*this, &Editor::edit_region_in_pianoroll_window));
+	register_region_action (_region_actions, RegionActionTarget (SelectedRegions), "edit-region-dedicated-window", _("Edit in separate window..."), sigc::mem_fun (*this, &Editor::edit_region_in_dedicated_window));
 
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "play-selected-regions", _("Play Selected Regions"), sigc::mem_fun(*this, &Editor::play_selected_region));
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "tag-selected-regions", _("Tag Selected Regions"), sigc::mem_fun(*this, &Editor::tag_selected_region));
@@ -1333,3 +1493,172 @@ Editor::register_region_actions ()
 	sensitize_all_region_actions (false);
 }
 
+void
+Editor::automation_create_point_at_edit_point (bool with_guard_points)
+{
+	AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (entered_track);
+	if (!atv) {
+		return;
+	}
+
+	timepos_t where (get_preferred_edit_position());
+	GdkEvent event;
+
+	event.type = GDK_KEY_PRESS;
+	event.button.button = 1;
+	event.button.state = 0;
+
+	if (atv->line()->the_list()->has_event_at (where)) {
+		atv->line()->begin_edit();
+	} else {
+		atv->line()->add (atv->control(), &event, where, atv->line()->the_list()->eval (where), with_guard_points, true);
+
+	}
+}
+
+void
+Editor::automation_begin_edit ()
+{
+	AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (entered_track);
+
+	if (!atv) {
+		return;
+	}
+
+	atv->line()->begin_edit ();
+}
+
+void
+Editor::automation_end_edit ()
+{
+	AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (entered_track);
+
+	if (!atv) {
+		ARDOUR_UI::instance()->Escape ();
+		return;
+	}
+
+	if (!atv->line()->end_edit ()) {
+		ARDOUR_UI::instance()->Escape ();
+	}
+}
+
+void
+Editor::automation_lower_points ()
+{
+	PointSelection& points (selection->points);
+
+	if (points.size() != 1) {
+		return;
+	}
+
+	AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (entered_track);
+
+	if (!atv) {
+		return;
+	}
+
+	atv->line()->end_edit ();
+
+	std::shared_ptr<AutomationControl> c (atv->control());
+
+	begin_reversible_command (_("automation event lower"));
+	add_command (new MementoCommand<AutomationList> (atv->line()->memento_command_binder(), &atv->line()->the_list()->get_state(), 0));
+	ControlPoint* point (points.front());
+	atv->line()->the_list()->modify (point->model(), (*point->model())->when, c->interface_to_internal (max (0.0, c->internal_to_interface ((*point->model())->value) - 0.1)));
+	add_command (new MementoCommand<AutomationList>(atv->line()->memento_command_binder (), 0, &atv->line()->the_list()->get_state()));
+	commit_reversible_command ();
+}
+
+void
+Editor::automation_raise_points ()
+{
+	PointSelection& points (selection->points);
+
+	if (points.size() != 1) {
+		return;
+	}
+
+	AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (entered_track);
+
+	if (!atv) {
+		return;
+	}
+
+	atv->line()->end_edit ();
+
+	std::shared_ptr<AutomationControl> c (atv->control());
+
+	begin_reversible_command (_("automation event raise"));
+	add_command (new MementoCommand<AutomationList> (atv->line()->memento_command_binder(), &atv->line()->the_list()->get_state(), 0));
+	ControlPoint* point (points.front());
+	atv->line()->the_list()->modify (point->model(), (*point->model())->when, c->interface_to_internal (min (1.0, c->internal_to_interface ((*point->model())->value) + 0.1)));
+	add_command (new MementoCommand<AutomationList>(atv->line()->memento_command_binder (), 0, &atv->line()->the_list()->get_state()));
+	commit_reversible_command ();
+}
+
+void
+Editor::automation_move_points_later ()
+{
+	PointSelection& points (selection->points);
+
+	if (points.size() != 1) {
+		return;
+	}
+
+	AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (entered_track);
+
+	if (!atv) {
+		return;
+	}
+
+	atv->line()->end_edit ();
+
+	begin_reversible_command (_("automation points move later"));
+	add_command (new MementoCommand<AutomationList> (atv->line()->memento_command_binder(), &atv->line()->the_list()->get_state(), 0));
+	ControlPoint* point (points.front());
+	timepos_t model_time ((*point->model())->when);
+
+	bool success;
+	Temporal::Beats how_far (get_grid_type_as_beats (success, model_time));
+	if (!success) {
+		how_far = Temporal::Beats (1, 0);
+	}
+	model_time += Temporal::BBT_Offset (0, how_far.get_beats(), how_far.get_ticks());
+	atv->line()->the_list()->modify (point->model(), model_time, (*point->model())->value);
+	add_command (new MementoCommand<AutomationList>(atv->line()->memento_command_binder (), 0, &atv->line()->the_list()->get_state()));
+	commit_reversible_command ();
+}
+
+void
+Editor::automation_move_points_earlier ()
+{
+	PointSelection& points (selection->points);
+
+	if (points.size() != 1) {
+		return;
+	}
+
+	AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (entered_track);
+
+	if (!atv) {
+		return;
+	}
+
+	atv->line()->end_edit ();
+
+	begin_reversible_command (_("automation points move earlier"));
+	add_command (new MementoCommand<AutomationList> (atv->line()->memento_command_binder(), &atv->line()->the_list()->get_state(), 0));
+	ControlPoint* point (points.front());
+	timepos_t model_time ((*point->model())->when);
+
+	bool success;
+	Temporal::Beats how_far (get_grid_type_as_beats (success, model_time));
+	if (!success) {
+		how_far = Temporal::Beats (1, 0);
+	}
+	model_time = model_time.earlier (Temporal::BBT_Offset (0, how_far.get_beats(), how_far.get_ticks()));
+	atv->line()->the_list()->modify (point->model(), model_time, (*point->model())->value);
+	add_command (new MementoCommand<AutomationList>(atv->line()->memento_command_binder (), 0, &atv->line()->the_list()->get_state()));
+	commit_reversible_command ();
+}

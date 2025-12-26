@@ -30,6 +30,7 @@
 #include "widgets/tabbable.h"
 
 #include "application_bar.h"
+#include "audio_clip_editor.h"
 #include "audio_region_operations_box.h"
 #include "audio_trigger_properties_box.h"
 #include "axis_provider.h"
@@ -37,7 +38,7 @@
 #include "fitted_canvas_widget.h"
 #include "midi_trigger_properties_box.h"
 #include "route_processor_selection.h"
-#include "slot_properties_box.h"
+#include "selection_properties_box.h"
 #include "trigger_clip_picker.h"
 #include "trigger_region_list.h"
 #include "trigger_route_list.h"
@@ -76,7 +77,7 @@ private:
 	void remove_route (TriggerStrip*);
 
 	void clear_selected_slot ();
-
+	void hide_all ();
 	void redisplay_track_list ();
 	void pi_property_changed (PBD::PropertyChange const&);
 	void stripable_property_changed (PBD::PropertyChange const&, std::weak_ptr<ARDOUR::Stripable>);
@@ -100,7 +101,8 @@ private:
 	AxisView* axis_view_by_control (std::shared_ptr<ARDOUR::AutomationControl>) const;
 
 	void                      selection_changed ();
-	void                      rec_enable_changed (ARDOUR::Trigger const *);
+	void                      trigger_arm_changed (ARDOUR::Trigger const *);
+	void                      region_captured (ARDOUR::Trigger const *);
 	PBD::ScopedConnectionList editor_connections;
 
 	gint start_updating ();
@@ -117,7 +119,6 @@ private:
 	Gtk::EventBox             _no_strips;
 	Gtk::Alignment            _cue_area_frame;
 	Gtk::VBox                 _cue_area_box;
-	Gtk::HBox                 _parameter_box;
 	Gtk::VBox                 _sidebar_vbox;
 	ArdourWidgets::MetaButton _sidebar_pager1;
 	ArdourWidgets::MetaButton _sidebar_pager2;
@@ -126,7 +127,7 @@ private:
 	TriggerSourceList         _trigger_source_list;
 	TriggerRegionList         _trigger_region_list;
 	TriggerRouteList          _trigger_route_list;
-	Gtk::Table                 table;
+	Gtk::HBox                  hpacker;
 
 	CueBoxWidget       _cue_box;
 	FittedCanvasWidget _master_widget;
@@ -134,17 +135,16 @@ private:
 
 	bool _show_bottom_pane;
 
-	SlotPropertiesBox _slot_prop_box;
-
+	SelectionPropertiesBox    _properties_box;
 	AudioTriggerPropertiesBox _audio_trig_box;
 	MidiTriggerPropertiesBox _midi_trig_box;
 
 #if REGION_PROPERTIES_BOX_TODO
 	AudioRegionOperationsBox  _audio_ops_box;
-	AudioClipEditorBox        _audio_trim_box;
 #endif
 
 	Pianoroll*           _midi_editor;
+	AudioClipEditor*     _audio_editor;
 
 	RouteProcessorSelection  _selection;
 	std::list<TriggerStrip*> _strips;

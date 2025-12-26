@@ -18,9 +18,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/time.h>
 #include <errno.h>
-#include <unistd.h>
 #include <algorithm>
 #include <glibmm.h>
 
@@ -431,7 +429,7 @@ no_audio_tracks:
 				ChanCount (DataType::MIDI, 1),
 				true,
 				instrument, (Plugin::PresetRecord*) 0,
-				(RouteGroup*) 0,
+				nullptr,
 				1,
 				a->trname,
 				PresentationInfo::max_order,

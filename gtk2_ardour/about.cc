@@ -24,7 +24,6 @@
  */
 
 #include <algorithm>
-#include <unistd.h>
 #include <sys/types.h>
 #include <cstdio>
 #include <ctime>
@@ -140,6 +139,7 @@ static const char* authors[] = {
 	N_("Sakari Bergen"),
 	N_("Christian Borss"),
 	N_("Thomas Brand"),
+	N_("Franke Burgarino"),
 	N_("Chris Cannam"),
 	N_("Jeremy Carter"),
 	N_("Enrico Castella"),
@@ -258,7 +258,8 @@ static const char* translators[] = {
 	N_("Brazilian Portuguese:\n\tAlexander da Franca Fernandes <alexander@nautae.eti.br>\
 \n\tChris Ross <chris@tebibyte.org>\n"),
 	N_("Spanish:\n\t Alex Krohn <alexkrohn@fastmail.fm>\
-\n\tPablo Fernández <pablo.fbus@gmail.com>\n"),
+\n\tPablo Fernández <pablo.fbus@gmail.com>\
+\n\tJuan Cruz Vardy Sabaté <juanvardy@zohomail.com>\n"),
 	N_("Russian:\n\t Igor Blinov <pitstop@nm.ru>\
 \n\tAleksandr Koltsov <ag1455@mail.ru>\
 \n\tPetr Semiletov <tea@list.ru>\

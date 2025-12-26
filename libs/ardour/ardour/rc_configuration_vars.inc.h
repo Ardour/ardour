@@ -34,6 +34,7 @@ CONFIG_VARIABLE (Temporal::TimeDomain, preferred_time_domain, "preferred_time_do
 
 /* IO connection */
 
+CONFIG_VARIABLE (bool, restore_hardware_connections, "restore-hardware-connections", true)
 CONFIG_VARIABLE (bool, auto_connect_standard_busses, "auto-connect-standard-busses", true)
 /* this variable is used to indicate output mode in Waves Tracks:
    "Multi Out" == AutoConnectPhysical and "Stereo Out" == AutoConnectMaster
@@ -171,6 +172,7 @@ CONFIG_VARIABLE (bool, create_xrun_marker, "create-xrun-marker", false)
 CONFIG_VARIABLE (bool, stop_at_session_end, "stop-at-session-end", false)
 CONFIG_VARIABLE (float, preroll_seconds, "preroll-seconds", -2.0f)
 CONFIG_VARIABLE (bool, loop_is_mode, "loop-is-mode", false)
+CONFIG_VARIABLE (bool, roll_will_loop, "roll-will-loop", false)
 CONFIG_VARIABLE (LoopFadeChoice, loop_fade_choice, "loop-fade-choice", XFadeLoop)
 CONFIG_VARIABLE (float, shuttle_speed_factor, "shuttle-speed-factor", 1.0f) // used for MMC shuttle
 CONFIG_VARIABLE (float, shuttle_speed_threshold, "shuttle-speed-threshold", 5.0f) // used for MMC shuttle
@@ -202,6 +204,7 @@ CONFIG_VARIABLE (std::string, auditioner_output_right, "auditioner-output-right"
 CONFIG_VARIABLE (bool, replicate_missing_region_channels, "replicate-missing-region-channels", true)
 CONFIG_VARIABLE (bool, hiding_groups_deactivates_groups, "deprecated-hiding-groups-deactivates-groups", false)  /*deprecated*/
 CONFIG_VARIABLE (bool, group_override_inverts, "group-override-inverts", true)
+CONFIG_VARIABLE (bool, implicit_selection_op_groups, "implicit-selection-op-groups", true)
 CONFIG_VARIABLE (bool, verify_remove_last_capture, "verify-remove-last-capture", true)
 CONFIG_VARIABLE (bool, save_history, "save-history", true)
 CONFIG_VARIABLE (int32_t, saved_history_depth, "save-history-depth", 20)
@@ -256,6 +259,7 @@ CONFIG_VARIABLE (bool, setup_sidechain, "setup-sidechain", false)
 CONFIG_VARIABLE (uint32_t, plugin_scan_timeout, "plugin-scan-timeout", 150) /* deci-seconds */
 CONFIG_VARIABLE (uint32_t, limit_n_automatables, "limit-n-automatables", 512)
 CONFIG_VARIABLE (uint32_t, plugin_cache_version, "plugin-cache-version", 0)
+CONFIG_VARIABLE (VST3KnobMode, vst3_knob_mode, "vst3-knob-mode", VST3KnobLinearMode)
 
 CONFIG_VARIABLE (float, tail_duration_sec, "tail-duration-sec", 2.0)
 CONFIG_VARIABLE (uint32_t, max_tail_samples, "max-tail-samples", 0xffffffff) // aka kInfiniteTail

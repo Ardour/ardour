@@ -1116,7 +1116,7 @@ Editor::section_rect_event (GdkEvent* ev, Location* loc, ArdourCanvas::Rectangle
 			}
 			if (ev->button.button == 1) {
 				assert (find_location_markers (loc));
-				rename_marker (find_location_markers (loc)->start);
+				edit_marker (find_location_markers (loc)->start, true);
 				return true;
 			}
 			break;
@@ -1198,6 +1198,16 @@ Editor::canvas_note_event (GdkEvent *event, ArdourCanvas::Item* item)
 	}
 
 	return typed_event (item, event, NoteItem);
+}
+
+bool
+Editor::canvas_bg_event (GdkEvent *event, ArdourCanvas::Item* item)
+{
+	if (!internal_editing()) {
+		return false;
+	}
+
+	return typed_event (item, event, RegionItem);
 }
 
 bool
@@ -1384,7 +1394,7 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
 	double px;
 	double py;
 
-	event.type = GDK_MOTION_NOTIFY;
+	event.type = GDK_BUTTON_PRESS;
 	event.button.x = x;
 	event.button.y = y;
 	/* assume we're dragging with button 1 */
@@ -1418,7 +1428,7 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
 				                                         Config->get_strict_io () || Profile->get_mixbus (),
 				                                         std::shared_ptr<ARDOUR::PluginInfo>(),
 				                                         (ARDOUR::Plugin::PresetRecord*) 0,
-				                                         (ARDOUR::RouteGroup*) 0, 1, region->name(), PresentationInfo::max_order, Normal, true);
+				                                         nullptr, 1, region->name(), PresentationInfo::max_order, Normal, true);
 				rtav = dynamic_cast<RouteTimeAxisView*> (time_axis_view_from_stripable (midi_tracks.front()));
 			} else {
 				return;

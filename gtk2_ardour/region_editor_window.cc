@@ -25,7 +25,7 @@
 using namespace ARDOUR;
 
 RegionEditorWindow::RegionEditorWindow (Session* s, RegionView* rv)
-	: ArdourWindow (_("Region"))
+	: ArdourWindow (_("Region Properties"))
 {
 	AudioRegionView* arv = dynamic_cast<AudioRegionView*> (rv);
 	if (arv) {

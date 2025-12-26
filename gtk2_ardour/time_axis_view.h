@@ -106,6 +106,8 @@ public:
 	TimeAxisView(ARDOUR::Session* sess, PublicEditor& ed, TimeAxisView* parent, ArdourCanvas::Canvas& canvas);
 	virtual ~TimeAxisView ();
 
+	std::string name () const { return name_label.get_text (); }
+
 	static PBD::Signal<void(TimeAxisView*)> CatchDeletion;
 
 	static void setup_sizes ();
@@ -124,7 +126,7 @@ public:
 	uint32_t effective_height () const { return _effective_height; }
 
 	/** @return y position, or -1 if hidden */
-	double y_position () const { return _y_position; }
+	int y_position () const { return _y_position; }
 
 	/** @return our Editor */
 	PublicEditor& editor () const { return _editor; }
@@ -133,7 +135,7 @@ public:
 
 	void idle_resize (int32_t);
 
-	virtual guint32 show_at (double y, int& nth, Gtk::VBox *parent);
+	virtual guint32 show_at (int y, int& nth, Gtk::VBox *parent);
 	virtual void hide ();
 
 	bool touched (double top, double bot);
@@ -169,8 +171,8 @@ public:
 
 	virtual void step_height (bool);
 
-	virtual ARDOUR::RouteGroup* route_group() const { return 0; }
-	virtual std::shared_ptr<ARDOUR::Playlist> playlist() const { return std::shared_ptr<ARDOUR::Playlist> (); }
+	virtual std::shared_ptr<ARDOUR::RouteGroup> route_group() const { return nullptr; }
+	virtual std::shared_ptr<ARDOUR::Playlist> playlist() const { return nullptr; }
 
 	virtual void set_samples_per_pixel (double);
 	virtual void show_selection (TimeSelection&);
@@ -260,14 +262,13 @@ protected:
 	Gtk::Menu*            _size_menu;
 	ArdourCanvas::Line*       _canvas_separator;
 	ArdourCanvas::Container*  _canvas_display;
-	double                _y_position;
+	int                   _y_position;
 	PublicEditor&         _editor;
 
 	virtual bool can_edit_name() const;
 
 	void begin_name_edit ();
 	void end_name_edit (std::string, int);
-	virtual std::string name () const { return name_label.get_text (); }
 
 	/* derived classes can override these */
 

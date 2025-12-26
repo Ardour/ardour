@@ -25,14 +25,9 @@ def build(bld):
 #    obj.includes       = ['.', ]
 #    obj.name           = 'libardour_launchkey_mini'
 #    obj.target         = 'ardour_launchkey_mini'
-#    obj.uselib         = 'CAIROMM PANGOMM USB SIGCPP XML OSX'
-#    obj.use            = 'libardour libardour_cp libardour_midisurface libgtkmm2ext libpbd libevoral libcanvas libtemporal'
+#    obj.uselib         = 'CAIROMM PANGOMM USB SIGCPP XML OSX GLIBMM GIOMM'
+#    obj.use            = 'libardour libardour_cp libardour_midisurface libgtkmm2ext libpbd libevoral libcanvas libtemporal libytkmm'
 #    obj.install_path   = os.path.join(bld.env['LIBDIR'], 'surfaces')
-#    if bld.is_defined('YTK'):
-#        obj.use    += ' libytkmm'
-#        obj.uselib += ' GLIBMM GIOMM'
-#    else:
-#        obj.uselib += ' GTKMM'
 
     obj = bld(features = 'cxx cxxshlib')
     obj.source         = list(lpxm_sources)
@@ -42,11 +37,6 @@ def build(bld):
     obj.includes       = ['.', ]
     obj.name           = 'libardour_launchkey_4'
     obj.target         = 'ardour_launchkey_4'
-    obj.uselib         = 'CAIROMM PANGOMM USB SIGCPP XML OSX'
-    obj.use            = 'libardour libardour_cp libardour_midisurface libgtkmm2ext libpbd libevoral libcanvas libtemporal'
+    obj.uselib         = 'CAIROMM PANGOMM USB SIGCPP XML OSX GLIBMM GIOMM'
+    obj.use            = 'libardour libardour_cp libardour_midisurface libgtkmm2ext libpbd libevoral libcanvas libtemporal libytkmm'
     obj.install_path   = os.path.join(bld.env['LIBDIR'], 'surfaces')
-    if bld.is_defined('YTK'):
-        obj.use    += ' libytkmm'
-        obj.uselib += ' GLIBMM GIOMM'
-    else:
-        obj.uselib += ' GTKMM'

@@ -369,6 +369,8 @@ PlugInsertBase::PluginPropertyControl::PluginPropertyControl (Session&          
 	: AutomationControl (s, param, desc, list)
 	, _pib (p)
 {
+	_value = _desc.normal;
+	AutomationControl::actually_set_value (_desc.normal, PBD::Controllable::NoGroup);
 }
 
 void
@@ -391,6 +393,14 @@ PlugInsertBase::PluginPropertyControl::actually_set_value (double user_val, Cont
 	_value = value;
 
 	AutomationControl::actually_set_value (user_val, gcd);
+}
+
+void
+PlugInsertBase::PluginPropertyControl::catch_up_with_external_value (double user_val)
+{
+	if (user_val != Control::get_double ()) {
+		PluginPropertyControl::actually_set_value (user_val, Controllable::NoGroup);
+	}
 }
 
 XMLNode&

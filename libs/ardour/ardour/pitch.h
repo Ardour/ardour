@@ -30,8 +30,6 @@ namespace ARDOUR {
 	class AudioRegion;
 }
 
-#ifdef USE_RUBBERBAND
-
 #include "ardour/rb_effect.h"
 
 namespace ARDOUR {
@@ -43,23 +41,3 @@ class LIBARDOUR_API Pitch : public RBEffect {
 };
 
 } /* namespace */
-
-# else
-
-namespace ARDOUR {
-
-class LIBARDOUR_API Pitch : public Filter {
-  public:
-	Pitch (ARDOUR::Session&, TimeFXRequest&);
-	~Pitch () {}
-
-	int run (std::shared_ptr<ARDOUR::Region>, Progress *);
-
-  private:
-	TimeFXRequest& tsr;
-};
-
-} /* namespace */
-
-#endif
-

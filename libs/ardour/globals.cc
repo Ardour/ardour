@@ -37,7 +37,6 @@
 #include <sstream>
 
 #include <sys/stat.h>
-#include <sys/time.h>
 #include <sys/types.h>
 #ifndef PLATFORM_WINDOWS
 #include <sys/resource.h>
@@ -45,7 +44,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <time.h>
-#include <unistd.h>
 
 #include <glib.h>
 #include "pbd/gstdio_compat.h"
@@ -167,6 +165,8 @@ PBD::Signal<bool(std::string, std::string, int)>  ARDOUR::CopyConfigurationFiles
 std::map<std::string, bool> ARDOUR::reserved_io_names;
 
 float ARDOUR::ui_scale_factor = 1.0;
+
+Glib::Threads::Mutex ARDOUR::fft_planner_lock;
 
 static bool have_old_configuration_files = false;
 static bool running_from_gui             = false;
@@ -747,7 +747,7 @@ ARDOUR::init (bool try_optimization, const char* localedir, bool with_gui)
 	 * WaveViewThreads::start_threads adds `min (8, hw - 1)`
 	 *
 	 */
-	BufferManager::init (hardware_concurrency () * 3 + 6);
+	BufferManager::init (PBD::hardware_concurrency () * 3 + 6);
 
 	PannerManager::instance ().discover_panners ();
 

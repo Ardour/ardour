@@ -44,20 +44,63 @@ public:
 	void menu_size_request(Gtk::Requisition*);
 
 	void clear_items ();
-	void AddMenuElem (Gtk::Menu_Helpers::Element e);
+	void add_menu_elem (Gtk::Menu_Helpers::Element e);
+	void append_text_item (std::string const& text);
+	void add_separator ();
+	void append (Glib::RefPtr<Gtk::Action>);
+	void append (Gtk::Menu&, Glib::RefPtr<Gtk::Action>);
 
 	void disable_scrolling();
 
 	Gtk::Menu_Helpers::MenuList& items () { return _menu.items (); }
 	Gtk::Menu& menu () { return _menu; }
 
-	void append_text_item (std::string const& text);
 	void set_active (std::string const& text);
+
+	void set_active (int);
+	int get_active_row_number () const;
 
 protected:
 	void default_text_handler (std::string const&);
 
 private:
+	class LblMenuItem : public Gtk::MenuItem
+	{
+	public:
+		LblMenuItem (std::string const& label, std::string const& menutext)
+			: Gtk::MenuItem (menutext, false)
+			, _label (label)
+		{
+		}
+
+		std::string label () const
+		{
+			return _label;
+		}
+
+		std::string menutext () const
+		{
+			return get_label ();
+		}
+
+	private:
+		std::string _label;
+	};
+
+	class LblMenuElement : public Gtk::Menu_Helpers::MenuElem
+	{
+	public:
+		LblMenuElement (Glib::RefPtr<Gtk::Action> action)
+			: Gtk::Menu_Helpers::MenuElem ("")
+		{
+			LblMenuItem* mmi = manage (new LblMenuItem (action->get_short_label(), action->get_label()));
+			child_->unreference ();
+			set_child (mmi);
+			child_->signal_activate ().connect (sigc::mem_fun (action.get(), &Gtk::Action::activate));
+			child_->show ();
+		}
+	};
+
 	Gtk::Menu      _menu;
 
 	bool _scrolling_disabled;

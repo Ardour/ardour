@@ -40,10 +40,8 @@
 #include <cstdio> /* snprintf(3) ... grrr */
 #include <cmath>
 
-#include <unistd.h>
 #include <climits>
 #include <signal.h>
-#include <sys/time.h>
 /* for open(2) */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -65,6 +63,7 @@
 #include <glib.h>
 #include "pbd/gstdio_compat.h"
 #include "pbd/locale_guard.h"
+#include "pbd/strsplit.h"
 
 #include <glibmm.h>
 #include <glibmm/threads.h>
@@ -185,7 +184,6 @@ Session::pre_engine_init (string fullpath)
 	_playback_load.store (100);
 	_capture_load.store (100);
 	set_next_event ();
-	_all_route_group->set_active (true, this);
 
 	if (config.get_use_video_sync()) {
 		waiting_for_sync_offset = true;
@@ -683,7 +681,7 @@ Session::remove_pending_capture_state ()
 {
 	std::string pending_state_file_path(_session_dir->root_path());
 
-	pending_state_file_path = Glib::build_filename (pending_state_file_path, legalize_for_path (_current_snapshot_name) + pending_suffix);
+	pending_state_file_path = Glib::build_filename (pending_state_file_path, legalize_for_path (_current_snapshot_name + pending_suffix));
 
 	if (!Glib::file_test (pending_state_file_path, Glib::FILE_TEST_EXISTS)) {
 		return;
@@ -712,8 +710,8 @@ Session::rename_state (string old_name, string new_name)
 		return;
 	}
 
-	const string old_xml_filename = legalize_for_path (old_name) + statefile_suffix;
-	const string new_xml_filename = legalize_for_path (new_name) + statefile_suffix;
+	const string old_xml_filename = legalize_for_path (old_name + statefile_suffix);
+	const string new_xml_filename = legalize_for_path (new_name + statefile_suffix);
 
 	const std::string old_xml_path(Glib::build_filename (_session_dir->root_path(), old_xml_filename));
 	const std::string new_xml_path(Glib::build_filename (_session_dir->root_path(), new_xml_filename));
@@ -737,7 +735,7 @@ Session::remove_state (string snapshot_name)
 
 	std::string xml_path(_session_dir->root_path());
 
-	xml_path = Glib::build_filename (xml_path, legalize_for_path (snapshot_name) + statefile_suffix);
+	xml_path = Glib::build_filename (xml_path, legalize_for_path (snapshot_name + statefile_suffix));
 
 	if (!create_backup_file (xml_path)) {
 		// don't remove it if a backup can't be made
@@ -831,6 +829,8 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 
 	PBD::Unwinder<bool> uw (LV2Plugin::force_state_save, for_archive);
 
+	PBD::Unwinder<PBD::UUID> uw2 (_uuid, fork_state != NormalSave ? PBD::UUID () : _uuid);
+
 	SessionSaveUnderway (); /* EMIT SIGNAL */
 
 	bool mark_as_clean = true;
@@ -857,7 +857,7 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 
 		/* proper save: use statefile_suffix (.ardour in English) */
 
-		xml_path = Glib::build_filename (xml_path, legalize_for_path (snapshot_name) + statefile_suffix);
+		xml_path = Glib::build_filename (xml_path, legalize_for_path (snapshot_name + statefile_suffix));
 
 		/* make a backup copy of the old file */
 
@@ -869,11 +869,11 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 	} else {
 		assert (snapshot_name == _current_snapshot_name);
 		/* pending save: use pending_suffix (.pending in English) */
-		xml_path = Glib::build_filename (xml_path, legalize_for_path (snapshot_name) + pending_suffix);
+		xml_path = Glib::build_filename (xml_path, legalize_for_path (snapshot_name + pending_suffix));
 	}
 
 	std::string tmp_path(_session_dir->root_path());
-	tmp_path = Glib::build_filename (tmp_path, legalize_for_path (snapshot_name) + temp_suffix);
+	tmp_path = Glib::build_filename (tmp_path, legalize_for_path (snapshot_name + temp_suffix));
 
 	DEBUG_TRACE (DEBUG::SaveState, string_compose ("writing state to '%1'\n", tmp_path));
 
@@ -979,9 +979,9 @@ Session::load_state (string snapshot_name, bool from_template)
 	/* check for leftover pending state from a crashed capture attempt */
 
 	std::string xmlpath(_session_dir->root_path());
-	xmlpath = Glib::build_filename (xmlpath, legalize_for_path (snapshot_name) + pending_suffix);
+	xmlpath = Glib::build_filename (xmlpath, legalize_for_path (snapshot_name + pending_suffix));
 
-	if (Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
+	if (Glib::file_test (xmlpath, Glib::FILE_TEST_IS_REGULAR)) {
 
 		/* there is pending state from a crashed capture attempt */
 
@@ -997,9 +997,9 @@ Session::load_state (string snapshot_name, bool from_template)
 		xmlpath = Glib::build_filename (_session_dir->root_path(), snapshot_name);
 	}
 
-	if (!Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
-		xmlpath = Glib::build_filename (_session_dir->root_path(), legalize_for_path (snapshot_name) + statefile_suffix);
-		if (!Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
+	if (!Glib::file_test (xmlpath, Glib::FILE_TEST_IS_REGULAR)) {
+		xmlpath = Glib::build_filename (_session_dir->root_path(), legalize_for_path (snapshot_name + statefile_suffix));
+		if (!Glib::file_test (xmlpath, Glib::FILE_TEST_IS_REGULAR)) {
 			error << string_compose(_("%1: session file \"%2\" doesn't exist!"), _name, xmlpath) << endmsg;
 			return 1;
 		}
@@ -1045,7 +1045,7 @@ Session::load_state (string snapshot_name, bool from_template)
 			}
 		}
 
-		std::string backup_filename = string_compose ("%1-%2%3", legalize_for_path (snapshot_name), Stateful::loading_state_version, statefile_suffix);
+		std::string backup_filename = legalize_for_universal_path (string_compose ("%1-%2%3", snapshot_name, Stateful::loading_state_version, statefile_suffix));
 		backup_path = Glib::build_filename (backup_path, backup_filename);
 
 		// only create a backup for a given statefile version once
@@ -1112,10 +1112,10 @@ Session::get_template ()
 typedef std::set<std::shared_ptr<Source> > SourceSet;
 
 bool
-Session::export_track_state (std::shared_ptr<RouteList> rl, const string& path)
+Session::export_route_state (std::shared_ptr<RouteList> rl, const string& path, bool with_sources)
 {
 	if (Glib::file_test (path, Glib::FILE_TEST_EXISTS))  {
-		return false;
+		remove_directory (path);
 	}
 	if (g_mkdir_with_parents (path.c_str(), 0755) != 0) {
 		return false;
@@ -1124,62 +1124,326 @@ Session::export_track_state (std::shared_ptr<RouteList> rl, const string& path)
 	PBD::Unwinder<std::string> uw (_template_state_dir, path);
 
 	LocaleGuard lg;
-	XMLNode* node = new XMLNode("TrackState"); // XXX
+	XMLNode* node = new XMLNode("RouteState");
 	XMLNode* child;
 
-		PlaylistSet playlists; // SessionPlaylists
-		SourceSet sources;
+	node->set_property ("uuid", _uuid.to_s());
 
-	// these will work with  new_route_from_template()
-	// TODO: LV2 plugin-state-dir needs to be relative (on load?)
+	PlaylistSet playlists; // SessionPlaylists
+	SourceSet sources;
+
+	RouteList sorted_rl (*rl);
+	sorted_rl.sort (Stripable::Sorter ());
+
+	/* these will work with  new_route_from_template()
+	 * TODO: LV2 plugin-state-dir needs to be relative (on load?)
+	 */
 	child = node->add_child ("Routes");
-	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		if ((*i)->is_auditioner()) {
+	for (auto const& r: sorted_rl) {
+		if (r->is_auditioner()) {
 			continue;
 		}
-		if ((*i)->is_singleton()) {
+		if (r->is_singleton() && !r->is_master ()) {
 			continue;
 		}
-		child->add_child_nocopy ((*i)->get_state());
-		std::shared_ptr<Track> track = std::dynamic_pointer_cast<Track> (*i);
+		if (r->is_foldbackbus()) {
+			continue;
+		}
+		child->add_child_nocopy (r->get_state());
+		std::shared_ptr<Track> track = std::dynamic_pointer_cast<Track> (r);
 		if (track) {
 			playlists.insert (track->playlist ());
 		}
 	}
 
-	// on load, Regions in the playlists need to resolve and map Source-IDs
-	// also playlist needs to be merged or created with new-name..
-	// ... and Diskstream in tracks adjusted to use the correct playlist
-	child = node->add_child ("Playlists"); // SessionPlaylists::add_state
-	for (PlaylistSet::const_iterator i = playlists.begin(); i != playlists.end(); ++i) {
-		child->add_child_nocopy ((*i)->get_state ());
-		std::shared_ptr<RegionList> prl = (*i)->region_list ();
-		for (RegionList::const_iterator s = prl->begin(); s != prl->end(); ++s) {
-			const Region::SourceList& sl = (*s)->sources ();
-			for (Region::SourceList::const_iterator sli = sl.begin(); sli != sl.end(); ++sli) {
-				sources.insert (*sli);
+	child = node->add_child ("RouteGroups");
+	for (auto const& rg : _route_groups) {
+		child->add_child_nocopy (rg->get_state ());
+	}
+
+	if (with_sources) {
+		/* on load, Regions in the playlists need to resolve and map Source-IDs
+		 * also playlist needs to be merged or created with new-name..
+		 * ... and Diskstream in tracks adjusted to use the correct playlist
+		 */
+		child = node->add_child ("Playlists"); // SessionPlaylists::add_state
+		for (PlaylistSet::const_iterator i = playlists.begin(); i != playlists.end(); ++i) {
+			child->add_child_nocopy ((*i)->get_state ());
+			std::shared_ptr<RegionList> prl = (*i)->region_list ();
+			for (RegionList::const_iterator s = prl->begin(); s != prl->end(); ++s) {
+				const Region::SourceList& sl = (*s)->sources ();
+				for (Region::SourceList::const_iterator sli = sl.begin(); sli != sl.end(); ++sli) {
+					sources.insert (*sli);
+				}
+			}
+		}
+
+		child = node->add_child ("Sources");
+		for (SourceSet::const_iterator i = sources.begin(); i != sources.end(); ++i) {
+			child->add_child_nocopy ((*i)->get_state ());
+			std::shared_ptr<FileSource> fs = std::dynamic_pointer_cast<FileSource> (*i);
+			if (fs) {
+#ifdef PLATFORM_WINDOWS
+				fs->close ();
+#endif
+				string p = fs->path ();
+				PBD::copy_file (p, Glib::build_filename (path, Glib::path_get_basename (p)));
 			}
 		}
 	}
 
-	child = node->add_child ("Sources");
-	for (SourceSet::const_iterator i = sources.begin(); i != sources.end(); ++i) {
-		child->add_child_nocopy ((*i)->get_state ());
-		std::shared_ptr<FileSource> fs = std::dynamic_pointer_cast<FileSource> (*i);
-		if (fs) {
-#ifdef PLATFORM_WINDOWS
-			fs->close ();
-#endif
-			string p = fs->path ();
-			PBD::copy_file (p, Glib::build_filename (path, Glib::path_get_basename (p)));
-		}
-	}
-
-	std::string sn = Glib::build_filename (path, "share.axml");
+	std::string sn = Glib::build_filename (path, PBD::basename_nosuffix (path) + routestate_suffix);
 
 	XMLTree tree;
 	tree.set_root (node);
 	return tree.write (sn.c_str());
+}
+
+static bool
+allow_import_route_state (PresentationInfo const& pi)
+{
+	if (pi.special (false)) { // |SurroundMaster|MonitorOut|Auditioner
+		return false;
+	}
+
+	if (pi.flags() & (PresentationInfo::FoldbackBus | PresentationInfo::VBMAny)) {
+		return false;
+	}
+	return true;
+}
+
+static bool
+allow_import_route_state (XMLNode const& node, int version)
+{
+	XMLNode* pnode = node.child (PresentationInfo::state_node_name.c_str ());
+	if (!pnode) {
+		return false;
+	}
+
+	PresentationInfo pi (PresentationInfo::Flag (0));
+	pi.set_state (*pnode, version);
+
+	return allow_import_route_state (pi);
+}
+
+std::map<PBD::ID, Session::RouteImportInfo>
+Session::parse_route_state (const string& path, bool& match_pbd_id)
+{
+	std::map<PBD::ID, RouteImportInfo> rv;
+
+	XMLTree tree;
+	if (!tree.read (path)) {
+		error << string_compose (_("Could not understand state file \"%1\""), path) << endmsg;
+		return rv;
+	}
+	if (tree.root()->name() != X_("RouteState") && tree.root()->name() != X_("Session")) {
+		return rv;
+	}
+
+	XMLProperty const* prop;
+	if ((prop = tree.root()->property ("uuid")) && _uuid == PBD::UUID (prop->value())) {
+		match_pbd_id = true;
+	} else {
+		match_pbd_id = false;
+	}
+
+	XMLNode* xroutes = tree.root()->child ("Routes");
+	if (xroutes) {
+		/* foreach route .. */
+		for (auto const rxml : xroutes->children()) {
+			int version = 0;
+			if (!rxml->get_property ("version", version)) {
+				continue;
+			}
+			PBD::ID id;
+			if (!rxml->get_property ("id", id)) {
+				continue;
+			}
+			std::string name;
+			if (!rxml->get_property ("name", name)) {
+				continue;
+			}
+
+			XMLNode* pnode = rxml->child (PresentationInfo::state_node_name.c_str ());
+			if (!pnode) {
+				continue;
+			}
+
+			PresentationInfo pi (PresentationInfo::Flag (0));
+			pi.set_state (*pnode, version);
+
+			if (!allow_import_route_state (pi)) {
+				continue;
+			}
+
+			rv.emplace (id, RouteImportInfo (name, pi, 0));
+		}
+	}
+	return rv;
+}
+
+int
+Session::import_route_state (const string& path, std::map<PBD::ID, PBD::ID> const& idmap, RouteGroupImportMode rgim)
+{
+	/* idmap:  <local route ID : extern/XML route ID>
+	 * a given route may only be set to the state of one extern ID,
+	 * but extern state can be applied to multiple routes (or create new ones)
+	 */
+	XMLTree tree;
+	if (!tree.read (path)) {
+		error << string_compose (_("Could not understand state file \"%1\""),_path) << endmsg;
+		return -1;
+	}
+	if (tree.root()->name() != X_("RouteState") && tree.root()->name() != X_("Session")) { // XXX
+		return -2;
+	}
+
+	int version = 0;
+
+	/* session has a global property */
+	tree.root()->get_property ("version", version);
+
+	bool from_this_session;
+	XMLProperty const* prop;
+	if ((prop = tree.root()->property ("uuid")) && _uuid == PBD::UUID (prop->value())) {
+		from_this_session = true;
+	} else {
+		from_this_session = false;
+	}
+
+	std::map<PBD::ID, std::string> route_groupname;
+
+	XMLNode* xgroups = tree.root()->child ("RouteGroups");
+	if (xgroups) {
+		for (auto const& rgxml : xgroups->children()) {
+			/* see also Session::load_route_groups */
+			if (rgxml->name() != "RouteGroup") {
+				continue;
+			}
+			std::string name;
+			if (!rgxml->get_property ("name", name)) {
+				continue;
+			}
+			/* see also RouteGroup::set_state */
+			std::string routes;
+			if (rgxml->get_property ("routes", routes)) {
+				stringstream str (routes);
+				vector<string> ids;
+				split (str.str(), ids, ' ');
+				for (auto const& i : ids) {
+					PBD::ID id (i);
+					route_groupname[id] = name;
+				}
+			}
+		}
+	}
+
+	XMLNode* xroutes = tree.root()->child ("Routes");
+
+	std::vector<std::pair<PBD::ID, PresentationInfo::order_t>> new_track_order;
+
+	if (xroutes) {
+		/* foreach route .. */
+		for (auto const rxml : xroutes->children()) {
+			/* track-state includes version per route */
+			if (!rxml->get_property ("version", version) || version == 0) {
+				continue;
+			}
+			PBD::ID id;
+			if (!rxml->get_property ("id", id)) {
+				continue;
+			}
+			for (auto [dst, src] : idmap) {
+				if (src != id) {
+					continue;
+				}
+
+				XMLNode* pnode = rxml->child (PresentationInfo::state_node_name.c_str ());
+				PresentationInfo pi (PresentationInfo::Flag (0));
+				pi.set_state (*pnode, version);
+
+				std::shared_ptr<Route> r = route_by_id (dst);
+
+				/* note: audtioner, monitor-out, etc are skipped in `allow_import_route_state` */
+#ifdef MIXBUS
+				static const int special_pi = PresentationInfo::Mixbus | PresentationInfo::VBMAny | PresentationInfo::MasterOut;
+#else
+				static const int special_pi = PresentationInfo::Mixbus | PresentationInfo::VBMAny;
+#endif
+
+				/* special case, new track from special routes */
+				if (!r && 0 != (pi.flags () & special_pi)) {
+					auto rl = new_audio_track (1, 2, 0, 1, "", PresentationInfo::max_order, Normal, true, false);
+					assert (rl.size () < 2);
+					if (rl.size () > 0) {
+						r = rl.front ();
+						new_track_order.push_back (make_pair (r->id(), pi.order()));
+					}
+				}
+
+				if (r) {
+					r->import_state (*rxml, from_this_session);
+				} else if (allow_import_route_state (*rxml, version)) {
+					/* invalid ID (e.g. 0, -1 (int64_t max) -> new track */
+					if (pi.flags () & special_pi) {
+						continue;
+					}
+					pi.set_flags (PresentationInfo::Flag (pi.flags () & (PresentationInfo::AudioTrack | PresentationInfo::MidiTrack | PresentationInfo::AudioBus | PresentationInfo::MidiBus)));
+
+					XMLNode copy (*rxml);
+					copy.remove_nodes_and_delete ("PresentationInfo"); // "Master"
+					copy.add_child_nocopy (pi.get_state());
+
+					RouteList rl = new_route_from_template (1, PresentationInfo::max_order, copy, "", NewPlaylist);
+					assert (rl.size () < 2);
+					if (rl.size () > 0) {
+						r = rl.front ();
+						new_track_order.push_back (make_pair (r->id(), pi.order()));
+					}
+				}
+				/* set route-group */
+				if (r && route_groupname.find (src) != route_groupname.end ()) {
+					std::shared_ptr<RouteGroup> rg;
+					switch (rgim) {
+						case IgnoreRouteGroup:
+							break;
+						case UseRouteGroup:
+							rg = route_group_by_name (route_groupname[src]);
+							break;
+						case CreateRouteGroup:
+							rg = new_route_group (route_groupname[src]);
+							add_route_group (rg);
+							break;
+					}
+					if (rg) {
+						rg->add (r);
+					}
+				}
+			}
+		}
+	}
+
+	if (!new_track_order.empty ()) {
+		std::sort (new_track_order.begin (), new_track_order.end (), [=] (auto& a, auto& b) { return a.second < b.second; });
+
+		/* sort all after the end, and then rely on
+		 * ensure_stripable_sort_order () to pull them back.
+		 *
+		 * Otherwise two routes may temporarily have the same order-id
+		 * and since signals are not blocked, the GUI may sync* callbacks
+		 * may interfere.
+		 */
+		uint32_t n_routes = routes.reader()->size ();
+		uint32_t added = 0;
+
+		for (auto const& [rid, _] : new_track_order) {
+			std::shared_ptr<Route> r = route_by_id (rid);
+			r->set_presentation_order (n_routes + added++);
+		}
+		ensure_stripable_sort_order ();
+	}
+
+	return 0;
 }
 
 static void
@@ -1235,9 +1499,13 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 
 	if (!save_template) {
 
+		node->set_property ("uuid", _uuid.to_s());
 		node->set_property ("name", _name);
 		node->set_property ("sample-rate", _base_sample_rate);
 
+		if (!_engine_state) {
+			_engine_state = new XMLNode (X_("EngineState"));
+		}
 		/* store the last engine device we we can avoid autostarting on a different device with wrong i/o count */
 		std::shared_ptr<AudioBackend> backend = _engine.current_backend();
 		if (!for_archive && _engine.running () && backend && _engine.setup_required ()) {
@@ -1250,7 +1518,21 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 				child->set_property ("input-device", backend->device_name ());
 				child->set_property ("output-device", backend->device_name ());
 			}
+			/* store port-engine external connections */
+			XMLNode* backend_state = backend->get_state();
+			if (backend_state) {
+				XMLNode* engine_state = new XMLNode (X_("EngineState"));
+				for (auto const& s : _engine_state->children ()) {
+					if (!backend->match_state (*s, CURRENT_SESSION_FILE_VERSION)) {
+						engine_state->add_child_copy (*s);
+					}
+				}
+				engine_state->add_child_nocopy (*backend_state);
+				delete _engine_state;
+				_engine_state = engine_state;
+			}
 		}
+		node->add_child_copy (*_engine_state);
 
 		if (session_dirs.size() > 1) {
 
@@ -1542,8 +1824,8 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 	_playlists->add_state (node, save_template, !only_used_assets);
 
 	child = node->add_child ("RouteGroups");
-	for (list<RouteGroup *>::const_iterator i = _route_groups.begin(); i != _route_groups.end(); ++i) {
-		child->add_child_nocopy ((*i)->get_state());
+	for (auto const & rg : _route_groups) {
+		child->add_child_nocopy (rg->get_state());
 	}
 
 	if (_click_io) {
@@ -1794,12 +2076,19 @@ Session::set_state (const XMLNode& node, int version)
 	if ((child = find_named_node (node, "ProgramVersion")) != 0) {
 		child->get_property (X_("created-with"), created_with);
 
- 		child->get_property (X_("modified-with"), modified_with);
+		child->get_property (X_("modified-with"), modified_with);
 #if 0
 		if (modified_with.rfind (PROGRAM_NAME, 0) != 0) {
 			throw WrongProgram (modified_with);
 		}
 #endif
+	}
+
+	{
+		std::string str;
+		if (node.get_property ("uuid", str)) {
+			_uuid = str;
+		}
 	}
 
 	setup_raid_path(_session_dir->root_path());
@@ -1844,6 +2133,16 @@ Session::set_state (const XMLNode& node, int version)
 
 	if ((child = find_named_node (node, "MIDIPorts")) != 0) {
 		_midi_ports->set_midi_port_states (child->children());
+	}
+
+	if ((child = find_named_node (node, "EngineState")) != 0) {
+		_engine_state = new XMLNode (*child);
+		if (Config->get_restore_hardware_connections ()) {
+			std::shared_ptr<AudioBackend> backend = _engine.current_backend();
+			for (auto const& s: _engine_state->children ()) {
+				backend->set_state (*s, version);
+			}
+		}
 	}
 
 	Stateful::save_extra_xml (node);
@@ -2892,10 +3191,15 @@ Session::save_template (const string& template_name, const string& description, 
 		template_dir_path = template_name;
 	}
 
-	if (!replace_existing && Glib::file_test (template_dir_path, Glib::FILE_TEST_EXISTS)) {
-		warning << string_compose(_("Template \"%1\" already exists - new version not created"),
-		                          template_dir_path) << endmsg;
-		return -2;
+	if (Glib::file_test (template_dir_path, Glib::FILE_TEST_EXISTS)) {
+		if (replace_existing) {
+			/* clean out old plugin state, etc */
+			remove_directory (template_dir_path);
+		} else {
+			warning << string_compose(_("Template \"%1\" already exists - new version not created"),
+			                          template_dir_path) << endmsg;
+			return -2;
+		}
 	}
 
 	if (g_mkdir_with_parents (template_dir_path.c_str(), 0755) != 0) {
@@ -3202,7 +3506,7 @@ Session::load_route_groups (const XMLNode& node, int version)
 
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 			if ((*niter)->name() == "RouteGroup") {
-				RouteGroup* rg = new RouteGroup (*this, "");
+				std::shared_ptr<RouteGroup> rg (new RouteGroup (*this, ""));
 				add_route_group (rg);
 				rg->set_state (**niter, version);
 			}
@@ -3212,7 +3516,7 @@ Session::load_route_groups (const XMLNode& node, int version)
 
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 			if ((*niter)->name() == "EditGroup" || (*niter)->name() == "MixGroup") {
-				RouteGroup* rg = new RouteGroup (*this, "");
+				std::shared_ptr<RouteGroup> rg (new RouteGroup (*this, ""));
 				add_route_group (rg);
 				rg->set_state (**niter, version);
 			}
@@ -3267,47 +3571,61 @@ Session::possible_states () const
 	return possible_states(_path);
 }
 
-RouteGroup*
+std::shared_ptr<RouteGroup>
 Session::new_route_group (const std::string& name)
 {
-	RouteGroup* rg = NULL;
+	std::shared_ptr<RouteGroup> rg;
 
-	for (std::list<RouteGroup*>::const_iterator i = _route_groups.begin (); i != _route_groups.end (); ++i) {
-		if ((*i)->name () == name) {
-			rg = *i;
+	for (auto const & grp : _route_groups) {
+		if (grp->name () == name) {
+			rg = grp;
 			break;
 		}
 	}
 
 	if (!rg) {
-		rg = new RouteGroup (*this, name);
-		add_route_group (rg);
+		rg.reset (new RouteGroup (*this, name));
 	}
-	return (rg);
+
+	return rg;
 }
 
 void
-Session::add_route_group (RouteGroup* g)
+Session::add_route_group (std::shared_ptr<RouteGroup> g)
 {
 	_route_groups.push_back (g);
 	route_group_added (g); /* EMIT SIGNAL */
 
 	g->RouteAdded.connect_same_thread (*this, std::bind (&Session::route_added_to_route_group, this, _1, _2));
-	g->RouteRemoved.connect_same_thread (*this, std::bind (&Session::route_removed_from_route_group, this, _1, _2));
-	g->PropertyChanged.connect_same_thread (*this, std::bind (&Session::route_group_property_changed, this, g));
+
+
+	/* Cannot bind std::shared_ptr<> to a signal connection because of lifetime issues */
+	std::weak_ptr<RouteGroup> wrg (g);
+	g->PropertyChanged.connect_same_thread (*this, std::bind (&Session::route_group_property_changed, this, wrg));
 
 	set_dirty ();
 }
 
 void
-Session::remove_route_group (RouteGroup& rg)
+Session::remove_route_group (std::shared_ptr<RouteGroup> rg)
 {
-	list<RouteGroup*>::iterator i;
+	if (!rg) {
+		return;
+	}
 
-	if ((i = find (_route_groups.begin(), _route_groups.end(), &rg)) != _route_groups.end()) {
+	rg->clear ();
+
+	/* by the magic of reference counting, rg will now be deleted */
+}
+
+void
+Session::route_group_emptied (std::shared_ptr<RouteGroup> rg)
+{
+	list<std::shared_ptr<RouteGroup>>::iterator i;
+
+	if ((i = find (_route_groups.begin(), _route_groups.end(), rg)) != _route_groups.end()) {
 		_route_groups.erase (i);
-		delete &rg;
-
+		rg->drop_references ();
 		route_group_removed (); /* EMIT SIGNAL */
 	}
 }
@@ -3316,7 +3634,7 @@ Session::remove_route_group (RouteGroup& rg)
  *  @param groups Route group list in the new order.
  */
 void
-Session::reorder_route_groups (list<RouteGroup*> groups)
+Session::reorder_route_groups (RouteGroupList groups)
 {
 	_route_groups = groups;
 
@@ -3325,23 +3643,15 @@ Session::reorder_route_groups (list<RouteGroup*> groups)
 }
 
 
-RouteGroup *
+std::shared_ptr<RouteGroup>
 Session::route_group_by_name (string name)
 {
-	list<RouteGroup *>::iterator i;
-
-	for (i = _route_groups.begin(); i != _route_groups.end(); ++i) {
-		if ((*i)->name() == name) {
-			return* i;
+	for (auto & rg : _route_groups) {
+		if (rg->name() == name) {
+			return rg;
 		}
 	}
 	return 0;
-}
-
-RouteGroup&
-Session::all_route_group() const
-{
-	return *_all_route_group;
 }
 
 static bool
@@ -4068,7 +4378,7 @@ Session::save_history (string snapshot_name)
 		snapshot_name = _current_snapshot_name;
 	}
 
-	const string history_filename = legalize_for_path (snapshot_name) + history_suffix;
+	const string history_filename = legalize_for_path (snapshot_name + history_suffix);
 	const string backup_filename = history_filename + backup_suffix;
 	const std::string xml_path(Glib::build_filename (_session_dir->root_path(), history_filename));
 	const std::string backup_path(Glib::build_filename (_session_dir->root_path(), backup_filename));
@@ -4115,7 +4425,7 @@ Session::restore_history (string snapshot_name)
 		snapshot_name = _current_snapshot_name;
 	}
 
-	const std::string xml_filename = legalize_for_path (snapshot_name) + history_suffix;
+	const std::string xml_filename = legalize_for_path (snapshot_name + history_suffix);
 	const std::string xml_path(Glib::build_filename (_session_dir->root_path(), xml_filename));
 
 	info << "Loading history from " << xml_path << endmsg;

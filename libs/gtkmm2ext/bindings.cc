@@ -373,19 +373,20 @@ KeyboardKey::make_key (const string& str, KeyboardKey& k)
 
 /*================================= Bindings =================================*/
 Bindings::Bindings (std::string const& name)
-	: _name (name)
+	: _parent (nullptr)
+	, _name (name)
 {
 	bindings.push_back (this);
 }
 
-Bindings::Bindings (std::string const & name, Bindings const & other)
-	: _name (name)
-	, press_bindings (other.press_bindings)
-	, release_bindings (other.release_bindings)
-	, button_press_bindings (other.button_press_bindings)
-	, button_release_bindings (other.button_release_bindings)
+Bindings::Bindings (std::string const & name, Bindings & other)
+	: _parent (&other)
+	, _name (name)
 {
-	relativize ();
+	copy_from_parent (false);
+
+	BindingsChanged.connect_same_thread (bc, std::bind (&Bindings::parent_changed, this, _1));
+
 	bindings.push_back (this);
 }
 
@@ -550,13 +551,8 @@ Bindings::relativize ()
 }
 
 void
-Bindings::associate ()
+Bindings::associate (bool force)
 {
-#warning find a better solution than this
-	if (_name == "Editing" || _name == "MIDI") {
-		return;
-	}
-
 	KeybindingMap::iterator k;
 
 	for (k = press_bindings.begin(); k != press_bindings.end(); ++k) {
@@ -593,6 +589,55 @@ Bindings::dissociate ()
 	for (k = release_bindings.begin(); k != release_bindings.end(); ++k) {
 		k->second.action.clear ();
 	}
+}
+
+void
+Bindings::copy_from_parent (bool assoc)
+{
+	assert (_parent);
+	press_bindings.clear ();
+	release_bindings.clear ();
+
+	_parent->clone_press (press_bindings);
+	_parent->clone_release (release_bindings);
+
+	dissociate ();
+	relativize ();
+
+	if (assoc) {
+		associate (true);
+	}
+}
+
+void
+Bindings::parent_changed (Bindings* changed)
+{
+	if (_parent != changed) {
+		return;
+	}
+
+	press_bindings.clear();
+	release_bindings.clear();
+
+	copy_from_parent (true);
+}
+
+void
+Bindings::clone_press (KeybindingMap& target) const
+{
+	clone_kbd_bindings (press_bindings, target);
+}
+
+void
+Bindings::clone_release (KeybindingMap& target) const
+{
+	clone_kbd_bindings (release_bindings, target);
+}
+
+void
+Bindings::clone_kbd_bindings (KeybindingMap const & src, KeybindingMap& target) const
+{
+	target = src;
 }
 
 void
@@ -810,15 +855,21 @@ Bindings::save_all_bindings_as_html (ostream& ostr)
 		return;
 	}
 
-
+	ostr << "<!DOCTYPE html>\n";
 	ostr << "<html>\n<head>\n<title>";
 	ostr << PROGRAM_NAME;
 	ostr << "</title>\n";
 	ostr << "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n";
+	ostr << "<style>\n";
+	ostr << "  table { border: 2px outset gray; line-height: 0.8em; box-sizing: border-box; }\n";
+	ostr << "  h2 { margin: 1em 0; }\n";
+	ostr << "  td, th { padding: 6px; border: 1px inset; }\n";
+	ostr << "  span { font-family:monospace; margin: 0px; }\n";
+	ostr << "</style>\n";
 
 	ostr << "</head>\n<body>\n";
 
-	ostr << "<table border=\"2\" cellpadding=\"6\"><tbody>\n\n";
+	ostr << "<table><tbody>\n\n";
 	ostr << "<tr>\n\n";
 
 	/* first column: separate by group */
@@ -839,7 +890,8 @@ Bindings::save_all_bindings_as_html (ostream& ostr)
 	ostr << "</tr>\n\n";
 	ostr << "</tbody></table>\n\n";
 
-	ostr << "</br></br>\n\n";
+	ostr << "<br/>\n\n";
+	ostr << "<div style=\"page-break-before: always;\"></div>\n\n";
 	ostr << "<table border=\"2\" cellpadding=\"6\"><tbody>\n\n";
 	ostr << "<tr>\n\n";
 	ostr << "<td>\n\n";
@@ -860,9 +912,9 @@ Bindings::save_all_bindings_as_html (ostream& ostr)
 		for (p = paths.begin(), k = keys.begin(), l = labels.begin(); p != paths.end(); ++k, ++p, ++l) {
 
 			if ((*k).empty()) {
-				ostr << *p  << " ( " << *l << " ) "  << "</br>" << endl;
+				ostr << *p  << " ( " << *l << " ) "  << "<br/>" << endl;
 			} else {
-				ostr << *p << " ( " << *l << " ) " << " => " << *k << "</br>" << endl;
+				ostr << *p << " ( " << *l << " ) " << " => " << *k << "<br/>" << endl;
 			}
 		}
 	}
@@ -975,8 +1027,8 @@ Bindings::save_as_html (ostream& ostr, bool categorize) const
 				while (key_name.length()<28)
 					key_name.append("-");
 
-				ostr << "<span style=\"font-family:monospace;\">" << key_name;
-				ostr << "<i>" << action->get_label() << "</i></span></br>\n";
+				ostr << "<span>" << key_name;
+				ostr << "<i>" << action->get_label() << "</i></span><br/>\n";
 			}
 			ostr << "\n\n";
 

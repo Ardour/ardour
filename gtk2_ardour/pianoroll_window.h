@@ -40,6 +40,7 @@ public:
 	void set (std::shared_ptr<ARDOUR::MidiTrack>, std::shared_ptr<ARDOUR::MidiRegion>);
 	bool on_key_press_event (GdkEventKey*);
 	bool on_delete_event (GdkEventAny*);
+	void set_show_source (bool);
 
 private:
 	Gtk::HBox     hpacker;

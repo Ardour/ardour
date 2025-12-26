@@ -29,8 +29,6 @@
 #include <memory>
 #include <string>
 
-#include <unistd.h>
-
 #include <glibmm/main.h>
 
 #include "midi++/mmc.h"
@@ -817,7 +815,7 @@ Session::rewire_selected_midi (std::shared_ptr<MidiTrack> new_midi_target)
 			/* connect it to the new target */
 			new_midi_target->input()->connect (new_midi_target->input()->nth(0), (*p), this);
 			/* and grouped tracks */
-			RouteGroup* group = new_midi_target->route_group ();
+			std::shared_ptr<RouteGroup> group = new_midi_target->route_group ();
 			if (group && group->is_active () && group->is_select ()) {
 				for (auto const& r : *group->route_list ()) {
 					if (dynamic_pointer_cast<MidiTrack> (r)) {
@@ -861,7 +859,7 @@ Session::rewire_midi_selection_ports ()
 		disconnect_port_for_rewire (*p);
 		target->input()->connect (target->input()->nth (0), (*p), this);
 
-		RouteGroup* group = target->route_group ();
+		std::shared_ptr<RouteGroup> group = target->route_group ();
 		if (group && group->is_active () && group->is_select ()) {
 			for (auto const& r : *group->route_list ()) {
 				if (dynamic_pointer_cast<MidiTrack> (r)) {

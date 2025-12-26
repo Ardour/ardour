@@ -53,6 +53,8 @@
 #include "keyboard.h"
 #include "keyeditor.h"
 #include "rc_option_editor.h"
+#include "region_editor.h"
+#include "rta_manager.h"
 #include "route_params_ui.h"
 #include "trigger_ui.h"
 #include "step_entry.h"
@@ -86,7 +88,7 @@ ARDOUR_UI::we_have_dependents ()
 	mixer->monitor_section().use_others_actions ();
 
 	StepEntry::setup_actions_and_bindings ();
-	ClipEditorBox::init ();
+	RegionEditor::setup_actions_and_bindings ();
 
 	setup_action_tooltips ();
 
@@ -132,6 +134,8 @@ ARDOUR_UI::connect_dependents_to_session (ARDOUR::Session *s)
 	recorder->set_session (s);
 	trigger_page->set_session (s);
 	meterbridge->set_session (s);
+
+	RTAManager::instance ()->set_session (s);
 
 	/* its safe to do this now */
 
@@ -210,7 +214,7 @@ ARDOUR_UI::idle_ask_about_quit ()
 		                         Gtk::BUTTONS_YES_NO,
 		                         true); /* modal */
 		msg.set_default_response (Gtk::RESPONSE_YES);
-		msg.set_position (WIN_POS_MOUSE);
+		msg.set_position (UIConfiguration::instance().get_default_window_position());
 
 		if (msg.run () == Gtk::RESPONSE_YES) {
 			finish ();

@@ -35,12 +35,37 @@
 
 #include "pbd/cpus.h"
 
-#if defined(COMPILER_MSVC) && !defined(PTW32_VERSION)
-#include <ardourext/pthread.h>  // Gets us 'PTW32_VERSION'
+#if defined(COMPILER_MSVC) && !defined(__PTW32_VERSION)
+#ifndef WAF_BUILD
+#include <ardourext/pthread.h>  // Gets us '__PTW32_VERSION'
+#else
+#include <pthread.h>
+#endif
 #endif
 
+int32_t
+PBD::max_mmcss_threads_per_process ()
+{
+#ifdef PLATFORM_WINDOWS
+	DWORD dwType = REG_DWORD;
+	DWORD dwSize = 4;
+	int32_t rv   = 32;
+	HKEY hKey;
+	if (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Software\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile", 0, KEY_READ, &hKey)) {
+		if (ERROR_SUCCESS == RegQueryValueExA (hKey, "MaxThreadsPerProcess", 0, &dwType, (LPBYTE)&rv, &dwSize)) {
+			if (dwType == REG_DWORD && dwSize == 4) {
+				return rv;
+			}
+		}
+	}
+	return 32;
+#else
+	return INT32_MAX;
+#endif
+}
+
 uint32_t
-hardware_concurrency()
+PBD::hardware_concurrency()
 {
 	if (getenv("ARDOUR_CONCURRENCY")) {
 		int c = atoi (getenv("ARDOUR_CONCURRENCY"));
@@ -48,28 +73,28 @@ hardware_concurrency()
 			return c;
 		}
 	}
-#if defined(PTW32_VERSION) || defined(__hpux)
+#if defined(__PTW32_VERSION) || defined(__hpux)
 	return pthread_num_processors_np();
 #elif defined(__APPLE__)
 	int count;
 	size_t size=sizeof(count);
 # ifdef MIXBUS
-	return sysctlbyname("hw.logicalcpu",&count,&size,NULL,0)?0:count;
+	return sysctlbyname ("hw.logicalcpu", &count, &size, NULL, 0) ? 1 : count;
 # else
-	return sysctlbyname("hw.physicalcpu",&count,&size,NULL,0)?0:count;
+	return sysctlbyname ("hw.physicalcpu", &count, &size, NULL, 0) ? 1 :count;
 # endif
 #elif defined(__FreeBSD__)
 	int count;
 	size_t size=sizeof(count);
-	return sysctlbyname("hw.ncpu",&count,&size,NULL,0)?0:count;
-#elif defined(HAVE_UNISTD) && defined(_SC_NPROCESSORS_ONLN)
-	int const count=sysconf(_SC_NPROCESSORS_ONLN);
-	return (count>0)?count:0;
+	return sysctlbyname ("hw.ncpu", &count, &size, NULL, 0) ? 1 : count;
+#elif defined(HAVE_UNISTD_H) && defined(_SC_NPROCESSORS_ONLN)
+	int const count = sysconf (_SC_NPROCESSORS_ONLN);
+	return count > 1 ? count : 1;
 #elif defined(PLATFORM_WINDOWS)
 	SYSTEM_INFO sys_info;
-	GetSystemInfo( &sys_info );
+	GetSystemInfo (&sys_info);
 	return sys_info.dwNumberOfProcessors;
 #else
-	return 0;
+	return 1;
 #endif
 }

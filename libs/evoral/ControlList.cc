@@ -1213,6 +1213,23 @@ ControlList::shift (timepos_t const& time, timecnt_t const& distance)
 	maybe_signal_changed ();
 }
 
+/* Note: timepos_t is used here instead of timecnt_t because there's an
+ * implicit origin for the magnitude of the distance.
+ */
+void
+ControlList::simple_shift (timepos_t const & distance)
+{
+	{
+		Glib::Threads::RWLock::WriterLock lm (_lock);
+		for (auto & e : _events) {
+			e->when = e->when + distance;
+		}
+
+		mark_dirty ();
+	}
+	maybe_signal_changed ();
+}
+
 void
 ControlList::modify (iterator iter, timepos_t const& time, double val)
 {
@@ -1866,20 +1883,33 @@ ControlList::rt_safe_earliest_event_linear_unlocked (Temporal::timepos_t const& 
 	}
 
 	/* This method is ONLY used for interpolating to generate value/time
-	 * duples not present in the actual ControlList, and because of this,
-	 * the desired time domain is always audio time.
+	 * duples not present in the actual ControlList
 	 */
 
-	double       a     = first->when.superclocks ();
-	double       b     = next->when.superclocks ();
-	const double slope = (b - a) / (next->value - first->value);
-	assert (slope != 0);
+	double slope;
 
-	double t  = start_time.superclocks ();
-	double dt = fmod (t, fabs (slope));
-	t += fabs (slope) - dt;
-	x = timecnt_t::from_superclock (t + 1);
-	y = rint (first->value + (t - a) / slope);
+	if (time_domain() == Temporal::AudioTime) {
+		double       a     = first->when.superclocks ();
+		double       b     = next->when.superclocks ();
+		slope = (b - a) / (next->value - first->value);
+		assert (slope != 0);
+		double t  = start_time.superclocks ();
+		double dt = fmod (t, fabs (slope));
+		t += fabs (slope) - dt;
+		x = timecnt_t::from_superclock (t + 1);
+		y = rint (first->value + (t - a) / slope);
+	} else {
+		double       a     = first->when.beats().to_ticks();
+		double       b     = next->when.beats().to_ticks();
+		slope = (b - a) / (next->value - first->value);
+		assert (slope != 0);
+		double t  = start_time.beats ().to_ticks();
+		double dt = fmod (t, fabs (slope));
+		t += fabs (slope) - dt;
+		x = timecnt_t::from_ticks (t + 1);
+		y = rint (first->value + (t - a) / slope);
+	}
+
 	if (slope > 0) {
 		y = std::max (first->value, std::min (next->value, y));
 	} else {
@@ -2318,6 +2348,17 @@ ControlList::dump (ostream& o)
 	for (auto const & e : _events) {
 		o << e->value << " @ " << e->when << endl;
 	}
+}
+
+bool
+ControlList::has_event_at (Temporal::timepos_t const & pos) const
+{
+	const ControlEvent fake (pos, 0.);
+	EventList::const_iterator i = std::lower_bound (_events.begin(), _events.end(), &fake, time_comparator);
+	if ((i == _events.end()) || ((*i)->when != pos)) {
+			return false;
+	}
+	return true;
 }
 
 } // namespace Evoral

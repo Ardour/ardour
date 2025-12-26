@@ -87,7 +87,7 @@ VelocityDisplay::line_draw_motion (ArdourCanvas::Duple const & d, ArdourCanvas::
 	std::vector<GhostEvent*> affected_lollis;
 
 	if (last_x < 0) {
-		lollis_close_to_x (d.x, 20., affected_lollis);
+		lollis_close_to_x (d.x, 10., affected_lollis);
 	} else if (last_x < d.x) {
 		/* rightward, "later" motion */
 		lollis_between (last_x, d.x, affected_lollis);
@@ -327,9 +327,9 @@ VelocityDisplay::drag_lolli (ArdourCanvas::Lollipop* l, GdkEventMotion* ev)
 		snprintf (buf, sizeof (buf), "Velocity %d (%d)", verbose_velocity, verbose_velocity - oldvel);
 	}
 
-	editing_context.verbose_cursor()->set (buf);
-	editing_context.verbose_cursor()->show ();
-	editing_context.verbose_cursor()->set_offset (ArdourCanvas::Duple (10., 10.));
+	editing_context.verbose_cursor().set (buf);
+	editing_context.verbose_cursor().show ();
+	editing_context.verbose_cursor().set_offset (ArdourCanvas::Duple (10., 10.));
 }
 
 int

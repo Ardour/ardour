@@ -27,7 +27,6 @@
 #include <algorithm>
 #include <set>
 #include <cstdio> /* for sprintf */
-#include <unistd.h>
 #include <cerrno>
 #include <ctime>
 #include <list>

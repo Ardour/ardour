@@ -274,9 +274,23 @@ set_region_gain (aafiAudioClip* aafAudioClip, std::shared_ptr<Region> region, Se
 		std::shared_ptr<AudioRegion>    ar    = std::dynamic_pointer_cast<AudioRegion> (region);
 		std::shared_ptr<AutomationList> al    = ar->envelope ();
 
-		for (unsigned int i = 0; i < level->pts_cnt; ++i) {
-			al->fast_simple_add (timepos_t (aafRationalToFloat (level->time[i]) * region->length ().samples ()), aafRationalToFloat (level->value[i]));
+		assert (level->pts_cnt > 0);
+
+		al->freeze ();
+		al->clear ();
+		if (aafRationalToFloat (level->time[0]) > 0.) {
+			/* add initial point */
+			al->add (timepos_t (timepos_t (Temporal::AudioTime)), aafRationalToFloat (level->value[0]), false, false);
 		}
+		for (unsigned int i = 0; i < level->pts_cnt; ++i) {
+			al->add (timepos_t (aafRationalToFloat (level->time[i]) * region->length ().samples ()), aafRationalToFloat (level->value[i]), false, false);
+		}
+		int last = level->pts_cnt - 1;
+		if (aafRationalToFloat (level->time[last]) < 1.) {
+			al->add (timepos_t (region->length ().samples ()), aafRationalToFloat (level->value[last]), false, false);
+		}
+		al->thaw ();
+		ar->set_envelope_active (true);
 	}
 }
 
@@ -496,7 +510,8 @@ ARDOUR_UI::new_session_from_aaf (string const& aaf, string const& target_dir, st
 
 	aafRational_t samplerate_r;
 
-	samplerate_r.numerator   = aafi->Audio->samplerate;
+	/* if AAF contains no audio clip, then samplerate is 0 */
+	samplerate_r.numerator   = (aafi->Audio->samplerate) ? aafi->Audio->samplerate : 48000;
 	samplerate_r.denominator = 1;
 
 	std::string restore_backend;

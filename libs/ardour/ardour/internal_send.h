@@ -45,6 +45,7 @@ public:
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
 	bool configure_io (ChanCount in, ChanCount out);
 	int  set_block_size (pframes_t);
+	bool actually_active() const { return _active; }
 
 	std::shared_ptr<Route> source_route() const { return _send_from; }
 	std::shared_ptr<Route> target_route() const { return _send_to; }

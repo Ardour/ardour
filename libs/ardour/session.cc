@@ -36,7 +36,6 @@
 #include <cstdio> /* sprintf(3) ... grrr */
 #include <cmath>
 #include <cerrno>
-#include <unistd.h>
 #include <limits.h>
 
 #include <glibmm/datetime.h>
@@ -138,6 +137,7 @@
 #include "ardour/vca.h"
 
 #ifdef VST3_SUPPORT
+#include "ardour/vst3_host.h"
 #include "ardour/vst3_plugin.h"
 #endif // VST3_SUPPORT
 
@@ -307,7 +307,6 @@ Session::Session (AudioEngine &eng,
 	, ltc_timecode_negative_offset (false)
 	, midi_control_ui (0)
 	, _punch_or_loop (NoConstraint)
-	, _all_route_group (new RouteGroup (*this, "all"))
 	, routes (new RouteList)
 	, _adding_routes_in_progress (false)
 	, _reconnecting_routes_in_progress (false)
@@ -321,6 +320,7 @@ Session::Session (AudioEngine &eng,
 	, no_questions_about_missing_files (false)
 	, _bundles (new BundleList)
 	, _bundle_xml_node (0)
+	, _engine_state (0)
 	, _clicking (false)
 	, _click_rec_only (false)
 	, click_data (0)
@@ -338,6 +338,7 @@ Session::Session (AudioEngine &eng,
 	, first_file_data_format_reset (true)
 	, first_file_header_format_reset (true)
 	, have_looped (false)
+	, roll_started_loop (false)
 	, _step_editors (0)
 	,  _speakers (new Speakers)
 	, _ignore_route_processor_changes (0)
@@ -518,6 +519,8 @@ Session::Session (AudioEngine &eng,
 	StartTimeChanged.connect_same_thread (*this, std::bind (&Session::start_time_changed, this, _1));
 	EndTimeChanged.connect_same_thread (*this, std::bind (&Session::end_time_changed, this, _1));
 
+	RouteGroup::RouteRemoved.connect_same_thread (*this, std::bind (&Session::route_removed_from_route_group, this, _1, _2));
+
 	LatentSend::ChangedLatency.connect_same_thread (*this, std::bind (&Session::send_latency_compensation_change, this));
 	LatentSend::QueueUpdate.connect_same_thread (*this, std::bind (&Session::update_send_delaylines, this));
 	Latent::DisableSwitchChanged.connect_same_thread (*this, std::bind (&Session::queue_latency_recompute, this));
@@ -539,6 +542,10 @@ Session::Session (AudioEngine &eng,
 
 	_engine.set_session (this);
 	_engine.reset_timebase ();
+
+#ifdef VST3_SUPPORT
+	Steinberg::HostApplication::theHostContext ()->set_session (this);
+#endif
 
 	if (!mix_template.empty ()) {
 		/* ::create() unsets _is_new after creating the session.
@@ -571,9 +578,6 @@ Session::Session (AudioEngine &eng,
 
 Session::~Session ()
 {
-#ifdef PT_TIMING
-	ST.dump ("ST.dump");
-#endif
 	destroy ();
 }
 
@@ -707,6 +711,8 @@ Session::destroy ()
 
 	/* clear state tree so that no references to objects are held any more */
 
+	delete _engine_state;
+
 	delete state_tree;
 	state_tree = 0;
 
@@ -742,13 +748,6 @@ Session::destroy ()
 	_butler->drop_references ();
 	delete _butler;
 	_butler = 0;
-
-	delete _all_route_group;
-
-	DEBUG_TRACE (DEBUG::Destruction, "delete route groups\n");
-	for (list<RouteGroup *>::iterator i = _route_groups.begin(); i != _route_groups.end(); ++i) {
-		delete *i;
-	}
 
 	if (click_data != default_click) {
 		delete [] click_data;
@@ -825,6 +824,9 @@ Session::destroy ()
 		/* writer goes out of scope and updates master */
 	}
 	routes.flush ();
+
+	DEBUG_TRACE (DEBUG::Destruction, "delete route groups\n");
+	_route_groups.clear ();
 
 	{
 		DEBUG_TRACE (DEBUG::Destruction, "delete sources\n");
@@ -908,6 +910,7 @@ Session::destroy ()
 	for (auto const& nfo : PluginManager::instance().vst3_plugin_info()) {
 		std::dynamic_pointer_cast<VST3PluginInfo> (nfo)->m.reset ();
 	}
+	Steinberg::HostApplication::theHostContext ()->set_session (0);
 #endif // VST3_SUPPORT
 
 	DEBUG_TRACE (DEBUG::Destruction, "Session::destroy() done\n");
@@ -1660,7 +1663,7 @@ Session::hookup_io ()
 
 	/* Get everything connected */
 
-	AudioEngine::instance()->reconnect_ports ();
+	AudioEngine::instance()->reconnect_ports (this);
 
 	AfterConnect (); /* EMIT SIGNAL */
 
@@ -2741,7 +2744,7 @@ Session::default_track_name_pattern (DataType t)
 list<std::shared_ptr<MidiTrack> >
 Session::new_midi_track (const ChanCount& input, const ChanCount& output, bool strict_io,
                          std::shared_ptr<PluginInfo> instrument, Plugin::PresetRecord* pset,
-                         RouteGroup* route_group, uint32_t how_many,
+                         std::shared_ptr<RouteGroup> route_group, uint32_t how_many,
                          string name_template, PresentationInfo::order_t order,
                          TrackMode mode, bool input_auto_connect,
                          bool trigger_visibility)
@@ -2806,7 +2809,7 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, bool s
 
 		catch (AudioEngine::PortRegistrationFailure& pfe) {
 
-			error << string_compose (_("No more JACK ports are available. You will need to stop %1 and restart JACK with more ports if you need this many tracks."), PROGRAM_NAME) << endmsg;
+			error << string_compose (_("A required port for MIDI I/O could not be created (%1).\nYou may need to restart the Audio/MIDI engine to fix this."), pfe.what()) << endmsg;
 			goto failed;
 		}
 
@@ -2821,13 +2824,16 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, bool s
 
 		add_routes (new_routes, input_auto_connect, !instrument, order);
 		load_and_connect_instruments (new_routes, strict_io, instrument, pset, existing_outputs);
+		if (instrument) {
+			InstrumentRouteAdded (new_routes);
+		}
 	}
 
 	return ret;
 }
 
 RouteList
-Session::new_midi_route (RouteGroup* route_group, uint32_t how_many, string name_template, bool strict_io,
+Session::new_midi_route (std::shared_ptr<RouteGroup> route_group, uint32_t how_many, string name_template, bool strict_io,
                          std::shared_ptr<PluginInfo> instrument, Plugin::PresetRecord* pset,
                          PresentationInfo::Flag flag, PresentationInfo::order_t order)
 {
@@ -2901,6 +2907,9 @@ Session::new_midi_route (RouteGroup* route_group, uint32_t how_many, string name
 
 		add_routes (ret, false, !instrument, order);
 		load_and_connect_instruments (ret, strict_io, instrument, pset, existing_outputs);
+		if (instrument) {
+			InstrumentRouteAdded (ret);
+		}
 	}
 
 	return ret;
@@ -2996,7 +3005,7 @@ Session::ensure_route_presentation_info_gap (PresentationInfo::order_t first_new
  *  @param name_template string to use for the start of the name, or "" to use "Audio".
  */
 list< std::shared_ptr<AudioTrack> >
-Session::new_audio_track (int input_channels, int output_channels, RouteGroup* route_group,
+Session::new_audio_track (int input_channels, int output_channels, std::shared_ptr<RouteGroup> route_group,
                           uint32_t how_many, string name_template, PresentationInfo::order_t order,
                           TrackMode mode, bool input_auto_connect,
                           bool trigger_visibility)
@@ -3088,7 +3097,7 @@ Session::new_audio_track (int input_channels, int output_channels, RouteGroup* r
  *  @param name_template string to use for the start of the name, or "" to use "Bus".
  */
 RouteList
-Session::new_audio_route (int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many, string name_template,
+Session::new_audio_route (int input_channels, int output_channels, std::shared_ptr<RouteGroup> route_group, uint32_t how_many, string name_template,
                           PresentationInfo::Flag flags, PresentationInfo::order_t order)
 {
 	string bus_name;
@@ -3950,7 +3959,7 @@ Session::route_listen_changed (Controllable::GroupControlDisposition group_overr
 
 			_engine.monitor_port().clear_ports (false);
 
-			RouteGroup* rg = route->route_group ();
+			std::shared_ptr<RouteGroup> rg (route->route_group ());
 			const bool group_already_accounted_for = (group_override == Controllable::ForGroup);
 
 			std::shared_ptr<RouteList const> r = routes.reader ();
@@ -4059,7 +4068,7 @@ Session::route_solo_changed (bool self_solo_changed, Controllable::GroupControlD
 	 * belongs to.
 	 */
 
-	RouteGroup* rg = route->route_group ();
+	std::shared_ptr<RouteGroup> rg = route->route_group ();
 	const bool group_already_accounted_for = (group_override == Controllable::ForGroup);
 
 	DEBUG_TRACE (DEBUG::Solo, string_compose ("propagate to session, group accounted for ? %1\n", group_already_accounted_for));
@@ -4338,6 +4347,8 @@ Session::get_routes_with_internal_returns() const
 			rl->push_back (i);
 		}
 	}
+
+	rl->sort (Stripable::Sorter ());
 	return rl;
 }
 
@@ -4466,7 +4477,21 @@ Session::route_by_name (string name) const
 		}
 	}
 
-	return std::shared_ptr<Route> ((Route*) 0);
+	return nullptr;
+}
+
+std::shared_ptr<Stripable>
+Session::stripable_by_name (string name) const
+{
+	StripableList sl;
+	get_stripables (sl);
+
+	for (auto & s : sl) {
+		if (s->name() == name) {
+			return s;
+		}
+	}
+	return nullptr;
 }
 
 std::shared_ptr<Route>
@@ -5271,7 +5296,7 @@ Session::new_audio_source_path (const string& base, uint32_t nchan, uint32_t cha
 	string legalized;
 	bool some_related_source_name_exists = false;
 
-	legalized = legalize_for_path (base);
+	legalized = legalize_for_universal_path (base);
 
 	// Find a "version" of the base name that doesn't exist in any of the possible directories.
 
@@ -5313,7 +5338,7 @@ Session::new_midi_source_path (const string& base, bool need_lock)
 	string possible_path;
 	string possible_name;
 
-	possible_name = legalize_for_path (base);
+	possible_name = legalize_for_universal_path (base);
 
 	// Find a "version" of the file name that doesn't exist in any of the possible directories.
 	std::vector<string> sdirs = source_search_path(DataType::MIDI);
@@ -6222,7 +6247,7 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 	samplepos_t len = end - start;
 	bool need_block_size_reset = false;
 	ChanCount const max_proc = track.max_processor_streams ();
-	string legal_name;
+	string base_name;
 	string possible_path;
 	MidiBuffer resolved (256);
 	MidiNoteTracker tracker;
@@ -6261,17 +6286,17 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 	}
 
 	if (source_name.length() > 0) {
-		/*if the user passed in a name, we will use it, and also prepend the resulting sources with that name*/
-		legal_name = legalize_for_path (source_name);
+		/*if the user passed in a name, we will use it, and also prepend the resulting sources with that name */
+		base_name = source_name;
 	} else {
-		legal_name = legalize_for_path (playlist->name ());
+		base_name = playlist->name ();
 	}
 
 	for (uint32_t chan_n = 0; chan_n < diskstream_channels.n(data_type); ++chan_n) {
 
 		string path = ((data_type == DataType::AUDIO)
-		               ? new_audio_source_path (legal_name, diskstream_channels.n_audio(), chan_n, false)
-		               : new_midi_source_path (legal_name));
+		               ? new_audio_source_path (base_name, diskstream_channels.n_audio(), chan_n, false)
+		               : new_midi_source_path (base_name));
 
 		if (path.empty()) {
 			goto out;
@@ -6370,20 +6395,25 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 			}
 		}
 
-		/* XXX NUTEMPO fix this to not use samples */
+		Temporal::Beats bpos (timepos_t (position).beats());
+		Temporal::Beats bout_pos (timepos_t (out_pos).beats());
 
 		for (vector<MidiSourceLockMap*>::iterator m = midi_source_locks.begin(); m != midi_source_locks.end(); ++m) {
 				const MidiBuffer& buf = buffers.get_midi(0);
 				for (MidiBuffer::const_iterator i = buf.begin(); i != buf.end(); ++i) {
-					Evoral::Event<samplepos_t> ev = *i;
+					Evoral::Event<samplepos_t> sev (*i);
+					Evoral::Event<Temporal::Beats> bev (sev.event_type(), timepos_t (sev.time()).beats(), sev.size(), sev.buffer());
+
 					if (!endpoint || for_export) {
-						ev.set_time(ev.time() - position);
+						bev.set_time (bev.time() - bpos);
 					} else {
 						/* MidiTrack::export_stuff moves event to the current cycle */
-						ev.set_time(ev.time() + out_pos - position);
+						bev.set_time(bev.time() + bout_pos - bpos);
 					}
-					(*m)->src->append_event_samples ((*m)->lock, ev, (*m)->src->natural_position().samples());
+
+					(*m)->src->append_event_beats ((*m)->lock, bev, false);
 				}
+
 		}
 		out_pos += current_chunk;
 		latency_skip = 0;
@@ -6515,7 +6545,7 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 
 		if (region_name.empty ()) {
 			/* setting name in the properties didn't seem to work, but this does */
-			result->set_name(legal_name);
+			result->set_name(legalize_for_universal_path (base_name));
 		} else {
 			result->set_name(region_name);
 		}
@@ -6777,27 +6807,32 @@ Session::solo_control_mode_changed ()
 
 /** Called when a property of one of our route groups changes */
 void
-Session::route_group_property_changed (RouteGroup* rg)
+Session::route_group_property_changed (std::weak_ptr<RouteGroup> wrg)
 {
-	RouteGroupPropertyChanged (rg); /* EMIT SIGNAL */
+	std::shared_ptr<RouteGroup> rg (wrg.lock());
+	if (rg) {
+		RouteGroupPropertyChanged (rg); /* EMIT SIGNAL */
+	}
 }
 
 /** Called when a route is added to one of our route groups */
 void
-Session::route_added_to_route_group (RouteGroup* rg, std::weak_ptr<Route> r)
+Session::route_added_to_route_group (std::shared_ptr<RouteGroup> rg, std::weak_ptr<Route> r)
 {
 	RouteAddedToRouteGroup (rg, r);
 }
 
 /** Called when a route is removed from one of our route groups */
 void
-Session::route_removed_from_route_group (RouteGroup* rg, std::weak_ptr<Route> r)
+Session::route_removed_from_route_group (std::shared_ptr<RouteGroup> rg, std::weak_ptr<Route> r)
 {
 	update_route_record_state ();
 	RouteRemovedFromRouteGroup (rg, r); /* EMIT SIGNAL */
 
+	std::shared_ptr<Route> rr (r.lock());
+
 	if (!rg->has_control_master () && !rg->has_subgroup () && rg->empty()) {
-		remove_route_group (*rg);
+		route_group_emptied (rg);
 	}
 }
 
@@ -8151,15 +8186,8 @@ Session::ProcessorChangeBlocker::~ProcessorChangeBlocker ()
 	if (PBD::atomic_dec_and_test (_session->_ignore_route_processor_changes)) {
 		RouteProcessorChange::Type type = (RouteProcessorChange::Type) _session->_ignored_a_processor_change.fetch_and (0);
 		if (_reconfigure_on_delete) {
-			if (type & RouteProcessorChange::GeneralChange) {
-				_session->route_processors_changed (RouteProcessorChange ());
-			} else {
-				if (type & RouteProcessorChange::MeterPointChange) {
-					_session->route_processors_changed (RouteProcessorChange (RouteProcessorChange::MeterPointChange));
-				}
-				if (type & RouteProcessorChange::RealTimeChange) {
-					_session->route_processors_changed (RouteProcessorChange (RouteProcessorChange::RealTimeChange));
-				}
+			if (type != RouteProcessorChange::NoProcessorChange) {
+				_session->route_processors_changed (type);
 			}
 		}
 	}
@@ -8196,4 +8224,21 @@ Session::have_external_connections_for_current_backend (bool tracks_only) const
 		}
 	}
 	return false;
+}
+
+std::shared_ptr<TriggerBox>
+Session::armed_triggerbox () const
+{
+	std::shared_ptr<TriggerBox> armed_tb;
+	std::shared_ptr<RouteList const> rl = routes.reader();
+
+	for (auto const & r : *rl) {
+		std::shared_ptr<TriggerBox> tb = r->triggerbox();
+		if (tb && tb->armed()) {
+			armed_tb = tb;
+			break;
+		}
+	}
+
+	return armed_tb;
 }

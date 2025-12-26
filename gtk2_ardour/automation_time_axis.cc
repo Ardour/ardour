@@ -175,15 +175,15 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 
 	using namespace Menu_Helpers;
 
-	auto_dropdown.AddMenuElem (MenuElem (automation_state_off_string(), sigc::bind (sigc::mem_fun(*this,
+	auto_dropdown.add_menu_elem (MenuElem (automation_state_off_string(), sigc::bind (sigc::mem_fun(*this,
 						&AutomationTimeAxisView::set_automation_state), (AutoState) ARDOUR::Off)));
-	auto_dropdown.AddMenuElem (MenuElem (_("Play"), sigc::bind (sigc::mem_fun(*this,
+	auto_dropdown.add_menu_elem (MenuElem (_("Play"), sigc::bind (sigc::mem_fun(*this,
 						&AutomationTimeAxisView::set_automation_state), (AutoState) Play)));
 
 	if (!parameter_is_midi(_parameter.type ())) {
-		auto_dropdown.AddMenuElem (MenuElem (_("Write"), sigc::bind (sigc::mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Write)));
-		auto_dropdown.AddMenuElem (MenuElem (_("Touch"), sigc::bind (sigc::mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Touch)));
-		auto_dropdown.AddMenuElem (MenuElem (_("Latch"), sigc::bind (sigc::mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Latch)));
+		auto_dropdown.add_menu_elem (MenuElem (_("Write"), sigc::bind (sigc::mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Write)));
+		auto_dropdown.add_menu_elem (MenuElem (_("Touch"), sigc::bind (sigc::mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Touch)));
+		auto_dropdown.add_menu_elem (MenuElem (_("Latch"), sigc::bind (sigc::mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Latch)));
 	}
 
 	/* XXX translators: use a string here that will be at least as long
@@ -971,6 +971,7 @@ AutomationTimeAxisView::entered()
 	if (_line) {
 		_line->track_entered();
 	}
+	_editor.enable_automation_bindings ();
 }
 
 void
@@ -979,6 +980,8 @@ AutomationTimeAxisView::exited ()
 	if (_line) {
 		_line->track_exited();
 	}
+
+	_editor.disable_automation_bindings ();
 }
 
 void

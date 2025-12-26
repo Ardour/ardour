@@ -51,6 +51,10 @@ tresult PLUGIN_API queryInterface (const TUID _iid, void** obj) SMTG_OVERRIDE \
 #  pragma GCC diagnostic ignored "-Wdelete-non-virtual-dtor"
 #endif
 
+namespace ARDOUR {
+	class Session;
+}
+
 namespace Steinberg {
 
 LIBARDOUR_API extern std::string tchar_to_utf8 (Vst::TChar const* s);
@@ -271,7 +275,7 @@ private:
 	std::vector<FUID> _interfaces;
 };
 
-class LIBARDOUR_API HostApplication : public Vst::IHostApplication
+class LIBARDOUR_API HostApplication : public Vst::IHostApplication , public Presonus::IContextInfoProvider
 {
 public:
 	static Vst::IHostApplication* getHostContext ()
@@ -280,7 +284,10 @@ public:
 		return app;
 	}
 
-	HostApplication ();
+	static HostApplication* theHostContext () {
+		return static_cast<HostApplication*> (getHostContext ());
+	}
+
 	virtual ~HostApplication () {}
 	tresult PLUGIN_API queryInterface (const TUID _iid, void** obj) SMTG_OVERRIDE;
 
@@ -297,8 +304,17 @@ public:
 	tresult PLUGIN_API getName (Vst::String128 name) SMTG_OVERRIDE;
 	tresult PLUGIN_API createInstance (TUID cid, TUID _iid, void** obj) SMTG_OVERRIDE;
 
+	void set_session (ARDOUR::Session*);
+
+	/* IContextInfoProvider API */
+	tresult PLUGIN_API getContextInfoValue (int32&, FIDString) SMTG_OVERRIDE;
+	tresult PLUGIN_API getContextInfoString (Vst::TChar*, int32, FIDString) SMTG_OVERRIDE;
+
 protected:
 	std::unique_ptr<PlugInterfaceSupport> _plug_interface_support;
+private:
+	HostApplication ();
+	ARDOUR::Session* _session;
 };
 
 class LIBARDOUR_LOCAL Vst3ParamValueQueue : public Vst::IParamValueQueue

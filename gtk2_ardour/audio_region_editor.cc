@@ -92,6 +92,8 @@ AudioRegionEditor::AudioRegionEditor (Session* s, AudioRegionView* arv)
 	gain_table->attach (_peak_amplitude_label, 2, 4, row, row + 1, Gtk::FILL, Gtk::FILL);
 	++row;
 
+	gain_table->show_all ();
+
 	Gtk::HBox* b = Gtk::manage (new Gtk::HBox);
 	b->set_spacing (6);
 	b->pack_start (_gain_entry);
@@ -111,10 +113,14 @@ AudioRegionEditor::AudioRegionEditor (Session* s, AudioRegionView* arv)
 
 	/* Add to main layout */
 
-	_table_main.attach (*gain_table,        1, 2, 3, 4, Gtk::FILL, Gtk::SHRINK);
-	_table_main.attach (_region_line_label, 0, 1, 5, 6, Gtk::FILL, Gtk::SHRINK);
-	_table_main.attach (_region_line,       1, 3, 5, 6, Gtk::EXPAND | Gtk::FILL, Gtk::SHRINK);
-	_table_main.attach (_show_on_touch,     3, 4, 5, 6, Gtk::FILL, Gtk::SHRINK);
+	row = 4; /* see RegionEditor table packing for why this is 4 */
+	_table_main.attach (*gain_table,        1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK);
+	row++;
+	_table_main.attach (_region_line_label, 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK);
+	_table_main.attach (_region_line,       1, 3, row, row+1, Gtk::EXPAND | Gtk::FILL, Gtk::SHRINK);
+	_table_main.attach (_show_on_touch,     3, 4, row, row+1, Gtk::FILL, Gtk::SHRINK);
+	row++;
+	_table_main.attach (*manage (new ArdourWidgets::ArdourHSpacer (0)), 0, 3, row, row + 1, Gtk::FILL, Gtk::FILL | Gtk::EXPAND);
 
 	UI::instance()->set_tip (_polarity_toggle, _("Invert the signal polarity (180deg phase shift)"));
 	UI::instance()->set_tip (_fade_before_fx_toggle, _("Apply region effects after the region fade.\nThis is useful if the effect(s) have tail, which would otherwise be faded out by the region fade (e.g. reverb, delay)"));
@@ -123,6 +129,7 @@ AudioRegionEditor::AudioRegionEditor (Session* s, AudioRegionView* arv)
 	gain_changed ();
 	fade_before_fx_changed ();
 	refill_region_line ();
+	_table_main.show_all ();
 
 	_gain_adjustment.signal_value_changed ().connect (sigc::mem_fun (*this, &AudioRegionEditor::gain_adjustment_changed));
 	_polarity_toggle.signal_toggled ().connect (sigc::mem_fun (*this, &AudioRegionEditor::gain_adjustment_changed));
@@ -146,7 +153,9 @@ AudioRegionEditor::AudioRegionEditor (Session* s, AudioRegionView* arv)
 AudioRegionEditor::~AudioRegionEditor ()
 {
 	void* v;
+	_peak_amplitude_connection.disconnect ();
 	_peak_channel.deliver ('t');
+	Progress::cancel ();
 	pthread_join (_peak_amplitude_thread_handle, &v);
 }
 
@@ -235,7 +244,7 @@ AudioRegionEditor::peak_amplitude_thread ()
 		Temporal::TempoMap::fetch ();
 
 		/* compute peak amplitude and signal the fact */
-		PeakAmplitudeFound (accurate_coefficient_to_dB (_audio_region->maximum_amplitude ())); /* EMIT SIGNAL */
+		PeakAmplitudeFound (accurate_coefficient_to_dB (_audio_region->maximum_amplitude (this))); /* EMIT SIGNAL */
 	}
 }
 
@@ -249,13 +258,9 @@ AudioRegionEditor::peak_amplitude_found (double p)
 	_peak_amplitude.set_text (s.str ());
 }
 
-void
-AudioRegionEditor::show_touched_automation (std::weak_ptr<PBD::Controllable> wac)
+static void
+switch_tool_to_show_rfx_line ()
 {
-	if (!_arv->set_region_fx_line (wac)) {
-		return;
-	}
-
 	switch (PublicEditor::instance ().current_mouse_mode ()) {
 		case Editing::MouseObject:
 		case Editing::MouseTimeFX:
@@ -266,6 +271,16 @@ AudioRegionEditor::show_touched_automation (std::weak_ptr<PBD::Controllable> wac
 		default:
 			break;
 	}
+}
+
+void
+AudioRegionEditor::show_touched_automation (std::weak_ptr<PBD::Controllable> wac)
+{
+	if (!_arv->set_region_fx_line (wac)) {
+		return;
+	}
+
+	switch_tool_to_show_rfx_line ();
 }
 
 void
@@ -301,7 +316,7 @@ AudioRegionEditor::refill_region_line ()
 	rm_items.push_back (RadioMenuElem (grp, _("Gain Envelope")));
 	Gtk::CheckMenuItem* cmi = static_cast<Gtk::CheckMenuItem*> (&rm_items.back ());
 	cmi->set_active (rfx_id == 0 || param_id == UINT32_MAX);
-	cmi->signal_activate ().connect ([cmi, arv] () { if (cmi->get_active ()) {arv->set_region_gain_line (); } });
+	cmi->signal_activate ().connect ([cmi, arv] () { if (cmi->get_active ()) { arv->set_region_gain_line (); switch_tool_to_show_rfx_line ();} });
 
 	_audio_region->foreach_plugin ([&rm_items, arv, &nth, &grp, &active_text, rfx_id, param_id] (std::weak_ptr<RegionFxPlugin> wfx) {
 		std::shared_ptr<RegionFxPlugin> fx (wfx.lock ());
@@ -335,7 +350,7 @@ AudioRegionEditor::refill_region_line ()
 			acm_items.push_back (RadioMenuElem (grp, label));
 			Gtk::CheckMenuItem* cmi = static_cast<Gtk::CheckMenuItem*> (&acm_items.back ());
 			cmi->set_active (active);
-			cmi->signal_activate ().connect ([cmi, arv, nth, i] () { if (cmi->get_active ()) {arv->set_region_fx_line (nth, i); } });
+			cmi->signal_activate ().connect ([cmi, arv, nth, i] () { if (cmi->get_active ()) { arv->set_region_fx_line (nth, i); switch_tool_to_show_rfx_line (); } });
 			if (active) {
 				active_text = fx->name () + ": " + label;
 			}

@@ -62,6 +62,7 @@ using namespace PBD;
 void
 Editor::showhide_att_left (bool yn)
 {
+	Tabbable::showhide_att_left (yn);
 	show_editor_mixer (yn);
 }
 
@@ -113,6 +114,10 @@ Editor::show_editor_mixer (bool yn)
 
 				if ((atv = dynamic_cast<RouteTimeAxisView*> (*i)) != 0) {
 					r = atv->route();
+					if (r && r->is_hidden ()) {
+						r.reset ();
+						continue;
+					}
 					break;
 				}
 			}

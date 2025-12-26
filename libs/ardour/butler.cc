@@ -22,7 +22,6 @@
 
 #include <errno.h>
 #include <fcntl.h>
-#include <unistd.h>
 
 #ifdef HAVE_IOPRIO
 #include <sys/syscall.h>
@@ -258,13 +257,17 @@ Butler::thread_work ()
 			}
 		}
 
-		sampleoffset_t audition_seek;
-		if (should_run && _session.is_auditioning () && (audition_seek = _session.the_auditioner ()->seek_sample ()) >= 0) {
+		if (should_run && _session.is_auditioning ()) {
 			std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (_session.the_auditioner ());
-			DEBUG_TRACE (DEBUG::Butler, "seek the auditioner\n");
-			tr->seek (audition_seek);
-			tr->do_refill ();
-			_session.the_auditioner ()->seek_response (audition_seek);
+			sampleoffset_t audition_seek;
+			if ((audition_seek = _session.the_auditioner ()->seek_sample ()) >= 0) {
+				DEBUG_TRACE (DEBUG::Butler, "seek the auditioner\n");
+				tr->seek (audition_seek);
+				tr->do_refill ();
+				_session.the_auditioner ()->seek_response (audition_seek);
+			} else if (tr->pending_overwrite ()) {
+				tr->overwrite_existing_buffers ();
+			}
 		}
 
 		std::shared_ptr<RouteList const> rl = _session.get_routes ();
@@ -296,7 +299,7 @@ Butler::thread_work ()
 					case 0:
 						//DEBUG_TRACE (DEBUG::Butler, string_compose ("\ttrack refill done %1\n", tr->name()));
 						break;
-					case 1:
+					case -1:
 						DEBUG_TRACE (DEBUG::Butler, string_compose ("\ttrack refill unfinished %1\n", tr->name ()));
 						disk_work_outstanding = true;
 						break;

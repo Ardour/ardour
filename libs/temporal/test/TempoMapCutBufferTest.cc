@@ -35,11 +35,13 @@ TempoMapCutBufferTest::cutTest()
 	                                   timepos_t::from_superclock (tmap->superclock_at (BBT_Argument (300, 1, 0))),
 	                                   false);
 
+#if 0
 	std::cerr << "Cut Buffer:\n";
-	cb->dump (std::cerr);
+	cb->dump (std::cout);
 
 	std::cerr << "After cut\n";
-	tmap->dump (std::cerr);
+	tmap->dump (std::cout);
+#endif
 
 	tmap->abort_update ();
 }
@@ -69,19 +71,19 @@ TempoMapCutBufferTest::pasteTest()
 	TempoMap* new_map = new TempoMap (Tempo (120, 4), Meter (7, 8));
 
 #if 0
-	std::cerr << "\n\nCut Buffer:\n";
-	cb->dump (std::cerr);
+	std::cout << "\n\nCut Buffer:\n";
+	cb->dump (std::cout);
 
-	std::cerr << "Before paste\n";
-	new_map->dump (std::cerr);
+	std::cout << "Before paste\n";
+	new_map->dump (std::cout);
 #endif
 
 	new_map->paste (*cb, timepos_t::from_superclock (tmap->superclock_at (BBT_Argument (6, 1, 0))),
 	                false);
 
 #if 0
-	std::cerr << "After paste\n";
-	new_map->dump (std::cerr);
+	std::cout << "After paste\n";
+	new_map->dump (std::cout);
 #endif
 
 	Meter nmm (new_map->meter_at (BBT_Argument (21,7,34)));

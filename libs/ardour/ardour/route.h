@@ -66,6 +66,7 @@
 
 class RoutePinWindowProxy;
 class PatchChangeGridDialog;
+class ArdourWindow;
 
 namespace ARDOUR {
 
@@ -137,6 +138,9 @@ public:
 
 	std::string comment() { return _comment; }
 	void set_comment (std::string str, void *src);
+
+	ArdourWindow* comment_editor () const { return _comment_editor_window; }
+	void set_comment_editor (ArdourWindow* w) { _comment_editor_window = w; }
 
 	bool set_name (const std::string& str);
 	static void set_name_in_state (XMLNode &, const std::string &);
@@ -247,6 +251,7 @@ public:
 	}
 
 	std::shared_ptr<Processor> processor_by_id (PBD::ID) const;
+	std::shared_ptr<Processor> plugin_by_uri (std::string const&, int offset = 0) const;
 
 	std::shared_ptr<Processor> nth_plugin (uint32_t n) const;
 	std::shared_ptr<Processor> nth_send (uint32_t n) const;
@@ -427,6 +432,7 @@ public:
 	XMLNode& get_state() const;
 	XMLNode& get_template();
 	virtual int set_state (const XMLNode&, int version);
+	virtual int import_state (const XMLNode&, bool use_pbd_ids = true, bool processor_only = true);
 
 	XMLNode& get_processor_state ();
 	void set_processor_state (const XMLNode&, int version);
@@ -663,6 +669,7 @@ protected:
 	std::shared_ptr<SoloSafeControl> _solo_safe_control;
 
 	std::string    _comment;
+	ArdourWindow*  _comment_editor_window;
 	bool           _have_internal_generator;
 	DataType       _default_type;
 
@@ -705,6 +712,8 @@ protected:
 
 	SlavableAutomationControlList slavables () const;
 
+	virtual void input_change_handler (IOChange, void *src);
+
 private:
 	/* no copy construction */
 	Route (Route const &);
@@ -712,7 +721,6 @@ private:
 	int set_state_2X (const XMLNode&, int);
 	void set_processor_state_2X (XMLNodeList const &, int);
 
-	void input_change_handler (IOChange, void *src);
 	void output_change_handler (IOChange, void *src);
 	void sidechain_change_handler (IOChange, void *src);
 
@@ -720,8 +728,8 @@ private:
 	std::vector<std::weak_ptr<Processor> > selfdestruct_sequence;
 	Glib::Threads::Mutex  selfdestruct_lock;
 
-	bool input_port_count_changing (ChanCount);
-	bool output_port_count_changing (ChanCount);
+	int input_port_count_changing (ChanCount);
+	int output_port_count_changing (ChanCount);
 
 	bool output_effectively_connected_real () const;
 	mutable std::map<Route*, bool> _connection_cache;

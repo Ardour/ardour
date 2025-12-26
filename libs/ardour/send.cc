@@ -142,13 +142,16 @@ Send::deactivate ()
 	_meter->deactivate ();
 	_meter->reset ();
 
-	Delivery::deactivate ();
+	/* DO NOT CALL Delivery::deactivate (); that deactivates _amp.
+	 * InternalSend still runs and uses _amp until fade out has converged.
+	 */
+	Processor::deactivate ();
 }
 
 samplecnt_t
 Send::signal_latency () const
 {
-	if (!_pending_active) {
+	if (!_pending_active && !_active) {
 		 return 0;
 	}
 	if (_delay_out > _delay_in) {
@@ -239,7 +242,11 @@ Send::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, do
 		return;
 	}
 
-	if (!check_active()) {
+	/* Do not use check_active() here, because we need to continue running
+	 * until the gain has gone to zero.
+	 */
+
+	if (!_active && !_pending_active) {
 		_meter->reset ();
 		_output->silence (nframes);
 		return;

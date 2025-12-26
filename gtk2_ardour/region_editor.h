@@ -66,12 +66,15 @@ public:
 
 	std::shared_ptr<ARDOUR::Region> region () const { return _region; }
 
+	static void setup_actions_and_bindings ();
+
 protected:
 	virtual void region_changed (const PBD::PropertyChange&);
 	virtual void region_fx_changed ();
 
 	Gtk::Table _table_main;
 	Gtk::Table _table_clocks;
+	Gtk::Table _table_tempo;
 
 private:
 	class RegionFxEntry : public Gtkmm2ext::DnDVBoxChild, public sigc::trackable
@@ -104,8 +107,9 @@ private:
 		RegionFxBox (std::shared_ptr<ARDOUR::Region>);
 		void redisplay_plugins ();
 
-	private:
 		static void register_actions ();
+
+	private:
 		static void load_bindings ();
 		static void static_delete ();
 
@@ -162,6 +166,11 @@ private:
 	Gtk::Label _sync_absolute_label;
 	Gtk::Label _start_label;
 	Gtk::Label _region_fx_label;
+	Gtk::Label _region_tempo_label;
+	Gtk::Label _region_meter_label;
+
+	Gtk::Entry _region_tempo_entry;
+	Gtk::Entry _region_meter_entry;
 
 	Gtk::ToggleButton _audition_button;
 
@@ -186,6 +195,7 @@ private:
 	PBD::ScopedConnection _region_connection;
 
 	void bounds_changed (const PBD::PropertyChange&);
+	void tempo_changed (const PBD::PropertyChange&);
 	void name_changed ();
 
 	void audition_state_changed (bool);
@@ -207,4 +217,11 @@ private:
 	bool on_delete_event (GdkEventAny*);
 
 	void set_clock_mode_from_primary ();
+
+	bool tempo_entry_key (GdkEventKey*);
+	bool meter_entry_key (GdkEventKey*);
+	void filter_tempo_text (const Glib::ustring&, int*);
+	void filter_meter_text (const Glib::ustring&, int*);
+	bool tempo_entry_focused (GdkEventFocus*);
+	bool meter_entry_focused (GdkEventFocus*);
 };

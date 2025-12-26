@@ -35,6 +35,7 @@
 #include "pbd/signals.h"
 
 #include "temporal/timeline.h"
+#include "temporal/scope.h"
 
 #include "ardour/midi_operator.h"
 #include "ardour/session_handle.h"
@@ -58,6 +59,10 @@ namespace Temporal {
 	class TempoMap;
 }
 
+namespace ARDOUR {
+	class Strum;
+}
+
 class XMLNode;
 
 class ControlPoint;
@@ -75,31 +80,18 @@ class Selection;
 class SelectionMemento;
 class SelectableOwner;
 
-class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
+class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider, public Temporal::ScopedTempoMapOwner, public virtual sigc::trackable
 {
  public:
 	EditingContext (std::string const &);
 	~EditingContext ();
 
 	std::string editor_name() const { return _name; }
+	std::string scope_name() const { return _name; }
 
 	void set_session (ARDOUR::Session*);
 
 	Temporal::TimeDomain time_domain () const;
-
-
-	struct TempoMapScope {
-		TempoMapScope (EditingContext& context, std::shared_ptr<Temporal::TempoMap> map)
-			: ec (context)
-		{
-			old_map = ec.start_local_tempo_map (map);
-		}
-		~TempoMapScope () {
-			ec.end_local_tempo_map (old_map);
-		}
-		EditingContext& ec;
-		std::shared_ptr<Temporal::TempoMap const> old_map;
-	};
 
 	DragManager* drags () const {
 		return _drags;
@@ -131,6 +123,11 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	virtual void stop_canvas_autoscroll () = 0;
 	virtual bool autoscroll_active() const = 0;
 
+	void scroll_left_step ();
+	void scroll_right_step ();
+	void scroll_left_half_page ();
+	void scroll_right_half_page ();
+
 	virtual void redisplay_grid (bool immediate_redraw) = 0;
 	virtual Temporal::timecnt_t get_nudge_distance (Temporal::timepos_t const & pos, Temporal::timecnt_t& next) const = 0;
 
@@ -147,7 +144,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	void toggle_follow_playhead ();
 
 	/** @return true if the editor is following the playhead */
-	bool follow_playhead () const { return _follow_playhead; }
+	bool follow_playhead () const;
 
 	Temporal::timepos_t get_preferred_edit_position (Editing::EditIgnoreOption eio = Editing::EDIT_IGNORE_NONE,
 	                                                 bool use_context_click = false,
@@ -174,6 +171,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	virtual PBD::HistoryOwner& history() = 0;
 
 	virtual void add_command (PBD::Command *) = 0;
+	virtual void add_commands (std::vector<PBD::Command *>) = 0;
 	virtual void begin_reversible_command (std::string cmd_name) = 0;
 	virtual void begin_reversible_command (GQuark) = 0;
 	virtual void abort_reversible_command () = 0;
@@ -257,6 +255,9 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	double timeline_to_canvas (double p) const { return p + _timeline_origin; }
 	double canvas_to_timeline (double p) const { return p - _timeline_origin; }
 
+	double visible_canvas_width () const { return _visible_canvas_width; }
+	double visible_canvas_height () const { return _visible_canvas_height; }
+
 	/** computes the timeline position for an event whose coordinates
 	 * are in canvas units (pixels, scroll offset included). The time
 	 * domain used by the return value will match ::default_time_domain()
@@ -275,13 +276,13 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	virtual bool canvas_control_point_event (GdkEvent* event, ArdourCanvas::Item*, ControlPoint*) = 0;
 	virtual bool canvas_cue_start_event (GdkEvent* event, ArdourCanvas::Item*) { return true; }
 	virtual bool canvas_cue_end_event (GdkEvent* event, ArdourCanvas::Item*) { return true; }
-	virtual bool canvas_bg_event (GdkEvent* event, ArdourCanvas::Item*) { return true; }
+	virtual bool canvas_bg_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
 
 	Temporal::Beats get_grid_type_as_beats (bool& success, Temporal::timepos_t const & position) const;
 	Temporal::Beats get_draw_length_as_beats (bool& success, Temporal::timepos_t const & position) const;
 
 	int32_t get_grid_beat_divisions (Editing::GridType gt) const;
-	int32_t get_grid_music_divisions (Editing::GridType gt, uint32_t event_state) const;
+	int32_t get_grid_music_divisions (Editing::GridType gt) const;
 
 	Editing::GridType  grid_type () const;
 	bool  grid_type_is_musical (Editing::GridType) const;
@@ -290,16 +291,18 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	void cycle_snap_mode ();
 	void next_grid_choice ();
 	void prev_grid_choice ();
-	void set_grid_to (Editing::GridType);
+	void set_grid_type (Editing::GridType);
 	void set_snap_mode (Editing::SnapMode);
 
-	void set_draw_length_to (Editing::GridType);
-	void set_draw_velocity_to (int);
-	void set_draw_channel_to (int);
+	void set_draw_length (Editing::GridType);
+	void set_draw_velocity (int);
+	void set_draw_channel (int);
+	virtual void set_note_mode (ARDOUR::NoteMode) {}
 
 	Editing::GridType  draw_length () const;
 	int                draw_velocity () const;
 	int                draw_channel () const;
+	virtual ARDOUR::NoteMode note_mode() const { return ARDOUR::Sustained; }
 
 	Editing::SnapMode  snap_mode () const;
 
@@ -325,16 +328,12 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	void reset_zoom (samplecnt_t);
 	virtual double max_extents_scale() const { return 1.0; }
 	virtual void set_samples_per_pixel (samplecnt_t) = 0;
-	virtual void on_samples_per_pixel_changed () {}
 
 	virtual void cycle_zoom_focus ();
 	virtual void set_zoom_focus (Editing::ZoomFocus) = 0;
-	Editing::ZoomFocus zoom_focus () const { return _zoom_focus; }
-	sigc::signal<void> ZoomFocusChanged;
+	Editing::ZoomFocus zoom_focus () const;
 
-	void zoom_focus_selection_done (Editing::ZoomFocus);
 	void zoom_focus_chosen (Editing::ZoomFocus);
-	Glib::RefPtr<Gtk::RadioAction> zoom_focus_action (Editing::ZoomFocus);
 
 	virtual void reposition_and_zoom (samplepos_t, double) = 0;
 
@@ -360,8 +359,9 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	/** @return The current mouse mode (gain, object, range, timefx etc.)
 	 * (defined in editing_syms.inc.h)
 	 */
-	Editing::MouseMode current_mouse_mode () const { return mouse_mode; }
-	virtual Editing::MouseMode effective_mouse_mode () const { return mouse_mode; }
+	Editing::MouseMode current_mouse_mode () const;
+	virtual Editing::MouseMode effective_mouse_mode () const { return current_mouse_mode(); }
+	virtual void use_appropriate_mouse_mode_for_sections () {}
 
 	/** @return Whether the current mouse mode is an "internal" editing mode. */
 	virtual bool internal_editing() const = 0;
@@ -384,8 +384,8 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	static MouseCursors const* cursors () {
 		return _cursors;
 	}
-	virtual VerboseCursor* verbose_cursor () const {
-		return _verbose_cursor;
+	virtual VerboseCursor& verbose_cursor () const {
+		return *_verbose_cursor;
 	}
 
 	virtual void set_snapped_cursor_position (Temporal::timepos_t const & pos) = 0;
@@ -395,20 +395,36 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	PBD::Signal<void()> SnapChanged;
 	PBD::Signal<void()> MouseModeChanged;
 
+	typedef std::vector<MidiView*> MidiViews;
+
 	/* MIDI actions, proxied to selected MidiRegionView(s) */
 	ARDOUR::Quantize* get_quantize_op ();
+	ARDOUR::Strum* get_strum_op (bool, bool);
 	void apply_midi_note_edit_op (ARDOUR::MidiOperator& op, const RegionSelection& rs);
+	void apply_midi_note_edit_op (ARDOUR::MidiOperator& op, const MidiViews& rs);
 	PBD::Command* apply_midi_note_edit_op_to_region (ARDOUR::MidiOperator& op, MidiView& mrv);
 	virtual void midi_action (void (MidiView::*method)());
-	std::vector<MidiView*> filter_to_unique_midi_region_views (RegionSelection const & ms) const;
+	std::vector<MidiView*> filter_to_unique_midi_region_views (RegionSelection const & rs) const;
+	std::vector<MidiView*> filter_to_unique_midi_region_views (MidiViews const & ms) const;
 
 	void quantize_region ();
 	void transform_region ();
 	void legatize_region (bool shrink_only);
 	void transpose_region ();
 
-	void register_midi_actions (Gtkmm2ext::Bindings*);
-	void register_common_actions (Gtkmm2ext::Bindings*);
+	void quantize_regions (const MidiViews& rs);
+	void legatize_regions (const MidiViews& rs, bool shrink_only);
+	void strum_notes (const MidiViews& rs, bool forward);
+	void transform_regions (const MidiViews& rs);
+	void transpose_regions (const MidiViews& rs);
+
+	void edit_notes (MidiView*);
+
+	static bool need_shared_actions;
+	void register_midi_actions (Gtkmm2ext::Bindings*, std::string const &);
+	void register_common_actions (Gtkmm2ext::Bindings*, std::string const &);
+	void register_automation_actions (Gtkmm2ext::Bindings*, std::string const &);
+	virtual void set_action_defaults ();
 
 	ArdourCanvas::Rectangle* rubberband_rect;
 
@@ -428,7 +444,8 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	virtual ArdourCanvas::GtkCanvasViewport* get_canvas_viewport() const = 0;
 	virtual ArdourCanvas::GtkCanvas* get_canvas() const = 0;
 
-	virtual void mouse_mode_toggled (Editing::MouseMode) = 0;
+	virtual void mouse_mode_chosen (Editing::MouseMode) = 0;
+	Editing::MouseMode old_mouse_mode;
 
 	bool on_velocity_scroll_event (GdkEventScroll*);
 	void pre_render ();
@@ -477,12 +494,41 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 
 	virtual void update_grid ();
 
+	virtual bool allow_trim_cursors () const;
+	virtual void make_a_region() {}
+
+	void center_screen (samplepos_t);
+	void reset_x_origin_to_follow_playhead ();
+
+	void enable_automation_bindings ();
+	void disable_automation_bindings ();
+
+	/* playhead/screen stuff */
+
+	void set_stationary_playhead (bool yn);
+	void toggle_stationary_playhead ();
+	bool stationary_playhead() const;
+
+	bool dragging_playhead () const { return _dragging_playhead; }
+
+	struct AutomationRecord {
+		AutomationRecord () : state (0) , line (nullptr) {}
+		AutomationRecord (XMLNode* s, const AutomationLine* l) : state (s) , line (l) {}
+
+		XMLNode* state; ///< state before any operation
+		const AutomationLine* line; ///< line this came from
+		std::shared_ptr<Evoral::ControlList> copy; ///< copied events for the cut buffer
+	};
+
+	virtual Gtk::Menu* get_single_region_context_menu ();
+
   protected:
 	std::string _name;
 	bool within_track_canvas;
 
 	Glib::RefPtr<Gtk::ActionGroup> _midi_actions;
 	Glib::RefPtr<Gtk::ActionGroup> _common_actions;
+	Glib::RefPtr<Gtk::ActionGroup> _automation_actions;
 	Glib::RefPtr<Gtk::ActionGroup> editor_actions;
 	Glib::RefPtr<Gtk::ActionGroup> snap_actions;
 	Glib::RefPtr<Gtk::ActionGroup> length_actions;
@@ -490,7 +536,9 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	Glib::RefPtr<Gtk::ActionGroup> velocity_actions;
 	Glib::RefPtr<Gtk::ActionGroup> zoom_actions;
 
-	void load_shared_bindings ();
+	virtual void load_shared_bindings ();
+
+	virtual Gtk::Window* transient_parent () = 0;
 
 	Editing::GridType  pre_internal_grid_type;
 	Editing::SnapMode  pre_internal_snap_mode;
@@ -498,24 +546,21 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	Editing::SnapMode  internal_snap_mode;
 
 	static std::vector<std::string> grid_type_strings;
+	static std::vector<std::string> grid_type_short_labels;
 
-	Glib::RefPtr<Gtk::RadioAction> grid_type_action (Editing::GridType);
-	Glib::RefPtr<Gtk::RadioAction> snap_mode_action (Editing::SnapMode);
-
-	Glib::RefPtr<Gtk::RadioAction> draw_length_action (Editing::GridType);
-	Glib::RefPtr<Gtk::RadioAction> draw_velocity_action (int);
-	Glib::RefPtr<Gtk::RadioAction> draw_channel_action (int);
-
-	Editing::GridType _grid_type;
-	Editing::SnapMode _snap_mode;
-
-	Editing::GridType _draw_length;
-	int _draw_velocity;
-	int _draw_channel;
+	std::map<Editing::GridType, Glib::RefPtr<Gtk::RadioAction> > grid_actions;
+	std::map<Editing::SnapMode, Glib::RefPtr<Gtk::RadioAction> > snap_mode_actions;
+	std::map<Editing::GridType, Glib::RefPtr<Gtk::RadioAction> > draw_length_actions;
+	std::map<Editing::MouseMode, Glib::RefPtr<Gtk::RadioAction> > mouse_mode_actions;
+	std::map<ARDOUR::NoteMode, Glib::RefPtr<Gtk::RadioAction> > note_mode_actions;
+	std::map<Editing::ZoomFocus, Glib::RefPtr<Gtk::RadioAction> > zoom_focus_actions;
+	std::map<int, Glib::RefPtr<Gtk::RadioAction> > draw_velocity_actions;
+	std::map<int, Glib::RefPtr<Gtk::RadioAction> > draw_channel_actions;
 
 	void draw_channel_chosen (int);
 	void draw_velocity_chosen (int);
 	void draw_length_chosen (Editing::GridType);
+	virtual void note_mode_chosen (ARDOUR::NoteMode) {}
 
 	sigc::signal<void> DrawLengthChanged;
 	sigc::signal<void> DrawVelocityChanged;
@@ -535,14 +580,13 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	ArdourWidgets::ArdourDropdown draw_channel_selector;
 	void build_draw_midi_menus ();
 
-	void grid_type_selection_done (Editing::GridType);
-	void snap_mode_selection_done (Editing::SnapMode);
-	void snap_mode_chosen (Editing::SnapMode);
-	void grid_type_chosen (Editing::GridType);
+	virtual void snap_mode_chosen (Editing::SnapMode);
+	virtual void grid_type_chosen (Editing::GridType);
 
 	ArdourWidgets::ArdourButton play_note_selection_button;
 	ArdourWidgets::ArdourButton note_mode_button;
 	ArdourWidgets::ArdourButton follow_playhead_button;
+	ArdourWidgets::ArdourButton follow_edits_button;
 
 	ArdourWidgets::ArdourButton zoom_in_button;
 	ArdourWidgets::ArdourButton zoom_out_button;
@@ -553,7 +597,6 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 
 	virtual void play_note_selection_clicked();
 	virtual void note_mode_clicked() {}
-	virtual void follow_playhead_clicked ();
 	virtual void full_zoom_clicked() {};
 	virtual void set_visible_channel (int) {}
 
@@ -573,8 +616,11 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	EditorCursor* _playhead_cursor;
 	EditorCursor* _snapped_cursor;
 
-	bool _follow_playhead;
-	virtual void reset_x_origin_to_follow_playhead () = 0;
+	Glib::RefPtr<Gtk::ToggleAction> follow_playhead_action;
+	void follow_playhead_chosen ();
+
+	Glib::RefPtr<Gtk::ToggleAction> stationary_playhead_action;
+	void stationary_playhead_chosen ();
 
 	/* selection process */
 
@@ -586,11 +632,11 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 
 	static MouseCursors* _cursors;
 
-	VerboseCursor* _verbose_cursor;
+	std::unique_ptr<VerboseCursor> _verbose_cursor;
 
 	samplecnt_t        samples_per_pixel;
-	Editing::ZoomFocus _zoom_focus;
-	virtual Editing::ZoomFocus effective_zoom_focus() const { return _zoom_focus; }
+
+	virtual Editing::ZoomFocus effective_zoom_focus() const { return zoom_focus(); }
 
 	Temporal::timepos_t snap_to_bbt_via_grid (Temporal::timepos_t const & start,
 	                                          Temporal::RoundMode   direction,
@@ -607,7 +653,6 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	                               bool                 ensure_snap = false) const = 0;
 
 	void check_best_snap (Temporal::timepos_t const & presnap, Temporal::timepos_t &test, Temporal::timepos_t &dist, Temporal::timepos_t &best) const;
-	virtual double visible_canvas_width() const = 0;
 
 	enum BBTRulerScale {
 		bbt_show_many,
@@ -636,9 +681,6 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 
 	QuantizeDialog* quantize_dialog;
 
-	friend struct TempoMapScope;
-	virtual std::shared_ptr<Temporal::TempoMap const> start_local_tempo_map (std::shared_ptr<Temporal::TempoMap>);
-	virtual void end_local_tempo_map (std::shared_ptr<Temporal::TempoMap const>) { /* no-op by default */ }
 
 	virtual bool button_press_handler (ArdourCanvas::Item*, GdkEvent*, ItemType) = 0;
 	virtual bool button_press_handler_1 (ArdourCanvas::Item*, GdkEvent*, ItemType) = 0;
@@ -660,13 +702,9 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 
 	virtual RegionSelection region_selection() = 0;
 
-	void edit_notes (MidiView*);
 	void note_edit_done (int, EditNoteDialog*);
 
-	void quantize_regions (const RegionSelection& rs);
-	void legatize_regions (const RegionSelection& rs, bool shrink_only);
-	void transform_regions (const RegionSelection& rs);
-	void transpose_regions (const RegionSelection& rs);
+	virtual MidiViews midiviews_from_region_selection (RegionSelection const &) const;
 
 	/** the adjustment that controls the overall editing vertical scroll position */
 	friend class EditorSummary;
@@ -684,7 +722,6 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	virtual void register_actions() = 0;
 	void register_grid_actions ();
 
-	Glib::RefPtr<Gtk::Action> get_mouse_mode_action (Editing::MouseMode m) const;
 	void bind_mouse_mode_buttons ();
 
 	Gtk::HBox snap_box;
@@ -694,13 +731,11 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	ArdourWidgets::ArdourVSpacer _grid_box_spacer;
 	ArdourWidgets::ArdourVSpacer _draw_box_spacer;
 
-	void pack_draw_box ();
+	void pack_draw_box (bool with_channel);
 	void pack_snap_box ();
 
 	Gtkmm2ext::BindingSet bindings;
 	Gtkmm2ext::Bindings* own_bindings;
-
-	Editing::MouseMode mouse_mode;
 
 	void set_common_editing_state (XMLNode const & node);
 	void get_common_editing_state (XMLNode& node) const;
@@ -760,8 +795,10 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 
 	bool clear_entered_track;
 
+	ARDOUR::Location* transport_loop_location();
+
 	std::vector<ArdourCanvas::Ruler::Mark> grid_marks;
-	GridLines* grid_lines;
+	std::unique_ptr<GridLines> grid_lines;
 	ArdourCanvas::Container* time_line_group;
 
 	void drop_grid ();
@@ -771,7 +808,29 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	virtual void metric_get_timecode (std::vector<ArdourCanvas::Ruler::Mark>&, int64_t, int64_t, gint) {}
 	virtual void metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>&, int64_t, int64_t, gint) {}
 	virtual void metric_get_samples (std::vector<ArdourCanvas::Ruler::Mark>&, int64_t, int64_t, gint) {}
-	virtual void metric_get_minsec (std::vector<ArdourCanvas::Ruler::Mark>&, int64_t, int64_t, gint) {}
+
+	enum MinsecRulerScale {
+		minsec_show_msecs,
+		minsec_show_seconds,
+		minsec_show_minutes,
+		minsec_show_hours,
+		minsec_show_many_hours
+	};
+
+	MinsecRulerScale minsec_ruler_scale;
+
+	samplecnt_t minsec_mark_interval;
+	gint minsec_mark_modulo;
+	gint minsec_nmarks;
+
+	void metric_get_minsec (std::vector<ArdourCanvas::Ruler::Mark>&, int64_t, int64_t, gint);
+	void set_minsec_ruler_scale (samplepos_t lower, samplepos_t upper);
+	void sample_to_clock_parts (samplepos_t sample,
+	                            samplepos_t sample_rate,
+	                            long*       hrs_p,
+	                            long*       mins_p,
+	                            long*       secs_p,
+	                            long*       millisecs_p);
 
 	virtual void set_entered_track (TimeAxisView*) {};
 
@@ -795,6 +854,19 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	/* protected helper functions to help with registering actions */
 
 	static Glib::RefPtr<Gtk::Action> reg_sens (Glib::RefPtr<Gtk::ActionGroup> group, char const* name, char const* label, sigc::slot<void> slot);
-	static void toggle_reg_sens (Glib::RefPtr<Gtk::ActionGroup> group, char const* name, char const* label, sigc::slot<void> slot);
-	static void radio_reg_sens (Glib::RefPtr<Gtk::ActionGroup> action_group, Gtk::RadioAction::Group& radio_group, char const* name, char const* label, sigc::slot<void> slot);
+	static Glib::RefPtr<Gtk::ToggleAction> toggle_reg_sens (Glib::RefPtr<Gtk::ActionGroup> group, char const* name, char const* label, sigc::slot<void> slot);
+	static Glib::RefPtr<Gtk::RadioAction> radio_reg_sens (Glib::RefPtr<Gtk::ActionGroup> action_group, Gtk::RadioAction::Group& radio_group, char const* name, char const* label, sigc::slot<void> slot);
+
+	void center_screen_internal (samplepos_t, float);
+
+	virtual void automation_create_point_at_edit_point(bool with_guard_points) {}
+	virtual void automation_raise_points () {}
+	virtual void automation_lower_points () {};
+	virtual void automation_move_points_later () {};
+	virtual void automation_move_points_earlier () {};
+	virtual void automation_begin_edit () {};
+	virtual void automation_end_edit () {};
+
+	bool temporary_zoom_focus_change;
+	bool _dragging_playhead;
 };

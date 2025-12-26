@@ -573,9 +573,6 @@ LadspaPlugin::connect_and_run (BufferSet& bufs,
 {
 	Plugin::connect_and_run (bufs, start, end, speed, in_map, out_map, nframes, offset);
 
-	cycles_t now;
-	cycles_t then = get_cycles ();
-
 	BufferSet& silent_bufs  = _session.get_silent_buffers(ChanCount(DataType::AUDIO, 1));
 	BufferSet& scratch_bufs = _session.get_scratch_buffers(ChanCount(DataType::AUDIO, 1));
 
@@ -599,8 +596,6 @@ LadspaPlugin::connect_and_run (BufferSet& bufs,
 	}
 
 	run_in_place (nframes);
-	now = get_cycles ();
-	set_cycles ((uint32_t) (now - then));
 
 	return 0;
 }

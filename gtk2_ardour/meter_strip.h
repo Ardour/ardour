@@ -68,9 +68,9 @@ public:
 
 	void reset_peak_display ();
 	void reset_route_peak_display (ARDOUR::Route*);
-	void reset_group_peak_display (ARDOUR::RouteGroup*);
+	void reset_group_peak_display (std::shared_ptr<ARDOUR::RouteGroup>);
 
-	void set_meter_type_multi (int, ARDOUR::RouteGroup*, ARDOUR::MeterType);
+	void set_meter_type_multi (int, std::shared_ptr<ARDOUR::RouteGroup>, ARDOUR::MeterType);
 
 	void set_metric_mode (int, ARDOUR::MeterType);
 	int  get_metric_mode() { return _metricmode; }

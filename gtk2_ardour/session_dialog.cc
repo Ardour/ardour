@@ -82,6 +82,16 @@ SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_
 	, new_name_was_edited (false)
 	, new_folder_chooser (FILE_CHOOSER_ACTION_SELECT_FOLDER)
 {
+	action_group = ActionGroup::create (X_("SessionDialog"));
+
+	/* No string translation because these don't show anywhere */
+	new_session_action = Action::create (X_("New"));
+	action_group->add (new_session_action, sigc::mem_fun (this, &SessionDialog::new_button_choice_action));
+	recent_session_action = Action::create (X_("Recent"));
+	action_group->add (recent_session_action, sigc::mem_fun (this, &SessionDialog::recent_button_choice_action));
+	existing_session_action = Action::create (X_("Open"));
+	action_group->add (existing_session_action, sigc::mem_fun (this, &SessionDialog::existing_button_choice_action));
+
 	set_position (WIN_POS_CENTER);
 	get_vbox()->set_spacing (6);
 	get_vbox()->pack_start (_open_table, false, false);
@@ -89,13 +99,6 @@ SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_
 	string image_path;
 	Searchpath rc (ARDOUR::ardour_data_search_path());
 	rc.add_subdirectory_to_paths ("resources");
-
-	if (find_file (rc, PROGRAM_NAME "-small-splash.png", image_path)) {
-		Gtk::Image* image;
-		if ((image = manage (new Gtk::Image (image_path))) != 0) {
-			_open_table.attach (*image, 0,1,  0,1, FILL, FILL, 0, 6);
-		}
-	}
 
 	/* Possible update message */
 	if (ARDOUR_UI::instance()->announce_string() != "") {
@@ -120,48 +123,55 @@ SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_
 	/* no update message for trax, show license here */
 	_open_table.attach (_info_box, 1,3, 0,1, FILL, FILL, 0, 6);
 #endif
-	
-	new_button.set_text("NEW");
+
+	new_button.set_text (_("NEW"));
 	new_button.set_name ("tab button");
-	new_button.signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::new_button_pressed), false);
 	new_button.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceFlat));
+	new_button.set_can_focus (true);
+	new_button.set_related_action (new_session_action);
 
-	recent_button.set_text("RECENT");
+	recent_button.set_text (_("RECENT"));
 	recent_button.set_name ("tab button");
-	recent_button.signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::recent_button_pressed), false);
 	recent_button.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceFlat));
+	recent_button.set_can_focus (true);
+	recent_button.set_related_action (recent_session_action);
 
-	existing_button.set_text("OPEN");
+	existing_button.set_text (_("OPEN"));
 	existing_button.set_name ("tab button");
-	existing_button.signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::existing_button_pressed), false);
 	existing_button.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceFlat));
+	existing_button.set_can_focus (true);
+	existing_button.set_related_action (existing_session_action);
 
-	prefs_button.set_text("SETTINGS");
+	prefs_button.set_text(_("SETTINGS"));
 	prefs_button.set_name ("tab button");
 	prefs_button.signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::prefs_button_pressed), false);
 	prefs_button.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceFlat));
 
-	Glib::RefPtr<SizeGroup> grp = SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL);
+	Glib::RefPtr<SizeGroup> grp = SizeGroup::create (Gtk::SIZE_GROUP_BOTH);
 	grp->add_widget(new_button);
 	grp->add_widget(recent_button);
 	grp->add_widget(existing_button);
-	grp->add_widget(prefs_button);
 
-	ArdourHSpacer *spacer = manage (new ArdourHSpacer(1.0));
-	spacer->set_size_request(-1, 12);
-	_open_table.attach (*spacer,           0,3, 1,2, FILL|EXPAND, SHRINK, 0, 6);
+	int top = 0;
+	int row = 0;
 
-	_open_table.attach (new_button,        0,1, 2,3, FILL, FILL);
-	_open_table.attach (recent_button,     0,1, 3,4, FILL, FILL);
-	_open_table.attach (existing_button,   0,1, 4,5, FILL, FILL);
-#if 0
-	_open_table.attach (prefs_button,      0,1, 5,6, FILL, FILL);
-#endif
+	if (find_file (rc, PROGRAM_NAME "-small-splash.png", image_path)) {
+		Gtk::Image* image;
+		if ((image = manage (new Gtk::Image (image_path))) != 0) {
+			_open_table.attach (*image, 0,1,  row , row + 1, FILL, FILL); ++row;
+			grp->add_widget (*image);
+		}
+	}
 
+	_open_table.attach (recent_button,     0,1, row, row + 1, FILL, FILL); ++row;
+	_open_table.attach (existing_button,   0,1, row, row + 1, FILL, FILL); ++row;
+	_open_table.attach (new_button,        0,1, row, row + 1, FILL, FILL); ++row;
+
+	++row;
 	Label *vspacer = manage (new Label());
 	vspacer->set_size_request(8, -1);
-	_open_table.attach (*vspacer,          1,2, 1,6, FILL, FILL|EXPAND, 0, 0);
-	_open_table.attach (_tabs,             2,3, 2,6, FILL|EXPAND, FILL|EXPAND, 0, 0);
+	_open_table.attach (*vspacer,          1,2, top, row, FILL,        FILL|EXPAND, 0, 0);
+	_open_table.attach (_tabs,             2,3, top, row, FILL|EXPAND, FILL|EXPAND, 0, 0);
 
 	_tabs.set_show_tabs(false);
 	_tabs.set_show_border(false);
@@ -537,34 +547,48 @@ SessionDialog::existing_file_selected ()
 		return;
 	}
 
-	open_button->set_sensitive(false);
+	open_button->set_sensitive (false);
 
-	float sr;
-	SampleFormat sf;
-	string pv;
-	XMLNode   engine_hints ("EngineHints");
+	std::string const& s = existing_session_chooser.get_filename ();
+	if (!Glib::file_test (s, Glib::FILE_TEST_IS_REGULAR)) {
+		return;
+	}
 
-	std::string s = existing_session_chooser.get_filename ();
-	if (Glib::file_test (s, Glib::FILE_TEST_IS_REGULAR)) {
-		switch (Session::get_info_from_path (s, sr, sf, pv, &engine_hints)) {
-			case 0: {
+	std::string suffix = s.substr (s.find_last_of ('.'));
+
+	if (PBD::downcase (suffix).find (advanced_authoring_format_suffix) == 0) {
+		// OK
+	}  else if (suffix.find (session_archive_suffix) == 0) {
+		// OK
+	} else {
+		float        sr;
+		SampleFormat sf;
+		string       pv;
+
+		switch (Session::get_info_from_path (s, sr, sf, pv)) {
+			case 1:
+				/* OK */
+				break;
+			case 0:
 				//TODO: display the rate somewhere? check that our engine can open this rate?
 				/* OK */
-			} break;
+				break;
 			case -1:
 				error << string_compose (_("Session file %1 does not exist"), s) << endmsg;
 				return;
-			break;
+				break;
 			case -3:
 				error << string_compose (_("Session %1 is from a newer version of %2"), s, PROGRAM_NAME) << endmsg;
 				return;
-			break;
+				break;
 			default:
 				error << string_compose (_("Cannot get existing session information from %1"), s) << endmsg;
-				//fallthrough
+				return;
+				break;
 		}
-		open_button->set_sensitive(true);  //still potentially openable; checks for session archives, .ptf, and .aaf will have to occur later
 	}
+
+	open_button->set_sensitive(true);  //still potentially openable; checks for session archives, .ptf, and .aaf will have to occur later
 }
 
 void
@@ -572,28 +596,22 @@ SessionDialog::session_selected ()
 {
 }
 
-bool
-SessionDialog::new_button_pressed (GdkEventButton*)
+void
+SessionDialog::new_button_choice_action ()
 {
 	_tabs.set_current_page(0);
-
-	return true;
 }
 
-bool
-SessionDialog::recent_button_pressed (GdkEventButton*)
+void
+SessionDialog::recent_button_choice_action ()
 {
 	_tabs.set_current_page(1);
-
-	return true;
 }
 
-bool
-SessionDialog::existing_button_pressed (GdkEventButton*)
+void
+SessionDialog::existing_button_choice_action ()
 {
 	_tabs.set_current_page(2);
-
-	return true;
 }
 
 bool
@@ -810,13 +828,13 @@ SessionDialog::setup_new_session_page ()
 
 		template_desc_frame.set_name (X_("TextHighlightFrame"));
 		template_desc_frame.add (*desc_scroller);
-		template_hbox->pack_start (template_desc_frame, true, true);
+		template_hbox->pack_start (template_desc_frame, false, false);
 	}
 
 	//template_desc is the textview that displays the currently selected template's description
 	template_desc.set_editable (false);
 	template_desc.set_wrap_mode (Gtk::WRAP_WORD);
-	template_desc.set_size_request (300,300);
+	template_desc.set_size_request (200,300);
 	template_desc.set_name (X_("TextOnBackground"));
 	template_desc.set_border_width (6);
 

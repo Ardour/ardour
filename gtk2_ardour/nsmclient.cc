@@ -20,8 +20,11 @@
 #include "nsmclient.h"
 #include <string.h>
 #include <sys/types.h>
-#include <unistd.h>
 #include <stdlib.h>
+
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #ifndef COMPILER_MSVC
 #pragma GCC diagnostic ignored "-Wunused-parameter"

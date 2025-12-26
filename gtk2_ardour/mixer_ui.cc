@@ -162,7 +162,7 @@ Mixer_UI::Mixer_UI ()
 	Glib::RefPtr<ToggleAction> fb_act = ActionManager::get_toggle_action ("Mixer", "ToggleFoldbackStrip");
 	fb_act->set_sensitive (false);
 
-	set_widget_bindings (contents(), *bindings, "ardour-bindings");
+	set_widget_bindings (contents(), *bindings, ARDOUR_BINDING_KEY);
 
 	PresentationInfo::Change.connect (*this, invalidator (*this), std::bind (&Mixer_UI::presentation_info_changed, this, _1), gui_context());
 	Route::FanOut.connect (*this, invalidator (*this), std::bind (&Mixer_UI::fan_out, this, _1, false, true), gui_context());
@@ -185,8 +185,9 @@ Mixer_UI::Mixer_UI ()
 	/* add as last item of strip packer */
 	strip_packer.pack_end (scroller_base, true, true);
 	scroller_base.set_size_request (PX_SCALE (20), -1);
-	scroller_base.signal_expose_event ().connect (sigc::bind (sigc::ptr_fun (&ArdourWidgets::ArdourIcon::expose_with_text), &scroller_base, ArdourWidgets::ArdourIcon::ShadedPlusSign,
-			_("Right-click or Double-click here\nto add Track, Bus, or VCA channels")));
+	if (UIConfiguration::instance().get_render_plus_hints ()) {
+		scroller_base.signal_expose_event ().connect (sigc::bind (sigc::ptr_fun (&ArdourWidgets::ArdourIcon::expose_with_text), &scroller_base, ArdourWidgets::ArdourIcon::ShadedPlusSign, _("Right-click or Double-click here\nto add Track, Bus, or VCA channels")));
+	}
 
 #ifdef MIXBUS
 	/* create a drop-shadow at the end of the mixer strips */
@@ -389,6 +390,7 @@ Mixer_UI::Mixer_UI ()
 
 	if (!Profile->get_mixbus ()) {
 		content_att_left.add (list_vpacker);
+		content_left_pane.set_child_minsize (content_att_left, 150);
 	} else {
 		content_att_right.add (list_vpacker);
 	}
@@ -402,7 +404,7 @@ Mixer_UI::Mixer_UI ()
 	scroller_base.show();
 	scroller_hpacker.show();
 	mixer_scroller_vpacker.show();
-	list_vpacker.show();
+	list_vpacker.show_all();
 	group_display_button_label.show();
 	group_display_scroller.show();
 	favorite_plugins_scroller.show();
@@ -494,7 +496,7 @@ Mixer_UI::use_own_window (bool and_fill_it)
 		win->set_name ("MixerWindow");
 		ARDOUR_UI::instance()->setup_toplevel_window (*win, _("Mixer"), this);
 		win->signal_event().connect (sigc::bind (sigc::ptr_fun (&Keyboard::catch_user_event_for_pre_dialog_focus), win));
-		set_widget_bindings (*win, *bindings, "ardour-bindings");
+		set_widget_bindings (*win, *bindings, ARDOUR_BINDING_KEY);
 		update_title ();
 		if (!win->get_focus()) {
 			/* set focus widget to something, anything */
@@ -1095,16 +1097,16 @@ Mixer_UI::fan_out (std::weak_ptr<Route> wr, bool to_busses, bool group)
 #undef BUSNAME
 
 	if (group) {
-		RouteGroup* rg = NULL;
-		const std::list<RouteGroup*>& rgs (_session->route_groups ());
-		for (std::list<RouteGroup*>::const_iterator i = rgs.begin (); i != rgs.end (); ++i) {
+		std::shared_ptr<RouteGroup> rg;
+		const RouteGroupList & rgs (_session->route_groups ());
+		for (RouteGroupList::const_iterator i = rgs.begin (); i != rgs.end (); ++i) {
 			if ((*i)->name () == pi->name ()) {
 				rg = *i;
 				break;
 			}
 		}
 		if (!rg) {
-			rg = new RouteGroup (*_session, pi->name ());
+			rg = _session->new_route_group (pi->name ());
 			_session->add_route_group (rg);
 			rg->set_gain (false);
 		}
@@ -1268,7 +1270,23 @@ Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 bool
 Mixer_UI::vca_button_release_event (GdkEventButton *ev, VCAMasterStrip *strip)
 {
-	_selection.set (strip);
+	if (ev->button == 1) {
+		if (_selection.selected (strip)) {
+			/* primary-click: toggle selection state of strip */
+			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+				_selection.remove (strip, false);
+			} else if (_selection.axes.size() > 1) {
+				/* de-select others */
+				_selection.set (strip);
+			}
+		} else {
+			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+				_selection.add (strip, true);
+			} else {
+				_selection.set (strip);
+			}
+		}
+	}
 	return true;
 }
 
@@ -1358,9 +1376,11 @@ Mixer_UI::session_going_away ()
 {
 	ENSURE_GUI_THREAD (*this, &Mixer_UI::session_going_away);
 
-	_in_group_rebuild_or_clear = true;
-	group_model->clear ();
-	_in_group_rebuild_or_clear = false;
+	{
+		PBD::Unwinder<bool> uw (_in_group_rebuild_or_clear, true);
+		group_model->clear ();
+	}
+
 
 	_selection.clear ();
 	track_model->clear ();
@@ -1778,8 +1798,9 @@ Mixer_UI::redisplay_track_list ()
 
 	vca_hpacker.pack_end (vca_scroller_base, true, true);
 	vca_scroller_base.set_size_request (PX_SCALE (20), -1);
-	vca_scroller_base.signal_expose_event ().connect (sigc::bind (sigc::ptr_fun (&ArdourWidgets::ArdourIcon::expose_with_text), &vca_scroller_base, ArdourWidgets::ArdourIcon::ShadedPlusSign,
-			_("Right-click or Double-click here\nto add Track, Bus, or VCA channels")));
+	if (UIConfiguration::instance().get_render_plus_hints ()) {
+		vca_scroller_base.signal_expose_event ().connect (sigc::bind (sigc::ptr_fun (&ArdourWidgets::ArdourIcon::expose_with_text), &vca_scroller_base, ArdourWidgets::ArdourIcon::ShadedPlusSign, _("Right-click or Double-click here\nto add Track, Bus, or VCA channels")));
+	}
 	vca_scroller_base.show();
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
@@ -2134,7 +2155,7 @@ Mixer_UI::group_display_button_press (GdkEventButton* ev)
 		return true;
 	}
 
-	RouteGroup* group = (*iter)[group_columns.group];
+	std::shared_ptr<RouteGroup> group = (*iter)[group_columns.group];
 
 	if (Keyboard::is_context_menu_event (ev)) {
 		_group_tabs->get_menu(group)->popup (ev->button, ev->time);
@@ -2188,11 +2209,12 @@ Mixer_UI::route_groups_changed ()
 {
 	ENSURE_GUI_THREAD (*this, &Mixer_UI::route_groups_changed);
 
-	_in_group_rebuild_or_clear = true;
+	PBD::Unwinder<bool> uw (_in_group_rebuild_or_clear, true);
 
 	/* just rebuild the while thing */
 
 	group_model->clear ();
+	_group_tabs->clear ();
 
 #if 0
 	/* this is currently not used,
@@ -2207,14 +2229,12 @@ Mixer_UI::route_groups_changed ()
 		row = *(group_model->append());
 		row[group_columns.visible] = true;
 		row[group_columns.text] = (_("-all-"));
-		row[group_columns.group] = 0;
+		row[group_columns.group] = nullptr;
 	}
 #endif
 
 	_session->foreach_route_group (sigc::mem_fun (*this, &Mixer_UI::add_route_group));
-
 	_group_tabs->set_dirty ();
-	_in_group_rebuild_or_clear = false;
 }
 
 void
@@ -2240,18 +2260,23 @@ Mixer_UI::remove_selected_route_group ()
 
 	if ((iter = group_model->get_iter (*i))) {
 
-		RouteGroup* rg = (*iter)[group_columns.group];
+		std::shared_ptr<RouteGroup> rg = (*iter)[group_columns.group];
 
 		if (rg) {
-			_session->remove_route_group (*rg);
+			_session->remove_route_group (rg);
 		}
 	}
 }
 
 void
-Mixer_UI::route_group_property_changed (RouteGroup* group, const PropertyChange& change)
+Mixer_UI::route_group_property_changed (std::weak_ptr<RouteGroup> wgroup, const PropertyChange& change)
 {
 	if (in_group_row_change) {
+		return;
+	}
+
+	std::shared_ptr<RouteGroup> group (wgroup.lock());
+	if (!group) {
 		return;
 	}
 
@@ -2272,7 +2297,8 @@ Mixer_UI::route_group_property_changed (RouteGroup* group, const PropertyChange&
 	in_group_row_change = true;
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
-		if ((*i)[group_columns.group] == group) {
+		std::shared_ptr<RouteGroup> rg ((*i)[group_columns.group]);
+		if (rg == group) {
 			(*i)[group_columns.visible] = !group->is_hidden ();
 			(*i)[group_columns.text] = group->name ();
 			break;
@@ -2380,7 +2406,7 @@ Mixer_UI::showhide_mixbuses (bool on)
 void
 Mixer_UI::route_group_name_edit (const std::string& path, const std::string& new_text)
 {
-	RouteGroup* group;
+	std::shared_ptr<RouteGroup> group;
 	TreeIter iter;
 
 	if ((iter = group_model->get_iter (path))) {
@@ -2398,13 +2424,15 @@ Mixer_UI::route_group_name_edit (const std::string& path, const std::string& new
 void
 Mixer_UI::route_group_row_change (const Gtk::TreeModel::Path&, const Gtk::TreeModel::iterator& iter)
 {
-	RouteGroup* group;
+	std::shared_ptr<RouteGroup> group;
 
 	if (in_group_row_change) {
 		return;
 	}
 
-	if ((group = (*iter)[group_columns.group]) == 0) {
+	group = (*iter)[group_columns.group];
+
+	if (!group) {
 		return;
 	}
 
@@ -2434,11 +2462,11 @@ Mixer_UI::route_group_row_deleted (Gtk::TreeModel::Path const &)
 
 	/* Re-write the session's route group list so that the new order is preserved */
 
-	list<RouteGroup*> new_list;
+	RouteGroupList new_list;
 
 	Gtk::TreeModel::Children children = group_model->children();
 	for (Gtk::TreeModel::Children::iterator i = children.begin(); i != children.end(); ++i) {
-		RouteGroup* g = (*i)[group_columns.group];
+		std::shared_ptr<RouteGroup> g = (*i)[group_columns.group];
 		if (g) {
 			new_list.push_back (g);
 		}
@@ -2449,7 +2477,7 @@ Mixer_UI::route_group_row_deleted (Gtk::TreeModel::Path const &)
 
 
 void
-Mixer_UI::add_route_group (RouteGroup* group)
+Mixer_UI::add_route_group (std::shared_ptr<RouteGroup> group)
 {
 	ENSURE_GUI_THREAD (*this, &Mixer_UI::add_route_group, group)
 	bool focus = false;
@@ -2466,7 +2494,8 @@ Mixer_UI::add_route_group (RouteGroup* group)
 		focus = true;
 	}
 
-	group->PropertyChanged.connect (*this, invalidator (*this), std::bind (&Mixer_UI::route_group_property_changed, this, group, _1), gui_context());
+	std::weak_ptr<RouteGroup> wg (group);
+	group->PropertyChanged.connect (*this, invalidator (*this), std::bind (&Mixer_UI::route_group_property_changed, this, wg, _1), gui_context());
 
 	if (focus) {
 		TreeViewColumn* col = group_display.get_column (0);
@@ -2513,7 +2542,7 @@ Mixer_UI::scroller_drag_data_received (const Glib::RefPtr<Gdk::DragContext>& con
 		if (!pip->is_instrument ()) {
 			continue;
 		}
-		ARDOUR_UI::instance()->session_add_midi_route (true, (RouteGroup*) 0, 1, _("MIDI"), Config->get_strict_io (), pip, ppp->_preset.valid ? &ppp->_preset : 0, PresentationInfo::max_order, false);
+		ARDOUR_UI::instance()->session_add_midi_route (true, nullptr, 1, _("MIDI"), Config->get_strict_io (), pip, ppp->_preset.valid ? &ppp->_preset : 0, PresentationInfo::max_order, false);
 		ok = true;
 	}
 
@@ -2925,7 +2954,7 @@ Mixer_UI::parameter_changed (string const & p)
 }
 
 void
-Mixer_UI::set_route_group_activation (RouteGroup* g, bool a)
+Mixer_UI::set_route_group_activation (std::shared_ptr<RouteGroup> g, bool a)
 {
 	g->set_active (a, this);
 }
@@ -3761,18 +3790,15 @@ Mixer_UI::register_actions ()
 
 	RefPtr<Action> act;
 	if (!Profile->get_mixbus ()) {
-		act = ActionManager::register_toggle_action (group, "ToggleMixerList", _("(Mixer) Show Sidebar List"), sigc::mem_fun (*this, &Tabbable::att_left_button_toggled));
+		act = ActionManager::register_toggle_action (group, "ToggleMixerList", _("Mixer: Show Sidebar List"), sigc::mem_fun (*this, &Tabbable::att_left_button_toggled));
 		left_attachment_button.set_related_action (act);
-		act = ActionManager::register_toggle_action (group, "ToggleMixerStrip", _("(Mixer) Show Sidebar Strip"), []{});
 	} else {
-		act = ActionManager::register_toggle_action (group, "ToggleMixerList", _("(Mixer) Show Sidebar List"), sigc::mem_fun (*this, &Tabbable::att_right_button_toggled));
+		act = ActionManager::register_toggle_action (group, "ToggleMixerList", _("Mixer: Show Sidebar List"), sigc::mem_fun (*this, &Tabbable::att_right_button_toggled));
 		right_attachment_button.set_related_action (act);
-		act = ActionManager::register_toggle_action (group, "ToggleMixerStrip", _("(Mixer) Show Sidebar Strip"), sigc::mem_fun (*this, &Tabbable::att_left_button_toggled));
-		left_attachment_button.set_related_action (act);
 	}
 
 #ifdef MIXBUS
-	act = ActionManager::register_toggle_action (group, "ToggleMixerProps", _("(Mixer) Show Properties Bottom"), sigc::mem_fun (*this, &Tabbable::att_bottom_button_toggled));
+	act = ActionManager::register_toggle_action (group, "ToggleMixerProps", _("Mixer: Show Properties Bottom"), sigc::mem_fun (*this, &Tabbable::att_bottom_button_toggled));
 	bottom_attachment_button.set_related_action (act);
 #endif
 
@@ -4306,7 +4332,7 @@ Mixer_UI::update_scene_buttons ()
 			                                  "Right-Click for Context menu")
 			                                  , Keyboard::momentary_push_name() ) );
 			if (last) {
-				l->set_markup(string_compose ("<b>>%1</b>", scn->name()));
+				l->set_markup(string_compose ("<b>%1</b>", Gtkmm2ext::markup_escape_text (scn->name())));
 			} else {
 				l->set_text (scn->name());
 			}

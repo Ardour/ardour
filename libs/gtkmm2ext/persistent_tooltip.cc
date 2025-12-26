@@ -37,7 +37,6 @@ PersistentTooltip::PersistentTooltip (Gtk::Widget* target, bool  draggable, int 
 	, _label (0)
 	, _draggable (draggable)
 	, _maybe_dragging (false)
-	, _align_to_center (true)
 	, _margin_y (margin_y)
 {
 	target->signal_enter_notify_event().connect (sigc::mem_fun (*this, &PersistentTooltip::enter), false);
@@ -77,6 +76,14 @@ PersistentTooltip::leave (GdkEventCrossing *)
 		hide ();
 	}
 
+	return false;
+}
+
+bool
+PersistentTooltip::parent_focus_out (GdkEventFocus*) 
+{
+	_timeout.disconnect ();
+	hide ();
 	return false;
 }
 
@@ -126,6 +133,7 @@ PersistentTooltip::show ()
 		_window->set_name (X_("ContrastingPopup"));
 		_window->set_position (WIN_POS_MOUSE);
 		_window->set_decorated (false);
+		_window->signal_realize().connect (mem_fun (this, &PersistentTooltip::realized));
 
 		_label = manage (new Label);
 		_label->modify_font (_font);
@@ -138,39 +146,69 @@ PersistentTooltip::show ()
 		Gtk::Window* tlw = dynamic_cast<Gtk::Window*> (_target->get_toplevel ());
 		if (tlw) {
 			_window->set_transient_for (*tlw);
+			_window->signal_focus_out_event ().connect (sigc::mem_fun (*this, &PersistentTooltip::parent_focus_out));
 		}
 	}
 
 	set_tip (_tip);
 
-	if (!_window->get_visible ()) {
-		int rx, ry;
-		int sw = gdk_screen_width ();
-
-		_target->get_window()->get_origin (rx, ry);
-
-		/* the window needs to be realized first
-		 * for _window->get_width() to be correct.
-		 */
-
-
-		if (sw < rx + _window->get_width()) {
-			/* right edge of window would be off the right edge of
-			   the screen, so don't show it in the usual place.
-			*/
-			rx = sw - _window->get_width();
-			_window->move (rx, ry + _target->get_height() + _margin_y);
-		} else {
-			if (_align_to_center) {
-				_window->move (rx + (_target->get_width () - _window->get_width ()) / 2, ry + _target->get_height());
-			} else {
-				_window->move (rx, ry + _target->get_height());
-			}
-		}
-
-		_window->present ();
-
+	if (_window->is_realized ()) {
+		update_position ();
 	}
+
+	if (!_window->get_visible ()) {
+		_window->present ();
+	}
+
+}
+
+void
+PersistentTooltip::update_position ()
+{
+	int tgt_x, tgt_y;
+
+	int tgt_w = _target->get_width ();
+	int tgt_h = _target->get_height ();
+
+	_target->get_window()->get_origin (tgt_x, tgt_y);
+
+	GdkScreen* screen = gtk_widget_get_screen (GTK_WIDGET(_window->gobj()));
+	GdkRectangle monitor;
+	gint monitor_num = gdk_screen_get_monitor_at_point (screen, tgt_x, tgt_y + tgt_h / 2);
+	gdk_screen_get_monitor_geometry (screen, monitor_num, &monitor);
+
+	int w = _window->get_width ();
+	int h = _window->get_height ();
+
+	int left   = tgt_x + (tgt_w - w) / 2;
+	int right  = left + w;
+	int top    = tgt_y + tgt_h + _margin_y;
+	int bottom = top + h;
+
+	int sw = monitor.x + monitor.width;
+
+	if (right > sw) {
+		/* right edge of window would be off the right edge of
+		 * the screen, so don't show it in the usual place.
+		 */
+		left = sw - w;
+	} else if (left < monitor.x) {
+		/* ditto for the left edge */
+		left = monitor.x;
+	}
+
+	if (bottom > monitor.y + monitor.height) {
+		/* don't show tooltop across screens */
+		top = tgt_y - h - _margin_y - 1;
+	}
+
+	_window->move (left, top);
+}
+
+void
+PersistentTooltip::realized ()
+{
+	update_position ();
 }
 
 void
@@ -191,10 +229,4 @@ PersistentTooltip::set_font (Pango::FontDescription font)
 	if (_label) {
 		_label->modify_font (_font);
 	}
-}
-
-void
-PersistentTooltip::set_center_alignment (bool align_to_center)
-{
-	_align_to_center = align_to_center;
 }

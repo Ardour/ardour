@@ -22,6 +22,7 @@
 
 #include "pbd/compose.h"
 
+#include "ardour/audio_track.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/port_insert.h"
 #include "ardour/route.h"
@@ -30,8 +31,8 @@
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/utils.h"
 
-#include "widgets/frame.h"
-
+#include "ardour_ui.h"
+#include "mixer_ui.h"
 #include "plugin_selector.h"
 #include "plugin_ui.h"
 #include "port_insert_ui.h"
@@ -46,19 +47,40 @@ using namespace ARDOUR;
 using namespace ArdourWidgets;
 
 RoutePropertiesBox::RoutePropertiesBox ()
-	: _idle_refill_processors_id (-1)
+	: _insert_box (nullptr)
+	, _show_insert (false)
+	, _idle_refill_processors_id (-1)
 {
 	_scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_NEVER);
 	_scroller.add (_box);
 
-	_box.set_spacing (4);
+	/* the return of the ScrolledWindowViewport mess:
+	 * remove shadow from scrollWindow's viewport
+	 * see http://www.mail-archive.com/gtkmm-list@gnome.org/msg03509.html
+	 */
+	Gtk::Viewport* viewport = (Gtk::Viewport*) _scroller.get_child();
+	viewport->set_shadow_type(Gtk::SHADOW_NONE);
+	viewport->set_border_width(0);
 
+	_box.set_spacing (4);
+	_insert_frame.set_no_show_all ();
+
+	pack_start (_insert_frame, false, false, 4);
 	pack_start (_scroller, true, true);
 	show_all();
+
+	ARDOUR_UI::instance()->ActionsReady.connect_same_thread (_forever_connections, std::bind (&RoutePropertiesBox::ui_actions_ready, this));
 }
 
 RoutePropertiesBox::~RoutePropertiesBox ()
 {
+}
+
+void
+RoutePropertiesBox::ui_actions_ready ()
+{
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("show-editor-mixer"));
+	tact->signal_toggled().connect (sigc::mem_fun (*this, &RoutePropertiesBox::update_processor_box_visibility));
 }
 
 void
@@ -67,24 +89,101 @@ RoutePropertiesBox::session_going_away ()
 	ENSURE_GUI_THREAD (*this, &RoutePropertiesBox::session_going_away);
 	SessionHandlePtr::session_going_away ();
 
+	_insert_frame.remove ();
 	drop_plugin_uis ();
 	drop_route ();
+	delete _insert_box;
+	_insert_box = nullptr;
 }
 
 void
-RoutePropertiesBox::set_route (std::shared_ptr<Route> r)
-{
-	if (r == _route) {
+RoutePropertiesBox::set_session (ARDOUR::Session* s) {
+	SessionHandlePtr::set_session (s);
+	if (!s) {
 		return;
 	}
-	assert (r);
+	delete _insert_box;
+	_insert_box = new ProcessorBox (_session, std::bind (&Mixer_UI::plugin_selector, Mixer_UI::instance()), Mixer_UI::instance()->selection(), 0);
+	_insert_box->show_all ();
+
+	float ui_scale = std::max<float> (1.f, UIConfiguration::instance().get_ui_scale());
+	_insert_frame.remove ();
+	_insert_frame.add (*_insert_box);
+	_insert_frame.set_padding (4);
+	_insert_frame.set_size_request (144 * ui_scale, 236 * ui_scale);
+
+	_session->SurroundMasterAddedOrRemoved.connect (_session_connections, invalidator (*this), std::bind (&RoutePropertiesBox::surround_master_added_or_removed, this), gui_context());
+}
+
+void
+RoutePropertiesBox::surround_master_added_or_removed ()
+{
+	set_route (_route, true);
+}
+
+void
+RoutePropertiesBox::set_route (std::shared_ptr<Route> r, bool force_update)
+{
+	if (r == _route && !force_update) {
+		return;
+	}
+
+	if (!r) {
+		drop_route ();
+		return;
+	}
+
 	_route = r;
 	_route_connections.drop_connections ();
 
 	_route->processors_changed.connect (_route_connections, invalidator (*this), std::bind (&RoutePropertiesBox::idle_refill_processors, this), gui_context());
 	_route->PropertyChanged.connect (_route_connections, invalidator (*this), std::bind (&RoutePropertiesBox::property_changed, this, _1), gui_context ());
 	_route->DropReferences.connect (_route_connections, invalidator (*this), std::bind (&RoutePropertiesBox::drop_route, this), gui_context());
+
+	std::shared_ptr<AudioTrack> at = std::dynamic_pointer_cast<AudioTrack>(_route);
+	if (at) {
+		at->FreezeChange.connect (_route_connections, invalidator (*this), std::bind (&RoutePropertiesBox::map_frozen, this), gui_context());
+	}
+
+	_insert_box->set_route (r);
 	refill_processors ();
+}
+
+void
+RoutePropertiesBox::map_frozen ()
+{
+	ENSURE_GUI_THREAD (*this, &RoutePropertiesBox::map_frozen)
+		std::shared_ptr<AudioTrack> at = std::dynamic_pointer_cast<AudioTrack>(_route);
+	if (at && _insert_box) {
+		switch (at->freeze_state()) {
+			case AudioTrack::Frozen:
+				_insert_box->set_sensitive (false);
+				break;
+			default:
+				_insert_box->set_sensitive (true);
+				break;
+		}
+	}
+}
+
+void
+RoutePropertiesBox::update_processor_box_visibility ()
+{
+	_show_insert = !ActionManager::get_toggle_action (X_("Editor"), X_("show-editor-mixer"))->get_active ();
+	if (!_show_insert || _proc_uis.empty ()) {
+		_insert_frame.hide ();
+	} else {
+		_insert_frame.show ();
+	}
+
+#ifndef MIXBUS
+	if (_show_insert || !_proc_uis.empty ()) {
+		float ui_scale = std::max<float> (1.f, UIConfiguration::instance().get_ui_scale());
+		set_size_request (-1, 365 * ui_scale); // match with SelectionPropertiesBox
+	} else {
+		set_size_request (-1, -1);
+	}
+#endif
 }
 
 void
@@ -121,6 +220,7 @@ RoutePropertiesBox::drop_plugin_uis ()
 
 	_processor_connections.drop_connections ();
 	_proc_uis.clear ();
+	_insert_frame.hide ();
 }
 
 void
@@ -189,11 +289,12 @@ RoutePropertiesBox::refill_processors ()
 		float ui_scale = std::max<float> (1.f, UIConfiguration::instance().get_ui_scale());
 		int h = 100 * ui_scale;
 		for (auto const& ui : _proc_uis) {
-			h = std::max<int> (h, ui->get_preferred_height () + /* frame label */ 30 * ui_scale);
+			h = std::max<int> (h, ui->get_preferred_height () + /* frame label */ 34 * ui_scale);
 		}
 		h = std::min<int> (h, 300 * ui_scale);
 		_box.set_size_request (-1, h);
 		_scroller.show_all ();
 	}
+	update_processor_box_visibility ();
 	_idle_refill_processors_id = -1;
 }

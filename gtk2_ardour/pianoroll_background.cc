@@ -20,23 +20,28 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "ardour/smf_source.h"
+#include "ardour/midi_region.h"
+
+#include "pianoroll.h"
 #include "pianoroll_background.h"
 #include "midi_view.h"
 
-CueMidiBackground::CueMidiBackground (ArdourCanvas::Item* parent)
-	: MidiViewBackground (parent)
+PianorollMidiBackground::PianorollMidiBackground (ArdourCanvas::Item* parent, Pianoroll& pr)
+	: MidiViewBackground (parent, pr)
 	, view (nullptr)
-	, _width (0.)
-	, _height (0.)
+	, pianoroll (pr)
+	, _width (0)
+	, _height (0)
 {
 }
 
-CueMidiBackground::~CueMidiBackground ()
+PianorollMidiBackground::~PianorollMidiBackground ()
 {
 }
 
 void
-CueMidiBackground::set_size (double w, double h)
+PianorollMidiBackground::set_size (int w, int h)
 {
 	_width = w;
 	_height = h;
@@ -46,50 +51,65 @@ CueMidiBackground::set_size (double w, double h)
 	HeightChanged (); /* EMIT SIGNAL */
 }
 
-double
-CueMidiBackground::contents_height() const
+int
+PianorollMidiBackground::contents_height() const
 {
 	return _height;
 }
 
-double
-CueMidiBackground::height() const
+int
+PianorollMidiBackground::height() const
 {
 	return _height;
 }
 
-double
-CueMidiBackground::width() const
+int
+PianorollMidiBackground::width() const
 {
 	return _width;
 }
 
+ARDOUR::InstrumentInfo*
+PianorollMidiBackground::instrument_info () const
+{
+	return pianoroll.instrument_info ();
+}
+
 uint8_t
-CueMidiBackground::get_preferred_midi_channel () const
+PianorollMidiBackground::get_preferred_midi_channel () const
 {
-	return 0;
+	return pianoroll.visible_channel ();
 }
 
 void
-CueMidiBackground::set_note_highlight (bool yn)
-{
-}
-
-void
-CueMidiBackground::record_layer_check (std::shared_ptr<ARDOUR::Region>, samplepos_t)
+PianorollMidiBackground::set_note_highlight (bool yn)
 {
 }
 
 void
-CueMidiBackground::set_view (MidiView* mv)
+PianorollMidiBackground::record_layer_check (std::shared_ptr<ARDOUR::Region>, samplepos_t)
+{
+}
+
+void
+PianorollMidiBackground::set_view (MidiView* mv)
 {
 	view = mv;
 }
 
 void
-CueMidiBackground::apply_note_range_to_children ()
+PianorollMidiBackground::apply_note_range_to_children ()
 {
 	if (view) {
 		view->apply_note_range (lowest_note(), highest_note());
 	}
+}
+
+void
+PianorollMidiBackground::display_region (MidiView& mv)
+{
+	std::shared_ptr<ARDOUR::SMFSource> smf (std::dynamic_pointer_cast<ARDOUR::SMFSource> (mv.midi_region()->source()));
+	assert (smf);
+	(void) update_data_note_range (smf->model()->lowest_note(), smf->model()->highest_note());
+	apply_note_range (smf->model()->lowest_note(), smf->model()->highest_note(), true, RangeCanMove (CanMoveTop|CanMoveBottom));
 }

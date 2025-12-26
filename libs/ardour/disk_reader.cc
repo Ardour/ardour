@@ -468,7 +468,7 @@ midi:
 
 	/* MIDI data handling */
 
-	const bool no_playlist_modification_pending = !(pending_overwrite () & PlaylistModified);
+	const bool no_playlist_modification_pending = 0 == (_pending_overwrite.load () & PlaylistModified);
 
 	if (bufs.count ().n_midi ()) {
 		MidiBuffer& dst (bufs.get_midi (0));
@@ -1626,7 +1626,6 @@ DiskReader::dec_no_disk_output ()
 /* min gain difference for de-click and loop-fadess
  * (-60dB difference to target)
  */
-#define GAIN_COEFF_DELTA (1e-5)
 
 DiskReader::DeclickAmp::DeclickAmp (samplecnt_t sample_rate)
 {

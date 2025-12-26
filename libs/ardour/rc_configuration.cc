@@ -20,7 +20,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <unistd.h>
 #include <cstdio> /* for snprintf, grrr */
 
 #include <glib.h>
@@ -239,8 +238,10 @@ RCConfiguration::get_variables (std::string const & node_name) const
 
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
+/* due to special case of PBD::ConfigVariable<std::string> we cannot use PBD::to_string<type> (value),
+ * but have to construct a ConfigVariable */
 #define CONFIG_VARIABLE(type,var,Name,value) \
-	var.add_to_node (*node);
+	var.add_to_node_if_modified (*node, ConfigVariable<type> (Name, value).get_as_string ());
 #define CONFIG_VARIABLE_SPECIAL(type,var,Name,value,mutator) \
 	var.add_to_node (*node);
 #include "ardour/rc_configuration_vars.inc.h"

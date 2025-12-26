@@ -21,7 +21,7 @@
 #include <atomic>
 #include <string>
 
-#include <curl/curl.h>
+#include "pbd/ccurl.h"
 
 #include "pbd/libpbd_visibility.h"
 
@@ -53,7 +53,7 @@ class LIBPBD_API Downloader {
 	std::string destdir;
 	std::string file_path;
 	FILE* file;
-	CURL* curl;
+	CCurl _ccurl;
 	bool _cancel;
 	std::atomic<uint64_t> _download_size; /* read-only from requestor thread */
 	std::atomic<uint64_t> _downloaded; /* read-only from requestor thread */

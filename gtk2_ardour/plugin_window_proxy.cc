@@ -16,18 +16,28 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "ardour/io_plug.h"
 #include "ardour/plug_insert_base.h"
 #include "ardour/plugin_manager.h"
+#include "ardour/region_fx_plugin.h"
 
 #include "gui_thread.h"
 #include "plugin_ui.h"
 #include "plugin_window_proxy.h"
+#include "ui_config.h"
 
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
 using namespace Gtk;
 using namespace Gtkmm2ext;
+
+static bool
+idle_drop_window (WM::ProxyBase* s)
+{
+	s->drop_window ();
+	return false;
+}
 
 PluginWindowProxy::PluginWindowProxy (std::string const& name, std::string const& title, std::weak_ptr<PlugInsertBase> plugin)
 	: WM::ProxyBase (name, std::string ())
@@ -41,6 +51,28 @@ PluginWindowProxy::PluginWindowProxy (std::string const& name, std::string const
 		return;
 	}
 	p->DropReferences.connect (*this, MISSING_INVALIDATOR, std::bind (&PluginWindowProxy::plugin_going_away, this), gui_context ());
+
+	std::shared_ptr<RegionFxPlugin> rfx = std::dynamic_pointer_cast<RegionFxPlugin> (p);
+	std::shared_ptr<IOPlug>         iop = std::dynamic_pointer_cast<IOPlug> (p);
+	  if (rfx || iop) {
+	  _unmap_connection = signal_unmap.connect (sigc::bind ([] (ProxyBase* self, PluginType type) {
+	    PluginWindowProxy* me = dynamic_cast<PluginWindowProxy*> (self);
+	    if (!me->_is_custom || type == Lua) {
+	      return;
+	    }
+	    switch (UIConfiguration::instance ().get_plugin_gui_behavior ()) {
+	      case PluginGUIHide:
+	        return;
+	      case PluginGUIDestroyVST:
+	        if (type != Windows_VST && type != LXVST && type != MacVST && type != VST3) {
+	          return;
+	        }
+	      default:
+	        break;
+	    }
+	    me->_drop_window_connection = Glib::signal_idle ().connect (sigc::bind (&idle_drop_window, self)/*, G_PRIORITY_HIGH_IDLE*/);
+	  }, this, rfx ? rfx->type () : iop->type ()));
+	}
 }
 
 PluginWindowProxy::~PluginWindowProxy ()

@@ -71,7 +71,7 @@ AddRouteDialog::AddRouteDialog ()
 	: ArdourDialog (_("Add Track/Bus/VCA"))
 	, routes_adjustment (1, 1, 128, 1, 4)
 	, routes_spinner (routes_adjustment)
-	, configuration_label (_("Configuration:"))
+	, configuration_label (_("Input Config:"))
 	, manual_label (_("Configuration:"))
 	, add_label (_("Add:"))
 	, name_label (_("Name:"))
@@ -89,7 +89,7 @@ AddRouteDialog::AddRouteDialog ()
 	set_name ("AddRouteDialog");
 	set_skip_taskbar_hint (true);
 	set_resizable (false);
-	set_position (WIN_POS_MOUSE);
+	set_position (UIConfiguration::instance().get_default_window_position());
 
 	name_template_entry.set_name (X_("AddRouteDialogNameTemplateEntry"));
 	// routes_spinner.set_name (X_("AddRouteDialogSpinner"));
@@ -1052,12 +1052,12 @@ AddRouteDialog::refill_channel_setups ()
 }
 
 void
-AddRouteDialog::add_route_group (RouteGroup* g)
+AddRouteDialog::add_route_group (std::shared_ptr<RouteGroup> g)
 {
 	route_group_combo.insert (3, g->name ());
 }
 
-RouteGroup*
+std::shared_ptr<RouteGroup>
 AddRouteDialog::route_group ()
 {
 	if (!_session || route_group_combo.get_active_row_number () == 2) {
@@ -1098,7 +1098,7 @@ void
 AddRouteDialog::group_changed ()
 {
 	if (_session && route_group_combo.get_active_text () == _("New Group...")) {
-		RouteGroup* g = new RouteGroup (*_session, "");
+		std::shared_ptr<RouteGroup> g (_session->new_route_group (""));
 		RouteGroupDialog* d = new RouteGroupDialog (g, true);
 
 		d->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &AddRouteDialog::new_group_dialog_finished), d));
@@ -1122,7 +1122,6 @@ AddRouteDialog::new_group_dialog_finished (int r, RouteGroupDialog* d)
 		add_route_group (d->group());
 		route_group_combo.set_active (3);
 	} else {
-		delete d->group ();
 		route_group_combo.set_active (2);
 	}
 

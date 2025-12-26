@@ -44,6 +44,7 @@
 #include "ardour_http.h"
 #include "ardour_ui.h"
 #include "audio_region_view.h"
+#include "control_point.h"
 #include "public_editor.h"
 #include "region_selection.h"
 #include "luadialog.h"
@@ -54,6 +55,7 @@
 #include "region_view.h"
 #include "processor_box.h"
 #include "time_axis_view.h"
+#include "midi_time_axis.h"
 #include "time_axis_view_item.h"
 #include "selection.h"
 #include "script_selector.h"
@@ -783,7 +785,7 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 {
 	LuaBindings::stddef (L);
 	LuaBindings::common (L);
-	LuaBindings::session (L);
+	LuaBindings::non_rt (L);
 	LuaBindings::osc (L);
 
 	bind_cairo (L);
@@ -801,6 +803,12 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 		.beginStdCPtrList <ArdourMarker> ("ArdourMarkerList")
 		.endClass ()
 
+		.beginStdCPtrList <ControlPoint> ("ControlPointList")
+		.endClass ()
+
+		.beginStdList <std::shared_ptr<ARDOUR::AutomationList> > ("ARDOUR::AutomationListList")
+		.endClass ()
+
 		.beginClass <ArdourMarker> ("ArdourMarker")
 		.addFunction ("name", &ArdourMarker::name)
 		.addFunction ("position", &ArdourMarker::position)
@@ -811,11 +819,16 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 		.endClass ()
 
 		.deriveClass <TimeAxisView, AxisView> ("TimeAxisView")
+		.addCast<MidiTimeAxisView> ("to_midi_time_axis_view")
 		.addFunction ("order", &TimeAxisView::order)
 		.addFunction ("y_position", &TimeAxisView::y_position)
 		.addFunction ("effective_height", &TimeAxisView::effective_height)
 		.addFunction ("current_height", &TimeAxisView::current_height)
 		.addFunction ("set_height", &TimeAxisView::set_height)
+		.endClass ()
+
+		.deriveClass <MidiTimeAxisView, TimeAxisView> ("MidiTimeAxisView")
+		.addFunction ("add_region", &MidiTimeAxisView::add_region)
 		.endClass ()
 
 		.deriveClass <StripableTimeAxisView, TimeAxisView> ("StripableTimeAxisView")
@@ -825,6 +838,7 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 		.endClass ()
 
 		.deriveClass <TimeAxisViewItem, Selectable> ("TimeAxisViewItem")
+		.addFunction ("get_time_axis_view", &TimeAxisViewItem::get_time_axis_view)
 		.endClass ()
 
 		.deriveClass <RegionView, TimeAxisViewItem> ("RegionView")
@@ -854,6 +868,9 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 		.beginConstStdCPtrList <TimeAxisView> ("TrackViewStdList")
 		.endClass ()
 
+		.deriveClass <ControlPoint, Selectable> ("ControlPoint")
+		//.addFunction ("line", &ControlPoint::line) // AutomationLine&
+		.endClass ()
 
 		.beginClass <RegionSelection> ("RegionSelection")
 		.addFunction ("start_time", &RegionSelection::start_time)
@@ -873,6 +890,12 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 		.deriveClass <MarkerSelection, std::list<ArdourMarker*> > ("MarkerSelection")
 		.endClass ()
 
+		.deriveClass <PointSelection, std::list<ControlPoint*> > ("PointSelection")
+		.endClass ()
+
+		.deriveClass <AutomationSelection, std::list<std::shared_ptr<ARDOUR::AutomationList>> > ("AutomationSelection")
+		.endClass ()
+
 		.beginClass <TrackViewList> ("TrackViewList")
 		.addCast<std::list<TimeAxisView*> > ("to_tav_list")
 		.addFunction ("contains", &TrackViewList::contains)
@@ -890,10 +913,10 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 		.addData ("regions", &Selection::regions)
 		.addData ("time", &Selection::time)
 		.addData ("markers", &Selection::markers)
-#if 0
 		.addData ("lines", &Selection::lines)
-		.addData ("playlists", &Selection::playlists)
 		.addData ("points", &Selection::points)
+#if 0
+		.addData ("playlists", &Selection::playlists)
 		.addData ("midi_regions", &Selection::midi_regions)
 		.addData ("midi_notes", &Selection::midi_notes) // cut buffer only
 #endif
@@ -1106,9 +1129,10 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 
 		.addCFunction ("actionlist", &lua_actionlist)
 
-
 		.beginClass <UIConfiguration> ("UIConfiguration")
+		.addFunction ("set_modifier", (void (UIConfiguration::*)(std::string const&, std::string const&))&UIConfiguration::set_modifier)
 #undef  UI_CONFIG_VARIABLE
+
 #define UI_CONFIG_VARIABLE(Type,var,name,value) \
 		.addFunction ("get_" # var, &UIConfiguration::get_##var) \
 		.addFunction ("set_" # var, &UIConfiguration::set_##var) \

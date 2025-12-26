@@ -73,6 +73,7 @@ class LIBARDOUR_API AudioRegion : public Region, public AudioReadable
 	~AudioRegion();
 
 	void copy_settings (std::shared_ptr<const AudioRegion>);
+	void copy_plugin_state (std::shared_ptr<const AudioRegion>);
 
 	bool source_equivalent (std::shared_ptr<const Region>) const;
 
@@ -142,6 +143,8 @@ class LIBARDOUR_API AudioRegion : public Region, public AudioReadable
 
 	bool fade_in_is_default () const;
 	bool fade_out_is_default () const;
+	Temporal::timepos_t fade_in_length ();
+	Temporal::timepos_t fade_out_length ();
 
 	void set_fade_in_active (bool yn);
 	void set_fade_in_shape (FadeShape);
@@ -266,12 +269,12 @@ class LIBARDOUR_API AudioRegion : public Region, public AudioReadable
 	void apply_region_fx (BufferSet&, samplepos_t, samplepos_t, samplecnt_t);
 	void fx_latency_changed (bool no_emit);
 	void fx_tail_changed (bool no_emit);
-	void copy_plugin_state (std::shared_ptr<const AudioRegion>);
 
 	mutable samplepos_t _fx_pos;
 	pframes_t           _fx_block_size;
 	mutable bool        _fx_latent_read;
 
+	mutable Glib::Threads::Mutex _read_lock;
 	mutable Glib::Threads::Mutex _cache_lock;
 	mutable BufferSet            _readcache;
 	mutable samplepos_t          _cache_start;

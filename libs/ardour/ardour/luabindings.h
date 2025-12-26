@@ -28,7 +28,7 @@ namespace ARDOUR {
 
 		LIBARDOUR_API extern void common (lua_State* L);
 		LIBARDOUR_API extern void dsp (lua_State* L);
-		LIBARDOUR_API extern void session (lua_State* L);
+		LIBARDOUR_API extern void non_rt (lua_State* L);
 		LIBARDOUR_API extern void osc (lua_State* L);
 
 		LIBARDOUR_API extern void set_session (lua_State* L, Session *s);

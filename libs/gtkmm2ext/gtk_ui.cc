@@ -26,7 +26,6 @@
 #include <cmath>
 #include <fcntl.h>
 #include <signal.h>
-#include <unistd.h>
 #include <cerrno>
 #include <climits>
 #include <cctype>
@@ -50,6 +49,7 @@
 #include "gtkmm2ext/activatable.h"
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/gui_thread.h"
+#include "gtkmm2ext/ui_config.h"
 
 #include "pbd/i18n.h"
 
@@ -73,12 +73,26 @@ BaseUI::RequestType Gtkmm2ext::AddTimeout = BaseUI::new_request_type();
 
 template class AbstractUI<Gtkmm2ext::UIRequest>;
 
+#ifndef NDEBUG
+static int debug_call_slot = -1;
+#endif
+
 UI::UI (string application_name, string thread_name, int *argc, char ***argv)
 	: AbstractUI<UIRequest> (thread_name)
 	, _receiver (*this)
 	, global_bindings (0)
 	, errors (0)
 {
+#ifndef NDEBUG
+	/* one time initialization of this to reduce run time cost in debug builds */
+	if (debug_call_slot < 0) {
+		if (g_getenv ("DEBUG_THREADED_SIGNALS")) {
+			debug_call_slot = 1;
+		} else {
+			debug_call_slot = 0;
+		}
+	}
+#endif
 	theMain = new Main (argc, argv);
 
 	char buf[18];
@@ -389,7 +403,7 @@ UI::set_tip (Widget *w, const gchar *tip, const gchar *hlp)
 		Widget* ww = w;
 		BindingSet* binding_set = nullptr;
 		do {
-			binding_set = (BindingSet*) ww->get_data ("ardour-bindings");
+			binding_set = (BindingSet*) ww->get_data (ARDOUR_BINDING_KEY);
 			if (binding_set) {
 				break;
 			}
@@ -479,7 +493,7 @@ UI::do_request (UIRequest* req)
 
 	} else if (req->type == CallSlot) {
 #ifndef NDEBUG
-		if (getenv ("DEBUG_THREADED_SIGNALS")) {
+		if (debug_call_slot) {
 			cerr << "call slot for " << event_loop_name() << endl;
 		}
 #endif
@@ -681,7 +695,7 @@ UI::toggle_errors ()
 {
 	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("toggle-log-window"));
 	if (tact->get_active()) {
-		errors->set_position (WIN_POS_MOUSE);
+		errors->set_position (UIConfigurationBase::instance().get_default_window_position());
 		errors->show ();
 	} else {
 		errors->hide ();
@@ -716,7 +730,7 @@ UI::handle_fatal (const char *message)
 	title += ": Fatal Error";
 	win.set_title (title.get_string());
 
-	win.set_position (WIN_POS_MOUSE);
+	win.set_position (UIConfigurationBase::instance().get_default_window_position());
 	win.set_border_width (12);
 
 	win.get_vbox()->pack_start (label, true, true);
@@ -746,7 +760,7 @@ UI::popup_error (const string& text)
 	MessageDialog msg (text);
 	msg.set_title (string_compose (_("I'm sorry %1, I can't do that"), g_get_user_name()));
 	msg.set_wmclass (X_("error"), Glib::get_application_name());
-	msg.set_position (WIN_POS_MOUSE);
+	msg.set_position (UIConfigurationBase::instance().get_default_window_position());
 	msg.run ();
 }
 

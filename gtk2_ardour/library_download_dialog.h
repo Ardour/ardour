@@ -64,6 +64,7 @@ class LibraryDownloadDialog : public ArdourDialog
 			add (toplevel);
 			add (install);
 			add (progress);
+			add (installing);
 			add (downloader);
 		}
 
@@ -77,6 +78,7 @@ class LibraryDownloadDialog : public ArdourDialog
 		Gtk::TreeModelColumn<std::string> url;
 		Gtk::TreeModelColumn<std::string> toplevel;
 		Gtk::TreeModelColumn<PBD::Downloader*> downloader;
+		Gtk::TreeModelColumn<bool> installing;
 		Gtk::TreeModelColumn<int> progress;
 		/* used as tooltip */
 		Gtk::TreeModelColumn<std::string> description;

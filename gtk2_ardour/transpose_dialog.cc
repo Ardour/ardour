@@ -26,8 +26,8 @@
 
 using namespace Gtk;
 
-TransposeDialog::TransposeDialog ()
-	: ArdourDialog (_("Transpose MIDI"))
+TransposeDialog::TransposeDialog (Gtk::Window& parent)
+	: ArdourDialog (parent, _("Transpose MIDI"))
 	, _octaves_adjustment (0.0, -4.0, 4.0, 1, 2.0)
 	, _semitones_adjustment (0.0, -12.0, 12.0, 1.0, 4.0)
 	, _octaves_spinner (_octaves_adjustment)

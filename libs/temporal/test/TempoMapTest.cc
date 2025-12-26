@@ -17,7 +17,7 @@ TempoMapTest::createTest()
 void
 TempoMapTest::addTest()
 {
-	TempoMap::WritableSharedPtr tmap (TempoMap::write_copy());
+	TempoMap::WritableSharedPtr tmap (new TempoMap(Tempo (120,4), Meter (4,4))); // TempoMap::write_copy());
 	TempoPoint& tp = tmap->set_tempo (Tempo (180, 4), BBT_Argument (6, 1, 0));
 	tmap->set_meter (Meter (6, 8), BBT_Argument (3, 1, 0));
 

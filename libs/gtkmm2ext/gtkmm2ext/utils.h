@@ -122,6 +122,8 @@ namespace Gtkmm2ext {
 	LIBGTKMM2EXT_API void rounded_top_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r=10);
 	LIBGTKMM2EXT_API void rounded_top_left_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r=10);
 	LIBGTKMM2EXT_API void rounded_top_right_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r=10);
+	LIBGTKMM2EXT_API void rounded_bottom_left_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r=10);
+	LIBGTKMM2EXT_API void rounded_bottom_right_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r=10);
 	LIBGTKMM2EXT_API void rounded_top_half_rectangle (Cairo::RefPtr<Cairo::Context>, double x, double y, double w, double h, double r=10);
 	LIBGTKMM2EXT_API void rounded_bottom_half_rectangle (Cairo::RefPtr<Cairo::Context>, double x, double y, double w, double h, double r=10);
 	LIBGTKMM2EXT_API void rounded_right_half_rectangle (Cairo::RefPtr<Cairo::Context>, double x, double y, double w, double h, double r=10);
@@ -134,6 +136,8 @@ namespace Gtkmm2ext {
 	LIBGTKMM2EXT_API void rounded_top_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
 	LIBGTKMM2EXT_API void rounded_top_left_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
 	LIBGTKMM2EXT_API void rounded_top_right_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
+	LIBGTKMM2EXT_API void rounded_bottom_left_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
+	LIBGTKMM2EXT_API void rounded_bottom_right_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
 	LIBGTKMM2EXT_API void rounded_top_half_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
 	LIBGTKMM2EXT_API void rounded_bottom_half_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
 	LIBGTKMM2EXT_API void rounded_right_half_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);

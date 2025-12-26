@@ -32,6 +32,7 @@
 #include "pbd/string_convert.h"
 
 #include "temporal/debug.h"
+#include "temporal/scope.h"
 #include "temporal/tempo.h"
 #include "temporal/types_convert.h"
 
@@ -346,10 +347,76 @@ Meter::bbt_subtract (Temporal::BBT_Time const & bbt, Temporal::BBT_Offset const 
 	return Temporal::BBT_Time (r.bars, r.beats, r.ticks);
 }
 
+/* Compute BBT_offset between two BBT_Times (assumed to have the same reference
+ * point), The Meter object this is called upon MUST cover both BBT_Times,
+ * otherwise the return value is undefined.
+ */
+Temporal::BBT_Offset
+Meter::bbt_delta (BBT_Time const & later, BBT_Time const & earlier) const
+{
+	if (later == earlier) {
+		return BBT_Offset();
+	}
+
+	assert (later > earlier);
+
+	BBT_Offset d;
+	BBT_Time a (earlier);
+	BBT_Time b (later);
+
+	if (a.ticks > b.ticks) {
+		d.ticks = b.ticks + (ticks_per_grid() - a.ticks);
+		if (a.beats == _divisions_per_bar) {
+			a.beats = 1;
+			a.bars++;
+		} else {
+			a.beats++;
+		}
+	} else {
+		d.ticks = b.ticks - a.ticks;
+	}
+
+	if (a.beats > b.beats) {
+		d.beats = b.beats + (_divisions_per_bar - a.beats);
+		a.bars++;
+	} else {
+		d.beats = b.beats - a.beats;
+	}
+
+	d.bars  = b.bars - a.bars;
+
+	return d;
+}
+
 Temporal::Beats
 Meter::round_to_beat (Temporal::Beats const & b) const
 {
 	return b.round_to_multiple (Beats::ticks (ticks_per_grid()));
+}
+
+Temporal::BBT_Time
+Meter::round_to_beat (Temporal::BBT_Time const & bbt) const
+{
+	if (bbt.ticks == 0) {
+		return bbt;
+	}
+
+	BBT_Time b (bbt);
+
+	if (bbt.ticks >= ticks_per_grid()) {
+		/* Round up */
+		b.ticks = 0;
+		b.beats += 1;
+		if (b.beats > _divisions_per_bar) {
+			b.beats = 0;
+			b.bars++;
+		}
+	} else {
+		/* Round down */
+		b.ticks = 0;
+	}
+
+	return b;
 }
 
 Temporal::BBT_Time
@@ -379,31 +446,27 @@ Meter::round_up_to_bar (Temporal::BBT_Time const & bbt) const
 Temporal::BBT_Time
 Meter::round_up_to_beat_div (Temporal::BBT_Time const & bbt, int beat_div) const
 {
-	Temporal::BBT_Time b = bbt.round_up_to_beat_div (beat_div);
-	if (b.beats > _divisions_per_bar) {
-		b.bars++;
-		b.beats = 1;
-	}
-	return b;
-}
+	const int32_t div_ticks = ticks_per_grid() / beat_div;
+	int32_t rounded_up = bbt.ticks + div_ticks - 1;
+	rounded_up -= rounded_up % div_ticks;
 
-Temporal::BBT_Time
-Meter::round_to_beat (Temporal::BBT_Time const & bbt) const
-{
-	Temporal::BBT_Time b = bbt.round_to_beat ();
-	if (b.beats > _divisions_per_bar) {
-		b.bars++;
-		b.beats = 1;
+	if (rounded_up == ticks_per_grid()) {
+		/* round up next beat count, which may be in next bar */
+		if (bbt.beats + 1 > _divisions_per_bar) {
+			return BBT_Time (bbt.bars+1, 1, 0);
+		} else {
+			return BBT_Time (bbt.bars, bbt.beats+1, 0);
+		}
 	}
-	return b;
+
+	return BBT_Time (bbt.bars, bbt.beats, rounded_up);
 }
 
 Temporal::Beats
 Meter::to_quarters (Temporal::BBT_Offset const & offset) const
 {
-	int64_t ticks = 0;
+	int64_t ticks = (Beats::PPQN * offset.bars * _divisions_per_bar * 4) / _note_value;
 
-	ticks += (Beats::PPQN * offset.bars * _divisions_per_bar * 4) / _note_value;
 	ticks += (Beats::PPQN * offset.beats * 4) / _note_value;
 
 	/* "parts per bar division" */
@@ -521,6 +584,10 @@ TempoPoint::superclock_at (Temporal::Beats const & qn) const
 		TEMPO_MAP_ASSERT (_quarters == Beats());
 	} else {
 		/* positive */
+		if (qn < _quarters) {
+			std::cerr << "\n\nLOGIC FAIL sc @ " << qn << " using " << *this << std::endl;
+			PBD::stacktrace (std::cerr, 19);
+		}
 		TEMPO_MAP_ASSERT (qn >= _quarters);
 	}
 
@@ -675,7 +742,10 @@ MeterPoint::MeterPoint (TempoMap const & map, XMLNode const & node)
 Temporal::Beats
 MeterPoint::quarters_at (Temporal::BBT_Time const & bbt) const
 {
-	Temporal::BBT_Offset offset = bbt_delta (bbt, _bbt);
+	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("%1 computing quarters for bbt %2\n", *this, bbt));
+	BBT_Offset offset (bbt_delta (bbt, _bbt));
+	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("getting quarters at %1 from %2, offset is %3 as quarters %4 so %5\n",
+	                                                 bbt, *this, offset, to_quarters (offset), _quarters + to_quarters (offset)));
 	return _quarters + to_quarters (offset);
 }
 
@@ -755,7 +825,7 @@ TempoMetric::bbt_at (timepos_t const & pos) const
 
 	const Beats dq = _tempo->quarters_at_superclock (sc) - reference_point->beats();
 
-	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("qn @ %1 = %2, meter @ %3 , delta %4\n", sc, _tempo->quarters_at_superclock (sc), _meter->beats(), dq));
+	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("qn @ %1 = %2, meter @ %3 , delta %4 from ref %5\n", sc, _tempo->quarters_at_superclock (sc), reference_point->beats(), dq, *reference_point));
 
 	/* dq is delta in quarters (beats). Convert to delta in note types of
 	   the current meter, which we'll call "grid"
@@ -763,14 +833,15 @@ TempoMetric::bbt_at (timepos_t const & pos) const
 
 	const int64_t note_value_count = muldiv_round (dq.get_beats(), _meter->note_value(), int64_t (4));
 
+	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("which converts to %1 note value count\n", note_value_count));
+
 	/* now construct a BBT_Offset using the count in grid units */
 
 	const BBT_Offset bbt_offset (0, note_value_count, dq.get_ticks());
 
-	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("BBT offset from %3 @ %1: %2\n", (_tempo->beats() < _meter->beats() ?  _meter->bbt() : _tempo->bbt()), bbt_offset,
-	                                                 (_tempo->beats() < _meter->beats() ? "meter" : "tempo")));
-	superclock_t ref (std::min (_meter->sclock(), _tempo->sclock()));
+	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("BBT offset from %1 = %2, so final BBT = %3\n", reference_point->bbt(), bbt_offset, _meter->bbt_add (reference_point->bbt(), bbt_offset)));
 
+	superclock_t ref (std::min (_meter->sclock(), _tempo->sclock()));
 	return BBT_Argument (ref, _meter->bbt_add (reference_point->bbt(), bbt_offset));
 }
 
@@ -825,6 +896,7 @@ GridIterator::valid_for (TempoMap const & m, superclock_t start, uint32_t bmod, 
 /* TEMPOMAP */
 
 TempoMap::TempoMap (Tempo const & initial_tempo, Meter const & initial_meter)
+	: _scope_owner (nullptr)
 {
 	TempoPoint* tp = new TempoPoint (*this, initial_tempo, 0, Beats(), BBT_Time());
 	MeterPoint* mp = new MeterPoint (*this, initial_meter, 0, Beats(), BBT_Time());
@@ -836,18 +908,32 @@ TempoMap::TempoMap (Tempo const & initial_tempo, Meter const & initial_meter)
 	_points.push_back (*mp);
 }
 
-TempoMap::~TempoMap()
-{
-}
-
 TempoMap::TempoMap (XMLNode const & node, int version)
+	: _scope_owner (nullptr)
 {
 	set_state (node, version);
 }
 
 TempoMap::TempoMap (TempoMap const & other)
+	: _scope_owner (nullptr)
 {
 	copy_points (other);
+}
+
+void
+TempoMap::set_scope_owner (ScopedTempoMapOwner& sco)
+{
+	_scope_owner = &sco;
+}
+
+TempoMap::~TempoMap()
+{
+}
+
+void
+TempoMap::clear_scope_owner ()
+{
+	_scope_owner = nullptr;
 }
 
 TempoMap&
@@ -945,7 +1031,6 @@ TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy, b
 	}
 
 	for (Points::iterator p = _points.begin(); p != _points.end(); ) {
-
 
 		/* XXX might to check time domain of start/end, and use beat
 		 * time here.
@@ -1060,8 +1145,9 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 			core_add_meter (mtp, ignored);
 			core_add_point (mtp);
 		}
-	}
 
+		reset_starting_at (position.superclocks());
+	}
 
 	for (auto const & p : cb.points()) {
 		TempoPoint const * tp;
@@ -1072,38 +1158,45 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 
 		s = p.sclock() + position.superclocks();
 		b = quarters_at_superclock (s);
-		bb = bbt_at (s);
 
 		if ((mtp = dynamic_cast<MusicTimePoint const *> (&p))) {
 
 			tp = dynamic_cast<TempoPoint const *> (&p);
 			mp = dynamic_cast<MeterPoint const *> (&p);
 
+			/* not entirely clear what the semantics of this ought
+			 * to be. Do we paste the precise same BBT markers, or
+			 * do we shift by the paste position
+			 */
+			bb = p.bbt ();
+
 			MusicTimePoint *ntp = new MusicTimePoint (*this, s, b, bb, *tp, *mp, mtp->name());
 			core_add_bartime (ntp, replaced);
 
 			if (!replaced) {
 				core_add_tempo (ntp, ignored);
-				core_add_meter (ntp, ignored);
+				(void) core_add_meter (ntp, ignored);
 				core_add_point (ntp);
 			}
 
 		} else {
 
 			if ((tp = dynamic_cast<TempoPoint const *> (&p))) {
-				TempoPoint *ntp = new TempoPoint (*this, *tp, s, b, bb);
+				TempoPoint *ntp = new TempoPoint (*this, *tp, s, b, p.bbt());
 				core_add_tempo (ntp, replaced);
 				if (!replaced) {
 					core_add_point (ntp);
 				}
 			} else if ((mp = dynamic_cast<MeterPoint const *> (&p))) {
-				MeterPoint *ntp = new MeterPoint (*this, *mp, s, b, bb);
+				MeterPoint *ntp = new MeterPoint (*this, *mp, s, b, p.bbt());
 				core_add_meter (ntp, replaced);
 				if (!replaced) {
 					core_add_point (ntp);
 				}
 			}
 		}
+
+		reset_starting_at (s);
 	}
 
 	pos_bbt = bbt_at (end_position);
@@ -1124,9 +1217,9 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 			core_add_meter (mtp, ignored);
 			core_add_point (mtp);
 		}
-	}
 
-	reset_starting_at (s);
+		reset_starting_at (s);
+	}
 }
 
 void
@@ -1215,6 +1308,7 @@ MeterPoint*
 TempoMap::add_meter (MeterPoint* mp)
 {
 	bool replaced;
+	bool reset = _points.back().beats() > mp->beats();
 	MeterPoint* ret = core_add_meter (mp, replaced);
 
 	if (!replaced) {
@@ -1223,7 +1317,10 @@ TempoMap::add_meter (MeterPoint* mp)
 		delete mp;
 	}
 
-	reset_starting_at (ret->sclock());
+	if (reset) {
+		reset_starting_at (ret->sclock());
+	}
+
 	return ret;
 }
 
@@ -1432,6 +1529,42 @@ TempoMap::set_tempo (Tempo const & t, timepos_t const & time, Beats const & beat
 }
 
 void
+TempoMap::smf_begin ()
+{
+	_tempos.clear ();
+	_meters.clear ();
+	_points.clear ();
+	_bartimes.clear ();
+}
+
+void
+TempoMap::smf_end ()
+{
+}
+
+void
+TempoMap::smf_add (TempoPoint & tp)
+{
+	assert (&tp.map() == this);
+	/* all other tempos must be earlier; other points must be earlier or identical */
+	assert (_tempos.empty() || _tempos.back().sclock() < tp.sclock());
+	assert (_points.empty() || _points.back().sclock() <= tp.sclock());
+	_points.push_back (tp);
+	_tempos.push_back (tp);
+}
+
+void
+TempoMap::smf_add (MeterPoint & mp)
+{
+	assert (&mp.map() == this);
+	/* all other meters must be earlier; other points must be earlier or identical */
+	assert (_meters.empty() || _meters.back().sclock() < mp.sclock());
+	assert (_points.empty() || _points.back().sclock() <= mp.sclock());
+	_points.push_back (mp);
+	_meters.push_back (mp);
+}
+
+void
 TempoMap::core_add_point (Point* pp)
 {
 	Points::iterator p;
@@ -1519,6 +1652,7 @@ TempoPoint*
 TempoMap::add_tempo (TempoPoint * tp)
 {
 	bool replaced;
+	bool reset = _points.back().beats() > tp->beats();
 	TempoPoint* ret = core_add_tempo (tp, replaced);
 
 	if (!replaced) {
@@ -1527,11 +1661,13 @@ TempoMap::add_tempo (TempoPoint * tp)
 		delete tp;
 	}
 
-	TempoPoint* prev = const_cast<TempoPoint*> (previous_tempo (*ret));
-	if (prev) {
-		reset_starting_at (prev->sclock());
-	} else {
-		reset_starting_at (ret->sclock());
+	if (reset) {
+		TempoPoint* prev = const_cast<TempoPoint*> (previous_tempo (*ret));
+		if (prev) {
+			reset_starting_at (prev->sclock());
+		} else {
+			reset_starting_at (ret->sclock());
+		}
 	}
 
 	return ret;
@@ -1907,8 +2043,8 @@ TempoMap::reset_section (Points::iterator& begin, Points::iterator& end, supercl
 				++pp;
 			}
 
-			DEBUG_TRACE (DEBUG::MapReset, string_compose ("considering omega comp for %1 with nxt = %2\n", *tp, nxt_tempo));
 			if (tp->ramped() && nxt_tempo) {
+				DEBUG_TRACE (DEBUG::MapReset, string_compose ("computing omega for %1 with nxt = %2\n", *tp, nxt_tempo));
 				tp->compute_omega_from_next_tempo (*nxt_tempo);
 			}
 		}
@@ -2589,7 +2725,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t rstart, superclock_t end, 
 		dump (std::cout);
 	}
 #endif
-	DEBUG_TRACE (DEBUG::Grid, string_compose (">>> GRID START %1 .. %2 (barmod = %3)\n", rstart, end, bar_mod));
+	DEBUG_TRACE (DEBUG::Grid, string_compose (">>> GRID START %1 .. %2 (barmod = %3, beat_div = %4)\n", rstart, end, bar_mod, beat_div));
 
 	/* The fast path: one tempo, one meter, just do (relatively) simple math */
 
@@ -2623,12 +2759,12 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t rstart, superclock_t end, 
 
 		if (rstart != 0) {
 			if (bar_mod == 1) {
-				on_bar = bbt.round_up_to_bar ();
+				on_bar = metric.meter().round_up_to_bar (bbt);
 			} else {
 				on_bar = metric.meter().round_up_to_beat_div (bbt, beat_div);
 			}
 
-			BBT_Offset delta = Temporal::bbt_delta (on_bar, bbt);
+			BBT_Offset delta = metric.meter().bbt_delta (on_bar, bbt);
 
 			if (delta != BBT_Offset ()) {
 				bbt = on_bar;
@@ -2842,6 +2978,8 @@ TempoMap::fill_grid_by_walking (TempoMapPoints& ret, Points::const_iterator& p_i
 			   time position of @v bbt ?
 			*/
 			start = metric.superclock_at (bbt);
+			DEBUG_TRACE (DEBUG::Grid, string_compose ("reset start to %1 based on %2 using %3\n", start, bbt, metric));
+
 			if (start >= p->sclock()) {
 				/* Yep, too far. So we need to reset and take
 				   the next (music time point) into account.
@@ -2889,13 +3027,13 @@ TempoMap::fill_grid_by_walking (TempoMapPoints& ret, Points::const_iterator& p_i
 					BBT_Time on_bar;
 
 					if (bar_mod == 1) {
-						on_bar = p->bbt().round_up_to_bar ();
+						on_bar = mp->round_up_to_bar (p->bbt());
 					} else {
 						on_bar = mp->round_up_to_beat_div (p->bbt(), beat_div);
 					}
 
 					bbt = BBT_Argument (metric.reftime(), on_bar);
-					BBT_Offset delta = Temporal::bbt_delta (on_bar, p->bbt());
+					BBT_Offset delta = metric.meter().bbt_delta (on_bar, p->bbt());
 
 					if (delta != BBT_Offset ()) {
 						Beats beats_delta = mp->to_quarters (delta);
@@ -2964,6 +3102,13 @@ TempoMap::fill_grid_by_walking (TempoMapPoints& ret, Points::const_iterator& p_i
 
 				}
 
+				if (p != _points.end()) {
+					DEBUG_TRACE (DEBUG::Grid, string_compose ("left loop with %5, to find next, p->bbt %1 vs bbt %2 p->sc %3 vs %4\n",
+					                                          p->bbt(), bbt, p->sclock(), sc, *p));
+				} else {
+					DEBUG_TRACE (DEBUG::Grid, "left loop because we reached the end of points\n");
+				}
+
 				/* reset the metric to use the most recent tempo & meter */
 
 				if (rebuild_metric) {
@@ -2977,12 +3122,14 @@ TempoMap::fill_grid_by_walking (TempoMapPoints& ret, Points::const_iterator& p_i
 
 		}
 
+		DEBUG_TRACE (DEBUG::Grid, string_compose ("reset done, bbt now at %1 with metric %2, get superclock\n", bbt, metric));
 		start = metric.superclock_at (bbt);
 
 		/* Update the quarter-note time value to match the BBT and
 		 * audio time positions
 		 */
 
+		DEBUG_TRACE (DEBUG::Grid, string_compose ("get quarters for %1 from %2\n", bbt, metric));
 		beats = metric.quarters_at (bbt);
 
 		/* we have a candidate grid point (start,beats,bbt). It might
@@ -3105,7 +3252,7 @@ std::operator<<(std::ostream& str, TempoPoint const & t)
 std::ostream&
 std::operator<<(std::ostream& str, MusicTimePoint const & p)
 {
-	str << "MP @ "
+	str << "MP " << p.name() << " @ "
 	    << *((Point const *) &p) << ' '
 	    << *((Tempo const *) &p) << ' '
 	    << *((Meter const *) &p);
@@ -3261,6 +3408,8 @@ TempoMap::bbt_walk (BBT_Argument const & bbt, BBT_Offset const & o) const
 		}
 	}
 
+#undef TEMPO_CHECK_FOR_NEW_METRIC
+
 	start.ticks += offset.ticks;
 
 	if (start.ticks >= ticks_per_beat) {
@@ -3269,6 +3418,132 @@ TempoMap::bbt_walk (BBT_Argument const & bbt, BBT_Offset const & o) const
 	}
 
 	return BBT_Argument (metric.reftime(), start);
+}
+
+BBT_Offset
+TempoMap::bbt_distance (BBT_Argument const & strt, BBT_Argument const & nd) const
+{
+	BBT_Offset offset;
+	BBT_Time start (strt);
+	BBT_Time end (nd);
+	bool reversed = false;
+	Tempos::const_iterator t, prev_t, next_t;
+	Meters::const_iterator m, prev_m, next_m;
+
+	if (start > end) {
+		std::swap (start, end);
+		reversed = true;
+	}
+
+	TEMPO_MAP_ASSERT (!_tempos.empty());
+	TEMPO_MAP_ASSERT (!_meters.empty());
+
+	/* trivial (and common) case: single tempo, single meter */
+
+	if (_tempos.size() == 1 && _meters.size() == 1) {
+		if (reversed) {
+			return BBT_Offset (start.bars - end.bars, start.beats - end.beats, start.ticks - end.ticks);
+
+		} else {
+			return BBT_Offset (end.bars - start.bars, end.beats - start.beats, end.ticks - start.ticks);
+		}
+	}
+
+	/* Find tempo,meter pair for bbt, and also for the next tempo and meter
+	 * after each (if any)
+	 */
+
+	/* Yes, linear search because the typical size of _tempos and _meters
+	 * is 1, and extreme sizes are on the order of 10
+	 */
+
+	next_t = _tempos.end();
+	next_m = _meters.end();
+
+	for (t = _tempos.begin(), prev_t = t; t != _tempos.end() && t->bbt() < start;) {
+		prev_t = t;
+		++t;
+
+		if (t != _tempos.end()) {
+			next_t = t;
+			++next_t;
+		}
+	}
+
+	for (m = _meters.begin(), prev_m = m; m != _meters.end() && m->bbt() < start;) {
+		prev_m = m;
+		++m;
+
+		if (m != _meters.end()) {
+			next_m = m;
+			++next_m;
+		}
+	}
+
+	/* may have found tempo and/or meter precisely at the time given */
+
+	if (t != _tempos.end() && t->bbt() == start) {
+		prev_t = t;
+	}
+
+	if (m != _meters.end() && m->bbt() == start) {
+		prev_m = m;
+	}
+
+	/* see ::metric_at() for comments about the use of const_cast here
+	 */
+
+	TempoMetric metric (*const_cast<TempoPoint*>(&*prev_t), *const_cast<MeterPoint*>(&*prev_m));
+
+	/* add each beat, 1 by 1, rechecking to see if there's a new
+	 * TempoMetric in effect after each addition
+	 */
+
+#define TEMPO_CHECK_FOR_NEW_METRIC(b)                                   \
+	{ \
+		/* need new metric */ \
+		bool advance_t = false; \
+		bool advance_m = false; \
+		if (next_t != _tempos.end() && (b >= next_t->bbt())) { \
+			advance_t = true; \
+		}\
+		if (next_m != _meters.end() && (b >= next_m->bbt())) { \
+			advance_m = true; \
+		} \
+		if (advance_t && advance_m) { \
+			metric = TempoMetric (*const_cast<TempoPoint*>(&*next_t), *const_cast<MeterPoint*>(&*next_m)); \
+			++next_t; \
+			++next_m; \
+		} else if (advance_t && !advance_m) { \
+			metric = TempoMetric (*const_cast<TempoPoint*>(&*next_t), metric.meter()); \
+			++next_t; \
+		} else if (advance_m && !advance_t) { \
+			metric = TempoMetric (metric.tempo(), *const_cast<MeterPoint*>(&*next_m)); \
+			++next_m; \
+		} \
+	}
+
+	for (;;) {
+		BBT_Time s = metric.meter().bbt_add (start, BBT_Offset (0, 1, 0));
+		if (s > end) {
+			break;
+		}
+		start = s;
+		offset += BBT_Offset (0, 1, 0);
+		TEMPO_CHECK_FOR_NEW_METRIC (s);
+	}
+
+#undef TEMPO_CHECK_FOR_NEW_METRIC
+
+	/* Deal with ticks */
+
+	offset.ticks = end.ticks - start.ticks;
+
+	if (reversed) {
+		offset = -offset;
+	}
+
+	return offset;
 }
 
 Temporal::Beats
@@ -4761,6 +5036,20 @@ TempoMap::min_notes_per_minute() const
 	return npm;
 }
 
+timepos_t
+TempoMap::duration(TimeDomain td) const
+{
+	if (_points.empty()) {
+		return timepos_t::zero (td);
+	}
+
+	if (td == BeatTime) {
+		return timepos_t (_points.back().beats() + Beats (1, 0));
+	}
+
+	return timepos_t::from_superclock (_points.back().sclock() + 1);
+}
+
 #if 0
 void
 TempoMap::fix_legacy_session ()
@@ -5091,4 +5380,75 @@ TempoMapCutBuffer::clear ()
 	_meters.clear ();
 	_bartimes.clear ();
 	_points.clear ();
+}
+
+void
+ScopedTempoMapOwner::start_local_tempo_map (std::shared_ptr<Temporal::TempoMap> map)
+{
+	/* This one is a little complicated to explain. This is where we set
+	 * the _local_tempo_map pointer which holds the local tempo map that
+	 * this ScopedTempoMapOwner wants to use every time one of its methods
+	 * is used. But we must also emulate the side effects of calling
+	 * ::in(), which include incrementing the depth and setting the
+	 * thread-local tempo map pointer.
+	 *
+	 * Subsequent to that, all later in() and out() calls will install and
+	 * uninstall the local tempo map as the depth transitions from and to
+	 * zero, and will maintain the depth counter appropriately.
+	 */
+
+
+	DEBUG_TRACE (PBD::DEBUG::ScopedTempoMap, string_compose ("%1: starting local tempo scope\n", scope_name()));
+#ifndef NDEBUG
+	if (DEBUG_ENABLED (PBD::DEBUG::ScopedTempoMap)) {
+		PBD::stacktrace (std::cerr, 29);
+		map->dump (std::cerr);
+	}
+#endif
+	map->set_scope_owner (*this);
+	_local_tempo_map = map;
+	local_tempo_map_depth = 0;
+	Temporal::TempoMap::set (_local_tempo_map);
+}
+
+void
+ScopedTempoMapOwner::end_local_tempo_map ()
+{
+	/* Like ::start_local_tempo_map() and ::in(), this needs to emulate the
+	 * side effects of calling ::out(), ehich are reducing the depth
+	 * counter to zero and resetting the thread local tempo map pointer to
+	 * the current global tempo map.
+	 *
+	 * The caller need not have used EC_LOCAL_TEMPO_SCOPE before calling
+	 * this, however, since there are no side effects to undo when we leave
+	 * the caller's scope.
+	 */
+
+	DEBUG_TRACE (PBD::DEBUG::ScopedTempoMap, string_compose ("%1: ending local tempo scope\n", scope_name()));
+#ifndef NDEBUG
+	if (DEBUG_ENABLED (PBD::DEBUG::ScopedTempoMap)) {
+		PBD::stacktrace (std::cerr, 29);
+	}
+#endif
+	assert (_local_tempo_map);
+	_local_tempo_map->clear_scope_owner ();
+	_local_tempo_map.reset ();
+	local_tempo_map_depth = 0;
+	Temporal::TempoMap::fetch ();
+}
+
+/* This is defined here for use in an assert() made in tempo.h. Circular
+ * dependencies between ScopedTempoMapOwner and TempoMap mean that we can't
+ * place uses of a ScopedTempoMapOwner in tempo.h
+ */
+bool
+TempoMap::fetch_condition ()
+{
+	bool ret (!_tempo_map_p || !_tempo_map_p->scope_owner() || _tempo_map_p->scope_owner()->depth() == 0);
+#ifndef NDEBUG
+	if (!ret) {
+		PBD::stacktrace (std::cerr, 29);
+	}
+#endif
+	return ret;
 }

@@ -12,7 +12,7 @@ def configure(conf):
     if conf.is_defined('USE_EXTERNAL_LIBS'):
         autowaf.check_pkg(conf, 'hidapi-hidraw', uselib_store='HIDAPI', mandatory=False)
     else:
-        if conf.env['build_target'] == 'mingw':
+        if conf.env['build_target'] == 'mingw' or conf.env['build_target'] == 'msvc':
             conf.check (compiler='cxx', lib='setupapi', mandatory=True, uselib_store='SETUPAPI')
             conf.define ('HAVE_HIDAPI', 1)
         elif sys.platform == 'darwin':
@@ -42,7 +42,7 @@ def build(bld):
     obj.install_path       = bld.env['LIBDIR']
     obj.defines            = '_POSIX_C_SOURCE=200809L'
 
-    if bld.env['build_target'] == 'mingw':
+    if bld.env['build_target'] == 'mingw' or bld.env['build_target'] == 'msvc':
         obj.source         = 'windows/hid.c'
         obj.linkflags      = [ '-lsetupapi', '-mwindows' ]
         obj.uselib         = 'SETUPAPI'

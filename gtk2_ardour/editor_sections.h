@@ -29,10 +29,12 @@
 #include <ytkmm/treemodel.h>
 #include <ytkmm/treeview.h>
 
+class EditingContext;
+
 class EditorSections : public ARDOUR::SessionHandlePtr, public virtual sigc::trackable
 {
 public:
-	EditorSections ();
+	EditorSections (EditingContext&);
 
 	void set_session (ARDOUR::Session*);
 
@@ -115,6 +117,7 @@ private:
 	Gtk::TreeView                _view;
 	Gtk::ScrolledWindow          _scroller;
 
+	EditingContext&  editing_context;
 	LocationRowMap   _location_row_map;
 	bool             _no_redisplay;
 	sigc::connection _scroll_timeout;

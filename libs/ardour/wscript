@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 from waflib.extras import autowaf as autowaf
 from waflib import Options, Task
+import sys
+import platform as PLATFORM
 import os
 import re
 
@@ -18,12 +20,9 @@ libardour_sources = [
         'audio_buffer.cc',
         'audio_library.cc',
         'audio_playlist.cc',
-        'audio_playlist_importer.cc',
         'audio_playlist_source.cc',
         'audio_port.cc',
-        'audio_region_importer.cc',
         'audio_track.cc',
-        'audio_track_importer.cc',
         'audioanalyser.cc',
         'audioengine.cc',
         'audiofile_tagger.cc',
@@ -53,7 +52,6 @@ libardour_sources = [
         'control_group.cc',
         'control_protocol_manager.cc',
         'convolver.cc',
-        'cycle_timer.cc',
         'data_type.cc',
         'default_click.cc',
         'debug.cc',
@@ -66,7 +64,6 @@ libardour_sources = [
         'dsp_filter.cc',
         'ebur128_analysis.cc',
         'element_import_handler.cc',
-        'element_importer.cc',
         'engine_slave.cc',
         'enums.cc',
         'event_type_map.cc',
@@ -116,7 +113,6 @@ libardour_sources = [
         'legatize.cc',
         'library.cc',
         'location.cc',
-        'location_importer.cc',
         'ltc_file_reader.cc',
         'ltc_slave.cc',
         'lua_api.cc',
@@ -245,11 +241,13 @@ libardour_sources = [
         'soundcloud_upload.cc',
         'source.cc',
         'source_factory.cc',
+        'sp_stretch.cc',
         'speakers.cc',
         'srcfilesource.cc',
         'stripable.cc',
         # 'step_sequencer.cc',
         'strip_silence.cc',
+        'strum.cc',
         'surround_pannable.cc',
         'surround_return.cc',
         'surround_send.cc',
@@ -258,7 +256,6 @@ libardour_sources = [
         'rt_midibuffer.cc',
         'tailtime.cc',
         'template_utils.cc',
-        'tempo_map_importer.cc',
         'thawlist.cc',
         'thread_buffers.cc',
         'ticker.cc',
@@ -286,6 +283,9 @@ def options(opt):
     pass
 
 def configure(conf):
+    if conf.env['build_target'] == 'msvc':
+        conf.find_program('ml64', var='AS')
+
     conf.load('gas')
     # we don't use hard-coded micro versions with ardour, so hard code it to zero
     autowaf.check_pkg(conf, 'aubio', uselib_store='AUBIO',
@@ -340,15 +340,10 @@ def configure(conf):
     autowaf.check_pkg(conf, 'fftw3f', uselib_store='FFTW35F',
                       atleast_version='3.3.5', mandatory=False)
 
-    # controls whether we actually use it in preference to soundtouch
-    # Note: as of 2104, soundtouch (WSOLA) has been out-of-use for years.
-    conf.define('USE_RUBBERBAND', 1)
-
     conf.define('CURRENT_SESSION_FILE_VERSION', CURRENT_SESSION_FILE_VERSION)
 
     conf.check(header_name='sys/vfs.h', define_name='HAVE_SYS_VFS_H',mandatory=False)
     conf.check(header_name='sys/statvfs.h', define_name='HAVE_SYS_STATVFS_H',mandatory=False)
-    conf.check(header_name='unistd.h', define_name='HAVE_UNISTD',mandatory=False)
 
     have_sys_ioprio = conf.check_cc(
             msg="Checking for 'ioprio_set' syscall support",
@@ -387,6 +382,7 @@ def build(bld):
     # Library
     if bld.is_defined ('INTERNAL_SHARED_LIBS'):
         obj              = bld.shlib(features = 'c cxx cshlib cxxshlib', source=sources)
+        obj.cxxflags     = []
         # macros for this shared library
         obj.defines      = [ 'LIBARDOUR_DLL_EXPORTS=1' ]
     else:
@@ -407,11 +403,15 @@ def build(bld):
                         'libtemporal',
                         'liblua',
                         'libptformat',
+                        'staffpad',
                         'zita-resampler',
                         'zita-convolver',
                         ]
     if bld.env['build_target'] != 'mingw':
         obj.uselib += ['DL']
+    elif sys.platform == "win32":
+        obj.cxxflags += ['-Og']
+
 
     if bld.is_defined('USE_EXTERNAL_LIBS'):
         obj.uselib.extend(['VAMPSDK', 'LIBLTC', 'LIBFLUIDSYNTH'])
@@ -430,7 +430,7 @@ def build(bld):
 
     if bld.is_defined('HAVE_SOUNDTOUCH'):
         obj.source += ['st_stretch.cc']
-        #obj.source += ' st_stretch.cc st_pitch.cc '
+        #obj.source += ' st_stretch.cc '
         obj.uselib += ['SOUNDTOUCH']
     #obj.add_objects = 'default/libs/surfaces/control_protocol/smpte_1.o'
 
@@ -438,10 +438,7 @@ def build(bld):
         obj.source += ['lv2_plugin.cc', 'lv2_evbuf.cc', 'uri_map.cc']
         obj.uselib += ['LILV']
         if bld.is_defined('HAVE_SUIL'):
-            if bld.is_defined('YTK'):
-                obj.use += [ 'libsuil' ]
-            else:
-                obj.uselib += ['SUIL']
+            obj.use += [ 'libsuil' ]
 
     if bld.is_defined('WINDOWS_VST_SUPPORT'):
         obj.source += [ 'windows_vst_plugin.cc']
@@ -476,6 +473,8 @@ def build(bld):
     lua_use = list(obj.use);
     if bld.env['build_target'] == 'mingw' and bld.env['DEBUG']:
         lua_cxxflags += " -Og -Wa,-mbig-obj"
+    elif bld.env['build_target'] == 'msvc' and bld.env['DEBUG']:
+        lua_cxxflags += " /bigobj"
 
     bld(features = 'cxx cxxstlib asm',
         source   = "luabindings.cc" ,
@@ -727,8 +726,7 @@ def create_ardour_test_program(bld, includes, name, target, sources):
     testobj.use          = [ 'testcommon' ]
     testobj.name         = name
     testobj.target       = target
-    # not sure about install path
-    testobj.install_path = bld.env['LIBDIR']
+    testobj.install_path = ''
     testobj.defines      = [
         'PACKAGE="libardour' + bld.env['MAJOR'] + 'test"',
         'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',

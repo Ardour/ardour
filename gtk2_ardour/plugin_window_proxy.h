@@ -67,6 +67,9 @@ private:
 	std::string _title;
 	bool        _is_custom;
 	bool        _want_custom;
+
+	sigc::connection _unmap_connection;
+	sigc::connection _drop_window_connection;
 };
 
 #endif

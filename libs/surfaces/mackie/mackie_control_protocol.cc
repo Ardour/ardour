@@ -251,6 +251,35 @@ struct StripableByPresentationOrder
 	}
 };
 
+struct mcpStripableSorter
+{
+	bool operator () (const std::shared_ptr<Stripable> & a, const std::shared_ptr<Stripable> & b) const
+	{
+		if (!(a->presentation_info().special() || b->presentation_info().special() ||
+		      a->is_foldbackbus() || b->is_foldbackbus())) {
+			return a->presentation_info().order() < b->presentation_info().order();
+		}
+
+		int cmp_a = 0;
+		int cmp_b = 0;
+
+		if (a->is_foldbackbus ())     { cmp_a = 1; }
+		if (b->is_foldbackbus ())     { cmp_b = 1; }
+		if (a->is_master ())          { cmp_a = 2; }
+		if (b->is_master ())          { cmp_b = 2; }
+		if (a->is_monitor ())         { cmp_a = 3; }
+		if (b->is_monitor ())         { cmp_b = 3; }
+		if (a->is_surround_master ()) { cmp_a = 4; }
+		if (b->is_surround_master ()) { cmp_b = 4; }
+
+		if (cmp_a == cmp_b) {
+			return a->presentation_info().order() < b->presentation_info().order();
+		} else {
+			return cmp_a < cmp_b;
+		}
+	}
+};
+
 MackieControlProtocol::Sorted
 MackieControlProtocol::get_sorted_stripables()
 {
@@ -268,7 +297,9 @@ MackieControlProtocol::get_sorted_stripables()
 
 		std::shared_ptr<Stripable> s = *it;
 
-		if (s->presentation_info().special()) {
+		if (s->is_auditioner()) { continue; }
+		if (s->is_hidden()) { continue; }
+		if (this->device_info().has_master_fader() && s->presentation_info().special()) {
 			continue;
 		}
 
@@ -280,50 +311,46 @@ MackieControlProtocol::get_sorted_stripables()
 
 		switch (_view_mode) {
 		case Mixer:
-			if (!s->presentation_info().hidden()) {
-				sorted.push_back (s);
-			}
+			sorted.push_back (s);
 			break;
 		case AudioTracks:
-			if (is_audio_track(s) && !s->presentation_info().hidden()) {
+			if (is_audio_track(s)) {
 				sorted.push_back (s);
 			}
 			break;
 		case Busses:
-			if (Profile->get_mixbus()) {
 #ifdef MIXBUS
-				if (s->mixbus()) {
-					sorted.push_back (s);
-				}
-#endif
-			} else {
-				if (!is_track (s) && !is_vca (s) && !is_foldback_bus (s)  && !s->presentation_info().hidden()) {
-					sorted.push_back (s);
-				}
+			if (s->mixbus()) {
+				sorted.push_back (s);
 			}
+#else
+			if (is_bus(s)) {
+				sorted.push_back (s);
+			}
+#endif
 			break;
 		case MidiTracks:
-			if (is_midi_track(s) && !s->presentation_info().hidden()) {
+			if (is_midi_track(s)) {
 				sorted.push_back (s);
 			}
 			break;
 		case Auxes: // in ardour, for now aux and buss are same. for mixbus, "Busses" are mixbuses, "Auxes" are ardour buses
 #ifdef MIXBUS
-			if (!s->mixbus() && !is_track(s) && !is_vca (s) && !is_foldback_bus (s) && !s->presentation_info().hidden())
+			if (is_bus(s) && !s->mixbus())
 #else
-			if (!is_track (s) && !is_vca (s) && !is_foldback_bus (s) && !s->presentation_info().hidden())
+			if (is_bus(s))
 #endif
 			{
 				sorted.push_back (s);
 			}
 			break;
 		case Outputs:
-			if (is_foldback_bus (s) && !s->presentation_info().hidden()) {
+			if (is_foldback_bus (s)) {
 				sorted.push_back (s);
 			}
 			break;
 		case Selected: // For example: a group (this is USER)
-			if (s->is_selected() && !s->presentation_info().hidden()) {
+			if (s->is_selected()) {
 				sorted.push_back (s);
 			}
 			break;
@@ -333,14 +360,14 @@ MackieControlProtocol::get_sorted_stripables()
 			}
 			break;
 		case Inputs:
-			if (is_trigger_track (s) && !s->presentation_info().hidden()){
+			if (is_trigger_track (s)){
 				sorted.push_back (s);
 			}
 			break;
 		}
 	}
 
-	sort (sorted.begin(), sorted.end(), StripableByPresentationOrder());
+	sort (sorted.begin(), sorted.end(), mcpStripableSorter());
 	return sorted;
 }
 
@@ -425,6 +452,11 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("give surface %1 stripables\n", stripables.size()));
 
 				(*si)->map_stripables (stripables);
+
+				// Force RGB update on next redisplay
+				if (_device_info.is_v1m() || _device_info.is_p1m() || _device_info.is_p1nano()) {
+					(*si)->force_icon_rgb_update();
+				}
 			}
 		}
 
@@ -1787,21 +1819,20 @@ MackieControlProtocol::set_subview_mode (MACKIE_NAMESPACE::Subview::Mode sm, std
 
 		DEBUG_TRACE (DEBUG::MackieControl, "subview mode not OK\n");
 
-		if (r) {
+		Glib::Threads::Mutex::Lock lm (surfaces_lock);
 
-			Glib::Threads::Mutex::Lock lm (surfaces_lock);
-
-			if (!surfaces.empty()) {
-				if (!reason_why_subview_not_possible.empty()) {
-					surfaces.front()->display_message_for (reason_why_subview_not_possible, 1000);
-					if (_subview->subview_mode() != MACKIE_NAMESPACE::Subview::None) {
-						/* redisplay current subview mode after
-						   that message goes away.
-						*/
-						Glib::RefPtr<Glib::TimeoutSource> redisplay_timeout = Glib::TimeoutSource::create (1000); // milliseconds
-						redisplay_timeout->connect (sigc::mem_fun (*this, &MackieControlProtocol::redisplay_subview_mode));
-						redisplay_timeout->attach (main_loop()->get_context());
-					}
+		if (!surfaces.empty()) {
+			if (!reason_why_subview_not_possible.empty()) {
+				r ?
+					surfaces.front()->display_message_for (reason_why_subview_not_possible, 1000) :
+					surfaces.front()->display_message_for ("no track/bus selected", 1000);
+				if (_subview->subview_mode() != MACKIE_NAMESPACE::Subview::None) {
+					/* redisplay current subview mode after
+						that message goes away.
+					*/
+					Glib::RefPtr<Glib::TimeoutSource> redisplay_timeout = Glib::TimeoutSource::create (1000); // milliseconds
+					redisplay_timeout->connect (sigc::mem_fun (*this, &MackieControlProtocol::redisplay_subview_mode));
+					redisplay_timeout->attach (main_loop()->get_context());
 				}
 			}
 		}
@@ -1833,6 +1864,12 @@ MackieControlProtocol::set_view_mode (ViewMode m)
 
 	_view_mode = m;
 	_last_bank[old_view_mode] = _current_initial_bank;
+
+	if (Sorted sorted = get_sorted_stripables(); sorted.empty()) {
+		surfaces.front()->display_message_for ("This view is empty", 1000);
+		_view_mode = old_view_mode;
+		return;
+	}
 
 	if (switch_banks(_last_bank[m], true)) {
 		_view_mode = old_view_mode;
@@ -2351,6 +2388,12 @@ MackieControlProtocol::is_trigger_track (std::shared_ptr<Stripable> r) const
 {
 	std::shared_ptr<Track> trk = std::dynamic_pointer_cast<Track>(r);
 	return (trk && (r)->presentation_info ().trigger_track ());
+}
+
+bool
+MackieControlProtocol::is_bus (std::shared_ptr<Stripable> r) const
+{
+	return ((r)->presentation_info ().flags () & PresentationInfo::Bus);
 }
 
 bool

@@ -33,6 +33,7 @@
 #include "gui_thread.h"
 #include "route_group_dialog.h"
 #include "group_tabs.h"
+#include "ui_config.h"
 
 #include "pbd/i18n.h"
 
@@ -41,7 +42,7 @@ using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
 
-RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
+RouteGroupDialog::RouteGroupDialog (std::shared_ptr<RouteGroup> g, bool creating_new)
 	: ArdourDialog (_("Track/bus Group"))
 	, _group (g)
 	, _initial_name (g->name ())
@@ -161,7 +162,9 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	table->attach (_mute,             1, 3, r, r + 1, Gtk::FILL, Gtk::FILL, 0, 0); ++r;
 	table->attach (_solo,             1, 3, r, r + 1, Gtk::FILL, Gtk::FILL, 0, 0); ++r;
 	table->attach (_rec_enable,       1, 3, r, r + 1, Gtk::FILL, Gtk::FILL, 0, 0); ++r;
+#ifdef VAPOR
 	table->attach (_sursend_enable,   1, 3, r, r + 1, Gtk::FILL, Gtk::FILL, 0, 0); ++r;
+#endif
 	table->attach (_select,           1, 3, r, r + 1, Gtk::FILL, Gtk::FILL, 0, 0); ++r;
 	table->attach (_route_active,     1, 3, r, r + 1, Gtk::FILL, Gtk::FILL, 0, 0); ++r;
 	table->attach (_share_color,      1, 3, r, r + 1, Gtk::FILL, Gtk::FILL, 0, 0); ++r;
@@ -203,7 +206,7 @@ RouteGroupDialog::name_check () const
 		true
 		);
 
-	msg.set_position (WIN_POS_MOUSE);
+	msg.set_position (UIConfiguration::instance().get_default_window_position());
 	msg.run ();
 
 	return false;
@@ -243,8 +246,8 @@ bool
 RouteGroupDialog::unique_name (std::string const name) const
 {
 	if (name.empty()) return false; // do not allow empty name, empty means unset.
-	list<RouteGroup*> route_groups = _group->session().route_groups ();
-	list<RouteGroup*>::iterator i = route_groups.begin ();
+	RouteGroupList route_groups = _group->session().route_groups ();
+	RouteGroupList::iterator i = route_groups.begin ();
 	while (i != route_groups.end() && ((*i)->name() != name || *i == _group)) {
 		++i;
 	}

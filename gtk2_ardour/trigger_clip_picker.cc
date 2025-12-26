@@ -319,7 +319,7 @@ TriggerClipPicker::refill_dropdown ()
 	/* Custom Paths */
 	assert (_clip_dir_menu.items ().size () > 0);
 	if (!Config->get_sample_lib_path ().empty ()) {
-		_clip_dir_menu.AddMenuElem (Menu_Helpers::SeparatorElem ());
+		_clip_dir_menu.add_menu_elem (Menu_Helpers::SeparatorElem ());
 		Searchpath cpath (Config->get_sample_lib_path ());
 		for (auto const& f : cpath) {
 			maybe_add_dir (f);
@@ -328,10 +328,10 @@ TriggerClipPicker::refill_dropdown ()
 
 	_clip_library_listed = maybe_add_dir (clip_library_dir (false));
 
-	_clip_dir_menu.AddMenuElem (Menu_Helpers::SeparatorElem ());
-	_clip_dir_menu.AddMenuElem (Menu_Helpers::MenuElem (_("Edit..."), sigc::mem_fun (*this, &TriggerClipPicker::edit_path)));
-	_clip_dir_menu.AddMenuElem (Menu_Helpers::MenuElem (_("Other..."), sigc::mem_fun (*this, &TriggerClipPicker::open_dir)));
-	_clip_dir_menu.AddMenuElem (Menu_Helpers::MenuElem (_("Download..."), sigc::mem_fun (*this, &TriggerClipPicker::open_downloader)));
+	_clip_dir_menu.add_menu_elem (Menu_Helpers::SeparatorElem ());
+	_clip_dir_menu.add_menu_elem (Menu_Helpers::MenuElem (_("Edit..."), sigc::mem_fun (*this, &TriggerClipPicker::edit_path)));
+	_clip_dir_menu.add_menu_elem (Menu_Helpers::MenuElem (_("Other..."), sigc::mem_fun (*this, &TriggerClipPicker::open_dir)));
+	_clip_dir_menu.add_menu_elem (Menu_Helpers::MenuElem (_("Download..."), sigc::mem_fun (*this, &TriggerClipPicker::open_downloader)));
 	return false;
 }
 
@@ -405,7 +405,7 @@ TriggerClipPicker::maybe_add_dir (std::string const& dir)
 		return false;
 	}
 
-	_clip_dir_menu.AddMenuElem (Gtkmm2ext::MenuElemNoMnemonic (display_name (dir), sigc::bind (sigc::mem_fun (*this, &TriggerClipPicker::list_dir), dir, (Gtk::TreeNodeChildren*)0)));
+	_clip_dir_menu.add_menu_elem (Gtkmm2ext::MenuElemNoMnemonic (display_name (dir), sigc::bind (sigc::mem_fun (*this, &TriggerClipPicker::list_dir), dir, (Gtk::TreeNodeChildren*)0)));
 
 	/* check if a parent path of the given dir already exists,
 	 * or if this new path is parent to any existing ones.

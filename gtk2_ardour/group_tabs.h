@@ -52,6 +52,7 @@ public:
 	virtual ~GroupTabs ();
 
 	void set_session (ARDOUR::Session *);
+	void clear ();
 
 	/** Create route-group context menu
 	 *
@@ -60,26 +61,26 @@ public:
 	 *                 When true a given group's context menu for the group \p g is displayed.
 	 * @return Menu to be popped up on right-click over the given route group.
 	 */
-	Gtk::Menu* get_menu (ARDOUR::RouteGroup* g, bool tabArea = false);
+	Gtk::Menu* get_menu (std::shared_ptr<ARDOUR::RouteGroup> g, bool tabArea = false);
 
 	void run_new_group_dialog (ARDOUR::RouteList const *, bool with_master);
 
 	void set_extent (double);
 	void set_offset (double);
 
-	static void set_group_color (ARDOUR::RouteGroup *, uint32_t);
-	static std::string group_gui_id (ARDOUR::RouteGroup *);
-	static uint32_t group_color (ARDOUR::RouteGroup *);
+	static void set_group_color (std::shared_ptr<ARDOUR::RouteGroup>, uint32_t);
+	static std::string group_gui_id (std::shared_ptr<ARDOUR::RouteGroup>);
+	static uint32_t group_color (std::shared_ptr<ARDOUR::RouteGroup>);
 
 protected:
 
 	struct Tab {
-		Tab () : group (0) {}
+		Tab () {}
 
 		double from;
 		double to;
 		uint32_t color; ///< color
-		ARDOUR::RouteGroup* group; ///< route group
+		std::weak_ptr<ARDOUR::RouteGroup> group; ///< route group
 	};
 
 	/** @return Size of the widget along the primary axis */
@@ -115,7 +116,7 @@ private:
 	virtual double primary_coordinate (double x, double y) const = 0;
 
 	virtual ARDOUR::RouteList routes_for_tab (Tab const * t) const = 0;
-	virtual void add_menu_items (Gtk::Menu *, ARDOUR::RouteGroup *) {}
+	virtual void add_menu_items (Gtk::Menu *, std::shared_ptr<ARDOUR::RouteGroup>) {}
 	virtual ARDOUR::RouteList selected_routes () const = 0;
 
 	void add_new_from_items (Gtk::Menu_Helpers::MenuList&);
@@ -127,14 +128,14 @@ private:
 	void new_group_dialog_finished (int, RouteGroupDialog*, ARDOUR::RouteList const *, bool with_master) const;
 	void edit_group_dialog_finished (int, RouteGroupDialog*) const;
 
-	void collect (ARDOUR::RouteGroup *);
-	void set_activation (ARDOUR::RouteGroup *, bool);
-	void edit_group (ARDOUR::RouteGroup *);
-	void subgroup (ARDOUR::RouteGroup *, bool, ARDOUR::Placement);
-	void un_subgroup (ARDOUR::RouteGroup *);
+	void collect (std::shared_ptr<ARDOUR::RouteGroup>);
+	void set_activation (std::shared_ptr<ARDOUR::RouteGroup>, bool);
+	void edit_group (std::shared_ptr<ARDOUR::RouteGroup>);
+	void subgroup (std::shared_ptr<ARDOUR::RouteGroup>, bool, ARDOUR::Placement);
+	void un_subgroup (std::shared_ptr<ARDOUR::RouteGroup>);
 	void activate_all ();
 	void disable_all ();
-	void remove_group (ARDOUR::RouteGroup *);
+	void remove_group (std::shared_ptr<ARDOUR::RouteGroup>);
 
 	void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
 	void on_size_request (Gtk::Requisition *);
@@ -147,12 +148,12 @@ private:
 
 	Tab * click_to_tab (double, std::list<Tab>::iterator *, std::list<Tab>::iterator *);
 
-	void route_group_property_changed (ARDOUR::RouteGroup *);
-	void route_added_to_route_group (ARDOUR::RouteGroup *, std::weak_ptr<ARDOUR::Route>);
-	void route_removed_from_route_group (ARDOUR::RouteGroup *, std::weak_ptr<ARDOUR::Route>);
+	void route_group_property_changed (std::shared_ptr<ARDOUR::RouteGroup>);
+	void route_added_to_route_group (std::shared_ptr<ARDOUR::RouteGroup>, std::weak_ptr<ARDOUR::Route>);
+	void route_removed_from_route_group (std::shared_ptr<ARDOUR::RouteGroup>, std::weak_ptr<ARDOUR::Route>);
 
-	void assign_group_to_master (uint32_t which, ARDOUR::RouteGroup*, bool rename_master) const;
-	void unassign_group_to_master (uint32_t which, ARDOUR::RouteGroup*) const;
+	void assign_group_to_master (std::shared_ptr<ARDOUR::RouteGroup>, uint32_t which, bool rename_master) const;
+	void unassign_group_to_master (std::shared_ptr<ARDOUR::RouteGroup>, uint32_t which) const;
 	void assign_selection_to_master (uint32_t which);
 	void assign_recenabled_to_master (uint32_t which);
 	void assign_soloed_to_master (uint32_t which);

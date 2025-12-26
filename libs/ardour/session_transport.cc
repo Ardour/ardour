@@ -30,7 +30,6 @@
 
 #include <cmath>
 #include <cerrno>
-#include <unistd.h>
 
 #include "pbd/atomic.h"
 #include "pbd/error.h"
@@ -151,6 +150,10 @@ Session::realtime_stop (bool abort, bool clear_state)
 
 	if (config.get_use_video_sync()) {
 		waiting_for_sync_offset = true;
+	}
+
+	if (todo & PostTransportClearSubstate) {
+		roll_started_loop = false;
 	}
 
 	if (todo) {
@@ -474,6 +477,17 @@ Session::start_transport (bool after_loop)
 {
 	ENSURE_PROCESS_THREAD;
 	DEBUG_TRACE (DEBUG::Transport, "start_transport\n");
+
+	if (!after_loop && !roll_started_loop && !_exporting
+	    && Config->get_roll_will_loop ()
+	    && !get_play_loop ()
+	    && !transport_master_is_external ()
+	    && _locations->auto_loop_location ()) {
+		roll_started_loop = true;
+		SessionEvent* ev = new SessionEvent (SessionEvent::SetLoop, SessionEvent::Add, SessionEvent::Immediate, 0, _transport_fsm->default_speed(), true, true);
+		queue_event (ev);
+		return;
+	}
 
 	if (Config->get_loop_is_mode() && get_play_loop ()) {
 
@@ -977,6 +991,21 @@ Session::force_locate (samplepos_t target_sample, LocateTransportDisposition ltd
 	ev->locate_transport_disposition = ltd;
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request forced locate to %1 roll %2\n", target_sample, enum_2_string (ltd)));
 	queue_event (ev);
+}
+
+bool
+Session::request_locate_to_mark (std::string const& name, LocateTransportDisposition ltd, TransportRequestSource origin)
+{
+	for (auto const& l : locations()->list()) {
+		if (!l->is_mark() || l->is_hidden() || l->is_session_range()) {
+			continue;
+		}
+		if (l->name () == name) {
+			request_locate (l->start_sample(), false, ltd, origin);
+			return true;
+		}
+	}
+	return false;
 }
 
 void
@@ -1541,7 +1570,9 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished, bool will_
 
 	if (ptw & (PostTransportClearSubstate|PostTransportStop)) {
 		if (!Config->get_loop_is_mode() && get_play_loop() && !loop_changing) {
-			unset_play_loop ();
+			if (!Config->get_roll_will_loop () || (ptw & PostTransportClearSubstate)) {
+				unset_play_loop ();
+			}
 		}
 	}
 
@@ -1892,6 +1923,17 @@ Session::engine_running ()
 {
 	_transport_fsm->start ();
 	reset_xrun_count ();
+
+	if (_engine_state && Config->get_restore_hardware_connections ()) {
+		/* Note this restores the connections from the most recent [pending] save.
+		 * Which may or may not be idendical to the ones used before the engine 
+		 * re-started.
+		 */
+		std::shared_ptr<AudioBackend> backend = _engine.current_backend();
+		for (auto const& s: _engine_state->children ()) {
+			backend->set_state (*s, Stateful::loading_state_version);
+		}
+	}
 }
 
 void
@@ -1946,21 +1988,25 @@ Session::route_processors_changed (RouteProcessorChange c)
 		return;
 	}
 
-	if (c.type == RouteProcessorChange::MeterPointChange) {
-		/* sort rec-armed routes first */
+	if (c.type == RouteProcessorChange::NoProcessorChange) {
+		return;
+	}
+
+	if (c.type & RouteProcessorChange::MeterPointChange) {
+		/* sort rec-armed routes to be processed first */
 		resort_routes ();
 		set_dirty ();
 		return;
 	}
 
-	if (c.type == RouteProcessorChange::RealTimeChange) {
+	if (c.type & RouteProcessorChange::RealTimeChange) {
 		set_dirty ();
 		return;
 	}
 
 	resort_routes ();
 
-	if (c.type == RouteProcessorChange::SendReturnChange) {
+	if (c.type & RouteProcessorChange::SendReturnChange) {
 		update_latency_compensation (true, false);
 	} else {
 		update_latency_compensation (false, false);
@@ -2189,7 +2235,8 @@ Session::flush_cue_recording ()
 
 	while (TriggerBox::cue_records.read (&cr, 1) == 1) {
 		BBT_Argument bbt = tmap->bbt_at (timepos_t (cr.when));
-		bbt = BBT_Argument (bbt.reference(), bbt.round_up_to_bar ());
+		Meter const & meter (tmap->meter_at (timepos_t (cr.when)));
+		bbt = BBT_Argument (bbt.reference(), meter.round_up_to_bar (bbt));
 
 		const timepos_t when (tmap->quarters_at (bbt));
 

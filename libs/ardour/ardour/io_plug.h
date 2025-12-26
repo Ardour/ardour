@@ -59,6 +59,7 @@ public:
 	int  set_block_size (pframes_t);
 	void set_public_latency (bool);
 	bool ensure_io ();
+	void set_pretty_port_names ();
 
 	bool is_pre () const { return _pre; }
 
@@ -118,6 +119,8 @@ private:
 	std::string ensure_io_name (std::string) const;
 	void create_parameters ();
 	void parameter_changed_externally (uint32_t, float);
+	void property_changed_externally (uint32_t, Variant);
+	void processor_change (RouteProcessorChange const&);
 
 	void setup ();
 

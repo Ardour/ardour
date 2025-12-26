@@ -11,7 +11,7 @@ def options(opt):
     pass
 
 def configure(conf):
-    autowaf.check_pkg(conf, 'jack', uselib_store='JACK', atleast_version='0.121.0')
+    autowaf.check_pkg(conf, 'jack', uselib_store='JACK', atleast_version='1.9.10')
 
     #
     # PortAudio is currently used to get a list of audio device names.

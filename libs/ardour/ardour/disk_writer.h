@@ -82,6 +82,7 @@ public:
 	PBD::Signal<void()> AlignmentStyleChanged;
 
 	bool configure_io (ChanCount in, ChanCount out);
+	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
 
 	std::list<std::shared_ptr<Source>>& last_capture_sources ();
 	void reset_last_capture_sources ();

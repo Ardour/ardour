@@ -49,6 +49,7 @@ URIMap::URIDs::init(URIMap& uri_map)
 	atom_Float          = uri_map.uri_to_id("http://lv2plug.in/ns/ext/atom#Float");
 	atom_Long           = uri_map.uri_to_id("http://lv2plug.in/ns/ext/atom#Long");
 	atom_Int            = uri_map.uri_to_id("http://lv2plug.in/ns/ext/atom#Int");
+	atom_Bool           = uri_map.uri_to_id("http://lv2plug.in/ns/ext/atom#Bool");
 	log_Error           = uri_map.uri_to_id("http://lv2plug.in/ns/ext/log#Error");
 	log_Note            = uri_map.uri_to_id("http://lv2plug.in/ns/ext/log#Note");
 	log_Trace           = uri_map.uri_to_id("http://lv2plug.in/ns/ext/log#Trace");

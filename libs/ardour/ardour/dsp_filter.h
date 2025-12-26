@@ -26,6 +26,7 @@
 #include <glibmm.h>
 #include <fftw3.h>
 
+#include "pbd/enum_convert.h"
 #include "pbd/malign.h"
 
 #include "ardour/buffer_set.h"
@@ -284,7 +285,14 @@ namespace ARDOUR { namespace DSP {
 			double _b0, _b1, _b2;
 	};
 
-	class LIBARDOUR_API FFTSpectrum {
+	class LIBARDOUR_API SpectrumAnalyzer {
+	public:
+		virtual ~SpectrumAnalyzer () {}
+		virtual float power_at_bin (const uint32_t bin, const float gain, bool pink) const = 0;
+		virtual float freq_at_bin (const uint32_t bin) const = 0;
+	};
+
+	class LIBARDOUR_API FFTSpectrum : public SpectrumAnalyzer {
 		public:
 			FFTSpectrum (uint32_t window_size, double rate);
 			~FFTSpectrum ();
@@ -306,14 +314,13 @@ namespace ARDOUR { namespace DSP {
 			 * @param norm gain factor (set equal to \p bin for 1/f normalization)
 			 * @return signal power at given bin (in dBFS)
 			 */
-			float power_at_bin (const uint32_t bin, const float norm = 1.f) const;
+			float power_at_bin (const uint32_t bin, const float gain = 1.f, bool pink = false) const;
 
 			float freq_at_bin (const uint32_t bin) const {
 				return bin * _fft_freq_per_bin;
 			}
 
 		private:
-			static Glib::Threads::Mutex fft_planner_lock;
 			float* hann_window;
 
 			void init (uint32_t window_size, double rate);
@@ -328,6 +335,105 @@ namespace ARDOUR { namespace DSP {
 			float* _fft_power;
 
 			fftwf_plan _fftplan;
+	};
+
+	class LIBARDOUR_API PerceptualAnalyzer : public SpectrumAnalyzer {
+		public:
+			PerceptualAnalyzer (double rate, int ipsize = 4096);
+			~PerceptualAnalyzer ();
+			PerceptualAnalyzer (PerceptualAnalyzer const&) = delete;
+
+			class Trace {
+				public:
+					Trace (int size);
+					~Trace ();
+
+					bool     _valid;
+					int32_t  _count;
+					float   *_data;
+			};
+
+			enum ProcessMode {
+					MM_NONE,
+					MM_PEAK,
+					MM_AVER
+			};
+
+			enum Speed {
+				Rapid,
+				Fast,
+				Moderate,
+				Slow,
+				Noise
+			};
+
+			enum Warp {
+				Bark,
+				Medium,
+				High
+			};
+
+			void set_wfact (float wfact);
+			void set_speed (float speed);
+
+			void set_wfact (enum Warp);
+			void set_speed (enum Speed);
+
+			void reset ();
+
+			int    fftlen () const { return _fftlen; }
+			float* ipdata () const { return _ipdata; }
+			Trace* power ()  const { return _power; }
+			Trace* peakp ()  const { return _peakp; }
+			float  pmax ()   const { return _pmax; }
+
+			/** process current data in buffer */
+			void process (int iplen, ProcessMode mode = MM_NONE);
+
+			static double warp_freq (double w, double f);
+
+			float freq_at_bin (const uint32_t bin) const;
+			float power_at_bin (const uint32_t bin, const float gain = 1.f, bool pink = false) const;
+
+		private:
+			static const int _fftlen = 512;
+
+			void  init ();
+			float conv0 (fftwf_complex*);
+			float conv1 (fftwf_complex*);
+
+			int              _ipsize;
+			int              _icount;
+			fftwf_plan       _fftplan;
+			float           *_ipdata;
+			float           *_warped;
+			fftwf_complex   *_trdata;
+			Trace           *_power;
+			Trace           *_peakp;
+			float            _fsamp;
+			float            _wfact;
+			float            _speed;
+			float            _pmax;
+			float            _fscale[513];
+			float            _bwcorr[513];
+	};
+
+	class LIBARDOUR_API StereoCorrelation {
+		public:
+			StereoCorrelation (float samplerate, float lp_freq = 2e3f, float tc_corr = .3f);
+
+			void process (float const*, float const*, uint32_t n_samples);
+			void reset ();
+			float read () const;
+
+		private:
+			float _zl;
+			float _zr;
+			float _zlr;
+			float _zll;
+			float _zrr;
+			float _w1;  // lowpass filter coefficient
+			float _w2;  // correlation filter coeffient
 	};
 
 	class LIBARDOUR_API Generator {
@@ -359,4 +465,9 @@ namespace ARDOUR { namespace DSP {
 	};
 
 } } /* namespace */
+
+namespace PBD {
+DEFINE_ENUM_CONVERT(ARDOUR::DSP::PerceptualAnalyzer::Speed);
+DEFINE_ENUM_CONVERT(ARDOUR::DSP::PerceptualAnalyzer::Warp);
+}
 #endif

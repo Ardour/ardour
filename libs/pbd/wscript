@@ -24,6 +24,7 @@ libpbd_sources = [
     'base_ui.cc',
     'boost_debug.cc',
     'cartesian.cc',
+    'ccurl.cc',
     'command.cc',
     'configuration_variable.cc',
     'convert.cc',
@@ -103,8 +104,9 @@ def configure(conf):
     autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.32.0', mandatory=True)
     autowaf.check_pkg(conf, 'giomm-2.4', uselib_store='GIOMM', atleast_version='2.2', mandatory=True)
 
-    conf.check(header_name='execinfo.h', define_name='HAVE_EXECINFO',mandatory=False)
-    conf.check(header_name='unistd.h', define_name='HAVE_UNISTD',mandatory=False)
+    conf.check(header_name='execinfo.h', define_name='HAVE_EXECINFO_H',mandatory=False)
+    conf.check(header_name='unistd.h', define_name='HAVE_UNISTD_H',mandatory=False)
+    conf.env.append_value('CFLAGS', "-D_POSIX_C_SOURCE=200809L")
     if not Options.options.ppc:
         conf.check_cc(
                 msg="Checking for function 'posix_memalign' in stdlib.h",
@@ -120,7 +122,7 @@ def configure(conf):
             define_name='HAVE_LOCALTIME_R', execute = False, mandatory=False)
 
     # Boost headers
-    if Options.options.dist_target == 'mingw':
+    if Options.options.dist_target == 'mingw' or Options.options.dist_target == 'msvc':
         conf.check(compiler='cxx',
                    lib='ole32',
                    mandatory=True,
@@ -168,13 +170,14 @@ def build(bld):
     obj.vnum         = LIBPBD_LIB_VERSION
     obj.install_path = bld.env['LIBDIR']
     obj.defines     += [ 'PACKAGE="' + I18N_PACKAGE + '"' ]
+    obj.defines     += [ 'VERSIONSTRING="' + bld.env['VERSION'] + '"' ]
 
     if sys.platform.startswith('netbsd'):
         obj.linkflags = '-lexecinfo'
 
     if bld.env['build_target'] == 'x86_64':
         obj.defines += [ 'USE_X86_64_ASM' ]
-    if bld.env['build_target'] == 'mingw':
+    if bld.env['build_target'] == 'mingw' or bld.env['build_target'] == 'msvc':
         obj.defines += [ 'NO_POSIX_MEMALIGN' ]
         obj.source += [ 'windows_special_dirs.cc' ]
         obj.source += [ 'windows_timer_utils.cc' ]
@@ -199,7 +202,7 @@ def build(bld):
                 test/xml_test.cc
                 test/test_common.cc
         '''.split()
-        if bld.env['build_target'] == 'mingw':
+        if bld.env['build_target'] == 'mingw' or bld.env['build_target'] == 'msvc':
             testobj.source += [ 'test/windows_timer_utils_test.cc' ]
         testobj.target       = 'run-tests'
         testobj.includes     = obj.includes + ['test', '../pbd']
@@ -207,5 +210,6 @@ def build(bld):
         testobj.use          = 'libpbd'
         testobj.name         = 'libpbd-tests'
         testobj.defines      = [ 'PACKAGE="' + I18N_PACKAGE + '"' ]
-        if sys.platform != 'darwin' and bld.env['build_target'] != 'mingw':
+        if sys.platform != 'darwin' and bld.env['build_target'] != 'mingw' and  bld.env['build_target'] != 'msvc':
             testobj.lib      = ['rt', 'dl']
+        testobj.install_path = ''

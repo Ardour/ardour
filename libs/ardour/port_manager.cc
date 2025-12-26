@@ -24,8 +24,6 @@
 #ifdef COMPILER_MSVC
 #include <ardourext/misc.h>
 #include <io.h> // Microsoft's nearest equivalent to <unistd.h>
-#else
-#include <regex.h>
 #endif
 
 #include <glibmm/fileutils.h>
@@ -551,6 +549,9 @@ PortManager::port_renamed (const std::string& old_relative_name, const std::stri
 	if (x != p->end ()) {
 		std::shared_ptr<Port> port = x->second;
 		p->erase (x);
+		for (auto& [pn, pt] : *p) {
+			pt->rename_connected_port (make_port_name_non_relative (old_relative_name), make_port_name_non_relative (new_relative_name));
+		}
 		p->insert (make_pair (new_relative_name, port));
 	}
 }
@@ -917,7 +918,7 @@ PortManager::set_pretty_names (std::vector<std::string> const& port_names, DataT
 }
 
 int
-PortManager::reconnect_ports ()
+PortManager::reconnect_ports (Session* s)
 {
 	std::shared_ptr<Ports const> p = _ports.reader ();
 
@@ -925,7 +926,10 @@ PortManager::reconnect_ports ()
 
 	DEBUG_TRACE (DEBUG::Ports, string_compose ("reconnect %1 ports\n", p->size ()));
 
-	Session* s = AudioEngine::instance ()->session ();
+	if (!s) {
+		s = AudioEngine::instance ()->session ();
+	}
+
 	if (s && s->master_out() && !s->master_out ()->output()->has_ext_connection()) {
 		s->auto_connect_master_bus ();
 	}
@@ -998,6 +1002,12 @@ PortManager::connect_callback (const string& a, const string& b, bool conn)
 		} else if (port_a && port_b) {
 			port_a->decrement_internal_connections ();
 			port_a->decrement_internal_connections ();
+		}
+	}
+
+	if (!port_a && !port_b && Config->get_restore_hardware_connections () && !AudioEngine::instance ()->is_jack ()) {
+		if (AudioEngine::instance ()->session ()) {
+			AudioEngine::instance ()->session ()->set_dirty ();
 		}
 	}
 
@@ -1481,40 +1491,29 @@ PortManager::port_engine ()
 bool
 PortManager::port_is_control_only (std::string const& name)
 {
-	static regex_t compiled_pattern;
-	static string  pattern;
+	/* This is a list of substrings that identify ports related
+	 * to physical MIDI devices that we do not want to expose as
+	 * normal physical ports.
+	 */
 
-	if (pattern.empty ()) {
-		/* This is a list of regular expressions that match ports
-		 * related to physical MIDI devices that we do not want to
-		 * expose as normal physical ports.
-		 */
+	static const char* const control_only_ports[] = {
+		X_("Ableton Push"),
+		X_("FaderPort "),
+		X_("FaderPort8 "),
+		X_("FaderPort16 "),
+		X_("FaderPort2 "),
+		X_("US-2400 "),
+		X_("Mackie "),
+		X_("MIDI Control "),
+		X_("Console1 "),
+	};
 
-		const char* const control_only_ports[] = {
-			X_(".*Ableton Push.*"),
-			X_(".*FaderPort .*"),
-			X_(".*FaderPort8 .*"),
-			X_(".*FaderPort16 .*"),
-			X_(".*FaderPort2 .*"),
-			X_(".*US-2400 .*"),
-			X_(".*Mackie .*"),
-			X_(".*MIDI Control .*"),
-			X_(".*Console1 .*"),
-		};
-
-		pattern = "(";
-		for (size_t n = 0; n < sizeof (control_only_ports) / sizeof (control_only_ports[0]); ++n) {
-			if (n > 0) {
-				pattern += '|';
-			}
-			pattern += control_only_ports[n];
+	for (size_t n = 0; n < sizeof (control_only_ports) / sizeof (control_only_ports[0]); ++n) {
+		if (name.find (control_only_ports[n]) != string::npos) {
+			return true;
 		}
-		pattern += ')';
-
-		regcomp (&compiled_pattern, pattern.c_str (), REG_EXTENDED | REG_NOSUB);
 	}
-
-	return regexec (&compiled_pattern, name.c_str (), 0, 0, 0) == 0;
+	return false;
 }
 
 static bool

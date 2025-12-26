@@ -93,10 +93,11 @@ Meterbridge::Meterbridge ()
 
 	m_width = default_width;
 	m_height = default_height;
-	m_root_x = 1;
-	m_root_y = 1;
+	m_root_x = -1;
+	m_root_y = -1;
 
 	update_title ();
+	set_position (UIConfiguration::instance().get_default_window_position());
 
 	set_wmclass (X_("ardour_mixer"), PROGRAM_NAME);
 
@@ -465,8 +466,8 @@ Meterbridge::set_state (const XMLNode& node)
 
 	m_width = default_width;
 	m_height = default_height;
-	m_root_x = 1;
-	m_root_y = 1;
+	m_root_x = -1;
+	m_root_y = -1;
 
 	if ((geometry = find_named_node (node, "geometry")) != 0) {
 		geometry->get_property ("x-size", m_width);

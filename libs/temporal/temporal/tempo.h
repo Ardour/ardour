@@ -62,6 +62,7 @@ namespace Temporal {
 class Meter;
 class TempoMap;
 class TempoMapCutBuffer;
+class ScopedTempoMapOwner;
 
 class MapOwned {
  protected:
@@ -301,6 +302,7 @@ class LIBTEMPORAL_API Meter {
 		return *this;
 	}
 
+	BBT_Offset bbt_delta (BBT_Time const & later, BBT_Time const &earlier) const;
 	BBT_Time bbt_add (BBT_Time const & bbt, BBT_Offset const & add) const;
 	BBT_Time bbt_subtract (BBT_Time const & bbt, BBT_Offset const & sub) const;
 	BBT_Time round_to_bar (BBT_Time const &) const;
@@ -738,12 +740,15 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
   private:
 	static thread_local SharedPtr _tempo_map_p;
 	static SerializedRCUManager<TempoMap> _map_mgr;
+	static bool fetch_condition ();
   public:
 	LIBTEMPORAL_API static void init ();
 
 	LIBTEMPORAL_API static void      update_thread_tempo_map() { _tempo_map_p = _map_mgr.reader(); }
 	LIBTEMPORAL_API static SharedPtr use() { assert (_tempo_map_p); return _tempo_map_p; }
-	LIBTEMPORAL_API static SharedPtr fetch() { update_thread_tempo_map(); return _tempo_map_p; }
+	LIBTEMPORAL_API static SharedPtr fetch() { assert (fetch_condition()); update_thread_tempo_map(); return _tempo_map_p; }
+	/* No fetch condition for this, to be used only in association with LocalTempoMapScope */
+	LIBTEMPORAL_API static SharedPtr global_fetch() { return _map_mgr.reader(); }
 
 	/* Used only by the ARDOUR::AudioEngine API to reset the process thread
 	 * tempo map only when it has changed.
@@ -769,11 +774,17 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	/* and now on with the rest of the show ... */
 
   public:
-	LIBTEMPORAL_API TempoMap () {}
+	LIBTEMPORAL_API TempoMap () : _scope_owner (nullptr) {}
 	LIBTEMPORAL_API TempoMap (Tempo const& initial_tempo, Meter const& initial_meter);
 	LIBTEMPORAL_API TempoMap (TempoMap const&);
 	LIBTEMPORAL_API TempoMap (XMLNode const&, int version);
 	LIBTEMPORAL_API ~TempoMap();
+
+	/* For use ONLY when building a tempo map from an SMF tempo map */
+	LIBTEMPORAL_API void smf_begin ();
+	LIBTEMPORAL_API void smf_end ();
+	LIBTEMPORAL_API void smf_add (TempoPoint&);
+	LIBTEMPORAL_API void smf_add (MeterPoint&);
 
 	LIBTEMPORAL_API TempoMap& operator= (TempoMap const&);
 
@@ -871,6 +882,8 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	LIBTEMPORAL_API void shift (timepos_t const & at, BBT_Offset const & by);
 	LIBTEMPORAL_API void shift (timepos_t const & at, timecnt_t const & by);
+
+	LIBTEMPORAL_API timepos_t duration (TimeDomain) const;
 
   private:
 	template<typename TimeType, typename Comparator> TempoPoint const & _tempo_at (TimeType when, Comparator cmp) const {
@@ -971,6 +984,8 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	LIBTEMPORAL_API	BBT_Argument bbt_walk (BBT_Argument const &, BBT_Offset const &) const;
 
+	LIBTEMPORAL_API BBT_Offset bbt_distance (BBT_Argument const & a, BBT_Argument const & b) const;
+
 	Tempos const & tempos() const { return _tempos; }
 	Meters const & meters() const { return _meters; }
 	MusicTimes const & bartimes() const { return _bartimes; }
@@ -1001,11 +1016,16 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	static void map_assert (bool expr, char const * exprstr, char const * file, int line);
 
+	LIBTEMPORAL_API void set_scope_owner (ScopedTempoMapOwner&);
+	LIBTEMPORAL_API void clear_scope_owner ();
+	ScopedTempoMapOwner* scope_owner() const { return _scope_owner; }
+
   private:
 	Tempos       _tempos;
 	Meters       _meters;
 	MusicTimes   _bartimes;
 	Points       _points;
+	ScopedTempoMapOwner* _scope_owner;
 
 	int set_tempos_from_state (XMLNode const &);
 	int set_meters_from_state (XMLNode const &);
@@ -1302,4 +1322,3 @@ LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::MeterPoint
 LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::MusicTimePoint const &);
 LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::TempoMetric const &);
 }
-

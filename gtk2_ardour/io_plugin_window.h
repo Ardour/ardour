@@ -107,6 +107,7 @@ private:
 		void self_delete (); /* implicit */
 		void self_remove (); /* explicit */
 		void edit_plugin (bool);
+		void rename ();
 
 		Gtk::Frame                        _frame;
 		Gtk::VBox                         _box;

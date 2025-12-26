@@ -70,6 +70,7 @@ private:
 
 	void parameter_changed (std::string);
 	void ui_actions_ready ();
+	void setup_tooltips ();
 
 	void repack_transport_hbox ();
 
@@ -104,7 +105,7 @@ private:
 
 	void reset_peak_display ();
 	void reset_route_peak_display (ARDOUR::Route*);
-	void reset_group_peak_display (ARDOUR::RouteGroup*);
+	void reset_group_peak_display (std::shared_ptr<ARDOUR::RouteGroup>);
 
 	bool editor_meter_peak_button_release (GdkEventButton*);
 
@@ -132,21 +133,21 @@ private:
 	ArdourWidgets::ArdourButton   _latency_disable_button;
 	Gtk::Label                    _route_latency_value;
 	ArdourWidgets::ArdourButton   _auto_return_button;
-	ArdourWidgets::ArdourButton   _follow_edits_button;
 	TransportClock                _primary_clock;
 	TransportClock                _secondary_clock;
-	ArdourWidgets::ArdourVSpacer* _secondary_clock_spacer;
+	ArdourWidgets::ArdourVSpacer  _primary_clock_spacer;
+	ArdourWidgets::ArdourVSpacer  _secondary_clock_spacer;
 	ArdourWidgets::ArdourButton   _auditioning_alert_button;
 	ArdourWidgets::ArdourButton   _solo_alert_button;
 	ArdourWidgets::ArdourButton   _feedback_alert_button;
 	Gtk::VBox                     _alert_box;
-	ArdourWidgets::ArdourVSpacer  _monitor_spacer;
 	ArdourWidgets::ArdourButton   _monitor_dim_button;
 	ArdourWidgets::ArdourButton   _monitor_mono_button;
 	ArdourWidgets::ArdourButton   _monitor_mute_button;
 	ArdourWidgets::ArdourVSpacer  _cuectrl_spacer;
 	ArdourWidgets::ArdourButton   _cue_rec_enable;
 	ArdourWidgets::ArdourButton   _cue_play_enable;
+	Gtk::HBox                     _left_hbox;
 	Gtk::HBox                     _transport_hbox;
 	MiniTimeline                  _mini_timeline;
 	TimeInfoBox*                  _time_info_box;

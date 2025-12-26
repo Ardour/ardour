@@ -38,12 +38,20 @@
 #include "pbd/pthread_utils.h"
 
 #ifdef COMPILER_MSVC
-DECLARE_DEFAULT_COMPARISONS (pthread_t) // Needed for 'DECLARE_DEFAULT_COMPARISONS'. Objects in an STL container can be
-                                        // searched and sorted. Thus, when instantiating the container, MSVC complains
-                                        // if the type of object being contained has no appropriate comparison operators
-                                        // defined (specifically, if operators '<' and '==' are undefined). This seems
-                                        // to be the case with ptw32 'pthread_t' which is a simple struct.
-
+#ifndef WAF_BUILD
+DECLARE_DEFAULT_COMPARISONS(pthread_t) // Needed for 'DECLARE_DEFAULT_COMPARISONS'. Objects in an STL container can be
+                                       // searched and sorted. Thus, when instantiating the container, MSVC complains
+                                       // if the type of object being contained has no appropriate comparison operators
+                                       // defined (specifically, if operators '<' and '==' are undefined). This seems
+                                       // to be the case with ptw32 'pthread_t' which is a simple struct.
+#else
+LIBPBD_API inline bool operator<(const pthread_t& lhs, const pthread_t& rhs) {
+    return lhs.p < rhs.p || (lhs.p == rhs.p && lhs.x < rhs.x);
+}
+LIBPBD_API inline bool operator==(const pthread_t& lhs, const pthread_t& rhs) {
+    return lhs.p == rhs.p && lhs.x == rhs.x;
+}
+#endif
 #define pthread_gethandle  pthread_getw32threadhandle_np
 #endif
 
@@ -194,7 +202,7 @@ fake_thread_start (void* arg)
 	pthread_mutex_lock (&thread_map_lock);
 
 	for (auto const& t : all_threads) {
-		if (pthread_equal (t.first, pthread_self ())) {
+		if (pthread_equal (t.first, pthread_self ()) != 0) {
 			DEBUG_TRACE (PBD::DEBUG::Threads, string_compose ("Terminated: '%1'\n", t.second));
 			all_threads.erase (t.first);
 			break;
@@ -237,7 +245,7 @@ pthread_set_name (const char* str)
 	/* copy string and delete it when exiting */
 	thread_name.set (strdup (str)); // leaks
 
-#if !defined PTW32_VERSION && defined _GNU_SOURCE
+#if !defined __PTW32_VERSION && defined _GNU_SOURCE
 	/* set public thread name, up to 16 chars */
 	char ptn[16];
 	memset (ptn, 0, 16);
@@ -262,7 +270,7 @@ pthread_kill_all (int signum)
 {
 	pthread_mutex_lock (&thread_map_lock);
 	for (auto const& t : all_threads) {
-		if (pthread_equal (t.first, pthread_self ())) {
+		if (pthread_equal (t.first, pthread_self ()) != 0) {
 			continue;
 		}
 		DEBUG_TRACE (PBD::DEBUG::Threads, string_compose ("Kill: '%1'\n", t.second));
@@ -277,7 +285,7 @@ pthread_cancel_all ()
 {
 	pthread_mutex_lock (&thread_map_lock);
 	for (auto const& t : all_threads) {
-		if (pthread_equal (t.first, pthread_self ())) {
+		if (pthread_equal (t.first, pthread_self ()) != 0) {
 			continue;
 		}
 		DEBUG_TRACE (PBD::DEBUG::Threads, string_compose ("Cancel: '%1'\n", t.second));
@@ -292,7 +300,7 @@ pthread_cancel_one (pthread_t thread)
 {
 	pthread_mutex_lock (&thread_map_lock);
 	for (auto const& t : all_threads) {
-		if (pthread_equal (t.first, thread)) {
+		if (pthread_equal (t.first, thread) != 0) {
 			all_threads.erase (t.first);
 			break;
 		}
@@ -574,7 +582,8 @@ PBD::Thread::Thread (std::function<void ()> const& slot, std::string const& name
 }
 
 void*
-PBD::Thread::_run (void* arg) {
+PBD::Thread::_run (void* arg)
+{
 	PBD::Thread* self = static_cast<PBD::Thread *>(arg);
 	if (!self->_name.empty ()) {
 		pthread_set_name (self->_name.c_str ());
@@ -587,7 +596,7 @@ PBD::Thread::_run (void* arg) {
 	/* cleanup */
 	pthread_mutex_lock (&thread_map_lock);
 	for (auto const& t : all_threads) {
-		if (pthread_equal (t.first, pthread_self ())) {
+		if (pthread_equal (t.first, pthread_self ()) != 0) {
 			DEBUG_TRACE (PBD::DEBUG::Threads, string_compose ("Terminated: '%1'\n", t.second));
 			all_threads.erase (t.first);
 			break;

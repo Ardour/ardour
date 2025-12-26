@@ -59,7 +59,6 @@
 #include "widgets/prompter.h"
 
 #include "ardour_dialog.h"
-#include "ardour_http.h"
 #include "sfdb_freesound_mootcher.h"
 #include "gui_thread.h"
 #include "ui_config.h"
@@ -79,7 +78,6 @@ static const std::string fields = "id,name,duration,filesize,samplerate,license,
 
 //------------------------------------------------------------------------
 Mootcher::Mootcher(const std::string &the_token)
-	: curl(curl_easy_init())
 {
 	DEBUG_TRACE(PBD::DEBUG::Freesound, "Created new Mootcher, oauth_token =\"" + the_token + "\"\n");
 	custom_headers = NULL;
@@ -95,7 +93,6 @@ Mootcher::Mootcher(const std::string &the_token)
 //------------------------------------------------------------------------
 Mootcher:: ~Mootcher()
 {
-	curl_easy_cleanup(curl);
 	if (custom_headers) {
 		curl_slist_free_all (custom_headers);
 	}
@@ -166,6 +163,11 @@ std::string Mootcher::sortMethodString(enum sortMethod sort)
 //------------------------------------------------------------------------
 void Mootcher::setcUrlOptions()
 {
+	CURL* curl = ccurl.curl ();
+	if (!curl) {
+		return;
+	}
+
 	// some servers don't like requests that are made without a user-agent field, so we provide one
 	curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
 	// setup curl error buffer
@@ -176,9 +178,6 @@ void Mootcher::setcUrlOptions()
 	// Allow connections to time out (without using signals)
 	curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
 	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 30);
-
-	/* set ca-certificates to use for bundled versions of ardour */
-	ArdourCurl::HttpGet::ca_setopt (curl);
 }
 
 std::string Mootcher::doRequest(std::string uri, std::string params)
@@ -188,6 +187,7 @@ std::string Mootcher::doRequest(std::string uri, std::string params)
 	xml_page.memory = NULL;
 	xml_page.size = 0;
 
+	CURL* curl = ccurl.curl ();
 	setcUrlOptions();
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *) &xml_page);
@@ -292,6 +292,7 @@ std::string Mootcher::auth_code_to_oauth_token(const std::string &auth_code)
 	json_page.size = 0;
 	CURLcode res;
 
+	CURL* curl = ccurl.curl ();
 	setcUrlOptions();
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *) &json_page);
@@ -351,6 +352,7 @@ std::string Mootcher::searchText(std::string query, int page, std::string filter
 		params += buf;
 	}
 
+	CURL* curl = ccurl.curl ();
 	char *eq = curl_easy_escape(curl, query.c_str(), query.length());
 	params += "query=\"" + std::string(eq) + "\"";
 	curl_free(eq);
@@ -444,6 +446,7 @@ void *
 Mootcher::threadFunc()
 {
 	CURLcode res;
+	CURL*    curl = ccurl.curl ();
 
 	DEBUG_TRACE(PBD::DEBUG::Freesound, "threadFunc\n");
 	res = curl_easy_perform (curl);
@@ -538,6 +541,7 @@ Mootcher::fetchAudioFile(std::string originalFileName, std::string theID, std::s
 	ID = theID;
 	audioFileName = Glib::build_filename (basePath, ID + "-" + originalFileName);
 
+	CURL* curl = ccurl.curl ();
 	if (!curl) {
 		return false;
 	}

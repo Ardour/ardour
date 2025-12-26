@@ -18,7 +18,6 @@
 /*******************************************************************************/
 
 #include <stdio.h>
-#include <unistd.h>
 
 #include "gtkmm2ext/application.h"
 

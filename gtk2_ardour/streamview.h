@@ -33,6 +33,7 @@
 
 #include "enums.h"
 #include "selectable.h"
+#include "time_axis_view_item.h"
 #include "view_background.h"
 
 namespace Gdk {
@@ -76,6 +77,13 @@ public:
 	void attach ();
 
 	void set_zoom_all();
+
+	int height() const;
+	int width() const;
+	int contents_height() const {
+		return child_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2;
+	}
+	int y_position () const;
 
 	int set_position (gdouble x, gdouble y);
 	virtual int set_height (double);
@@ -185,7 +193,7 @@ protected:
 	ARDOUR::layer_t _layers;
 	LayerDisplay    _layer_display;
 
-	double height;
+	double _height;
 
 	PBD::ScopedConnectionList rec_data_ready_connections;
 	samplepos_t               last_rec_data_sample;

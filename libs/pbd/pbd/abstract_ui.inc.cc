@@ -21,7 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <unistd.h>
 #include <iostream>
 #include <algorithm>
 
@@ -37,7 +36,7 @@
                              // searched and sorted. Thus, when instantiating the container, MSVC complains
                              // if the type of object being contained has no appropriate comparison operators
                              // defined (specifically, if operators '<' and '==' are undefined). This seems
-                             // to be the case with ptw32 'pthread_t' which is a simple struct.
+                             // to be the case with 'ptw32_handle_t' which is a simple struct.
 DECLARE_DEFAULT_COMPARISONS(ptw32_handle_t)
 #endif
 

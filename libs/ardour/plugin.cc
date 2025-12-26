@@ -302,19 +302,13 @@ ARDOUR::find_plugin(Session& session, string identifier, PluginType type)
 ChanCount
 Plugin::output_streams () const
 {
-	/* LADSPA & VST should not get here because they do not
-	   return "infinite" i/o counts.
-	*/
-	return ChanCount::ZERO;
+	return get_info()->n_outputs;
 }
 
 ChanCount
 Plugin::input_streams () const
 {
-	/* LADSPA & VST should not get here because they do not
-	   return "infinite" i/o counts.
-	*/
-	return ChanCount::ZERO;
+	return get_info()->n_inputs;
 }
 
 samplecnt_t
@@ -538,6 +532,17 @@ Plugin::parameter_changed_externally (uint32_t which, float /* value */)
 	_session.set_dirty ();
 	ParameterChangedExternally (which, get_parameter (which)); /* EMIT SIGNAL */
 	PresetDirty (); /* EMIT SIGNAL */
+}
+
+void
+Plugin::send_processors_changed (ARDOUR::RouteProcessorChange const& rpc)
+{
+	ProcessorChange (rpc);
+
+	Route* r = dynamic_cast<Route*> (_owner);
+	if (r) {
+		r->processors_changed (rpc); /* EMIT SIGNAL */
+	}
 }
 
 void

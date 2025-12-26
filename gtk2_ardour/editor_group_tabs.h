@@ -27,14 +27,14 @@ class Editor;
 class EditorGroupTabs : public GroupTabs, public EditorComponent
 {
 public:
-	EditorGroupTabs (Editor *);
+	EditorGroupTabs (Editor&);
 
 private:
 	std::list<Tab> compute_tabs () const;
 	void draw_tab (cairo_t *, Tab const &);
 	double primary_coordinate (double, double) const;
 	ARDOUR::RouteList routes_for_tab (Tab const *) const;
-	void add_menu_items (Gtk::Menu *, ARDOUR::RouteGroup *);
+	void add_menu_items (Gtk::Menu *, std::shared_ptr<ARDOUR::RouteGroup>);
 	ARDOUR::RouteList selected_routes () const;
 
 	double visible_extent () const { 

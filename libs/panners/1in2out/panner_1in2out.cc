@@ -28,7 +28,6 @@
 #include <float.h>
 #include <locale.h>
 #include <string>
-#include <unistd.h>
 
 #include <glibmm.h>
 

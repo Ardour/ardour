@@ -26,6 +26,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <iostream>
+
+#include "pbd/ccurl.h"
 #include "pbd/gstdio_compat.h"
 
 #include "pbd/i18n.h"
@@ -54,6 +56,7 @@ SoundcloudUploader::SoundcloudUploader()
 {
 	curl_handle = curl_easy_init();
 	multi_handle = curl_multi_init();
+	PBD::CCurl::ca_setopt (curl_handle);
 }
 
 std::string
@@ -345,8 +348,5 @@ SoundcloudUploader::setcUrlOptions()
 	// Allow connections to time out (without using signals)
 	curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL, 1);
 	curl_easy_setopt(curl_handle, CURLOPT_CONNECTTIMEOUT, 30);
-
-	curl_easy_setopt(curl_handle, CURLOPT_SSL_VERIFYHOST, 0);
-	curl_easy_setopt(curl_handle, CURLOPT_SSL_VERIFYPEER, 0);
 }
 

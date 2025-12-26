@@ -177,8 +177,8 @@ private:
 	void insert_fsharp ();
 	void insert_g ();
 	void insert_gsharp ();
-	void note_length_change (GtkAction*);
-	void note_velocity_change (GtkAction*);
+	void note_length_change (GtkRadioAction*);
+	void note_velocity_change (GtkRadioAction*);
 	bool radio_button_press (GdkEventButton*);
 	void inc_note_velocity ();
 	void dec_note_velocity ();
@@ -202,7 +202,7 @@ private:
 	void octave_8 () { octave_n (8); }
 	void octave_9 () { octave_n (9); }
 	void octave_10 () { octave_n (10); }
-	void dot_change (GtkAction*);
+	void dot_change (GtkRadioAction*);
 	void dot_value_change ();
 	void toggle_triplet();
 	void toggle_chord();
@@ -228,8 +228,8 @@ private:
 	static void se_insert_fsharp () { if (_instance) { _instance->insert_fsharp (); } }
 	static void se_insert_g () { if (_instance) { _instance->insert_g (); } }
 	static void se_insert_gsharp () { if (_instance) { _instance->insert_gsharp (); } }
-	static void se_note_length_change (GtkAction* act) { if (_instance) { _instance->note_length_change (act); } }
-	static void se_note_velocity_change (GtkAction* act) { if (_instance) { _instance->note_velocity_change (act); } }
+	static void se_note_length_change (GtkRadioAction* act) { if (_instance) { _instance->note_length_change (act); } }
+	static void se_note_velocity_change (GtkRadioAction* act) { if (_instance) { _instance->note_velocity_change (act); } }
 	static void se_inc_note_velocity () { if (_instance) { _instance->inc_note_velocity (); } }
 	static void se_dec_note_velocity () { if (_instance) { _instance->dec_note_velocity (); } }
 	static void se_next_note_velocity () { if (_instance) { _instance->next_note_velocity (); } }
@@ -252,7 +252,7 @@ private:
 	static void se_octave_8 () { if (_instance) { _instance->octave_8 (); } }
 	static void se_octave_9 () { if (_instance) { _instance->octave_9 (); } }
 	static void se_octave_10 () { if (_instance) { _instance->octave_10 (); } }
-	static void se_dot_change (GtkAction* act) { if (_instance) { _instance->dot_change (act); } }
+	static void se_dot_change (GtkRadioAction* act) { if (_instance) { _instance->dot_change (act); } }
 	static void se_dot_value_change () { if (_instance) { _instance->dot_value_change (); } }
 	static void se_toggle_triplet() { if (_instance) { _instance->toggle_triplet (); } }
 	static void se_toggle_chord() { if (_instance) { _instance->toggle_chord (); } }

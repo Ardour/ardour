@@ -200,7 +200,7 @@ GenericPluginUI::GenericPluginUI (std::shared_ptr<PlugInsertBase> pib, bool scro
 	prefheight = -1;
 	build ();
 
-	if (_pib->plugin()->has_midnam() && _pib->plugin()->knows_bank_patch()) {
+	if (!ctrls_only && _pib->plugin()->has_midnam() && _pib->plugin()->knows_bank_patch()) {
 		build_midi_table ();
 	}
 
@@ -751,7 +751,7 @@ GenericPluginUI::midi_refill_patches ()
 					const std::string pgm = (*j)->name ();
 					MIDI::Name::PatchPrimaryKey const& key = (*j)->patch_primary_key ();
 					const uint32_t bp = (key.bank() << 7) | key.program();
-					midi_pgmsel[chn]->AddMenuElem (MenuElemNoMnemonic (pgm, sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::midi_bank_patch_select), chn, bp)));
+					midi_pgmsel[chn]->add_menu_elem (MenuElemNoMnemonic (pgm, sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::midi_bank_patch_select), chn, bp)));
 					pgm_names[bp] = pgm;
 				}
 			}
@@ -952,7 +952,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			for (ARDOUR::ScalePoints::const_iterator i = control_ui->scale_points->begin();
 			     i != control_ui->scale_points->end();
 			     ++i) {
-				control_ui->combo->AddMenuElem(Menu_Helpers::MenuElem(
+				control_ui->combo->add_menu_elem(Menu_Helpers::MenuElem(
 						i->first,
 						sigc::bind(sigc::mem_fun(*this, &GenericPluginUI::control_combo_changed),
 						           control_ui,
@@ -1346,11 +1346,15 @@ GenericPluginUI::set_path_property (const ParameterDescriptor& desc,
 void
 GenericPluginUI::path_property_changed (uint32_t key, const Variant& value)
 {
-	FilePathControls::iterator c = _filepath_controls.find(key);
-	if (c != _filepath_controls.end()) {
-		c->second->set_filename(value.get_path());
-	} else {
-		std::cerr << "warning: property change for property with no control" << std::endl;
+	if (value.type () == Variant::PATH) {
+		FilePathControls::iterator c = _filepath_controls.find(key);
+		if (c != _filepath_controls.end()) {
+			c->second->set_filename(value.get_path());
+		} else {
+			std::cerr << "warning: property change for property with no control" << std::endl;
+		}
+	} else if (Variant::type_is_numeric (value.type ())) {
+		//printf ("Prop Change %d %f\n", key, value.to_double());
 	}
 }
 

@@ -38,10 +38,10 @@ public:
 	void detach ();
 
   private:
-	void add_item (ARDOUR::RouteGroup *, std::set<ARDOUR::RouteGroup*> const &, Gtk::RadioMenuItem::Group*);
+	void add_item (std::shared_ptr<ARDOUR::RouteGroup>, std::set<std::shared_ptr<ARDOUR::RouteGroup>> const &, Gtk::RadioMenuItem::Group*);
 	void new_group ();
-	void edit_group (ARDOUR::RouteGroup *);
-	void set_group (Gtk::RadioMenuItem*, ARDOUR::RouteGroup *);
+	void edit_group (std::weak_ptr<ARDOUR::RouteGroup>);
+	void set_group (Gtk::RadioMenuItem*, std::shared_ptr<ARDOUR::RouteGroup>);
 	void new_group_dialog_finished (int, RouteGroupDialog*);
 
 	Gtk::Menu* _menu;

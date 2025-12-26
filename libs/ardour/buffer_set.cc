@@ -155,11 +155,19 @@ void
 BufferSet::ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capacity)
 {
 	assert(type != DataType::NIL);
-	assert(type < _buffers.size());
+	assert(type < _buffers.capacity());
 
 	if (num_buffers == 0) {
 		return;
 	}
+
+	/* after a clear (), re-initlaize buffers */
+	if (_buffers.empty ()) {
+		for (size_t i=0; i < DataType::num_types; ++i) {
+			_buffers.push_back(BufferVec());
+		}
+	}
+	assert(_buffers.size() == DataType::num_types);
 
 	// The vector of buffers of the type we care about
 	BufferVec& bufs = _buffers[type];

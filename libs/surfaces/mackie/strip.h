@@ -92,10 +92,12 @@ public:
 	MidiByteArray display (uint32_t lcd_number, uint32_t line_number, const std::string&);
 	MidiByteArray blank_display (uint32_t lcd_number, uint32_t line_number);
 	
+	static std::string remove_units (std::string s);
+
 	static std::string format_parameter_for_display(
 		ARDOUR::ParameterDescriptor const& desc, 
 		float val, 
-		std::shared_ptr<ARDOUR::Stripable> stripable_for_non_mixbus_azimuth_automation, 
+		std::shared_ptr<ARDOUR::Stripable> stripable_for_azimuth_automation, 
 		bool& overwrite_screen_hold);
 
 	void zero ();
@@ -154,7 +156,9 @@ private:
 
 	void notify_solo_changed ();
 	void notify_mute_changed ();
+	void notify_monitor_cut_changed ();
 	void notify_record_enable_changed ();
+	void notify_subview_type_changed ();
 	void notify_gain_changed (bool force_update = true);
 	void notify_property_changed (const PBD::PropertyChange&);
 	void notify_panner_azi_changed (bool force_update = true);

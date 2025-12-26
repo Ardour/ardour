@@ -61,6 +61,8 @@ namespace PBD {
 		LIBARDOUR_API extern DebugBits IOTaskList;
 		LIBARDOUR_API extern DebugBits LTC;
 		LIBARDOUR_API extern DebugBits LV2;
+		LIBARDOUR_API extern DebugBits LV2AtomToUI;
+		LIBARDOUR_API extern DebugBits LV2AtomFromUI;
 		LIBARDOUR_API extern DebugBits LV2Automate;
 		LIBARDOUR_API extern DebugBits LatencyCompensation;
 		LIBARDOUR_API extern DebugBits LatencyDelayLine;
@@ -117,6 +119,7 @@ namespace PBD {
 		LIBARDOUR_API extern DebugBits WiimoteControl;
 		LIBARDOUR_API extern DebugBits Freesound;
 		LIBARDOUR_API extern DebugBits ClipRecording;
+		LIBARDOUR_API extern DebugBits TempoEstimation;
 
 	}
 }

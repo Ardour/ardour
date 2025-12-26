@@ -36,7 +36,7 @@
   #define LIBPBD_TEMPLATE_MEMBER_DLL_EXPORT
 #endif
 
-#ifdef LIBPBD_STATIC // libpbd is a DLL
+#ifdef LIBPBD_STATIC // libpbd is not a DLL
   #define LIBPBD_API
   #define LIBPBD_LOCAL
   #define LIBPBD_TEMPLATE_API

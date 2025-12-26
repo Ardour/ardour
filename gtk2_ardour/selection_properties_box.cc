@@ -27,12 +27,18 @@
 
 #include "audio_region_editor.h"
 #include "audio_region_view.h"
+#include "control_point.h"
 #include "editor.h"
+#include "region_fx_line.h"
 #include "region_fx_properties_box.h"
 #include "region_view.h"
 #include "route_properties_box.h"
 #include "selection_properties_box.h"
+#include "slot_properties_box.h"
 #include "time_info_box.h"
+#include "trigger_strip.h"
+#include "triggerbox_ui.h"
+#include "ui_config.h"
 
 #include "pbd/i18n.h"
 
@@ -41,21 +47,25 @@ using namespace ARDOUR;
 using std::min;
 using std::max;
 
-SelectionPropertiesBox::SelectionPropertiesBox ()
+SelectionPropertiesBox::SelectionPropertiesBox (DispositionMask mask)
 	: _region_editor (nullptr)
 	, _region_fx_box (nullptr)
+	, _disposition (mask)
 {
 	init ();
 
 	_time_info_box  = new TimeInfoBox ("EditorTimeInfo", true);
 	_route_prop_box = new RoutePropertiesBox ();
+	_slot_prop_box = new SlotPropertiesBox ();
 
 	pack_start(*_time_info_box, false, false, 0);
 	pack_start(*_route_prop_box, true, true, 0);
+	pack_start(*_slot_prop_box, true, true, 0);
 	pack_start(_region_editor_box, true, true, 0);
 
 	_time_info_box->set_no_show_all ();
 	_route_prop_box->set_no_show_all ();
+	_slot_prop_box->set_no_show_all ();
 	_region_editor_box.set_no_show_all ();
 	_region_editor_box.set_spacing (4);
 
@@ -69,6 +79,7 @@ SelectionPropertiesBox::~SelectionPropertiesBox ()
 	delete _route_prop_box;
 	delete _region_editor;
 	delete _region_fx_box;
+	delete _slot_prop_box;
 }
 
 void
@@ -102,6 +113,7 @@ SelectionPropertiesBox::set_session (Session* s)
 
 	_time_info_box->set_session(s);
 	_route_prop_box->set_session(s);
+	_slot_prop_box->set_session(s);
 
 	selection_changed();
 }
@@ -110,6 +122,24 @@ void
 SelectionPropertiesBox::track_mouse_mode ()
 {
 	/* maybe do something here? */
+}
+
+void
+SelectionPropertiesBox::on_map ()
+{
+	HBox::on_map ();
+	SelectionPropertiesBox::selection_changed ();
+}
+
+void
+SelectionPropertiesBox::on_unmap ()
+{
+	/* This also triggers when switching pages, or hiding the GUI
+	 * perhaps consider show/hide get_visible() instead.
+	 */
+	HBox::on_unmap ();
+	SelectionPropertiesBox::selection_changed ();
+	_route_prop_box->set_route (std::shared_ptr<Route>());
 }
 
 void
@@ -131,38 +161,47 @@ SelectionPropertiesBox::delete_region_editor ()
 void
 SelectionPropertiesBox::selection_changed ()
 {
-	if (!_session || _session->inital_connect_or_deletion_in_progress ()) {
+	if (!_session || _session->inital_connect_or_deletion_in_progress () || !get_mapped ()) {
 		_time_info_box->hide ();
 		_route_prop_box->hide ();
+		_slot_prop_box->hide ();
 		delete_region_editor ();
 		return;
 	}
 
 	Selection& selection (Editor::instance().get_selection());
 
-	if (!selection.time.empty ()) {
-		_time_info_box->show ();
-	} else {
-		_time_info_box->hide ();
+	bool show_slot_properties = false;
+	if (!selection.triggers.empty () && 0 != (_disposition & ShowTriggers)) {
+		TriggerSelection ts      = selection.triggers;
+		TriggerEntry*    entry   = *ts.begin ();
+		TriggerReference ref     = entry->trigger_reference ();
+
+		_slot_prop_box->set_slot(ref);
+		show_slot_properties = true;
 	}
 
 	bool show_route_properties = false;
-	if (!selection.tracks.empty ()) {
-		TimeAxisView *tav = selection.tracks.front ();
+	if (!selection.tracks.empty () && 0 != (_disposition & ShowRoutes)) {
+		TimeAxisView *tav = selection.tracks.back (); //the LAST selected stripable is the clicked one. see selection.cc line ~92
 		RouteTimeAxisView *rtav = dynamic_cast<RouteTimeAxisView *>(tav);
 		if (rtav) {
 			_route_prop_box->set_route (rtav->route());
 			show_route_properties = true;
 		}
 	}
-	if (show_route_properties) {
-		_route_prop_box->show();
-	} else {
-		_route_prop_box->hide();
+
+	RegionView* rv = 0;
+	if (selection.regions.size () == 1) {
+		rv = selection.regions.front ();
+	} else if (!selection.points.empty ()) {
+		RegionFxLine *rfx = dynamic_cast<RegionFxLine*>(&selection.points.back()->line ());
+		if (rfx) {
+			rv = &rfx->region_view();
+		}
 	}
 
-	if (selection.regions.size () == 1)  {
-		RegionView* rv = (selection.regions.front ());
+	if (rv && 0 != (_disposition & ShowRegions)) {
 		if (!_region_editor || _region_editor->region () != rv->region ()) {
 			delete_region_editor ();
 			AudioRegionView* arv = dynamic_cast<AudioRegionView*> (rv);
@@ -181,12 +220,44 @@ SelectionPropertiesBox::selection_changed ()
 			_region_fx_box = new RegionFxPropertiesBox (rv->region ());
 			_region_editor_box.pack_start (*_region_fx_box);
 			rv->RegionViewGoingAway.connect_same_thread (_region_connection, std::bind (&SelectionPropertiesBox::delete_region_editor, this));
+
+#ifndef MIXBUS
+			float min_h = _region_editor->size_request().height;
+			float ui_scale = std::max<float> (1.f, UIConfiguration::instance().get_ui_scale());
+			_region_editor_box.set_size_request (-1, std::max (365 * ui_scale, min_h));
+#endif
 		}
-		_region_editor_box.show ();
 	} else {
-		/* only hide region props when selecting a track or trigger ..*/
-		if (_route_prop_box->get_visible () || !selection.markers.empty () || !selection.playlists.empty () || !selection.triggers.empty ()) {
+		/* only hide region props when selecting a track or trigger,
+		 * retain existing RegionEditor, when selecting another additional region, or
+		 * when switching tools (grab -> draw) to edit region-gain, or note entry.
+		 */
+		if (!selection.tracks.empty ()|| !selection.markers.empty () || !selection.playlists.empty () || !selection.triggers.empty ()) {
 			delete_region_editor ();
 		}
+	}
+
+	if (show_slot_properties) {
+		_slot_prop_box->show ();
+		_route_prop_box->hide ();
+		delete_region_editor ();
+	} else if (_region_editor) {
+		_slot_prop_box->hide ();
+		_route_prop_box->hide ();
+		_region_editor_box.show ();
+	} else if (show_route_properties) {
+		_slot_prop_box->hide ();
+		_route_prop_box->show ();
+		delete_region_editor ();
+	} else {
+		_slot_prop_box->hide ();
+		_route_prop_box->hide ();
+		delete_region_editor ();
+	}
+
+	if (!selection.time.empty () && 0 != (_disposition & ShowTimeInfo)) {
+		_time_info_box->show ();
+	} else {
+		_time_info_box->hide ();
 	}
 }

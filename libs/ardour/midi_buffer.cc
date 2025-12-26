@@ -112,7 +112,9 @@ MidiBuffer::read_from (const Buffer& src, samplecnt_t nframes, sampleoffset_t ds
 		const Evoral::Event<TimeType> ev(*i, false);
 
 		if (ev.time() >= src_offset && ev.time() < nframes + src_offset) {
-			push_back (ev.time() + dst_offset - src_offset, ev.event_type (), ev.size(), ev.buffer());
+			if (!push_back (ev.time() + dst_offset - src_offset, ev.event_type (), ev.size(), ev.buffer())) {
+				std::cerr << "MidiBuffer::push_back() failed\n";
+			}
 		}
 	}
 
@@ -197,7 +199,7 @@ MidiBuffer::push_back(TimeType time, Evoral::EventType event_type, size_t size, 
 extern PBD::Timing minsert;
 
 bool
-MidiBuffer::insert_event(const Evoral::Event<TimeType>& ev)
+MidiBuffer::insert_event (const Evoral::Event<TimeType>& ev)
 {
 	if (size() == 0) {
 		return push_back(ev);
@@ -254,10 +256,13 @@ MidiBuffer::insert_event(const Evoral::Event<TimeType>& ev)
 }
 
 uint32_t
-MidiBuffer::write(TimeType time, Evoral::EventType type, uint32_t size, const uint8_t* buf)
+MidiBuffer::write (TimeType time, Evoral::EventType type, uint32_t size, const uint8_t* buf)
 {
-	insert_event(Evoral::Event<TimeType>(type, time, size, const_cast<uint8_t*>(buf)));
-	return size;
+	if (insert_event (Evoral::Event<TimeType>(type, time, size, const_cast<uint8_t*>(buf)))) {
+		return size;
+	} else {
+		return 0;
+	}
 }
 
 /** Reserve space for a new event in the buffer.

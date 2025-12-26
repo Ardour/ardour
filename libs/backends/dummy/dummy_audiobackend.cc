@@ -21,7 +21,6 @@
 
 #include <math.h>
 #include <sys/time.h>
-#include <regex.h>
 #include <stdlib.h>
 
 #include <glibmm.h>
@@ -1916,3 +1915,48 @@ DummyMidiEvent::DummyMidiEvent (const DummyMidiEvent& other)
 DummyMidiEvent::~DummyMidiEvent () {
 	free (_data);
 };
+
+
+/* ****************************************************************************/
+
+XMLNode*
+DummyAudioBackend::get_state () const {
+	XMLNode* node = PortEngineSharedImpl::get_state ();
+	node->set_property ("backend", name ());
+	node->set_property ("driver", driver_name ());
+	node->set_property ("device", device_name ());
+	node->set_property ("instance", s_instance_name);
+	return node;
+}
+
+int
+DummyAudioBackend::set_state (XMLNode const& node, int version)
+{
+	if (match_state (node, version)) {
+		return PortEngineSharedImpl::set_state (node, version);
+	}
+	return -1;
+}
+
+bool
+DummyAudioBackend::match_state (XMLNode const& node, int version)
+{
+	if (node.name() != X_("PortEngine")) {
+		return false;
+	}
+	std::string val;
+
+	if (!node.get_property ("backend", val) || val != name ()) {
+		return false;
+	}
+	if (!node.get_property ("driver", val) || val != driver_name ()) {
+		return false;
+	}
+	if (!node.get_property ("device", val) || val != device_name ()) {
+		return false;
+	}
+	if (!node.get_property ("instance", val) || val != s_instance_name) {
+		return false;
+	}
+	return true;
+}

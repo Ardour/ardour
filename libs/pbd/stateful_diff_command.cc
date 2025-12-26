@@ -34,7 +34,7 @@ using namespace PBD;
 
 StatefulDiffCommand::StatefulDiffCommand (std::shared_ptr<StatefulDestructible> s)
 	: _object (s)
-	, _changes (0)
+	, _changes (nullptr)
 {
 	_changes = s->get_changes_as_properties (this);
 
@@ -42,12 +42,14 @@ StatefulDiffCommand::StatefulDiffCommand (std::shared_ptr<StatefulDestructible> 
            be sure to notify owners of this command.
         */
 
-	s->DropReferences.connect_same_thread (*this, std::bind (&Destructible::drop_references, this));
+	if (!_changes || _changes->empty()) {
+		s->DropReferences.connect_same_thread (*this, std::bind (Destructible::drop_and_kill, this));
+	}
 }
 
 StatefulDiffCommand::StatefulDiffCommand (std::shared_ptr<StatefulDestructible> s, XMLNode const& n)
 	: _object (s)
-	, _changes (0)
+	, _changes (nullptr)
 {
 	const XMLNodeList& children (n.children ());
 
@@ -57,13 +59,15 @@ StatefulDiffCommand::StatefulDiffCommand (std::shared_ptr<StatefulDestructible> 
 		}
 	}
 
-	assert (_changes != 0);
+	assert (_changes);
 
 	/* if the stateful object that this command refers to goes away,
            be sure to notify owners of this command.
         */
 
-	s->DropReferences.connect_same_thread (*this, std::bind (&Destructible::drop_references, this));
+	if (_changes->empty()) {
+		s->DropReferences.connect_same_thread (*this, std::bind (Destructible::drop_and_kill, this));
+	}
 }
 
 StatefulDiffCommand::~StatefulDiffCommand ()

@@ -50,8 +50,6 @@ public:
 	static LuaWindow* instance();
 	~LuaWindow();
 
-	void show_window ();
-	bool hide_window (GdkEventAny *ev);
 	void edit_script (const std::string&, const std::string&);
 
 	void set_session (ARDOUR::Session* s);
@@ -87,7 +85,6 @@ private:
 	static LuaWindow* _instance;
 
 	LuaState *lua;
-	bool _visible;
 
 	Gtk::Menu* _menu_scratch;
 	Gtk::Menu* _menu_snippet;

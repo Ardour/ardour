@@ -62,13 +62,16 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
 	virtual ~ArdourButton ();
 
 	enum Tweaks {
-		Square         = 0x01,
-		TrackHeader    = 0x02,
-		OccasionalText = 0x04,
-		OccasionalLED  = 0x08,
-		ForceBoxy      = 0x10,
-		ForceFlat      = 0x20,
-		ExpandtoSquare = 0x40,
+		Square           = 0x001,
+		TrackHeader      = 0x002,
+		OccasionalText   = 0x004,
+		OccasionalLED    = 0x008,
+		ForceBoxy        = 0x010,
+		ForceFlat        = 0x020,
+		ExpandtoSquare   = 0x040,
+		TransportIcon    = 0x080,
+		NoConcave        = 0x100,
+		EnforceMinHeight = 0x200,
 	};
 
 	static Tweaks default_tweaks;
@@ -93,7 +96,20 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
 	void set_icon (ArdourIcon::Icon);
 	void set_icon (rendercallback_t, void*);
 
+	enum CornerMask {
+		NONE         = 0x0,
+		TOP_LEFT     = 0x1,
+		TOP_RIGHT    = 0x2,
+		BOTTOM_LEFT  = 0x4,
+		BOTTOM_RIGHT = 0x8,
+		TOP          = 0x3,
+		BOTTOM       = 0xC,
+		LEFT         = 0x5,
+		RIGHT        = 0xA
+	};
+
 	void set_corner_radius (float);
+	void set_corner_mask (int);
 
 	void set_text (const std::string&, bool markup = false);
 	const std::string& get_text () const { return _text; }
@@ -219,6 +235,7 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
 	bool _led_left;
 	bool _distinct_led_click;
 	bool _hovering;
+	bool _touching;
 	bool _focused;
 	int  _fixed_colors_set;
 	bool _fallthrough_to_parent;

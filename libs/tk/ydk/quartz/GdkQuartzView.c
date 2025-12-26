@@ -768,6 +768,7 @@ static int showInvalidation = 0;
       region = gdk_region_rectangle (&r);
       if (impl->needs_display_region) {
 	gdk_region_destroy (impl->needs_display_region);
+	impl->needs_display_region = NULL;
       }
     } else if (!impl->needs_display_region || gdk_quartz_get_use_cocoa_invalidation()) {
        gint nrects;

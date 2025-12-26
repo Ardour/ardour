@@ -35,11 +35,19 @@ class TimeInfoBox;
 class RegionEditor;
 class RegionFxPropertiesBox;
 class RoutePropertiesBox;
+class SlotPropertiesBox;
 
 class SelectionPropertiesBox : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 {
 public:
-	SelectionPropertiesBox ();
+	enum DispositionMask {
+		ShowRoutes   = 0x01,
+		ShowRegions  = 0x02,
+		ShowTriggers = 0x04,
+		ShowTimeInfo = 0x08,
+	};
+
+	SelectionPropertiesBox (DispositionMask dm = DispositionMask(0x07));
 	~SelectionPropertiesBox ();
 
 	void set_session (ARDOUR::Session*);
@@ -50,11 +58,17 @@ private:
 	void track_mouse_mode ();
 	void delete_region_editor ();
 
+	void on_map ();
+	void on_unmap ();
+
 	TimeInfoBox*           _time_info_box;
 	RoutePropertiesBox*    _route_prop_box;
+	SlotPropertiesBox*     _slot_prop_box;
 	Gtk::HBox              _region_editor_box;
 	RegionEditor*          _region_editor;
 	RegionFxPropertiesBox* _region_fx_box;
+
+	DispositionMask _disposition;
 
 	PBD::ScopedConnection _region_connection;
 	PBD::ScopedConnection _editor_connection;

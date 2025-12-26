@@ -85,6 +85,8 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<uint64_t> reg_group;
 		PBD::PropertyDescriptor<bool> contents;
 		PBD::PropertyDescriptor<bool> region_fx;
+		PBD::PropertyDescriptor<bool> region_tempo;
+		PBD::PropertyDescriptor<bool> region_meter;
 
 /* these properties are used as a convenience for announcing changes to state, but aren't stored as properties */
 		PBD::PropertyDescriptor<Temporal::TimeDomain> time_domain;
@@ -193,6 +195,10 @@ Region::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for time_domain = %1\n",	Properties::time_domain.property_id));
 	Properties::reg_group.property_id = g_quark_from_static_string (X_("rgroup"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for region_group = %1\n", Properties::reg_group.property_id));
+	Properties::region_tempo.property_id = g_quark_from_static_string (X_("region-tempo"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for region_tempo = %1\n", Properties::region_tempo.property_id));
+	Properties::region_meter.property_id = g_quark_from_static_string (X_("region-meter"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for region_meter = %1\n", Properties::region_meter.property_id));
 }
 
 void
@@ -228,7 +234,7 @@ Region::register_properties ()
 }
 
 #define REGION_DEFAULT_STATE(s,l) \
-	_sync_marked (Properties::sync_marked, false) \
+	  _sync_marked (Properties::sync_marked, false) \
 	, _left_of_split (Properties::left_of_split, false) \
 	, _right_of_split (Properties::right_of_split, false) \
 	, _valid_transients (Properties::valid_transients, false) \
@@ -259,7 +265,7 @@ Region::register_properties ()
 	, _contents (Properties::contents, false)
 
 #define REGION_COPY_STATE(other) \
-	  _sync_marked (Properties::sync_marked, other->_sync_marked) \
+     	  _sync_marked (Properties::sync_marked, other->_sync_marked) \
 	, _left_of_split (Properties::left_of_split, other->_left_of_split) \
 	, _right_of_split (Properties::right_of_split, other->_right_of_split) \
 	, _valid_transients (Properties::valid_transients, other->_valid_transients) \
@@ -1559,8 +1565,14 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 			   non-silently just force the region length to the
 			   correct value.
 			*/
-			error << "Correcting length of region " << _name << " to match it's (first) source's length of " << _sources.front()->length().str() << endmsg;
-			_length = timecnt_t (start().distance (_sources.front()->length()), _length.val().position());
+			error << "Correcting region " << _name << " with start offset " << start() << " length " << _length << " to match it's (first) source's length of " << _sources.front()->length().str() << endmsg;
+			if (start() >= _sources.front()->length()) {
+				_length = timecnt_t (0, _length.val().position());
+				error << "Truncated region " << _name << " length to " << _length << endmsg;
+			} else {
+				_length = timecnt_t (start().distance (_sources.front()->length()), _length.val().position());
+				error << "Corrected region " << _name << " length to " << _length << endmsg;
+			}
 		}
 	}
 
@@ -2494,4 +2506,104 @@ Region::fx_tail_changed (bool)
 		return;
 	}
 	_fx_tail = t;
+}
+
+void
+Region::set_tempo (Temporal::Tempo const & t)
+{
+	assert (!_sources.empty());
+
+	bool changed = false;
+	TimelineRange r (start(), start() + length(), 0); /* ID doesn't matter */
+	SegmentDescriptor sd;
+
+	if (_sources.front()->get_segment_descriptor (r, sd)) {
+		if (t != sd.tempo()) {
+			changed = true;
+		}
+	} else {
+		changed = true;
+	}
+
+	if (!changed) {
+		return;
+	}
+
+	sd.set_position (start().samples());
+	sd.set_duration (length().samples());
+	sd.set_tempo (t);
+
+	for (auto & s : _sources) {
+		s->set_segment_descriptor (sd, true);
+	}
+
+	send_change (Properties::region_tempo);
+}
+
+void
+Region::set_meter (Temporal::Meter const & m)
+{
+	assert (!_sources.empty());
+
+	bool changed = false;
+	TimelineRange r (start(), start() + length(), 0); /* ID doesn't matter */
+	SegmentDescriptor sd;
+
+	if (_sources.front()->get_segment_descriptor (r, sd)) {
+		if (m != sd.meter()) {
+			changed = true;
+		}
+	} else {
+		changed = true;
+	}
+
+	if (!changed) {
+		return;
+	}
+
+	sd.set_position (start().samples());
+	sd.set_duration (length().samples());
+	sd.set_meter (m);
+
+	for (auto & s : _sources) {
+		s->set_segment_descriptor (sd, true);
+	}
+
+	send_change (Properties::region_meter);
+}
+
+std::shared_ptr<Temporal::TempoMap>
+Region::tempo_map () const
+{
+	assert (!_sources.empty());
+
+	TimelineRange r (start(), start() + length(), 0); /* ID doesn't matter */
+	SegmentDescriptor sd;
+
+	if (!_sources.front()->get_segment_descriptor (r, sd)) {
+		Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
+		return std::make_shared<Temporal::TempoMap> (tmap->tempo_at (position()), tmap->meter_at (position()));
+	}
+
+	return std::make_shared<Temporal::TempoMap> (sd.tempo(), sd.meter());
+}
+
+std::optional<Temporal::Tempo>
+Region::tempo() const
+{
+	std::shared_ptr<Temporal::TempoMap> tmap = tempo_map ();
+	if (!tmap) {
+		return std::optional<Temporal::Tempo>();
+	}
+	return tmap->tempo_at (0);
+}
+
+std::optional<Temporal::Meter>
+Region::meter() const
+{
+	std::shared_ptr<Temporal::TempoMap> tmap = tempo_map ();
+	if (!tmap) {
+		return std::optional<Temporal::Meter>();
+	}
+	return tmap->meter_at (0);
 }

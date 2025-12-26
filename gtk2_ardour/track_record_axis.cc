@@ -444,7 +444,7 @@ TrackRecordAxis::reset_route_peak_display (Route* route)
 }
 
 void
-TrackRecordAxis::reset_group_peak_display (RouteGroup* group)
+TrackRecordAxis::reset_group_peak_display (std::shared_ptr<RouteGroup> group)
 {
 	if (_route && group == _route->route_group ()) {
 		reset_peak_display ();
@@ -498,7 +498,7 @@ TrackRecordAxis::build_route_ops_menu ()
 
 	MenuList& items = _route_ops_menu->items ();
 
-	items.push_back (MenuElem (_("Color..."), sigc::mem_fun (*this, &RouteUI::choose_color)));
+	items.push_back (MenuElem (_("Color..."), sigc::bind (sigc::mem_fun (*this, &RouteUI::choose_color), dynamic_cast<Gtk::Window*> (get_toplevel()))));
 	items.push_back (MenuElem (_("Comments..."), sigc::mem_fun (*this, &RouteUI::open_comment_editor)));
 	items.push_back (MenuElem (_("Inputs..."), sigc::mem_fun (*this, &RouteUI::edit_input_configuration)));
 	items.push_back (MenuElem (_("Outputs..."), sigc::mem_fun (*this, &RouteUI::edit_output_configuration)));
@@ -696,7 +696,7 @@ TrackRecordAxis::TrackSummary::render (Cairo::RefPtr<Cairo::Context> const& cr, 
 	cr->rectangle (r->x, r->y, r->width, r->height);
 	cr->clip ();
 
-	RouteGroup* g = _track->route_group ();
+	std::shared_ptr<RouteGroup> g (_track->route_group ());
 	if (g && g->is_color()) {
 		Gtkmm2ext::set_source_rgba (cr, GroupTabs::group_color (g));
 	} else {

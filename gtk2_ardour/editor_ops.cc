@@ -30,8 +30,6 @@
 
 /* Note: public Editor methods are documented in public_editor.h */
 
-#include <unistd.h>
-
 #include <cstdlib>
 #include <cmath>
 #include <string>
@@ -40,6 +38,7 @@
 
 #include <ytkmm/messagedialog.h>
 
+#include "pbd/convert.h"
 #include "pbd/error.h"
 #include "pbd/basename.h"
 #include "pbd/pthread_utils.h"
@@ -51,6 +50,7 @@
 
 #include "temporal/tempo.h"
 
+#include "gtkmm2ext/string_completion.h"
 #include "gtkmm2ext/utils.h"
 
 #include "widgets/choice.h"
@@ -159,6 +159,14 @@ Editor::add_command (PBD::Command * cmd)
 {
 	if (_session) {
 		_session->add_command (cmd);
+	}
+}
+
+void
+Editor::add_commands (std::vector<PBD::Command *> cmds)
+{
+	if (_session) {
+		_session->add_commands (cmds);
 	}
 }
 
@@ -370,7 +378,7 @@ Editor::split_regions_at (timepos_t const & where, RegionSelection& regions)
 	}
 
 	//if the user wants newly-created regions to be selected, then select them:
-	if (mouse_mode == MouseObject) {
+	if (current_mouse_mode() == MouseObject) {
 		for (RegionSelection::iterator ri = latest_regionviews.begin(); ri != latest_regionviews.end(); ri++) {
 			if ((*ri)->region()->position() < where) {
 				// new regions created before the split
@@ -1191,7 +1199,7 @@ Editor::cursor_to_selection_start (EditorCursor *cursor)
 {
 	timepos_t pos;
 
-	switch (mouse_mode) {
+	switch (current_mouse_mode()) {
 	case MouseObject:
 		if (!selection->regions.empty()) {
 			pos = selection->regions.start_time();
@@ -1220,7 +1228,7 @@ Editor::cursor_to_selection_end (EditorCursor *cursor)
 {
 	timepos_t pos;
 
-	switch (mouse_mode) {
+	switch (current_mouse_mode()) {
 	case MouseObject:
 		if (!selection->regions.empty()) {
 			pos = selection->regions.end_time();
@@ -1390,7 +1398,7 @@ Editor::selected_marker_to_selection_start ()
 		return;
 	}
 
-	switch (mouse_mode) {
+	switch (current_mouse_mode()) {
 	case MouseObject:
 		if (!selection->regions.empty()) {
 			pos = selection->regions.start_time();
@@ -1425,7 +1433,7 @@ Editor::selected_marker_to_selection_end ()
 		return;
 	}
 
-	switch (mouse_mode) {
+	switch (current_mouse_mode()) {
 	case MouseObject:
 		if (!selection->regions.empty()) {
 			pos = selection->regions.end_time();
@@ -1756,53 +1764,6 @@ Editor::scroll_up_one_track (bool skip_child_views)
 	return false;
 }
 
-void
-Editor::scroll_left_step ()
-{
-	samplepos_t xdelta = (current_page_samples() / 8);
-
-	if (_leftmost_sample > xdelta) {
-		reset_x_origin (_leftmost_sample - xdelta);
-	} else {
-		reset_x_origin (0);
-	}
-}
-
-
-void
-Editor::scroll_right_step ()
-{
-	samplepos_t xdelta = (current_page_samples() / 8);
-
-	if (max_samplepos - xdelta > _leftmost_sample) {
-		reset_x_origin (_leftmost_sample + xdelta);
-	} else {
-		reset_x_origin (max_samplepos - current_page_samples());
-	}
-}
-
-void
-Editor::scroll_left_half_page ()
-{
-	samplepos_t xdelta = (current_page_samples() / 2);
-	if (_leftmost_sample > xdelta) {
-		reset_x_origin (_leftmost_sample - xdelta);
-	} else {
-		reset_x_origin (0);
-	}
-}
-
-void
-Editor::scroll_right_half_page ()
-{
-	samplepos_t xdelta = (current_page_samples() / 2);
-	if (max_samplepos - xdelta > _leftmost_sample) {
-		reset_x_origin (_leftmost_sample + xdelta);
-	} else {
-		reset_x_origin (max_samplepos - current_page_samples());
-	}
-}
-
 /* ZOOM */
 
 void
@@ -1915,7 +1876,7 @@ Editor::choose_new_marker_name(string &name, bool is_range) {
 
 	dialog.set_name ("MarkNameWindow");
 	dialog.set_size_request (250, -1);
-	dialog.set_position (Gtk::WIN_POS_MOUSE);
+	dialog.set_position (UIConfiguration::instance().get_default_window_position());
 
 	dialog.add_button (Stock::OK, RESPONSE_ACCEPT);
 	dialog.set_initial_text (name);
@@ -1997,10 +1958,15 @@ Editor::add_location_mark_with_flag (timepos_t const & where, Location::Flags fl
 
 	_session->locations()->next_available_name(markername, namebase);
 
-	if (!choose_new_marker_name (markername)) {
-		return;
-	}
 	Location *location = new Location (*_session, where, where, markername, flags, cue_id);
+
+	if (UIConfiguration::instance().get_name_new_markers()) {
+		if (!edit_location (*location, true, false)) {
+			delete location;
+			return;
+		}
+	}
+
 	begin_reversible_command (_("add marker"));
 
 	XMLNode &before = _session->locations()->get_state();
@@ -2605,7 +2571,7 @@ Editor::maybe_locate_with_edit_preroll (samplepos_t location)
 	}
 
 	//if follow_playhead is on, keep the playhead on the screen
-	if (_follow_playhead)
+	if (follow_playhead())
 		if (location < _leftmost_sample)
 			location = _leftmost_sample;
 
@@ -2789,13 +2755,6 @@ void
 Editor::lower_region_to_bottom ()
 {
 	do_layer_operation (LowerToBottom);
-}
-
-/** Show the region editor for the selected regions */
-void
-Editor::show_region_properties ()
-{
-	selection->foreach_regionview (&RegionView::show_region_editor);
 }
 
 /** Show the midi list editor for the selected MIDI regions */
@@ -3738,22 +3697,69 @@ Editor::trim_region (bool front)
 
 	begin_reversible_command (front ? _("trim front") : _("trim back"));
 
-	for (list<RegionView*>::const_iterator i = rs.by_layer().begin(); i != rs.by_layer().end(); ++i) {
-		if (!(*i)->region()->locked()) {
+	list<RegionView*> rsl (rs.by_layer());
+	vector<std::shared_ptr<Playlist> > playlists;
 
-			(*i)->region()->clear_changes ();
+	for (auto & rv : rsl) {
 
-			if (front) {
-				(*i)->region()->trim_front (where);
-			} else {
-				(*i)->region()->trim_end (where);
-			}
+		std::shared_ptr<Region> region (rv->region());
 
-			_session->add_command (new StatefulDiffCommand ((*i)->region()));
+		if (region->locked()) {
+			continue;
 		}
+
+		std::shared_ptr<Playlist> playlist = region->playlist();
+
+		if (!playlist) {
+			// is this check necessary?
+			continue;
+		}
+
+		if (std::find (playlists.begin(), playlists.end(), playlist) == playlists.end()) {
+			playlists.push_back (playlist);
+
+			playlist->clear_changes ();
+			playlist->clear_owned_changes ();
+			playlist->freeze ();
+		}
+
+		region->clear_changes ();
+		timepos_t old_pos = region->position();
+		timecnt_t delta;
+
+		if (front) {
+			delta = where.distance (region->position());
+			region->trim_front (where);
+		} else {
+			old_pos = region->end();
+			delta = region->end().distance (where);
+			region->trim_end (where);
+		}
+
+		if (should_ripple()) {
+			do_ripple (playlist, old_pos, delta, std::shared_ptr<Region>(), false);
+		}
+
+		add_command (new StatefulDiffCommand (region));
 	}
 
-	commit_reversible_command ();
+	bool commit_result = false;
+
+	for (auto & pl : playlists) {
+		commit_result = true;
+		pl->thaw ();
+
+		vector<Command*> cmds;
+		pl->rdiff (cmds);
+		add_commands (cmds);
+		add_command (new StatefulDiffCommand (pl));
+	}
+
+	if (commit_result) {
+		commit_reversible_command ();
+	} else {
+		abort_reversible_command ();
+	}
 }
 
 /** Trim the end of the selected regions to the position of the edit cursor */
@@ -4057,7 +4063,7 @@ Editor::bounce_range_selection (BounceTarget target, bool with_processing)
 
 		dialog.set_name ("BounceNameWindow");
 		dialog.set_size_request (400, -1);
-		dialog.set_position (Gtk::WIN_POS_MOUSE);
+		dialog.set_position (UIConfiguration::instance().get_default_window_position());
 
 		dialog.add_button (_("Bounce"), RESPONSE_ACCEPT);
 		dialog.set_initial_text (bounce_name);
@@ -4080,7 +4086,7 @@ Editor::bounce_range_selection (BounceTarget target, bool with_processing)
 
 			for (int c = 0; c < TriggerBox::default_triggers_per_box; ++c) {
 				std::string lbl = cue_marker_name (c);
-				tslot->AddMenuElem (Menu_Helpers::MenuElem (lbl, sigc::bind ([] (uint32_t* t, uint32_t v, ArdourWidgets::ArdourDropdown* s, std::string l) {*t = v; s->set_text (l);}, &trigger_slot, c, tslot, lbl)));
+				tslot->add_menu_elem (Menu_Helpers::MenuElem (lbl, sigc::bind ([] (uint32_t* t, uint32_t v, ArdourWidgets::ArdourDropdown* s, std::string l) {*t = v; s->set_text (l);}, &trigger_slot, c, tslot, lbl)));
 			}
 			tslot->set_active ("A");
 
@@ -4332,7 +4338,7 @@ Editor::cut_copy (CutCopyOp op)
 		return;
 	}
 
-	switch (mouse_mode) {
+	switch (current_mouse_mode()) {
 	case MouseDraw:
 	case MouseContent:
 		begin_reversible_command (opname + ' ' + X_("MIDI"));
@@ -4400,16 +4406,6 @@ Editor::cut_copy (CutCopyOp op)
 		_drags->abort ();
 	}
 }
-
-
-struct AutomationRecord {
-	AutomationRecord () : state (0) , line (nullptr) {}
-	AutomationRecord (XMLNode* s, const AutomationLine* l) : state (s) , line (l) {}
-
-	XMLNode* state; ///< state before any operation
-	const AutomationLine* line; ///< line this came from
-	std::shared_ptr<Evoral::ControlList> copy; ///< copied events for the cut buffer
-};
 
 struct PointsSelectionPositionSorter {
 	bool operator() (ControlPoint* a, ControlPoint* b) {
@@ -4540,7 +4536,7 @@ Editor::cut_copy_midi (CutCopyOp op)
 		if (!mrv->selection().empty()) {
 			earliest = std::min (earliest, (*mrv->selection().begin())->note()->time());
 		}
-		mrv->cut_copy_clear (op);
+		mrv->cut_copy_clear (*selection, op);
 
 		/* XXX: not ideal, as there may be more than one track involved in the selection */
 		_last_cut_copy_source_track = &mrv->get_time_axis_view();
@@ -7739,7 +7735,7 @@ Editor::playhead_forward_to_grid ()
 
 	timepos_t pos (_playhead_cursor->current_sample ());
 
-	if (_grid_type == GridTypeNone) {
+	if (grid_type() == GridTypeNone) {
 		timepos_t const decipage (samplepos_t(floor (current_page_samples() * 0.1)));
 		if (pos < timepos_t::max (pos.time_domain()).earlier (decipage)) {
 			pos += timepos_t (decipage);
@@ -7768,7 +7764,7 @@ Editor::playhead_backward_to_grid ()
 
 	timepos_t pos (_playhead_cursor->current_sample ());
 
-	if (_grid_type == GridTypeNone) {
+	if (grid_type() == GridTypeNone) {
 		samplepos_t const decipage (floor (current_page_samples() * 0.1));
 		if (pos.samples() > decipage) {
 			pos.shift_earlier (timepos_t (decipage));
@@ -8437,7 +8433,7 @@ Editor::fit_tracks (TrackViewList & tracks)
 	 *  - height of the ruler/hscroll area
 	 */
 	uint32_t h = (uint32_t) floor ((trackviews_height() - child_heights) / visible_tracks);
-	double first_y_pos = DBL_MAX;
+	int first_y_pos = std::numeric_limits<int>::max();
 
 	if (h < TimeAxisView::preset_height (HeightSmall)) {
 		ArdourMessageDialog msg (_("There are too many tracks to fit in the current window"));
@@ -8542,7 +8538,7 @@ Editor::start_visual_state_op (uint32_t n)
 {
 	save_visual_state (n);
 
-	PopUp* pup = new PopUp (WIN_POS_MOUSE, 1000, true);
+	PopUp* pup = new PopUp (UIConfiguration::instance().get_default_window_position(), 1000, true);
 	char buf[32];
 	snprintf (buf, sizeof (buf), _("Saved view %u"), n+1);
 	pup->set_text (buf);
@@ -9389,11 +9385,13 @@ Editor::ripple_marks (std::shared_ptr<Playlist> target_playlist, timepos_t at, t
 Editing::ZoomFocus
 Editor::effective_zoom_focus() const
 {
-	if (_zoom_focus == ZoomFocusEdit && _edit_point == EditAtMouse) {
+	auto zf = zoom_focus();
+
+	if (zf == ZoomFocusEdit && _edit_point == EditAtMouse) {
 		return ZoomFocusMouse;
 	}
 
-	return _zoom_focus;
+	return zf;
 }
 
 void
@@ -9515,8 +9513,68 @@ Editor::temporal_zoom_extents ()
 }
 
 void
-Editor::edit_region_in_pianoroll_window ()
+Editor::edit_region_in_dedicated_window ()
 {
-	selection->foreach_midi_regionview (&MidiRegionView::edit_in_pianoroll_window);
+	selection->foreach_regionview (&RegionView::show_region_editor);
 }
 
+void
+Editor::find_and_display_track ()
+{
+	ArdourDialog d (_("Find Track/Bus"), true, false);
+	Gtk::Entry text;
+	Gtk::HBox hpacker;
+	Gtk::Label l (_("Name:"));
+	hpacker.set_spacing (12);
+	hpacker.set_border_width (12);
+	hpacker.pack_start (l, true, false);
+	hpacker.pack_start (text, true, true);
+
+	d.get_vbox()->set_spacing (12);
+	d.get_vbox()->set_border_width (12);
+	d.get_vbox()->pack_start (hpacker, false, false);
+	d.get_vbox()->show_all ();
+
+	text.set_activates_default ();
+	d.add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	d.add_button (Stock::OK, RESPONSE_OK);
+	d.set_default_response (RESPONSE_OK);
+
+	std::vector<Glib::ustring> matching_names;
+
+	{
+		ARDOUR::StripableList sl;
+		_session->get_stripables (sl, ARDOUR::PresentationInfo::AllStripables);
+
+		for (auto & s : sl) {
+			matching_names.push_back (s->name());
+		}
+	}
+
+	Glib::RefPtr<StringCompletion> comp = StringCompletion::create (matching_names);
+	comp->set_minimum_key_length (1);
+	comp->set_match_anywhere ();
+	comp->set_case_fold (true);
+	comp->set_inline_completion (true);
+	comp->set_inline_selection (true);
+	text.set_completion (comp);
+
+	switch (d.run()) {
+	case RESPONSE_OK:
+		break;
+	default:
+		return;
+	}
+
+	std::shared_ptr<Stripable> s = _session->stripable_by_name (text.get_text());
+
+	if (!s) {
+		return;
+	}
+
+	StripableTimeAxisView* stv = get_stripable_time_axis_by_id (s->id());
+
+	if (stv) {
+		ensure_time_axis_view_is_visible (*stv, true);
+	}
+}

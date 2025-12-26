@@ -48,7 +48,7 @@ InternalReturn::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t 
 	}
 
 	for (auto & send : _sends) {
-		if (send->active () && (!send->source_route() || send->source_route()->active())) {
+		if ((send->active() || send->actually_active()) && (!send->source_route() || send->source_route()->active())) {
 			bufs.merge_from (send->get_buffers(), nframes);
 		}
 	}

@@ -131,6 +131,7 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanva
 	, _channel_color_mode_item(nullptr)
 	, _track_color_mode_item(0)
 	, _channel_selector (nullptr)
+	, midnam_selector (nullptr)
 	, _step_edit_item (nullptr)
 	, controller_menu (nullptr)
 	, _step_editor (nullptr)
@@ -287,8 +288,6 @@ MidiTimeAxisView::set_route (std::shared_ptr<Route> rt)
 	/* this directly calls use_midnam_info() if there are midnam's already */
 	MIDI::Name::MidiPatchManager::instance().maybe_use (*this, invalidator (*this), std::bind (&MidiTimeAxisView::use_midnam_info, this), gui_context());
 
-	controls_vbox.pack_start(_midi_controls_box, false, false);
-
 	const string color_mode = gui_property ("color-mode");
 	if (!color_mode.empty()) {
 		_color_mode = ColorMode (string_2_enum(color_mode, _color_mode));
@@ -363,6 +362,9 @@ MidiTimeAxisView::~MidiTimeAxisView ()
 {
 	delete _view;
 	_view = nullptr;
+
+	delete midnam_selector;
+	midnam_selector = nullptr;
 
 	delete _channel_selector;
 	_channel_selector = nullptr;
@@ -442,7 +444,7 @@ MidiTimeAxisView::setup_midnam_patches ()
 
 	if (_route->instrument_info().have_custom_plugin_info ()) {
 		Menu_Helpers::MenuElem elem = Gtk::Menu_Helpers::MenuElem(_("Plugin Provided"), sigc::bind(sigc::mem_fun(*this, &MidiTimeAxisView::model_changed), ""));
-		_midnam_model_selector.AddMenuElem(elem);
+		_midnam_model_selector.add_menu_elem(elem);
 	}
 
 	for (PatchManager::DeviceNamesByMaker::const_iterator m = patch_manager.devices_by_manufacturer().begin(); m != patch_manager.devices_by_manufacturer().end(); ++m) {
@@ -469,7 +471,7 @@ MidiTimeAxisView::setup_midnam_patches ()
 		}
 
 		/* Add manufacturer submenu to selector */
-		_midnam_model_selector.AddMenuElem(Menu_Helpers::MenuElem(m->first, *menu));
+		_midnam_model_selector.add_menu_elem(Menu_Helpers::MenuElem(m->first, *menu));
 	}
 
 	if (patch_manager.all_models().empty()) {
@@ -615,7 +617,7 @@ MidiTimeAxisView::model_changed (const std::string& m)
 
 	_midnam_custom_device_mode_selector.clear_items();
 	for (std::list<std::string>::const_iterator i = device_modes.begin(); i != device_modes.end(); ++i) {
-		_midnam_custom_device_mode_selector.AddMenuElem (Gtk::Menu_Helpers::MenuElem(*i, sigc::bind(sigc::mem_fun(*this, &MidiTimeAxisView::custom_device_mode_changed), *i)));
+		_midnam_custom_device_mode_selector.add_menu_elem (Gtk::Menu_Helpers::MenuElem(*i, sigc::bind(sigc::mem_fun(*this, &MidiTimeAxisView::custom_device_mode_changed), *i)));
 	}
 
 	if (device_modes.size() > 1) {
@@ -663,29 +665,8 @@ MidiTimeAxisView::midi_view()
 }
 
 void
-MidiTimeAxisView::update_midi_controls_visibility (uint32_t h)
-{
-	if (_route && !_route->active ()) {
-		h = 0;
-	}
-	if (h >= MIDI_CONTROLS_BOX_MIN_HEIGHT) {
-		_midi_controls_box.show ();
-	} else {
-		_midi_controls_box.hide();
-	}
-}
-
-void
 MidiTimeAxisView::set_height (uint32_t h, TrackHeightMode m, bool from_idle)
 {
-	update_midi_controls_visibility (h);
-
-	if (h >= MIDI_CONTROLS_BOX_MIN_HEIGHT) {
-		_midi_controls_box.show ();
-	} else {
-		_midi_controls_box.hide();
-	}
-
 	update_scroomer_visbility (h, layer_display ());
 
 	/* We need to do this after changing visibility of our stuff, as it will
@@ -757,6 +738,9 @@ MidiTimeAxisView::append_extra_display_menu_items ()
 
 	items.push_back (MenuElem (_("Note Range"), *range_menu));
 	items.push_back (MenuElem (_("Note Mode"), *build_note_mode_menu()));
+	items.push_back (MenuElem (_("MIDNAM Selector..."),
+				   sigc::mem_fun(*this, &MidiTimeAxisView::toggle_midnam_selector)));
+
 	items.push_back (MenuElem (_("Channel Selector..."),
 				   sigc::mem_fun(*this, &MidiTimeAxisView::toggle_channel_selector)));
 
@@ -794,6 +778,18 @@ MidiTimeAxisView::toggle_channel_selector ()
 		_channel_selector->show_all ();
 	} else {
 		_channel_selector->cycle_visibility ();
+	}
+}
+
+void
+MidiTimeAxisView::toggle_midnam_selector ()
+{
+	if (!midnam_selector) {
+		midnam_selector = new ArdourWindow (string_compose (_("MIDNAM Selector for %1"), track()->name()));
+		midnam_selector->add (_midi_controls_box);
+		midnam_selector->show_all ();
+	} else {
+		midnam_selector->cycle_visibility ();
 	}
 }
 
@@ -1397,8 +1393,8 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 		break;
 
 	default:
-		error << "MidiTimeAxisView: unknown automation child "
-		      << EventTypeMap::instance().to_symbol(param) << endmsg;
+		warning << "MidiTimeAxisView: unknown automation child "
+		        << EventTypeMap::instance().to_symbol(param) << endmsg;
 	}
 }
 
@@ -1407,7 +1403,6 @@ MidiTimeAxisView::route_active_changed ()
 {
 	RouteTimeAxisView::route_active_changed ();
 	update_control_names();
-	update_midi_controls_visibility (height);
 
 	if (!_route->active()) {
 		controls_table.hide();
@@ -1688,7 +1683,7 @@ MidiTimeAxisView::add_region (timepos_t const & f, timecnt_t const & length, boo
 		plist.add (ARDOUR::Properties::name, PBD::basename_nosuffix(src->name()));
 		plist.add (ARDOUR::Properties::opaque, _session->config.get_draw_opaque_midi_regions());
 
-		region = (RegionFactory::create (src, plist, true));
+		region = (RegionFactory::create (src, plist));
 	}
 
 	/* Now create the region that we will actually use within the playlist */
@@ -1696,7 +1691,7 @@ MidiTimeAxisView::add_region (timepos_t const & f, timecnt_t const & length, boo
 	{
 		PropertyList plist;
 		plist.add (ARDOUR::Properties::name, region->name());
-		region = RegionFactory::create (region, plist, false);
+		region = RegionFactory::create (region, plist);
 	}
 
 	region->set_position (pos);

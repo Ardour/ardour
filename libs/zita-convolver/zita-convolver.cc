@@ -20,10 +20,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #ifdef _MSC_VER
-#include <windows.h>  // Needed for MSVC 'Sleep()'
+#include <windows.h> // Needed for MSVC 'Sleep()'
+#else
+#include <unistd.h>  // for usleep ()
 #endif
 
 #include "zita-convolver/zita-convolver.h"
@@ -432,7 +433,7 @@ Convlevel::Convlevel (void)
 	, _npar (0)
 	, _parsize (0)
 	, _options (0)
-#ifndef PTW32_VERSION
+#ifndef __PTW32_VERSION
 	, _pthr (0)
 #endif
 	, _inp_list (0)
@@ -607,7 +608,7 @@ Convlevel::start (int abspri, int policy)
 	pthread_attr_t     attr;
 	struct sched_param parm;
 
-#ifndef PTW32_VERSION
+#ifndef __PTW32_VERSION
 	_pthr = 0;
 #endif
 	min   = sched_get_priority_min (policy);
@@ -685,7 +686,7 @@ void*
 Convlevel::static_main (void* arg)
 {
 	((Convlevel*)arg)->main ();
-#if !defined PTW32_VERSION && defined _GNU_SOURCE
+#if !defined __PTW32_VERSION && defined _GNU_SOURCE
 	pthread_setname_np (pthread_self(), "ZConvlevel");
 #endif
 	return 0;
@@ -699,7 +700,7 @@ Convlevel::main (void)
 		_trig.wait ();
 		if (_stat == ST_TERM) {
 			_stat = ST_IDLE;
-#ifndef PTW32_VERSION
+#ifndef __PTW32_VERSION
 			_pthr = 0;
 #endif
 			return;

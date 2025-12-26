@@ -28,7 +28,9 @@
 #include "canvas/button.h"
 #include "canvas/canvas.h"
 #include "canvas/debug.h"
+#include "canvas/text.h"
 
+#include "control_point.h"
 #include "editing_context.h"
 #include "editor_drag.h"
 #include "hit.h"
@@ -53,6 +55,8 @@ PianorollMidiView::PianorollMidiView (std::shared_ptr<ARDOUR::MidiTrack> mt,
                                       MidiViewBackground&      bg,
                                       uint32_t                 basic_color)
 	: MidiView (mt, parent, ec, bg, basic_color)
+	, _noscroll_parent (&noscroll_parent)
+	, overlay_text (nullptr)
 	, active_automation (nullptr)
 	, velocity_display (nullptr)
 	, _height (0.)
@@ -105,6 +109,7 @@ PianorollMidiView::PianorollMidiView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 	automation_group->set_data ("linemerger", this);
 
 	_show_source = true;
+	_on_timeline = false;
 	set_extensible (true);
 }
 
@@ -116,10 +121,19 @@ PianorollMidiView::~PianorollMidiView ()
 bool
 PianorollMidiView::midi_canvas_group_event (GdkEvent* ev)
 {
+	EC_LOCAL_TEMPO_SCOPE_ARG (_editing_context);
+
 	/* Let MidiView do its thing */
 
 	if (MidiView::midi_canvas_group_event (ev)) {
-		return true;
+
+		switch (ev->type) {
+		case GDK_ENTER_NOTIFY:
+		case GDK_LEAVE_NOTIFY:
+			break;
+		default:
+			return true;
+		}
 	}
 
 	return _editing_context.canvas_bg_event (ev, event_rect);
@@ -133,11 +147,11 @@ PianorollMidiView::set_height (double h)
 	double note_area_height;
 	double automation_height;
 
-	if (automation_map.empty()) {
+	if (!have_visible_automation()) {
 		note_area_height = h;
 		automation_height = 0.;
 	} else {
-		note_area_height = ceil (h / 2.);
+		note_area_height = ceil (2 * h / 3.);
 		automation_height = ceil (h - note_area_height);
 	}
 
@@ -145,7 +159,7 @@ PianorollMidiView::set_height (double h)
 	midi_context().set_size (midi_context().width(), note_area_height);
 
 	automation_group->set_position (ArdourCanvas::Duple (0., note_area_height));
-	automation_group->set (ArdourCanvas::Rect (0., 0., ArdourCanvas::COORD_MAX, automation_height));
+	automation_group->set (ArdourCanvas::Rect (0., 0., 100000000000000., automation_height));
 
 	for (auto & ads : automation_map) {
 		ads.second.set_height (automation_height);
@@ -183,19 +197,28 @@ PianorollMidiView::scroll (GdkEventScroll* ev)
 		return false;
 	}
 
-	if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier) ||
-	    Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
-
-		switch (ev->direction) {
-		case GDK_SCROLL_UP:
+	switch (ev->direction) {
+	case GDK_SCROLL_UP:
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollHorizontalModifier)) {
+			_editing_context.scroll_left_step ();
+			return true;
+		}
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 			_editing_context.reset_zoom (_editing_context.get_current_zoom() / 2);
 			return true;
-		case GDK_SCROLL_DOWN:
+		}
+	case GDK_SCROLL_DOWN:
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollHorizontalModifier)) {
+			_editing_context.scroll_right_step ();
+			return true;
+		}
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 			_editing_context.reset_zoom (_editing_context.get_current_zoom() * 2);
 			return true;
-		default:
-			break;
 		}
+		break;
+	default:
+		break;
 	}
 
 	return MidiView::scroll (ev);
@@ -204,18 +227,15 @@ PianorollMidiView::scroll (GdkEventScroll* ev)
 void
 PianorollMidiView::set_samples_per_pixel (double spp)
 {
-	std::shared_ptr<Temporal::TempoMap> map;
 	Temporal::timecnt_t duration;
 
 	if (_midi_region) {
 		duration = Temporal::timecnt_t (_midi_region->midi_source()->length().beats());
-		map.reset (new Temporal::TempoMap (Temporal::Tempo (120, 4), Temporal::Meter (4, 4)));
 	} else {
 		duration = Temporal::timecnt_t (Temporal::Beats (4, 0));
-		map.reset (new Temporal::TempoMap (Temporal::Tempo (120, 4), Temporal::Meter (4, 4)));
 	}
 
-	EditingContext::TempoMapScope tms (_editing_context, map);
+	/* XXX Really needs to use a tempo map based on the _midi_region (and its SMF) */
 
 	reset_width_dependent_items (_editing_context.duration_to_pixels (duration));
 }
@@ -224,6 +244,10 @@ void
 PianorollMidiView::reset_width_dependent_items (double pixel_width)
 {
 	MidiView::reset_width_dependent_items (pixel_width);
+
+	if (overlay_text) {
+		overlay_text->set_position (ArdourCanvas::Duple ((pixel_width / 2.0) - overlay_text->text_width(), (_height / 2.0 - overlay_text->text_height())));
+	}
 
 	for (auto & a : automation_map) {
 		if (a.second.line) {
@@ -327,7 +351,7 @@ PianorollMidiView::swap_automation_channel (int new_channel)
 	/* Create the new */
 
 	for (auto const & p : new_params) {
-		update_automation_display (p, SelectionAdd);
+		toggle_visibility (p);
 	}
 
 	if (have_active) {
@@ -359,8 +383,89 @@ PianorollMidiView::line_color_for (Evoral::Parameter const & param)
 
 	return 0xff0000ff;
 }
+
+PianorollMidiView::AutomationDisplayState*
+PianorollMidiView::find_or_create_automation_display_state (Evoral::Parameter const & param)
+{
+	if (!midi_region()) {
+		editing_context().make_a_region();
+	}
+
+	CueAutomationMap::iterator i = automation_map.find (param);
+
+	/* Step one: find the AutomationDisplayState object for this parameter,
+	 * or create it if it does not already exist.
+	 */
+
+	if (i != automation_map.end()) {
+		return &i->second;
+	}
+
+	AutomationDisplayState* ads = nullptr;
+	bool was_empty = automation_map.empty();
+
+	if (param.type() == MidiVelocityAutomation) {
+
+		if (!velocity_display) {
+
+			/* Create and add to automation display map */
+
+			velocity_display = new PianorollVelocityDisplay (editing_context(), midi_context(), *this, *automation_group, 0x312244ff);
+			auto res = automation_map.insert (std::make_pair (param, AutomationDisplayState (*velocity_display, false)));
+
+			ads = &((*res.first).second);
+
+			for (auto & ev : _events) {
+				velocity_display->add_note (ev.second);
+			}
+		}
+
+	} else {
+
+		std::shared_ptr<Evoral::Control> control = _midi_region->model()->control (param, true);
+		CueAutomationControl ac = std::dynamic_pointer_cast<AutomationControl> (control);
+
+		if (!ac) {
+			return nullptr;
+		}
+
+		CueAutomationLine line (new PianorollAutomationLine (ARDOUR::EventTypeMap::instance().to_symbol (param),
+		                                                     _editing_context,
+		                                                     *automation_group,
+		                                                     automation_group,
+		                                                     ac->alist(),
+		                                                     ac->desc()));
+
+		line->set_insensitive_line_color (line_color_for (param));
+
+		AutomationDisplayState cad (ac, line, false);
+
+		auto res = automation_map.insert (std::make_pair (param, cad));
+
+		ads = &((*res.first).second);
+	}
+
+	if (was_empty) {
+		set_height (_height);
+	}
+
+	return ads;
+}
+
+bool
+PianorollMidiView::have_visible_automation () const
+{
+	for (auto const & [oarameter,ads] : automation_map) {
+		if (ads.visible) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void
-PianorollMidiView::update_automation_display (Evoral::Parameter const & param, SelectionOperation op)
+PianorollMidiView::toggle_visibility (Evoral::Parameter const & param)
 {
 	using namespace ARDOUR;
 
@@ -381,159 +486,101 @@ PianorollMidiView::update_automation_display (Evoral::Parameter const & param, S
 		return;
 	}
 
-	CueAutomationMap::iterator i = automation_map.find (param);
-	AutomationDisplayState* ads = nullptr;
+	AutomationDisplayState* ads = find_or_create_automation_display_state (param);
 
-	if (i != automation_map.end()) {
-
-		ads = &i->second;
-
-	} else {
-
-		if (op == SelectionRemove) {
-			/* remove it, but it doesn't exist yet, no worries */
-			return;
-		}
-
-		if (param.type() == MidiVelocityAutomation) {
-
-
-			if (!velocity_display) {
-
-				/* Create and add to automation display map */
-
-				velocity_display = new PianorollVelocityDisplay (editing_context(), midi_context(), *this, *automation_group, 0x312244ff);
-				auto res = automation_map.insert (std::make_pair (Evoral::Parameter (ARDOUR::MidiVelocityAutomation, 0, 0), AutomationDisplayState (*velocity_display, false)));
-
-				ads = &((*res.first).second);
-
-				for (auto & ev : _events) {
-					velocity_display->add_note (ev.second);
-				}
-			}
-
-		} else {
-
-			std::shared_ptr<Evoral::Control> control = _midi_region->model()->control (param, true);
-			CueAutomationControl ac = std::dynamic_pointer_cast<AutomationControl> (control);
-
-			if (!ac) {
-				return;
-			}
-
-			CueAutomationLine line (new PianorollAutomationLine (ARDOUR::EventTypeMap::instance().to_symbol (param),
-			                                                   _editing_context,
-			                                                   *automation_group,
-			                                                   automation_group,
-			                                                   ac->alist(),
-			                                                   ac->desc()));
-
-			line->set_insensitive_line_color (line_color_for (param));
-
-			AutomationDisplayState cad (ac, line, false);
-
-			auto res = automation_map.insert (std::make_pair (param, cad));
-
-			ads = &((*res.first).second);
-		}
+	if (!ads) {
+		return;
 	}
 
-	switch (op) {
-	case SelectionSet:
-		/* hide the rest */
-		for (auto & as : automation_map) {
-			as.second.hide ();
-		}
-		ads->set_height (automation_group->get().height());
-		ads->show ();
-		internal_set_active_automation (param);
-		break;
-
-	case SelectionAdd:
-		ads->set_height (automation_group->get().height());
-		ads->show ();
-		break;
-
-	case SelectionRemove:
+	if (ads->visible) {
 		ads->hide ();
-		if (active_automation == ads) {
+		if (ads == active_automation) {
 			unset_active_automation ();
+			return;
 		}
-		break;
-
-	case SelectionToggle:
-		if (ads->visible) {
-			ads->hide ();
-			if (active_automation == ads) {
-				unset_active_automation ();
-			}
-		} else {
-			ads->set_height (automation_group->get().height());
-			ads->show ();
-			internal_set_active_automation (param);
+		if (!have_visible_automation()) {
+			set_height (_height);
 		}
-		break;
-
-	case SelectionExtend:
-		/* undefined in this context */
-		break;
+	} else {
+		ads->show ();
 	}
 
 	set_height (_height);
+	AutomationStateChange (); /* EMIT SIGNAL */
 }
 
 void
 PianorollMidiView::set_active_automation (Evoral::Parameter const & param)
 {
-	if (!internal_set_active_automation (param)) {
-		update_automation_display (param, SelectionSet);
+	AutomationDisplayState* ads = find_or_create_automation_display_state (param);
+
+	if (ads) {
+		internal_set_active_automation (*ads);
 	}
 }
 
 void
 PianorollMidiView::unset_active_automation ()
 {
-	for (CueAutomationMap::iterator i = automation_map.begin(); i != automation_map.end(); ++i) {
-		if (i->second.line) {
-			i->second.line->set_sensitive (false);
+	if (!active_automation) {
+		return;
+	}
+
+	CueAutomationMap::size_type visible = 0;
+
+	for (auto & [param,ads] : automation_map) {
+		if (ads.line) {
+			ads.line->set_sensitive (false);
 		} else {
-			i->second.velocity_display->set_sensitive (false);
+			ads.velocity_display->set_sensitive (false);
 		}
+
+		if (ads.visible) {
+			visible++;
+		}
+	}
+
+	/* If the currently active automation is the only one visible, hide it */
+
+	if (active_automation->visible && visible == 1) {
+		active_automation->hide ();
+		set_height (_height);
 	}
 
 	active_automation = nullptr;
+
 	AutomationStateChange(); /* EMIT SIGNAL */
 }
 
-bool
-PianorollMidiView::internal_set_active_automation (Evoral::Parameter const & param)
+void
+PianorollMidiView::internal_set_active_automation (AutomationDisplayState& ads)
 {
-	bool exists = false;
+	if (active_automation == &ads) {
+		unset_active_automation ();
+		return;
+	}
 
-	for (auto & iter : automation_map) {
-		if (iter.first == param) {
-			if (iter.second.line) {
-				/* velocity does not have a line */
-				iter.second.line->set_sensitive (true);
-			} else {
-				iter.second.velocity_display->set_sensitive (true);
-			}
-			active_automation = &iter.second;
-			exists = true;
-		} else {
-			if (iter.second.line) {
-				iter.second.line->set_sensitive (false);
-			} else {
-				iter.second.velocity_display->set_sensitive (false);
-			}
+	/* active automation MUST be visible and sensitive */
+	bool had_visible = have_visible_automation ();
+	ads.show ();
+	if (!had_visible) {
+		set_height (_height);
+	}
+	ads.set_sensitive (true);
+	ads.set_height (automation_group->get().height());
+	active_automation = &ads;
+
+	/* Now desensitize the rest */
+
+	for (auto & [param,ds] : automation_map) {
+		if (&ds == &ads) {
+			continue;
 		}
+
+		ds.set_sensitive (false);
 	}
 
-	if (exists) {
-		AutomationStateChange(); /* EMIT SIGNAL */
-	}
-
-	return exists;
+	AutomationStateChange(); /* EMIT SIGNAL */
 }
 
 bool
@@ -575,7 +622,6 @@ MergeableLine*
 PianorollMidiView::make_merger ()
 {
 	if (active_automation && active_automation->line) {
-		std::cerr << "Mergeable will use active automation @ " << active_automation << std::endl;
 
 		return new MergeableLine (active_automation->line, active_automation->control,
 		                          [](Temporal::timepos_t const& t) { return t; },
@@ -626,6 +672,16 @@ PianorollMidiView::AutomationDisplayState::hide ()
 		line->hide_all ();
 	}
 	visible = false;
+}
+
+void
+PianorollMidiView::AutomationDisplayState::set_sensitive (bool yn)
+{
+	if (velocity_display) {
+		velocity_display->set_sensitive (yn);
+	} else if (line) {
+		line->set_sensitive (yn);
+	}
 }
 
 void
@@ -685,6 +741,197 @@ PianorollMidiView::clear_selection ()
 	for (CueAutomationMap::iterator i = automation_map.begin(); i != automation_map.end(); ++i) {
 		if (i->second.line) {
 			i->second.line->set_selected_points (empty);
+		}
+	}
+}
+
+void
+PianorollMidiView::set_overlay_text (std::string const & str)
+{
+	if (!overlay_text) {
+		overlay_text = new ArdourCanvas::Text (_noscroll_parent);
+		Pango::FontDescription font ("Sans 200");
+		overlay_text->set_font_description (font);
+		overlay_text->set_color (0xff000088);
+		overlay_text->set ("0"); /* not shown, used for positioning math */
+		overlay_text->set_position (ArdourCanvas::Duple ((midi_context().width() / 2.0) - (overlay_text->text_width()/2.), (midi_context().height() / 2.0) - (overlay_text->text_height() / 2.)));
+	}
+
+	overlay_text->set (str);
+	show_overlay_text ();
+}
+
+void
+PianorollMidiView::show_overlay_text ()
+{
+	if (overlay_text) {
+		overlay_text->show ();
+	}
+}
+
+void
+PianorollMidiView::hide_overlay_text ()
+{
+	if (overlay_text) {
+		overlay_text->hide ();
+	}
+}
+void
+PianorollMidiView::cut_copy_clear (::Selection& selection, Editing::CutCopyOp op)
+{
+	MidiView::cut_copy_clear (selection, op);
+
+	cut_copy_points (op, timepos_t::zero (Temporal::BeatTime));
+}
+
+struct PointsSelectionPositionSorter {
+	bool operator() (ControlPoint* a, ControlPoint* b) {
+		return (*(a->model()))->when < (*(b->model()))->when;
+	}
+};
+
+/** Cut, copy or clear selected automation points.
+ *  @param op Operation (Cut, Copy or Clear)
+ */
+void
+PianorollMidiView::cut_copy_points (Editing::CutCopyOp op, timepos_t const & earliest_time)
+{
+	using namespace Editing;
+
+	::Selection& selection (_editing_context.get_selection());
+
+	if (selection.points.empty ()) {
+		return;
+	}
+
+	timepos_t earliest (earliest_time);
+
+	/* Keep a record of the AutomationLists that we end up using in this operation */
+	typedef std::map<std::shared_ptr<AutomationList>, EditingContext::AutomationRecord> Lists;
+	Lists lists;
+
+	/* user could select points in any order */
+	selection.points.sort (PointsSelectionPositionSorter ());
+
+	/* Go through all selected points, making an AutomationRecord for each distinct AutomationList */
+	for (auto & selected_point : selection.points) {
+		const AutomationLine& line (selected_point->line());
+		const std::shared_ptr<AutomationList> al   = line.the_list();
+		if (lists.find (al) == lists.end ()) {
+			/* We haven't seen this list yet, so make a record for it.  This includes
+			   taking a copy of its current state, in case this is needed for undo later.
+			*/
+			lists[al] = EditingContext::AutomationRecord (&al->get_state (), &line);
+		}
+	}
+
+	if (op == Cut || op == Copy) {
+		/* This operation will involve putting things in the cut buffer, so create an empty
+		   ControlList for each of our source lists to put the cut buffer data in.
+		*/
+		for (Lists::iterator i = lists.begin(); i != lists.end(); ++i) {
+			i->second.copy = i->first->create (i->first->parameter (), i->first->descriptor(), *i->first);
+		}
+
+		/* Add all selected points to the relevant copy ControlLists */
+
+		for (auto & selected_point : selection.points) {
+			std::shared_ptr<AutomationList>    al = selected_point->line().the_list();
+			AutomationList::const_iterator ctrl_evt = selected_point->model ();
+
+			lists[al].copy->fast_simple_add ((*ctrl_evt)->when, (*ctrl_evt)->value);
+			earliest = std::min (earliest, (*ctrl_evt)->when);
+		}
+
+		for (Lists::iterator i = lists.begin(); i != lists.end(); ++i) {
+			/* Correct this copy list so that it is relative to the earliest
+			   start time, so relative ordering between points is preserved
+			   when copying from several lists and the paste starts at the
+			   earliest copied piece of data.
+			*/
+			std::shared_ptr<Evoral::ControlList> &al_cpy = i->second.copy;
+			for (AutomationList::iterator ctrl_evt = al_cpy->begin(); ctrl_evt != al_cpy->end(); ++ctrl_evt) {
+				(*ctrl_evt)->when.shift_earlier (earliest);
+			}
+
+			/* And add it to the cut buffer */
+			_editing_context.get_cut_buffer().add (al_cpy);
+		}
+	}
+
+	if (op == Delete || op == Cut) {
+		/* This operation needs to remove things from the main AutomationList, so do that now */
+
+		for (Lists::iterator i = lists.begin(); i != lists.end(); ++i) {
+			i->first->freeze ();
+		}
+
+		/* Remove each selected point from its AutomationList */
+		for (auto & selected_point : selection.points) {
+			AutomationLine& line (selected_point->line ());
+			std::shared_ptr<AutomationList> al = line.the_list();
+			al->erase (selected_point->model ());
+		}
+
+		/* Thaw the lists and add undo records for them */
+		for (Lists::iterator i = lists.begin(); i != lists.end(); ++i) {
+			std::shared_ptr<AutomationList> al = i->first;
+			al->thaw ();
+			_editing_context.add_command (new MementoCommand<AutomationList> (*al.get(), i->second.state, &(al->get_state ())));
+		}
+	}
+}
+
+void
+PianorollMidiView::cut_copy_clear_one (AutomationLine& line, ::Selection& selection, Editing::CutCopyOp op)
+{
+	using namespace Editing;
+
+	std::shared_ptr<Evoral::ControlList> what_we_got;
+	std::shared_ptr<AutomationList> alist (line.the_list());
+
+	XMLNode &before = alist->get_state();
+
+	/* convert time selection to automation list model coordinates */
+	timepos_t start = selection.time.front().start().earlier (line.get_origin());
+	timepos_t end = selection.time.front().end().earlier (line.get_origin());
+
+	std::cerr << "CCCO from " << start << " .. " << end << " based on " << selection.time.front().start() << " .. " << selection.time.front().end() << std::endl;
+
+	switch (op) {
+	case Delete:
+		if (alist->cut (start, end) != 0) {
+			_editing_context.add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
+		}
+		break;
+
+	case Cut:
+
+		if ((what_we_got = alist->cut (start, end)) != 0) {
+			_editing_context.get_cut_buffer().add (what_we_got);
+			_editing_context.add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
+		}
+		break;
+	case Copy:
+		if ((what_we_got = alist->copy (start, end)) != 0) {
+			_editing_context.get_cut_buffer().add (what_we_got);
+		}
+		break;
+
+	case Clear:
+		if ((what_we_got = alist->cut (start, end)) != 0) {
+			_editing_context.add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
+		}
+		break;
+	}
+
+	if (what_we_got) {
+		for (AutomationList::iterator x = what_we_got->begin(); x != what_we_got->end(); ++x) {
+			timepos_t when = (*x)->when;
+			double val  = (*x)->value;
+			val = line.model_to_view_coord_y (val);
+			(*x)->when = when;
+			(*x)->value = val;
 		}
 	}
 }

@@ -137,6 +137,7 @@ public:
 
 	void truncate_automation_start (timecnt_t);
 	void truncate_automation_end (timepos_t);
+	void x_scale_automation (Temporal::ratio_t);
 
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
 	bool configure_io (ChanCount in, ChanCount out);
@@ -164,6 +165,7 @@ private:
 	bool check_inplace ();
 	void create_parameters ();
 	void parameter_changed_externally (uint32_t, float);
+	void property_changed_externally (uint32_t, Variant);
 	void automation_run (samplepos_t start, pframes_t nframes);
 	bool find_next_event (timepos_t const& start, timepos_t const& end, Evoral::ControlEvent& next_event) const;
 	void start_touch (uint32_t param_id);

@@ -31,28 +31,33 @@
 #include "midi_view_background.h"
 
 class MidiView;
+class Pianoroll;
 
-class CueMidiBackground : public MidiViewBackground
+class PianorollMidiBackground : public MidiViewBackground
 {
   public:
-	CueMidiBackground (ArdourCanvas::Item* parent);
-	~CueMidiBackground ();
+	PianorollMidiBackground (ArdourCanvas::Item* parent, Pianoroll&);
+	~PianorollMidiBackground ();
 
-	double height() const;
-	double width() const;
-	double contents_height() const;
+	int height() const;
+	int width() const;
+	int contents_height() const;
 
 	uint8_t get_preferred_midi_channel () const;
 	void set_note_highlight (bool);
 	void record_layer_check (std::shared_ptr<ARDOUR::Region>, samplepos_t);
 
-	void set_size (double w, double h);
+	void set_size (int w, int h);
 	void set_view (MidiView*);
+	void display_region (MidiView&);
+
+	ARDOUR::InstrumentInfo* instrument_info() const;
 
   protected:
 	MidiView* view;
-	double _width;
-	double _height;
+	Pianoroll& pianoroll;
+	int _width;
+	int _height;
 
 	void apply_note_range_to_children();
 };

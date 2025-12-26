@@ -25,7 +25,7 @@ function factory () return function ()
 	end
 
 	if tracks:size () > 0 then
-		local bus = Session:new_audio_route (chn, chn, nil, 1, "", ARDOUR.PresentationInfo.Flag.AudioBus, ARDOUR.PresentationInfo.max_order)
+		local bus = Session:new_audio_route (chn, chn, ARDOUR.RouteGroup(), 1, "", ARDOUR.PresentationInfo.Flag.AudioBus, ARDOUR.PresentationInfo.max_order)
 		if bus:size () > 0 then
 			Session:add_internal_sends (bus:front (), ARDOUR.Placement.PostFader, tracks);
 		end

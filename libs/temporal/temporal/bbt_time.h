@@ -111,19 +111,15 @@ struct LIBTEMPORAL_API BBT_Time
 	 * values.
 	 */
 
-	BBT_Time round_to_beat () const { return ticks >= (ticks_per_beat/2) ? BBT_Time (bars, beats+1, 0) : BBT_Time (bars, beats, 0); }
-	BBT_Time round_down_to_beat () const { return BBT_Time (bars, beats, 0); }
-	BBT_Time round_up_to_beat () const { return ticks ? BBT_Time (bars, beats+1, 0) : *this; }
-	BBT_Time round_up_to_beat_div (int beat_div) const;
-
-	/* cannot implement round_to_bar() without knowing meter (time
+	/* cannot implement round_to_*() or round_up_tp_*() without knowing meter (time
 	 * signature) information, since it requires knowing how many beats
 	 * are in a bar, in order to decide if we are closer to the previous or
 	 * next bar time.
 	 */
 
-	BBT_Time round_up_to_bar () const;
+	BBT_Time round_down_to_beat () const { return BBT_Time (bars, beats, 0); }
 	BBT_Time round_down_to_bar () const { return BBT_Time (bars, 1, 0); }
+
 	BBT_Time next_bar () const { return (bars == -1) ? BBT_Time (1, 1, 0) : BBT_Time (bars+1, 1, 0); }
 	BBT_Time prev_bar () const { return (bars == 1)  ? BBT_Time (-1, 1, 0) : BBT_Time (bars-1, 1, 0); }
 
@@ -260,10 +256,6 @@ struct LIBTEMPORAL_API BBT_Offset
 		return os.str ();
 	}
 };
-
-inline BBT_Offset LIBTEMPORAL_API bbt_delta (Temporal::BBT_Time const & a, Temporal::BBT_Time const & b) {
-	return Temporal::BBT_Offset (a.bars - b.bars, a.beats - b.beats, a.ticks - b.ticks);
-}
 
 inline bool
 BBT_Time::operator< (const BBT_Offset& other) const

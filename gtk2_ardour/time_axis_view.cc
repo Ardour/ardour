@@ -268,10 +268,11 @@ TimeAxisView::~TimeAxisView()
 	delete _canvas_display;
 	_canvas_display = 0;
 
+	delete _size_menu;
+	_size_menu = 0;
+
 	delete display_menu;
 	display_menu = 0;
-
-	delete _size_menu;
 }
 
 void
@@ -315,7 +316,7 @@ TimeAxisView::hide ()
 * @return height of this TimeAxisView.
 */
 guint32
-TimeAxisView::show_at (double y, int& nth, VBox *parent)
+TimeAxisView::show_at (int y, int& nth, VBox *parent)
 {
 	if (control_parent) {
 		control_parent->reorder_child (TOP_LEVEL_WIDGET, nth);

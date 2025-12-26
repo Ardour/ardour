@@ -197,10 +197,10 @@ Port::insert_connection (std::string const& pn)
 		std::string const bid (AudioEngine::instance()->backend_id (receives_input ()));
 		Glib::Threads::RWLock::WriterLock lm (_connections_lock);
 		_ext_connections[bid].insert (pn);
-		_int_connections.erase (pn); // XXX
+		_int_connections.erase (port_manager->make_port_name_non_relative (pn)); // XXX
 	} else {
 		Glib::Threads::RWLock::WriterLock lm (_connections_lock);
-		_int_connections.insert (pn);
+		_int_connections.insert (port_manager->make_port_name_non_relative (pn));
 	}
 }
 
@@ -220,8 +220,19 @@ Port::erase_connection (std::string const& pn)
 		}
 	} else {
 		Glib::Threads::RWLock::WriterLock lm (_connections_lock);
-		_int_connections.erase (pn);
+		_int_connections.erase (port_manager->make_port_name_non_relative (pn));
 	}
+}
+
+void
+Port::rename_connected_port (std::string const& old_name, std::string const& new_name)
+{
+	Glib::Threads::RWLock::WriterLock lm (_connections_lock);
+	if (_int_connections.find (old_name) == _int_connections.end()) {
+		return;
+	}
+	_int_connections.erase (old_name);
+	_int_connections.insert (new_name);
 }
 
 void

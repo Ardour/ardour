@@ -80,7 +80,10 @@ class DeviceInfo
 	bool uses_ipmidi() const;
 	bool no_handshake() const;
 	bool is_qcon() const;
+	bool is_v1m() const;
 	bool is_platformMp() const;
+	bool is_p1m() const;
+	bool is_p1nano() const;
 	bool is_proG2() const;
 	bool is_xtouch() const;
 	bool has_qcon_second_lcd() const;
@@ -116,7 +119,10 @@ class DeviceInfo
 	bool     _uses_ipmidi;
 	bool     _no_handshake;
 	bool     _is_qcon;
+	bool     _is_v1m;
 	bool     _is_platformMp;
+	bool     _is_p1m;
+	bool     _is_p1nano;
 	bool	 _is_proG2;
 	bool	 _is_xtouch;
 	bool     _has_qcon_second_lcd;

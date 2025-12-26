@@ -26,6 +26,7 @@ STRIP=1
 PRINT_SYSDEPS=
 WITH_NLS=1
 X42PLUGINS="x42-autotune x42-midifilter x42-stereoroute setBfree x42-avldrums x42-limiter x42-tuner"
+CURLOPT="-s -S --retry-connrefused --retry 3"
 
 : ${HARRISONCHANNELSTRIP=harrison_channelstrip}
 : ${HARRISONLV2=harrison_lv2s-n}
@@ -67,6 +68,8 @@ while [ $# -gt 0 ] ; do
 		WITH_HARRISON_VBM=1 ;
 		WITH_COMMERCIAL_X42_LV2=1
 		WITH_GRATIS_X42_LV2=1
+		WITH_XJADEO= ;
+		WITH_HARVID= ;
 		STRIP= ;
 		PRODUCT_PKG_DIR=MixbusVBM;
 		lower_case_appname=mixbusvbm;
@@ -705,7 +708,7 @@ fi
 
 if test x$WITH_HARRISON_LV2 != x ; then
 	echo "Bundling Harrison XT plugins"
-	curl -s -S --fail -#  \
+	curl ${CURLOPT} --fail -#  \
 		-z "${CACHEDIR}/${HARRISONLV2}.${OSX_BENSID}.zip" \
 		-o "${CACHEDIR}/${HARRISONLV2}.${OSX_BENSID}.zip" \
 		"${HARRISONDSPURL}/${HARRISONLV2}.${OSX_BENSID}.zip"
@@ -716,7 +719,7 @@ if test x$WITH_HARRISON_LV2 != x ; then
 fi
 
 if test x$WITH_HARRISON_VBM != x ; then
-	curl -s -S --fail -#  \
+	curl ${CURLOPT} --fail -#  \
 		-z "${CACHEDIR}/harrison_vbm.${OSX_BENSID}.zip" \
 		-o "${CACHEDIR}/harrison_vbm.${OSX_BENSID}.zip" \
 		"${HARRISONDSPURL}/harrison_vbm.${OSX_BENSID}.zip"
@@ -728,7 +731,7 @@ fi
 
 if test x$WITH_HARVID != x ; then
 	echo "installing harvid..."
-	HARVID_VERSION=$(curl -s -S http://ardour.org/files/video-tools/harvid_version.txt)
+	HARVID_VERSION=$(curl ${CURLOPT} http://ardour.org/files/video-tools/harvid_version.txt)
 
 	rsync -Pa \
 		rsync://ardour.org/video-tools/harvid-${HARVID_ARCH}-${HARVID_VERSION}.tgz \
@@ -741,7 +744,7 @@ fi
 
 if test x$WITH_XJADEO != x ; then
 	echo "installing video monitor.."
-	XJADEO_VERSION=$(curl -s -S http://ardour.org/files/video-tools/xjadeo_version.txt)
+	XJADEO_VERSION=$(curl ${CURLOPT} http://ardour.org/files/video-tools/xjadeo_version.txt)
 
 	rsync -Pa \
 		rsync://ardour.org/video-tools/jadeo${XJADEO_ARCH}-${XJADEO_VERSION:1}.dmg \
@@ -775,7 +778,7 @@ if test x$WITH_GMSYNTH != x ; then
 	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2"
 
 	for proj in x42-gmsynth; do
-		X42_VERSION=$(curl -s -S http://${OSX_X42URI}/${proj}.latest.txt)
+		X42_VERSION=$(curl ${CURLOPT} http://${OSX_X42URI}/${proj}.latest.txt)
 		rsync -a -q --partial \
 			rsync://${OSX_X42URI}/${proj}-lv2-${OSX_X42ID}-${X42_VERSION}.zip \
 			"$CACHEDIR/${proj}-lv2-${OSX_X42ID}-${X42_VERSION}.zip"
@@ -789,7 +792,7 @@ if test x$WITH_COMMERCIAL_X42_LV2 != x ; then
 	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2"
 
 	for proj in x42-meters x42-eq x42-whirl; do
-		X42_VERSION=$(curl -s -S http://${OSX_X42URI}/${proj}.latest.txt)
+		X42_VERSION=$(curl ${CURLOPT} http://${OSX_X42URI}/${proj}.latest.txt)
 		rsync -a -q --partial \
 			rsync://${OSX_X42URI}/${proj}-lv2-${OSX_X42ID}-${X42_VERSION}.zip \
 			"$CACHEDIR/${proj}-lv2-${OSX_X42ID}-${X42_VERSION}.zip"
@@ -813,7 +816,7 @@ if test x$WITH_GRATIS_X42_LV2 != x ; then
 			fi
 		fi
 
-		X42_VERSION=$(curl -s -S http://${OSX_X42URI}/${proj}.latest.txt)
+		X42_VERSION=$(curl ${CURLOPT} http://${OSX_X42URI}/${proj}.latest.txt)
 		rsync -a -q --partial \
 			rsync://${OSX_X42URI}/${proj}-lv2-${OSX_X42ID}-${X42_VERSION}.zip \
 			"$CACHEDIR/${proj}-lv2-${OSX_X42ID}-${X42_VERSION}.zip"
@@ -835,7 +838,7 @@ if test -n "$MIXBUS"; then
 
 	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/ladspa/strip"
 
-	curl -s -S --fail -#  \
+	curl ${CURLOPT} --fail -#  \
 		-z "${CACHEDIR}/${HARRISONCHANNELSTRIP}.${OSX_BENSID}.so" \
 		-o "${CACHEDIR}/${HARRISONCHANNELSTRIP}.${OSX_BENSID}.so" \
 		"${HARRISONDSPURL}/${HARRISONCHANNELSTRIP}.${OSX_BENSID}.so"
@@ -845,7 +848,7 @@ if test -n "$MIXBUS"; then
 
 	echo "deploying harrison vamp plugins for $OSX_BENSID"
 
-	curl -s -S --fail -#  \
+	curl ${CURLOPT} --fail -#  \
 		-z "${CACHEDIR}/harrison_vamp.${OSX_BENSID}.dylib" \
 		-o "${CACHEDIR}/harrison_vamp.${OSX_BENSID}.dylib" \
 		"${HARRISONDSPURL}/harrison_vamp.${OSX_BENSID}.dylib"
@@ -854,7 +857,7 @@ if test -n "$MIXBUS"; then
 		"${PRODUCT_PKG_DIR}/${APPROOT}/lib/harrison_vamp.dylib"
 
 	# Mixbus Bundled Media Content
-	curl -s -S --fail -#  \
+	curl ${CURLOPT} --fail -#  \
 		-z "${CACHEDIR}/MixbusBundledMedia.zip" \
 		-o "${CACHEDIR}/MixbusBundledMedia.zip" \
 		"https://builder.harrisonconsoles.com/pub/share/MixbusBundledMedia.zip"
@@ -867,7 +870,7 @@ if test -n "$MIXBUS"; then
 	fi
 elif test -z "$LIVETRAX" -a -z "$VBM" ; then
 	echo "Fetching Ardour bundled content"
-	curl -s -S --fail -#  \
+	curl ${CURLOPT} --fail -#  \
 		-z "${CACHEDIR}/ArdourBundledMedia.zip" \
 		-o "${CACHEDIR}/ArdourBundledMedia.zip" \
 		"http://stuff.ardour.org/loops/ArdourBundledMedia.zip"
@@ -904,9 +907,9 @@ fi
 
 if test x$DEMO_SESSION_URL != x ; then
 	mkdir -p ${PRODUCT_PKG_DIR}/$Shared/sessions
-	DEMO_SESSIONS=$(curl -s -S --fail $DEMO_SESSION_URL/index.txt)
+	DEMO_SESSIONS=$(curl ${CURLOPT} --fail $DEMO_SESSION_URL/index.txt)
 	for demo in $DEMO_SESSIONS; do
-		curl -s -S --fail -# -o ${PRODUCT_PKG_DIR}/$Shared/sessions/$demo $DEMO_SESSION_URL/$demo
+		curl ${CURLOPT} --fail -# -o ${PRODUCT_PKG_DIR}/$Shared/sessions/$demo $DEMO_SESSION_URL/$demo
 	done
 fi
 

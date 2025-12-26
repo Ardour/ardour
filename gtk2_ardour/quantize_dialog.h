@@ -43,7 +43,7 @@ class EditingContext;
 class QuantizeDialog : public ArdourDialog
 {
 public:
-	QuantizeDialog (EditingContext&);
+	QuantizeDialog (Gtk::Window&, EditingContext&);
 	~QuantizeDialog ();
 
 	Temporal::Beats start_grid_size() const;

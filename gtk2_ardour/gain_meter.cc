@@ -36,6 +36,7 @@
 #include "ardour/amp.h"
 #include "ardour/control_group.h"
 #include "ardour/logmeter.h"
+#include "ardour/rc_configuration.h"
 #include "ardour/route_group.h"
 #include "ardour/selection.h"
 #include "ardour/session_route.h"
@@ -487,7 +488,7 @@ GainMeterBase::reset_route_peak_display (Route* r)
 }
 
 void
-GainMeterBase::reset_group_peak_display (RouteGroup* group)
+GainMeterBase::reset_group_peak_display (std::shared_ptr<RouteGroup> group)
 {
 	if (route() && group == route()->route_group()) {
 		reset_peak_display ();
@@ -538,10 +539,11 @@ GainMeterBase::gain_activated ()
 
 	/* clamp to displayable values */
 	if (_data_type == DataType::AUDIO) {
-		f = min (f, 6.0f);
+		float max_dB = accurate_coefficient_to_dB (Config->get_max_gain());
+		f = min (f, max_dB);
 		_control->set_value (dB_to_coefficient(f), Controllable::UseGroup);
 	} else {
-		f = min (fabs (f), 2.0f);
+		f = min (fabs (f), Config->get_max_gain());
 		_control->set_value (f, Controllable::UseGroup);
 	}
 
@@ -742,7 +744,7 @@ GainMeterBase::set_meter_point (Route& route, MeterPoint mp)
 void
 GainMeterBase::set_route_group_meter_point (Route& route, MeterPoint mp)
 {
-	RouteGroup* route_group;
+	std::shared_ptr<RouteGroup> route_group;
 
 	if ((route_group = route.route_group ()) != 0) {
 		route_group->foreach_route (std::bind (&Route::set_meter_point, _1, mp));

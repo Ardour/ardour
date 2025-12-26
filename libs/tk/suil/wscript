@@ -10,7 +10,7 @@ def options(ctx):
 def configure(conf):
     autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.28', mandatory=True)
     autowaf.check_pkg(conf, 'lv2', uselib_store='LV2_1_16_0', atleast_version='1.16.0', mandatory=False)
-    if conf.env['build_target'] != 'mingw' and sys.platform != 'darwin': # Linux
+    if conf.env['build_target'] != 'mingw' and conf.env['build_target'] != 'msvc' and sys.platform != 'darwin': # Linux
         autowaf.check_pkg(conf, 'x11', uselib_store='X11', system=True, mandatory=True)
 
 def build(bld):
@@ -24,7 +24,7 @@ def build(bld):
     if sys.platform == 'darwin':
         cflags  += ['-fvisibility=hidden']
         defines += ['SUIL_WITH_COCOA_IN_GTK2', 'SUIL_MODULE_PREFIX="lib"', 'SUIL_MODULE_EXT=".dylib"']
-    elif bld.env['build_target'] == 'mingw':
+    elif bld.env['build_target'] == 'mingw' or bld.env['build_target'] == 'msvc':
         defines += ['SUIL_WITH_WIN_IN_GTK2', 'SUIL_MODULE_PREFIX=""', 'SUIL_MODULE_EXT=".dll"']
     else:
         defines += ['SUIL_WITH_X11_IN_GTK2', 'SUIL_MODULE_PREFIX="lib"', 'SUIL_MODULE_EXT=".so"']
@@ -56,7 +56,7 @@ def build(bld):
             uselib       = 'LV2 DL GLIB PANGOCAIRO',
             linkflags    = ['-framework', 'Cocoa'])
 
-    elif bld.env['build_target'] == 'mingw':
+    elif bld.env['build_target'] == 'mingw' or bld.env['build_target'] == 'msvc':
         bld(features     = 'cxx cxxshlib',
             source       = 'win_in_gtk2.cpp',
             target       = 'suil_win_in_gtk2',

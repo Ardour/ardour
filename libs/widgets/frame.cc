@@ -22,10 +22,11 @@
 #include "gtkmm2ext/utils.h"
 
 #include "widgets/frame.h"
-#include "widgets/ui_config.h"
+#include "gtkmm2ext/ui_config.h"
 
 using namespace std;
 using namespace Gtk;
+using namespace Gtkmm2ext;
 using namespace ArdourWidgets;
 
 Frame::Frame (Orientation orientation, bool boxy)
@@ -60,8 +61,18 @@ Frame::~Frame ()
 		_parent_style_change.disconnect ();
 	}
 	if (_w) {
+		g_signal_handler_disconnect (_w->gobj(), _destroy_connection);
+		/* This is manly for the benefit of macOS GLCanvas (see also EventBoxExt) */
 		_w->unparent ();
 	}
+}
+
+void
+Frame::child_destroyed (GtkWidget*, gpointer data)
+{
+	Frame* self = static_cast<Frame*>(data);
+	g_signal_handler_disconnect (self->_w->gobj(), self->_destroy_connection);
+	self->_w = 0;
 }
 
 void
@@ -73,6 +84,8 @@ Frame::on_add (Widget* w)
 
 	Bin::on_add (w);
 	_w = w;
+
+	_destroy_connection = g_signal_connect_after (w->gobj(), "destroy", G_CALLBACK(child_destroyed), this);
 	queue_resize ();
 }
 
@@ -81,6 +94,9 @@ Frame::on_remove (Gtk::Widget* w)
 {
 	Bin::on_remove (w);
 	assert (_w == w);
+	if (_w) {
+		g_signal_handler_disconnect (_w->gobj(), _destroy_connection);
+	}
 	_w = 0;
 }
 
@@ -130,10 +146,9 @@ Frame::on_size_allocate (Allocation& alloc)
 
 	Allocation child_alloc;
 	if (alloc.get_width () < _min_size.width || alloc.get_height () < _min_size.height) {
-#if 0
+#ifndef NDEBUG
 		printf ("Frame::on_size_allocate %dx%d < %dx%d\n", alloc.get_width (), alloc.get_height (), _min_size.width, _min_size.height);
 #endif
-		return;
 	}
 
 	int pb_l, pb_t;

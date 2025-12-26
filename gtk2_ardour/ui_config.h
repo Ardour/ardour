@@ -28,6 +28,7 @@
 #include <iostream>
 #include <map>
 
+#include "ytkmm/enums.h"
 
 #include "ardour/types.h" // required for operators used in pbd/configuration_variable.h
 #include "ardour/types_convert.h"
@@ -38,12 +39,12 @@
 #include "pbd/xml++.h"
 
 #include "gtkmm2ext/colors.h"
-#include "widgets/ui_config.h"
+#include "gtkmm2ext/ui_config.h"
 
 #include "editing.h"
 #include "utils.h"
 
-class UIConfiguration : public ArdourWidgets::UIConfigurationBase
+class UIConfiguration : public Gtkmm2ext::UIConfigurationBase
 {
 private:
 	UIConfiguration ();
@@ -81,6 +82,7 @@ public:
 	void set_alias (std::string const& name, std::string const& alias);
 	void set_color (const std::string& name, Gtkmm2ext::Color);
 	void set_modifier (std::string const&, Gtkmm2ext::SVAModifier svam);
+	void set_modifier (std::string const& name, std::string const& mod_str);
 
 	Gtkmm2ext::Color quantized (Gtkmm2ext::Color) const;
 

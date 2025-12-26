@@ -357,18 +357,27 @@ MidiPlaylist::render (MidiChannelFilter* filter)
 	} else {
 
 		DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\t%1 layered regions to read\n", regs.size()));
-
-		bool top = true;
+#ifndef NDEBUG
+		for (auto & r : regs) {
+			DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\t\t%1 on layer %2\n", r->name(), r->layer()));
+		}
+#endif
 		std::vector<samplepos_t> bounds;
 		EventsSortByTimeAndType<samplepos_t> cmp;
+		bool top = true;
 
-		/* iterate, top-most region first */
-		for (auto & mr : regs) {
+		/* iterate, top region first. Not eht use of ::rbegin() - this
+		 * is reverse iteration and should not auto-fied
+		 */
+
+		for (auto i = regs.rbegin(); i != regs.rend(); ++i) {
+			std::shared_ptr<MidiRegion> mr = *i;
 
 			DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("maybe render from %1\n", mr->name()));
 
 			if (top) {
 				/* render topmost region as-is */
+				DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("render top region %1\n", mr->name()));
 				mr->render (evlist, 0, _note_mode, filter);
 				top = false;
 			} else {
@@ -384,8 +393,7 @@ MidiPlaylist::render (MidiChannelFilter* filter)
 				MidiStateTracker mtr;
 				Evoral::EventList<samplepos_t> const slist (evlist);
 
-				for (Evoral::EventList<samplepos_t>::iterator e = tmp.begin(); e != tmp.end(); ++e) {
-					Evoral::Event<samplepos_t>* ev (*e);
+				for (auto & ev : tmp) {
 					timepos_t t (ev->time());
 
 					if (ev->event_type () == Evoral::NO_EVENT) {
@@ -393,6 +401,7 @@ MidiPlaylist::render (MidiChannelFilter* filter)
 						mtr.resolve_state (evlist, slist, ev->time());
 					} else if (region_is_audible_at (mr, t)) {
 						/* no opaque region above this event */
+						DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("region %1 is audible for event %2\n", mr->name(), *ev));
 						uint8_t* evbuf = ev->buffer();
 						if (3 == ev->size() && (evbuf[0] & 0xf0) == MIDI_CMD_NOTE_OFF && !mtr.active (evbuf[1], evbuf[0] & 0x0f)) {
 							; /* skip note off */

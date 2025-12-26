@@ -179,8 +179,8 @@ AudioStreamView::redisplay_track ()
 	list<RegionView *>::iterator i;
 
 	// Flag region views as invalid and disable drawing
-	for (i = region_views.begin(); i != region_views.end(); ++i) {
-		(*i)->set_valid (false);
+	for (auto & rv : region_views) {
+		rv->set_valid (false);
 	}
 
 	// Add and display views, and flag them as valid
@@ -196,8 +196,8 @@ void
 AudioStreamView::reload_waves ()
 {
 	list<RegionView *>::iterator i;
-	for (i = region_views.begin(); i != region_views.end(); ++i) {
-		AudioRegionView* arv = dynamic_cast<AudioRegionView*> (*i);
+	for (auto & rv : region_views) {
+		AudioRegionView* arv = dynamic_cast<AudioRegionView*> (rv);
 		if (!arv) {
 			continue;
 		}

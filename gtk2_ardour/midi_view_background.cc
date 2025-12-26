@@ -22,7 +22,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "canvas/line_set.h"
+#include "canvas/debug.h"
+#include "canvas/rect_set.h"
 
 #include "midi_view_background.h"
 #include "ui_config.h"
@@ -31,20 +32,22 @@
 
 using namespace std;
 
-MidiViewBackground::MidiViewBackground (ArdourCanvas::Item* parent)
+MidiViewBackground::MidiViewBackground (ArdourCanvas::Item* parent, EditingContext& ec)
 	: note_range_adjustment (0.0f, 0.0f, 0.0f)
+	, _editing_context (ec)
 	, _range_dirty (false)
 	, _range_sum_cache (-1.0)
 	, _lowest_note (UIConfiguration::instance().get_default_lower_midi_note())
 	, _highest_note (UIConfiguration::instance().get_default_upper_midi_note())
 	, _data_note_min (127)
 	, _data_note_max (0)
-	, _note_lines (new ArdourCanvas::LineSet (parent, ArdourCanvas::LineSet::Horizontal))
+	, _note_lines (new ArdourCanvas::RectSet (parent))
 	, _note_mode (ARDOUR::Sustained)
 	, _color_mode (ARDOUR::MeterColors)
 	, _visibility_note_range (ContentsRange)
 	, note_range_set (false)
 {
+	CANVAS_DEBUG_NAME (_note_lines, "MVB note lines");
 	_note_lines->lower_to_bottom();
 
 	// color_handler ();
@@ -57,7 +60,7 @@ MidiViewBackground::MidiViewBackground (ArdourCanvas::Item* parent)
 	note_range_adjustment.set_lower(0);
 	note_range_adjustment.set_upper(127);
 
-	note_range_adjustment.signal_value_changed().connect(sigc::mem_fun(*this, &MidiViewBackground::note_range_adjustment_changed));
+	note_range_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &MidiViewBackground::note_range_adjustment_changed));
 }
 
 MidiViewBackground::~MidiViewBackground()
@@ -75,40 +78,13 @@ MidiViewBackground::parameter_changed (std::string const & param)
 void
 MidiViewBackground::color_handler ()
 {
-	draw_note_lines ();
-}
-
-void
-MidiViewBackground::note_range_adjustment_changed()
-{
-	double sum = note_range_adjustment.get_value() + note_range_adjustment.get_page_size();
-	int lowest = (int) floor(note_range_adjustment.get_value());
-	int highest;
-
-	if (sum == _range_sum_cache) {
-		//cerr << "cached" << endl;
-		highest = (int) floor(sum);
-	} else {
-		//cerr << "recalc" << endl;
-		highest = lowest + (int) floor(note_range_adjustment.get_page_size());
-		_range_sum_cache = sum;
-	}
-
-	if (lowest == _lowest_note && highest == _highest_note) {
-		return;
-	}
-
-	//cerr << "note range adjustment changed: " << lowest << " " << highest << endl;
-	//cerr << "  val=" << v_zoom_adjustment.get_value() << " page=" << v_zoom_adjustment.get_page_size() << " sum=" << v_zoom_adjustment.get_value() + v_zoom_adjustment.get_page_size() << endl;
-
-	apply_note_range (lowest, highest, true);
+	setup_note_lines ();
 }
 
 uint8_t
-MidiViewBackground::y_to_note (double y) const
+MidiViewBackground::y_to_note (int y) const
 {
-	int const n = ((contents_height() - y) / contents_height() * (double)contents_note_range())
-		+ lowest_note();
+	int const n = highest_note() - (floor ((double) y / note_height()));
 
 	if (n < 0) {
 		return 0;
@@ -127,27 +103,35 @@ MidiViewBackground::update_contents_height ()
 {
 	ViewBackground::update_contents_height ();
 
-	draw_note_lines ();
+	setup_note_lines ();
 	apply_note_range (lowest_note(), highest_note(), true);
 }
 
 void
-MidiViewBackground::draw_note_lines()
+MidiViewBackground::get_note_positions (std::vector<int>& numbers, std::vector<int>& pos, std::vector<int>& heights) const
+{
+	for (auto const & r : _note_lines->rects()) {
+		numbers.push_back (r.index);
+		pos.push_back (r.y0);
+		heights.push_back (r.height());
+	}
+}
+
+void
+MidiViewBackground::setup_note_lines()
 {
 	if (updates_suspended()) {
 		return;
 	}
 
-	double y;
-	double prev_y = 0.;
 	Gtkmm2ext::Color black = UIConfiguration::instance().color_mod ("piano roll black", "piano roll black");
 	Gtkmm2ext::Color white = UIConfiguration::instance().color_mod ("piano roll white", "piano roll white");
-	Gtkmm2ext::Color outline = UIConfiguration::instance().color ("piano roll black outline");
+	Gtkmm2ext::Color divider = UIConfiguration::instance().color ("piano roll black outline");
 	Gtkmm2ext::Color color;
 
-	ArdourCanvas::LineSet::ResetRAII lr (*_note_lines);
+	ArdourCanvas::RectSet::ResetRAII lr (*_note_lines);
 
-	if (contents_height() < 10 || note_height() < 3) {
+	if (contents_height() < 10 || note_height() < 2) {
 		/* context is too small for note lines, or there are too many */
 		return;
 	}
@@ -156,9 +140,14 @@ MidiViewBackground::draw_note_lines()
 	 * coordinate system in which y=0 is at the top
 	 */
 
-	for (int i = highest_note() + 1; i >= lowest_note(); --i) {
+	int h = note_height();
+	double y = 0;
 
-		y = floor (note_to_y (i));
+	for (int i = highest_note(); i >= lowest_note(); --i) {
+
+		if (i > 127) {
+			continue;
+		}
 
 		/* add a thicker line/bar which covers the entire vertical height of this note. */
 
@@ -172,48 +161,51 @@ MidiViewBackground::draw_note_lines()
 			break;
 		case 4:
 		case 11:
-			/* this is the line actually corresponding to the division between B & C and E & F */
-			_note_lines->add_coord (y, 1.0, outline);
+			/* this is the line corresponding to the division between B & C and E & F */
+			_note_lines->add_rect (i, ArdourCanvas::Rect (0., y, ArdourCanvas::COORD_MAX, y + 1.), divider);
 			/* fallthrough */
 		default:
 			color = white;
 			break;
 		}
 
-		double h = y - prev_y;
-		double middle = y + (h/2.0);
+		/* There's no clipping region trivially available for the note
+		 * lines, so make sure the last line doesn't draw "too tall"
+		 */
 
-		if (!fmod (h, 2.) && !fmod (middle, 1.)) {
-			middle += 0.5;
+		if (y + h > contents_height()) {
+			h = contents_height() - y;
 		}
 
-		if (middle >= 0 && h > 1.0) {
-			_note_lines->add_coord (middle, h, color);
-		}
+		_note_lines->add_rect (i, ArdourCanvas::Rect (0., y, ArdourCanvas::COORD_MAX, y + h), color);
 
-		prev_y = y;
+		y += h;
+
+		if (y >= contents_height()) {
+			break;
+		}
 	}
-
-	_note_lines->set_extent (ArdourCanvas::COORD_MAX);
 }
 
 void
 MidiViewBackground::set_note_visibility_range_style (VisibleNoteRange r)
 {
-	_visibility_note_range = r;
-
-	if (_visibility_note_range == FullRange) {
-		apply_note_range (0, 127, true);
+	if (r == UserRange) {
+		_visibility_note_range = UserRange;
+	} else if (r == ContentsRange) {
+		if (apply_note_range (_data_note_min, _data_note_max, true)) {
+			_visibility_note_range = ContentsRange;
+		}
 	} else {
-		apply_note_range (_data_note_min, _data_note_max, true);
+		if (apply_note_range (0, 127, true)) {
+			_visibility_note_range = FullRange;
+		}
 	}
 }
 
 void
 MidiViewBackground::maybe_extend_note_range (uint8_t note_num)
 {
-	_data_note_min = min (_data_note_min, note_num);
-	_data_note_max = max (_data_note_max, note_num);
 
 	bool changed = false;
 
@@ -239,21 +231,33 @@ MidiViewBackground::maybe_extend_note_range (uint8_t note_num)
 	}
 }
 
-void
-MidiViewBackground::maybe_apply_note_range (uint8_t lowest, uint8_t highest, bool to_children)
+bool
+MidiViewBackground::maybe_apply_note_range (uint8_t lowest, uint8_t highest, bool to_children, RangeCanMove can_move)
 {
 	if (note_range_set && _lowest_note <= lowest && _highest_note >= highest) {
 		/* already large enough */
-		return;
+		return false;
 	}
 
-	apply_note_range (lowest, highest, to_children);
+	return apply_note_range (lowest, highest, to_children, can_move);
 }
 
-void
-MidiViewBackground::apply_note_range (uint8_t lowest, uint8_t highest, bool to_children)
+bool
+MidiViewBackground::apply_note_range (uint8_t lowest, uint8_t highest, bool to_children, RangeCanMove can_move)
 {
+	if (contents_height() == 0) {
+		return false;
+	}
+
 	bool changed = false;
+
+	/* Enforce a 1 octave minimum */
+
+	if (highest - lowest < 12) {
+		int8_t mid = lowest + ((highest - lowest) / 2);
+		lowest = std::max (mid - 6, 0);
+		highest = lowest + 12;
+	}
 
 	if (_highest_note != highest) {
 		_highest_note = highest;
@@ -266,40 +270,65 @@ MidiViewBackground::apply_note_range (uint8_t lowest, uint8_t highest, bool to_c
 	}
 
 	if (note_range_set && !changed) {
-		return;
+		return false;
 	}
 
 	float uiscale = UIConfiguration::instance().get_ui_scale();
-	uiscale = expf (uiscale) / expf (1.f);
 
-	const int mnh = UIConfiguration::instance().get_max_note_height();
-	int const max_note_height = std::max<int> (mnh, mnh * uiscale);
-	int const range = _highest_note - _lowest_note;
+	int range = _highest_note - _lowest_note;
+	int apparent_note_height = (int) ceil ((double) contents_height() / range);
+	int nh = std::min ((int) (UIConfiguration::instance().get_max_note_height() * uiscale), apparent_note_height);
+	int additional_notes = 0;
 
-	int const available_note_range = floor (contents_height() / max_note_height);
-	int additional_notes = available_note_range - range;
+	if (nh < 1) {
+		/* range does not fit, so center on the data range */
+		nh = 1;
+		range = _data_note_max - _data_note_min;
+		int center = _data_note_min + (range /2);
+		highest = center + ((contents_height() / nh) / 2);
+		lowest = center - ((contents_height() / nh) / 2);
+	}
+
+	if (note_range_set) {
+		/* how many notes do we need to add or remove to adequately
+		 * fill contents_height() with note lines?
+		 */
+		additional_notes = (int) ceil ((contents_height() - (nh * range)) / (double) nh);
+	}
 
 	/* distribute additional notes to higher and lower ranges, clamp at 0 and 127 */
-	for (int i = 0; i < additional_notes; i++){
+	if (additional_notes > 0) {
+		for (int i = 0; i < additional_notes; i++){
 
-		if (i % 2 && _highest_note < 127){
-			_highest_note++;
+			if ((can_move & CanMoveTop) || (i % 2 && _highest_note < 127)) {
+				_highest_note++;
+			} else if ((can_move & CanMoveBottom) && (i % 2)) {
+				_lowest_note--;
+			} else if ((can_move & CanMoveBottom) && (_lowest_note > 0)) {
+				_lowest_note--;
+			} else if (can_move & CanMoveTop) {
+				_highest_note++;
+			}
 		}
-		else if (i % 2) {
-			_lowest_note--;
-		}
-		else if (_lowest_note > 0){
-			_lowest_note--;
-		}
-		else {
-			_highest_note++;
+	} else if (additional_notes < 0) {
+		for (int i = 0; i < -additional_notes; i++){
+
+			if ((can_move & CanMoveTop) && (i % 2 && _highest_note < 127)) {
+				_highest_note--;
+			} else if ((can_move & CanMoveBottom) && (i % 2)) {
+				_lowest_note++;
+			} else if ((can_move & CanMoveBottom) && (_lowest_note > 0)) {
+				_lowest_note++;
+			} else if ((can_move & CanMoveTop)) {
+				_highest_note--;
+			}
 		}
 	}
 
 	note_range_adjustment.set_page_size (_highest_note - _lowest_note);
 	note_range_adjustment.set_value (_lowest_note);
 
-	draw_note_lines();
+	setup_note_lines();
 
 	if (to_children) {
 		apply_note_range_to_children ();
@@ -308,22 +337,53 @@ MidiViewBackground::apply_note_range (uint8_t lowest, uint8_t highest, bool to_c
 	note_range_set = true;
 
 	NoteRangeChanged(); /* EMIT SIGNAL*/
+
+	return true;
 }
 
+void
+MidiViewBackground::note_range_adjustment_changed()
+{
+	double sum = note_range_adjustment.get_value() + note_range_adjustment.get_page_size();
+	int lowest = (int) floor(note_range_adjustment.get_value());
+	int highest;
 
+	if (sum == _range_sum_cache) {
+		//cerr << "cached" << endl;
+		highest = (int) floor(sum);
+	} else {
+		//cerr << "recalc" << endl;
+		highest = lowest + (int) floor(note_range_adjustment.get_page_size());
+		_range_sum_cache = sum;
+	}
+
+	if (lowest == _lowest_note && highest == _highest_note) {
+		return;
+	}
+
+	// cerr << "  val=" << v_zoom_adjustment.get_value() << " page=" << v_zoom_adjustment.get_page_size() << " sum=" << v_zoom_adjustment.get_value() + v_zoom_adjustment.get_page_size() << endl;
+
+	apply_note_range (lowest, highest, true);
+}
 
 bool
 MidiViewBackground::update_data_note_range (uint8_t min, uint8_t max)
 {
 	bool dirty = false;
-	if (min < _data_note_min) {
+
+	/* Note: pitches can come and go, so both min and max could be moving
+	 * up or down on any call.
+	 */
+
+	if (min != _data_note_min) {
 		_data_note_min = min;
 		dirty = true;
 	}
-	if (max > _data_note_max) {
+	if (max != _data_note_max) {
 		_data_note_max = max;
 		dirty = true;
 	}
+
 	return dirty;
 }
 

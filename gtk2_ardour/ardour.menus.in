@@ -5,29 +5,26 @@
       <menuitem action='Open'/>
       <menuitem action='Recent'/>
       <menuitem action='Close'/>
+
       <separator/>
+
       <menuitem action='Save'/>
-      <menuitem action='SaveAs'/>
-#ifndef WINDOWS /* can't move open files. */
       <menuitem action='Rename'/>
       <menuitem action='SnapshotStay'/>
       <menuitem action='SnapshotSwitch'/>
-#endif
-      <menuitem action='SaveTemplate'/>
-      <menuitem action='Archive'/>
+      <menuitem action='SaveAs'/>
+
       <separator/>
+
       <menuitem action='AddTrackBus'/>
-      <separator/>
       <menuitem action='addExistingAudioFiles'/>
-#ifdef PTFORMAT
-      <menuitem action='addExistingPTFiles'/>
-#endif
-      <!--menuitem action='importFromSession'/-->
+
+      <separator/>
 
       <menuitem action='OpenVideo'/>
       <menuitem action='CloseVideo'/>
 
-      <menuitem action='LoudnessAssistant'/>
+      <separator/>
 
       <menu name='Export' action='Export'>
         <menuitem action='QuickExport'/>
@@ -38,11 +35,23 @@
         <menuitem action='StemExport'/>
         <menuitem action='ExportVideo'/>
       </menu>
+
       <separator/>
+
+#ifdef PTFORMAT
+      <menuitem action='addExistingPTFiles'/>
+#endif
+      <menuitem action='ImportStrips'/>
+      <menuitem action='ExportStrips'/>
+      <menuitem action='SaveTemplate'/>
+
+      <separator/>
+
       <menuitem action='toggle-session-options-editor'/>
 #ifdef VAPOR
       <menuitem action='ToggleSurroundMaster'/>
 #endif
+      <menuitem action='LoudnessAssistant'/>
 
       <menu name='MonitorMenu' action='MonitorMenu'>
         <menuitem action='UseMonitorSection'/>
@@ -55,6 +64,7 @@
         <menuitem action='EditMetadata'/>
         <menuitem action='ImportMetadata'/>
       </menu>
+
       <menu name='Cleanup' action='Cleanup'>
         <menuitem action='bring-into-session'/>
         <menuitem action='CleanupPeakFiles'/>
@@ -62,6 +72,9 @@
         <menuitem action='CleanupUnusedRegions'/>
         <menuitem action='FlushWastebasket'/>
       </menu>
+
+      <menuitem action='Archive'/>
+
 #ifdef __APPLE__
       <menuitem action='toggle-about'/>
 #endif
@@ -186,8 +199,8 @@
       <menuitem action='ToggleAutoPlay'/>
       <menuitem action='ToggleAutoReturn'/>
       <menuitem action='ToggleClick'/>
-      <menuitem action='toggle-follow-playhead'/>
-      <menuitem action='toggle-stationary-playhead'/>
+      <menuitem action='EditorEditing/toggle-follow-playhead'/>
+      <menuitem action='EditorEditing/toggle-stationary-playhead'/>
       <menuitem action='ToggleFollowEdits'/>
       <menuitem action='ToggleExternalSync'/>
       <menuitem action='panic'/>
@@ -195,15 +208,15 @@
     </menu>
 
     <menu name='Edit' action='Edit'>
-      <menuitem action='undo'/>
-      <menuitem action='redo'/>
+      <menuitem action='EditorEditing/undo'/>
+      <menuitem action='EditorEditing/redo'/>
       <separator/>
       <menuitem action='undo-last-selection-op'/>
       <menuitem action='redo-last-selection-op'/>
       <separator/>
-      <menuitem action='editor-cut'/>
-      <menuitem action='editor-copy'/>
-      <menuitem action='editor-paste'/>
+      <menuitem action='EditorEditing/editor-cut'/>
+      <menuitem action='EditorEditing/editor-copy'/>
+      <menuitem action='EditorEditing/editor-paste'/>
       <separator/>
       <menuitem action='cut-paste-section'/>
       <menuitem action='copy-paste-section'/>
@@ -241,7 +254,7 @@
         <menuitem action='select-prev-route'/>
       </menu>
       <separator/>
-      <menuitem action='editor-delete'/>
+      <menuitem action='EditorEditing/editor-delete'/>
       <menuitem action='editor-crop'/>
       <menuitem action='split-region'/>
       <menu action="SeparateMenu">
@@ -294,6 +307,16 @@
       </menu>
       <menuitem action='cycle-snap-mode'/>
       <menu name='GridChoice' action='GridChoice'>
+        <menu name='GlobalQuantize' action='GlobalQuantize'>
+        <menuitem action='set-global-quantization-1-bar'/>
+	<menuitem action='set-global-quantization-quarter-note'/>
+	<menuitem action='set-global-quantization-eighth-note'/>
+	<menuitem action='set-global-quantization-sixteenth-note'/>
+	<menuitem action='set-global-quantization-thirtysecond-note'/>
+	<menuitem action='set-global-quantization-sixtyfourth-note'/>
+	<menuitem action='set-global-quantization-onetwentyeighth-note'/>
+        </menu>
+        <separator/>
         <menuitem action='prev-grid-choice'/>
         <menuitem action='next-grid-choice'/>
         <separator/>
@@ -362,10 +385,11 @@
       <separator/>
       <menuitem action='loop-region'/>
       <menuitem action='rename-region'/>
-      <menuitem action='show-region-properties'/>
       <menuitem action='loudness-analyze-region'/>
       <menuitem action='spectral-analyze-region'/>
       <menu action='RegionMenuEdit'>
+        <menuitem action='edit-region-dedicated-window'/>
+        <separator/>
 #ifndef MIXBUS
         <menuitem action='combine-regions'/>
         <menuitem action='uncombine-regions'/>
@@ -411,14 +435,22 @@
       <menu action='RegionMenuPosition'>
         <menuitem action='naturalize-region'/>
         <menuitem action='snap-regions-to-grid'/>
+        <separator/>
+        <menuitem action='align-regions-start'/>
+        <menuitem action='align-regions-end'/>
+        <menuitem action='align-regions-sync'/>
+        <menuitem action='align-regions-start-relative'/>
+        <separator/>
         <menuitem action='toggle-region-lock'/>
         <menuitem action='toggle-region-video-lock'/>
         <menuitem action='set-region-sync-position'/>
         <menuitem action='remove-region-sync'/>
+        <separator/>
         <menuitem action='nudge-forward'/>
         <menuitem action='nudge-backward'/>
         <menuitem action='nudge-forward-by-capture-offset'/>
         <menuitem action='nudge-backward-by-capture-offset'/>
+        <separator/>
         <menuitem action='sequence-regions'/>
       </menu>
       <menu action='RegionMenuMarkers'>
@@ -473,6 +505,7 @@
               <menuitem action='lua-manage-tracks'/>
       </menu>
 #endif
+      <menuitem action='find-and-display-stripable'/>
       <menuitem action='duplicate-routes'/>
       <separator/>
       <menuitem action='track-record-enable-toggle'/>
@@ -567,13 +600,13 @@
         <menuitem action='shrink-tracks'/>
       </menu>
       <menu name='ZoomFocus' action='ZoomFocus'>
-        <menuitem action='zoom-focus-left'/>
-        <menuitem action='zoom-focus-right'/>
-        <menuitem action='zoom-focus-center'/>
-        <menuitem action='zoom-focus-playhead'/>
-        <menuitem action='zoom-focus-mouse'/>
-        <menuitem action='zoom-focus-edit'/>
-        <menuitem action='cycle-zoom-focus'/>
+        <menuitem action='EditorZoom/zoom-focus-left'/>
+        <menuitem action='EditorZoom/zoom-focus-right'/>
+        <menuitem action='EditorZoom/zoom-focus-center'/>
+        <menuitem action='EditorZoom/zoom-focus-playhead'/>
+        <menuitem action='EditorZoom/zoom-focus-mouse'/>
+        <menuitem action='EditorZoom/zoom-focus-edit'/>
+        <menuitem action='EditorZoom/cycle-zoom-focus'/>
       </menu>
       <menu action="ScrollMenu">
         <menuitem action='scroll-tracks-down'/>
@@ -625,6 +658,7 @@
 
       <menuitem action='show-editor-mixer'/>
       <menuitem action='show-editor-list'/>
+      <menuitem action='show-editor-props'/>
 
       <menuitem action='ToggleSummary'/>
       <menuitem action='ToggleGroupTabs'/>
@@ -635,12 +669,9 @@
       <menuitem action='ToggleTriggerProps'/>
 
       <separator/>
-      <menuitem action='ToggleMixerStrip'/>
-#ifdef MIXBUS
-      <menuitem action='ToggleMixerProps'/>
-#endif
       <menuitem action='ToggleMixerList'/>
 #ifdef MIXBUS
+      <menuitem action='ToggleMixerProps'/>
       <menuitem action='ToggleMixbusPane'/>
 #endif
       <menuitem action='ToggleVCAPane'/>
@@ -687,8 +718,9 @@
         <menuitem action='attach-preferences'/>
         <menuitem action='detach-preferences'/>
       </menu>
-      <!-- Common Ardour Widows (all toggle) !-->
+      <!-- Common Ardour Windows (all toggle) !-->
       <menuitem action='toggle-meterbridge'/>
+      <menuitem action='toggle-rtawindow'/>
       <menuitem action='toggle-locations'/>
       <menuitem action='toggle-big-clock'/>
       <menuitem action='toggle-big-transport'/>
@@ -717,10 +749,6 @@
       <menuitem action='toggle-plugin-manager'/>
 #ifndef MIXBUS
       <menuitem action='toggle-io-plugins'/>
-#endif
-#ifdef MIXBUS
-      <separator/>
-      <menuitem action='license-manager'/>
 #endif
 
       <separator/><!-- Misc Configuration !-->
@@ -898,8 +926,7 @@
     <separator/>
     <menuitem action='loop-region'/>
     <menuitem action='rename-region'/>
-    <menuitem action='show-region-properties'/>
-    <menuitem action='edit-region-pianoroll-window'/>
+    <menuitem action='edit-region-dedicated-window'/>
     <menu action='RegionMenuEdit'>
       <menuitem action='combine-regions'/>
       <menuitem action='uncombine-regions'/>

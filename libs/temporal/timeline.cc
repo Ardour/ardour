@@ -664,7 +664,7 @@ timepos_t::earlier (Temporal::BBT_Offset const & offset) const
 	TempoMap::SharedPtr tm (TempoMap::use());
 
 	if (is_superclock()) {
-		return timepos_t (tm->superclock_at (BBT_Argument (this->superclocks(), tm->bbt_walk (BBT_Argument (this->superclocks(), tm->bbt_at (*this)), -offset))));
+		return timepos_t::from_superclock (tm->superclock_at (tm->bbt_walk (BBT_Argument (this->superclocks(), tm->bbt_at (*this)), -offset)));
 	}
 
 	return timepos_t (tm->bbtwalk_to_quarters (beats(), -offset));
@@ -778,7 +778,8 @@ timepos_t::operator+= (Temporal::BBT_Offset const & offset)
 {
 	TempoMap::SharedPtr tm (TempoMap::use());
 	if (is_beats()) {
-		v = build (true, tm->bbtwalk_to_quarters (beats(), offset).to_ticks());
+		Temporal::Beats r = tm->quarters_at (tm->bbt_walk (tm->bbt_at (beats()), offset));
+		v = build (true, r.to_ticks());
 	} else {
 		v = build (false, tm->superclock_at (tm->bbt_walk (BBT_Argument (this->superclocks(), tm->bbt_at (*this)), offset)));
 	}

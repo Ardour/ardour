@@ -41,6 +41,7 @@
 #include <ytkmm/table.h>
 #include <ytkmm/treestore.h>
 
+#include "gtkmm2ext/cell_renderer_pixbuf_multi.h"
 #include "gtkmm2ext/utils.h"
 
 #include "widgets/tooltips.h"
@@ -58,6 +59,7 @@
 #include "plugin_utils.h"
 #include "gui_thread.h"
 #include "ui_config.h"
+#include "utils.h"
 
 #include "pbd/i18n.h"
 
@@ -94,7 +96,26 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 
 	plugin_model = Gtk::ListStore::create (plugin_columns);
 	plugin_display.set_model (plugin_model);
-	plugin_display.append_column (S_("Favorite|Fav"), plugin_columns.favorite);
+
+	{
+		Gtkmm2ext::CellRendererPixbufMulti* cell;
+		Gtk::TreeViewColumn*                tvc;
+
+		cell = manage (new Gtkmm2ext::CellRendererPixbufMulti ());
+		cell->signal_changed().connect (sigc::mem_fun (*this, &PluginSelector::favorite_changed));
+		cell->set_pixbuf (Gtkmm2ext::Off, ARDOUR_UI_UTILS::get_icon ("favorite-no"));
+		cell->set_pixbuf (Gtkmm2ext::ExplicitActive, ARDOUR_UI_UTILS::get_icon ("favorite-yes"));
+
+		tvc = manage (new Gtk::TreeViewColumn (S_("Favorite|Fav"), *cell));
+		tvc->add_attribute (cell->property_state (), plugin_columns.favorite);
+		tvc->set_sizing (Gtk::TREE_VIEW_COLUMN_GROW_ONLY);
+		tvc->set_alignment (Gtk::ALIGN_CENTER);
+		tvc->set_expand (false);
+		tvc->set_resizable (false);
+
+		plugin_display.append_column (*tvc);
+	}
+
 	plugin_display.append_column (_("Name"), plugin_columns.name);
 	plugin_display.append_column (_("Tags"), plugin_columns.tags);
 	plugin_display.append_column (_("Creator"), plugin_columns.creator);
@@ -114,10 +135,6 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	plugin_display.set_name("PluginSelectorDisplay");
 	plugin_display.signal_row_activated().connect_notify (sigc::mem_fun(*this, &PluginSelector::row_activated));
 	plugin_display.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &PluginSelector::display_selection_changed));
-
-	CellRendererToggle* fav_cell = dynamic_cast<CellRendererToggle*>(plugin_display.get_column_cell_renderer (0));
-	fav_cell->property_activatable() = true;
-	fav_cell->signal_toggled().connect (sigc::mem_fun (*this, &PluginSelector::favorite_changed));
 
 	scroller.set_border_width(10);
 	scroller.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
@@ -367,16 +384,32 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 		return false;
 	}
 
+	bool search_name = _search_name_checkbox->get_active();
+	bool search_tags = _search_tags_checkbox->get_active();
+	bool search_creator = false;
+
+	if (!search_name && !search_tags) {
+		search_name = true;
+		search_tags = true;
+		search_creator = true;
+	}
+
 	if (!searchstr.empty()) {
 
-		if (_search_name_checkbox->get_active()) { /* name contains */
+		if (search_name) {
 			std::string compstr = info->name;
 			setup_search_string (compstr);
 			maybe_show |= match_search_strings (compstr, searchstr);
 		}
 
-		if (_search_tags_checkbox->get_active()) { /* tag contains */
+		if (search_tags) {
 			std::string compstr = manager.get_tags_as_string (info);
+			setup_search_string (compstr);
+			maybe_show |= match_search_strings (compstr, searchstr);
+		}
+
+		if (search_creator) {
+			std::string compstr = info->creator;
 			setup_search_string (compstr);
 			maybe_show |= match_search_strings (compstr, searchstr);
 		}
@@ -914,6 +947,9 @@ struct PluginMenuCompareByCreator {
 Gtk::Menu*
 PluginSelector::plugin_menu()
 {
+	if (_plugin_menu->get_attach_widget ()) {
+		_plugin_menu->detach ();
+	}
 	return _plugin_menu;
 }
 

@@ -71,6 +71,7 @@ class Source;
 class AudioSource;
 class GraphNode;
 class Route;
+class RouteGroup;
 class Region;
 class Playlist;
 class Stripable;
@@ -103,6 +104,8 @@ typedef std::map<std::shared_ptr<ARDOUR::Region>,AudioIntervalResult> AudioInter
 
 typedef std::list<std::shared_ptr<Region> > RegionList;
 typedef std::set<std::shared_ptr<Playlist> > PlaylistSet;
+typedef std::list<std::shared_ptr<RouteGroup>> RouteGroupList;
+	
 
 struct IOChange {
 
@@ -753,12 +756,14 @@ enum AppleNSGLViewMode {
  */
 struct RouteProcessorChange {
 	enum Type {
-		NoProcessorChange = 0x0,
-		MeterPointChange  = 0x1,
-		RealTimeChange    = 0x2,
-		GeneralChange     = 0x4,
-		SendReturnChange  = 0x8,
-		CustomPinChange   = 0x10
+		NoProcessorChange   = 0x00,
+		MeterPointChange    = 0x01,
+		RealTimeChange      = 0x02,
+		GeneralChange       = 0x04,
+		SendReturnChange    = 0x08,
+		CustomPinChange     = 0x10,
+		ParameterNameChange = 0x20,
+		PortNameChange      = 0x40
 	};
 
 	RouteProcessorChange () : type (GeneralChange), meter_visibly_changed (true)
@@ -1002,6 +1007,14 @@ enum RecordState {
 	Recording = 2
 };
 
+
+/* compare to IEditController */
+enum VST3KnobMode {
+	VST3KnobPluginDefault = -1,
+	VST3KnobCircularMode = 0,
+	VST3KnobRelativCircularMode,
+	VST3KnobLinearMode
+};
 
 } // namespace ARDOUR
 

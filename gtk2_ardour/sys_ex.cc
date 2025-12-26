@@ -55,7 +55,7 @@ SysEx::SysEx (
 
 SysEx::~SysEx()
 {
-	/* _flag is deleted by the canvas container/parent it is placed in */
+	delete _flag;
 }
 
 bool

@@ -24,18 +24,25 @@
 namespace ARDOUR {
 
 	struct TimeFXRequest : public InterThreadInfo {
+
+	enum Algorithm {
+		Rubberband,
+		StaffPad,
+		SoundTouch,
+	};
+
 		TimeFXRequest()
-			: time_fraction(0,1)
+			: algorithm (Rubberband)
+			, time_fraction(0,1)
 			, pitch_fraction(0)
-			, use_soundtouch(false)
 			, quick_seek(false)
 			, antialias(false)
 			, opts(0) {}
 
+		Algorithm algorithm;
 		Temporal::ratio_t time_fraction;
 		float pitch_fraction;
 		/* SoundTouch */
-		bool use_soundtouch;
 		bool  quick_seek;
 		bool  antialias;
 		/* RubberBand */

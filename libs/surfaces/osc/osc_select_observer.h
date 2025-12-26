@@ -104,7 +104,7 @@ class OSCSelectObserver
 	void name_changed (const PBD::PropertyChange& what_changed);
 	void panner_changed ();
 	void group_name ();
-	void group_sharing (ARDOUR::RouteGroup *rg_c);
+	void group_sharing (std::shared_ptr<ARDOUR::RouteGroup> rg_c);
 	void comment_changed ();
 	void pi_changed (PBD::PropertyChange const&);
 	void change_message (std::string path, std::shared_ptr<PBD::Controllable> controllable);

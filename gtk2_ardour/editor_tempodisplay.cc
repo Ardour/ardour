@@ -363,7 +363,7 @@ Editor::compute_current_bbt_points (Temporal::TempoMapPoints& grid, samplepos_t 
 	const samplecnt_t sr (_session->sample_rate());
 
 	float divisor;
-	switch (_grid_type) {
+	switch (grid_type()) {
 		case GridTypeBeatDiv3:
 		case GridTypeBeatDiv6:
 		case GridTypeBeatDiv12:
@@ -576,7 +576,7 @@ Editor::edit_meter_section (Temporal::MeterPoint& section)
 		return;
 	}
 
-	Temporal::TempoMetric tm (TempoMap::use()->metric_at (timepos_t (section.sample(TEMPORAL_SAMPLE_RATE))));
+	Temporal::TempoMetric tm (TempoMap::use()->metric_at (timepos_t::from_superclock (section.sclock())));
 	Temporal::MeterPoint const * mpp (TempoMap::use()->previous_meter (tm.meter()));
 
 	double bpb = meter_dialog.get_bpb ();
@@ -669,7 +669,7 @@ Editor::edit_tempo_section (TempoPoint& section)
 		return;
 	}
 
-	Temporal::TempoMetric tm (TempoMap::use()->metric_at (timepos_t (section.sample (TEMPORAL_SAMPLE_RATE))));
+	Temporal::TempoMetric tm (TempoMap::use()->metric_at (timepos_t::from_superclock (section.sclock())));
 	Temporal::TempoPoint const * tpp (TempoMap::use()->previous_tempo (tm.tempo()));
 
 	double bpm = tempo_dialog.get_bpm ();

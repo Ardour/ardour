@@ -53,6 +53,8 @@ function factory () return function ()
 		print ("Marker:", m:name (), m:position(), m:_type())
 	end
 
+	print ("AutomationList/Lines:", sel.lines:size(), "Control Points:", sel.points:size())
+
 	----------------------------------------------------------
 	-- The total time extents of all selected regions and ranges
 	local ok, ext = Editor:get_selection_extents (Temporal.timepos_t(0), Temporal.timepos_t(0))

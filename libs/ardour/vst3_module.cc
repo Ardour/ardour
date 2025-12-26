@@ -56,10 +56,8 @@ using namespace ARDOUR;
 class VST3MacModule : public VST3PluginModule
 {
 public:
-	VST3MacModule (std::string const& module_path)
+	VST3MacModule (std::string const& path)
 	{
-		std::string path = Glib::path_get_dirname (module_path); // Contents
-		path = Glib::path_get_dirname (path); // theVST.vst3
 #ifndef NDEBUG
 		_path = path;
 #endif

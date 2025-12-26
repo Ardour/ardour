@@ -245,6 +245,9 @@ protected:
 
 	virtual BackendPort* port_factory (std::string const& name, ARDOUR::DataType dt, ARDOUR::PortFlags flags) = 0;
 
+	XMLNode* get_state () const;
+	int      set_state (XMLNode const&, int version);
+
 #ifndef NDEBUG
 	void list_ports () const;
 #endif

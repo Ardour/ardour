@@ -111,8 +111,8 @@ TempoDialog::init (const Temporal::BBT_Time& when, double bpm, double end_bpm, d
 
 	note_types.insert (make_pair (_("whole"), 1));
 	strings.push_back (_("whole"));
-	note_types.insert (make_pair (_("second"), 2));
-	strings.push_back (_("second"));
+	note_types.insert (make_pair (_("half"), 2));
+	strings.push_back (_("half"));
 	note_types.insert (make_pair (_("third"), 3));
 	strings.push_back (_("third"));
 	note_types.insert (make_pair (_("quarter"), 4));

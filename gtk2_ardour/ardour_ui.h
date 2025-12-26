@@ -89,6 +89,7 @@
 #include "ardour_window.h"
 #include "editing.h"
 #include "enums.h"
+#include "region_ui_settings.h"
 #include "shuttle_control.h"
 #include "startup_fsm.h"
 #include "transport_control.h"
@@ -117,6 +118,7 @@
 #include "rc_option_editor.h"
 #include "route_dialogs.h"
 #include "route_params_ui.h"
+#include "rta_window.h"
 #include "session_option_editor.h"
 #include "speaker_dialog.h"
 #include "transport_masters_dialog.h"
@@ -144,6 +146,7 @@ class IdleOMeter;
 class IOPluginWindow;
 class PluginDSPLoadWindow;
 class PluginManagerUI;
+class RTAWindow;
 class DspStatisticsWindow;
 class TransportMastersWindow;
 class VirtualKeyboardWindow;
@@ -236,6 +239,7 @@ public:
 
 	RCOptionEditor* get_rc_option_editor() { return rc_option_editor; }
 	void show_tabbable (ArdourWidgets::Tabbable*);
+	bool tabbable_visibility_button_press (GdkEventButton* ev, std::string const& tabbable_name);
 
 	enum ArdourLogLevel {
 		LogLevelNone = 0,
@@ -252,6 +256,8 @@ public:
 	void build_session_from_dialog (SessionDialog&, std::string const& session_name, std::string const& session_path, std::string const& session_template, Temporal::TimeDomain domain);
 	bool ask_about_loading_existing_session (const std::string& session_path);
 	int load_session_from_startup_fsm ();
+
+	bool loading_session () const { return _loading_session; }
 
 	/// @return true if session was successfully unloaded.
 	int unload_session (bool hide_stuff = false, bool force_unload = false);
@@ -285,6 +291,8 @@ public:
 	void toggle_mixer_space();
 	void toggle_keep_tearoffs();
 	void show_plugin_manager();
+	void show_lua_window();
+	void show_realtime_analyzer();
 
 	void reset_focus (Gtk::Widget*);
 
@@ -294,6 +302,7 @@ public:
 	 *  (either RapidScreenUpdate || SuperRapidScreenUpdate - user-config)
 	 */
 	static sigc::signal<void, Temporal::timepos_t> Clock;
+	static unsigned int clock_signal_interval ();
 
 	static void close_all_dialogs () { CloseAllDialogs(); }
 	static sigc::signal<void> CloseAllDialogs;
@@ -352,10 +361,10 @@ public:
 	void flush_videotimeline_cache (bool localcacheonly=false);
 	void export_video (bool range = false);
 
-	void session_add_audio_route (bool, int32_t, int32_t, ARDOUR::TrackMode, ARDOUR::RouteGroup *,
+	void session_add_audio_route (bool, int32_t, int32_t, ARDOUR::TrackMode, std::shared_ptr<ARDOUR::RouteGroup>,
 	                              uint32_t, std::string const &, bool, ARDOUR::PresentationInfo::order_t order, bool trigger_visibility);
 
-	void session_add_midi_route (bool, ARDOUR::RouteGroup *, uint32_t, std::string const &, bool,
+	void session_add_midi_route (bool, std::shared_ptr<ARDOUR::RouteGroup>, uint32_t, std::string const &, bool,
 	                             ARDOUR::PluginInfoPtr, ARDOUR::Plugin::PresetRecord*,
 	                             ARDOUR::PresentationInfo::order_t order, bool trigger_visibility);
 
@@ -413,6 +422,8 @@ public:
 
 	void gui_idle_handler ();
 
+	RegionUISettingsManager region_ui_settings_manager;
+
 protected:
 	friend class PublicEditor;
 
@@ -434,6 +445,7 @@ protected:
 	void reenable_hide_loop_punch_ruler_if_appropriate ();
 	void toggle_auto_return ();
 	void toggle_click ();
+	void toggle_click_on_rec ();
 	void toggle_session_auto_loop ();
 	void toggle_rc_options_window ();
 	void toggle_session_options_window ();
@@ -634,6 +646,7 @@ private:
 	void transport_ffwd_rewind (bool fwd);
 	void transport_loop ();
 	void toggle_roll (bool with_abort, bool roll_out_of_bounded_mode);
+	void spacebar_action (bool with_abort, bool roll_out_of_bounded_mode);
 	bool trx_record_enable_all_tracks ();
 
 	bool _session_is_new;
@@ -657,6 +670,8 @@ private:
 	void save_session_as ();
 	void archive_session ();
 	void rename_session (bool for_unnamed);
+	void import_strips ();
+	void export_strips ();
 
 	int         create_mixer ();
 	int         create_editor ();
@@ -700,6 +715,7 @@ private:
 	WM::ProxyWithConstructor<GlobalPortMatrixWindow> midi_port_matrix;
 	WM::ProxyWithConstructor<KeyEditor> key_editor;
 	WM::ProxyWithConstructor<LuaWindow> luawindow;
+	WM::ProxyWithConstructor<RTAWindow> rtawindow;
 
 	/* creator methods */
 
@@ -713,6 +729,7 @@ private:
 	GlobalPortMatrixWindow* create_global_port_matrix (ARDOUR::DataType);
 	KeyEditor*              create_key_editor ();
 	LuaWindow*              create_luawindow ();
+	RTAWindow*              create_rtawindow ();
 
 	ARDOUR::SystemExec *video_server_process;
 
@@ -752,6 +769,8 @@ private:
 	void disk_speed_dialog_gone (int ignored_response, Gtk::MessageDialog*);
 	void disk_overrun_handler ();
 	void disk_underrun_handler ();
+	bool have_mmcss_error_dialog_displayed;
+	void mmcss_error_handler ();
 
 	void session_format_mismatch (std::string, std::string);
 
@@ -850,8 +869,6 @@ private:
 	bool main_window_delete_event (GdkEventAny*);
 	bool idle_ask_about_quit ();
 
-	bool tabbable_visibility_button_press (GdkEventButton* ev, std::string const& tabbable_name);
-
 	void step_up_through_tabs ();
 	void step_down_through_tabs ();
 
@@ -860,6 +877,8 @@ private:
 
 	void ask_about_scratch_deletion ();
 	bool nsm_first_session_opened;
+
+	bool _loading_session;
 
 	PBD::ScopedConnectionList clock_state_connection;
 };

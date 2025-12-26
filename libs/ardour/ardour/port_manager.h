@@ -146,7 +146,7 @@ public:
 	int disconnect (std::shared_ptr<Port>);
 	int disconnect (std::string const&);
 	int reestablish_ports ();
-	int reconnect_ports ();
+	int reconnect_ports (Session* s = nullptr);
 
 	bool connected (const std::string&);
 	bool physically_connected (const std::string&);

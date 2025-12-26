@@ -11,7 +11,7 @@
   #define LIBZCONVOLVER_DLL_LOCAL  __attribute__ ((visibility ("hidden")))
 #endif
 
-#ifdef LIBZCONVOLVER_STATIC // libzita-convolver is a DLL
+#ifdef LIBZCONVOLVER_STATIC // libzita-convolver is not a DLL
   #define LIBZCONVOLVER_API
   #define LIBZCONVOLVER_LOCAL
   #define LIBZCONVOLVER_TEMPLATE_API

@@ -80,22 +80,59 @@ ArdourDropdown::on_button_press_event (GdkEventButton* ev)
 }
 
 void
-ArdourDropdown::set_active (std::string const& text)
+ArdourDropdown::set_active (int c)
+{
+	for (auto& i : _menu.items()) {
+		if (0 == c--) {
+			_menu.set_active (c);
+			_menu.activate_item (i);
+			break;
+		}
+	}
+}
+
+int
+ArdourDropdown::get_active_row_number () const
 {
 	const MenuItem* current_active = _menu.get_active();
-	if (current_active && current_active->get_label() == text) {
+
+	if (!current_active) {
+		return -1;
+	}
+
+	int c = 0;
+	for (auto const& i : _menu.items ()) {
+		if (&i == current_active) {
+			return c;
+		}
+		++c;
+	}
+	return -1;
+}
+
+void
+ArdourDropdown::set_active (std::string const& text)
+{
+	MenuItem const*    current_active  = _menu.get_active();
+	LblMenuItem const* current_lblitem = dynamic_cast<LblMenuItem const*> (current_active);
+
+	if ((current_lblitem && current_lblitem->label() == text) || (current_active && current_active->get_label() == text)) {
 		set_text (text);
 		return;
 	}
+
 	using namespace Menu_Helpers;
-	const MenuList& items = _menu.items ();
 	int c = 0;
-	for (MenuList::const_iterator i = items.begin(); i != items.end(); ++i, ++c) {
-		if (i->get_label() == text) {
-			_menu.set_active(c);
-			_menu.activate_item(*i);
+	for (auto& i : _menu.items()) {
+		LblMenuItem const* m = dynamic_cast<LblMenuItem const*> (&i);
+		if ((m && (m->label() == text || m->menutext() == text))
+		    ||
+		    (!m && i.get_label() == text)) {
+			_menu.set_active (c);
+			_menu.activate_item (i);
 			break;
 		}
+		++c;
 	}
 	set_text (text);
 	StateChanged (); /* EMIT SIGNAL */
@@ -169,7 +206,14 @@ ArdourDropdown::clear_items ()
 }
 
 void
-ArdourDropdown::AddMenuElem (Menu_Helpers::Element e)
+ArdourDropdown::add_separator ()
+{
+	using namespace Menu_Helpers;
+	add_menu_elem (SeparatorElem());
+}
+
+void
+ArdourDropdown::add_menu_elem (Menu_Helpers::Element e)
 {
 	using namespace Menu_Helpers;
 
@@ -187,11 +231,23 @@ ArdourDropdown::disable_scrolling()
 void
 ArdourDropdown::append_text_item (std::string const& text) {
 	using namespace Gtkmm2ext;
-	AddMenuElem (MenuElemNoMnemonic (text, sigc::bind (sigc::mem_fun (*this, &ArdourDropdown::default_text_handler), text)));
+	add_menu_elem (MenuElemNoMnemonic (text, sigc::bind (sigc::mem_fun (*this, &ArdourDropdown::default_text_handler), text)));
 }
 
 void
 ArdourDropdown::default_text_handler (std::string const& text) {
 	set_text (text);
 	StateChanged (); /* EMIT SIGNAL */
+}
+
+void
+ArdourDropdown::append (Glib::RefPtr<Action> action)
+{
+	_menu.items().push_back (LblMenuElement (action));
+}
+
+void
+ArdourDropdown::append (Gtk::Menu& submenu, Glib::RefPtr<Action> action)
+{
+	submenu.items().push_back (LblMenuElement (action));
 }

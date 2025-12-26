@@ -32,7 +32,6 @@
 
 #include <fcntl.h>
 #include <signal.h>
-#include <unistd.h>
 #include <cerrno>
 #include <iostream>
 #include <cmath>

@@ -37,6 +37,7 @@ def configure(conf):
     autowaf.check_pkg(conf, 'gio-2.0', uselib_store='GIO', atleast_version='2.2', mandatory=True)
     autowaf.check_pkg(conf, 'gobject-2.0', uselib_store='GOBJECT', mandatory=True)
     autowaf.check_pkg(conf, 'libpng', uselib_store='LIBPNG', mandatory=True)
+    conf.check(header_name='unistd.h', define_name='HAVE_UNISTD_H',mandatory=False)
 
 def build(bld):
     obj = bld.shlib(features = 'c cshlib', source=libydkpixbuf_sources)

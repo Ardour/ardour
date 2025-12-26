@@ -156,7 +156,6 @@ public:
 
 	/* import dialogs -> ardour-ui ?! */
 	virtual void external_audio_dialog () = 0;
-	virtual void session_import_dialog () = 0;
 
 	virtual void new_region_from_selection () = 0;
 	virtual void separate_region_from_selection () = 0;
@@ -241,10 +240,10 @@ public:
 	/** Open stem export dialog */
 	virtual void stem_export () = 0;
 
-	/** Open export dialog with current selection pre-selected */
+	/** Open export dialog with current selection preselected */
 	virtual void export_selection () = 0;
 
-	/** Open export dialog with current range pre-selected */
+	/** Open export dialog with current range preselected */
 	virtual void export_range () = 0;
 
 	/** Open Simple Export Dialog */
@@ -279,14 +278,9 @@ public:
 	virtual void hide_track_in_display (TimeAxisView* tv, bool apply_to_selection = false) = 0;
 	virtual void show_track_in_display (TimeAxisView* tv, bool move_into_view = false) = 0;
 
-	virtual void set_stationary_playhead (bool yn) = 0;
-	virtual void toggle_stationary_playhead () = 0;
-	virtual bool stationary_playhead() const = 0;
-
 	virtual void toggle_cue_behavior () = 0;
 
 	/** @return true if the playhead is currently being dragged, otherwise false */
-	virtual bool dragging_playhead () const = 0;
 	virtual samplepos_t leftmost_sample() const = 0;
 	virtual samplecnt_t current_page_samples() const = 0;
 	virtual double visible_canvas_height () const = 0;
@@ -398,8 +392,6 @@ public:
 	virtual void set_current_trimmable (std::shared_ptr<ARDOUR::Trimmable>) = 0;
 	virtual void set_current_movable (std::shared_ptr<ARDOUR::Movable>) = 0;
 
-	virtual void center_screen (samplepos_t) = 0;
-
 	virtual TrackViewList const & get_track_views () const = 0;
 
 	virtual MixerStrip* get_current_mixer_strip () const = 0;
@@ -462,6 +454,8 @@ protected:
 	virtual void _commit_tempo_map_edit (Temporal::TempoMap::WritableSharedPtr&, bool with_update) = 0;
 
 	std::atomic<int> _suspend_route_redisplay_counter;
+
+	Gtk::Window* transient_parent () { return current_toplevel (); }
 };
 
 class DisplaySuspender {

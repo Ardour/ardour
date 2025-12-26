@@ -40,7 +40,7 @@ ArdourWindow::ArdourWindow (string title)
 {
 	set_title (title);
 	init ();
-	set_position (Gtk::WIN_POS_MOUSE);
+	set_position (UIConfiguration::instance().get_default_window_position());
 }
 
 ArdourWindow::ArdourWindow (Gtk::Window& parent, string title)

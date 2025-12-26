@@ -286,7 +286,6 @@ MidiRegionView::add_ghost (TimeAxisView& tv)
 	ghost->set_height ();
 	ghost->set_duration (_region->length().samples() / samples_per_pixel);
 
-	std::cerr << "Adding " << _events.size() << " notes to ghost\n";
 	for (auto const & i : _events) {
 		ghost->add_note (i.second);
 	}
@@ -308,7 +307,20 @@ MidiRegionView::canvas_group_event(GdkEvent* ev)
 		return RegionView::canvas_group_event (ev);
 	}
 
-	return MidiView::midi_canvas_group_event (ev);
+	/* Let MidiView do its thing */
+
+	if (MidiView::midi_canvas_group_event (ev)) {
+
+		switch (ev->type) {
+		case GDK_ENTER_NOTIFY:
+		case GDK_LEAVE_NOTIFY:
+			break;
+		default:
+			return true;
+		}
+	}
+
+	return _editing_context.canvas_bg_event (ev, get_canvas_group());
 }
 
 bool
@@ -387,19 +399,25 @@ MidiRegionView::scroll (GdkEventScroll* ev)
 		return false;
 	}
 
+	/* Note: it is hard to select regions in draw mode, which makes the
+	 * requirement that the region is selected before we do MIDI scrolling
+	 * a bit burdensome. However, removing it means that in draw mode,
+	 * vertical scroll will behave in even less desirable ways.
+	 */
+
 	if (!_editing_context.get_selection().selected (this)) {
 		return false;
 	}
 
-	if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier) ||
-	    Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
-		/* XXX: bit of a hack; allow PrimaryModifier+TertiaryModifier scroll
+	if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+		/* XXX: bit of a hack; allow PrimaryModifier scroll
 		 * through so that it still works for navigation and zoom.
 		 */
 		return false;
 	}
 
-	if (_selection.empty()) {
+	if (_selection.empty() || !UIConfiguration::instance().get_scroll_velocity_editing()) {
+
 		const int step = 1;
 		const bool zoom = Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier);
 		const bool just_one_edge = Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier|Keyboard::PrimaryModifier);
@@ -519,8 +537,6 @@ MidiRegionView::ghost_add_note (NoteBase* nb)
 
 		MidiGhostRegion* gr;
 
-		std::cerr << "GAN on " << ghost << std::endl;
-
 		if ((gr = dynamic_cast<MidiGhostRegion*>(ghost)) != 0) {
 			gr->add_note (nb);
 		}
@@ -573,7 +589,9 @@ uint32_t
 MidiRegionView::get_fill_color() const
 {
 	Gtkmm2ext::Color c;
-	if (_selected) {
+	Editing::MouseMode mm = trackview.editor().effective_mouse_mode ();
+
+	if (_selected && (mm != Editing::MouseDraw && mm != Editing::MouseContent)) {
 		c = UIConfiguration::instance().color ("selected region base");
 	} else if ((!UIConfiguration::instance().get_show_name_highlight() || high_enough_for_name) && !UIConfiguration::instance().get_color_regions_using_track_color()) {
 		c = UIConfiguration::instance().color (fill_color_name);
@@ -682,22 +700,6 @@ MidiRegionView::add_control_points_to_selection (timepos_t const & start, timepo
 	}
 }
 
-void
-MidiRegionView::edit_in_pianoroll_window ()
-{
-	std::shared_ptr<MidiTrack> track = std::dynamic_pointer_cast<MidiTrack> (trackview.stripable());
-	assert (track);
-
-	PianorollWindow* pr = new PianorollWindow (string_compose (_("Pianoroll: %1"), _region->name()), track->session());;
-
-	pr->set (track, midi_region());
-	pr->show_all ();
-	pr->present ();
-
-	pr->signal_delete_event().connect (sigc::mem_fun (*this, &MidiRegionView::pianoroll_window_deleted), false);
-	_editor = pr;
-}
-
 bool
 MidiRegionView::pianoroll_window_deleted (GdkEventAny*)
 {
@@ -708,7 +710,21 @@ MidiRegionView::pianoroll_window_deleted (GdkEventAny*)
 void
 MidiRegionView::show_region_editor ()
 {
-	edit_in_pianoroll_window ();
+	if (!_editor) {
+		std::shared_ptr<MidiTrack> track = std::dynamic_pointer_cast<MidiTrack> (trackview.stripable());
+		assert (track);
+
+		PianorollWindow* pr = new PianorollWindow (string_compose (_("Pianoroll: %1"), _region->name()), track->session());
+
+		pr->set (track, midi_region());
+		pr->set_show_source (false);
+
+		pr->signal_delete_event().connect (sigc::mem_fun (*this, &MidiRegionView::pianoroll_window_deleted), false);
+		_editor = pr;
+	}
+
+	_editor->show_all ();
+	_editor->present ();
 }
 
 void
@@ -717,4 +733,43 @@ MidiRegionView::hide_region_editor ()
 	RegionView::hide_region_editor ();
 	delete _editor;
 	_editor = nullptr;
+}
+
+void
+MidiRegionView::trim_front_starting ()
+{
+	/* We used to eparent the note group to the region view's parent, so that it didn't change.
+	   now we update it.
+	*/
+}
+
+void
+MidiRegionView::trim_front_ending ()
+{
+	if (!_midi_region) {
+		return;
+	}
+
+	if (_midi_region->start().is_negative()) {
+		/* Trim drag made start time -ve; fix this */
+		midi_region()->fix_negative_start (_editing_context.history());
+	}
+}
+
+bool
+MidiRegionView::post_paste (Temporal::timepos_t const & pos, const ::Selection& selection, PasteContext& ctx)
+{
+	// Paste control points to automation children, if available
+
+	typedef RouteTimeAxisView::AutomationTracks ATracks;
+	ATracks const & atracks = dynamic_cast<StripableTimeAxisView*>(&trackview)->automation_tracks();
+	bool commit = false;
+
+	for (auto & at : atracks) {
+		if (at.second->paste(pos, selection, ctx)) {
+			commit = true;
+		}
+	}
+
+	return commit;
 }

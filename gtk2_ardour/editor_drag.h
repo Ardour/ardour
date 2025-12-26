@@ -64,6 +64,7 @@ namespace PBD {
 	class StatefulDiffCommand;
 }
 
+class CueEditor;
 class PatchChange;
 class EditingContext;
 class Editor;
@@ -222,9 +223,9 @@ public:
 	}
 
 	/** @return minimum number of samples (in x) and pixels (in y) that should be considered a movement */
-	std::pair<Temporal::timecnt_t,int> move_threshold () const {
-		return std::make_pair (Temporal::timecnt_t (1, Temporal::AudioTime), 1);
-	}
+	typedef std::pair<int,int> MoveThreshold;
+
+	virtual MoveThreshold move_threshold () const;
 
 	virtual bool allow_vertical_autoscroll () const {
 		return true;
@@ -331,6 +332,7 @@ protected:
 	bool _y_constrained; ///< true if y motion is constrained, otherwise false
 	bool _was_rolling; ///< true if the session was rolling before the drag started, otherwise false
 	ARDOUR::timepos_t _earliest_time_limit; ///< time we cannot drag before (defaults to 0, indicating no such limit)
+	bool _copy;
 
 private:
 	bool _trackview_only; ///< true if pointer y value should always be relative to the top of the trackview group
@@ -518,10 +520,6 @@ public:
 		return true;
 	}
 
-	std::pair<Temporal::timecnt_t,int> move_threshold () const {
-		return std::make_pair (Temporal::timecnt_t (4, Temporal::AudioTime), 4);
-	}
-
 	void setup_pointer_offset ();
 
 private:
@@ -557,7 +555,6 @@ private:
 	void collect_new_region_view (RegionView *);
 	RouteTimeAxisView* create_destination_time_axis (std::shared_ptr<ARDOUR::Region>, TimeAxisView* original);
 
-	bool _copy;
 	RegionView* _new_region_view;
 };
 
@@ -655,7 +652,6 @@ private:
 	Temporal::timepos_t  _earliest; // earliest note in note selection
 	bool   _was_selected;
 	double _note_height;
-	bool   _copy;
 };
 
 class NoteCreateDrag : public Drag
@@ -685,11 +681,6 @@ private:
 	double y_to_region (double) const;
 	Temporal::Beats round_to_grid (Temporal::timepos_t const & pos, GdkEvent const * event) const;
 
-	/** @return minimum number of samples (in x) and pixels (in y) that should be considered a movement */
-	std::pair<Temporal::timecnt_t,int> move_threshold () const {
-		return std::make_pair (Temporal::timecnt_t (0, Temporal::AudioTime), 0);
-	}
-
 	MidiView* _midi_view;
 	ArdourCanvas::Rectangle* _drag_rect;
 	Temporal::timepos_t _note[2];
@@ -717,15 +708,43 @@ public:
 private:
 	double y_to_region (double) const;
 
-	/** @return minimum number of samples (in x) and pixels (in y) that should be considered a movement */
-	std::pair<Temporal::timecnt_t,int> move_threshold () const {
-		return std::make_pair (Temporal::timecnt_t::zero (Temporal::AudioTime), 0);
+	MidiView*           _midi_view;
+	int                 _y;
+
+};
+
+class NoteBrushDrag : public Drag
+{
+public:
+	NoteBrushDrag (EditingContext&, ArdourCanvas::Item *, MidiView *, Temporal::Beats specified_length = Temporal::Beats(), int stride_multiple = 1, int held_note = -1);
+	~NoteBrushDrag ();
+
+	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
+	void aborted (bool) {}
+
+	bool active (Editing::MouseMode mode) {
+		return mode == Editing::MouseDraw || mode == Editing::MouseContent;
 	}
 
-	MidiView* _midi_view;
-	Temporal::timepos_t _last_pos;
-	double          _y;
+	bool y_movement_matters () const {
+		return false;
+	}
 
+private:
+	double y_to_region (double) const;
+	Temporal::Beats get_stride (Temporal::Beats const & pos, Temporal::BBT_Offset const & quantization);
+
+	MidiView*           _midi_view;
+	Temporal::timepos_t _last_pos;
+	int                 _y;
+	Temporal::Beats      stride;
+	Temporal::Beats      next_grid;
+	bool                 added_notes;
+	Temporal::Beats      specified_length;
+	int                  stride_multiple;
+	int                  held_note;
 };
 
 /** Drag to move MIDI patch changes */
@@ -1293,10 +1312,6 @@ public:
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
 
-	std::pair<Temporal::timecnt_t,int> move_threshold () const {
-		return std::make_pair (Temporal::timecnt_t (8, Temporal::AudioTime), 1);
-	}
-
 	void do_select_things (GdkEvent *, bool);
 
 	/** Select some things within a rectangle.
@@ -1323,6 +1338,7 @@ class MidiRubberbandSelectDrag : public RubberbandSelectDrag
 
 	void select_things (int, Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, bool);
 	void deselect_things ();
+	void finished (GdkEvent *, bool);
 
   private:
 	MidiView* _midi_view;
@@ -1434,7 +1450,6 @@ private:
 
 	Operation _operation;
 	ArdourCanvas::Rectangle* _drag_rect;
-	bool _copy;
 };
 
 /** Drag of rectangle to set zoom */
@@ -1447,10 +1462,6 @@ public:
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
-
-	std::pair<Temporal::timecnt_t,int> move_threshold () const {
-		return std::make_pair (Temporal::timecnt_t (4, Temporal::AudioTime), 4);
-	}
 
 private:
 	bool _zoom_out;
@@ -1511,10 +1522,6 @@ public:
 
 	bool y_movement_matters () const {
 		return false;
-	}
-
-	std::pair<Temporal::timecnt_t,int> move_threshold () const {
-		return std::make_pair (Temporal::timecnt_t (4, Temporal::AudioTime), 4);
 	}
 
 private:
@@ -1642,7 +1649,7 @@ class VelocityLineDrag : public FreehandLineDrag<Evoral::ControlList::OrderedPoi
 class ClipStartDrag : public Drag
 {
   public:
-	ClipStartDrag (EditingContext&, ArdourCanvas::Rectangle &, Pianoroll& m);
+	ClipStartDrag (CueEditor&, ArdourCanvas::Rectangle &);
 	~ClipStartDrag ();
 
 	void start_grab (GdkEvent*,Gdk::Cursor*);
@@ -1652,7 +1659,7 @@ class ClipStartDrag : public Drag
 	void aborted (bool);
 
   private:
-	Pianoroll& mce;
+	CueEditor& ce;
 	ArdourCanvas::Rectangle* dragging_rect;
 	ArdourCanvas::Rect original_rect;
 };
@@ -1660,7 +1667,7 @@ class ClipStartDrag : public Drag
 class ClipEndDrag : public Drag
 {
   public:
-	ClipEndDrag (EditingContext&, ArdourCanvas::Rectangle &, Pianoroll& m);
+	ClipEndDrag (CueEditor&, ArdourCanvas::Rectangle &);
 	~ClipEndDrag ();
 
 	void start_grab (GdkEvent*,Gdk::Cursor*);
@@ -1670,7 +1677,7 @@ class ClipEndDrag : public Drag
 	void aborted (bool);
 
   private:
-	Pianoroll& mce;
+	CueEditor& ce;
 	ArdourCanvas::Rectangle* dragging_rect;
 	ArdourCanvas::Rect original_rect;
 };

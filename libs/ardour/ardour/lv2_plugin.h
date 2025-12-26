@@ -178,7 +178,9 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	int work_response(uint32_t size, const void* data);
 
 	void                       set_property(uint32_t key, const Variant& value);
-	const PropertyDescriptors& get_supported_properties() const { return _property_descriptors; }
+	const PropertyDescriptors& get_supported_properties (bool readonly) const {
+		return readonly ? _ro_property_descriptors : _property_descriptors;
+	}
 	const ParameterDescriptor& get_property_descriptor(uint32_t id) const;
 	Variant                    get_property_value (uint32_t) const;
 	void                       announce_property_values();
@@ -268,6 +270,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	std::map<uint32_t, Variant>    _property_values;
 
 	PropertyDescriptors _property_descriptors;
+	PropertyDescriptors _ro_property_descriptors;
 
 	struct AutomationCtrl {
 		AutomationCtrl (const AutomationCtrl &other)
@@ -362,6 +365,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	static uint32_t      _ui_foreground_color;
 	static uint32_t      _ui_contrasting_color;
 	static unsigned long _ui_transient_win_id;
+	static float         _ui_update_hz;
 
 	mutable unsigned _state_version;
 
@@ -380,7 +384,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	void allocate_atom_event_buffers ();
 	void run (pframes_t nsamples, bool sync_work = false);
 
-	void load_supported_properties(PropertyDescriptors& descs);
+	void load_supported_properties(PropertyDescriptors& descs, bool writable);
 
 #ifdef LV2_EXTENDED
 	bool has_inline_display ();

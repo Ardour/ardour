@@ -52,7 +52,9 @@
 #include "editor_cursors.h"
 #include "keyboard.h"
 #include "midi_region_view.h"
+#include "mixer_strip.h"
 #include "pianoroll.h"
+#include "selection_properties_box.h"
 #include "sfdb_ui.h"
 
 #include "pbd/i18n.h"
@@ -388,7 +390,7 @@ Editor::mapover_grouped_routes (sigc::slot<void, RouteUI&> sl, RouteUI* basis, P
 
 	routes.insert(basis);
 
-	RouteGroup* group = basis->route()->route_group();
+	std::shared_ptr<RouteGroup> group = basis->route()->route_group();
 
 	if (group && group->enabled_property(prop) && group->enabled_property (Properties::active.property_id)) {
 
@@ -477,7 +479,7 @@ Editor::mapover_tracks_with_unique_playlists (sigc::slot<void, RouteTimeAxisView
 	set<RouteTimeAxisView*> tracks;
 	tracks.insert (route_basis);
 
-	RouteGroup* group = route_basis->route()->route_group(); // could be null, not a problem
+	std::shared_ptr<RouteGroup> group = route_basis->route()->route_group(); // could be null, not a problem
 
 	if (group && group->enabled_property(prop) && group->enabled_property (Properties::active.property_id)) {
 
@@ -1081,6 +1083,15 @@ Editor::set_selected_regionview_from_map_event (GdkEventAny* /*ev*/, StreamView*
 void
 Editor::presentation_info_changed (PropertyChange const & what_changed)
 {
+	if (!_session) {
+		/* static signal, that the editor c'tor subscribes to.
+		 * It may be received during connect_dependents_to_session() when
+		 * signals are processed in BootMessage -> GUIIdle, just
+		 * just before Editor::set_session();
+		 */
+		return;
+	}
+
 	uint32_t n_tracks = 0;
 	uint32_t n_busses = 0;
 	uint32_t n_vcas = 0;
@@ -1217,6 +1228,13 @@ Editor::presentation_info_changed (PropertyChange const & what_changed)
 			}
 
 			sfbrowser->reset (audio_track_cnt, midi_track_cnt);
+		}
+	}
+
+	if (current_mixer_strip && what_changed.contains (Properties::hidden)) {
+		/* don't show hidden tracks in editor mixer */
+		if (current_mixer_strip->route()->is_hidden () && att_left_visible ()) {
+			show_editor_mixer (true);
 		}
 	}
 
@@ -1514,7 +1532,7 @@ Editor::sensitize_the_right_region_actions (bool because_canvas_crossing)
 
 	if (rs.size() > 1) {
 		_region_actions->get_action("show-region-list-editor")->set_sensitive (false);
-		_region_actions->get_action("show-region-properties")->set_sensitive (false);
+		_region_actions->get_action("edit-region-dedicated-window")->set_sensitive (false);
 		_region_actions->get_action("rename-region")->set_sensitive (false);
 		/* XXX need to check whether there is than 1 per
 		   playlist, because otherwise this makes no sense.
@@ -1709,25 +1727,65 @@ Editor::region_selection_changed ()
 		/* if in TimeFX mode and there's just 1 region selected
 		 * (i.e. we just clicked on it), leave things as they are
 		 */
-		if (selection->regions.size() > 1 || mouse_mode != Editing::MouseTimeFX) {
+		if (selection->regions.size() > 1 || current_mouse_mode() != Editing::MouseTimeFX) {
 			set_mouse_mode (MouseObject, false);
 		}
 	}
 	update_selection_markers ();
 
-	_pianoroll->contents().hide ();
 	if (selection->regions.size () == 1)  {
 		RegionView* rv = (selection->regions.front ());
-		MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rv);
-		if (mrv) {
-			std::shared_ptr<ARDOUR::MidiTrack> mt = std::dynamic_pointer_cast<ARDOUR::MidiTrack> (mrv->midi_view()->track());
-			std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion>(mrv->region());
-			if (mrv && mt && mr) {
-				_pianoroll->set_track (mt);
-				_pianoroll->set_region (mr);
-				_pianoroll->contents().show ();
-			}
+		assert (rv);
+		maybe_edit_region_in_bottom_pane (*rv);
+	} else {
+		_bottom_hbox.set_child_packing (*_properties_box, true, true);
+		if (_pianoroll && _pianoroll->contents().get_parent()) {
+			_pianoroll->contents().unmap ();
+			_pianoroll->contents().get_parent()->remove (_pianoroll->contents());
 		}
+	}
+}
+
+void
+Editor::maybe_edit_region_in_bottom_pane (RegionView& rv)
+{
+	bool pack_pianoroll = false;
+	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&rv);
+
+	if (mrv && UIConfiguration::instance().get_region_edit_disposition() != Editing::NeverBottomPane) {
+		std::shared_ptr<ARDOUR::MidiTrack> mt = std::dynamic_pointer_cast<ARDOUR::MidiTrack> (mrv->midi_view()->track());
+		std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion>(mrv->region());
+		if (mrv && mt && mr) {
+
+			if (!_pianoroll) {
+				// XXX this should really not happen here
+				_pianoroll = new Pianoroll ("editor pianoroll", true);
+				_pianoroll->get_canvas_viewport()->set_size_request (-1, 120);
+				if (_session) {
+					_pianoroll->set_session (_session);
+				}
+			}
+
+			_pianoroll->set_track (mt);
+			_pianoroll->set_region (mr);
+			pack_pianoroll = true;
+		}
+	}
+
+	if (pack_pianoroll) {
+		_bottom_hbox.set_child_packing (*_properties_box, false, false);
+
+		if (!_pianoroll->contents().get_parent()) {
+			_bottom_hbox.pack_start (_pianoroll->contents(), true, true);
+		}
+		_pianoroll->contents().hide (); // Why is this needed?
+		_pianoroll->contents().show_all ();
+	} else {
+		if (_pianoroll && _pianoroll->contents().get_parent()) {
+			_pianoroll->contents().unmap ();
+			_pianoroll->contents().get_parent()->remove (_pianoroll->contents());
+		}
+		_bottom_hbox.set_child_packing (*_properties_box, true, true);
 	}
 }
 
@@ -1984,7 +2042,7 @@ Editor::set_selection_from_region ()
 
 	selection->set (tvl);
 
-	if (!get_smart_mode () || !(mouse_mode == Editing::MouseObject) ) {
+	if (!get_smart_mode () || !(current_mouse_mode() == Editing::MouseObject) ) {
 		set_mouse_mode (Editing::MouseRange, false);
 	}
 }
@@ -2027,7 +2085,7 @@ Editor::set_selection_from_range (Location& loc)
 
 	commit_reversible_selection_op ();
 
-	if (!get_smart_mode () || mouse_mode != Editing::MouseObject) {
+	if (!get_smart_mode () || current_mouse_mode() != Editing::MouseObject) {
 		set_mouse_mode (MouseRange, false);
 	}
 }
@@ -2298,7 +2356,7 @@ Editor::select_range_between ()
 		return;
 	}
 
-	if (!get_smart_mode () || mouse_mode != Editing::MouseObject) {
+	if (!get_smart_mode () || current_mouse_mode() != Editing::MouseObject) {
 		set_mouse_mode (MouseRange, false);
 	}
 
@@ -2312,16 +2370,16 @@ Editor::get_edit_op_range (timepos_t& start, timepos_t& end) const
 {
 	/* if an explicit range exists, use it */
 
-	if ((mouse_mode == MouseRange || get_smart_mode()) &&  !selection->time.empty()) {
+	if ((current_mouse_mode() == MouseRange || get_smart_mode()) &&  !selection->time.empty()) {
 		/* we know that these are ordered */
 		start = selection->time.start_time();
 		end = selection->time.end_time();
 		return true;
-	} else {
-		start = timepos_t ();
-		end = timepos_t ();
-		return false;
 	}
+
+	start = timepos_t ();
+	end = timepos_t ();
+	return false;
 }
 
 void

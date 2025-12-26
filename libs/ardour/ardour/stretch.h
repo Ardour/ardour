@@ -37,7 +37,19 @@ class LIBARDOUR_API RBStretch : public RBEffect {
 	~RBStretch() {}
 };
 
-} /* namespace */
+
+class LIBARDOUR_API SPStretch : public Filter {
+  public:
+	SPStretch (ARDOUR::Session&, TimeFXRequest&);
+	~SPStretch ();
+
+	int run (std::shared_ptr<ARDOUR::Region>, PBD::Progress* progress = 0);
+
+  private:
+	TimeFXRequest& tsr;
+};
+
+}
 
 #ifdef HAVE_SOUNDTOUCH
 #include <soundtouch/SoundTouch.h>

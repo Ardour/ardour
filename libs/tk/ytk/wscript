@@ -263,9 +263,10 @@ def configure(conf):
     autowaf.check_pkg(conf, 'cairo', uselib_store='CAIRO', atleast_version='1.12', mandatory=True)
     autowaf.check_pkg(conf, 'pangocairo', uselib_store='PANGOCAIRO', mandatory=True)
     autowaf.check_pkg(conf, 'gmodule-2.0', uselib_store='GMODULE', mandatory=True)
-    if conf.env['build_target'] != 'mingw' and sys.platform != 'darwin': # Linux
+    if conf.env['build_target'] != 'mingw' and conf.env['build_target'] != 'msvc' and sys.platform != 'darwin': # Linux
         autowaf.check_pkg(conf, 'x11', uselib_store='X11', system=True, mandatory=True)
         autowaf.check_pkg(conf, 'xext', uselib_store='XEXT', system=True, mandatory=True)
+    conf.check(header_name='unistd.h', define_name='HAVE_UNISTD_H',mandatory=False)
 
 def build(bld):
     obj = bld.shlib(features = 'c cshlib')
@@ -294,11 +295,12 @@ def build(bld):
         obj.source   = libytk_sources +  libytk_quartz_sources
         obj.cflags   += ['-xobjective-c']
         obj.uselib   += ' OSX' #  -framework Cocoa -framework CoreFoundation -framework ApplicationServices
-    elif bld.env['build_target'] == 'mingw':
+    elif bld.env['build_target'] == 'mingw' or bld.env['build_target'] == 'msvc':
         obj.source   = libytk_sources +  libytk_win32_sources
         obj.defines += [ 'INSIDE_GTK_WIN32', 'DLL_EXPORT', 'PIC' ]
-        obj.ldflags  = '-limm32 -lole32 -lgdi32 -lcomdlg32 -lwinspool -lcomctl32 -luuid'
-        obj.linkflags = ['-Wl,--export-all-symbols']
+        obj.lib  = ['imm32', 'ole32', 'gdi32', 'comdlg32', 'winspool', 'comctl32', 'uuid']
+        if bld.env['build_target'] == 'mingw':
+            obj.linkflags = ['-Wl,--export-all-symbols']
     else:
         obj.source    = libytk_sources +  libytk_x11_sources
         obj.uselib   += ' X11 XEXT'

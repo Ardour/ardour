@@ -54,9 +54,13 @@
 
 #include "evoral/Curve.h"
 
+#include "canvas/canvas.h"
 #include "canvas/debug.h"
 
+#include "gtkmm2ext/doi.h"
+
 #include "automation_line.h"
+#include "automation_text_entry.h"
 #include "control_point.h"
 #include "editing_context.h"
 #include "gui_thread.h"
@@ -86,11 +90,11 @@ using namespace Temporal;
  *  This will not be deleted by EditorAutomationLine.
  */
 AutomationLine::AutomationLine (const string&                   name,
-                                        EditingContext&                 ec,
-                                        ArdourCanvas::Item&             parent,
-                                        ArdourCanvas::Rectangle*        drag_base,
-                                        std::shared_ptr<AutomationList> al,
-                                        const ParameterDescriptor&      desc)
+                                EditingContext&                 ec,
+                                ArdourCanvas::Item&             parent,
+                                ArdourCanvas::Rectangle*        drag_base,
+                                std::shared_ptr<AutomationList> al,
+                                const ParameterDescriptor&      desc)
 	:_name (name)
 	, _height (0)
 	, _line_color_name ("automation line")
@@ -112,6 +116,9 @@ AutomationLine::AutomationLine (const string&                   name,
 	, _desc (desc)
 	, _control_points_inherit_color (true)
 	, _sensitive (true)
+	, atv (nullptr)
+	, entry_required_post_add (false)
+	, automation_entry (nullptr)
 {
 	group = new ArdourCanvas::Container (&parent, ArdourCanvas::Duple(0, 1.5));
 	CANVAS_DEBUG_NAME (group, "automation line group");
@@ -1063,12 +1070,17 @@ AutomationLine::get_inverted_selectables (Selection&, list<Selectable*>& /*resul
 void
 AutomationLine::set_selected_points (PointSelection const & points)
 {
+	bool one_of_ours = false;
+
 	for (auto & cp : control_points) {
 		cp->set_selected (false);
 	}
 
 	for (auto & p : points) {
-		p->set_selected (true);
+		if (&p->line() == this) {
+			one_of_ours = true;
+			p->set_selected (true);
+		}
 	}
 
 	if (points.empty()) {
@@ -1078,6 +1090,155 @@ AutomationLine::set_selected_points (PointSelection const & points)
 	}
 
 	set_colors ();
+
+	if (points.empty() || !one_of_ours) {
+		return;
+	}
+
+	if (one_of_ours && entry_required_post_add && points.size() == 1) {
+		text_edit_control_point (*points.front(), false);
+	} else {
+		if (points.size() > 1 && automation_entry) {
+			delete_when_idle (automation_entry);
+		}
+	}
+
+	if (one_of_ours) {
+		entry_required_post_add = false;
+	}
+}
+
+void
+AutomationLine::text_edit_control_point (ControlPoint& cp, bool grab_focus)
+{
+	switch (_desc.type) {
+	case GainAutomation:
+	case PanAzimuthAutomation:
+	case PanElevationAutomation:
+	case PanWidthAutomation:
+	case PanFrontBackAutomation:
+	case PanLFEAutomation:
+	case MidiCCAutomation:
+	case MidiPitchBenderAutomation:
+	case MidiChannelPressureAutomation:
+	case MidiNotePressureAutomation:
+	case FadeInAutomation:
+	case FadeOutAutomation:
+	case EnvelopeAutomation:
+	case TrimAutomation:
+	case PhaseAutomation:
+	case MonitoringAutomation:
+	case BusSendLevel:
+	case BusSendEnable:
+	case SurroundSendLevel:
+	case InsertReturnLevel:
+	case MainOutVolume:
+	case MidiVelocityAutomation:
+	case PanSurroundX:
+	case PanSurroundY:
+	case PanSurroundZ:
+	case PanSurroundSize:
+	case PanSurroundSnap:
+	case BinauralRenderMode:
+	case PanSurroundElevationEnable:
+	case PanSurroundZones:
+	case PanSurroundRamp:
+	case SendLevelAutomation:
+	case SendEnableAutomation:
+	case SendAzimuthAutomation:
+		break;
+	default:
+		/* No text editing values for this type of automation */
+		entry_required_post_add = false;
+		return;
+	}
+
+	std::string txt = ARDOUR::value_as_string (_desc, (*cp.model())->value);
+
+	ArdourCanvas::GtkCanvas* cvp = dynamic_cast<ArdourCanvas::GtkCanvas*> (cp.item().canvas());
+	Gtk::Window* toplevel = static_cast<Gtk::Window*> (cvp->get_toplevel());
+	if (!toplevel) {
+		entry_required_post_add = false;
+		return;
+	}
+
+	if (automation_entry) {
+		delete_when_idle (automation_entry);
+		automation_entry = nullptr;
+	}
+
+	automation_entry = new AutomationTextEntry (toplevel, txt);
+	automation_entry->set_name (X_("BigTextEntry"));
+	automation_entry->use_text.connect (sigc::bind (sigc::mem_fun (*this, &AutomationLine::value_edited), &cp));
+	automation_entry->going_away.connect (sigc::mem_fun (*this, &AutomationLine::automation_text_deleted));
+
+	ArdourCanvas::Duple d (cp.get_x(), cp.get_y());
+	d = cp.item().item_to_window (d);
+
+	int wx, wy;
+
+	cvp->translate_coordinates (*toplevel, d.x, d.y, wx, wy);
+
+	/* Shift the text entry a bit to the right */
+	wx += 30 * UIConfiguration::instance().get_ui_scale();
+
+	gint rwx, rwy;
+
+	toplevel->get_position (rwx, rwy);
+	automation_entry->move (rwx + wx, rwy + wy);
+	automation_entry->show ();
+
+	if (grab_focus) {
+		automation_entry->activate_entry ();
+	}
+}
+
+void
+AutomationLine::begin_edit ()
+{
+	if (automation_entry) {
+		return;
+	}
+
+	PointSelection& points (_editing_context.get_selection().points);
+
+	if (points.size() != 1) {
+		return;
+	}
+
+	if (&(points.front()->line()) == this) {
+		text_edit_control_point (*points.front(), true);
+	}
+}
+
+bool
+AutomationLine::end_edit ()
+{
+	if (automation_entry) {
+		delete_when_idle (automation_entry);
+		return true;
+	}
+	return false;
+}
+
+void
+AutomationLine::automation_text_deleted (AutomationTextEntry* ate)
+{
+	if (ate == automation_entry) {
+		automation_entry = nullptr;
+	}
+}
+
+void
+AutomationLine::value_edited (std::string str, int /* what_next*/, ControlPoint* cp)
+{
+	bool legal;
+	double val = ARDOUR::string_as_value (_desc, str, legal);
+
+	if (legal) {
+		alist->modify (cp->model(), (*cp->model())->when, val);
+		automation_entry->hide ();
+	}
 }
 
 void
@@ -1261,7 +1422,9 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 		update_visibility ();
 	}
 
-	set_selected_points (_editing_context.get_selection().points);
+	if (!entry_required_post_add) {
+		set_selected_points (_editing_context.get_selection().points);
+	}
 }
 
 void
@@ -1593,7 +1756,7 @@ AutomationLine::set_offset (timepos_t const & off)
 }
 
 void
-AutomationLine::add (std::shared_ptr<AutomationControl> control, GdkEvent* event, timepos_t const & pos, double y, bool with_guard_points)
+AutomationLine::add (std::shared_ptr<AutomationControl> control, GdkEvent* event, timepos_t const & pos, double y, bool with_guard_points, bool from_kbd)
 {
 	if (alist->in_write_pass()) {
 		/* do not allow the GUI to add automation events during an
@@ -1607,12 +1770,14 @@ AutomationLine::add (std::shared_ptr<AutomationControl> control, GdkEvent* event
 
 	_editing_context.snap_to_with_modifier (when, event);
 
-	if (UIConfiguration::instance().get_new_automation_points_on_lane() || control->list()->size () == 0) {
+	if (!from_kbd && (UIConfiguration::instance().get_new_automation_points_on_lane() || control->list()->size () == 0)) {
 		if (control->list()->size () == 0) {
 			y = control->get_value ();
 		} else {
 			y = control->list()->eval (when);
 		}
+	} else if (from_kbd) {
+		/* relax, y is in model space already */
 	} else {
 		double x = 0;
 		grab_item().canvas_to_item (x, y);
@@ -1625,11 +1790,16 @@ AutomationLine::add (std::shared_ptr<AutomationControl> control, GdkEvent* event
 	XMLNode& before = alist->get_state();
 	std::list<Selectable*> results;
 
+	if (from_kbd) {
+		entry_required_post_add = false;
+	}
+
 	if (alist->editor_add (when, y, with_guard_points)) {
 
 		if (control->automation_state () == ARDOUR::Off) {
-#warning paul make this work again .. call back to ATV or similar
-			// set_automation_state (ARDOUR::Play);
+			if (atv) {
+				atv->set_automation_state (ARDOUR::Play);
+			}
 		}
 
 		if (UIConfiguration::instance().get_automation_edit_cancels_auto_hide () && control == session->recently_touched_controllable ()) {
@@ -1646,4 +1816,11 @@ AutomationLine::add (std::shared_ptr<AutomationControl> control, GdkEvent* event
 		_editing_context.commit_reversible_command ();
 		session->set_dirty ();
 	}
+
+}
+
+void
+AutomationLine::set_atv (AutomationTimeAxisView& a)
+{
+	atv = &a;
 }

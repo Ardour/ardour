@@ -846,7 +846,7 @@ JACKAudioBackend::join_process_threads ()
 bool
 JACKAudioBackend::in_process_thread ()
 {
-#if defined COMPILER_MINGW && (!defined PTW32_VERSION || defined __jack_systemdeps_h__)
+#if defined COMPILER_MINGW && (!defined __PTW32_VERSION || defined __jack_systemdeps_h__)
 	if (_main_thread == GetCurrentThread()) {
 		return true;
 	}
@@ -858,7 +858,7 @@ JACKAudioBackend::in_process_thread ()
 
 	for (auto & thread : _jack_threads) {
 
-#if defined COMPILER_MINGW && (!defined PTW32_VERSION || defined __jack_systemdeps_h__)
+#if defined COMPILER_MINGW && (!defined __PTW32_VERSION || defined __jack_systemdeps_h__)
 		if (thread == GetCurrentThread()) {
 			return true;
 		}
@@ -909,7 +909,7 @@ JACKAudioBackend::process_thread ()
         /* JACK doesn't do this for us when we use the wait API
          */
 
-#if defined COMPILER_MINGW && (!defined PTW32_VERSION || defined __jack_systemdeps_h__)
+#if defined COMPILER_MINGW && (!defined __PTW32_VERSION || defined __jack_systemdeps_h__)
 	_main_thread = GetCurrentThread();
 #else
 	_main_thread = pthread_self ();

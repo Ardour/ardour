@@ -41,7 +41,6 @@ public:
 		Gtk::Button *cancel_button = add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 		cancel_button->signal_clicked().connect (cancel);
 		cancel_button->show();
-		get_vbox()->pack_start (*cancel_button, Gtk::PACK_SHRINK);
 	}
 
 	void update_progress (ARDOUR::samplecnt_t c, ARDOUR::samplecnt_t t) {

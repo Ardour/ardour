@@ -61,6 +61,8 @@
 #include "gui_object.h"
 #include "gui_thread.h"
 #include "keyeditor.h"
+#include "strip_export_dialog.h"
+#include "strip_import_dialog.h"
 #include "library_download_dialog.h"
 #include "location_ui.h"
 #include "lua_script_manager.h"
@@ -79,6 +81,7 @@
 #include "rc_option_editor.h"
 #include "recorder_ui.h"
 #include "route_params_ui.h"
+#include "rta_window.h"
 #include "shuttle_control.h"
 #include "session_option_editor.h"
 #include "speaker_dialog.h"
@@ -625,10 +628,18 @@ void
 ARDOUR_UI::tabs_switch (GtkNotebookPage*, guint page)
 {
 	if (tabbables_table.get_parent ()) {
-		editor->tab_btn_box ().remove ();
-		mixer->tab_btn_box ().remove ();
-		recorder->tab_btn_box ().remove ();
-		trigger_page->tab_btn_box ().remove ();
+		if (editor) {
+			editor->tab_btn_box ().remove ();
+		}
+		if (mixer) {
+			mixer->tab_btn_box ().remove ();
+		}
+		if (recorder) {
+			recorder->tab_btn_box ().remove ();
+		}
+		if (trigger_page) {
+			trigger_page->tab_btn_box ().remove ();
+		}
 	}
 
 	//pack the tabbables selector in this tab, and set button sensitivity appropriately
@@ -915,8 +926,10 @@ ARDOUR_UI::create_key_editor ()
 {
 	KeyEditor* kedit = new KeyEditor;
 
-	for (std::list<Bindings*>::iterator b = Bindings::bindings.begin(); b != Bindings::bindings.end(); ++b) {
-		kedit->add_tab ((*b)->name(), **b);
+	for (auto & b : Bindings::bindings) {
+		if (!b->parent()) {
+			kedit->add_tab (b->name(), *b);
+		}
 	}
 
 	return kedit;
@@ -980,6 +993,29 @@ ARDOUR_UI::create_luawindow ()
 	return luawindow;
 }
 
+RTAWindow*
+ARDOUR_UI::create_rtawindow ()
+{
+	RTAWindow* rtawindow = new RTAWindow ();
+	return rtawindow;
+}
+
+void ARDOUR_UI::export_strips ()
+{
+	if (_session) {
+		StripExportDialog esd (*editor, _session);
+		esd.run();
+	}
+}
+
+void ARDOUR_UI::import_strips ()
+{
+	if (_session) {
+		StripImportDialog isd (_session);
+		isd.run();
+	}
+}
+
 void
 ARDOUR_UI::handle_locations_change (Location *)
 {
@@ -1041,11 +1077,24 @@ ARDOUR_UI::toggle_mixer_space()
 		mixer->restore_mixer_space ();
 	}
 }
+void
+ARDOUR_UI::show_lua_window ()
+{
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("Window", "toggle-luawindow");
+	tact->set_active();
+}
 
 void
 ARDOUR_UI::show_plugin_manager ()
 {
 	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("Window", "toggle-plugin-manager");
+	tact->set_active();
+}
+
+void
+ARDOUR_UI::show_realtime_analyzer ()
+{
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("Window", "toggle-rtawindow");
 	tact->set_active();
 }
 

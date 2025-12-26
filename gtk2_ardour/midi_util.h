@@ -46,4 +46,5 @@ inline static void clamp_to_0_127(uint8_t &val)
 void
 build_controller_menu (Gtk::Menu& menu, ARDOUR::InstrumentInfo const & instrument_info, uint16_t channel_mask,
                        std::function<void (Gtk::Menu_Helpers::MenuList&, int, const std::string&)> add_single,
-                       std::function<void (Gtk::Menu_Helpers::MenuList&, uint16_t, int, const std::string&)> add_multi);
+                       std::function<void (Gtk::Menu_Helpers::MenuList&, uint16_t, int, const std::string&)> add_multi,
+                       int button_name_length = 0);

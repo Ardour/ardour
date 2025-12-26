@@ -220,6 +220,10 @@ class PortAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 	bool        physically_connected (PortEngine::PortHandle ph, bool process_callback_safe) { return PortEngineSharedImpl::physically_connected (ph, process_callback_safe); }
 	int         get_connections (PortEngine::PortHandle ph, std::vector<std::string>& results, bool process_callback_safe) { return PortEngineSharedImpl::get_connections (ph, results, process_callback_safe); }
 
+	XMLNode* get_state () const;
+	int      set_state (XMLNode const& node, int version);
+	bool     match_state (XMLNode const&, int version);
+
 		/* MIDI */
 		int midi_event_get (pframes_t& timestamp, size_t& size, uint8_t const** buf, void* port_buffer, uint32_t event_index);
 		int midi_event_put (void* port_buffer, pframes_t timestamp, const uint8_t* buffer, size_t size);

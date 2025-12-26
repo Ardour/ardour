@@ -115,10 +115,8 @@ ApplicationBar::ApplicationBar ()
 	, _basic_ui (0)
 	, _latency_disable_button (ArdourButton::led_default_elements)
 	, _auto_return_button (ArdourButton::led_default_elements)
-	, _follow_edits_button (ArdourButton::led_default_elements)
 	, _primary_clock  (X_("primary"), X_("transport"), MainClock::PrimaryClock)
 	, _secondary_clock (X_("secondary"), X_("secondary"), MainClock::SecondaryClock)
-	, _secondary_clock_spacer (0)
 	, _auditioning_alert_button (_("Audition"))
 	, _solo_alert_button (_("Solo"))
 	, _feedback_alert_button (_("Feedback"))
@@ -171,15 +169,13 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_punch_in_button.set_text (S_("Punch|In"));
 	_punch_out_button.set_text (S_("Punch|Out"));
 
-	_record_mode_selector.AddMenuElem (MenuElem (_record_mode_strings[(int)RecLayered], sigc::bind (sigc::mem_fun (*this, &ApplicationBar::set_record_mode), RecLayered)));
-	_record_mode_selector.AddMenuElem (MenuElem (_record_mode_strings[(int)RecNonLayered], sigc::bind (sigc::mem_fun (*this, &ApplicationBar::set_record_mode), RecNonLayered)));
-	_record_mode_selector.AddMenuElem (MenuElem (_record_mode_strings[(int)RecSoundOnSound], sigc::bind (sigc::mem_fun (*this, &ApplicationBar::set_record_mode), RecSoundOnSound)));
+	_record_mode_selector.add_menu_elem (MenuElem (_record_mode_strings[(int)RecLayered], sigc::bind (sigc::mem_fun (*this, &ApplicationBar::set_record_mode), RecLayered)));
+	_record_mode_selector.add_menu_elem (MenuElem (_record_mode_strings[(int)RecNonLayered], sigc::bind (sigc::mem_fun (*this, &ApplicationBar::set_record_mode), RecNonLayered)));
+	_record_mode_selector.add_menu_elem (MenuElem (_record_mode_strings[(int)RecSoundOnSound], sigc::bind (sigc::mem_fun (*this, &ApplicationBar::set_record_mode), RecSoundOnSound)));
 	_record_mode_selector.set_sizing_texts (_record_mode_strings);
 
 	_latency_disable_button.set_text (_("Disable PDC"));
-
 	_auto_return_button.set_text(_("Auto Return"));
-	_follow_edits_button.set_text(_("Follow Range"));
 
 	/* alert box sub-group */
 	VBox* alert_box = manage (new VBox);
@@ -218,7 +214,7 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_table.attach (*ssbox,         TCOL, 1, 2 , FILL,   SHRINK, 0, 0);
 	++col;
 
-	_table.attach (*(manage (new ArdourVSpacer ())), TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
+	_table.attach (_recpunch_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
 
 	_table.attach (_punch_label, TCOL, 0, 1 , FILL, SHRINK, 3, 0);
@@ -231,7 +227,7 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_table.attach (_record_mode_selector, col,      col + 3, 1, 2 , FILL, SHRINK, hpadding, vpadding);
 	col += 3;
 
-	_table.attach (_recpunch_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
+	_table.attach (_latency_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
 
 	_table.attach (_latency_disable_button, TCOL, 0, 1 , FILL, SHRINK, hpadding, vpadding);
@@ -240,14 +236,11 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 
 	_route_latency_value.set_alignment (Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
 
-	_table.attach (_latency_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
+	_left_hbox.set_spacing (3);
+	_table.attach (_left_hbox, TCOL, 0, 2, EXPAND|FILL, EXPAND|FILL, hpadding, 0);
 	++col;
 
-	_table.attach (_follow_edits_button, TCOL, 0, 1 , FILL, SHRINK, hpadding, vpadding);
-	_table.attach (_auto_return_button,  TCOL, 1, 2 , FILL, SHRINK, hpadding, vpadding);
-	++col;
-
-	_table.attach (*(manage (new ArdourVSpacer ())), TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
+	_table.attach (_primary_clock_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
 
 	_table.attach (_primary_clock,                col,     col + 2, 0, 1 , FILL, SHRINK, hpadding, 0);
@@ -255,10 +248,10 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_table.attach (*(_primary_clock.right_btn()), col + 1, col + 2, 1, 2 , FILL, SHRINK, hpadding, 0);
 	col += 2;
 
-	_table.attach (*(manage (new ArdourVSpacer ())), TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
-	++col;
-
 	if (!ARDOUR::Profile->get_small_screen()) {
+		_table.attach (_secondary_clock_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
+		++col;
+
 		_table.attach (_secondary_clock,                col,     col + 2, 0, 1 , FILL, SHRINK, hpadding, 0);
 		_table.attach (*(_secondary_clock.left_btn()),  col,     col + 1, 1, 2 , FILL, SHRINK, hpadding, 0);
 		_table.attach (*(_secondary_clock.right_btn()), col + 1, col + 2, 1, 2 , FILL, SHRINK, hpadding, 0);
@@ -266,20 +259,7 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 		(ARDOUR_UI::instance()->secondary_clock)->left_btn()->set_no_show_all (true);
 		(ARDOUR_UI::instance()->secondary_clock)->right_btn()->set_no_show_all (true);
 		col += 2;
-
-		_secondary_clock_spacer = manage (new ArdourVSpacer ());
-		_table.attach (*_secondary_clock_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
-		++col;
 	}
-
-	_table.attach (*alert_box, TCOL, 0, 2, SHRINK, EXPAND|FILL, hpadding, 0);
-	++col;
-
-	_table.attach (_monitor_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
-	++col;
-
-	_table.attach (*monitor_box, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
-	++col;
 
 	_table.attach (_cuectrl_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
@@ -293,11 +273,21 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_table.attach (_transport_hbox, TCOL, 0, 2, EXPAND|FILL, EXPAND|FILL, hpadding, 0);
 	++col;
 
+	_table.attach (*monitor_box, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
+	++col;
+
+	_table.attach (*alert_box, TCOL, 0, 2, SHRINK, EXPAND|FILL, hpadding, 0);
+	++col;
+
+	_table.attach (*(manage (new ArdourVSpacer ())), TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
+	++col;
+
 	/* lua script action buttons */
 	for (int i = 0; i < MAX_LUA_ACTION_BUTTONS; ++i) {
 		const int r = i % 2;
 		const int c = col + i / 2;
 		_table.attach (_action_script_call_btn[i], c, c + 1, r, r + 1, FILL, SHRINK, 1, vpadding);
+		_action_script_call_btn[i].set_no_show_all ();
 	}
 	col += MAX_LUA_ACTION_BUTTONS / 2;
 
@@ -307,6 +297,27 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_table.set_spacings (0);
 	_table.set_row_spacings (4);
 	_table.set_border_width (1);
+
+	/* mark any optional widgets as no-show, so they don't expand the toolbar on load */
+	//_transport_spacer.set_no_show_all ();
+	_punch_in_button.set_no_show_all ();
+	_punch_out_button.set_no_show_all ();
+	_record_mode_selector.set_no_show_all ();
+	_recpunch_spacer.set_no_show_all ();
+	_latency_spacer.set_no_show_all ();
+	_latency_disable_button.set_no_show_all ();
+	_route_latency_value.set_no_show_all ();
+	_auto_return_button.set_no_show_all ();
+	_primary_clock_spacer.set_no_show_all ();
+	_secondary_clock_spacer.set_no_show_all ();
+	_monitor_dim_button.set_no_show_all ();
+	_monitor_mono_button.set_no_show_all ();
+	_monitor_mute_button.set_no_show_all ();
+	_cue_rec_enable.set_no_show_all ();
+	_cue_play_enable.set_no_show_all ();
+	_cuectrl_spacer.set_no_show_all ();
+	_mini_timeline.set_no_show_all();
+	_left_hbox.set_no_show_all();
 
 	_table.show_all (); // TODO: update visibility somewhere else
 	pack_start (_table, true, true);
@@ -319,7 +330,6 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	button_height_size_group->add_widget (_punch_out_button);
 	button_height_size_group->add_widget (_record_mode_selector);
 	button_height_size_group->add_widget (_latency_disable_button);
-	button_height_size_group->add_widget (_follow_edits_button);
 	button_height_size_group->add_widget (_auto_return_button);
 
 	for (int i = 0; i < MAX_LUA_ACTION_BUTTONS; ++i) {
@@ -349,17 +359,6 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	monitor_button_size_group->add_widget (_monitor_mono_button);
 	monitor_button_size_group->add_widget (_monitor_mute_button);
 
-	/* tooltips */
-	Gtkmm2ext::UI::instance()->set_tip (_record_mode_selector, _("<b>Layered</b>, new recordings will be added as regions on a layer atop existing regions.\n<b>SoundOnSound</b>, behaves like <i>Layered</i>, except underlying regions will be audible.\n<b>Non Layered</b>, the underlying region will be spliced and replaced with the newly recorded region."));
-	Gtkmm2ext::UI::instance()->set_tip (_latency_disable_button, _("Disable all Plugin Delay Compensation. This results in the shortest delay from live input to output, but any paths with delay-causing plugins will sound later than those without."));
-	Gtkmm2ext::UI::instance()->set_tip (_primary_clock, _("<b>Primary Clock</b> right-click to set display mode. Click to edit, click+drag a digit or mouse-over+scroll wheel to modify.\nText edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: confirm; postfix the edit with '+' or '-' to enter delta times.\n"));
-	Gtkmm2ext::UI::instance()->set_tip (_secondary_clock, _("<b>Secondary Clock</b> right-click to set display mode. Click to edit, click+drag a digit or mouse-over+scroll wheel to modify.\nText edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: confirm; postfix the edit with '+' or '-' to enter delta times.\n"));
-	Gtkmm2ext::UI::instance()->set_tip (_auditioning_alert_button, _("When active, auditioning is taking place.\nClick to stop the audition"));
-	Gtkmm2ext::UI::instance()->set_tip (_feedback_alert_button, _("When lit, there is a ports connection issue, leading to feedback loop or ambiguous alignment.\nThis is caused by connecting an output back to some input (feedback), or by multiple connections from a source to the same output via different paths (ambiguous latency, record alignment)."));
-	Gtkmm2ext::UI::instance()->set_tip (_cue_rec_enable, _("<b>When enabled</b>, triggering Cues will result in Cue Markers added to the timeline"));
-	Gtkmm2ext::UI::instance()->set_tip (_cue_play_enable, _("<b>When enabled</b>, Cue Markers will trigger the associated Cue when passed on the timeline"));
-	Gtkmm2ext::UI::instance()->set_tip (_editor_meter_peak_display, _("Reset All Peak Meters"));
-
 	/* theming */
 	_sync_button.set_name ("transport active option button");
 	_punch_in_button.set_name ("punch button");
@@ -367,7 +366,6 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_record_mode_selector.set_name ("record mode button");
 	_latency_disable_button.set_name ("latency button");
 	_auto_return_button.set_name ("transport option button");
-	_follow_edits_button.set_name ("transport option button");
 	_solo_alert_button.set_name ("rude solo");
 	_auditioning_alert_button.set_name ("rude audition");
 	_feedback_alert_button.set_name ("feedback alert");
@@ -424,12 +422,23 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 #undef TCOL
 
 void
+ApplicationBar::setup_tooltips ()
+{
+	/* tooltips -- after actions have been set */
+	Gtkmm2ext::UI::instance()->set_tip (_record_mode_selector, _("<b>Layered</b>, new recordings will be added as regions on a layer atop existing regions.\n<b>Non Layered</b>, the underlying region will be spliced and replaced with the newly recorded region.\n<b>SoundOnSound</b>, behaves like <i>Layered</i>, except underlying regions will be audible."));
+	Gtkmm2ext::UI::instance()->set_tip (_latency_disable_button, _("Disable all Plugin Delay Compensation. This results in the shortest delay from live input to output, but any paths with delay-causing plugins will sound later than those without."));
+	Gtkmm2ext::UI::instance()->set_tip (_primary_clock, _("<b>Primary Clock</b> right-click to set display mode. Click to edit, click+drag a digit or mouse-over+scroll wheel to modify.\nText edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: confirm; postfix the edit with '+' or '-' to enter delta times.\n"));
+	Gtkmm2ext::UI::instance()->set_tip (_secondary_clock, _("<b>Secondary Clock</b> right-click to set display mode. Click to edit, click+drag a digit or mouse-over+scroll wheel to modify.\nText edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: confirm; postfix the edit with '+' or '-' to enter delta times.\n"));
+	Gtkmm2ext::UI::instance()->set_tip (_auditioning_alert_button, _("When active, auditioning is taking place.\nClick to stop the audition"));
+	Gtkmm2ext::UI::instance()->set_tip (_feedback_alert_button, _("When lit, there is a ports connection issue, leading to feedback loop or ambiguous alignment.\nThis is caused by connecting an output back to some input (feedback), or by multiple connections from a source to the same output via different paths (ambiguous latency, record alignment)."));
+	Gtkmm2ext::UI::instance()->set_tip (_cue_rec_enable, _("<b>When enabled</b>, triggering Cues will result in Cue Markers added to the timeline"));
+	Gtkmm2ext::UI::instance()->set_tip (_cue_play_enable, _("<b>When enabled</b>, Cue Markers will trigger the associated Cue when passed on the timeline"));
+	Gtkmm2ext::UI::instance()->set_tip (_editor_meter_peak_display, _("Reset All Peak Meters"));
+}
+
+void
 ApplicationBar::ui_actions_ready ()
 {
-	_blink_connection = Timers::blink_connect (sigc::mem_fun(*this, &ApplicationBar::blink_handler));
-
-	_point_zero_something_second_connection = Timers::super_rapid_connect (sigc::mem_fun(*this, &ApplicationBar::every_point_zero_something_seconds));
-
 	LuaInstance::instance()->ActionChanged.connect (sigc::mem_fun (*this, &ApplicationBar::action_script_changed));
 
 	Glib::RefPtr<Action> act;
@@ -447,11 +456,8 @@ ApplicationBar::ui_actions_ready ()
 
 	act = ActionManager::get_action ("Transport", "ToggleAutoReturn");
 	_auto_return_button.set_related_action (act);
-	act = ActionManager::get_action (X_("Transport"), X_("ToggleFollowEdits"));
-	_follow_edits_button.set_related_action (act);
 
 	_auto_return_button.set_text(_("Auto Return"));
-	_follow_edits_button.set_text(_("Follow Range"));
 
 	/* CANNOT sigc::bind these to clicked or toggled, must use pressed or released */
 	act = ActionManager::get_action (X_("Main"), X_("cancel-solo"));
@@ -478,12 +484,13 @@ ApplicationBar::ui_actions_ready ()
 			_action_script_call_btn[i].set_visual_state (Gtkmm2ext::VisualState (_action_script_call_btn[i].visual_state() | Gtkmm2ext::Insensitive));
 		}
 		_action_script_call_btn[i].set_sizing_text ("88");
-		_action_script_call_btn[i].set_no_show_all ();
 	}
 
 	if (_session && _have_layout) {
 		repack_transport_hbox();
 	}
+
+	setup_tooltips ();
 }
 
 void
@@ -509,6 +516,11 @@ ApplicationBar::repack_transport_hbox ()
 	if (UIConfiguration::instance().get_show_mini_timeline ()) {
 		_transport_hbox.pack_start (_mini_timeline, true, true);
 		_mini_timeline.show();
+		_left_hbox.hide ();
+		_primary_clock_spacer.show ();
+	} else {
+		_left_hbox.show ();
+		_primary_clock_spacer.hide ();
 	}
 
 	if (_editor_meter) {
@@ -575,12 +587,10 @@ ApplicationBar::repack_transport_hbox ()
 		_monitor_dim_button.show ();
 		_monitor_mono_button.show ();
 		_monitor_mute_button.show ();
-		_monitor_spacer.show ();
 	} else {
 		_monitor_dim_button.hide ();
 		_monitor_mono_button.hide ();
 		_monitor_mute_button.hide ();
-		_monitor_spacer.hide ();
 	}
 }
 
@@ -799,13 +809,16 @@ ApplicationBar::set_session (Session *s)
 	/* initialize */
 	session_latency_updated (true);
 
-	_solo_alert_button.set_active (_session->soloing());
+	_solo_alert_button.set_active (_session->soloing () || _session->listening ());
 
 	if (_editor_meter_table.get_parent()) {
 		_transport_hbox.remove (_editor_meter_table);
 	}
 	if (_editor_meter) {
-		_editor_meter_table.remove(*_editor_meter);
+		Gtk::Container *parent = _editor_meter->get_parent();
+		if (parent) {
+			parent->remove(*_editor_meter);
+		}
 		delete _editor_meter;
 		_editor_meter = 0;
 	}
@@ -845,6 +858,9 @@ ApplicationBar::set_session (Session *s)
 	if (_have_layout) {
 		repack_transport_hbox();
 	}
+
+	_blink_connection = Timers::blink_connect (sigc::mem_fun(*this, &ApplicationBar::blink_handler));
+	_point_zero_something_second_connection = Timers::super_rapid_connect (sigc::mem_fun(*this, &ApplicationBar::every_point_zero_something_seconds));
 }
 
 void
@@ -879,10 +895,12 @@ ApplicationBar::update_clock_visibility ()
 		_secondary_clock.show();
 		_secondary_clock.left_btn()->show();
 		_secondary_clock.right_btn()->show();
+		_secondary_clock_spacer.show();
 	} else {
 		_secondary_clock.hide();
 		_secondary_clock.left_btn()->hide();
 		_secondary_clock.right_btn()->hide();
+		_secondary_clock_spacer.hide();
 	}
 }
 
@@ -902,7 +920,11 @@ ApplicationBar::session_latency_updated (bool for_playback)
 	} else {
 		samplecnt_t wrl = _session->worst_route_latency ();
 		float rate      = _session->nominal_sample_rate ();
-		_route_latency_value.set_text (samples_as_time_string (wrl, rate));
+		if (wrl == 0) {
+			_route_latency_value.set_text (_("No Latency"));
+		} else {
+			_route_latency_value.set_text (samples_as_time_string (wrl, rate));
+		}
 	}
 }
 
@@ -910,11 +932,12 @@ void
 ApplicationBar::parameter_changed (std::string p)
 {
 	if (p == "external-sync") {
-		if (!_session->config.get_external_sync()) {
+		if (!_session || !_session->config.get_external_sync()) {
 			_sync_button.set_text (S_("SyncSource|Int."));
 		} else {
 			_sync_button.set_text (TransportMasterManager::instance().current()->display_name());
 		}
+		UI::instance()->set_tip (_sync_button, _("Enable/Disable external positional sync"));
 	} else if (p == "sync-source") {
 		if (_session) {
 			if (!_session->config.get_external_sync()) {
@@ -922,14 +945,15 @@ ApplicationBar::parameter_changed (std::string p)
 			} else {
 				_sync_button.set_text (TransportMasterManager::instance().current()->display_name());
 			}
+			if (_session->config.get_video_pullup() == 0.0f || TransportMasterManager::instance().current()->type() != Engine) {
+				UI::instance()->set_tip (_sync_button, _("Enable/Disable external positional sync"));
+			} else {
+				UI::instance()->set_tip (_sync_button, _("External sync is not possible: video pull up/down is set"));
+			}
 		} else {
 			/* changing sync source without a session is unlikely/impossible , except during startup */
 			_sync_button.set_text (TransportMasterManager::instance().current()->display_name());
-		}
-		if (_session->config.get_video_pullup() == 0.0f || TransportMasterManager::instance().current()->type() != Engine) {
-			UI::instance()->set_tip (_sync_button, _("Enable/Disable external positional sync"));
-		} else {
-			UI::instance()->set_tip (_sync_button, _("External sync is not possible: video pull up/down is set"));
+			UI::instance()->set_tip (_sync_button, X_("Waiting for session to load.."));
 		}
 	} else if (p == "show-mini-timeline") {
 		repack_transport_hbox ();
@@ -1116,7 +1140,7 @@ ApplicationBar::reset_peak_display ()
 }
 
 void
-ApplicationBar::reset_group_peak_display (RouteGroup* group)
+ApplicationBar::reset_group_peak_display (std::shared_ptr<RouteGroup> group)
 {
 	if (!_session || !_session->master_out()) return;
 	if (group == _session->master_out()->route_group()) {

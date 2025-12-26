@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MackieProtocolDevice>
+  <Name value="iCON P1-NANO"/>
+  <Strips value="8"/>
+  <Extenders value="0"/>
+  <MasterPosition value="0"/>
+  <MasterFader value="yes"/>
+  <TimecodeDisplay value="yes"/>
+  <TwoCharacterDisplay value="no"/>
+  <HasSeparateMeters value="yes"/>
+  <GlobalControls value="yes"/>
+  <JogWheel value="yes"/>
+  <TouchSenseFaders value="yes"/>
+  <LogicControlButtons value="yes"/>
+  <usesIPMIDI value="no"/>
+  <NoHandShake value="yes"/>
+  <IsP1Nano value="yes"/>
+  <HasQConSecondLCD value="yes"/>
+  <HasQConMasterMeters value="yes"/>
+</MackieProtocolDevice>

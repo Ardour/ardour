@@ -32,6 +32,7 @@
 #include "editing_syms.inc.h"
 #include "keyboard.h"
 #include "midi_view.h"
+#include "time_axis_view.h"
 
 /* clang-format off */
 // Include last, when GRIDTYPE has been defined by editing.h via midi_region_view.h
@@ -66,8 +67,8 @@ NoteBase::set_colors ()
 	color_modifier = UIConfiguration::instance().modifier ("midi note");
 }
 
-NoteBase::NoteBase(MidiView& region, bool with_events, const std::shared_ptr<NoteType> note)
-	: _region(region)
+NoteBase::NoteBase(MidiView& v, bool with_events, const std::shared_ptr<NoteType> note)
+	: _view (v)
 	, _item (0)
 	, _text(0)
 	, _state(None)
@@ -86,8 +87,7 @@ NoteBase::NoteBase(MidiView& region, bool with_events, const std::shared_ptr<Not
 
 NoteBase::~NoteBase()
 {
-	_region.note_deleted (this);
-
+	_view.note_deleted (this);
 	delete _text;
 }
 
@@ -181,7 +181,7 @@ NoteBase::set_selected(bool selected)
 uint32_t
 NoteBase::base_color ()
 {
-	return base_color (_note->velocity(), _region.midi_context().color_mode(), _region.midi_context().region_color(), _note->channel(), selected());
+	return base_color (_note->velocity(), _view.midi_context().color_mode(), _view.midi_context().region_color(), _note->channel(), selected());
 }
 
 uint32_t
@@ -273,12 +273,12 @@ NoteBase::set_mouse_fractions (GdkEvent* ev)
 
 	if (notify) {
 		if (big_enough_to_trim()) {
-			_region.note_mouse_position (_mouse_x_fraction, _mouse_y_fraction, set_cursor);
+			_view.note_mouse_position (_mouse_x_fraction, _mouse_y_fraction, set_cursor);
 		} else {
 			/* pretend the mouse is in the middle, because this is not big enough
 			   to trim right now.
 			*/
-			_region.note_mouse_position (0.5, 0.5, set_cursor);
+			_view.note_mouse_position (0.5, 0.5, set_cursor);
 		}
 	}
 }
@@ -286,33 +286,30 @@ NoteBase::set_mouse_fractions (GdkEvent* ev)
 bool
 NoteBase::event_handler (GdkEvent* ev)
 {
-	EditingContext& editor = _region.editing_context();
+	EditingContext& editor = _view.editing_context();
 	if (!editor.internal_editing()) {
 		return false;
 	}
 
-#warning paul fix this pianorule issue
-#if 0
-	/* notebase has a MidiView not a RegionView so get_time_axis_view() Is
-	missing etc.
-	*/
-	if (_region.get_time_axis_view ().layer_display () == Stacked) {
-		/* only allow edting notes in the topmost layer */
-		if (_region.region()->layer() != _region.region()->playlist()->top_layer ()) {
-			/* this stll allows the draw tool to work, and edit cursor is updated */
-			return false;
+	RegionView* rv;
+	if ((rv = dynamic_cast<RegionView*> (&_view))) {
+		if (rv->get_time_axis_view ().layer_display () == Stacked) {
+			/* only allow edting notes in the topmost layer */
+			if (rv->region()->layer() != rv->region()->playlist()->top_layer ()) {
+				/* this stll allows the draw tool to work, and edit cursor is updated */
+				return false;
+			}
 		}
 	}
-#endif
+
 	switch (ev->type) {
 	case GDK_ENTER_NOTIFY:
-		_region.note_entered (this);
+		_view.note_entered (this);
 		set_mouse_fractions (ev);
 		break;
 
 	case GDK_LEAVE_NOTIFY:
-		set_mouse_fractions (ev);
-		_region.note_left (this);
+		_view.note_left (this);
 		break;
 
 	case GDK_MOTION_NOTIFY:

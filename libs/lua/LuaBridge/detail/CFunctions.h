@@ -1238,10 +1238,14 @@ struct CFunc
     lua_pushvalue (L, -1);
     lua_pushnil (L);
     while (lua_next (L, -2)) {
+#if 0
       lua_pushvalue (L, -2);
-      T const value = Stack<T>::get (L, -2);
+      lua_pop (L, 1);
+#endif
+      // lua_gettop is used because Userdata::getClass() doesn't handle negative stack indexes.
+      T const value = Stack<T>::get (L, lua_gettop (L));
       t->push_back (value);
-      lua_pop (L, 2);
+      lua_pop (L, 1);
     }
     lua_pop (L, 1);
     lua_pop (L, 2);
@@ -1388,11 +1392,13 @@ struct CFunc
     lua_pushnil (L);
     while (lua_next (L, -2)) {
       lua_pushvalue (L, -2);
-      K const key = Stack<K>::get (L, -1);
-      V const value = Stack<V>::get (L, -2);
+      // lua_gettop is used because Userdata::getClass() doesn't handle negative stack indexes.
+      K const key = Stack<K>::get (L, lua_gettop (L));
+      lua_pop (L, 1);
+      V const value = Stack<V>::get (L, lua_gettop (L));
+      lua_pop (L, 1);
       t->insert (std::pair<K,V> (key, value));
       //(*t)[key] = value;
-      lua_pop (L, 2);
     }
     lua_pop (L, 1);
     lua_pop (L, 2);
@@ -1482,12 +1488,14 @@ struct CFunc
     lua_pushnil (L);
     while (lua_next (L, -2)) {
       lua_pushvalue (L, -2);
-      T const member = Stack<T>::get (L, -1);
-      bool const v = Stack<bool>::get (L, -2);
+      // lua_gettop is used because Userdata::getClass() doesn't handle negative stack indexes.
+      T const member = Stack<T>::get (L, lua_gettop (L));
+      lua_pop (L, 1);
+      bool const v = Stack<bool>::get (L, lua_gettop (L));
+      lua_pop (L, 1);
       if (v) {
         t->insert (member);
       }
-      lua_pop (L, 2);
     }
     lua_pop (L, 1);
     lua_pop (L, 2);

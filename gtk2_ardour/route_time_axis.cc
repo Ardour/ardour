@@ -627,6 +627,10 @@ RouteTimeAxisView::build_display_menu ()
 		detach_menu (*automation_action_menu);
 	}
 
+	if (route_group_menu) {
+		route_group_menu->detach ();
+	}
+
 	TimeAxisView::build_display_menu ();
 
 	bool active = _route->active ();
@@ -635,7 +639,7 @@ RouteTimeAxisView::build_display_menu ()
 
 	/* now fill it with our stuff */
 	if (active) {
-		items.push_back (MenuElem (_("Color..."), sigc::mem_fun (*this, &RouteUI::choose_color)));
+		items.push_back (MenuElem (_("Color..."), sigc::bind (sigc::mem_fun (*this, &RouteUI::choose_color), PublicEditor::instance ().current_toplevel())));
 
 		items.push_back (MenuElem (_("Comments..."), sigc::mem_fun (*this, &RouteUI::open_comment_editor)));
 
@@ -812,7 +816,6 @@ RouteTimeAxisView::build_display_menu ()
 		}
 
 		if (!_route->is_singleton ()) {
-			route_group_menu->detach ();
 			route_group_menu->build (r);
 			items.push_back (MenuElem (_("Group"), *route_group_menu->menu ()));
 		}
@@ -892,13 +895,16 @@ RouteTimeAxisView::build_display_menu ()
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Hide"), sigc::bind (sigc::mem_fun(_editor, &PublicEditor::hide_track_in_display), this, !_editor.get_selection().tracks.empty ())));
 
-	if (active && _route && !_route->is_singleton ()) {
+	if (!_route || _route->is_singleton ()) {
+		return;
+	}
+
+	if (active) {
 		items.push_back (SeparatorElem());
 		items.push_back (MenuElem (_("Duplicate..."), std::bind (&ARDOUR_UI::start_duplicate_routes, ARDOUR_UI::instance())));
-
-		items.push_back (SeparatorElem());
-		items.push_back (MenuElem (_("Remove"), sigc::mem_fun(_editor, &PublicEditor::remove_tracks)));
 	}
+	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Remove"), sigc::mem_fun(_editor, &PublicEditor::remove_tracks)));
 }
 
 void
@@ -1236,7 +1242,7 @@ RouteTimeAxisView::get_regionviews_at_or_after (timepos_t const & pos, RegionSel
 	_view->get_regionviews_at_or_after (pos, regions);
 }
 
-RouteGroup*
+std::shared_ptr<RouteGroup>
 RouteTimeAxisView::route_group () const
 {
 	return _route->route_group();
@@ -1428,7 +1434,7 @@ RouteTimeAxisView::paste (timepos_t const & pos, const Selection& selection, Pas
 void
 RouteTimeAxisView::update_playlist_tip ()
 {
-	RouteGroup* rg = route_group ();
+	std::shared_ptr<RouteGroup> rg = route_group ();
 	if (rg && rg->is_active() && rg->enabled_property (ARDOUR::Properties::group_select.property_id)) {
 		string group_string = "." + rg->name() + ".";
 

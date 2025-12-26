@@ -49,7 +49,8 @@ using namespace std;
 void
 build_controller_menu (Gtk::Menu& menu, InstrumentInfo const & instrument_info, uint16_t channel_mask,
                        std::function<void (Menu_Helpers::MenuList&, int, const std::string&)> add_single,
-                       std::function<void (Menu_Helpers::MenuList&, uint16_t, int, const std::string&)> add_multi)
+                       std::function<void (Menu_Helpers::MenuList&, uint16_t, int, const std::string&)> add_multi,
+                       int button_name_length)
 {
 	using namespace Menu_Helpers;
 
@@ -106,10 +107,18 @@ build_controller_menu (Gtk::Menu& menu, InstrumentInfo const & instrument_info, 
 					}
 
 					MenuList& ctl_items (ctl_menu->items());
-					if (multi_channel) {
-						add_multi (ctl_items, channels, ctl, c->second->name());
+
+					std::string name;
+					if (button_name_length > 0) {
+						name = short_version (c->second->name(), button_name_length);
 					} else {
-						add_single (ctl_items, ctl, c->second->name());
+						name = c->second->name();
+					}
+
+					if (multi_channel) {
+						add_multi (ctl_items, channels, ctl, name);
+					} else {
+						add_single (ctl_items, ctl, name);
 					}
 					ctl_end = ctl;
 				}

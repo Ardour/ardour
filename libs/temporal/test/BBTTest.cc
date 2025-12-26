@@ -119,3 +119,78 @@ void
 BBTTest::convertTest()
 {
 }
+
+void
+BBTTest::deltaTest ()
+{
+	Meter m (12, 8);
+	BBT_Time a (5,12,0);
+	BBT_Time b (5,12,480);
+	BBT_Offset o (m.bbt_delta (b, a));
+
+	CPPUNIT_ASSERT_EQUAL (BBT_Offset (0, 0, 480), o);
+
+	a = BBT_Time (5,11,959);
+	o = m.bbt_delta (b, a);
+
+	CPPUNIT_ASSERT_EQUAL (BBT_Offset (0, 0, 481), o);
+
+	a = BBT_Time (4,11,959);
+	o = m.bbt_delta (b, a);
+
+	CPPUNIT_ASSERT_EQUAL (BBT_Offset (1, 0, 481), o);
+
+	a = BBT_Time (4,6,959);
+	o = m.bbt_delta (b, a);
+
+	CPPUNIT_ASSERT_EQUAL (BBT_Offset (1, 5, 481), o);
+
+	a = BBT_Time (4,4,959);
+	b = BBT_Time (5,3,840);
+	o = m.bbt_delta (b, a);
+
+	CPPUNIT_ASSERT_EQUAL (BBT_Offset (0, 10, 841), o);
+
+	a = BBT_Time (1, 1, 0);
+	b = BBT_Time (10, 1, 0);
+	o = m.bbt_delta (b, a);
+
+	CPPUNIT_ASSERT_EQUAL (BBT_Offset (9, 0, 0), o);
+
+	a = BBT_Time (1, 12, 0);
+	b = BBT_Time (10, 1, 0);
+	o = m.bbt_delta (b, a);
+
+	CPPUNIT_ASSERT_EQUAL (BBT_Offset (8, 1, 0), o);
+
+	a = BBT_Time (1, 1, 0);
+	b = BBT_Time (1, 1, 1);
+	o = m.bbt_delta (b, a);
+
+	CPPUNIT_ASSERT_EQUAL (BBT_Offset (0, 0, 1), o);
+
+	a = BBT_Time (1, 1, 960);
+	b = BBT_Time (1, 2, 0);
+	o = m.bbt_delta (b, a);
+
+	CPPUNIT_ASSERT_EQUAL (BBT_Offset (0, 0, 0), o);
+
+	a = BBT_Time (1, 1, 959);
+	b = BBT_Time (1, 2, 0);
+	o = m.bbt_delta (b, a);
+
+	CPPUNIT_ASSERT_EQUAL (BBT_Offset (0, 0, 1), o);
+
+
+	a = BBT_Time (1, 1, 480);
+	b = BBT_Time (1, 2, 959);
+	o = m.bbt_delta (b, a);
+
+	CPPUNIT_ASSERT_EQUAL (BBT_Offset (0, 1, 479), o);
+
+	a = BBT_Time (1, 1, 480);
+	b = BBT_Time (1, 1, 959);
+	o = m.bbt_delta (b, a);
+
+	CPPUNIT_ASSERT_EQUAL (BBT_Offset (0, 0, 479), o);
+}

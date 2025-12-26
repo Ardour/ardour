@@ -36,7 +36,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 bool
-CoreSelection::do_select (std::shared_ptr<Stripable> s, std::shared_ptr<AutomationControl> c, SelectionOperation op, bool with_group, bool routes_only, RouteGroup* not_allowed_in_group)
+CoreSelection::do_select (std::shared_ptr<Stripable> s, std::shared_ptr<AutomationControl> c, SelectionOperation op, bool with_group, bool routes_only, std::shared_ptr<RouteGroup> not_allowed_in_group)
 {
 	std::shared_ptr<Route> r;
 	StripableList sl;
@@ -48,7 +48,7 @@ CoreSelection::do_select (std::shared_ptr<Stripable> s, std::shared_ptr<Automati
 	 */
 
 	if (s)  {
-		if (s->is_hidden()) {
+		if (s->is_hidden() && op != SelectionRemove) {
 			return false;
 		}
 
@@ -64,19 +64,11 @@ CoreSelection::do_select (std::shared_ptr<Stripable> s, std::shared_ptr<Automati
 
 		if (r) {
 
-			/* no selection of inactive routes, though they can be selected
-			 * and made inactive.
-			 */
-
-			if (!r->active()) {
-				return false;
-			}
-
 			if (!c && with_group) {
 
 				if (!not_allowed_in_group || !r->route_group() || r->route_group() != not_allowed_in_group) {
 
-					RouteGroup* group = r->route_group();
+					std::shared_ptr<RouteGroup> group = r->route_group();
 
 					if (group && group->is_select() && group->is_active()) {
 						for (auto & ri : *(group->route_list())) {
@@ -137,7 +129,7 @@ CoreSelection::do_select (std::shared_ptr<Stripable> s, std::shared_ptr<Automati
 }
 
 bool
-CoreSelection::select_stripable_and_maybe_group (std::shared_ptr<Stripable> s, SelectionOperation op, bool with_group, bool routes_only, RouteGroup* not_allowed_in_group)
+CoreSelection::select_stripable_and_maybe_group (std::shared_ptr<Stripable> s, SelectionOperation op, bool with_group, bool routes_only, std::shared_ptr<RouteGroup> not_allowed_in_group)
 {
 	return do_select (s, nullptr, op, with_group, routes_only, not_allowed_in_group);
 }
@@ -204,7 +196,7 @@ CoreSelection::select_adjacent_stripable (bool mixer_order, bool routes_only,
 
 	/* Check for a possible selection-affecting route group */
 
-	RouteGroup* group = 0;
+	std::shared_ptr<RouteGroup> group;
 	std::shared_ptr<Route> r = std::dynamic_pointer_cast<Route> (last_selected);
 
 	if (r && r->route_group() && r->route_group()->is_select() && r->route_group()->is_active()) {
@@ -371,7 +363,7 @@ CoreSelection::remove (StripableList & sl, std::shared_ptr<AutomationControl> c)
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
 
-		for (auto & s : sl) {
+		for (auto const& s : sl) {
 			SelectedStripable ss (s, c, 0);
 
 			SelectedStripables::iterator i = _stripables.find (ss);
@@ -383,6 +375,7 @@ CoreSelection::remove (StripableList & sl, std::shared_ptr<AutomationControl> c)
 			}
 
 			if (s == _first_selected_stripable.lock ()) {
+				DEBUG_TRACE (DEBUG::Selection, "Reset _first_selected_stripable\n");
 				_first_selected_stripable.reset ();
 			}
 		}
@@ -641,9 +634,9 @@ CoreSelection::get_stripables_for_op (StripableList& sl, std::shared_ptr<Stripab
 	if (_stripables.empty()) {
 
 		if (r) {
-			RouteGroup* rg = r->route_group();
+			std::shared_ptr<RouteGroup> rg = r->route_group();
 
-			if (rg && rg->is_active() && (rg->*group_predicate)()) {
+			if (rg && rg->is_active() && ((rg.get())->*group_predicate)()) {
 				for (auto & r : *rg->route_list()) {
 					sl.push_back (r);
 				}
@@ -662,7 +655,7 @@ CoreSelection::get_stripables_for_op (StripableList& sl, std::shared_ptr<Stripab
 
 	} else {
 
-		if (target->is_selected()) {
+		if (target->is_selected() && Config->get_implicit_selection_op_groups ()) {
 
 			/* Use full selection */
 
@@ -678,9 +671,9 @@ CoreSelection::get_stripables_for_op (StripableList& sl, std::shared_ptr<Stripab
 			/* target not selected but might be part of a group */
 
 			if (r) {
-				RouteGroup* rg = r->route_group();
+				std::shared_ptr<RouteGroup> rg = r->route_group();
 
-				if (rg && rg->is_active() && (rg->*group_predicate)()) {
+				if (rg && rg->is_active() && ((rg.get())->*group_predicate)()) {
 					for (auto & r : *rg->route_list()) {
 						sl.push_back (r);
 					}

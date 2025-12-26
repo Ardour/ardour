@@ -213,7 +213,20 @@ InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 {
 	automation_run (start_sample, nframes);
 
-	if (!check_active() || !_send_to) {
+	/* Do not use check_active() here, because we need to continue running
+	 * until the gain has gone to zero.
+	 */
+
+	if (!_send_to) {
+		_meter->reset ();
+		return;
+	}
+
+	/* main gain control: * mute & bypass/enable */
+	const gain_t tgain = target_gain ();
+	const bool converged = fabsf (_current_gain - tgain) < GAIN_COEFF_DELTA;
+
+	if ((tgain == GAIN_COEFF_ZERO) && converged) {
 		_meter->reset ();
 		return;
 	}
@@ -290,8 +303,16 @@ InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		}
 
 	} else {
-		/* no panner or panner is bypassed */
-		assert (mixbufs.available () >= bufs.count ());
+		/* no panner or panner is bypassed
+		 * 1: if source has more channels than the destination bus
+		 *    only send as many channels as there ae on the destination
+		 *    (ignore excess channels)
+		 * 2: if desination has more channels than the source:
+		 *    silence additional channels.
+		 *
+		 * The following assert() would go off in case of (1)
+		 */
+		//assert (mixbufs.available () >= bufs.count ());
 		/* BufferSet::read_from() changes the channel-conut,
 		 * so we manually copy bufs -> mixbufs
 		 */
@@ -309,9 +330,6 @@ InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		}
 	}
 
-	/* main gain control: * mute & bypass/enable */
-	gain_t tgain = target_gain ();
-
 	if (tgain != _current_gain) {
 		/* target gain has changed, fade in/out */
 		_current_gain = Amp::apply_gain (mixbufs, _session.nominal_sample_rate (), nframes, _current_gain, tgain);
@@ -324,6 +342,8 @@ InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		/* target gain has not changed, but is not zero or unity */
 		Amp::apply_simple_gain (mixbufs, nframes, tgain);
 	}
+
+	maybe_merge_midi_mute (mixbufs, tgain == GAIN_COEFF_ZERO);
 
 	/* apply fader gain automation */
 	_amp->set_gain_automation_buffer (_session.send_gain_automation_buffer ());
@@ -343,7 +363,9 @@ InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 
 	_thru_delay->run (bufs, start_sample, end_sample, speed, nframes, true);
 
-	/* target will pick up our output when it is ready */
+	if (converged) {
+		_active = _pending_active;
+	}
 }
 
 void

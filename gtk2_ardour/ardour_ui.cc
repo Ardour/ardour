@@ -49,7 +49,6 @@
 
 #include <stdint.h>
 #include <fcntl.h>
-#include <unistd.h>
 #include <time.h>
 
 #include <glib.h>
@@ -111,6 +110,10 @@
 
 #include "LuaBridge/LuaBridge.h"
 
+#ifdef PLATFORM_WINDOWS
+#include "pbd/windows_mmcss.h"
+#endif
+
 #ifdef WINDOWS_VST_SUPPORT
 #include <fst.h>
 #endif
@@ -169,6 +172,7 @@
 #include "recorder_ui.h"
 #include "route_time_axis.h"
 #include "route_params_ui.h"
+#include "rta_window.h"
 #include "save_as_dialog.h"
 #include "save_template_dialog.h"
 #include "script_selector.h"
@@ -328,11 +332,13 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, midi_port_matrix (X_("midi-connection-manager"), _("MIDI Connections"), std::bind (&ARDOUR_UI::create_global_port_matrix, this, ARDOUR::DataType::MIDI))
 	, key_editor (X_("key-editor"), _("Keyboard Shortcuts"), std::bind (&ARDOUR_UI::create_key_editor, this))
 	, luawindow (X_("luawindow"), S_("Window|Scripting"), std::bind (&ARDOUR_UI::create_luawindow, this))
+	, rtawindow (X_("rtawindow"), S_("Window|Realtime Analyzer"), std::bind (&ARDOUR_UI::create_rtawindow, this))
 	, video_server_process (0)
 	, have_configure_timeout (false)
 	, last_configure_time (0)
 	, last_peak_grab (0)
 	, have_disk_speed_dialog_displayed (false)
+	, have_mmcss_error_dialog_displayed (false)
 	, _status_bar_visibility (X_("status-bar"))
 	, _log_not_acknowledged (LogLevelNone)
 	, duplicate_routes_dialog (0)
@@ -342,6 +348,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, recorder_visibility_button (S_("Window|Rec"))
 	, trigger_page_visibility_button (S_("Window|Cue"))
 	, nsm_first_session_opened (false)
+	, _loading_session (false)
 {
 	Gtkmm2ext::init (localedir);
 
@@ -419,6 +426,10 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	ARDOUR::Session::VersionMismatch.connect (forever_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::session_format_mismatch, this, _1, _2), gui_context());
 
+#ifdef PLATFORM_WINDOWS
+	PBD::MMCSS::MMCSSError.connect (forever_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::mmcss_error_handler, this), gui_context());
+#endif
+
 	/* handle dialog requests */
 
 	ARDOUR::Session::Dialog.connect (forever_connections, MISSING_INVALIDATOR, std::bind (&ARDOUR_UI::session_dialog, this, _1), gui_context());
@@ -485,6 +496,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 		audio_port_matrix.set_state (*ui_xml, 0);
 		midi_port_matrix.set_state (*ui_xml, 0);
 		luawindow.set_state (*ui_xml, 0);
+		rtawindow.set_state (*ui_xml, 0);
 		export_video_dialog.set_state (*ui_xml, 0);
 		lua_script_window.set_state (*ui_xml, 0);
 		idleometer.set_state (*ui_xml, 0);
@@ -519,6 +531,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	WM::Manager::instance().register_window (&audio_port_matrix);
 	WM::Manager::instance().register_window (&midi_port_matrix);
 	WM::Manager::instance().register_window (&luawindow);
+	WM::Manager::instance().register_window (&rtawindow);
 	WM::Manager::instance().register_window (&idleometer);
 	WM::Manager::instance().register_window (&io_plugin_window);
 	WM::Manager::instance().register_window (&plugin_manager_ui);
@@ -571,6 +584,7 @@ ARDOUR_UI::engine_stopped ()
 	ActionManager::set_sensitive (ActionManager::engine_opposite_sensitive_actions, true);
 	update_sample_rate ();
 	update_cpu_load ();
+	have_mmcss_error_dialog_displayed = false;
 }
 
 void
@@ -1109,7 +1123,7 @@ ARDOUR_UI::ask_about_scratch_deletion ()
 	msg.add_button (_("Delete this session (IRREVERSIBLE!)"), RESPONSE_OK);
 	msg.add_button (_("Do not delete"), RESPONSE_CANCEL);
 	msg.set_default_response (RESPONSE_CANCEL);
-	msg.set_position (Gtk::WIN_POS_MOUSE);
+	msg.set_position (UIConfiguration::instance().get_default_window_position());
 
 	int r = msg.run ();
 
@@ -1495,7 +1509,7 @@ ARDOUR_UI::update_wall_clock ()
 void
 ARDOUR_UI::session_add_midi_route (
 		bool disk,
-		RouteGroup* route_group,
+		std::shared_ptr<RouteGroup> route_group,
 		uint32_t how_many,
 		const string& name_template,
 		bool strict_io,
@@ -1549,7 +1563,7 @@ ARDOUR_UI::session_add_audio_route (
 	int32_t input_channels,
 	int32_t output_channels,
 	ARDOUR::TrackMode mode,
-	RouteGroup* route_group,
+	std::shared_ptr<RouteGroup> route_group,
 	uint32_t how_many,
 	string const & name_template,
 	bool strict_io,
@@ -1846,6 +1860,23 @@ ARDOUR_UI::get_smart_mode() const
 
 
 void
+ARDOUR_UI::spacebar_action (bool with_abort, bool roll_out_of_bounded_mode)
+{
+	if (!_session) {
+		return;
+	}
+
+	std::shared_ptr<TriggerBox> armed_tb = _session->armed_triggerbox();
+
+	if (armed_tb && _session->transport_rolling()) {
+		armed_tb->finish_recording ();
+		return;
+	}
+
+	toggle_roll (with_abort, roll_out_of_bounded_mode);
+}
+
+void
 ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 {
 	if (!_session) {
@@ -1907,7 +1938,7 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 		} else {
 			if (UIConfiguration::instance().get_follow_edits()) {
 				list<TimelineRange>& range = editor->get_selection().time;
-				if (range.front().start().samples() == _session->transport_sample()) { // if playhead is exactly at the start of a range, we assume it was placed there by follow_edits
+				if (!range.empty() && range.front().start().samples() == _session->transport_sample()) { // if playhead is exactly at the start of a range, we assume it was placed there by follow_edits
 					_session->request_play_range (&range, true);
 					_session->set_requested_return_sample (range.front().start().samples());  //force an auto-return here
 				}
@@ -2178,6 +2209,16 @@ ARDOUR_UI::start_clocking ()
 	}
 }
 
+unsigned int
+ARDOUR_UI::clock_signal_interval ()
+{
+	if (UIConfiguration::instance().get_super_rapid_clock_update()) {
+		return Timers::fps_interval ();
+	} else {
+		return Timers::rapid_interval ();
+	}
+}
+
 void
 ARDOUR_UI::stop_clocking ()
 {
@@ -2220,6 +2261,9 @@ ARDOUR_UI::save_state_canfail (string name, bool switch_to_it)
 		if ((ret = _session->save_state (name, false, switch_to_it)) != 0) {
 			return ret;
 		}
+
+		std::string rus_path = Glib::build_filename (_session->session_directory().root_path(), "rus.xml");
+		region_ui_settings_manager.save (rus_path);
 	}
 
 	save_ardour_state (); /* XXX cannot fail? yeah, right ... */
@@ -2230,7 +2274,7 @@ void
 ARDOUR_UI::save_template_dialog_response (int response, SaveTemplateDialog* d)
 {
 	if (response == RESPONSE_ACCEPT) {
-		const string name = legalize_for_path (d->get_template_name ());
+		const string name = legalize_for_universal_path (d->get_template_name ());
 		const string desc = d->get_description ();
 
 		int failed = _session->save_template (name, desc);
@@ -2242,8 +2286,7 @@ ARDOUR_UI::save_template_dialog_response (int response, SaveTemplateDialog* d)
 
 			if (overwrite) {
 				_session->save_template (name, desc, true);
-			}
-			else {
+			}  else {
 				d->show ();
 				return;
 			}
@@ -2551,7 +2594,7 @@ will release an additional %3 %4bytes of disk space.\n", removed),
 	results.get_vbox()->pack_start (ddhbox, true, false, 5);
 	results.add_button (Stock::CLOSE, RESPONSE_CLOSE);
 	results.set_default_response (RESPONSE_CLOSE);
-	results.set_position (Gtk::WIN_POS_MOUSE);
+	results.set_position (UIConfiguration::instance().get_default_window_position());
 
 	results_display.show();
 	list_scroller.show();
@@ -2594,7 +2637,7 @@ Clean-up will move all unused files to a \"dead\" location."));
 
 	checker.set_name (_("CleanupDialog"));
 	checker.set_wmclass (X_("ardour_cleanup"), PROGRAM_NAME);
-	checker.set_position (Gtk::WIN_POS_MOUSE);
+	checker.set_position (UIConfiguration::instance().get_default_window_position());
 
 	switch (checker.run()) {
 	case RESPONSE_ACCEPT:
@@ -2745,7 +2788,7 @@ ARDOUR_UI::add_route ()
 		return;
 	}
 
-	add_route_dialog->set_position (WIN_POS_MOUSE);
+	add_route_dialog->set_position (UIConfiguration::instance().get_default_window_position());
 	add_route_dialog->present();
 }
 
@@ -2810,7 +2853,7 @@ ARDOUR_UI::add_route_dialog_response (int r)
 	ChanCount input_chan= add_route_dialog->channels ();
 	ChanCount output_chan;
 	PluginInfoPtr instrument = add_route_dialog->requested_instrument ();
-	RouteGroup* route_group = add_route_dialog->route_group ();
+	std::shared_ptr<RouteGroup> route_group = add_route_dialog->route_group ();
 	AutoConnectOption oac = Config->get_output_auto_connect();
 	bool strict_io = add_route_dialog->use_strict_io ();
 	bool trigger_visibility = add_route_dialog->show_on_cue_page ();
@@ -2835,7 +2878,7 @@ ARDOUR_UI::add_route_dialog_response (int r)
 		d.add_button(Stock::CANCEL, RESPONSE_CANCEL);
 		d.add_button(Stock::OK, RESPONSE_OK);
 		d.set_default_response (RESPONSE_OK);
-		d.set_position (WIN_POS_MOUSE);
+		d.set_position (UIConfiguration::instance().get_default_window_position());
 		d.show_all ();
 
 		if (d.run () == RESPONSE_OK) {
@@ -2928,6 +2971,33 @@ ARDOUR_UI::disk_speed_dialog_gone (int /*ignored_response*/, MessageDialog* msg)
 {
 	have_disk_speed_dialog_displayed = false;
 	delete msg;
+}
+
+void
+ARDOUR_UI::mmcss_error_handler ()
+{
+	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::mmcss_error_handler)
+
+	if (!have_mmcss_error_dialog_displayed) {
+		have_mmcss_error_dialog_displayed = true;
+		ArdourMessageDialog msg (_("<b>MMCSS priority can not be set!</b>\n\n"
+		                           "Windows Multimedia Class Scheduler Service (MCSS) is used for time-critical audio processing. "
+		                           "By default, Microsoft has limited the number of MMCSS threads to 32, and this limit has been reached.\n\n"
+															 "You can reduce the number of process threads in Preferences &gt; Performance, but that may be insufficient, "
+		                           "because MCSS threads are also used for Audio and MIDI I/O.\n"
+		                           "One solution is to increase the number of available MCSS threads by modifying the windows registry. "
+															 "A tool to do that conveniently can be found <a href=\"https://helpcenter.steinberg.de/hc/en-us/articles/13338094735762-Error-message-on-Windows-MMCSS-priority-cannot-be-set\">here</a>."),
+		                     true, MESSAGE_ERROR);
+
+		for (auto const& w: msg.get_message_area ()->get_children ()) {
+			Gtk::Label* l = dynamic_cast<Gtk::Label*> (w);
+			if (l) {
+				l->property_track_visited_links() = false;
+				l->signal_activate_link().connect ([](std::string const& url) { std::cout << url << "\n"; return PBD::open_uri (url); }, false);
+			}
+		}
+		msg.run ();
+	}
 }
 
 void
@@ -3086,4 +3156,3 @@ ARDOUR_UI::stop_cues (int col, bool immediately)
 {
 	_basic_ui->trigger_stop_col (col, immediately);
 }
-

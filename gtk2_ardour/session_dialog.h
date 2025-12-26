@@ -100,10 +100,11 @@ private:
 
 	Gtk::ComboBoxText  timebase_chooser;
 
-	bool new_button_pressed (GdkEventButton*);
-	bool recent_button_pressed (GdkEventButton*);
-	bool existing_button_pressed (GdkEventButton*);
 	bool prefs_button_pressed (GdkEventButton*);
+
+	void new_button_choice_action ();
+	void recent_button_choice_action ();
+	void existing_button_choice_action ();
 
 	bool open_button_pressed (GdkEventButton*);
 
@@ -244,6 +245,11 @@ private:
 	void updates_button_clicked ();
 
 	Gtk::Notebook _tabs;
+
+	Glib::RefPtr<Gtk::ActionGroup> action_group;
+	Glib::RefPtr<Gtk::Action> new_session_action;
+	Glib::RefPtr<Gtk::Action> recent_session_action;
+	Glib::RefPtr<Gtk::Action> existing_session_action;
 };
 
 #endif /* __gtk2_ardour_session_dialog_h__ */

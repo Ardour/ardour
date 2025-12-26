@@ -133,7 +133,8 @@ Downloader::download ()
 		 * progress meter
 		 */
 
-		curl = curl_easy_init ();
+		CURL* curl = _ccurl.curl ();
+
 		if (!curl) {
 			_status = -1;
 			return;
@@ -155,7 +156,7 @@ Downloader::download ()
 			_download_size = dsize;
 		}
 
-		curl_easy_cleanup (curl);
+		_ccurl.reset ();
 
 		if (res != CURLE_OK ) {
 			error << string_compose (_("Download failed, error code %1 (%2)"), curl_easy_strerror (res), curl_error) << endmsg;
@@ -164,7 +165,7 @@ Downloader::download ()
 		}
 	}
 
-	curl = curl_easy_init ();
+	CURL* curl = _ccurl.curl ();
 	if (!curl) {
 		_status = -1;
 		return;
@@ -175,7 +176,6 @@ Downloader::download ()
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CurlWrite_CallbackFunc_Downloader);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
 	CURLcode res = curl_easy_perform (curl);
-	curl_easy_cleanup (curl);
 
 	if (res == CURLE_OK) {
 		_status = 1;

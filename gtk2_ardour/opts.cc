@@ -65,7 +65,7 @@ print_help (const char *execname)
 	cout
 		<< _("Usage: ") << PROGRAM_NAME << _(" [ OPTIONS ] [ SESSION-NAME ]")
 		<< "\n\n"
-		<< _("Ardour is a multichannel hard disk recorder (HDR) and digital audio workstation (DAW).")
+		<< string_compose (_("%1 is a digital audio workstation, used for multitrack recording, nonlinear, nondestructive editing and much more."), PROGRAM_NAME)
 		<< "\n\n"
 		<< _("Options:\n")
 		<< _("  -a, --no-announcements      Do not contact website for announcements\n")

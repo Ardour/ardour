@@ -244,6 +244,7 @@ struct smf_struct {
 	/** These are private fields using only by loading and saving routines. */
 	FILE      *stream;
 	void      *file_buffer;
+	size_t     file_buffer_capacity;
 	size_t     file_buffer_length;
 	size_t     next_chunk_offset;
 	int        expected_number_of_tracks;

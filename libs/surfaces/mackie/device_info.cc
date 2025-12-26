@@ -61,6 +61,7 @@ DeviceInfo::DeviceInfo()
 	, _uses_ipmidi (false)
 	, _no_handshake (false)
 	, _is_qcon(false)
+	, _is_v1m(false)
 	, _is_platformMp(false)
 	, _is_proG2(false)
 	, _is_xtouch(false)
@@ -71,7 +72,7 @@ DeviceInfo::DeviceInfo()
 	, _single_fader_follows_selection (false)
 	, _device_type (MCU)
 #ifdef UF8
-	, _name (X_("UF8/UF1"))
+	, _name (X_("UF8"))
 #else
 	, _name (X_("Mackie Control Universal Pro"))
 #endif
@@ -347,6 +348,12 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 		_is_qcon = false;
 	}
 	
+	if ((child = node.child ("IsV1M")) != 0) {
+		child->get_property ("value", _is_v1m);
+	} else {
+		_is_v1m = false;
+	}
+
 	if ((child = node.child ("IsXTouch")) != 0) {
 		child->get_property ("value", _is_xtouch);
 	} else {
@@ -357,6 +364,18 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 		child->get_property ("value", _is_platformMp);
 	} else {
 		_is_platformMp = false;
+	}
+
+	if ((child = node.child ("IsP1M")) != 0) {
+		child->get_property ("value", _is_p1m);
+	} else {
+		_is_p1m = false;
+	}
+
+	if ((child = node.child ("IsP1Nano")) != 0) {
+		child->get_property ("value", _is_p1nano);
+	} else {
+		_is_p1nano = false;
 	}
 
 	if ((child = node.child ("IsProG2")) != 0) {
@@ -525,9 +544,25 @@ DeviceInfo::is_qcon () const
 	return _is_qcon;
 }
 
+bool
+DeviceInfo::is_v1m () const
+{
+	return _is_v1m;
+}
+
 bool DeviceInfo::is_platformMp () const
 {
 	return _is_platformMp;
+}
+
+bool DeviceInfo::is_p1m () const
+{
+	return _is_p1m;
+}
+
+bool DeviceInfo::is_p1nano () const
+{
+	return _is_p1nano;
 }
 
 bool DeviceInfo::is_proG2 () const

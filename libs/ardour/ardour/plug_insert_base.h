@@ -100,6 +100,7 @@ public:
 		                       std::shared_ptr<AutomationList> list = std::shared_ptr<AutomationList> ());
 
 		virtual double get_value (void) const;
+		void           catch_up_with_external_value (double val);
 		XMLNode&       get_state () const;
 
 	protected:

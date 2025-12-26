@@ -110,7 +110,7 @@ RouteProcessorSelection::add (AxisView* r, bool with_groups)
 
 	PresentationInfo::ChangeSuspender cs;
 	if (axes.insert (r).second) {
-		shp.session()->selection().select_stripable_and_maybe_group (r->stripable(), SelectionAdd, with_groups);
+		shp.session()->selection().select_stripable_and_maybe_group (r->stripable(), SelectionAdd, with_groups, false);
 		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 		if (ms) {
 			ms->CatchDeletion.connect (*this, invalidator (*this), std::bind (&RouteProcessorSelection::remove, this, _1, false), gui_context());
@@ -127,7 +127,7 @@ RouteProcessorSelection::remove (AxisView* r, bool with_groups)
 	ENSURE_GUI_THREAD (*this, &RouteProcessorSelection::remove, r);
 
 	PresentationInfo::ChangeSuspender cs;
-	shp.session()->selection().select_stripable_and_maybe_group (r->stripable(), SelectionRemove, with_groups);
+	shp.session()->selection().select_stripable_and_maybe_group (r->stripable(), SelectionRemove, with_groups, false);
 }
 
 void
@@ -137,7 +137,7 @@ RouteProcessorSelection::set (AxisView* r)
 		return;
 	}
 
-	shp.session()->selection().select_stripable_and_maybe_group (r->stripable(), SelectionSet);
+	shp.session()->selection().select_stripable_and_maybe_group (r->stripable(), SelectionSet, true, false);
 }
 
 bool

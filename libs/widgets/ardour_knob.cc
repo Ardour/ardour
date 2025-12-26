@@ -27,11 +27,12 @@
 #include "gtkmm2ext/utils.h"
 
 #include "widgets/ardour_knob.h"
-#include "widgets/ui_config.h"
+#include "gtkmm2ext/ui_config.h"
 
 #include "pbd/i18n.h"
 
 using namespace ArdourWidgets;
+using namespace Gtkmm2ext;
 using namespace PBD;
 
 ArdourKnob::Element ArdourKnob::default_elements = ArdourKnob::Element (ArdourKnob::Arc);

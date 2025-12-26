@@ -68,7 +68,7 @@ playhead to the n-th marker.
 
 %rop Editor Region Operations
 
-%grid Editor Grid Settings + Editor Modes
+%grid Editing Grid Settings + Editor Modes
 
 %select Editor Selecting
 
@@ -111,13 +111,14 @@ This mode provides many different operations on both regions and control points,
 @editing|Editing/temporal-zoom-in|                                           equal|zoom in
 @editing|Editing/temporal-zoom-out|                                          minus|zoom out
 
-@vis|Editor/expand-tracks|                                   <@TERTIARY@>plus|expand track height
-@vis|Editor/shrink-tracks|                      <@SECONDARY@><@TERTIARY@>plus|shrink track height
-@vis|Editor/zoom-to-session|              <@SECONDARY@><@TERTIARY@>underscore|zoom to session
+@vis|Editor/expand-tracks|                                 <@SECONDARY@>equal|expand track height
+@vis|Editor/shrink-tracks|                                 <@SECONDARY@>minus|shrink track height
+@vis|Editor/zoom-to-session|                          <@PRIMARY@><@TERTIARY@>underscore|zoom to session
+
 @eep|Editor/edit-cursor-to-previous-region-sync|                   apostrophe|EP to prev region sync
 @eep|Editor/edit-cursor-to-next-region-sync|                        semicolon|EP to next region sync
 
-@trans|Transport/ToggleRoll|                                            space|toggle roll
+@trans|Transport/SpacebarAction|                                        space|toggle roll
 @trans|Transport/PlaySelection|                            <@SECONDARY@>space|play edit range
 @edit|Editor/play-from-edit-point-and-return|    <@PRIMARY@><@TERTIARY@>space|play from EP \& return
 @trans|Transport/ToggleRollMaybe|               <@PRIMARY@><@SECONDARY@>space|stop (keep loop/range play)
@@ -189,6 +190,7 @@ This mode provides many different operations on both regions and control points,
 @sess|Main/Recent|                              <@PRIMARY@><@TERTIARY@>o|open a recent session
 @wvis|Window/toggle-session-options-editor|               <@SECONDARY@>o|toggle preferences dialog
 @edit|Editor/set-playhead|                                             p|set playhead position
+@vis|Editor/show-editor-props|                             <@TERTIARY@>p|toggle editor properties
 
 ;; MIDDLE ROW
 
@@ -209,8 +211,8 @@ This mode provides many different operations on both regions and control points,
 @edit|Editor/multi-duplicate|                             <@SECONDARY@>d|duplicate (multi)
 @select|Editor/select-all-in-punch-range|                  <@TERTIARY@>d|select all in punch range
 @vis|Editor/fit-selection|                                             f|fit selection vertically
-@edit|Editor/toggle-follow-playhead|                        <@PRIMARY@>f|toggle playhead tracking
-@edit|Editor/toggle-stationary-playhead|                   <@TERTIARY@>f|toggle stationary playhead
+@edit|EditorEditing/toggle-follow-playhead|                 <@PRIMARY@>f|toggle playhead tracking
+@edit|EditorEditing/toggle-stationary-playhead|            <@TERTIARY@>f|toggle stationary playhead
 @rop|Region/show-rhythm-ferret|                           <@SECONDARY@>f|show rhythm ferret window 
 @wvis|Common/ToggleMaximalEditor|              <@PRIMARY@><@SECONDARY@>f|maximise editor space
 @wvis|Common/ToggleMaximalMixer|                <@PRIMARY@><@TERTIARY@>f|maximise mixer space
@@ -220,15 +222,17 @@ This mode provides many different operations on both regions and control points,
 @edit|Region/play-selected-regions|                                    h|play selected region(s)
 @eep|Region/trim-front|                                                j|trim front
 @eep|Region/trim-back|                                                 k|trim back
-@wvis|Window/toggle-virtual-keyboard|                     <@SECONDARY@>k|show virtual MIDI keyboard
+@wvis|Window/toggle-virtual-keyboard|                     <@SECONDARY@>k|show Virtual MIDI keyboard
+@wvis|Window/toggle-rtawindow|                <@SECONDARY@><@TERTIARY@>s|show Realtime Analyzer
 @trans|Transport/Loop|                                                 l|loop play (the loop range)
 @select|Editor/select-all-in-loop-range|                    <@PRIMARY@>l|select all in loop range
 @wvis|Window/toggle-locations|                            <@SECONDARY@>l|toggle locations dialog
 @edit|Editor/show-editor-list|                             <@TERTIARY@>l|show editor list
+@edit|Editor/find-and-display-stripable|        <@PRIMARY@><@TERTIARY@>l|find and display track/bus
 
 ;; BOTTOM ROW
 
-@emmode|Editing/zoom-to-selection|                                      z|zoom to selection
+@emmode|Editor/zoom-to-selection|                                      z|zoom to selection
 @editing|Editing/undo|                                       <@PRIMARY@>z|undo
 @editing|Editing/alternate-alternate-redo|       <@PRIMARY@><@TERTIARY@>z|redo
 @vis|Editor/toggle-zoom|                                   <@TERTIARY@>z|toggle last 2 zoom states
@@ -397,9 +401,9 @@ This mode provides many different operations on both regions and control points,
 @eep|Editor/cycle-edit-point-with-marker|     <@PRIMARY@>2|next EP w/marker {playhead, mouse, marker}
 @emmode|Editor/set-mouse-mode-object-range|              3|Smart Mode (provide some Range tools in Object mode)
 @gmode|Transport/ToggleFollowEdits|           <@PRIMARY@>3|toggle playhead follows edits
-@grid|Editor/cycle-snap-mode|                            4|cycle to next snap mode {On/Off}
-@grid|Editor/prev-grid-choice|                           5|use prev grid unit
-@grid|Editor/next-grid-choice|                           6|use next grid unit
+@grid|Editing/cycle-snap-mode|                            4|cycle to next snap mode {On/Off}
+@grid|Editing/prev-grid-choice|                           5|use prev grid unit
+@grid|Editing/next-grid-choice|                           6|use next grid unit
 @gmode|Transport/ToggleAutoReturn|                       7|toggle auto return
 @gmode|Transport/ToggleAutoPlay|              <@PRIMARY@>7|toggle auto play
 @gmode|Transport/TogglePunch|                            8|toggle punch in+out
@@ -497,10 +501,9 @@ This mode provides many different operations on both regions and control points,
 @notes|Notes/increase-velocity-fine-smush|      <@PRIMARY@><@SECONDARY@><@TERTIARY@>Up|Increase Note Velocity (+1) allow mushing
 @notes|Notes/decrease-velocity-fine-smush|    <@PRIMARY@><@SECONDARY@><@TERTIARY@>Down|Increase Note Velocity (+1) allow mushing
 
-@notes|Notes/quantize-selected-notes|q|Quantize Selected Notes
+@notes|Notes/quantize-selected-notes|                                    q|Quantize Selected Notes
 
-@notes|Main/Escape|			Clear selection
-
+@notes|Notes/select-all|                                      <@PRIMARY@>a|Select all notes
 @notes|Notes/select-next|                                              Tab|Select next note
 @notes|Notes/select-previous|                               <@PRIMARY@>Tab|Select previous note
 @notes|Notes/add-select-next|                              <@TERTIARY@>Tab|Select next note
@@ -510,6 +513,7 @@ This mode provides many different operations on both regions and control points,
 @notes|Notes/extend-selection|                                <@TERTIARY@>e|Extend selection to end of region
 @notes|Notes/invert-selection|                                <@TERTIARY@>i|Invert note selection
 @notes|Notes/duplicate-selection|                             <@TERTIARY@>d|Duplicate note selection
+@notes|Notes/clear-selection|                                        Escape|Clear note selection
 
 @rec|Recorder/arm-all|                        <@PRIMARY@>r|record arm all tracks
 @rec|Recorder/arm-none|           <@PRIMARY@><@TERTIARY@>r|disable record arm of all tracks

@@ -123,7 +123,7 @@ PluginPinWidget::PluginPinWidget (std::shared_ptr<ARDOUR::PluginInsert> pi)
 	_pm_size_group  = SizeGroup::create (SIZE_GROUP_BOTH);
 	_add_plugin.set_tweaks (ArdourButton::Square);
 	_del_plugin.set_tweaks (ArdourButton::Square);
-	if (_pi->plugin (0)->get_info()->reconfigurable_io ()) {
+	if (_pi->plugin (0)->get_info()->reconfigurable_io () || _pi->plugin (0)->get_info()->variable_bus_layout ()) {
 		_pm_size_group->add_widget (_add_input_audio);
 		_pm_size_group->add_widget (_del_input_audio);
 		_pm_size_group->add_widget (_add_input_midi);
@@ -151,7 +151,7 @@ PluginPinWidget::PluginPinWidget (std::shared_ptr<ARDOUR::PluginInsert> pi)
 	/* left side */
 	tl->pack_start (_set_config, false, false);
 
-	if (_pi->plugin (0)->get_info()->reconfigurable_io ()) {
+	if (_pi->plugin (0)->get_info()->reconfigurable_io () || _pi->plugin (0)->get_info()->variable_bus_layout ()) {
 		box = manage (new HBox ());
 		box->set_border_width (2);
 		box->pack_start (_add_input_audio, true, false);
@@ -507,7 +507,7 @@ PluginPinWidget::refill_output_presets ()
 		return;
 	}
 
-	_out_presets.AddMenuElem (MenuElem (_("Automatic"), sigc::bind (sigc::mem_fun (*this, &PluginPinWidget::select_output_preset), 0)));
+	_out_presets.add_menu_elem (MenuElem (_("Automatic"), sigc::bind (sigc::mem_fun (*this, &PluginPinWidget::select_output_preset), 0)));
 
 	const uint32_t n_audio = _pi->preset_out ().n_audio ();
 	if (n_audio == 0) {
@@ -532,7 +532,7 @@ PluginPinWidget::refill_output_presets ()
 	for (PluginOutputConfiguration::const_iterator i = ppc.begin () ; i != ppc.end (); ++i) {
 		assert (*i > 0);
 		std::string tmp = PluginSetupDialog::preset_label (*i);
-		_out_presets.AddMenuElem (MenuElem (tmp, sigc::bind (sigc::mem_fun (*this, &PluginPinWidget::select_output_preset), *i)));
+		_out_presets.add_menu_elem (MenuElem (tmp, sigc::bind (sigc::mem_fun (*this, &PluginPinWidget::select_output_preset), *i)));
 		if (n_audio == *i) {
 			_out_presets.set_text (tmp);
 		}
@@ -2183,8 +2183,14 @@ void
 PluginPinDialog::route_processors_changed (ARDOUR::RouteProcessorChange c)
 {
 	if (c.type == RouteProcessorChange::CustomPinChange) {
+		/* only a pin change, don't do anything */
 		return;
 	}
+	if (c.type == RouteProcessorChange::MeterPointChange && c.meter_visibly_changed == false) {
+		/* the meter has moved, but it was and still is invisible to the user, so nothing to do */
+		return;
+	}
+
 	ppw.clear ();
 	_height_mapped = false;
 	scroller->remove ();

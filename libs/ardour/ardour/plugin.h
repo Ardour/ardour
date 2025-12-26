@@ -33,7 +33,6 @@
 #include "ardour/buffer_set.h"
 #include "ardour/chan_count.h"
 #include "ardour/chan_mapping.h"
-#include "ardour/cycles.h"
 #include "ardour/latent.h"
 #include "ardour/libardour_visibility.h"
 #include "ardour/midi_ring_buffer.h"
@@ -316,6 +315,7 @@ public:
 
 	virtual bool reconfigure_io (ChanCount /*in*/, ChanCount /*aux_in*/, ChanCount /*out*/) { return true; }
 	virtual bool match_variable_io (ChanCount& /*in*/, ChanCount& /*aux_in*/, ChanCount& /*out*/) { return false; }
+	virtual void request_bus_layout (ChanCount const& /*in*/, ChanCount const& /*aux_in*/, ChanCount const& /*out*/) { }
 
 	virtual ChanCount output_streams () const;
 	virtual ChanCount input_streams () const;
@@ -325,9 +325,6 @@ public:
 
 	virtual void set_owner (SessionObject* o) { _owner = o; }
 	SessionObject* owner () const { return _owner; }
-
-	void set_cycles (uint32_t c) { _cycles = c; }
-	cycles_t cycles () const { return _cycles; }
 
 	void use_for_impulse_analysis ()
 	{
@@ -347,7 +344,7 @@ public:
 	 * For LV2 plugins, properties are implemented by sending/receiving set/get
 	 * messages to/from the plugin via event ports.
 	 */
-	virtual const PropertyDescriptors& get_supported_properties () const
+	virtual const PropertyDescriptors& get_supported_properties (bool readonly = false) const
 	{
 		static const PropertyDescriptors nothing;
 		return nothing;
@@ -382,11 +379,19 @@ public:
 	PBD::Signal<void(uint32_t)> StartTouch;
 	PBD::Signal<void(uint32_t)> EndTouch;
 
+	PBD::Signal<void(RouteProcessorChange)> ProcessorChange;
+
 protected:
 	friend class PluginInsert;
 	friend class PlugInsertBase;
 	friend class RegionFxPlugin;
 	friend class Session;
+
+	/* Notifiy owner (Route) that some config property changed.
+	 * -> ProcessorChange ()
+	 * -> route->processors_changed ()
+	 */
+	virtual void send_processors_changed (ARDOUR::RouteProcessorChange const&);
 
 	/* Called when a parameter of the plugin is changed outside of this
 	 * host's control (typical via a plugin's own GUI/editor)
@@ -527,6 +532,11 @@ public:
 
 	/* @return true if the plugin can change its inputs or outputs on demand. */
 	virtual bool reconfigurable_io () const { return false; }
+
+	/* @return true if the plugin has configurable busses but no AU style reconfigureable I/O (VST3)
+	 * implies request_bus_layout ()
+	 */
+	virtual bool variable_bus_layout () const { return false; }
 
 	/* max [re]configurable outputs (if finite, 0 otherwise) */
 	virtual uint32_t max_configurable_outputs () const

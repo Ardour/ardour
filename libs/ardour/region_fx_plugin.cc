@@ -430,6 +430,7 @@ RegionFxPlugin::add_plugin (std::shared_ptr<Plugin> plugin)
 	if (_plugins.empty ()) {
 		/* first (and probably only) plugin instance - connect to relevant signals */
 		plugin->ParameterChangedExternally.connect_same_thread (*this, std::bind (&RegionFxPlugin::parameter_changed_externally, this, _1, _2));
+		plugin->PropertyChanged.connect_same_thread (*this, std::bind (&RegionFxPlugin::property_changed_externally, this, _1, _2));
 		plugin->StartTouch.connect_same_thread (*this, std::bind (&RegionFxPlugin::start_touch, this, _1));
 		plugin->EndTouch.connect_same_thread (*this, std::bind (&RegionFxPlugin::end_touch, this, _1));
 	}
@@ -593,6 +594,9 @@ RegionFxPlugin::set_default_automation (timepos_t end)
 {
 	for (auto const& i : _controls) {
 		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (i.second);
+		if (!ac->alist ()) {
+			continue;
+		}
 		if (ac->alist ()->empty ()) {
 			ac->alist ()->fast_simple_add (timepos_t (time_domain ()), ac->normal ());
 			ac->alist ()->fast_simple_add (end, ac->normal ());
@@ -617,6 +621,15 @@ RegionFxPlugin::truncate_automation_end (timepos_t end)
 	for (auto const& i : _controls) {
 		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (i.second);
 		ac->alist ()->truncate_end (end);
+	}
+}
+
+void
+RegionFxPlugin::x_scale_automation (Temporal::ratio_t r)
+{
+	for (auto const& i : _controls) {
+		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (i.second);
+		ac->alist ()->x_scale (r);
 	}
 }
 
@@ -664,6 +677,17 @@ RegionFxPlugin::parameter_changed_externally (uint32_t which, float val)
 	if (pc) {
 		pc->catch_up_with_external_value (val);
 	}
+}
+
+void
+RegionFxPlugin::property_changed_externally (uint32_t which, Variant val)
+{
+	std::shared_ptr<Evoral::Control>        c  = control (Evoral::Parameter (PluginPropertyAutomation, 0, which));
+	std::shared_ptr<PluginPropertyControl>  pc = std::dynamic_pointer_cast<PluginPropertyControl> (c);
+
+	if (pc) {
+		pc->catch_up_with_external_value (val.to_double ());
+	}
 
 	/* Second propagation: tell all plugins except the first to
 	 * update the value of this parameter. For sane plugin APIs,
@@ -678,7 +702,7 @@ RegionFxPlugin::parameter_changed_externally (uint32_t which, float val)
 	if (i != _plugins.end ()) {
 		++i;
 		for (; i != _plugins.end (); ++i) {
-			(*i)->set_parameter (which, val, 0);
+			(*i)->set_property (which, val);
 		}
 	}
 }
@@ -798,7 +822,9 @@ RegionFxPlugin::flush ()
 	}
 	for (auto const& i : _controls) {
 		shared_ptr<TimedPluginControl> tpc = std::dynamic_pointer_cast<TimedPluginControl>(i.second);
-		tpc->flush ();
+		if (tpc) {
+			tpc->flush ();
+		}
 	}
 }
 
@@ -808,6 +834,12 @@ RegionFxPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& ou
 	if (_plugins.empty ()) {
 		out = ChanCount::min (in, out);
 		return true;
+	}
+	if (plugin()->get_info ()->variable_bus_layout ()) {
+		ChanCount sc;
+		for (auto const& p : _plugins) {
+			p->request_bus_layout (in, sc, in);
+		}
 	}
 	return private_can_support_io_configuration (in, out).method != Impossible;
 }
@@ -966,8 +998,8 @@ RegionFxPlugin::configure_io (ChanCount in, ChanCount out)
 		return true;
 	}
 
-	ChanCount natural_input_streams  = _plugins[0]->get_info ()->n_inputs;
-	ChanCount natural_output_streams = _plugins[0]->get_info ()->n_outputs;
+	ChanCount natural_input_streams  = _plugins[0]->input_streams ();
+	ChanCount natural_output_streams = _plugins[0]->output_streams ();
 
 	_match = private_can_support_io_configuration (in, out);
 
@@ -1117,8 +1149,8 @@ RegionFxPlugin::check_inplace ()
 			}
 		}
 
-		ChanCount natural_input_streams  = _plugins[0]->get_info ()->n_inputs;
-		ChanCount natural_output_streams = _plugins[0]->get_info ()->n_outputs;
+		ChanCount natural_input_streams  = _plugins[0]->input_streams ();
+		ChanCount natural_output_streams = _plugins[0]->output_streams ();
 
 		if (natural_input_streams * get_count () != _configured_in) {
 			inplace_ok = false;
@@ -1439,7 +1471,7 @@ RegionFxPlugin::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t
 
 	for (auto const& i : _controls) {
 		shared_ptr<TimedPluginControl> tpc = std::dynamic_pointer_cast<TimedPluginControl>(i.second);
-		if (tpc->automation_playback ()) {
+		if (tpc && tpc->automation_playback ()) {
 			tpc->store_value (start + pos, end + pos);
 		}
 	}
@@ -1471,7 +1503,7 @@ RegionFxPlugin::maybe_emit_changed_signals () const
 	Glib::Threads::Mutex::Lock lp (_process_lock);
 	for (auto const& i : _controls) {
 		shared_ptr<TimedPluginControl> tpc = std::dynamic_pointer_cast<TimedPluginControl>(i.second);
-		if (tpc->automation_playback ()) {
+		if (tpc && tpc->automation_playback ()) {
 			tpc->maybe_emit_changed ();
 		}
 	}

@@ -995,7 +995,7 @@ ProcessorEntry::toggle_allow_feedback ()
 	}
 }
 
-ProcessorEntry::Control::Control (ProcessorEntry& e,std::shared_ptr<AutomationControl> c, string const & n)
+ProcessorEntry::Control::Control (ProcessorEntry& e, std::shared_ptr<AutomationControl> c, string const & n)
 	: _entry (e)
 	, _control (c)
 	, _adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()), 0, 1, 0.01, 0.1)
@@ -1004,9 +1004,27 @@ ProcessorEntry::Control::Control (ProcessorEntry& e,std::shared_ptr<AutomationCo
 	, _button (ArdourButton::led_default_elements)
 	, _ignore_ui_adjustment (false)
 	, _visible (false)
+	, _have_ui (false)
 	, _name (n)
 {
 	box.set_padding(0, 0, 4, 4);
+	/* We're providing our own PersistentTooltip */
+	set_no_tooltip_whatsoever (_slider);
+}
+
+bool
+ProcessorEntry::Control::build_ui ()
+{
+	if (_have_ui) {
+		return true;
+	}
+
+	std::shared_ptr<AutomationControl> c = _control.lock ();
+
+	if (!c) {
+		return false;
+	}
+	_have_ui = true;
 
 	if (c->toggled()) {
 		_button.set_text (_name);
@@ -1065,9 +1083,7 @@ ProcessorEntry::Control::Control (ProcessorEntry& e,std::shared_ptr<AutomationCo
 
 	control_changed ();
 	set_tooltip ();
-
-	/* We're providing our own PersistentTooltip */
-	set_no_tooltip_whatsoever (_slider);
+	return true;
 }
 
 ProcessorEntry::Control::~Control ()
@@ -1182,7 +1198,7 @@ ProcessorEntry::Control::control_changed ()
 		return;
 	}
 
-	_ignore_ui_adjustment = true;
+	PBD::Unwinder uw (_ignore_ui_adjustment, true);
 
 	if (c->toggled ()) {
 		_button.set_active (c->get_value() > 0.5);
@@ -1194,8 +1210,6 @@ ProcessorEntry::Control::control_changed ()
 			set_tooltip ();
 		}
 	}
-
-	_ignore_ui_adjustment = false;
 }
 
 void
@@ -1226,6 +1240,9 @@ void
 ProcessorEntry::Control::set_visible (bool v)
 {
 	if (v) {
+		if (!build_ui ()) {
+			return;
+		}
 		box.show ();
 	} else {
 		box.hide ();

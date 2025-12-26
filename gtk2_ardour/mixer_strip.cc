@@ -89,6 +89,7 @@
 #include "gui_thread.h"
 #include "route_group_menu.h"
 #include "meter_patterns.h"
+#include "rta_manager.h"
 #include "ui_config.h"
 #include "triggerbox_ui.h"
 
@@ -104,6 +105,7 @@ using namespace ArdourMeter;
 
 MixerStrip* MixerStrip::_entered_mixer_strip;
 PBD::Signal<void(MixerStrip*)> MixerStrip::CatchDeletion;
+int MixerStrip::_scrollbar_spacer_height = 0;
 
 #define PX_SCALE(px) std::max((float)px, rintf((float)px * UIConfiguration::instance().get_ui_scale()))
 
@@ -120,7 +122,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, solo_iso_table (1, 2)
 	, mute_solo_table (1, 2)
 	, master_volume_table (2, 2)
-	, bottom_button_table (1, 3)
+	, bottom_button_table (2, 2)
 	, input_button (true)
 	, output_button (false)
 	, monitor_section_button (0)
@@ -157,7 +159,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, std::shared_ptr<Route> rt, 
 	, solo_iso_table (1, 2)
 	, mute_solo_table (1, 2)
 	, master_volume_table (1, 2)
-	, bottom_button_table (1, 3)
+	, bottom_button_table (2, 2)
 	, input_button (true)
 	, output_button (false)
 	, monitor_section_button (0)
@@ -175,9 +177,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, std::shared_ptr<Route> rt, 
 
 	if (is_master () && !_route->comment().empty () && _session->config.get_show_master_bus_comment_on_load () && self_destruct) {
 		open_comment_editor ();
-		_comment_window->hide ();
-		_comment_window->set_position (Gtk::WIN_POS_CENTER_ON_PARENT);
-		_comment_window->present ();
 		/* show only once */
 		_session->config.set_show_master_bus_comment_on_load (false);
 	}
@@ -212,7 +211,7 @@ MixerStrip::init ()
 	input_button_box.set_spacing(2);
 	input_button_box.pack_start (input_button, true, true);
 
-	bottom_button_table.attach (gpm.meter_point_button, 2, 3, 0, 1);
+	bottom_button_table.attach (gpm.meter_point_button, 1, 2, 0, 1);
 
 	hide_button.set_events (hide_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 
@@ -279,8 +278,9 @@ MixerStrip::init ()
 
 	bottom_button_table.set_spacings (2);
 	bottom_button_table.set_homogeneous (true);
-	bottom_button_table.attach (group_button, 1, 2, 0, 1);
 	bottom_button_table.attach (gpm.gain_automation_state_button, 0, 1, 0, 1);
+	bottom_button_table.attach (group_button, 0, 1, 1, 2);
+	bottom_button_table.attach (*rta_button,   1, 2, 1, 2);
 
 	name_button.set_name ("mixer strip button");
 	name_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
@@ -289,8 +289,12 @@ MixerStrip::init ()
 	set_tooltip (&group_button, _("Mix group"));
 	group_button.set_name ("mixer strip button");
 
+	set_tooltip (rta_button, _("Realtime Analyzer\nLeft-click to toggle track analysis\nRight-click to toggle RTA window visibility"));
+	rta_button->set_name ("mixer strip button");
+
 	Gtk::Requisition mpb_size = gpm.meter_point_button.size_request();
 	group_button.set_size_request (mpb_size.width, mpb_size.height);
+	rta_button->set_size_request (mpb_size.width, mpb_size.height);
 
 	_comment_button.set_name (X_("mixer strip button"));
 	_comment_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
@@ -354,23 +358,10 @@ MixerStrip::init ()
 	midi_input_enable_button.signal_button_release_event().connect (sigc::mem_fun (*this, &MixerStrip::input_active_button_release), false);
 	set_tooltip (midi_input_enable_button, _("Enable/Disable MIDI input"));
 
-#ifndef MIXBUS
-	//add a spacer underneath the master bus;
-	//this fills the area that is taken up by the scrollbar on the tracks;
-	//and therefore keeps the faders "even" across the bottom
-	int scrollbar_height = 0;
-	{
-		Gtk::Window window (WINDOW_TOPLEVEL);
-		HScrollbar scrollbar;
-		window.add (scrollbar);
-		scrollbar.set_name ("MixerWindow");
-		scrollbar.ensure_style();
-		Gtk::Requisition requisition(scrollbar.size_request ());
-		scrollbar_height = requisition.height;
-		scrollbar_height += 3; // track_display_frame border/shadow
-	}
-	spacer.set_size_request (-1, scrollbar_height);
+	update_spacer ();
 	spacer.set_name ("AudioBusStripBase");
+
+#ifndef MIXBUS
 	global_vpacker.pack_end (spacer, false, false);
 #endif
 
@@ -452,17 +443,19 @@ MixerStrip::~MixerStrip ()
 void
 MixerStrip::vca_assign (std::shared_ptr<ARDOUR::VCA> vca)
 {
-	std::shared_ptr<Slavable> sl = std::dynamic_pointer_cast<Slavable> ( route() );
-	if (sl)
+	std::shared_ptr<Slavable> sl = std::dynamic_pointer_cast<Slavable> (route());
+	if (sl) {
 		sl->assign(vca);
+	}
 }
 
 void
 MixerStrip::vca_unassign (std::shared_ptr<ARDOUR::VCA> vca)
 {
-	std::shared_ptr<Slavable> sl = std::dynamic_pointer_cast<Slavable> ( route() );
-	if (sl)
+	std::shared_ptr<Slavable> sl = std::dynamic_pointer_cast<Slavable> (route());
+	if (sl) {
 		sl->unassign(vca);
+	}
 }
 
 bool
@@ -477,7 +470,7 @@ bool
 MixerStrip::mixer_strip_leave_event (GdkEventCrossing *ev)
 {
 	//if we have moved outside our strip, but not into a child view, then deselect ourselves
-	if ( !(ev->detail == GDK_NOTIFY_INFERIOR) ) {
+	if (ev->detail != GDK_NOTIFY_INFERIOR) {
 		_entered_mixer_strip= 0;
 
 		//clear keyboard focus in the gain display.  this is cheesy but fixes a longstanding "bug" where the user starts typing in the gain entry, and leaves it active, thereby prohibiting other keybindings from working
@@ -528,13 +521,16 @@ MixerStrip::set_route (std::shared_ptr<Route> rt)
 		rec_mon_table.remove (*rec_enable_button);
 	}
 	if (monitor_input_button->get_parent()) {
-		rec_mon_table.remove (*monitor_input_button);
+		monitor_input_button->get_parent()->remove (*monitor_input_button);
 	}
 	if (monitor_disk_button->get_parent()) {
-		rec_mon_table.remove (*monitor_disk_button);
+		monitor_disk_button->get_parent()->remove (*monitor_disk_button);
 	}
 	if (group_button.get_parent()) {
 		bottom_button_table.remove (group_button);
+	}
+	if (rta_button->get_parent()) {
+		rta_button->get_parent()->remove (*rta_button);
 	}
 
 	RouteUI::set_route (rt);
@@ -574,6 +570,7 @@ MixerStrip::set_route (std::shared_ptr<Route> rt)
 		solo_button->hide ();
 		mute_button->show ();
 		mute_solo_table.attach (*mute_button, 0, 2, 0, 1);
+		bottom_button_table.attach (*rta_button,   1, 2, 1, 2);
 		if (Config->get_use_master_volume ()) {
 			master_volume_table.show ();
 		}
@@ -595,7 +592,8 @@ MixerStrip::set_route (std::shared_ptr<Route> rt)
 		mute_button->show ();
 		master_volume_table.hide ();
 	} else {
-		bottom_button_table.attach (group_button, 1, 2, 0, 1);
+		bottom_button_table.attach (group_button, 0, 1, 1, 2);
+		bottom_button_table.attach (*rta_button,   1, 2, 1, 2);
 		mute_solo_table.attach (*mute_button, 0, 1, 0, 1);
 		mute_solo_table.attach (*solo_button, 1, 2, 0, 1);
 		mute_button->show ();
@@ -625,8 +623,12 @@ MixerStrip::set_route (std::shared_ptr<Route> rt)
 
 		_loudess_analysis_button->show ();
 		_volume_controller->show ();
+		if (Config->get_use_master_volume ()) {
+			master_volume_table.show ();
+		}
 #ifdef MIXBUS
 	} else if (!route()->is_master()) {
+		/* mixbus has/had a show_all, empty table still adds some pixel padding */
 		master_volume_table.hide ();
 #endif
 	}
@@ -725,7 +727,6 @@ MixerStrip::set_route (std::shared_ptr<Route> rt)
 	/* now force an update of all the various elements */
 
 	name_changed ();
-	comment_changed ();
 	route_group_changed ();
 	update_track_number_visibility ();
 
@@ -769,6 +770,7 @@ MixerStrip::set_route (std::shared_ptr<Route> rt)
 	name_button.show();
 	_comment_button.show();
 	group_button.show();
+	rta_button->show();
 	gpm.gain_automation_state_button.show();
 
 	parameter_changed ("mixer-element-visibility");
@@ -790,9 +792,35 @@ MixerStrip::set_stuff_from_route ()
 }
 
 void
+MixerStrip::update_spacer ()
+{
+	if (_scrollbar_spacer_height == 0) {
+		Gtk::Window window (WINDOW_TOPLEVEL);
+		Gtk::ScrolledWindow scroller;
+		scroller.set_policy (Gtk::POLICY_ALWAYS, Gtk::POLICY_ALWAYS);
+		scroller.set_name ("MixerWindow");
+		window.add (scroller);
+		scroller.ensure_style();
+
+		const Scrollbar* scrollbar = scroller.get_hscrollbar();
+		Gtk::Requisition requisition(scrollbar->size_request ());
+		_scrollbar_spacer_height = requisition.height;
+
+		gint scrollbar_spacing = 0;
+		gtk_widget_style_get (GTK_WIDGET (scroller.gobj()), "scrollbar-spacing", &scrollbar_spacing, NULL);
+		_scrollbar_spacer_height += scrollbar_spacing;
+
+		_scrollbar_spacer_height += 6; // track_display_frame border/shadow
+	}
+	spacer.set_size_request (-1, _scrollbar_spacer_height);
+}
+
+void
 MixerStrip::dpi_reset ()
 {
 	set_width_enum (_width, _width_owner);
+	_scrollbar_spacer_height = 0;
+	update_spacer ();
 }
 
 void
@@ -1004,7 +1032,7 @@ MixerStrip::select_route_group (GdkEventButton *ev)
 		r.push_back (route ());
 		group_menu->build (r);
 
-		RouteGroup *rg = _route->route_group();
+		std::shared_ptr<RouteGroup> rg = _route->route_group();
 
 		Gtkmm2ext::anchored_menu_popup(group_menu->menu(), &group_button,
 		                               rg ? rg->name() : _("No Group"),
@@ -1017,9 +1045,9 @@ MixerStrip::select_route_group (GdkEventButton *ev)
 void
 MixerStrip::route_group_changed ()
 {
-	ENSURE_GUI_THREAD (*this, &MixerStrip::route_group_changed)
+	ENSURE_GUI_THREAD (*this, &MixerStrip::route_group_changed);
 
-	RouteGroup *rg = _route->route_group();
+	std::shared_ptr<RouteGroup> rg (_route->route_group());
 
 	if (rg) {
 		group_button.set_text (PBD::short_version (rg->name(), 5));
@@ -1040,7 +1068,8 @@ MixerStrip::route_color_changed ()
 {
 	using namespace ARDOUR_UI_UTILS;
 	name_button.modify_bg (STATE_NORMAL, color());
-	number_label.set_fixed_colors (gdk_color_to_rgba (color()), gdk_color_to_rgba (color()));
+	Gtkmm2ext::Color c (gdk_color_to_rgba (color()));
+	number_label.set_fixed_colors (c, c);
 	reset_strip_style ();
 }
 
@@ -1062,8 +1091,9 @@ MixerStrip::build_route_ops_menu ()
 	MenuList& items = route_ops_menu->items();
 
 	if (active) {
+		Gtk::Window* top = dynamic_cast<Gtk::Window*> (get_toplevel());
 
-		items.push_back (MenuElem (_("Color..."), sigc::mem_fun (*this, &RouteUI::choose_color)));
+		items.push_back (MenuElem (_("Color..."), sigc::bind (sigc::mem_fun (*this, &RouteUI::choose_color), top)));
 
 		items.push_back (MenuElem (_("Comments..."), sigc::mem_fun (*this, &RouteUI::open_comment_editor)));
 
@@ -1133,6 +1163,21 @@ MixerStrip::build_route_ops_menu ()
 		denormal_menu_item->set_active (_route->denormal_protection());
 	}
 
+	if (active && !_route->presentation_info().special (false)) {
+		items.push_back (CheckMenuElem (_("RTA")));
+		Gtk::CheckMenuItem* i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
+		bool attached = RTAManager::instance ()->attached (_route);
+		i->set_active (attached);
+		i->signal_activate().connect ([this, attached]() {
+				if (attached) {
+					RTAManager::instance ()->remove (_route);
+				} else {
+					RTAManager::instance ()->attach (_route);
+					ARDOUR_UI::instance()->show_realtime_analyzer ();
+				}
+			});
+	}
+
 	/* Disk I/O */
 
 	if (active && is_track()) {
@@ -1164,7 +1209,7 @@ MixerStrip::build_route_ops_menu ()
 	 * sane thing for users anyway.
 	 */
 	StripableTimeAxisView* stav = PublicEditor::instance().get_stripable_time_axis_by_id (_route->id());
-	if (active && stav) {
+	if (stav) {
 		Selection& selection (PublicEditor::instance().get_selection());
 		if (!selection.selected (stav)) {
 			selection.set (stav);
@@ -1176,13 +1221,16 @@ MixerStrip::build_route_ops_menu ()
 			return;
 		}
 #endif
+		if (_route->is_singleton ()) {
+			return;
+		}
 
-		if (!_route->is_singleton ()) {
+		if (active) {
 			items.push_back (SeparatorElem());
 			items.push_back (MenuElem (_("Duplicate..."), sigc::mem_fun (*this, &RouteUI::duplicate_selected_routes)));
-			items.push_back (SeparatorElem());
-			items.push_back (MenuElem (_("Remove"), sigc::mem_fun(PublicEditor::instance(), &PublicEditor::remove_tracks)));
 		}
+		items.push_back (SeparatorElem());
+		items.push_back (MenuElem (_("Remove"), sigc::mem_fun(PublicEditor::instance(), &PublicEditor::remove_tracks)));
 	}
 }
 
@@ -1223,7 +1271,7 @@ gboolean
 MixerStrip::number_button_button_press (GdkEventButton* ev)
 {
 	if (ev->type == GDK_2BUTTON_PRESS) {
-		choose_color ();
+		choose_color (dynamic_cast<Gtk::Window*> (get_toplevel()));
 		return true;
 	}
 
@@ -1903,6 +1951,7 @@ MixerStrip::update_sensitivity ()
 
 	input_button.set_sensitive (en && !send);
 	group_button.set_sensitive (en && !send);
+	rta_button->set_sensitive (en && !send);
 	gpm.meter_point_button.set_sensitive (en && !send);
 	mute_button->set_sensitive (en && !send);
 	solo_button->set_sensitive (en && !send);

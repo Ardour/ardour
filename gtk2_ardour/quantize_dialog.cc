@@ -71,8 +71,8 @@ static const int _grid_beats[] = {
 
 std::vector<std::string> QuantizeDialog::grid_strings;
 
-QuantizeDialog::QuantizeDialog (EditingContext& e)
-	: ArdourDialog (_("Quantize"), false, false)
+QuantizeDialog::QuantizeDialog (Gtk::Window& parent, EditingContext& e)
+	: ArdourDialog (parent, _("Quantize"), false, false)
 	, editor (e)
 	, strength_adjustment (100.0, 0.0, 100.0, 1.0, 10.0)
 	, strength_spinner (strength_adjustment)

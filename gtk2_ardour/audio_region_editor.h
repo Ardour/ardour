@@ -39,6 +39,7 @@
 #include "widgets/ardour_dropdown.h"
 
 #include "pbd/crossthread.h"
+#include "pbd/progress.h"
 #include "pbd/signals.h"
 
 #include "ardour_dialog.h"
@@ -52,7 +53,7 @@ namespace ARDOUR {
 
 class AudioRegionView;
 
-class AudioRegionEditor : public RegionEditor
+class AudioRegionEditor : public RegionEditor, protected PBD::Progress
 {
 public:
 	AudioRegionEditor (ARDOUR::Session*, AudioRegionView*);
@@ -100,6 +101,8 @@ private:
 	void peak_amplitude_found (double);
 
 	PBD::Signal<void (double)> PeakAmplitudeFound;
+
+	void set_overall_progress (float) {}
 
 	pthread_t             _peak_amplitude_thread_handle;
 	PBD::ScopedConnection _peak_amplitude_connection;

@@ -111,7 +111,7 @@ class NoteBase : public sigc::trackable
 	float mouse_y_fraction() const { return _mouse_y_fraction; }
 
 	const std::shared_ptr<NoteType> note() const { return _note; }
-	MidiView& region_view() const { return _region; }
+	MidiView& midi_view() const { return _view; }
 
 	static void set_colors ();
 
@@ -135,7 +135,7 @@ class NoteBase : public sigc::trackable
 protected:
 	enum State { None, Pressed, Dragging };
 
-	MidiView&                         _region;
+	MidiView&                         _view;
 	ArdourCanvas::Item*               _item;
 	ArdourCanvas::Text*               _text;
 	State                             _state;

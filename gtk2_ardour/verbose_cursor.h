@@ -28,7 +28,7 @@ namespace ArdourCanvas {
 	class TrackingText;
 }
 
-class VerboseCursor
+class VerboseCursor : public sigc::trackable
 {
 public:
 	VerboseCursor (EditingContext&);

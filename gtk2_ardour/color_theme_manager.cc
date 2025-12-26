@@ -486,7 +486,7 @@ ColorThemeManager::choose_color_from_palette (string const & name)
 
 	palette_response_connection = palette_window->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ColorThemeManager::alias_palette_response), name, i->second));
 
-	palette_window->set_position (WIN_POS_MOUSE);
+	palette_window->set_position (UIConfiguration::instance().get_default_window_position());
 	palette_window->present ();
 }
 

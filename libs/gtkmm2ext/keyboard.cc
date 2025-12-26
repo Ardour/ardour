@@ -196,6 +196,20 @@ guint Keyboard::snap_delta_mod = Keyboard::SecondaryModifier | Keyboard::Level4M
 
 #endif
 
+guint const Keyboard::CapsLockModifier    = GDK_LOCK_MASK;
+
+const char*
+Keyboard::caps_lock_modifier_name ()
+{
+	return _("CapsLock");
+}
+
+const char*
+Keyboard::caps_lock_modifier_short_name ()
+{
+	return _("Lock");
+}
+
 guint Keyboard::group_override_modifiers = Keyboard::TertiaryModifier;
 
 const char*

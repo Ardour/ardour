@@ -32,6 +32,7 @@
 #include "ardour/audioregion.h"
 #include "ardour/audiosource.h"
 #include "ardour/pitch.h"
+#include "ardour/region_fx_plugin.h"
 #include "ardour/session.h"
 #include "ardour/stretch.h"
 #include "ardour/types.h"
@@ -345,6 +346,23 @@ RBEffect::run (std::shared_ptr<Region> r, Progress* progress)
 		ret = finish (region, nsrcs, new_name);
 	}
 
+
+	/* apply automation scaling before calling set_length, which trims automation */
+	if (ret == 0 && !tsr.time_fraction.is_unity()) {
+		for (auto& r : results) {
+			std::shared_ptr<AudioRegion> ar = std::dynamic_pointer_cast<AudioRegion> (r);
+			assert (ar);
+			ar->envelope ()->x_scale (tsr.time_fraction);
+			ar->foreach_plugin ([&](std::weak_ptr<RegionFxPlugin> wfx)
+			{
+				shared_ptr<RegionFxPlugin> rfx = wfx.lock ();
+				if (rfx) {
+					rfx->x_scale_automation (tsr.time_fraction);
+				}
+			});
+		}
+	}
+
 	/* now reset ancestral data for each new region */
 
 	for (vector<std::shared_ptr<Region> >::iterator x = results.begin (); x != results.end (); ++x) {
@@ -358,15 +376,6 @@ RBEffect::run (std::shared_ptr<Region> r, Progress* progress)
 		 */
 		(*x)->set_length_unchecked ((*x)->length ().scale (tsr.time_fraction));
 		(*x)->set_whole_file (true);
-	}
-
-	/* stretch region gain envelope */
-	/* XXX: assuming we've only processed one input region into one result here */
-
-	if (ret == 0 && !tsr.time_fraction.is_unity()) {
-		std::shared_ptr<AudioRegion> result = std::dynamic_pointer_cast<AudioRegion> (results.front ());
-		assert (result);
-		result->envelope ()->x_scale (tsr.time_fraction);
 	}
 
 out:

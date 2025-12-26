@@ -38,7 +38,6 @@
 #include <cerrno>
 #include <sstream>
 
-#include <unistd.h>
 #include <limits.h>
 
 #include <glib.h>

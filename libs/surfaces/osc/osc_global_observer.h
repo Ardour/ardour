@@ -34,6 +34,22 @@
 #include "ardour/session.h"
 #include "ardour/types.h"
 
+namespace ArdourSurface {
+
+
+struct LocationMarker {
+	LocationMarker (const std::string& l, samplepos_t w)
+		: label (l), when (w) {}
+	std::string label;
+	samplepos_t  when;
+};
+
+struct LocationMarkerSort {
+	bool operator() (const LocationMarker& a, const LocationMarker& b) {
+		return (a.when < b.when);
+	}
+};
+
 class OSCGlobalObserver
 {
 
@@ -47,6 +63,8 @@ class OSCGlobalObserver
 	void jog_mode (uint32_t jogmode);
 
   private:
+	friend ArdourSurface::OSC;
+
 	ArdourSurface::OSC& _osc;
 
 	PBD::ScopedConnectionList strip_connections;
@@ -79,19 +97,7 @@ class OSCGlobalObserver
 	uint32_t last_click;
 	samplepos_t prev_mark;
 	samplepos_t next_mark;
-	struct LocationMarker {
-		LocationMarker (const std::string& l, samplepos_t w)
-			: label (l), when (w) {}
-		std::string label;
-		samplepos_t  when;
-	};
 	std::vector<LocationMarker> lm;
-
-	struct LocationMarkerSort {
-		bool operator() (const LocationMarker& a, const LocationMarker& b) {
-			return (a.when < b.when);
-		}
-	};
 
 	void update_mixer_scene_state();
 	void send_change_message (std::string path, std::shared_ptr<PBD::Controllable> controllable);
@@ -104,8 +110,9 @@ class OSCGlobalObserver
 	void extra_check (void);
 	void marks_changed (void);
 	void mark_update (void);
-	void group_changed (ARDOUR::RouteGroup*);
 	void group_changed (void);
 };
+
+} /* namespace */
 
 #endif /* __osc_oscglobalobserver_h__ */

@@ -257,6 +257,7 @@ Pane::reallocate (Gtk::Allocation const & alloc)
 	} else {
 		remaining = alloc.get_height ();
 	}
+	remaining = max<int> (0, remaining - (children.size() - 1) * divider_width);
 
 	Children::iterator child;
 	Children::iterator next;
@@ -298,8 +299,6 @@ Pane::reallocate (Gtk::Allocation const & alloc)
 			fract = (*div)->fract;
 		}
 
-		Gtk::Requisition cr = (*child)->w->size_request ();
-
 		if (horizontal) {
 			child_alloc.set_width ((gint) floor (remaining * fract));
 			child_alloc.set_height (alloc.get_height());
@@ -319,6 +318,7 @@ Pane::reallocate (Gtk::Allocation const & alloc)
 				child_alloc.set_height (max (child_alloc.get_height(), (*child)->minsize));
 			}
 		} else if (!check_fract && (*child)->w->get_visible ()) {
+			Gtk::Requisition cr = (*child)->w->size_request ();
 			if (horizontal) {
 				child_alloc.set_width (max (child_alloc.get_width(), cr.width));
 			} else {
@@ -347,12 +347,10 @@ Pane::reallocate (Gtk::Allocation const & alloc)
 		if (horizontal) {
 			divider_allocation.set_width (divider_width);
 			divider_allocation.set_height (alloc.get_height());
-			remaining = max (0, remaining - divider_width);
 			xpos += divider_width;
 		} else {
 			divider_allocation.set_width (alloc.get_width());
 			divider_allocation.set_height (divider_width);
-			remaining = max (0, remaining - divider_width);
 			ypos += divider_width;
 		}
 
@@ -433,7 +431,16 @@ Pane::constrain_fract (Dividers::size_type div, float fract)
 	if (children.size () <= div + 1) { return fract; } // XXX remove once hidden divs are skipped
 	assert(children.size () > div + 1);
 
-	const float size = horizontal ? get_allocation().get_width() : get_allocation().get_height();
+	float size = horizontal ? get_allocation().get_width() : get_allocation().get_height();
+	size = max<float> (0, size - (children.size() - 1) * divider_width);
+
+	/* compare to Pane::reallocate */
+	Dividers::iterator d = dividers.begin();
+	for (Dividers::size_type i = 0 ; i < div; ++i, ++d) {
+		if (children.at (i)->w->get_visible ()) {
+			size -= size * (*d)->fract;
+		}
+	}
 
 	// TODO: optimize: cache in Pane::on_size_request
 	Gtk::Requisition prev_req(children.at (div)->w->size_request ());

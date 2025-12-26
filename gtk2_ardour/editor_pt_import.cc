@@ -20,9 +20,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/time.h>
 #include <errno.h>
-#include <unistd.h>
 #include <algorithm>
 
 #include "pbd/pthread_utils.h"
@@ -53,7 +51,6 @@
 #include "editing.h"
 #include "audio_time_axis.h"
 #include "midi_time_axis.h"
-#include "session_import_dialog.h"
 #include "gui_thread.h"
 #include "interthread_progress_window.h"
 #include "mouse_cursors.h"

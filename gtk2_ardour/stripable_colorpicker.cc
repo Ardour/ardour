@@ -35,31 +35,6 @@ StripableColorDialog::StripableColorDialog ()
 {
 	initialize_color_palette ();
 	signal_response().connect (sigc::mem_fun (*this, &StripableColorDialog::finish_color_edit));
-
-#ifdef __APPLE__
-	/* hide eyedropper button -- which does not work on OSX:
-	 * " the problem is worse than just `not getting the color' though.
-	 *   The action doesn't actually complete, and window focus is in a
-	 *   `weird state' until you click inside the color-picker dialog twice;
-	 *   then it all seems back to normal (but no color got picked)"
-	 *
-	 * the alternative is to patch gtk's source:
-	 * gtk/gtkcolorsel.c  gtk_color_selection_init() which packs
-	 *
-	 *  top_hbox [ VBOX [ triangle || hbox [ sample-area || picker-button] ] || ... ]
-	 */
-	ColorSelection* cs = get_color_selection(); // IS-A VBOX
-	if (!cs) { return ; }
-	Gtk::HBox* top_hbox = dynamic_cast<Gtk::HBox*> (cs->children()[0].get_widget());
-	if (!top_hbox) { return ; }
-	Gtk::VBox* vbox = dynamic_cast<Gtk::VBox*> (top_hbox->children()[0].get_widget());
-	if (!vbox) { return ; }
-	Gtk::HBox* hbox = dynamic_cast<Gtk::HBox*> (vbox->children()[1].get_widget());
-	if (!hbox) { return ; }
-	Gtk::Button* picker = dynamic_cast<Gtk::Button*> (hbox->children()[1].get_widget());
-	if (!picker) { return ; }
-	picker->hide ();
-#endif
 }
 
 StripableColorDialog::~StripableColorDialog ()
@@ -105,7 +80,7 @@ StripableColorDialog::reset ()
 }
 
 void
-StripableColorDialog::popup (const std::string& name, uint32_t color)
+StripableColorDialog::popup (const std::string& name, uint32_t color, Gtk::Window* parent)
 {
 	set_title (string_compose (_("Color Selection: %1"), name));
 	_initial_color = color;
@@ -120,25 +95,39 @@ StripableColorDialog::popup (const std::string& name, uint32_t color)
 	_color_changed_connection.disconnect ();
 	_color_changed_connection = get_color_selection()->signal_color_changed().connect (sigc::mem_fun (*this, &StripableColorDialog::color_changed));
 
+	if (parent) {
+		set_transient_for (*parent);
+	}
+	set_position (UIConfiguration::instance().get_default_window_position());
 	present ();
 }
 
 void
-StripableColorDialog::popup (std::shared_ptr<ARDOUR::Stripable> s)
+StripableColorDialog::popup (std::shared_ptr<ARDOUR::Stripable> s, Gtk::Window* parent)
 {
 	if (s && s->active_color_picker()) {
+		if (parent) {
+			s->active_color_picker()->set_transient_for (*parent);
+		}
+		s->active_color_picker()->set_position (Gtk::WIN_POS_CENTER_ALWAYS); // force update
+		s->active_color_picker()->set_position (UIConfiguration::instance().get_default_window_position());
 		s->active_color_picker()->present ();
 		return;
 	}
 	if (_stripable == s) {
 		/* keep modified color */
+		if (parent) {
+			set_transient_for (*parent);
+		}
+		set_position (Gtk::WIN_POS_CENTER_ALWAYS); // force update
+		set_position (UIConfiguration::instance().get_default_window_position());
 		present ();
 		return;
 	}
 
 	_stripable = s;
 	_stripable->set_active_color_picker (this);
-	popup (s->name(), _stripable->presentation_info().color ());
+	popup (s->name(), _stripable->presentation_info().color (), parent);
 }
 
 void
@@ -177,7 +166,7 @@ ArdourColorButton::ArdourColorButton ()
 void
 ArdourColorButton::on_clicked ()
 {
-	_color_picker.popup ("", Gtkmm2ext::gdk_color_to_rgba (get_color ()));
+	_color_picker.popup ("", Gtkmm2ext::gdk_color_to_rgba (get_color ()), dynamic_cast<Gtk::Window*> (get_toplevel()));
 	_color_picker.get_window ()->set_transient_for (get_window ());
 }
 

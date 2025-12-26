@@ -60,6 +60,7 @@
 #include "pbd/statefuldestructible.h"
 #include "pbd/signals.h"
 #include "pbd/undo.h"
+#include "pbd/uuid.h"
 
 #ifdef USE_TLSF
 #  include "pbd/tlsf.h"
@@ -233,6 +234,7 @@ public:
 	 * internal, not user-visible IDs */
 	static unsigned int next_name_id ();
 
+	std::string uuid() const { return _uuid.to_s(); }
 	std::string path() const { return _path; }
 	std::string name() const { return _name; }
 	std::string snap_name() const { return _current_snapshot_name; }
@@ -382,6 +384,7 @@ public:
 	bool io_name_is_legal (const std::string&) const;
 	std::shared_ptr<Route> route_by_name (std::string) const;
 	std::shared_ptr<Route> route_by_id (PBD::ID) const;
+	std::shared_ptr<Stripable> stripable_by_name (std::string) const;
 	std::shared_ptr<Stripable> stripable_by_id (PBD::ID) const;
 	std::shared_ptr<Stripable> get_remote_nth_stripable (PresentationInfo::order_t n, PresentationInfo::Flag) const;
 	std::shared_ptr<Route> get_remote_nth_route (PresentationInfo::order_t n) const;
@@ -457,18 +460,22 @@ public:
 	PBD::Signal<void()> Located;
 
 	PBD::Signal<void(RouteList&)> RouteAdded;
+	/* This is emitted after one or more routes are added that are actually
+	   Tracks with an instrument plugin.
+	*/
+	PBD::Signal<void(RouteList&)> InstrumentRouteAdded;
 	/** Emitted when a property of one of our route groups changes.
 	 *  The parameter is the RouteGroup that has changed.
 	 */
-	PBD::Signal<void(RouteGroup *)> RouteGroupPropertyChanged;
+	PBD::Signal<void(std::shared_ptr<RouteGroup>)> RouteGroupPropertyChanged;
 	/** Emitted when a route is added to one of our route groups.
 	 *  First parameter is the RouteGroup, second is the route.
 	 */
-	PBD::Signal<void(RouteGroup *, std::weak_ptr<Route> )> RouteAddedToRouteGroup;
+	PBD::Signal<void(std::shared_ptr<RouteGroup>, std::weak_ptr<Route> )> RouteAddedToRouteGroup;
 	/** Emitted when a route is removed from one of our route groups.
 	 *  First parameter is the RouteGroup, second is the route.
 	 */
-	PBD::Signal<void(RouteGroup *, std::weak_ptr<Route> )> RouteRemovedFromRouteGroup;
+	PBD::Signal<void(std::shared_ptr<RouteGroup>, std::weak_ptr<Route> )> RouteRemovedFromRouteGroup;
 
 	/** Emitted when a foldback send is created or deleted
 	 */
@@ -487,6 +494,8 @@ public:
 	void request_roll (TransportRequestSource origin = TRS_UI);
 	void request_stop (bool abort = false, bool clear_state = false, TransportRequestSource origin = TRS_UI);
 	void request_locate (samplepos_t sample, bool force = false, LocateTransportDisposition ltd = RollIfAppropriate, TransportRequestSource origin = TRS_UI);
+
+	bool request_locate_to_mark (std::string const&, LocateTransportDisposition ltd = RollIfAppropriate, TransportRequestSource origin = TRS_UI);
 
 	void request_play_loop (bool yn, bool leave_rolling = false);
 	bool get_play_loop () const { return play_loop; }
@@ -655,7 +664,39 @@ public:
 	std::vector<std::string> possible_states() const;
 	static std::vector<std::string> possible_states (std::string path);
 
-	bool export_track_state (std::shared_ptr<RouteList> rl, const std::string& path);
+	enum RouteGroupImportMode {
+		IgnoreRouteGroup,
+		UseRouteGroup,
+		CreateRouteGroup
+	};
+
+	struct RouteImportInfo {
+		RouteImportInfo (std::string const& n, PresentationInfo const& p, int mb)
+			: name (n)
+			, pi (p)
+			, mixbus (mb)
+		{}
+
+		std::string      name;
+		PresentationInfo pi;
+		int              mixbus;
+
+		bool operator< (RouteImportInfo const& o) {
+			if (mixbus != o.mixbus) {
+				return mixbus < o.mixbus;
+			}
+			return name < o.name;
+		}
+
+		bool operator== (RouteImportInfo const& o) {
+			return mixbus == o.mixbus && name == o.name;
+		}
+	};
+
+	bool export_route_state (std::shared_ptr<RouteList> rl, const std::string& path, bool with_sources);
+	int  import_route_state (const std::string& path, std::map<PBD::ID, PBD::ID> const&, RouteGroupImportMode rgim = CreateRouteGroup);
+
+	std::map<PBD::ID, RouteImportInfo> parse_route_state (const std::string& path, bool& match_pbd_id);
 
 	/// The instant xml file is written to the session directory
 	void add_instant_xml (XMLNode&, bool write_to_config = true);
@@ -703,26 +744,24 @@ public:
 		bool _reconfigure_on_delete;
 	};
 
-	RouteGroup* new_route_group (const std::string&);
-	void add_route_group (RouteGroup *);
-	void remove_route_group (RouteGroup* rg) { if (rg) remove_route_group (*rg); }
-	void remove_route_group (RouteGroup&);
-	void reorder_route_groups (std::list<RouteGroup*>);
+	std::shared_ptr<RouteGroup> new_route_group (const std::string&);
+	void add_route_group (std::shared_ptr<RouteGroup>);
+	void remove_route_group (std::shared_ptr<RouteGroup> rg);
+	void reorder_route_groups (RouteGroupList);
 
-	RouteGroup* route_group_by_name (std::string);
-	RouteGroup& all_route_group() const;
+	std::shared_ptr<RouteGroup> route_group_by_name (std::string);
 
-	PBD::Signal<void(RouteGroup*)> route_group_added;
+	PBD::Signal<void(std::shared_ptr<RouteGroup>)> route_group_added;
 	PBD::Signal<void()>             route_group_removed;
 	PBD::Signal<void()>             route_groups_reordered;
 
-	void foreach_route_group (std::function<void(RouteGroup*)> f) {
-		for (std::list<RouteGroup *>::iterator i = _route_groups.begin(); i != _route_groups.end(); ++i) {
-			f (*i);
+	void foreach_route_group (std::function<void(std::shared_ptr<RouteGroup>)> f) {
+		for (auto & rg : _route_groups) {
+			f (rg);
 		}
 	}
 
-	std::list<RouteGroup*> const & route_groups () const {
+	RouteGroupList const & route_groups () const {
 		return _route_groups;
 	}
 
@@ -731,7 +770,7 @@ public:
 	std::list<std::shared_ptr<AudioTrack> > new_audio_track (
 		int input_channels,
 		int output_channels,
-		RouteGroup* route_group,
+		std::shared_ptr<RouteGroup> route_group,
 		uint32_t how_many,
 		std::string name_template,
 		PresentationInfo::order_t order,
@@ -744,15 +783,15 @@ public:
 		const ChanCount& input, const ChanCount& output, bool strict_io,
 		std::shared_ptr<PluginInfo> instrument,
 		Plugin::PresetRecord* pset,
-		RouteGroup* route_group, uint32_t how_many, std::string name_template,
+		std::shared_ptr<RouteGroup> route_group, uint32_t how_many, std::string name_template,
 		PresentationInfo::order_t,
 		TrackMode mode,
 		bool input_auto_connect,
 		bool trigger_visibility = false
 		);
 
-	RouteList new_audio_route (int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many, std::string name_template, PresentationInfo::Flag, PresentationInfo::order_t);
-	RouteList new_midi_route (RouteGroup* route_group, uint32_t how_many, std::string name_template, bool strict_io, std::shared_ptr<PluginInfo> instrument, Plugin::PresetRecord*, PresentationInfo::Flag, PresentationInfo::order_t);
+	RouteList new_audio_route (int input_channels, int output_channels, std::shared_ptr<RouteGroup> route_group, uint32_t how_many, std::string name_template, PresentationInfo::Flag, PresentationInfo::order_t);
+	RouteList new_midi_route (std::shared_ptr<RouteGroup> route_group, uint32_t how_many, std::string name_template, bool strict_io, std::shared_ptr<PluginInfo> instrument, Plugin::PresetRecord*, PresentationInfo::Flag, PresentationInfo::order_t);
 
 	void remove_routes (std::shared_ptr<RouteList>);
 	void remove_route (std::shared_ptr<Route>);
@@ -1342,6 +1381,7 @@ public:
 	bool bang_trigger_at(int32_t route_index, int32_t row_index, float velocity = 1.0);
 	bool unbang_trigger_at(int32_t route_index, int32_t row_index);
 	void clear_cue (int row_index);
+	std::shared_ptr<TriggerBox> armed_triggerbox () const;
 
 	void start_domain_bounce (Temporal::DomainBounceInfo&);
 	void finish_domain_bounce (Temporal::DomainBounceInfo&);
@@ -1549,6 +1589,7 @@ private:
 	bool maybe_stop (samplepos_t limit);
 	bool maybe_sync_start (pframes_t &);
 
+	PBD::UUID               _uuid;
 	std::string             _path;
 	std::string             _name;
 	bool                    _is_new;
@@ -1557,7 +1598,7 @@ private:
 	 *  know when to send full MTC messages every so often.
 	 */
 	pframes_t               _pframes_since_last_mtc;
-	bool                     play_loop;
+	std::atomic<bool>        play_loop;
 	bool                     loop_changing;
 	samplepos_t              last_loopend;
 
@@ -1904,8 +1945,8 @@ private:
 
 	int load_route_groups (const XMLNode&, int);
 
-	std::list<RouteGroup *> _route_groups;
-	RouteGroup*             _all_route_group;
+	RouteGroupList _route_groups;
+	void route_group_emptied (std::shared_ptr<RouteGroup>);
 
 	/* routes stuff */
 
@@ -1960,9 +2001,9 @@ private:
 	int load_regions (const XMLNode& node);
 	int load_compounds (const XMLNode& node);
 
-	void route_added_to_route_group (RouteGroup *, std::weak_ptr<Route>);
-	void route_removed_from_route_group (RouteGroup *, std::weak_ptr<Route>);
-	void route_group_property_changed (RouteGroup *);
+	void route_added_to_route_group (std::shared_ptr<RouteGroup>, std::weak_ptr<Route>);
+	void route_removed_from_route_group (std::shared_ptr<RouteGroup>, std::weak_ptr<Route>);
+	void route_group_property_changed (std::weak_ptr<RouteGroup>);
 
 	/* SOURCES */
 
@@ -2082,6 +2123,8 @@ private:
 	XMLNode* _bundle_xml_node;
 	int load_bundles (XMLNode const &);
 
+	mutable XMLNode* _engine_state;
+
 	int  backend_sync_callback (TransportState, samplepos_t);
 
 	void process_rtop (SessionEvent*);
@@ -2197,6 +2240,8 @@ private:
 	static bool _bypass_all_loaded_plugins;
 
 	mutable bool have_looped; ///< Used in \ref audible_sample
+
+	bool roll_started_loop;
 
 	void update_route_record_state ();
 	std::atomic<int> _have_rec_enabled_track;

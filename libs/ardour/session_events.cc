@@ -20,7 +20,6 @@
  */
 
 #include <cmath>
-#include <unistd.h>
 
 #include "pbd/error.h"
 #include "pbd/enumwriter.h"
