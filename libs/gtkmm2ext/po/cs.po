@@ -2,13 +2,13 @@
 # This file is distributed under the same license as the PACKAGE package.
 #
 # Pavel Fric <pavelfric@seznam.cz>, 2013, 2020.
-# Martin Vlk <martin@vlkk.cz>, 2023.
+# SPDX-FileCopyrightText: 2023, 2025 Martin Vlk <martin@vlkk.cz>
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-09-22 08:53+0200\n"
-"PO-Revision-Date: 2023-09-22 17:55+0200\n"
+"POT-Creation-Date: 2025-12-26 15:25+0100\n"
+"PO-Revision-Date: 2025-12-26 15:32+0100\n"
 "Last-Translator: Martin Vlk <martin@vlkk.cz>\n"
 "Language-Team: Czech <translation-team-cs@lists.sourceforge.net>\n"
 "Language: cs\n"
@@ -16,9 +16,9 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 21.12.3\n"
+"X-Generator: Lokalize 23.08.5\n"
 
-#: actions.cc:215
+#: actions.cc:219
 msgid "Unknown action name: %1/%2"
 msgstr "Neznámý název činnosti: %1/%2"
 
@@ -50,23 +50,23 @@ msgstr "RegionList"
 msgid "ProcessorMenu"
 msgstr "ProcessorMenu"
 
-#: bindings.cc:502
+#: bindings.cc:514
 msgid "Escape"
 msgstr "Escape"
 
-#: bindings.cc:852 bindings.cc:854
+#: bindings.cc:937 bindings.cc:939
 msgid "Window"
 msgstr "Window"
 
-#: bindings.cc:852
+#: bindings.cc:937
 msgid " (Categorized)"
 msgstr "(Zařazeno)"
 
-#: bindings.cc:854
+#: bindings.cc:939
 msgid " (Alphabetical)"
 msgstr "(Abecedně)"
 
-#: bindings.cc:870
+#: bindings.cc:955
 msgid "Uncategorized"
 msgstr "Nezařazeno"
 
@@ -78,11 +78,11 @@ msgstr "soubor s údaji o kontrolním bodu ukazatele %1 má chybu na řádku %2"
 msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 msgstr "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
-#: gtk_ui.cc:121
+#: gtk_ui.cc:135
 msgid "Log"
 msgstr "Zápis"
 
-#: gtk_ui.cc:410
+#: gtk_ui.cc:432
 msgid ""
 "\n"
 "\n"
@@ -92,11 +92,11 @@ msgstr ""
 "\n"
 "Klávesová zkratka: "
 
-#: gtk_ui.cc:702
+#: gtk_ui.cc:724
 msgid "Press To Exit"
 msgstr "Stisknout pro ukončení"
 
-#: gtk_ui.cc:739
+#: gtk_ui.cc:761
 msgid "I'm sorry %1, I can't do that"
 msgstr "Bohužel to nelze udělat, %1"
 
@@ -152,27 +152,36 @@ msgstr "Prostřední-Klik"
 msgid "Win"
 msgstr "Win"
 
-#: keyboard.cc:287 keyboard.cc:771
+#: keyboard.cc:204
+msgid "CapsLock"
+msgstr "CapsLock"
+
+#: keyboard.cc:210
+msgid "Lock"
+msgstr "Lock"
+
+#: keyboard.cc:301 keyboard.cc:785
 msgid "Unknown"
 msgstr "Neznámý"
 
-#: keyboard.cc:781
+#: keyboard.cc:795
 msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr ""
 "Soubor s přiřazením kláves \"%2\"se nepodařilo najít, nebo obsahuje chyby."
 
-#: keyboard.cc:807
+#: keyboard.cc:821
 msgid "Keyboard binding found without a name"
 msgstr "Nalezeno přiřazení kláves bez názvu"
 
-#: keyboard.cc:839
+#: keyboard.cc:853
 msgid "Cannot save key bindings to %1"
 msgstr "Přiřazení kláves nelze uložit do %1"
 
-#: keyboard.cc:854
+#: keyboard.cc:868
 msgid "Cannot rename your own keybinding file (%1)"
 msgstr "Nelze přejmenovat váš vlastní soubor s přiřazením kláves (%1)"
 
 #: textviewer.cc:32
 msgid "Close"
 msgstr "Zavřít"
+
