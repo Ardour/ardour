@@ -1223,9 +1223,9 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	bool solve_ramped_twist (TempoPoint&, TempoPoint&);  /* this is implemented by iteration, and it might fail. */
 	bool solve_constant_twist (TempoPoint&, TempoPoint&);  //TODO:  currently also done by iteration; should be possible to calculate directly
 
-	bool core_remove_meter (MeterPoint const &);
-	bool core_remove_tempo (TempoPoint const &);
-	bool core_remove_bartime (MusicTimePoint const &);
+	Point* core_remove_meter (MeterPoint const &);
+	Point* core_remove_tempo (TempoPoint const &);
+	Point* core_remove_bartime (MusicTimePoint const &);
 
 	void reset_section (Points::iterator& begin, Points::iterator& end, superclock_t, TempoMetric& metric);
 

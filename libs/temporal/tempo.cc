@@ -1055,24 +1055,30 @@ TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy, b
 		if ((mtp = dynamic_cast<MusicTimePoint const *> (&*p))) {
 			cb->add (*mtp);
 			if (!copy && mtp->sclock() != 0) {
-				core_remove_bartime (*mtp);
-				remove_point (*mtp);
-				removed = true;
+				Point* rp = core_remove_bartime (*mtp);
+				if (rp) {
+					remove_point (*rp);
+					removed = true;
+				}
 			}
 		} else {
 			if ((tp = dynamic_cast<TempoPoint const *> (&*p))) {
 				cb->add (*tp);
 				if (!copy && tp->sclock() != 0) {
-					core_remove_tempo (*tp);
-					remove_point (*tp);
-					removed = true;
+					Point* rp = core_remove_tempo (*tp);
+					if (rp) {
+						remove_point (*rp);
+						removed = true;
+					}
 				}
 			} else if ((mp = dynamic_cast<MeterPoint const *> (&*p))) {
 				cb->add (*mp);
 				if (!copy && mp->sclock() != 0) {
-					core_remove_meter (*mp);
-					remove_point (*mp);
-					removed = true;
+					Point* rp = core_remove_meter (*mp);
+					if (rp) {
+						remove_point (*rp);
+						removed = true;
+					}
 				}
 			}
 		}
@@ -1284,14 +1290,20 @@ TempoMap::shift (timepos_t const & at, BBT_Offset const & offset)
 
 				TempoPoint* tp;
 				MeterPoint* mp;
+				Point* rp;
 
 				if (dynamic_cast<MusicTimePoint*> (&*p)) {
 					break;
 				} else if ((mp = dynamic_cast<MeterPoint*> (&*p))) {
-					core_remove_meter (*mp);
+					rp = core_remove_meter (*mp);
 				} else if ((tp = dynamic_cast<TempoPoint*> (&*p))) {
-					core_remove_tempo (*tp);
+					rp = core_remove_tempo (*tp);
 				}
+
+				if (rp) {
+					remove_point (*rp);
+				}
+
 			} else {
 				BBT_Time new_bbt (p->bbt().bars + offset.bars, p->bbt().beats, p->bbt().ticks);
 				p->set (p->sclock(), p->beats(), new_bbt);
@@ -1653,6 +1665,7 @@ TempoMap::add_tempo (TempoPoint * tp)
 {
 	bool replaced;
 	bool reset = _points.back().beats() > tp->beats();
+
 	TempoPoint* ret = core_add_tempo (tp, replaced);
 
 	if (!replaced) {
@@ -1680,13 +1693,15 @@ TempoMap::remove_tempo (TempoPoint const & tp, bool with_reset)
 		return;
 	}
 
-	if (!core_remove_tempo (tp)) {
+	Point* rp;
+
+	if ((rp = core_remove_tempo (tp)) == nullptr) {
 		return;
 	}
 
 	superclock_t sc (tp.sclock());
 
-	remove_point (tp);
+	remove_point (*rp);
 
 	if (with_reset) {
 		reset_starting_at (sc);
@@ -1694,7 +1709,7 @@ TempoMap::remove_tempo (TempoPoint const & tp, bool with_reset)
 
 }
 
-bool
+Point*
 TempoMap::core_remove_tempo (TempoPoint const & tp)
 {
 	Tempos::iterator t;
@@ -1718,13 +1733,12 @@ TempoMap::core_remove_tempo (TempoPoint const & tp)
 
 	if (t == _tempos.end()) {
 		/* not found */
-		return false;
+		return nullptr;
 	}
 
 	if (t->sclock() != tp.sclock()) {
 		/* error ... no tempo point at the time of tp */
-		std::cerr << "not point at time\n";
-		return false;
+		return nullptr;
 	}
 
 	Tempos::iterator nxt = _tempos.begin();
@@ -1742,13 +1756,14 @@ TempoMap::core_remove_tempo (TempoPoint const & tp)
 
 	const bool was_end = (nxt == _tempos.end());
 
+	Point* ret (&(*t));
 	_tempos.erase (t);
 
 	if (prev != _tempos.end() && was_end) {
 		prev->set_end_npm (prev->note_types_per_minute()); /* remove any ramp */
 	}
 
-	return true;
+	return ret;
 }
 
 void
@@ -1809,7 +1824,7 @@ TempoMap::add_or_replace_bartime (MusicTimePoint* mtp)
 	return ret;
 }
 
-bool
+Point*
 TempoMap::core_remove_bartime (MusicTimePoint const & mtp)
 {
 	MusicTimes::iterator m;
@@ -1833,26 +1848,32 @@ TempoMap::core_remove_bartime (MusicTimePoint const & mtp)
 
 	if (m == _bartimes.end()) {
 		/* error ... not found */
-		return false;
+		return nullptr;
 	}
 
 	if  (m->sclock() != mtp.sclock()) {
 		/* error ... no music time point at the time of tp */
-		return false;
+		return nullptr;
 	}
 
-	remove_point (mtp);
+	Point* ret (&(*m));
+
+	remove_point (*ret);
 	core_remove_tempo (mtp);
 	core_remove_meter (mtp);
 	_bartimes.erase (m);
 
-	return true;
+	return ret;
 
 }
 void
 TempoMap::remove_bartime (MusicTimePoint const & mtp, bool with_reset)
 {
 	superclock_t sc (mtp.sclock());
+
+	/* Unlike ::remove_tempo() and ::remove_meter(), the core method here
+	 * also takes care of the point removal too.
+	 */
 
 	core_remove_bartime (mtp);
 
@@ -1864,16 +1885,9 @@ TempoMap::remove_bartime (MusicTimePoint const & mtp, bool with_reset)
 void
 TempoMap::remove_point (Point const & point)
 {
-	Points::iterator p;
-
-	/* Again, we do not allow multiple MusicTimePoints at the same
-	 * location, so if sclock() matches, @param point matches
-	 * the point in the list.
-	 */
-
-	for (p = _points.begin(); p != _points.end(); ++p) {
-		if (p->sclock() == point.sclock()) {
-			// XXX need to fix this leak delete tpp;
+	for (auto p = _points.begin(); p != _points.end(); ++p) {
+		if (&(*p) == &point) {
+			// XXX need to fix this leak by deleting point;
 			_points.erase (p);
 			break;
 		}
@@ -2057,11 +2071,18 @@ TempoMap::reset_section (Points::iterator& begin, Points::iterator& end, supercl
 			superclock_t sc = metric.superclock_at (p->bbt());
 
 			if (sc >= section_limit) {
+				Point* rp;
+
 				if (tp) {
-					core_remove_tempo (*tp);
+					rp = core_remove_tempo (*tp);
 				} else {
-					core_remove_meter (*mp);
+					rp = core_remove_meter (*mp);
 				}
+
+				if (rp) {
+					remove_point (*rp);
+				}
+
 			} else {
 
 				if (mp) {
@@ -2422,20 +2443,22 @@ TempoMap::remove_meter (MeterPoint const & mp, bool with_reset)
 		return;
 	}
 
-	if (!core_remove_meter (mp)) {
+	Point* rp;
+
+	if ((rp = core_remove_meter (mp)) == nullptr) {
 		return;
 	}
 
 	superclock_t sc = mp.sclock();
 
-	remove_point (mp);
+	remove_point (*rp);
 
 	if (with_reset) {
 		reset_starting_at (sc);
 	}
 }
 
-bool
+Point*
 TempoMap::core_remove_meter (MeterPoint const & mp)
 {
 	Meters::iterator m;
@@ -2459,17 +2482,19 @@ TempoMap::core_remove_meter (MeterPoint const & mp)
 
 	if (m == _meters.end()) {
 		/* not found */
-		return false;
+		return nullptr;
 	}
 
 	if (m->sclock() != mp.sclock()) {
 		/* error ... no meter point at the time of mp */
-		return false;
+		return nullptr;
 	}
+
+	Point* ret (&(*m));
 
 	_meters.erase (m);
 
-	return true;
+	return ret;
 }
 
 Temporal::BBT_Argument
@@ -3126,7 +3151,7 @@ TempoMap::fill_grid_by_walking (TempoMapPoints& ret, Points::const_iterator& p_i
 					++p;
 
 					if (p != _points.end()) {
-						DEBUG_TRACE (DEBUG::Grid, string_compose ("next point is %1\n", *p));
+						DEBUG_TRACE (DEBUG::Grid, string_compose ("next point is @ %1 %2\n", &(*p), *p));
 					} else {
 						DEBUG_TRACE (DEBUG::Grid, "\tthat was that\n");
 					}
@@ -4104,13 +4129,24 @@ TempoMap::set_ramped (TempoPoint & tp, bool yn)
 		return false;
 	}
 
+	std::cerr << "pre ramped to " << yn << std::endl;
+	dump (std::cerr);
+
 	if (yn) {
+		std::cerr << "set end of " << tp << " to match " << *nxt << std::endl;
 		tp.set_end_npm (nxt->end_note_types_per_minute());
 	} else {
 		tp.set_end_npm (tp.note_types_per_minute());
 	}
 
+	std::cerr << "post ramped to " << yn << std::endl;
+	dump (std::cerr);
+
+
 	reset_starting_at (tp.sclock());
+
+	std::cerr << "final post ramped to " << yn << std::endl;
+	dump (std::cerr);
 
 	return true;
 }
