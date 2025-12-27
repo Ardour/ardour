@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-12-26 15:25+0100\n"
-"PO-Revision-Date: 2025-12-26 15:48+0100\n"
+"PO-Revision-Date: 2025-12-27 13:07+0100\n"
 "Last-Translator: Martin Vlk <martin@vlkk.cz>\n"
 "Language-Team: Czech <translation-team-cs@lists.sourceforge.net>\n"
 "Language: cs\n"
@@ -683,7 +683,7 @@ msgstr "Přidat stopu/sběrnici/VCA"
 
 #: add_route_dialog.cc:74
 msgid "Input Config:"
-msgstr ""
+msgstr "Konfigurace vstupu:"
 
 #: add_route_dialog.cc:75
 msgid "Configuration:"
@@ -839,13 +839,12 @@ msgstr "Název pro VCA. \"%n\" bude nahrazeno rejstříkovým číslem pro každ
 
 #: add_route_dialog.cc:161 add_route_dialog.cc:595 add_route_dialog.cc:616
 msgid "Foldback Busses"
-msgstr "Skládací sběrnice (Foldback)"
+msgstr "Zpětné sběrnice"
 
 #: add_route_dialog.cc:162
 msgid "Use these settings to create one or more foldback busses."
 msgstr ""
-"Tato nastavení použijte k vytvoření jedné nebo více skládacích sběrnic "
-"(Foldback)."
+"Tato nastavení použijte k vytvoření jedné nebo více sběrnic zpětného poslechu."
 
 #: add_route_dialog.cc:163
 msgid ""
@@ -853,7 +852,7 @@ msgid ""
 "by\n"
 "hidden monitor sends."
 msgstr ""
-"Skládací sběrnice (Foldback) se používají jako hlavní výstupy pro sledovací "
+"Sběrnice zpětného poslechu se používají jako hlavní výstupy pro sledovací "
 "kanály a data jim dodávají\n"
 "skryté sledovací výstupy."
 
@@ -944,7 +943,7 @@ msgstr "Sběrnice"
 
 #: add_route_dialog.cc:643 add_route_dialog.cc:814
 msgid "Foldback"
-msgstr "Foldback"
+msgstr "Zpětný mix"
 
 #: add_route_dialog.cc:848
 msgid "Non Layered"
@@ -1146,7 +1145,7 @@ msgstr "Ztlumit vše"
 
 #: application_bar.cc:392
 msgid "Feedgeek"
-msgstr ""
+msgstr "Feedgeek"
 
 #: application_bar.cc:428
 msgid ""
@@ -1157,6 +1156,12 @@ msgid ""
 "<b>SoundOnSound</b>, behaves like <i>Layered</i>, except underlying regions "
 "will be audible."
 msgstr ""
+"<b>Vrstvené</b>, nové nahrávky budou přidány jako oblasti na vrstvu nad "
+"stávajícími oblastmi.\n"
+"<b>Nevrstvené</b>, oblast vespod bude rozdělena a nahrazena "
+"nově nahranou oblastí.\n"
+"<b>ZvukPřesZvuk</b>, chová se jako <i>Vrstvené</i>, jen oblasti vespod "
+"budou také slyšet."
 
 #: application_bar.cc:429
 msgid ""
@@ -1270,7 +1275,7 @@ msgstr ""
 
 #: application_bar.cc:924
 msgid "No Latency"
-msgstr ""
+msgstr "Bez latence"
 
 #: application_bar.cc:936 application_bar.cc:944
 msgid "SyncSource|Int."
@@ -1282,7 +1287,7 @@ msgstr "Povolit/Zakázat vnější seřízení podle polohy"
 
 #: application_bar.cc:951
 msgid "External sync is not possible: video pull up/down is set"
-msgstr ""
+msgstr "Externí sync není možný: pro video je nastaven pull up/down"
 
 #: ardour_http.cc:160 ardour_http.cc:163 ardour_http.cc:183
 msgid "HTTP request failed: (%1) %2"
@@ -1408,7 +1413,7 @@ msgstr "Skriptování"
 
 #: ardour_ui.cc:335
 msgid "Window|Realtime Analyzer"
-msgstr ""
+msgstr "Analýza v reálném čase"
 
 #: ardour_ui.cc:345
 msgid "Window|Edit"
@@ -1703,7 +1708,7 @@ msgstr[1] "Nepodařilo se vytvořit %1 nové zvukové sběrnice"
 #: ardour_ui.cc:1624
 msgid "could not create %1 new foldback bus"
 msgid_plural "could not create %1 new foldback busses"
-msgstr[0] "Nepodařilo se vytvořit %1 novou skládací sběrnici (Foldback)"
+msgstr[0] "Nepodařilo se vytvořit %1 novou sběrnici zpětného poslechu"
 msgstr[1] "Nepodařilo se vytvořit %1 nových skládacích sběrnic (Foldback)"
 
 #: ardour_ui.cc:1639
@@ -1907,6 +1912,19 @@ msgid ""
 "<a href=\"https://helpcenter.steinberg.de/hc/en-us/articles/13338094735762-"
 "Error-message-on-Windows-MMCSS-priority-cannot-be-set\">here</a>."
 msgstr ""
+"<b>MMCSS prioritu nelze nastavit!</b>\n"
+"\n"
+"Windows Multimedia Class Scheduler Service (MMCSS) se používá pro plynulé "
+"zpracování zvuku. V základním nastavení Microsoft omezil počet MMCSS "
+"vláken na 32 a tohoto limitu bylo dosaženo.\n"
+"\n"
+"Počet vláken pro zpracování můžete omezit v Nastavení &gt; "
+"Výkon, ale nemusí to stačit, protože MMCSS vlákna jsou také "
+"využívána pro Audio a MIDI I/O.\n"
+"Jedno možné řešení je zvýšit počet dostupných MMCSS vláken "
+"úpravou windows registru. Pohodlně to lze provést nástrojem, který najdete "
+"<a href=\"https://helpcenter.steinberg.de/hc/en-us/articles/13338094735762-"
+"Error-message-on-Windows-MMCSS-priority-cannot-be-set\">zde</a>."
 
 #: ardour_ui.cc:3016
 msgid "Crash Recovery"
@@ -2016,35 +2034,35 @@ msgstr "Název"
 
 #: ardour_ui_aaf.cc:486
 msgid "AAF: Destination '%1' already exists."
-msgstr ""
+msgstr "AAF: Cíl '%1' již existuje."
 
 #: ardour_ui_aaf.cc:498
 msgid "AAF: Could not prepare media cache: %1"
-msgstr ""
+msgstr "AAF: Nelze připravit cache pro média: %1"
 
 #: ardour_ui_aaf.cc:527
 msgid "AAF: Could not start [dummy] engine for AAF import ."
-msgstr ""
+msgstr "AAF: Nelze spustit [dummy] engine pro AAF import ."
 
 #: ardour_ui_aaf.cc:540
 msgid "AAF: Could not create new session for AAF import ."
-msgstr ""
+msgstr "AAF: Nelze vytvořit nové sezení pro AAF import ."
 
 #: ardour_ui_aaf.cc:603
 msgid "AAF: Clip has no essence."
-msgstr ""
+msgstr "AAF: Klip nemá obsah."
 
 #: ardour_ui_aaf.cc:616
 msgid "AAF: Audio essence pointer is missing an audio essence file entry"
-msgstr ""
+msgstr "AAF: V ukazateli na audio obsah chybí záznam pro soubor audio obsahu"
 
 #: ardour_ui_aaf.cc:656
 msgid "AAF: Could not create new region for clip '%1': Region has no source"
-msgstr ""
+msgstr "AAF: Nelze vytvořit novou oblast pro klip '%1': Oblast nemá zdroj"
 
 #: ardour_ui_aaf.cc:663
 msgid "AAF: Could not create new region for clip '%1'"
-msgstr ""
+msgstr "AAF: Nelze vytvořit novou oblast pro klip '%1'"
 
 #: ardour_ui_access_web.cc:54
 msgid ""
@@ -2264,7 +2282,7 @@ msgstr "Zavřít"
 
 #: ardour_ui_ed.cc:203
 msgid "Add New Track, Bus, VCA or Foldback..."
-msgstr ""
+msgstr "Přidat novou stopu, sběrnici, VCA nebo zpětný mix..."
 
 #: ardour_ui_ed.cc:208
 msgid "Duplicate Tracks/Busses..."
@@ -2308,7 +2326,7 @@ msgstr "Rychlý snímek (&přepnout na novou verzi)..."
 
 #: ardour_ui_ed.cc:244
 msgid "Save Session Copy As..."
-msgstr ""
+msgstr "Uložit kopii sezení jako..."
 
 #: ardour_ui_ed.cc:247
 msgid "Archive..."
@@ -2323,7 +2341,7 @@ msgstr "Přejmenovat..."
 
 #: ardour_ui_ed.cc:254
 msgid "Create Session Template..."
-msgstr ""
+msgstr "Vytvořit předlohu sezení..."
 
 #: ardour_ui_ed.cc:257
 msgid "Templates"
@@ -2331,11 +2349,11 @@ msgstr "Předlohy"
 
 #: ardour_ui_ed.cc:260
 msgid "Save Mixer Strips..."
-msgstr ""
+msgstr "Uložit pásy směšovače"
 
 #: ardour_ui_ed.cc:263
 msgid "Import Mixer Strips..."
-msgstr ""
+msgstr "Importovat pásy směšovače"
 
 #: ardour_ui_ed.cc:266 export_format_dialog.cc:324
 msgid "Metadata"
@@ -2618,7 +2636,7 @@ msgstr "Klepnout"
 
 #: ardour_ui_ed.cc:499
 msgid "Click when Recording"
-msgstr ""
+msgstr "Klikněte při nahrávání"
 
 #: ardour_ui_ed.cc:502
 msgid "Auto Input"
@@ -2638,11 +2656,11 @@ msgstr "Zakázat vyrovnání prodlevy"
 
 #: ardour_ui_ed.cc:518
 msgid "Reset Mixer Meter Peaks"
-msgstr ""
+msgstr "Vynulovat špičku na měřidle směšovače"
 
 #: ardour_ui_ed.cc:521
 msgid "Reset All Meter Peak Hold"
-msgstr ""
+msgstr "Vynulovat všechny držené špičky měřidel"
 
 #: ardour_ui_ed.cc:524
 msgid "Monitor Section"
@@ -2710,27 +2728,27 @@ msgstr "Skočit na další značku"
 
 #: ardour_ui_ed.cc:600
 msgid "Jump to Previous Location Mark"
-msgstr ""
+msgstr "Skočit na předchozí značku polohy"
 
 #: ardour_ui_ed.cc:604
 msgid "Jump to Next Location Mark"
-msgstr ""
+msgstr "Skočit na následující značku polohy"
 
 #: ardour_ui_ed.cc:608
 msgid "Jump to Previous Range"
-msgstr ""
+msgstr "Skočit na předchozí rozsah"
 
 #: ardour_ui_ed.cc:612
 msgid "Jump to Next Range"
-msgstr ""
+msgstr "Skočit na následující rozsah"
 
 #: ardour_ui_ed.cc:616
 msgid "Jump to Previous Arrangement Mark"
-msgstr ""
+msgstr "Skočit na předchozí značku aranže"
 
 #: ardour_ui_ed.cc:620
 msgid "Jump to Next Arrangement Mark"
-msgstr ""
+msgstr "Skočit na následující značku aranže"
 
 #: ardour_ui_ed.cc:626
 msgid "Locate to Mark %1"
@@ -2746,7 +2764,7 @@ msgstr "Přejít na konec smyčky"
 
 #: ardour_ui_ed.cc:636
 msgid "Import Audio/MIDI files..."
-msgstr ""
+msgstr "Import zvukových/MIDI souborů"
 
 #: ardour_ui_ed.cc:640
 msgid "Stem export..."
@@ -2798,7 +2816,7 @@ msgstr "Odstranit značku při ukazateli polohy"
 
 #: ardour_ui_ed.cc:690
 msgid "Add Arrangement Mark at Playhead"
-msgstr ""
+msgstr "Přidat značku aranže na ukazateli polohy"
 
 #: ardour_ui_ed.cc:693
 msgid "Add BBT Marker from Playhead"
@@ -2983,11 +3001,11 @@ msgstr "Souborový formát"
 
 #: ardour_ui_ed.cc:909
 msgid "Total I/O Latency"
-msgstr ""
+msgstr "Celková I/O latence"
 
 #: ardour_ui_ed.cc:910
 msgid "Plugin Latency"
-msgstr ""
+msgstr "Latence přídavných modulů"
 
 #: ardour_ui_ed.cc:911
 msgid "Timecode Format"
@@ -3030,6 +3048,8 @@ msgid ""
 "Please consider paying for a copy of %1 - you can pay whatever you want.\n"
 "Download the unrestricted build after paying..."
 msgstr ""
+"Prosím zvažte zaplatit si kopii %1 - můžete dát kolik chcete.\n"
+"Po zaplacení si stáhnete neomezenou verzi..."
 
 #: ardour_ui_engine.cc:69
 msgid "Better yet become a subscriber - subscriptions start at US$1 per month."
@@ -3106,7 +3126,7 @@ msgstr "Nepodařilo se vytáhnout archiv se sezením: %1"
 
 #: ardour_ui_session.cc:205
 msgid "Extracting AAF failed"
-msgstr ""
+msgstr "Selhala extrakce AAF"
 
 #: ardour_ui_session.cc:260 ardour_ui_session.cc:293 ardour_ui_session.cc:945
 #: session_dialog.cc:898 startup_fsm.cc:872
@@ -3148,7 +3168,7 @@ msgstr "Chyba při nahrávání"
 
 #: ardour_ui_session.cc:480
 msgid "Session not loaded"
-msgstr ""
+msgstr "Sezení nebylo načteno"
 
 #: ardour_ui_session.cc:502
 msgid ""
@@ -3332,6 +3352,8 @@ msgid ""
 "The currently loaded session name cannot be used as new snapshot.\n"
 "Just save the session for this operation."
 msgstr ""
+"Název současného sezení nelze použít pro nový snímek.\n"
+"Pro tuto operaci sezení prostě uložte."
 
 #: ardour_ui_session.cc:1164
 msgid ""
@@ -3676,27 +3698,27 @@ msgstr "Kopírovat do schránky"
 
 #: audio_region_editor.cc:62
 msgid "Polarity Invert"
-msgstr ""
+msgstr "Invertovat polaritu"
 
 #: audio_region_editor.cc:63
 msgid "Fade before Fx"
-msgstr ""
+msgstr "Prolnout před Fx"
 
 #: audio_region_editor.cc:64
 msgid "Show on Touch"
-msgstr ""
+msgstr "Ukázat při dotyku"
 
 #: audio_region_editor.cc:68
 msgid "Region gain"
-msgstr ""
+msgstr "Zisk oblasti"
 
 #: audio_region_editor.cc:72
 msgid "Peak Amplitude"
-msgstr ""
+msgstr "Nejvyšší amplituda"
 
 #: audio_region_editor.cc:76
 msgid "Region Line:"
-msgstr ""
+msgstr "Linka oblasti:"
 
 #: audio_region_editor.cc:100 rhythm_ferret.cc:140 rhythm_ferret.cc:157
 msgid "dB"
@@ -3712,7 +3734,7 @@ msgstr "dBFS"
 
 #: audio_region_editor.cc:125
 msgid "Invert the signal polarity (180deg phase shift)"
-msgstr ""
+msgstr "Invertovat polaritu signálu (180° fázový posun)"
 
 #: audio_region_editor.cc:126
 msgid ""
@@ -8307,7 +8329,7 @@ msgstr "V režimu zámku úprav nemůžete vložit čas."
 #: editor_ops.cc:8079 editor_ops.cc:8112 editor_ops.cc:8134 editor_ops.cc:8173
 #: editor_ops.cc:8183 editor_ops.cc:8190
 msgid "insert time"
-msgstr "Vložit čas"
+msgstr "vložit čas"
 
 #: editor_ops.cc:8204
 msgid "You must first select some tracks to Remove Time."
@@ -9968,7 +9990,7 @@ msgstr "Datum vytvoření"
 
 #: foldback_strip.cc:100
 msgid "Pan: "
-msgstr "Vyváž:"
+msgstr "Vyvážit:"
 
 #: foldback_strip.cc:111
 msgid "Level"
@@ -9976,27 +9998,27 @@ msgstr "Úroveň"
 
 #: foldback_strip.cc:291
 msgid "Copy track/bus gain to send"
-msgstr "Kopírovat zisk stopy/sběrnice na výstup"
+msgstr "Kopírovat zisk stopy/sběrnice na send"
 
 #: foldback_strip.cc:293
 msgid "Set send gain to -inf"
-msgstr "Nastavit zisk výstupu na -inf"
+msgstr "Nastavit zisk sendu na -inf"
 
 #: foldback_strip.cc:295
 msgid "Set send gain to 0dB"
-msgstr "Nastavit zisk výstupu na 0dB"
+msgstr "Nastavit zisk sendu na 0dB"
 
 #: foldback_strip.cc:301
 msgid "Set send post fader"
-msgstr "Nastavit po-prolínač výstupu"
+msgstr "Nastavit po-prolínač sendu"
 
 #: foldback_strip.cc:304
 msgid "Set send pre fader"
-msgstr "Nastavit před-prolínač výstupu"
+msgstr "Nastavit před-prolínač sendu"
 
 #: foldback_strip.cc:308
 msgid "Remove This Send"
-msgstr "Odstranit tento výstup"
+msgstr "Odstranit tento send"
 
 #: foldback_strip.cc:383 foldback_strip.cc:763 foldback_strip.cc:774
 #: mixer_strip.cc:130 mixer_strip.cc:167 mixer_strip.cc:414 mixer_strip.cc:996
@@ -10007,15 +10029,15 @@ msgstr "Poznámka"
 
 #: foldback_strip.cc:397
 msgid "Previous foldback bus"
-msgstr "Předchozí skládací sběrnice (Foldback)"
+msgstr "Předchozí sběrnice zpětného poslechu"
 
 #: foldback_strip.cc:403
 msgid "Next foldback bus"
-msgstr "Další skládací sběrnice (Foldback)"
+msgstr "Další sběrnice zpětného poslechu"
 
 #: foldback_strip.cc:409
 msgid "Hide Foldback strip"
-msgstr "Skrýt skládací proužek (Foldback)"
+msgstr "Skrýt proužek zpětného poslechu"
 
 #: foldback_strip.cc:465 meter_strip.cc:224 surround_strip.cc:171
 msgid "Level: "
@@ -10057,11 +10079,11 @@ msgstr "Chránit proti neobvyklým hodnotám"
 
 #: foldback_strip.cc:822
 msgid "Duplicate Foldback Bus"
-msgstr "Zdvojit skládací sběrnici"
+msgstr "Zdvojit sběrnici zpětného poslechu"
 
 #: foldback_strip.cc:1031 mixer_strip.cc:858
 msgid "Show Sends"
-msgstr "Ukázat výstupy"
+msgstr "Ukázat sendy"
 
 #: foldback_strip.cc:1035 mixer_strip.cc:1759 monitor_section.cc:90
 #: trigger_strip.cc:418
@@ -11404,7 +11426,7 @@ msgstr ""
 
 #: midi_trigger_properties_box.cc:57 slot_properties_box.cc:252
 msgid "Send Patches"
-msgstr "Odeslat zvuky"
+msgstr "Odeslat patche"
 
 #: midi_trigger_properties_box.cc:63
 msgid "Send CCs"
@@ -12390,7 +12412,7 @@ msgstr "Surround Master"
 
 #: mixer_ui.cc:3819
 msgid "Mixer: Show Foldback Strip"
-msgstr "Směšovač: Ukázat skládací proužek (Foldback)"
+msgstr "Směšovač: Ukázat proužek zpětného poslechu"
 
 #: mixer_ui.cc:3821
 msgid "Toggle Disk Monitoring"
@@ -13152,7 +13174,7 @@ msgstr "Abs"
 
 #: panner_ui.cc:421
 msgid "Link send and main panner"
-msgstr "Výstup spojení a hlavní vyvažovač"
+msgstr "Propojit send a hlavní vyvažovač"
 
 #: patch_change_widget.cc:137 patch_change_widget.cc:197
 msgid "%1 (Pgm-%2)"
@@ -13630,7 +13652,7 @@ msgstr "Automaticky"
 
 #: plugin_pin_dialog.cc:664
 msgid "Send"
-msgstr "Výstup"
+msgstr "Send"
 
 #: plugin_pin_dialog.cc:1063
 msgid "Latency %1 spl%2 %3"
@@ -13674,7 +13696,7 @@ msgstr "Nepodařilo se změnit vstupní nastavení přídavného modulu."
 
 #: plugin_pin_dialog.cc:1844 processor_box.cc:2938
 msgid "Cannot set up new send: %1"
-msgstr "Nelze nastavit nové odeslání: %1"
+msgstr "Nelze nastavit nový výstup: %1"
 
 #: plugin_pin_dialog.cc:1851
 msgid "SC %1 (%2)"
@@ -14207,7 +14229,7 @@ msgstr "Změřit prodlevu"
 
 #: port_insert_ui.cc:82
 msgid "Send/Output"
-msgstr "Odeslání/Výstup"
+msgstr "Send/Výstup"
 
 #: port_insert_ui.cc:83
 msgid "Return/Input"
@@ -14215,7 +14237,7 @@ msgstr "Návrat/Vstup"
 
 #: port_insert_ui.cc:113 route_ui.cc:2189 send_ui.cc:71
 msgid "Click to invert polarity of all send channels"
-msgstr "Kliknutím převrátíte polaritu všech odesílacích kanálů"
+msgstr "Kliknutím převrátíte polaritu všech kanálů pro send"
 
 #: port_insert_ui.cc:114
 msgid "Edit Latency, manually override measured or I/O reported latency"
@@ -14263,7 +14285,7 @@ msgstr "Zapomenout předchozí měření"
 
 #: port_insert_ui.cc:337 port_insert_ui.cc:347
 msgid "Port Insert: %1"
-msgstr "Vstupní port: %1"
+msgstr "Port insertu: %1"
 
 #: port_matrix.cc:355 port_matrix.cc:381
 msgid "<b>Sources</b>"
@@ -14416,7 +14438,7 @@ msgid ""
 "plugins,inserts,sends and more"
 msgstr ""
 "Klepnutí pravým tlačítkem myši pro přidání/odstranění/upravení\n"
-"přídavných modulů, vložení, poslání a další"
+"přídavných modulů, insertů, sendů a dalších"
 
 #: processor_box.cc:2164
 msgid ""
@@ -14490,7 +14512,7 @@ msgid ""
 "in that way because the inputs and\n"
 "outputs will not work correctly."
 msgstr ""
-"Nemůžete tyto přídavné moduly/odeslání/vložky\n"
+"Nemůžete tyto přídavné moduly/sendy/inserty\n"
 "přeuspořádat tímto způsobem, protože vstupy a\n"
 "výstupy nebudou nepracovat správně."
 
@@ -14560,23 +14582,23 @@ msgstr "Vložit nový přídavný modul"
 
 #: processor_box.cc:4186
 msgid "New Insert"
-msgstr "Vložit novou vložku"
+msgstr "Nový insert"
 
 #: processor_box.cc:4189
 msgid "New External Send ..."
-msgstr "Nové vnější odeslání..."
+msgstr "Nový externí send..."
 
 #: processor_box.cc:4193
 msgid "New Aux Send ..."
-msgstr "Nový aux výstup..."
+msgstr "Nový aux send..."
 
 #: processor_box.cc:4194
 msgid "New Foldback Send ..."
-msgstr "Nové skládací odeslání (Foldback)..."
+msgstr "Nový send zpětného poslechu ..."
 
 #: processor_box.cc:4195
 msgid "Remove Foldback Send ..."
-msgstr "Odstranit skládací odeslání (Foldback)..."
+msgstr "Odstranit send zpětného poslechu..."
 
 #: processor_box.cc:4197
 msgid "Inline Controls"
@@ -14584,7 +14606,7 @@ msgstr "Vnořené ovládání"
 
 #: processor_box.cc:4198
 msgid "Send Options"
-msgstr "Volby pro odeslání"
+msgstr "Volby pro send"
 
 #: processor_box.cc:4199
 msgid "Presets"
@@ -17282,11 +17304,11 @@ msgstr "Výchozí volby pro ztlumení stopy/sběrnice"
 
 #: rc_option_editor.cc:4603
 msgid "Mute affects pre-fader sends"
-msgstr "Ztlumení ovlivní odeslání před-prolínače"
+msgstr "Ztlumení ovlivní sendy před-prolínače"
 
 #: rc_option_editor.cc:4611
 msgid "Mute affects post-fader sends"
-msgstr "Ztlumení ovlivní odeslání po-prolínače"
+msgstr "Ztlumení ovlivní sendy po-prolínače"
 
 #: rc_option_editor.cc:4619
 msgid "Mute affects control outputs"
@@ -17298,12 +17320,11 @@ msgstr "Ztlumení ovlivní hlavní výstupy"
 
 #: rc_option_editor.cc:4633
 msgid "Send Routing"
-msgstr "Vedení odeslání"
+msgstr "Propojení sendů"
 
 #: rc_option_editor.cc:4637
 msgid "Link panners of Aux and External Sends with main panner by default"
-msgstr ""
-"Automaticky spojí vyvažovače AUX a vnější výstupy s hlavním vyvažovačem"
+msgstr "Automaticky spojí vyvažovače AUX a vnější sendy s hlavním vyvažovačem"
 
 #: rc_option_editor.cc:4642
 msgid "Audio Regions"
@@ -18255,7 +18276,7 @@ msgstr "Povolení nahrávání"
 
 #: route_group_dialog.cc:55
 msgid "Surround Send enable"
-msgstr ""
+msgstr "Zapnout surround send"
 
 #: route_group_dialog.cc:57
 msgid "Active state"
@@ -18339,7 +18360,7 @@ msgstr "Výstupy"
 
 #: route_params_ui.cc:108
 msgid "Plugins, Inserts & Sends"
-msgstr "Přídavné moduly, vložky & odeslání"
+msgstr "Přídavné moduly, inserty & sendy"
 
 #: route_params_ui.cc:197
 msgid "Display list item for renamed track/bus was not found!"
@@ -18566,15 +18587,15 @@ msgstr "Přiřadit vybrané stopy a sběrnice (po-prolínač)"
 
 #: route_ui.cc:1106
 msgid "Copy track/bus gains to sends"
-msgstr "Kopírovat zisk stop/sběrnic na výstup"
+msgstr "Kopírovat zisk stop/sběrnic na send"
 
 #: route_ui.cc:1107
 msgid "Set sends gain to -inf"
-msgstr "Nastavit zisk výstupů na -inf."
+msgstr "Nastavit zisk sendů na -inf."
 
 #: route_ui.cc:1108
 msgid "Set sends gain to 0dB"
-msgstr "Nastavit zisk výstupů na 0dB"
+msgstr "Nastavit zisk sendů na 0dB"
 
 #: route_ui.cc:1487
 msgid "Solo Isolate"
@@ -18582,11 +18603,11 @@ msgstr "Sólo izolovat"
 
 #: route_ui.cc:1512
 msgid "Pre Fader Sends"
-msgstr "Odeslání před-prolínače"
+msgstr "Sendy před-prolínače"
 
 #: route_ui.cc:1518
 msgid "Post Fader Sends"
-msgstr "Odeslání po-prolínače"
+msgstr "Sendy po-prolínače"
 
 #: route_ui.cc:1524
 msgid "Control Outs"
@@ -18598,7 +18619,7 @@ msgstr "Hlavní výstupy"
 
 #: route_ui.cc:1536
 msgid "Surround Send"
-msgstr "Surround výstup"
+msgstr "Surround send"
 
 #: route_ui.cc:1755
 msgid ""
@@ -18843,7 +18864,7 @@ msgstr "Oblast '%1'"
 
 #: send_ui.cc:155 send_ui.cc:164
 msgid "Send: %1"
-msgstr "Výstup: %1"
+msgstr "Send: %1"
 
 #: session_archive_dialog.cc:35
 msgid "Zip/Archive Current Session"
@@ -23033,4 +23054,5 @@ msgstr "Vstupní video soubor"
 
 #~ msgid "Color file for %1 not found along %2"
 #~ msgstr "Soubor s barvou pro %1 nebyl pod %2 nalezen"
+
 
