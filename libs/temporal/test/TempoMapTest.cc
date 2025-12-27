@@ -36,6 +36,22 @@ TempoMapTest::addTest()
 }
 
 void
+TempoMapTest::addRemoveTest()
+{
+	TempoMap::WritableSharedPtr tmap (new TempoMap(Tempo (120,4), Meter (4,4)));
+
+	tmap->set_tempo (Tempo (120, 4), BBT_Argument (5, 1, 0));
+	tmap->set_meter (Meter (2, 4), BBT_Argument (5, 1, 0));
+
+	TempoPoint& tp = tmap->set_tempo (Tempo (120, 4), BBT_Argument (7, 1, 0));
+	tmap->set_meter (Meter (4, 5), BBT_Argument (7, 1, 0));
+
+	tmap->replace_tempo (tp, Tempo (64, 4), timepos_t (tp.beats()));
+
+	CPPUNIT_ASSERT (tmap->tempo_at (BBT_Argument (8, 1, 0)).note_types_per_minute() == Tempo (64, 4).note_types_per_minute());
+}
+
+void
 TempoMapTest::subtractTest()
 {
 }
@@ -54,4 +70,5 @@ void
 TempoMapTest::convertTest()
 {
 }
+
 
