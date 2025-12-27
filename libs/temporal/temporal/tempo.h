@@ -742,6 +742,10 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	static SerializedRCUManager<TempoMap> _map_mgr;
 	static bool fetch_condition ();
   public:
+	/* These are only for use in unit tests */
+	Points::size_type count_tempos_in_points() const;
+	Points::size_type count_meters_in_points() const;
+  public:
 	LIBTEMPORAL_API static void init ();
 
 	LIBTEMPORAL_API static void      update_thread_tempo_map() { _tempo_map_p = _map_mgr.reader(); }

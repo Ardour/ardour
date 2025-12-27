@@ -2614,6 +2614,37 @@ TempoMap::dump (std::ostream& ostr) const
 	ostr << "------------\n\n\n";
 }
 
+Points::size_type
+TempoMap::count_tempos_in_points () const
+{
+	Points::size_type n = 0;
+
+	for (Points::const_iterator p = _points.begin(); p != _points.end(); ++p) {
+		if (dynamic_cast<MusicTimePoint const *> (&(*p))) {
+			/* ignore */
+		} else if (dynamic_cast<TempoPoint const *> (&(*p))) {
+			++n;
+		}
+	}
+	return n;
+}
+
+Points::size_type
+TempoMap::count_meters_in_points () const
+{
+	Points::size_type n = 0;
+
+	for (Points::const_iterator p = _points.begin(); p != _points.end(); ++p) {
+		if (dynamic_cast<MusicTimePoint const *> (&(*p))) {
+			/* ignore */
+		} else if (dynamic_cast<MeterPoint const *> (&(*p))) {
+			++n;
+		}
+	}
+	return n;
+}
+
+
 template<class const_traits_t>  typename const_traits_t::iterator_type
 TempoMap::_get_tempo_and_meter (typename const_traits_t::tempo_point_type & tp,
                                 typename const_traits_t::meter_point_type & mp,
