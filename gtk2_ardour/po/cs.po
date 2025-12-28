@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-12-26 15:25+0100\n"
-"PO-Revision-Date: 2025-12-27 13:07+0100\n"
+"PO-Revision-Date: 2025-12-28 15:30+0100\n"
 "Last-Translator: Martin Vlk <martin@vlkk.cz>\n"
 "Language-Team: Czech <translation-team-cs@lists.sourceforge.net>\n"
 "Language: cs\n"
@@ -3742,12 +3742,19 @@ msgid ""
 "This is useful if the effect(s) have tail, which would otherwise be faded "
 "out by the region fade (e.g. reverb, delay)"
 msgstr ""
+"Aplikovat efekty oblasti až po aplikaci prolnutí.\n"
+"To se hodí v případech, kdy efekt(y) mají koncovku, která by jinak byla"
+" ovlivněna "
+"prolnutím oblasti (např. reverb, delay)"
 
 #: audio_region_editor.cc:127
 msgid ""
 "When touching a control in a region effect plugin UI, the corresponding "
 "region-automation line is shown the editor, and edit mode is set to 'draw'."
 msgstr ""
+"Při dotyku ovladače v UI modulu efektu oblasti, se zobrazí "
+"v editoru odpovídající pás automatizace oblasti a režim úprav se nastaví na"
+" 'kreslení'."
 
 #: audio_region_editor.cc:143 strip_silence_dialog.cc:127
 #: strip_silence_dialog.cc:316
@@ -3756,7 +3763,7 @@ msgstr "Rozbor"
 
 #: audio_region_editor.cc:308 audio_region_editor.cc:316
 msgid "Gain Envelope"
-msgstr ""
+msgstr "Obálka zisku"
 
 #: audio_region_view.cc:1561
 msgid "add gain control point"
@@ -3867,7 +3874,7 @@ msgstr "Odstranit bod automatizace"
 
 #: automation_line.cc:1312 automation_line.cc:1382 automation_line.cc:1409
 msgid "Ignoring illegal points on EditorAutomationLine \"%1\""
-msgstr ""
+msgstr "Ignoruji neplatné body na EditorAutomationLine \"%1\""
 
 #: automation_line.cc:1810 automation_region_view.cc:215
 msgid "add automation event"
@@ -4168,7 +4175,7 @@ msgstr "CueBox pro XXXX"
 
 #: cue_editor.cc:54
 msgid "Record:"
-msgstr ""
+msgstr "Nahrávání:"
 
 #: cue_editor.cc:55 editor_route_groups.cc:99 mixer_strip.cc:1789
 #: meter_strip.cc:396 route_list_base.cc:209 route_time_axis.cc:2420
@@ -4178,51 +4185,51 @@ msgstr "S"
 
 #: cue_editor.cc:460
 msgid "Zoom to full clip"
-msgstr ""
+msgstr "Pohled na celý klip"
 
 #: cue_editor.cc:461
 msgid "Toggle between drum and regular note drawing"
-msgstr ""
+msgstr "Přepnout mezi kreslením not pro bicí nebo běžných"
 
 #: cue_editor.cc:492
 msgid "Play this clip from the top"
-msgstr ""
+msgstr "Přehrát tento klip odshora"
 
 #: cue_editor.cc:493
 msgid "Loop the range of this clip"
-msgstr ""
+msgstr "Opakovat oblast tohoto klipu"
 
 #: cue_editor.cc:494
 msgid "Solo the track containing this clip"
-msgstr ""
+msgstr "Sólo na stopě obsahující tento klip"
 
 #: cue_editor.cc:500
 msgid "Launch selected clip"
-msgstr ""
+msgstr "Spustit vybraný klip"
 
 #: cue_editor.cc:510
 msgid "Record clip"
-msgstr ""
+msgstr "Nahrát klip"
 
 #: cue_editor.cc:511
 msgid "Record length"
-msgstr ""
+msgstr "Délka nahrávání"
 
 #: cue_editor.cc:516 cue_editor.cc:523 cue_editor.cc:732
 msgid "Until Stopped"
-msgstr ""
+msgstr "Do zastavení"
 
 #: cue_editor.cc:615
 msgid "loop region"
-msgstr ""
+msgstr "opakovat oblast"
 
 #: cue_editor.cc:1991
 msgid "trim region front"
-msgstr ""
+msgstr "oříznout začátek oblasti"
 
 #: cue_editor.cc:2011
 msgid "trim region end"
-msgstr ""
+msgstr "oříznout konec oblasti"
 
 #: dsp_stats_ui.cc:43 idleometer.cc:43 panner_ui.cc:415 plugin_selector.cc:286
 #: plugin_ui.cc:533 plugin_dspload_ui.cc:37 rc_option_editor.cc:769
@@ -4453,43 +4460,43 @@ msgstr "Snímky CD"
 
 #: editing_context.cc:112
 msgid "1/3 Note"
-msgstr ""
+msgstr "1/3 nota"
 
 #: editing_context.cc:113
 msgid "1/6 Note"
-msgstr ""
+msgstr "1/6 nota"
 
 #: editing_context.cc:114
 msgid "1/12 Note"
-msgstr ""
+msgstr "1/12 nota"
 
 #: editing_context.cc:115
 msgid "1/24 Note"
-msgstr ""
+msgstr "1/24 nota"
 
 #: editing_context.cc:116
 msgid "1/5 Note"
-msgstr ""
+msgstr "1/5 nota"
 
 #: editing_context.cc:117
 msgid "1/10 Note"
-msgstr ""
+msgstr "1/10 nota"
 
 #: editing_context.cc:118
 msgid "1/20 Note"
-msgstr ""
+msgstr "1/20 nota"
 
 #: editing_context.cc:119
 msgid "1/7 Note"
-msgstr ""
+msgstr "1/7 nota"
 
 #: editing_context.cc:120
 msgid "1/14 Note"
-msgstr ""
+msgstr "1/14 nota"
 
 #: editing_context.cc:121
 msgid "1/28 Note"
-msgstr ""
+msgstr "1/28 nota"
 
 #: editing_context.cc:130 mono_panner_editor.cc:45
 msgid "Left"
@@ -4522,7 +4529,7 @@ msgstr "Následovat ukazatele polohy"
 
 #: editing_context.cc:152 editing_context.cc:2316
 msgid "MIDI|Ch:"
-msgstr ""
+msgstr "MIDI|Kan:"
 
 #: editing_context.cc:218
 msgid "Snap"
@@ -4560,47 +4567,47 @@ msgstr "Pohled na střed"
 
 #: editing_context.cc:235
 msgid "Play notes when selected"
-msgstr ""
+msgstr "Přehrávat noty při výběru"
 
 #: editing_context.cc:236
 msgid "Switch between sustained and percussive mode"
-msgstr ""
+msgstr "Přepnout mezi drženým a perkusním režimem"
 
 #: editing_context.cc:239
 msgid "Select visible MIDI channel"
-msgstr ""
+msgstr "Vybrat viditelný MIDI kanál"
 
 #: editing_context.cc:369
 msgid "Create Automation Point"
-msgstr ""
+msgstr "Vytvořit bod automatizace"
 
 #: editing_context.cc:370
 msgid "Create Automation Point (with Guard Points)"
-msgstr ""
+msgstr "Vytvořit bod automatizace (s ochrannými body)"
 
 #: editing_context.cc:371
 msgid "Move Selected Automation Points Later"
-msgstr ""
+msgstr "Přesunout vybrané automatizační body na později"
 
 #: editing_context.cc:372
 msgid "Move Selected Automation Points Earlier"
-msgstr ""
+msgstr "Přesunout vybrané automatizační body na dříve"
 
 #: editing_context.cc:373
 msgid "Increase Value of Selected Automation Points"
-msgstr ""
+msgstr "Zvýšit hodnotu vybraných automatizačních bodů"
 
 #: editing_context.cc:374
 msgid "Decrease Value of Selected Automation Points"
-msgstr ""
+msgstr "Snížit hodnotu vybraných automatizačních bodů"
 
 #: editing_context.cc:375
 msgid "Open value entry window for automation editing"
-msgstr ""
+msgstr "Otevřít okno zadávání hodnoty pro úpravy automatizace"
 
 #: editing_context.cc:376
 msgid "Close value entry window for automation editing"
-msgstr ""
+msgstr "Zavřít okno zadávání hodnoty pro úpravy automatizace"
 
 #: editing_context.cc:451 editing_context.cc:2358
 msgid "Zoom Out"
@@ -4616,7 +4623,7 @@ msgstr "Pevný ukazatel polohy"
 
 #: editing_context.cc:457
 msgid "Scroll automatically to keep playhead visible"
-msgstr ""
+msgstr "Automaticky stránkovat, aby ukazatel polohy zůstal viditelný"
 
 #: editing_context.cc:459 editing_context.cc:2704
 msgid "Command|Undo"
@@ -4757,7 +4764,7 @@ msgstr "Vybrat vše"
 
 #: editing_context.cc:595
 msgid "Select All (alternate)"
-msgstr ""
+msgstr "Vybrat vše (varianta)"
 
 #: editing_context.cc:596
 msgid "Select Next"
@@ -4921,11 +4928,11 @@ msgstr "Spojit vybrané noty"
 
 #: editing_context.cc:643
 msgid "Strum Notes Forward"
-msgstr ""
+msgstr "Brnknout noty dopředu"
 
 #: editing_context.cc:644
 msgid "Strum Notes Backward"
-msgstr ""
+msgstr "Brnknout noty dozadu"
 
 #: editing_context.cc:646
 msgid "Edit Note Channels"
@@ -4995,11 +5002,11 @@ msgstr "Proměnit..."
 
 #: editing_context.cc:1963
 msgid "Strum Forward"
-msgstr ""
+msgstr "Brnknout dopředu"
 
 #: editing_context.cc:1964
 msgid "Strum Backward"
-msgstr ""
+msgstr "Brnknout dozadu"
 
 #: editing_context.cc:2313
 msgid "Len:"
