@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-12-26 15:25+0100\n"
-"PO-Revision-Date: 2025-12-28 15:30+0100\n"
+"PO-Revision-Date: 2025-12-28 16:15+0100\n"
 "Last-Translator: Martin Vlk <martin@vlkk.cz>\n"
 "Language-Team: Czech <translation-team-cs@lists.sourceforge.net>\n"
 "Language: cs\n"
@@ -5161,7 +5161,7 @@ msgstr "Značky polohy"
 
 #: editor.cc:432
 msgid "Arrangement Markers"
-msgstr ""
+msgstr "Značky aranže"
 
 #: editor.cc:465
 msgid ""
@@ -5170,6 +5170,10 @@ msgid ""
 "to add Track, Bus,\n"
 " or VCA."
 msgstr ""
+"Pravý-klik\n"
+"nebo dvojklik zde\n"
+"pro přidání stopy, sběrnice,\n"
+" nebo VCA."
 
 #: editor.cc:541 mixer_ui.cc:359 port_group.cc:360 trigger_page.cc:141
 msgid "Tracks"
@@ -5193,15 +5197,15 @@ msgstr "Klipy"
 
 #: editor.cc:545
 msgid "Arrange"
-msgstr ""
+msgstr "Srovnat"
 
 #: editor.cc:545 editor_actions.cc:580
 msgid "Arrangement"
-msgstr "Úprava"
+msgstr "Aranže"
 
 #: editor.cc:546
 msgid "Snaps"
-msgstr ""
+msgstr "Příchyty"
 
 #: editor.cc:546
 msgid "Snapshots"
@@ -5209,7 +5213,7 @@ msgstr "Snímky obrazovky"
 
 #: editor.cc:547 mixer_ui.cc:360
 msgid "Groups"
-msgstr ""
+msgstr "Skupiny"
 
 #: editor.cc:547 mixer_ui.cc:360
 msgid "Track & Bus Groups"
@@ -5217,7 +5221,7 @@ msgstr "Skupiny stop a sběrnic"
 
 #: editor.cc:548
 msgid "Marks"
-msgstr ""
+msgstr "Značky"
 
 #: editor.cc:548
 msgid "Ranges & Marks"
@@ -5650,47 +5654,47 @@ msgstr "Přizpůsobit výběr"
 
 #: editor.cc:3251 editor_actions.cc:321
 msgid "Zoom to 10 ms"
-msgstr "Přiblížit na 10 ms"
+msgstr "Pohled na 10 ms"
 
 #: editor.cc:3252 editor_actions.cc:322
 msgid "Zoom to 100 ms"
-msgstr "Přiblížit na 100 ms"
+msgstr "Pohled na 100 ms"
 
 #: editor.cc:3253 editor_actions.cc:323
 msgid "Zoom to 1 sec"
-msgstr "Přiblížit na 1 s"
+msgstr "Pohled na 1 s"
 
 #: editor.cc:3254 editor_actions.cc:324
 msgid "Zoom to 10 sec"
-msgstr "Přiblížit na 10 s"
+msgstr "Pohled na 10 s"
 
 #: editor.cc:3255 editor_actions.cc:325
 msgid "Zoom to 1 min"
-msgstr "Přiblížit na 1 minutu"
+msgstr "Pohled na 1 minutu"
 
 #: editor.cc:3256 editor_actions.cc:327
 msgid "Zoom to 10 min"
-msgstr "Přiblížit na 10 minut"
+msgstr "Pohled na 10 minut"
 
 #: editor.cc:3257
 msgid "Zoom to 1 hour"
-msgstr "Přiblížit na 1 hodinu"
+msgstr "Pohled na 1 hodinu"
 
 #: editor.cc:3258
 msgid "Zoom to 8 hours"
-msgstr "Přiblížit na 8 hodin"
+msgstr "Pohled na 8 hodin"
 
 #: editor.cc:3259
 msgid "Zoom to 24 hours"
-msgstr "Přiblížit na 24 hodin"
+msgstr "Pohled na 24 hodin"
 
 #: editor.cc:3261 editor_actions.cc:304
 msgid "Zoom to Extents"
-msgstr "Přiblížit na celkovou velikost"
+msgstr "Pohled na rozsahy"
 
 #: editor.cc:3262
 msgid "Zoom to Range/Region Selection"
-msgstr "Přiblížit na výběr rozsahu/oblasti"
+msgstr "Pohled na výběr rozsahu/oblasti"
 
 #: editor.cc:3342
 msgid "*"
@@ -5972,7 +5976,7 @@ msgstr "Skripty Lua"
 
 #: editor_actions.cc:178
 msgid "Global Quantization"
-msgstr ""
+msgstr "Globální kvantizace"
 
 #: editor_actions.cc:187
 msgid "Session|Lock"
@@ -5988,7 +5992,7 @@ msgstr "Ukázat panel směšovače"
 
 #: editor_actions.cc:199
 msgid "Show Editor Properties Box"
-msgstr ""
+msgstr "Ukázat panel vlastností editoru"
 
 #: editor_actions.cc:203
 msgid "Playhead to Next Region Boundary"
@@ -6186,15 +6190,15 @@ msgstr "Vyvolat pohled %1"
 
 #: editor_actions.cc:305
 msgid "Zoom to Selection"
-msgstr "Přiblížit výběr"
+msgstr "Pohled na výběr"
 
 #: editor_actions.cc:306
 msgid "Zoom to Selection (Horizontal)"
-msgstr "Přiblížit výběr (vodorovně)"
+msgstr "Pohled na výběr (vodorovně)"
 
 #: editor_actions.cc:307
 msgid "Toggle Zoom State"
-msgstr "Přepnout na poslední přiblížení/oddálení"
+msgstr "Přepnout stav pohledu"
 
 #: editor_actions.cc:309
 msgid "Expand Track Height"
@@ -6206,39 +6210,39 @@ msgstr "Zmenšit výšku stopy"
 
 #: editor_actions.cc:312
 msgid "Fit 1 Track"
-msgstr "Přizpůsobit 1 stopu"
+msgstr "Přes 1 stopu"
 
 #: editor_actions.cc:313
 msgid "Fit 2 Tracks"
-msgstr "Přizpůsobit 2 stopy"
+msgstr "Přes 2 stopy"
 
 #: editor_actions.cc:314
 msgid "Fit 4 Tracks"
-msgstr "Přizpůsobit 4 stopy"
+msgstr "Přes 4 stopy"
 
 #: editor_actions.cc:315
 msgid "Fit 8 Tracks"
-msgstr "Přizpůsobit 8 stop"
+msgstr "Přes 8 stop"
 
 #: editor_actions.cc:316
 msgid "Fit 16 Tracks"
-msgstr "Přizpůsobit 16 stop"
+msgstr "Přes 16 stop"
 
 #: editor_actions.cc:317
 msgid "Fit 32 Tracks"
-msgstr "Přizpůsobit 32 stop"
+msgstr "Přes 32 stop"
 
 #: editor_actions.cc:318
 msgid "Fit All Tracks"
-msgstr "Přizpůsobit všechny stopy"
+msgstr "Přes všechny stopy"
 
 #: editor_actions.cc:319
 msgid "Fit Selected Tracks"
-msgstr ""
+msgstr "Přes vybrané stopy"
 
 #: editor_actions.cc:326
 msgid "Zoom to 5 min"
-msgstr "Přiblížit na 5 minut"
+msgstr "Pohled na 5 minut"
 
 #: editor_actions.cc:329
 msgid "Move Selected Tracks Up"
@@ -6306,7 +6310,7 @@ msgstr "Použít oblasti skoků"
 
 #: editor_actions.cc:357
 msgid "Find & Display Track/Bus..."
-msgstr ""
+msgstr "Najít & zobrazit stopu/sběrnici..."
 
 #: editor_actions.cc:362
 msgid "Insert Time Section at Playhead"
@@ -6390,15 +6394,15 @@ msgstr "Přidat značku rozsahu z výběru"
 
 #: editor_actions.cc:413
 msgid "Add Tempo Marker at Playhead"
-msgstr ""
+msgstr "Přidat značku tempa na ukazateli polohy"
 
 #: editor_actions.cc:416
 msgid "Add Time Signature at Playhead"
-msgstr ""
+msgstr "Přidat časové předznamenání na ukazateli polohy"
 
 #: editor_actions.cc:419
 msgid "Consolidate Range (with processing)"
-msgstr "Spojit rozsah (se zpracováním signálu)"
+msgstr "Konsolidovat rozsah (se zpracováním signálu)"
 
 #: editor_actions.cc:421
 msgid "Consolidate Range"
@@ -6486,7 +6490,7 @@ msgstr "Zapnout/Vypnout stopu"
 
 #: editor_actions.cc:507
 msgid "Remove Selected Track(s)"
-msgstr ""
+msgstr "Odstranit vybrané stopy"
 
 #: editor_actions.cc:510
 msgid "Fit Selection (Vertical)"
@@ -6556,43 +6560,43 @@ msgstr "Ukázat čáry značek"
 
 #: editor_actions.cc:586
 msgid "All Markers"
-msgstr ""
+msgstr "Všechny značky"
 
 #: editor_actions.cc:587
 msgid "Only CD Markers"
-msgstr ""
+msgstr "Pouze CD značky"
 
 #: editor_actions.cc:588
 msgid "Only Cue Markers"
-msgstr ""
+msgstr "Pouze značky řadičů"
 
 #: editor_actions.cc:589
 msgid "Only Scene Markers"
-msgstr ""
+msgstr "Pouze značky scén"
 
 #: editor_actions.cc:590
 msgid "Only Location Markers"
-msgstr ""
+msgstr "Pouze značky umístění"
 
 #: editor_actions.cc:592 editor_rulers.cc:335
 msgid "All Ranges"
-msgstr ""
+msgstr "Všechny rozsahy"
 
 #: editor_actions.cc:593
 msgid "Only Session Range"
-msgstr ""
+msgstr "Pouze rozsah sezení"
 
 #: editor_actions.cc:594
 msgid "Only Punch Range"
-msgstr ""
+msgstr "Pouze rozsah přepisu"
 
 #: editor_actions.cc:595
 msgid "Only Loop Range"
-msgstr ""
+msgstr "Pouze rozsah opakování"
 
 #: editor_actions.cc:596
 msgid "Only Named Ranges"
-msgstr ""
+msgstr "Pouze pojmenované rozsahy"
 
 #: editor_actions.cc:598 editor_actions.cc:601 editor_rulers.cc:290
 #: rc_option_editor.cc:1815
@@ -6629,7 +6633,7 @@ msgstr "Odstranit nepoužívané"
 
 #: editor_actions.cc:655
 msgid "Import PT session..."
-msgstr ""
+msgstr "Import PT sezení..."
 
 #: editor_actions.cc:663
 msgid "Import to Source List..."
@@ -6665,7 +6669,7 @@ msgstr "Chytrý"
 
 #: editor_actions.cc:700
 msgid "1 bar"
-msgstr ""
+msgstr "1 takt"
 
 #: editor_actions.cc:1116 editor_actions.cc:1127 luainstance.cc:372
 #: luainstance.cc:2408
@@ -6703,11 +6707,11 @@ msgstr "Posunout na původní polohu"
 
 #: editor_actions.cc:1321
 msgid "Unlock"
-msgstr ""
+msgstr "Odemknout"
 
 #: editor_actions.cc:1324
 msgid "Lock (toggle)"
-msgstr ""
+msgstr "Zamknout (přepínač)"
 
 #: editor_actions.cc:1325
 msgid "Lock to Video"
@@ -6827,7 +6831,7 @@ msgstr "Editor seznamu..."
 
 #: editor_actions.cc:1421
 msgid "Edit in separate window..."
-msgstr ""
+msgstr "Upravit v samostatném okně..."
 
 #: editor_actions.cc:1427
 msgid "Bounce (without processing)"
@@ -15942,21 +15946,21 @@ msgstr "Pouze v režimu kreslení a vnitřních úprav"
 
 #: rc_option_editor.cc:3257
 msgid "Scroll and Zoom Behaviors"
-msgstr "Chování posunu a zvětšní"
+msgstr "Chování posunu a pohledu"
 
 #: rc_option_editor.cc:3264
 msgid "Zoom to mouse position when zooming with scroll wheel"
 msgstr ""
-"Přibližovat na polohu ukazatele myši jako místo zaměření přiblížení, když se "
+"Pohled na polohu ukazatele myši, když se "
 "přibližuje/oddaluje pomocí kolečka myši"
 
 #: rc_option_editor.cc:3273
 msgid "Zoom with vertical drag in rulers"
-msgstr "Měnit přiblížení svislým tažením v pravítcích"
+msgstr "Měnit přiblížení svislým tažením v pravítkách"
 
 #: rc_option_editor.cc:3281
 msgid "Double click zooms to selection"
-msgstr "Dvojité klepnutí přiblíží výběr"
+msgstr "Dvojklikem pohled na výběr"
 
 #: rc_option_editor.cc:3289
 msgid "Update editor window during drags of the summary"
