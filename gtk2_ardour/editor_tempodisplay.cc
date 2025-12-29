@@ -164,7 +164,7 @@ Editor::make_tempo_marker (Temporal::TempoPoint const * ts, TempoPoint const *& 
 	const std::string tname (X_(""));
 	char const * color_name = X_("tempo marker");
 
-	tempo_marks.insert (before, new TempoMarker (*this, *tempo_group, color_name, tname, *ts, ts->sample (sr), tc_color));
+	tempo_marks.insert (before, new TempoMarker (*this, *tempo_group, color_name, tname, *ts, ts->sample_is_dangerous (sr), tc_color));
 
 	/* XXX the point of this code was "a jump in tempo by more than 1 ntpm results in a red
 	   tempo mark pointer."  (3a7bc1fd3f32f0)
@@ -278,7 +278,7 @@ Editor::update_tempo_curves (double min_tempo, double max_tempo, samplecnt_t sr)
 
 		if (tmp != tempo_marks.end()) {
 			TempoMarker* nxt = static_cast<TempoMarker*>(*tmp);
-			curve.set_duration (nxt->tempo().sample(sr) - tm->tempo().sample(sr));
+			curve.set_duration (nxt->tempo().sample_is_dangerous (sr) - tm->tempo().sample_is_dangerous (sr));
 		} else {
 			curve.set_duration (samplecnt_t (UINT32_MAX));
 		}
