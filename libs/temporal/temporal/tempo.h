@@ -102,7 +102,7 @@ class /*LIBTEMPORAL_API*/ Point : public point_hook, public MapOwned  {
 	LIBTEMPORAL_API superclock_t sclock() const  { return _sclock; }
 	LIBTEMPORAL_API Beats const & beats() const  { return _quarters; }
 	LIBTEMPORAL_API BBT_Time const & bbt() const { return _bbt; }
-	LIBTEMPORAL_API samplepos_t sample (int sr) const { return superclock_to_samples (sclock(), sr); }
+	LIBTEMPORAL_API samplepos_t sample_is_dangerous (int sr) const { return superclock_to_samples (sclock(), sr); }
 
 	LIBTEMPORAL_API virtual timepos_t time() const = 0;
 

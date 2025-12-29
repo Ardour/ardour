@@ -3325,7 +3325,7 @@ std::ostream&
 std::operator<<(std::ostream& str, TempoMapPoint const & tmp)
 {
 	str << '@' << std::setw (12) << tmp.sclock() << ' ' << tmp.sclock() / (double) superclock_ticks_per_second()
-	    << " secs " << tmp.sample (TEMPORAL_SAMPLE_RATE) << " samples"
+	    << " secs " << tmp.sample_is_dangerous (TEMPORAL_SAMPLE_RATE) << " samples"
 	    << (tmp.is_explicit_tempo() ? " EXP-T" : " imp-t")
 	    << (tmp.is_explicit_meter() ? " EXP-M" : " imp-m")
 	    << (tmp.is_explicit_position() ? " EXP-P" : " imp-p")
