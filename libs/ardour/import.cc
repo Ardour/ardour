@@ -752,7 +752,6 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 				std::shared_ptr<FileSource> fs (std::dynamic_pointer_cast<FileSource>(*nsi));
 				assert (fs);
 				fs->mark_removable ();
-				std::cerr << "goping to drop meta-only SMF at " << fs->path() << " removable ? " << fs->removable() << " UC " << fs.use_count() << std::endl;
 				nsi = newsrcs.erase (nsi);
 			}
 
