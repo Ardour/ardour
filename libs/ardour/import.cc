@@ -741,13 +741,22 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 			}
 		}
 
-		for (auto & newsrc : newsrcs) {
-			std::shared_ptr<SMFSource> smfs = std::dynamic_pointer_cast<SMFSource> (newsrc);
+		for (auto nsi = newsrcs.begin(); nsi != newsrcs.end(); ) {
+
+			std::shared_ptr<SMFSource> smfs = std::dynamic_pointer_cast<SMFSource> (*nsi);
 			assert (smfs);
 
 			bool meta_only = write_midi_type1_data_to_one_file (source, status, smfs, n, split_midi_channels, channel, meta_track);
 
-			if (split_midi_channels && !meta_only) {
+			if (meta_only) {
+				std::shared_ptr<FileSource> fs (std::dynamic_pointer_cast<FileSource>(*nsi));
+				assert (fs);
+				fs->mark_removable ();
+				std::cerr << "goping to drop meta-only SMF at " << fs->path() << " removable ? " << fs->removable() << " UC " << fs.use_count() << std::endl;
+				nsi = newsrcs.erase (nsi);
+			}
+
+			if (split_midi_channels) {
 				channel = (channel + 1) % 16;
 			}
 
@@ -756,6 +765,10 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 			}
 
 			++n;
+
+			if (!meta_only) {
+				++nsi;
+			}
 		}
 		break;
 
@@ -884,6 +897,7 @@ Session::import_files (ImportStatus& status)
 {
 	typedef vector<std::shared_ptr<Source> > Sources;
 	Sources all_new_sources;
+	Sources newfiles;
 	std::shared_ptr<AudioFileSource> afs;
 	std::shared_ptr<SMFSource> smfs;
 	uint32_t num_channels = 0;
@@ -986,15 +1000,13 @@ Session::import_files (ImportStatus& status)
 		}
 
 		vector<string> new_paths = get_paths_for_new_sources (status.replace_existing_source, *p, num_channels, smf_names, smf_keep_filename);
-		Sources newfiles;
 		samplepos_t natural_position = source ? source->natural_position() : 0;
-
 
 		if (status.replace_existing_source) {
 			fatal << "THIS IS NOT IMPLEMENTED YET, IT SHOULD NEVER GET CALLED!!! DYING!" << endmsg;
 			status.cancel = !map_existing_mono_sources (new_paths, *this, sample_rate(), newfiles, this);
 		} else {
-			status.cancel = !create_mono_sources_for_writing (new_paths, *this, sample_rate(), newfiles, natural_position, true);
+			status.cancel = !create_mono_sources_for_writing (new_paths, *this, sample_rate(), newfiles, natural_position, false);
 		}
 
 		// copy on cancel/failure so that any files that were created will be removed below
@@ -1041,7 +1053,7 @@ Session::import_files (ImportStatus& status)
 
 		/* flush the final length(s) to the header(s) */
 
-		for (Sources::iterator x = all_new_sources.begin(); x != all_new_sources.end(); ) {
+		for (Sources::iterator x = newfiles.begin(); x != newfiles.end(); ) {
 
 			if ((afs = std::dynamic_pointer_cast<AudioFileSource>(*x)) != 0) {
 				afs->update_header((*x)->natural_position().samples(), *now, xnow);
@@ -1074,13 +1086,20 @@ Session::import_files (ImportStatus& status)
 			/* don't create tracks for empty MIDI sources (channels) */
 
 			if ((smfs = std::dynamic_pointer_cast<SMFSource>(*x)) != 0 && smfs->is_empty()) {
-				x = all_new_sources.erase(x);
+				x = newfiles.erase (x);
 			} else {
 				++x;
 			}
 		}
 
-		std::copy (all_new_sources.begin(), all_new_sources.end(), std::back_inserter(status.sources));
+		std::copy (newfiles.begin(), newfiles.end(), std::back_inserter(status.sources));
+
+		/* Now, and only now, announce the newly created and to-be-used sources */
+
+		for (auto & src : newfiles) {
+			SourceFactory::SourceCreated (src);
+		}
+
 	} else {
 		try {
 			std::for_each (all_new_sources.begin(), all_new_sources.end(), remove_file_source);
