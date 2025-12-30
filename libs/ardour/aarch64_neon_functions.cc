@@ -132,6 +132,7 @@ arm_neon_compute_peak(const float* src, uint32_t nframes, float current)
 		size_t offset = 4 * i;
 		float32x4_t x0;
 		x0 = vld1q_f32(src_aligned + offset);
+		x0 = vabsq_f32(x0);
 		vmax = vmaxq_f32(vmax, x0);
 	}
 
@@ -139,6 +140,7 @@ arm_neon_compute_peak(const float* src, uint32_t nframes, float current)
 	{
 		float32x4_t x0;
 		x0 = vld1q_dup_f32(src_aligned + frame);
+		x0 = vabsq_f32(x0);
 		vmax = vmaxq_f32(vmax, x0);
 	}
 
