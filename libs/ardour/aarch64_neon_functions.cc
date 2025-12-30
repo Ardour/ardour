@@ -24,6 +24,7 @@
 #include <arm_neon.h>
 
 #include <cstddef>
+#include <algorithm>
 
 /**
  * @brief Aligns a pointer to the next 16-byte boundary
@@ -78,12 +79,18 @@ arm_neon_compute_peak(const float* src, uint32_t nframes, float current)
 	if (UNLIKELY(src_aligned != src))
 	{
 		size_t unaligned_count = src_aligned - src;
-		for (size_t i = 0; i < unaligned_count; i++)
+
+		// Handle small number of nframes
+		size_t count = std::min<size_t>(unaligned_count, nframes);
+
+		for (size_t i = 0; i < count; i++)
 		{
 			float32x4_t x0 = vld1q_dup_f32(src + i);
+			x0 = vabsq_f32(x0);
 			vmax = vmaxq_f32(vmax, x0);
 		}
-		nframes -= unaligned_count;
+
+		nframes -= count;
 	}
 
 	// Compute the number of SIMD frames
@@ -105,6 +112,11 @@ arm_neon_compute_peak(const float* src, uint32_t nframes, float current)
 			x1 = vld1q_f32(src_aligned + offset + (1 * 4));
 			x2 = vld1q_f32(src_aligned + offset + (2 * 4));
 			x3 = vld1q_f32(src_aligned + offset + (3 * 4));
+
+			x0 = vabsq_f32(x0);
+			x1 = vabsq_f32(x1);
+			x2 = vabsq_f32(x2);
+			x3 = vabsq_f32(x3);
 
 			max0 = vmaxq_f32(x0, x1);
 			max1 = vmaxq_f32(x2, x3);
@@ -182,13 +194,18 @@ arm_neon_find_peaks(const float* src, uint32_t nframes, float* minf, float* maxf
 	if (UNLIKELY(src_aligned != src))
 	{
 		size_t unaligned_count = src_aligned - src;
-		for (size_t i = 0; i < unaligned_count; i++)
+
+		// Handle small number of nframes
+		size_t count = std::min<size_t>(unaligned_count, nframes);
+
+		for (size_t i = 0; i < count; i++)
 		{
 			float32x4_t x0 = vld1q_dup_f32(src + i);
 			vmax = vmaxq_f32(vmax, x0);
 			vmin = vminq_f32(vmin, x0);
 		}
-		nframes -= unaligned_count;
+
+		nframes -= count;
 	}
 
 	// Compute the number of SIMD frames
@@ -299,7 +316,9 @@ arm_neon_apply_gain_to_buffer(float* dst, uint32_t nframes, float gain)
 	if (UNLIKELY(dst_aligned != dst))
 	{
 		size_t unaligned_count = dst_aligned - dst;
-		for (size_t i = 0; i < unaligned_count; i++)
+		size_t count = std::min<size_t>(unaligned_count, nframes);
+
+		for (size_t i = 0; i < count; i++)
 		{
 			float32_t x0, y0;
 
@@ -307,7 +326,8 @@ arm_neon_apply_gain_to_buffer(float* dst, uint32_t nframes, float gain)
 			y0 = x0 * gain;
 			dst[i] = y0;
 		}
-		nframes -= unaligned_count;
+
+		nframes -= count;
 	}
 
 	// Compute the number of SIMD frames
