@@ -2592,9 +2592,6 @@ Session::XMLRouteFactory_3X (const XMLNode& node, int version)
 
 		if (r->init () == 0 && r->set_state (node, version) == 0) {
 			BOOST_MARK_ROUTE (r);
-			if (!r->is_singleton ()) {
-				r->add_internal_return ();
-			}
 			ret = r;
 		}
 	}
@@ -2664,12 +2661,16 @@ Session::XMLRouteFactory_2X (const XMLNode& node, int version)
 
 	} else {
 		PresentationInfo::Flag flags = PresentationInfo::get_flags2X3X (node);
+		if (flags == 0) {
+			flags = PresentationInfo::AudioBus;
+		}
 		std::shared_ptr<Route> r (new Route (*this, X_("toBeResetFroXML"), flags));
 
 		if (r->init () == 0 && r->set_state (node, version) == 0) {
 			BOOST_MARK_ROUTE (r);
 			if (!r->is_singleton ()) {
 				r->add_internal_return ();
+
 			}
 			ret = r;
 		}
