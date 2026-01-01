@@ -2592,6 +2592,9 @@ Session::XMLRouteFactory_3X (const XMLNode& node, int version)
 
 		if (r->init () == 0 && r->set_state (node, version) == 0) {
 			BOOST_MARK_ROUTE (r);
+			if (!r->is_singleton ()) {
+				r->add_internal_return ();
+			}
 			ret = r;
 		}
 	}
@@ -2665,6 +2668,9 @@ Session::XMLRouteFactory_2X (const XMLNode& node, int version)
 
 		if (r->init () == 0 && r->set_state (node, version) == 0) {
 			BOOST_MARK_ROUTE (r);
+			if (!r->is_singleton ()) {
+				r->add_internal_return ();
+			}
 			ret = r;
 		}
 	}
