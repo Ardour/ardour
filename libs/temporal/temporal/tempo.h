@@ -607,6 +607,21 @@ class LIBTEMPORAL_API TempoMapPoint : public Point, public TempoMetric
 	timepos_t time() const { if (is_explicit_meter()) { return _meter->time(); } else if (is_explicit_tempo()) { return _tempo->time(); } else { return timepos_t::from_superclock (sclock()); } }
 };
 
+}
+
+namespace std {
+LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::TempoMapPoint const &);
+LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::Tempo const &);
+LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::Meter const &);
+LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::Point const &);
+LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::TempoPoint const &);
+LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::MeterPoint const &);
+LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::MusicTimePoint const &);
+LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::TempoMetric const &);
+}
+
+namespace Temporal {
+
 typedef std::vector<TempoMapPoint> TempoMapPoints;
 
 typedef boost::intrusive::list<TempoPoint, boost::intrusive::base_hook<tempo_hook>> Tempos;
@@ -1315,14 +1330,3 @@ class LIBTEMPORAL_API TempoCommand : public PBD::Command {
 #ifdef COMPILER_MSVC
 #pragma warning(disable:4101)
 #endif
-
-namespace std {
-LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::TempoMapPoint const &);
-LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::Tempo const &);
-LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::Meter const &);
-LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::Point const &);
-LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::TempoPoint const &);
-LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::MeterPoint const &);
-LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::MusicTimePoint const &);
-LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::TempoMetric const &);
-}
