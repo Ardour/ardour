@@ -1785,6 +1785,32 @@ TempoMap::set_bartime (BBT_Time const & bbt, timepos_t const & pos, std::string 
 	add_or_replace_bartime (tp);
 }
 
+superclock_t
+TempoMap::previous_bbt_reference_at_superclock (superclock_t sc) const
+{
+	if (_bartimes.empty()) {
+		return 0;
+	}
+
+	if (_bartimes.size() == 1) {
+		if (_bartimes.front().sclock() > sc) {
+			return 0;
+		}
+		return _bartimes.front().sclock();
+	}
+
+	MusicTimes::const_iterator m;
+
+	for (m = _bartimes.begin(); m != _bartimes.end() && (*m).sclock() < sc; ++m);
+
+	if (m == _bartimes.end()) {
+		return _bartimes.back().sclock();
+	}
+
+	--m;
+	return (*m).sclock();
+}
+
 void
 TempoMap::replace_bartime (MusicTimePoint & mtp, bool with_reset)
 {
