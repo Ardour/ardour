@@ -496,6 +496,7 @@ class LIBTEMPORAL_API TempoMetric
 	}
 
 	BBT_Argument bbt_at (timepos_t const &) const;
+	BBT_Argument bbt_at_superclock (superclock_t) const;
 	superclock_t superclock_at (BBT_Time const &) const;
 
 	samplepos_t samples_per_bar (samplecnt_t sr) const {
@@ -1065,7 +1066,7 @@ U
 
 	void add_point (Point &);
 
-	void reset_starting_at (superclock_t);
+	void reset_starting_at (superclock_t, bool constant_bbt = true);
 	void reset_starting_at (Beats const &);
 
 	void remove_point (Point const &);
@@ -1218,7 +1219,7 @@ U
 	Point* core_remove_tempo (TempoPoint const &);
 	Point* core_remove_bartime (MusicTimePoint const &);
 
-	void reset_section (Points::iterator& begin, Points::iterator& end, superclock_t, TempoMetric& metric);
+	void reset_section (Points::iterator& begin, superclock_t, TempoMetric& metric, bool constant_bbt);
 
 	TempoMapCutBuffer* cut_copy (timepos_t const & start, timepos_t const & end, bool copy, bool ripple);
 

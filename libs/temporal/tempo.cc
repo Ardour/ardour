@@ -807,8 +807,12 @@ TempoMetric::bbt_at (timepos_t const & pos) const
 		return bbt_at (pos.beats());
 	}
 
-	superclock_t sc = pos.superclocks();
+	return bbt_at_superclock (pos.superclocks());
+}
 
+Temporal::BBT_Argument
+TempoMetric::bbt_at_superclock (superclock_t sc) const
+{
 	/* Use the later of the tempo or meter as the reference point to
 	 * compute the BBT distance. All map points are fully defined by all 3
 	 * time types, but we need the latest one to avoid incorrect
@@ -1904,7 +1908,7 @@ TempoMap::remove_bartime (MusicTimePoint const & mtp, bool with_reset)
 	core_remove_bartime (mtp);
 
 	if (with_reset) {
-		reset_starting_at (sc);
+		reset_starting_at (sc, false);
 	}
 }
 
@@ -1921,7 +1925,7 @@ TempoMap::remove_point (Point const & point)
 }
 
 void
-TempoMap::reset_starting_at (superclock_t sc)
+TempoMap::reset_starting_at (superclock_t sc, bool constant_bbt)
 {
 	DEBUG_TRACE (DEBUG::MapReset, string_compose ("reset starting at %1\n", sc));
 #ifndef NDEBUG
@@ -1953,9 +1957,9 @@ TempoMap::reset_starting_at (superclock_t sc)
 			break;
 		}
 
-		mtp = 0;
-		tp = 0;
-		mp = 0;
+		mtp = nullptr;
+		tp = nullptr;
+		mp = nullptr;
 
 		if ((mtp = dynamic_cast<MusicTimePoint*> (&*p)) != 0) {
 			metric = TempoMetric (*mtp, *mtp);
@@ -2005,36 +2009,7 @@ TempoMap::reset_starting_at (superclock_t sc)
 		DEBUG_TRACE (DEBUG::MapReset, "start rset with no next MTP (run to end)\n");
 	}
 
-	/* Now iterate over remaining points and recompute their audio time
-	 * and beat time positions.
-	 */
-
-	while (p != _points.end()) {
-
-		if (next_mtp != _bartimes.end()) {
-			current_section_limit = next_mtp->sclock();
-		} else {
-			current_section_limit = std::numeric_limits<superclock_t>::max();
-		}
-
-		Points::iterator section_start = p;
-		DEBUG_TRACE (DEBUG::MapReset, string_compose ("start section at %1 with limit at %2\n", *p, current_section_limit));;
-
-		while (p != _points.end() && (p->sclock() < current_section_limit)) {
-			++p;
-		}
-
-		reset_section (section_start, p, current_section_limit, metric);
-
-		if (next_mtp != _bartimes.end()) {
-			DEBUG_TRACE (DEBUG::MapReset, string_compose ("reset MTP %1 using %2 to %3\n", *next_mtp, metric, metric.tempo().quarters_at_superclock (next_mtp->sclock())));
-			next_mtp->set (next_mtp->sclock(), metric.tempo().quarters_at_superclock (next_mtp->sclock()), next_mtp->bbt());
-		}
-
-		if (next_mtp != _bartimes.end()) {
-			++next_mtp;
-		}
-	}
+	reset_section (p, current_section_limit, metric, constant_bbt);
 
 	DEBUG_TRACE (DEBUG::MapReset, "RESET DONE\n");
 #ifndef NDEBUG
@@ -2045,28 +2020,30 @@ TempoMap::reset_starting_at (superclock_t sc)
 }
 
 void
-TempoMap::reset_section (Points::iterator& begin, Points::iterator& end, superclock_t section_limit, TempoMetric& metric)
+TempoMap::reset_section (Points::iterator& begin, superclock_t section_limit, TempoMetric& metric, bool constant_bbt)
 {
 	TempoPoint*     tp;
-	TempoPoint*     nxt_tempo = 0;
+	TempoPoint*     nxt_tempo (nullptr);
 	MeterPoint*     mp;
-	MusicTimePoint* mtp;
 
-	DEBUG_TRACE (DEBUG::MapReset, string_compose ("reset a section of %1 points, ending at %2\n", std::distance (begin, end), section_limit));
+	DEBUG_TRACE (DEBUG::MapReset, string_compose ("reset a section starting at %1, ending at %2\n", *begin, section_limit));
 
-	for (Points::iterator p = begin; p != end; ) {
+	Points::iterator p = begin;
 
-		mtp = 0;
-		tp = 0;
-		mp = 0;
+	while (p != _points.end() && p->sclock() < section_limit) {
 
-		if ((mtp = dynamic_cast<MusicTimePoint*> (&*p)) == 0) {
-			if ((tp = dynamic_cast<TempoPoint*> (&*p)) == 0) {
-				mp = dynamic_cast<MeterPoint*> (&*p);
-			}
+		tp = nullptr;
+		mp = nullptr;
+
+		assert (dynamic_cast<MusicTimePoint*> (&*p) == 0);
+
+		if ((tp = dynamic_cast<TempoPoint*> (&*p)) == 0) {
+			mp = dynamic_cast<MeterPoint*> (&*p);
 		}
 
-		DEBUG_TRACE (DEBUG::MapReset, string_compose ("workong on it! tp = %1 mp %2 mtp %3\n", tp, mp, mtp));
+		assert (tp || mp);
+
+		DEBUG_TRACE (DEBUG::MapReset, string_compose ("workong on it! tp = %1 mp %2\n", tp, mp));
 
 		if (tp) {
 
@@ -2092,8 +2069,9 @@ TempoMap::reset_section (Points::iterator& begin, Points::iterator& end, supercl
 		Points::iterator nxt = p;
 		++nxt;
 
-		if (!mtp) {
-			DEBUG_TRACE (DEBUG::MapReset, string_compose ("recompute %1 using %2\n", p->bbt(), metric));
+		if (constant_bbt) {
+
+			DEBUG_TRACE (DEBUG::MapReset, string_compose ("recompute constant BBT %1 using %2\n", p->bbt(), metric));
 			superclock_t sc = metric.superclock_at (p->bbt());
 
 			if (sc >= section_limit) {
@@ -2125,14 +2103,26 @@ TempoMap::reset_section (Points::iterator& begin, Points::iterator& end, supercl
 			}
 
 		} else {
-			DEBUG_TRACE (DEBUG::MapReset, "\tnot recomputing this one\n");
+
+			DEBUG_TRACE (DEBUG::MapReset, string_compose ("recompute constant sc %1 using %2\n", p->sclock(), metric));
+			BBT_Argument bbt = metric.bbt_at_superclock (p->sclock());
+
+			if (mp) {
+				/* Meter markers must be on-bar */
+				BBT_Time rounded = metric.meter().round_to_bar (bbt);
+				p->set (p->sclock(), metric.meter().quarters_at (rounded), rounded);
+				DEBUG_TRACE (DEBUG::MapReset, string_compose ("\tbased on %1 move meter point to %2,%3\n", p->bbt(), p->sclock(), p->beats()));
+			} else {
+				/* Tempo markers must be on-beat */
+				BBT_Time rounded = metric.meter().round_to_beat (bbt);
+				p->set (p->sclock(), metric.meter().quarters_at (rounded), rounded);
+				DEBUG_TRACE (DEBUG::MapReset, string_compose ("\tbased on %1 move tempo point to %2,%3\n", p->bbt(), p->sclock(), p->beats()));
+			}
 		}
 
 		/* Now ensure that metric is correct moving forward */
 
-		if ((mtp = dynamic_cast<MusicTimePoint*> (&*p)) != 0) {
-			metric = TempoMetric (*mtp, *mtp);
-		} else if ((tp = dynamic_cast<TempoPoint*> (&*p)) != 0) {
+		if ((tp = dynamic_cast<TempoPoint*> (&*p)) != 0) {
 			metric = TempoMetric (*tp, metric.meter());
 		} else if ((mp = dynamic_cast<MeterPoint*> (&*p)) != 0) {
 			metric = TempoMetric (metric.tempo(), *mp);
