@@ -258,6 +258,11 @@ Session::convert_to_samples (AnyTime const & position)
 	case AnyTime::Samples:
 		return position.samples;
 		break;
+
+	case AnyTime::BBT_Offset:
+		fatal << X_("programming error: Session::convert_to_samples() called with BBT_Offset\n") << endmsg;
+		/*NOTREACHED*/
+		break;
 	}
 
 	return position.samples;
@@ -292,6 +297,11 @@ Session::any_duration_to_samples (samplepos_t position, AnyTime const & duration
 
 	case AnyTime::Samples:
 		return duration.samples;
+		break;
+
+	case AnyTime::BBT_Offset:
+		fatal << X_("programming error: Session::any_duration_to_samples() called with BBT_Offset\n") << endmsg;
+		/*NOTREACHED*/
 		break;
 	}
 
