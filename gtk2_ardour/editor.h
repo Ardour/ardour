@@ -34,7 +34,7 @@
 #pragma once
 
 #ifndef COMPILER_MSVC
-include <sys/time.h>
+#include <sys/time.h>
 #endif
 
 #include <cmath>
