@@ -2760,6 +2760,112 @@ TempoMap::_get_tempo_and_meter (typename const_traits_t::tempo_point_type & tp,
 }
 
 Points::const_iterator
+TempoMap::get_tempo_and_meter_bbt (TempoPoint const *& t, MeterPoint const *& m, BBT_Argument const & bbt, bool can_match, bool ret_iterator_after_not_at) const
+{
+	TEMPO_MAP_ASSERT (!_tempos.empty());
+	TEMPO_MAP_ASSERT (!_meters.empty());
+	TEMPO_MAP_ASSERT (!_points.empty());
+
+	Points::const_iterator p;
+	Points::const_iterator last_used = _points.end();
+	bool tempo_done = false;
+	bool meter_done = false;
+
+	/* Walk the bartimes list and find the place to start looking for the
+	 * relevant tempo & meter
+	 */
+
+	if (_bartimes.empty() || bbt.reference() == 0) {
+		p = _points.begin();
+	} else {
+		MusicTimes::const_iterator mtp;
+
+		for (mtp = _bartimes.begin(); mtp != _bartimes.end() && mtp->sclock() < bbt.reference(); ++mtp);
+
+		if (mtp != _bartimes.end()) {
+			p = _points.s_iterator_to (*(static_cast<Point const *> (&(*mtp))));
+		} else {
+			p = _points.s_iterator_to (*(static_cast<Point const *> (&_bartimes.back())));
+		}
+	}
+
+	/* If the starting position is the beginning of the timeline (indicated
+	 * by the default constructor value for the time_type (superclock_t,
+	 * Beats, BBT_Time), then we are always allowed to use the tempo &
+	 * meter at that position.
+	 *
+	 * Without this, it would be necessary to special case "can_match" in
+	 * the caller if the start is "zero". Instead we do that here, since
+	 * common cases (e.g. ::get_grid()) will use can_match = false, but may
+	 * pass in a zero start point.
+	 */
+
+	can_match = (can_match || bbt == BBT_Time());
+
+	/* Set return tempo and meter points by value using the starting tempo
+	 * and meter passed in.
+	 *
+	 * Then advance through all points, resetting either tempo and/or meter
+	 * until we find a point beyond (or equal to, if @p can_match is
+	 * true) the @p arg (end time)
+	 */
+
+	for (; p != _points.end(); ++p) {
+
+		TempoPoint const * tpp;
+		MeterPoint const * mpp;
+
+		if (dynamic_cast<MusicTimePoint const *> (&(*p)) != 0) {
+			if (p->sclock() != bbt.reference()) {
+				break;
+			}
+		}
+
+		if (!tempo_done && (tpp = dynamic_cast<TempoPoint const *> (&(*p))) != 0) {
+			if ((can_match && ((*p).bbt() > bbt)) || (!can_match && ((*p).bbt() >= bbt))) {
+				tempo_done = true;
+			} else {
+				t = tpp;
+				last_used = p;
+			}
+		}
+
+		if (!meter_done && (mpp = dynamic_cast<MeterPoint const *> (&(*p))) != 0) {
+			if ((can_match && ((*p).bbt() > bbt)) || (!can_match && ((*p).bbt() >= bbt))) {
+				meter_done = true;
+			} else {
+				m = mpp;
+				last_used = p;
+			}
+		}
+
+		if (meter_done && tempo_done) {
+			break;
+		}
+	}
+
+	if (!t || !m) {
+		return _points.end();
+	}
+
+	if (ret_iterator_after_not_at) {
+
+		p = last_used;
+
+		if (can_match) {
+			while ((p != _points.end()) && ((*p).bbt() <= bbt)) ++p;
+		} else {
+			while ((p != _points.end()) && ((*p).bbt() < bbt)) ++p;
+		}
+
+		return p;
+	}
+
+	return last_used;
+}
+
+
+Points::const_iterator
 TempoMap::get_grid (TempoMapPoints& ret, superclock_t rstart, superclock_t end, uint32_t bar_mod, uint32_t beat_div) const
 {
 	if (rstart == end) {
