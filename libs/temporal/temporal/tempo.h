@@ -827,7 +827,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	LIBTEMPORAL_API void replace_bartime (MusicTimePoint & tp, bool with_reset = true);
 
 	LIBTEMPORAL_API superclock_t previous_bbt_reference_at_superclock (superclock_t) const;
-U
+
 	LIBTEMPORAL_API TempoPoint& set_tempo (Tempo const &, BBT_Argument const &);
 	LIBTEMPORAL_API	TempoPoint& set_tempo (Tempo const &, timepos_t const &);
 
