@@ -164,7 +164,7 @@ Editor::make_tempo_marker (Temporal::TempoPoint const * ts, TempoPoint const *& 
 	const std::string tname (X_(""));
 	char const * color_name = X_("tempo marker");
 
-	tempo_marks.insert (before, new TempoMarker (*this, *tempo_group, color_name, tname, *ts, ts->sample (sr), tc_color));
+	tempo_marks.insert (before, new TempoMarker (*this, *tempo_group, color_name, tname, *ts, ts->sample_is_dangerous (sr), tc_color));
 
 	/* XXX the point of this code was "a jump in tempo by more than 1 ntpm results in a red
 	   tempo mark pointer."  (3a7bc1fd3f32f0)
@@ -278,7 +278,7 @@ Editor::update_tempo_curves (double min_tempo, double max_tempo, samplecnt_t sr)
 
 		if (tmp != tempo_marks.end()) {
 			TempoMarker* nxt = static_cast<TempoMarker*>(*tmp);
-			curve.set_duration (nxt->tempo().sample(sr) - tm->tempo().sample(sr));
+			curve.set_duration (nxt->tempo().sample_is_dangerous (sr) - tm->tempo().sample_is_dangerous (sr));
 		} else {
 			curve.set_duration (samplecnt_t (UINT32_MAX));
 		}
@@ -472,9 +472,12 @@ Editor::mouse_add_new_meter_event (timepos_t pos)
 
 	Temporal::BBT_Time r;
 	meter_dialog.get_bbt_time (r);
-	Temporal::BBT_Argument requested (superclock_t (0), r);
 
 	TempoMapChange tmc (*this, _("add time signature"));
+	superclock_t sc (tmc.map().previous_bbt_reference_at_superclock (samples_to_superclock (pos.samples(), TEMPORAL_SAMPLE_RATE)));
+
+	Temporal::BBT_Argument requested (sc, r);
+
 	pos = timepos_t (tmc.map().quarters_at (requested));
 	tmc.map().set_meter (Meter (bpb, note_type), pos);
 }

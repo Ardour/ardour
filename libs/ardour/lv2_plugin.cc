@@ -3005,9 +3005,9 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 					}
 				}
 
-				while (m != m_end || ((tempo_map_point != tempo_map_points.end()) && ((*tempo_map_point).sample(TEMPORAL_SAMPLE_RATE) < tend))) {
+				while (m != m_end || ((tempo_map_point != tempo_map_points.end()) && ((*tempo_map_point).sample_is_dangerous (TEMPORAL_SAMPLE_RATE) < tend))) {
 
-					if (m != m_end && ((tempo_map_point == tempo_map_points.end()) || (*tempo_map_point).sample(TEMPORAL_SAMPLE_RATE) > (*m).time() + offset)) {
+					if (m != m_end && ((tempo_map_point == tempo_map_points.end()) || (*tempo_map_point).sample_is_dangerous (TEMPORAL_SAMPLE_RATE) > (*m).time() + offset)) {
 
 						const Evoral::Event<samplepos_t> ev (*m, false);
 
@@ -3020,7 +3020,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 
 					} else {
 						assert (tempo_map_point != tempo_map_points.end());
-						const samplepos_t sample = tempo_map_point->sample (TEMPORAL_SAMPLE_RATE);
+						const samplepos_t sample = tempo_map_point->sample_is_dangerous (TEMPORAL_SAMPLE_RATE);
 						const Temporal::BBT_Time bbt = tempo_map_point->bbt();
 						double bpm = (superclock_ticks_per_second() * 60) / tempo_map_point->superclocks_per_note_type_at_superclock (tempo_map_point->sclock());
 

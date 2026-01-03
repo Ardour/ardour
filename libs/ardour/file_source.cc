@@ -528,6 +528,12 @@ FileSource::mark_nonremovable ()
 }
 
 void
+FileSource::mark_removable ()
+{
+        _flags = Flag (_flags | (Removable|RemovableIfEmpty|RemoveAtDestroy));
+}
+
+void
 FileSource::set_within_session_from_path (const std::string& path)
 {
 	_within_session = _session.path_is_within_session (path);

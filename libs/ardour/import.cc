@@ -741,13 +741,21 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 			}
 		}
 
-		for (auto & newsrc : newsrcs) {
-			std::shared_ptr<SMFSource> smfs = std::dynamic_pointer_cast<SMFSource> (newsrc);
+		for (auto nsi = newsrcs.begin(); nsi != newsrcs.end(); ) {
+
+			std::shared_ptr<SMFSource> smfs = std::dynamic_pointer_cast<SMFSource> (*nsi);
 			assert (smfs);
 
 			bool meta_only = write_midi_type1_data_to_one_file (source, status, smfs, n, split_midi_channels, channel, meta_track);
 
-			if (split_midi_channels && !meta_only) {
+			if (meta_only) {
+				std::shared_ptr<FileSource> fs (std::dynamic_pointer_cast<FileSource>(*nsi));
+				assert (fs);
+				fs->mark_removable ();
+				nsi = newsrcs.erase (nsi);
+			}
+
+			if (split_midi_channels) {
 				channel = (channel + 1) % 16;
 			}
 
@@ -756,6 +764,10 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 			}
 
 			++n;
+
+			if (!meta_only) {
+				++nsi;
+			}
 		}
 		break;
 
@@ -883,7 +895,8 @@ void
 Session::import_files (ImportStatus& status)
 {
 	typedef vector<std::shared_ptr<Source> > Sources;
-	Sources all_new_sources;
+	Sources delete_if_cancelled;
+	Sources successful_imports;
 	std::shared_ptr<AudioFileSource> afs;
 	std::shared_ptr<SMFSource> smfs;
 	uint32_t num_channels = 0;
@@ -986,25 +999,23 @@ Session::import_files (ImportStatus& status)
 		}
 
 		vector<string> new_paths = get_paths_for_new_sources (status.replace_existing_source, *p, num_channels, smf_names, smf_keep_filename);
-		Sources newfiles;
 		samplepos_t natural_position = source ? source->natural_position() : 0;
-
 
 		if (status.replace_existing_source) {
 			fatal << "THIS IS NOT IMPLEMENTED YET, IT SHOULD NEVER GET CALLED!!! DYING!" << endmsg;
-			status.cancel = !map_existing_mono_sources (new_paths, *this, sample_rate(), newfiles, this);
+			status.cancel = !map_existing_mono_sources (new_paths, *this, sample_rate(), successful_imports, this);
 		} else {
-			status.cancel = !create_mono_sources_for_writing (new_paths, *this, sample_rate(), newfiles, natural_position, true);
+			status.cancel = !create_mono_sources_for_writing (new_paths, *this, sample_rate(), successful_imports, natural_position, false);
 		}
 
 		// copy on cancel/failure so that any files that were created will be removed below
-		std::copy (newfiles.begin(), newfiles.end(), std::back_inserter(all_new_sources));
+		std::copy (successful_imports.begin(), successful_imports.end(), std::back_inserter(delete_if_cancelled));
 
 		if (status.cancel) {
 			break;
 		}
 
-		for (Sources::iterator i = newfiles.begin(); i != newfiles.end(); ++i) {
+		for (Sources::iterator i = successful_imports.begin(); i != successful_imports.end(); ++i) {
 			if ((afs = std::dynamic_pointer_cast<AudioFileSource>(*i)) != 0) {
 				afs->prepare_for_peakfile_writes ();
 			}
@@ -1013,17 +1024,17 @@ Session::import_files (ImportStatus& status)
 		if (source) { // audio
 			status.doing_what = compose_status_message (*p, source->samplerate(),
 			                                            sample_rate(), status.current, status.total);
-			write_audio_data_to_new_files (source.get(), status, newfiles);
+			write_audio_data_to_new_files (source.get(), status, successful_imports);
 		} else if (smf_reader) { // midi
 			status.doing_what = string_compose(_("Loading MIDI file %1"), *p);
-			write_midi_data_to_new_files (smf_reader.get(), status, newfiles, status.split_midi_channels);
+			write_midi_data_to_new_files (smf_reader.get(), status, successful_imports, status.split_midi_channels);
 
 			if (status.import_markers) {
 				smf_reader->load_markers ();
 				for (auto const& m : smf_reader->markers ()) {
 					Temporal::Beats beats = Temporal::Beats::from_double (m.time_pulses / (double) smf_reader->ppqn ());
 					// XXX import to all sources (in case split_midi_channels is set)?
-					newfiles.front()->add_cue_marker (CueMarker (m.text, timepos_t (beats)));
+					successful_imports.front()->add_cue_marker (CueMarker (m.text, timepos_t (beats)));
 				}
 			}
 		}
@@ -1041,7 +1052,7 @@ Session::import_files (ImportStatus& status)
 
 		/* flush the final length(s) to the header(s) */
 
-		for (Sources::iterator x = all_new_sources.begin(); x != all_new_sources.end(); ) {
+		for (Sources::iterator x = successful_imports.begin(); x != successful_imports.end(); ) {
 
 			if ((afs = std::dynamic_pointer_cast<AudioFileSource>(*x)) != 0) {
 				afs->update_header((*x)->natural_position().samples(), *now, xnow);
@@ -1074,16 +1085,23 @@ Session::import_files (ImportStatus& status)
 			/* don't create tracks for empty MIDI sources (channels) */
 
 			if ((smfs = std::dynamic_pointer_cast<SMFSource>(*x)) != 0 && smfs->is_empty()) {
-				x = all_new_sources.erase(x);
+				x = successful_imports.erase(x);
 			} else {
 				++x;
 			}
 		}
 
-		std::copy (all_new_sources.begin(), all_new_sources.end(), std::back_inserter(status.sources));
+		std::copy (successful_imports.begin(), successful_imports.end(), std::back_inserter(status.sources));
+
+		/* Now, and only now, announce the newly created and to-be-used sources */
+
+		for (auto & src : successful_imports) {
+			SourceFactory::SourceCreated (src);
+		}
+
 	} else {
 		try {
-			std::for_each (all_new_sources.begin(), all_new_sources.end(), remove_file_source);
+			std::for_each (delete_if_cancelled.begin(), delete_if_cancelled.end(), remove_file_source);
 		} catch (...) {
 			error << _("Failed to remove some files after failed/cancelled import operation") << endmsg;
 		}

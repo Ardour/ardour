@@ -3386,8 +3386,16 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 			assert (buffer_samples >= 0);
 
 			Evoral::Event<MidiBuffer::TimeType> ev (Evoral::MIDI_EVENT, buffer_samples, evsize, const_cast<uint8_t*>(buf), false);
+			uint8_t old_gain = 0xff;
 
 			if (_gain != 1.0f && ev.is_note()) {
+				/* We must save and restore the event gain
+				   value because we're modifying it in place,
+				   not in a copy of the event. If we don't do
+				   this then each subsequent call to
+				   scale_velocity() moves it closer to 0 or 127
+				*/
+				old_gain = ev.velocity ();
 				ev.scale_velocity (_gain);
 			}
 
@@ -3419,6 +3427,10 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 
 			DEBUG_TRACE (DEBUG::Triggers, string_compose ("given et %1 TS %7 rs %8 ts %2 bs %3 ss %4 do %5, inserting %6\n", maybe_last_event_timeline_beats, timeline_samples, buffer_samples, start_sample, dest_offset, ev, transition_beats, region_start));
 			mb->insert_event (ev);
+
+			if (old_gain != 0xff) {
+				ev.set_velocity (old_gain);
+			}
 		}
 
 		_box.tracker->track (buf);

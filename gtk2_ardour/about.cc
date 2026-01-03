@@ -644,7 +644,7 @@ About::About ()
 #endif
 
 	set_translator_credits (t);
-	set_copyright (_("Copyright (C) 1999-2025 Paul Davis\n"));
+	set_copyright (_("Copyright (C) 1999-2026 Paul Davis\n"));
 	set_license (gpl);
 	set_name (X_("Ardour"));
 	set_website (X_("https://ardour.org/"));

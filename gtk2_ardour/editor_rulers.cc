@@ -1087,7 +1087,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 
 #if 0 // DEBUG GRID
 	for (auto const& g : grid) {
-		std::cout << "Grid " << g.time() <<  " Beats: " << g.beats() << " BBT: " << g.bbt() << " sample: " << g.sample(_session->nominal_sample_rate ()) << "\n";
+		std::cout << "Grid " << g.time() <<  " Beats: " << g.beats() << " BBT: " << g.bbt() << " sample: " << g.sample_is_dangerous (_session->nominal_sample_rate ()) << "\n";
 	}
 #endif
 
@@ -1122,7 +1122,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 							}
 						}
 						mark.label = buf;
-						mark.position = (*i).sample (sr);
+						mark.position = (*i).sample_is_dangerous (sr);
 						marks.push_back (mark);
 					}
 				}
@@ -1146,7 +1146,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 					}
 				}
 				mark.label = buf;
-				mark.position = (*i).sample(sr);
+				mark.position = (*i).sample_is_dangerous (sr);
 				marks.push_back (mark);
 			  }
 			}
@@ -1166,7 +1166,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 						mark.style = ArdourCanvas::Ruler::Mark::Minor;
 					}
 					mark.label = buf;
-					mark.position = (*i).sample (sr);
+					mark.position = (*i).sample_is_dangerous (sr);
 					marks.push_back (mark);
 				}
 			}
@@ -1180,7 +1180,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 				snprintf (buf, sizeof(buf), "%" PRIu32, bbt.bars);
 				mark.style = ArdourCanvas::Ruler::Mark::Major;
 				mark.label = buf;
-				mark.position = (*i).sample (sr);
+				mark.position = (*i).sample_is_dangerous (sr);
 				marks.push_back (mark);
 			}
 		}
@@ -1197,7 +1197,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 
 			BBT_Time bbt ((*i).bbt());
 
-			if ((*i).sample (sr) < lower && (bbt_bar_helper_on)) {
+			if ((*i).sample_is_dangerous (sr) < lower && (bbt_bar_helper_on)) {
 				snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, bbt.bars, bbt.beats);
 				edit_last_mark_label (marks, buf);
 			} else {
@@ -1213,7 +1213,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 					buf[0] = '\0';
 				}
 				mark.label = buf;
-				mark.position = (*i).sample (sr);
+				mark.position = (*i).sample_is_dangerous (sr);
 				marks.push_back (mark);
 			}
 		}
@@ -1236,7 +1236,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 
 			BBT_Time bbt ((*i).bbt());
 
-			if ((*i).sample (sr) < lower && (bbt_bar_helper_on)) {
+			if ((*i).sample_is_dangerous (sr) < lower && (bbt_bar_helper_on)) {
 				snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, bbt.bars, bbt.beats);
 				edit_last_mark_label (marks, buf);
 				helper_active = true;
@@ -1253,11 +1253,11 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 					buf[0] = '\0';
 				}
 
-				if (((*i).sample(sr) < bbt_position_of_helper) && helper_active) {
+				if (((*i).sample_is_dangerous (sr) < bbt_position_of_helper) && helper_active) {
 					buf[0] = '\0';
 				}
 				mark.label =  buf;
-				mark.position = (*i).sample (sr);
+				mark.position = (*i).sample_is_dangerous (sr);
 				marks.push_back (mark);
 			}
 		}
