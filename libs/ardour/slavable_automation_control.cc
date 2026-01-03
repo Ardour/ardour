@@ -106,7 +106,7 @@ SlavableAutomationControl::get_value_locked() const
 double
 SlavableAutomationControl::get_value() const
 {
-	Glib::Threads::RWLock::ReaderLock lm (master_lock);
+	PBD::RWLock::ReaderLock lm (master_lock);
 	if (!_masters.empty() && automation_write ()) {
 		/* writing automation takes the fader value as-is, factor out the master */
 		return Control::get_double ();
@@ -157,7 +157,7 @@ double
 SlavableAutomationControl::reduce_by_masters_locked (double value, bool ignore_automation_state) const
 {
 	if (!_desc.toggled) {
-		Glib::Threads::RWLock::ReaderLock lm (master_lock);
+		PBD::RWLock::ReaderLock lm (master_lock);
 		if (!_masters.empty() && (ignore_automation_state || !automation_write ())) {
 			/* need to scale given value by current master's scaling */
 			const double masters_value = get_masters_value_locked();
@@ -187,7 +187,7 @@ SlavableAutomationControl::add_master (std::shared_ptr<AutomationControl> m)
 
 	{
 		const double master_value = m->get_value();
-		Glib::Threads::RWLock::WriterLock lm (master_lock);
+		PBD::RWLock::WriterLock lm (master_lock);
 
 		pair<PBD::ID,MasterRecord> newpair (m->id(), MasterRecord (std::weak_ptr<AutomationControl> (m), get_value_locked(), master_value));
 		res = _masters.insert (newpair);
@@ -236,7 +236,7 @@ SlavableAutomationControl::get_boolean_masters () const
 	int32_t n = 0;
 
 	if (_desc.toggled) {
-		Glib::Threads::RWLock::ReaderLock lm (master_lock);
+		PBD::RWLock::ReaderLock lm (master_lock);
 		for (Masters::const_iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
 			if (mr->second.yn()) {
 				++n;
@@ -254,7 +254,7 @@ SlavableAutomationControl::update_boolean_masters_records (std::shared_ptr<Autom
 		/* We may modify a MasterRecord, but we not modify the master
 		 * map, so we use a ReaderLock
 		 */
-		Glib::Threads::RWLock::ReaderLock lm (master_lock);
+		PBD::RWLock::ReaderLock lm (master_lock);
 		Masters::iterator mi = _masters.find (m->id());
 		if (mi != _masters.end()) {
 			/* update MasterRecord to show whether the master is
@@ -287,7 +287,7 @@ SlavableAutomationControl::master_changed (bool /*from_self*/, GroupControlDispo
 {
 	std::shared_ptr<AutomationControl> m = wm.lock ();
 	assert (m);
-	Glib::Threads::RWLock::ReaderLock lm (master_lock);
+	PBD::RWLock::ReaderLock lm (master_lock);
 	bool send_signal = handle_master_change (m);
 	lm.release (); // update_boolean_masters_records() takes lock
 
@@ -341,7 +341,7 @@ SlavableAutomationControl::remove_master (std::shared_ptr<AutomationControl> m)
 	std::shared_ptr<AutomationControl> master;
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (master_lock);
+		PBD::RWLock::WriterLock lm (master_lock);
 
 		Masters::const_iterator mi = _masters.find (m->id ());
 
@@ -414,7 +414,7 @@ SlavableAutomationControl::clear_masters ()
 	pre_remove_master (std::shared_ptr<AutomationControl>());
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (master_lock);
+		PBD::RWLock::WriterLock lm (master_lock);
 		if (_masters.empty()) {
 			return;
 		}
@@ -592,7 +592,7 @@ SlavableAutomationControl::boolean_automation_run (samplepos_t start, pframes_t 
 {
 	bool change = false;
 	{
-		 Glib::Threads::RWLock::ReaderLock lm (master_lock);
+		 PBD::RWLock::ReaderLock lm (master_lock);
 		 change = boolean_automation_run_locked (start, len);
 	}
 	if (change) {
@@ -604,14 +604,14 @@ SlavableAutomationControl::boolean_automation_run (samplepos_t start, pframes_t 
 bool
 SlavableAutomationControl::slaved_to (std::shared_ptr<AutomationControl> m) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (master_lock);
+	PBD::RWLock::ReaderLock lm (master_lock);
 	return _masters.find (m->id()) != _masters.end();
 }
 
 bool
 SlavableAutomationControl::slaved () const
 {
-	Glib::Threads::RWLock::ReaderLock lm (master_lock);
+	PBD::RWLock::ReaderLock lm (master_lock);
 	return !_masters.empty();
 }
 
@@ -619,7 +619,7 @@ std::set<std::shared_ptr<AutomationControl>>
 SlavableAutomationControl::masters () const
 {
 	std::set<std::shared_ptr<AutomationControl>> rv;
-	Glib::Threads::RWLock::ReaderLock lm (master_lock);
+	PBD::RWLock::ReaderLock lm (master_lock);
 	for (auto const& m : _masters) {
 		std::shared_ptr<AutomationControl> ac (m.second.master ());
 		if (ac) {
@@ -645,7 +645,7 @@ SlavableAutomationControl::use_saved_master_ratios ()
 		return;
 	}
 
-	Glib::Threads::RWLock::ReaderLock lm (master_lock);
+	PBD::RWLock::ReaderLock lm (master_lock);
 
 	XMLNodeList nlist = _masters_node->children();
 	XMLNodeIterator niter;
@@ -677,7 +677,7 @@ SlavableAutomationControl::get_state () const
 	/* store VCA master ratios */
 
 	{
-		Glib::Threads::RWLock::ReaderLock lm (master_lock);
+		PBD::RWLock::ReaderLock lm (master_lock);
 		if (!_masters.empty()) {
 			XMLNode* masters_node = new XMLNode (X_("masters"));
 			for (Masters::const_iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {

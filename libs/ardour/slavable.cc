@@ -50,7 +50,7 @@ Slavable::get_state () const
 	XMLNode* node = new XMLNode (xml_node_name);
 	XMLNode* child;
 
-	Glib::Threads::RWLock::ReaderLock lm (master_lock);
+	PBD::RWLock::ReaderLock lm (master_lock);
 	for (std::set<uint32_t>::const_iterator i = _masters.begin(); i != _masters.end(); ++i) {
 		child = new XMLNode (X_("Master"));
 		child->set_property (X_("number"), *i);
@@ -64,7 +64,7 @@ std::vector<std::shared_ptr<VCA> >
 Slavable::masters (VCAManager* manager) const
 {
 	std::vector<std::shared_ptr<VCA> > rv;
-	Glib::Threads::RWLock::ReaderLock lm (master_lock);
+	PBD::RWLock::ReaderLock lm (master_lock);
 	for (std::set<uint32_t>::const_iterator i = _masters.begin(); i != _masters.end(); ++i) {
 		rv.push_back (manager->vca_by_number (*i));
 	}
@@ -94,7 +94,7 @@ Slavable::set_state (XMLNode const& node, int version)
 	}
 
 	XMLNodeList const& children (node.children());
-	Glib::Threads::RWLock::WriterLock lm (master_lock);
+	PBD::RWLock::WriterLock lm (master_lock);
 
 	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
 		if ((*i)->name() == X_("Master")) {
@@ -114,7 +114,7 @@ Slavable::do_assign (VCAManager* manager)
 	std::vector<std::shared_ptr<VCA> > vcas;
 
 	{
-		Glib::Threads::RWLock::ReaderLock lm (master_lock);
+		PBD::RWLock::ReaderLock lm (master_lock);
 
 		for (std::set<uint32_t>::const_iterator i = _masters.begin(); i != _masters.end(); ++i) {
 			std::shared_ptr<VCA> v = manager->vca_by_number (*i);
@@ -150,7 +150,7 @@ Slavable::assign (std::shared_ptr<VCA> v)
 {
 	assert (v);
 	{
-		Glib::Threads::RWLock::WriterLock lm (master_lock);
+		PBD::RWLock::WriterLock lm (master_lock);
 		if (assign_controls (v)) {
 			_masters.insert (v->number());
 		}
@@ -181,7 +181,7 @@ void
 Slavable::unassign (std::shared_ptr<VCA> v)
 {
 	{
-		Glib::Threads::RWLock::WriterLock lm (master_lock);
+		PBD::RWLock::WriterLock lm (master_lock);
 
 		unassign_controls (v);
 		if (v) {

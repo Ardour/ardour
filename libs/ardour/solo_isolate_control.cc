@@ -51,7 +51,7 @@ SoloIsolateControl::master_changed (bool from_self, PBD::Controllable::GroupCont
 	bool master_soloed;
 
 	{
-		Glib::Threads::RWLock::ReaderLock lm (master_lock);
+		PBD::RWLock::ReaderLock lm (master_lock);
 		master_soloed = (bool) get_masters_value_locked ();
 	}
 

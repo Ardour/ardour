@@ -24,7 +24,7 @@
 #include <string>
 #include <stdint.h>
 
-
+#include "pbd/rwlock.h"
 #include "pbd/signals.h"
 
 #include "evoral/Parameter.h"
@@ -77,7 +77,7 @@ private:
 	bool assign_control (std::shared_ptr<VCA>, std::shared_ptr<SlavableAutomationControl>);
 	void unassign_control (std::shared_ptr<VCA>, std::shared_ptr<SlavableAutomationControl>);
 
-	mutable Glib::Threads::RWLock master_lock;
+	mutable PBD::RWLock master_lock;
 	std::set<uint32_t> _masters;
 	PBD::ScopedConnection assign_connection;
 	PBD::ScopedConnectionList unassign_connections;

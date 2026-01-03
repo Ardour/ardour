@@ -50,18 +50,18 @@ public:
 	virtual void automation_run (samplepos_t start, pframes_t nframes);
 
 	double get_masters_value () const {
-		Glib::Threads::RWLock::ReaderLock lm (master_lock);
+		PBD::RWLock::ReaderLock lm (master_lock);
 		return get_masters_value_locked ();
 	}
 
 	/* factor out get_masters_value() */
 	double reduce_by_masters (double val, bool ignore_automation_state = false) const {
-		Glib::Threads::RWLock::ReaderLock lm (master_lock);
+		PBD::RWLock::ReaderLock lm (master_lock);
 		return reduce_by_masters_locked (val, ignore_automation_state);
 	}
 
 	bool get_masters_curve (samplepos_t s, samplepos_t e, float* v, samplecnt_t l) const {
-		Glib::Threads::RWLock::ReaderLock lm (master_lock);
+		PBD::RWLock::ReaderLock lm (master_lock);
 		return get_masters_curve_locked (s, e, v, l);
 	}
 
@@ -79,7 +79,7 @@ public:
 
 	bool find_next_event (Temporal::timepos_t const & n, Temporal::timepos_t const & e, Evoral::ControlEvent& ev) const
 	{
-		Glib::Threads::RWLock::ReaderLock lm (master_lock);
+		PBD::RWLock::ReaderLock lm (master_lock);
 		return find_next_event_locked (n, e, ev);
 	}
 
@@ -127,7 +127,7 @@ protected:
 		double _val_master;
 	};
 
-	mutable Glib::Threads::RWLock master_lock;
+	mutable PBD::RWLock master_lock;
 	typedef std::map<PBD::ID,MasterRecord> Masters;
 	Masters _masters;
 
