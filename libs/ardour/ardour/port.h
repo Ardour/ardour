@@ -28,6 +28,8 @@
 #include <set>
 #include <string>
 #include <vector>
+
+#include "pbd/rwlock.h"
 #include "pbd/signals.h"
 
 #include "ardour/data_type.h"
@@ -208,7 +210,7 @@ private:
 	/* ports that we are connected to, kept so that we can
 	 * reconnect to the backend when required
 	 */
-	mutable Glib::Threads::RWLock        _connections_lock;
+	mutable PBD::RWLock                  _connections_lock;
 	ConnectionSet                        _int_connections;
 	std::map<std::string, ConnectionSet> _ext_connections;
 
