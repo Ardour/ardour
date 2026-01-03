@@ -520,7 +520,7 @@ MidiRegion::model_automation_state_changed (Evoral::Parameter const & p)
 	   for a given set of filtered_parameters, so now that we've changed that list we must invalidate
 	   the iterator.
 	*/
-	Source::WriterLock lm (midi_source(0)->mutex(), Glib::Threads::TRY_LOCK);
+	Source::WriterLock lm (midi_source(0)->mutex(), PBD::RWLock::TryLock);
 	if (lm.locked()) {
 		/* TODO: This is too aggressive, we need more fine-grained invalidation. */
 		midi_source(0)->invalidate (lm);

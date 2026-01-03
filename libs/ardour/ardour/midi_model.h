@@ -358,7 +358,7 @@ public:
 
   private:
 	struct WriteLockImpl : public AutomatableSequence<TimeType>::WriteLockImpl {
-		WriteLockImpl(Source::WriterLock* slock, Glib::Threads::RWLock& s, Glib::Threads::Mutex& c)
+		WriteLockImpl(Source::WriterLock* slock, PBD::RWLock& s, Glib::Threads::Mutex& c)
 			: AutomatableSequence<TimeType>::WriteLockImpl(s, c)
 			, source_lock (slock)
 		{}
