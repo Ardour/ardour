@@ -35,6 +35,7 @@
 #include <glibmm/threads.h>
 
 #include "pbd/undo.h"
+#include "pbd/rwlock.h"
 #include "pbd/stateful.h"
 #include "pbd/statefuldestructible.h"
 
@@ -350,7 +351,7 @@ public:
 		 */
 		Locations::LocationList copy;
 		{
-			Glib::Threads::RWLock::ReaderLock lm (_lock);
+			PBD::RWLock::ReaderLock lm (_lock);
 			copy = locations;
 		}
 		(obj.*method)(copy);
@@ -361,7 +362,8 @@ private:
 
 	LocationList locations;
 	Location*    current_location;
-	mutable Glib::Threads::RWLock _lock;
+
+	mutable PBD::RWLock _lock;
 
 	int set_current_unlocked (Location *);
 	void location_changed (Location*);

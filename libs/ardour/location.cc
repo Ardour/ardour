@@ -874,7 +874,7 @@ Locations::Locations (Session& s)
 
 Locations::~Locations ()
 {
-	Glib::Threads::RWLock::WriterLock lm (_lock);
+	PBD::RWLock::WriterLock lm (_lock);
 	for (LocationList::iterator i = locations.begin(); i != locations.end(); ) {
 		LocationList::iterator tmp = i;
 		++tmp;
@@ -889,7 +889,7 @@ Locations::set_current (Location *loc, bool want_lock)
 	int ret;
 
 	if (want_lock) {
-		Glib::Threads::RWLock::ReaderLock lm (_lock);
+		PBD::RWLock::ReaderLock lm (_lock);
 		ret = set_current_unlocked (loc);
 	} else {
 		ret = set_current_unlocked (loc);
@@ -993,7 +993,7 @@ Locations::clear ()
 	bool deleted = false;
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 
 		for (LocationList::iterator i = locations.begin(); i != locations.end(); ) {
 
@@ -1025,7 +1025,7 @@ Locations::clear_markers ()
 	bool deleted = false;
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 		LocationList::iterator tmp;
 
 		for (LocationList::iterator i = locations.begin(); i != locations.end(); ) {
@@ -1055,7 +1055,7 @@ Locations::clear_xrun_markers ()
 	bool deleted = false;
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 		LocationList::iterator tmp;
 
 		for (LocationList::iterator i = locations.begin(); i != locations.end(); ) {
@@ -1085,7 +1085,7 @@ Locations::clear_ranges ()
 	bool deleted = false;
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 		LocationList::iterator tmp;
 
 		for (LocationList::iterator i = locations.begin(); i != locations.end(); ) {
@@ -1128,7 +1128,7 @@ Locations::add (Location *loc, bool make_current)
 	assert (loc);
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 
 		/* Do not allow multiple cue markers in the same location */
 
@@ -1207,7 +1207,7 @@ Locations::remove (Location *loc)
 	}
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 
 		for (i = locations.begin(); i != locations.end(); ++i) {
 			if ((*i) != loc) {
@@ -1257,7 +1257,7 @@ XMLNode&
 Locations::get_state () const
 {
 	XMLNode *node = new XMLNode ("Locations");
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
+	PBD::RWLock::ReaderLock lm (_lock);
 
 	for (auto const & l : locations) {
 		node->add_child_nocopy (l->get_state ());
@@ -1283,7 +1283,7 @@ Locations::set_state (const XMLNode& node, int version)
 
 	{
 		std::vector<Location::ChangeSuspender> lcs;
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 
 		current_location = 0;
 
@@ -1420,7 +1420,7 @@ Locations::first_mark_before_flagged (timepos_t const & pos, bool include_specia
 {
 	vector<LocationPair> locs;
 	{
-		Glib::Threads::RWLock::ReaderLock lm (_lock);
+		PBD::RWLock::ReaderLock lm (_lock);
 
 		for (LocationList::iterator i = locations.begin(); i != locations.end(); ++i) {
 			locs.push_back (make_pair ((*i)->start(), (*i)));
@@ -1479,7 +1479,7 @@ Locations::mark_at (timepos_t const & pos, timecnt_t const & slop, Location::Fla
 	 * to iterate across all of them to find the one closest to a give point.
 	 */
 
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
+	PBD::RWLock::ReaderLock lm (_lock);
 	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
 
 		if ((*i)->is_mark() && (!flags || ((*i)->flags() == flags))) {
@@ -1512,7 +1512,7 @@ Locations::first_mark_after_flagged (timepos_t const & pos, bool include_special
 	vector<LocationPair> locs;
 
 	{
-		Glib::Threads::RWLock::ReaderLock lm (_lock);
+		PBD::RWLock::ReaderLock lm (_lock);
 
 		for (LocationList::iterator i = locations.begin(); i != locations.end(); ++i) {
 			locs.push_back (make_pair ((*i)->start(), (*i)));
@@ -1575,7 +1575,7 @@ Locations::marks_either_side (timepos_t const & pos, timepos_t& before, timepos_
 	LocationList locs;
 
 	{
-		Glib::Threads::RWLock::ReaderLock lm (_lock);
+		PBD::RWLock::ReaderLock lm (_lock);
 		locs = locations;
 	}
 
@@ -1637,7 +1637,7 @@ void
 Locations::sorted_section_locations (vector<LocationPair>& locs) const
 {
 	{
-		Glib::Threads::RWLock::ReaderLock lm (_lock);
+		PBD::RWLock::ReaderLock lm (_lock);
 
 		for (auto const& i: locations) {
 			if (i->is_session_range ()) {
@@ -1728,7 +1728,7 @@ Locations::section_at (timepos_t const& when, timepos_t& start, timepos_t& end) 
 Location*
 Locations::session_range_location () const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
+	PBD::RWLock::ReaderLock lm (_lock);
 	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
 		if ((*i)->is_session_range()) {
 			return const_cast<Location*> (*i);
@@ -1740,7 +1740,7 @@ Locations::session_range_location () const
 Location*
 Locations::auto_loop_location () const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
+	PBD::RWLock::ReaderLock lm (_lock);
 	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
 		if ((*i)->is_auto_loop()) {
 			return const_cast<Location*> (*i);
@@ -1752,7 +1752,7 @@ Locations::auto_loop_location () const
 Location*
 Locations::auto_punch_location () const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
+	PBD::RWLock::ReaderLock lm (_lock);
 	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
 		if ((*i)->is_auto_punch()) {
 			return const_cast<Location*> (*i);
@@ -1765,7 +1765,7 @@ Location*
 Locations::clock_origin_location () const
 {
 	Location* sr = 0;
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
+	PBD::RWLock::ReaderLock lm (_lock);
 	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
 		if ((*i)->is_clock_origin()) {
 			return const_cast<Location*> (*i);
@@ -1782,7 +1782,7 @@ uint32_t
 Locations::num_range_markers () const
 {
 	uint32_t cnt = 0;
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
+	PBD::RWLock::ReaderLock lm (_lock);
 	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
 		if ((*i)->is_range_marker()) {
 			++cnt;
@@ -1794,7 +1794,7 @@ Locations::num_range_markers () const
 Location *
 Locations::get_location_by_id(PBD::ID id)
 {
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
+	PBD::RWLock::ReaderLock lm (_lock);
 	for (LocationList::const_iterator i  = locations.begin(); i != locations.end(); ++i) {
 		if (id == (*i)->id()) {
 			return const_cast<Location*> (*i);
@@ -1806,7 +1806,7 @@ Locations::get_location_by_id(PBD::ID id)
 void
 Locations::find_all_between (timepos_t const & start, timepos_t const & end, LocationList& ll, Location::Flags flags)
 {
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
+	PBD::RWLock::ReaderLock lm (_lock);
 	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
 		if ((flags == 0 || (*i)->matches (flags)) &&
 		    ((*i)->start() >= start && (*i)->end() < end)) {
@@ -1821,7 +1821,7 @@ Locations::range_starts_at (timepos_t const & pos, timecnt_t const & slop, bool 
 	Location *closest = 0;
 	timecnt_t mindelta = timecnt_t (pos.time_domain());
 
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
+	PBD::RWLock::ReaderLock lm (_lock);
 	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
 		if (!(*i)->is_range_marker()) {
 			continue;
@@ -1856,7 +1856,7 @@ Locations::ripple (timepos_t const & at, timecnt_t const & distance, bool includ
 	LocationList copy;
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 		copy = locations;
 	}
 
@@ -1901,7 +1901,7 @@ Locations::cut_copy_section (timepos_t const& start, timepos_t const& end, timep
 	LocationList pastebuf;
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 		ll = locations;
 	}
 
@@ -2041,7 +2041,7 @@ Locations::clear_cue_markers (samplepos_t start, samplepos_t end)
 	bool removed_at_least_one = false;
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 
 		for (LocationList::iterator i = locations.begin(); i != locations.end(); ) {
 
@@ -2095,7 +2095,7 @@ Locations::clear_scene_markers (samplepos_t start, samplepos_t end)
 	bool removed_at_least_one = false;
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 
 		for (LocationList::iterator i = locations.begin(); i != locations.end(); ) {
 
@@ -2143,7 +2143,7 @@ Locations::start_domain_bounce (Temporal::DomainBounceInfo& cmd)
 {
 	_session.add_command (new MementoCommand<Locations> (*this, &get_state(), nullptr));
 	{
-		Glib::Threads::RWLock::ReaderLock lm (_lock);
+		PBD::RWLock::ReaderLock lm (_lock);
 
 		for (auto & l : locations) {
 			l->start_domain_bounce (cmd);
@@ -2156,7 +2156,7 @@ Locations::finish_domain_bounce (Temporal::DomainBounceInfo& cmd)
 {
 	{
 		/* We modify locations, but we do not change the list */
-		Glib::Threads::RWLock::ReaderLock lm (_lock);
+		PBD::RWLock::ReaderLock lm (_lock);
 
 		for (auto & l : locations) {
 			l->finish_domain_bounce (cmd);
@@ -2168,7 +2168,7 @@ Locations::finish_domain_bounce (Temporal::DomainBounceInfo& cmd)
 void
 Locations::time_domain_changed ()
 {
-	Glib::Threads::RWLock::WriterLock lm (_lock);
+	PBD::RWLock::WriterLock lm (_lock);
 	for (auto & l : locations) {
 		l->set_time_domain (time_domain());
 	}
