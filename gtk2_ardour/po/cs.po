@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-12-26 15:25+0100\n"
-"PO-Revision-Date: 2026-01-03 12:51+0100\n"
+"PO-Revision-Date: 2026-01-03 14:07+0100\n"
 "Last-Translator: Martin Vlk <martin@vlkk.cz>\n"
 "Language-Team: Czech <translation-team-cs@lists.sourceforge.net>\n"
 "Language: cs\n"
@@ -3983,7 +3983,6 @@ msgstr "Nový hudební čas"
 
 #: bbt_marker_dialog.cc:37 bbt_marker_dialog.cc:50 cue_editor.cc:519
 #: cue_editor.cc:735 editing_context.cc:80 editing_context.cc:105
-#, fuzzy
 msgid "Bar"
 msgid_plural "Bars"
 msgstr[0] "Takt"
@@ -18853,7 +18852,7 @@ msgstr "Rychlost:"
 
 #: rta_window.cc:106
 msgid "Warp:"
-msgstr "Deformace:"
+msgstr "Zkreslení:"
 
 #: rta_window.cc:123
 msgid "Clear current set of analyzed signals (except for the master bus)."
@@ -18864,6 +18863,8 @@ msgid ""
 "Toggle analysis enable, pause the visual update. Left mouse press on the "
 "analysis area can temporarily freeze the display"
 msgstr ""
+"Přepnout analýzu, pozastavit aktualizaci pohledu. Levým tlačítkem myši "
+"na ploše analýzy můžete dočasně zastavit zobrazení"
 
 #: rta_window.cc:125
 msgid ""
@@ -18871,6 +18872,11 @@ msgid ""
 "seconds. Slow mode falls 5dB/s, Moderate 48dB/sec. Fast and Rapid mode are "
 "fast enough to be frequency dependent with Fast mode falling 96dB/s."
 msgstr ""
+"Nastavit dobu návratu analýzy. Měření hluku má dobu klesání 1dB za 2 "
+"sekundy. Pomalý režim klesá o 5dB/s, střední o 48dB/s. Rychlý a velmi rychlý"
+" režim jsou "
+"dostatečně rychlé, aby byly závislé na frekvenci, přičemž Rychlý režim klesá"
+" o 96dB/s."
 
 #: rta_window.cc:126
 msgid ""
@@ -18879,6 +18885,11 @@ msgid ""
 "frequency scale on which equal distances correspond with perceptually equal "
 "distances."
 msgstr ""
+"Frekvenčně zkreslí spektrum pro zaměření na daný rozsah. Vysoký faktor"
+" zkreslení "
+"zvyšuje rozlišení v nízkofrekvenčním rozsahu, zatímco Barkova stupnice je "
+"frekvenční stupnice, na které se dané vzdálenosti shodují se vzdálenostmi"
+" vnímanými."
 
 #: save_as_dialog.cc:36
 msgid "Switch to newly-saved version"
@@ -19015,19 +19026,19 @@ msgstr "Klepnout pro otevření stránek programu v prohlížeči"
 
 #: session_dialog.cc:127
 msgid "NEW"
-msgstr ""
+msgstr "NOVÉ"
 
 #: session_dialog.cc:133
 msgid "RECENT"
-msgstr ""
+msgstr "NEDÁVNÉ"
 
 #: session_dialog.cc:139
 msgid "OPEN"
-msgstr ""
+msgstr "OTEVŘENÉ"
 
 #: session_dialog.cc:145
 msgid "SETTINGS"
-msgstr ""
+msgstr "NASTAVENÍ"
 
 #: session_dialog.cc:194
 msgid "Safe Mode: Disable all Plugins"
@@ -19052,11 +19063,11 @@ msgstr "Archivy sezení"
 
 #: session_dialog.cc:524
 msgid "Advanced Authoring Format (AAF)"
-msgstr ""
+msgstr "Advanced Authoring Format (AAF)"
 
 #: session_dialog.cc:531 strip_import_dialog.cc:112
 msgid "All supported files"
-msgstr ""
+msgstr "Všechny podporované soubory"
 
 #: session_dialog.cc:577 startup_fsm.cc:623 startup_fsm.cc:763
 #: startup_fsm.cc:892
@@ -19079,7 +19090,7 @@ msgstr "Bez názvu-%1"
 
 #: session_dialog.cc:681
 msgid "Delete the selected Template"
-msgstr ""
+msgstr "Smazat vybranou předlohu"
 
 #: session_dialog.cc:733
 msgid "Empty Template"
@@ -19767,11 +19778,11 @@ msgstr "Při nahrávání vždy počítat"
 
 #: session_option_editor.cc:439
 msgid "Project Banner"
-msgstr ""
+msgstr "Vývěska projektu"
 
 #: session_option_editor.cc:443
 msgid "Show master bus comment window on session load"
-msgstr ""
+msgstr "Při načtení sezení zobrazit okno komentářů hlavní sběrnice"
 
 #: session_option_editor.cc:448
 msgid "Defaults"
@@ -19795,15 +19806,15 @@ msgstr "32 bitové číslo s plovoucí desetinnou čárkou"
 
 #: sfdb_ui.cc:109 sfdb_ui.cc:1982
 msgid "by track number"
-msgstr "Podle čísla stopy"
+msgstr "podle čísla stopy"
 
 #: sfdb_ui.cc:111 sfdb_ui.cc:1983
 msgid "by track name"
-msgstr "Podle názvu stopy"
+msgstr "podle názvu stopy"
 
 #: sfdb_ui.cc:113 sfdb_ui.cc:1984
 msgid "by file and track name"
-msgstr ""
+msgstr "podle názvu souboru a stopy"
 
 #: sfdb_ui.cc:115 sfdb_ui.cc:1985
 msgid "by instrument name"
@@ -20233,7 +20244,7 @@ msgstr "%1 - %2"
 
 #: simple_export_dialog.cc:282
 msgid "Error: ADM BWF files timecode cannot be past 24h."
-msgstr ""
+msgstr "Chyba: timecode v ADM BWF souborech nesmí přesáhnout 24h."
 
 #: simple_export_dialog.cc:301
 msgid ""
@@ -20241,6 +20252,9 @@ msgid ""
 "midnight boundary. Try moving the export-range earlier on the product "
 "timeline."
 msgstr ""
+"Chyba: Soubor pro export obsahuje neplatnou hodnotu timecode poblíž "
+"hranice půlnoci. Zkuste posunout rozsah exportu na časové ose projektu na"
+" dřívější pozici."
 
 #: simple_export_dialog.cc:330
 msgid "_Abort"
@@ -20492,7 +20506,7 @@ msgstr ""
 
 #: startup_fsm.cc:783
 msgid "Extracting aaf failed"
-msgstr ""
+msgstr "Selhala extrakce AAF"
 
 #: startup_fsm.cc:948
 msgid "Copied Demo Session %1."
@@ -20534,6 +20548,36 @@ msgid ""
 "\n"
 "                http://ardour.org/support</span>\n"
 msgstr ""
+"<span size=\"x-large\" weight=\"bold\">Vítejte v tomto ještě velmi"
+" nedokončeném "
+"vydání %1 %2</span>\n"
+"\n"
+"<span size=\"large\">Jedná se stále o velmi nedokončenou verzi a mnoho"
+" stávajících\n"
+"funkcí pro úpravy může být nefunkčních. Kromě toho se rychle vyvíjí funkčnost "
+"editace MIDI klipů\n"
+"na stránce řadiče, ale pokud vidíte tuto zprávu, "
+"není\n"
+"v tuto chvíli považována za dokončenou.\n"
+"1) Prosím <b>NEPOUŽÍVEJTE</b> tento software s očekáváním, že je "
+"stabilní nebo spolehlivý\n"
+" , i když tomu tak může být v závislosti na vašem pracovním postupu.\n"
+"2) Počkejte prosím na užitečný popis nových funkcí.\n"
+"3) <b>Nepoužívejte prosím fóra na ardour.org k hlášení problémů</b>.\n"
+"4) <b>V tuto chvíli prosím NEHLASTE chyby této alfa verze</b>.\n"
+"   Před dokončením počátečního vývoje se chyby netřídí a\n"
+"   hlášení problémů u neúplné, probíhající práce je většinou "
+"zbytečné.\n"
+"5) <b>Připojte</b> se prosím k nám na IRC k diskuzím o %1 %2 v reálném čase.\n"
+"5) <b>PŘIPOJTE SE</b> k nám na IRC pro diskuse v reálném čase o %1 %2. "
+"Můžete\n"
+"   se tam dostat přímo z programu přes nabídku Nápověda -> Chat\n"
+"6) <b>NEZAPOMEŇTE</b> zaslat opravy problémů po jejich projednání na IRC.\n"
+"\n"
+"Úplné informace o všech výše uvedených skutečnostech naleznete na stránce"
+" podpory na adrese\n"
+"\n"
+"                http://ardour.org/support</span>\n"
 
 #: step_entry.cc:70
 msgid ">beat"
@@ -20938,39 +20982,39 @@ msgstr "Šířka"
 
 #: strip_export_dialog.cc:36
 msgid "Export Track/Bus State"
-msgstr ""
+msgstr "Exportovat stav stopy/sběrnice"
 
 #: strip_export_dialog.cc:45
 msgid "Complete Session"
-msgstr ""
+msgstr "Kompletní sezení"
 
 #: strip_export_dialog.cc:47
 msgid "Selected Tracks/Busses"
-msgstr ""
+msgstr "Vybrané stopy/sběrnice"
 
 #: strip_export_dialog.cc:51
 msgid "Local strip template (saved in session folder)"
-msgstr ""
+msgstr "Lokální předloha zjednodušení (uložené v adresáři sezení)"
 
 #: strip_export_dialog.cc:52
 msgid "Global strip template (available for all sessions)"
-msgstr ""
+msgstr "Globální předloha zjednodušení (dostupná ze všech sezení)"
 
 #: strip_export_dialog.cc:63
 msgid "What to export:"
-msgstr ""
+msgstr "Co exportovat:"
 
 #: strip_export_dialog.cc:64
 msgid "Export as:"
-msgstr ""
+msgstr "Exportovat jako:"
 
 #: strip_import_dialog.cc:49
 msgid "Import Track/Bus State"
-msgstr ""
+msgstr "Importovat stav stopy/sběrnice"
 
 #: strip_import_dialog.cc:95 strip_import_dialog.cc:100
 msgid "%1 tracks"
-msgstr ""
+msgstr "%1 stop"
 
 #: strip_import_dialog.cc:202 template_dialog.cc:217
 msgid "Session Templates"
@@ -20978,65 +21022,65 @@ msgstr "Předlohy sezení"
 
 #: strip_import_dialog.cc:226
 msgid "Local Strip Templates"
-msgstr ""
+msgstr "Lokální předlohy zjednodušení"
 
 #: strip_import_dialog.cc:250 template_dialog.cc:223
 msgid "Global Strip Templates"
-msgstr ""
+msgstr "Globální předlohy zjednodušení"
 
 #: strip_import_dialog.cc:374
 msgid "%1 Track"
 msgid_plural "%1 Tracks"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%1 stopa"
+msgstr[1] "%1 stop"
 
 #: strip_import_dialog.cc:413
 msgid "Local Track/Bus"
-msgstr ""
+msgstr "Lokální stopa/sběrnice"
 
 #: strip_import_dialog.cc:418
 msgid "External State"
-msgstr ""
+msgstr "Externí stav"
 
 #: strip_import_dialog.cc:467
 msgid "<i>New Track</i>"
-msgstr ""
+msgstr "<i>Nová stopa</i>"
 
 #: strip_import_dialog.cc:532 strip_import_dialog.cc:533
 msgid " -- New Track -- "
-msgstr ""
+msgstr " -- Nová stopa -- "
 
 #: strip_import_dialog.cc:532
 msgid "New Track"
-msgstr ""
+msgstr "Nová stopa"
 
 #: strip_import_dialog.cc:724
 msgid "Clear Mapping"
-msgstr ""
+msgstr "Smazat mapování"
 
 #: strip_import_dialog.cc:725
 msgid "Import all as new tracks"
-msgstr ""
+msgstr "Importovat vše jako nové stopy"
 
 #: strip_import_dialog.cc:726
 msgid "Import visible as new tracks"
-msgstr ""
+msgstr "Importovat viditelné jako nové stopy"
 
 #: strip_import_dialog.cc:727
 msgid "Reset - auto-map by ID"
-msgstr ""
+msgstr "Obnovit - auto-map podle ID"
 
 #: strip_import_dialog.cc:727
 msgid "Reset - auto-map by name"
-msgstr ""
+msgstr "Obnovit - auto-map podle názvu"
 
 #: strip_import_dialog.cc:728
 msgid "Actions"
-msgstr ""
+msgstr "Akce"
 
 #: strip_import_dialog.cc:730
 msgid "Show all local tracks"
-msgstr ""
+msgstr "Ukázat všechny lokální stopy"
 
 #: strip_silence_dialog.cc:49
 msgid "Strip Silence"
@@ -21196,7 +21240,7 @@ msgstr "celá"
 
 #: tempo_dialog.cc:114 tempo_dialog.cc:115
 msgid "half"
-msgstr ""
+msgstr "půlka"
 
 #: tempo_dialog.cc:116 tempo_dialog.cc:117 tempo_dialog.cc:652
 #: tempo_dialog.cc:653
@@ -21689,11 +21733,11 @@ msgstr "Narážky"
 
 #: trigger_page.cc:975
 msgid "Cue Page: Show Sidebar List"
-msgstr ""
+msgstr "Panel řadiče: zobrazit seznam v postranní liště"
 
 #: trigger_page.cc:978
 msgid "Cue Page: Show Properties Bottom"
-msgstr ""
+msgstr "Panel řadiče: zobrazit vlastnosti dole"
 
 #: trigger_page.cc:981 trigger_page.cc:982
 msgid "Clear Selected Slot"
@@ -21721,7 +21765,7 @@ msgstr "Zastavit brzy všechny narážky"
 
 #: trigger_strip.cc:145
 msgid "Switch controls from cue launching to cue recording"
-msgstr ""
+msgstr "Přepnout ovladače ze spuštění na nahrávání"
 
 #: trigger_master.cc:129
 msgid ""
@@ -21741,7 +21785,7 @@ msgstr ""
 
 #: trigger_ui.cc:157
 msgid "Set Trigger Color"
-msgstr ""
+msgstr "Nastavit barvu spouštěče"
 
 #: trigger_ui.cc:164
 msgid "Select file to load into slot"
@@ -21852,6 +21896,8 @@ msgid ""
 "Click to enable recording for the follow length\n"
 "%1-click to enable recording until stopped"
 msgstr ""
+"Kliknutím zapnete nahrávání pro délku následování\n"
+"%1-klikem zapnete nahrávání až do vypnutí"
 
 #: triggerbox_ui.cc:176
 msgid ""
@@ -21894,7 +21940,7 @@ msgstr "Soubor s barvou \"%1\" se nepodařilo nahrát."
 
 #: ui_config.cc:393
 msgid "no theme file was found; colors will be odd"
-msgstr ""
+msgstr "nebyl nalezen soubor vzhledu; barvy budou vypadat divně"
 
 #: ui_config.cc:441 ui_config.cc:534
 msgid "Color file %1 not saved"
@@ -22235,7 +22281,7 @@ msgstr "Program pro sledování obrazu 'xjadeo' nelze spustit"
 
 #: video_timeline.cc:753
 msgid "Video-monitor 'xjadeo' version detection timed out."
-msgstr ""
+msgstr "Vypršel čas čekání na detekci verze video-monitoru 'xjadeo'."
 
 #: video_timeline.cc:775
 msgid ""
@@ -22247,7 +22293,7 @@ msgstr ""
 
 #: video_timeline.cc:829
 msgid "Video-decoder 'harvid' version detection timed out."
-msgstr ""
+msgstr "Vypršel čas čekání na detekci verze video-dekodéru 'harvid'."
 
 #: video_monitor.cc:291
 msgid "Video Monitor: File Not Found."
