@@ -104,11 +104,11 @@ class MyEventLoop : public sigc::trackable, public EventLoop
 			return true;
 		}
 
-		Glib::Threads::RWLock& slot_invalidation_rwlock() { return request_buffer_map_lock; }
+		PBD::RWLock& slot_invalidation_rwlock() { return request_buffer_map_lock; }
 
 	private:
 		Glib::Threads::Thread* run_loop_thread;
-		Glib::Threads::RWLock   request_buffer_map_lock;
+		PBD::RWLock            request_buffer_map_lock;
 };
 
 static MyEventLoop *event_loop;
