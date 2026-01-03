@@ -276,7 +276,7 @@ Auditioner::data_type () const {
 int
 Auditioner::roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool& need_butler)
 {
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
+	PBD::RWLock::ReaderLock lm (_processor_lock, PBD::RWLock::TryLock);
 	if (!lm.locked()) {
 		return 0;
 	}
