@@ -27,9 +27,8 @@
 #include <set>
 
 #include "pbd/libpbd_visibility.h"
+#include "pbd/rwlock.h"
 #include "pbd/signals.h"
-#include <glibmm/threads.h>
-
 
 #include "pbd/statefuldestructible.h"
 
@@ -191,7 +190,7 @@ private:
 	typedef std::set<PBD::Controllable*> Controllables;
 
 	static ScopedConnectionList registry_connections;
-	static Glib::Threads::RWLock registry_lock;
+	static PBD::RWLock registry_lock;
 	static Controllables registry;
 
 	static void add (Controllable&);
