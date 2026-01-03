@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include <glibmm/threads.h>
+#include "pbd/rwlock.h"
 
 #include "ardour/midi_port.h"
 #include "ardour/scene_changer.h"
@@ -58,7 +58,8 @@ class MIDISceneChanger : public SceneChanger
 
 	std::shared_ptr<MidiPort> input_port;
 	std::shared_ptr<MidiPort> output_port;
-	Glib::Threads::RWLock scene_lock;
+
+	PBD::RWLock scene_lock;
 	Scenes scenes;
 	bool _recording;
 	bool have_seen_bank_changes;
