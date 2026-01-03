@@ -195,11 +195,11 @@ Port::insert_connection (std::string const& pn)
 #endif
 	{
 		std::string const bid (AudioEngine::instance()->backend_id (receives_input ()));
-		Glib::Threads::RWLock::WriterLock lm (_connections_lock);
+		PBD::RWLock::WriterLock lm (_connections_lock);
 		_ext_connections[bid].insert (pn);
 		_int_connections.erase (port_manager->make_port_name_non_relative (pn)); // XXX
 	} else {
-		Glib::Threads::RWLock::WriterLock lm (_connections_lock);
+		PBD::RWLock::WriterLock lm (_connections_lock);
 		_int_connections.insert (port_manager->make_port_name_non_relative (pn));
 	}
 }
@@ -214,12 +214,12 @@ Port::erase_connection (std::string const& pn)
 #endif
 	{
 		std::string const bid (AudioEngine::instance()->backend_id (receives_input ()));
-		Glib::Threads::RWLock::WriterLock lm (_connections_lock);
+		PBD::RWLock::WriterLock lm (_connections_lock);
 		if (_ext_connections.find (bid) != _ext_connections.end ()) {
 			_ext_connections[bid].erase (pn);
 		}
 	} else {
-		Glib::Threads::RWLock::WriterLock lm (_connections_lock);
+		PBD::RWLock::WriterLock lm (_connections_lock);
 		_int_connections.erase (port_manager->make_port_name_non_relative (pn));
 	}
 }
@@ -227,7 +227,7 @@ Port::erase_connection (std::string const& pn)
 void
 Port::rename_connected_port (std::string const& old_name, std::string const& new_name)
 {
-	Glib::Threads::RWLock::WriterLock lm (_connections_lock);
+	PBD::RWLock::WriterLock lm (_connections_lock);
 	if (_int_connections.find (old_name) == _int_connections.end()) {
 		return;
 	}
@@ -284,7 +284,7 @@ Port::disconnect_all ()
 		port_engine.disconnect_all (_port_handle);
 		{
 			std::string const bid (AudioEngine::instance()->backend_id (receives_input ()));
-			Glib::Threads::RWLock::WriterLock lm (_connections_lock);
+			PBD::RWLock::WriterLock lm (_connections_lock);
 			_int_connections.clear ();
 			if (_ext_connections.find (bid) != _ext_connections.end ()) {
 				_ext_connections[bid].clear ();
@@ -328,7 +328,7 @@ Port::get_connections (std::vector<std::string>& c) const
 {
 	if (!port_manager->running()) {
 		std::string const bid (AudioEngine::instance()->backend_id (receives_input ()));
-		Glib::Threads::RWLock::ReaderLock lm (_connections_lock);
+		PBD::RWLock::ReaderLock lm (_connections_lock);
 		c.insert (c.end(), _int_connections.begin(), _int_connections.end());
 		if (_ext_connections.find (bid) != _ext_connections.end ()) {
 			c.insert (c.end(), _ext_connections.at(bid).begin(), _ext_connections.at(bid).end());
@@ -717,7 +717,7 @@ Port::has_ext_connection () const
 {
 	std::string const bid (AudioEngine::instance()->backend_id (receives_input ()));
 
-	Glib::Threads::RWLock::ReaderLock lm (_connections_lock);
+	PBD::RWLock::ReaderLock lm (_connections_lock);
 
 	return _ext_connections.find (bid) != _ext_connections.end ();
 }
@@ -729,7 +729,7 @@ Port::reconnect ()
 
 	std::vector <std::string> c_int, c_ext, f_int, f_ext;
 
-	Glib::Threads::RWLock::ReaderLock lm (_connections_lock);
+	PBD::RWLock::ReaderLock lm (_connections_lock);
 
 	if (_ext_connections.find (bid) != _ext_connections.end ()) {
 		if (_int_connections.empty () && _ext_connections[bid].empty ()) {
@@ -831,7 +831,7 @@ Port::get_state () const
 		root->set_property (X_("direction"), X_("Output"));
 	}
 
-	Glib::Threads::RWLock::ReaderLock lm (_connections_lock);
+	PBD::RWLock::ReaderLock lm (_connections_lock);
 	for (auto const& c : _int_connections) {
 		XMLNode* child = new XMLNode (X_("Connection"));
 		child->set_property (X_("other"), AudioEngine::instance()->make_port_name_relative (c));
