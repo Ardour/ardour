@@ -3078,6 +3078,12 @@ MeterMarkerDrag::MeterMarkerDrag (Editor& e, ArdourCanvas::Item* i, bool c)
 	, _old_snap_mode (e.snap_mode ())
 	, before_state (0)
 {
+	Temporal::MeterPoint const & mp (_marker->meter());
+
+	if (dynamic_cast<Temporal::MusicTimePoint const *> (&mp)) {
+		throw failed_constructor ();
+	}
+
 	DEBUG_TRACE (DEBUG::Drags, "New MeterMarkerDrag\n");
 	assert (_marker);
 	_movable = !TempoMap::use ()->is_initial (_marker->meter ());
@@ -3280,6 +3286,11 @@ TempoMarkerDrag::TempoMarkerDrag (Editor& e, ArdourCanvas::Item* i)
 
 	_marker       = reinterpret_cast<TempoMarker*> (_item->get_data ("marker"));
 	_real_section = &_marker->tempo ();
+
+	if (dynamic_cast<Temporal::MusicTimePoint const *> (_real_section)) {
+		throw failed_constructor ();
+	}
+
 	_movable      = !TempoMap::use ()->is_initial (_marker->tempo ());
 	_grab_bpm     = _real_section->note_types_per_minute ();
 	_grab_qn      = _real_section->beats ();
