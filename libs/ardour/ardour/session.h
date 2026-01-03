@@ -2160,7 +2160,7 @@ private:
 	Sample*                       click_emphasis_data;
 	samplecnt_t                   click_length;
 	samplecnt_t                   click_emphasis_length;
-	mutable Glib::Threads::RWLock click_lock;
+	mutable PBD::RWLock          _click_lock;
 	samplecnt_t                  _click_io_latency;
 	PBD::ScopedConnection        _click_io_connection;
 	Temporal::GridIterator       _click_iterator;
