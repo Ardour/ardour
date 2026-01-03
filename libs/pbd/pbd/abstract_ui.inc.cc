@@ -85,7 +85,7 @@ AbstractUI<RequestObject>::AbstractUI (const string& name)
 	vector<EventLoop::ThreadBufferMapping> tbm = EventLoop::get_request_buffers_for_target_thread (event_loop_name());
 
 	{
-		Glib::Threads::RWLock::WriterLock rbml (request_buffer_map_lock);
+		PBD::RWLock::WriterLock rbml (request_buffer_map_lock);
 
 		for (auto const & t : tbm) {
 			request_buffers[t.emitting_thread] = new RequestBuffer (t.num_requests);
@@ -131,7 +131,7 @@ AbstractUI<RequestObject>::register_thread (pthread_t thread_id, string thread_n
 	bool store = false;
 
 	{
-		Glib::Threads::RWLock::ReaderLock lm (request_buffer_map_lock);
+		PBD::RWLock::ReaderLock lm (request_buffer_map_lock);
 		typename RequestBufferMap::const_iterator ib = request_buffers.find (pthread_self());
 
 		if (ib == request_buffers.end()) {
@@ -151,7 +151,7 @@ AbstractUI<RequestObject>::register_thread (pthread_t thread_id, string thread_n
 		   and so this is of little consequence.
 		*/
 
-		Glib::Threads::RWLock::WriterLock rbml (request_buffer_map_lock);
+		PBD::RWLock::WriterLock rbml (request_buffer_map_lock);
 		request_buffers[thread_id] = b;
 		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2/%3 registered request buffer-B @ %4 for %5\n", event_loop_name(), pthread_name(), DEBUG_THREAD_SELF, b, DEBUG_THREAD_PRINT(thread_id)));
 
@@ -163,7 +163,7 @@ AbstractUI<RequestObject>::register_thread (pthread_t thread_id, string thread_n
 template<typename RequestObject> typename AbstractUI<RequestObject>::RequestBuffer*
 AbstractUI<RequestObject>::get_per_thread_request_buffer ()
 {
-	Glib::Threads::RWLock::ReaderLock lm (request_buffer_map_lock);
+	PBD::RWLock::ReaderLock lm (request_buffer_map_lock);
 	typename RequestBufferMap::iterator ib = request_buffers.find (pthread_self());
 	if (ib != request_buffers.end()) {
 		return ib->second;
@@ -222,7 +222,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 	int cnt = 0;
 
 	/* check all registered per-thread buffers first */
-	Glib::Threads::RWLock::ReaderLock rbml (request_buffer_map_lock);
+	PBD::RWLock::ReaderLock rbml (request_buffer_map_lock);
 
 	/* clean up any dead invalidation records (object was deleted) */
 	trash.sort();
@@ -442,7 +442,7 @@ AbstractUI<RequestObject>::send_request (RequestObject *req)
 			 * single-reader/single-writer semantics
 			 */
 			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2/%5 send heap request type %3 IR %4\n", event_loop_name(), pthread_name(), req->type, req->invalidation, DEBUG_THREAD_SELF));
-			Glib::Threads::RWLock::WriterLock lm (request_buffer_map_lock);
+			PBD::RWLock::WriterLock lm (request_buffer_map_lock);
 			request_list.push_back (req);
 		}
 

@@ -62,14 +62,14 @@ public:
 		; // process Events, if any
 	}
 
-	Glib::Threads::RWlock& slot_invalidation_rwlock ()
+	PBD::RWlock& slot_invalidation_rwlock ()
 	{
 		return request_buffer_map_lock;
 	}
 
 private:
 	Glib::Threads::Thread* run_loop_thread;
-	Glib::Threads::RWLock  request_buffer_map_lock;
+	PBD::RWLock            request_buffer_map_lock;
 };
 
 struct MyInvalidationRecord : public PBD::EventLoop::InvalidationRecord {

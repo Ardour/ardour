@@ -20,14 +20,16 @@
 #pragma once
 
 #include <atomic>
+#include <functional>
 #include <string>
 #include <vector>
-#include <map>
 #include <stdint.h>
 #include <pthread.h>
+
 #include <glibmm/threads.h>
 
 #include "pbd/libpbd_visibility.h"
+#include "pbd/rwlock.h"
 
 namespace PBD
 {
@@ -87,7 +89,7 @@ public:
 	};
 
 	virtual bool call_slot (InvalidationRecord*, const std::function<void()>&) = 0;
-	virtual Glib::Threads::RWLock& slot_invalidation_rwlock() = 0;
+	virtual PBD::RWLock& slot_invalidation_rwlock() = 0;
 
 	std::string event_loop_name() const { return _name; }
 
