@@ -1768,7 +1768,6 @@ Editor::ramp_to_next_tempo ()
 	if (!tmc.map().set_ramped (const_cast<Temporal::TempoPoint&>(tempo), true)) {
 		tmc.abort ();
 	}
-	std::cerr << "leave scope\n";
 }
 
 void

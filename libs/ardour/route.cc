@@ -5121,7 +5121,7 @@ Route::set_active (bool yn, void* src)
 		return;
 	}
 
-	if (is_singleton ()) {
+	if (is_singleton () && !yn) {
 		return;
 	}
 

@@ -506,12 +506,9 @@ TriggerClipPicker::row_selected ()
 			/* TODO: if it's a really big file, we could skip this check */
 			std::shared_ptr<SMFSource> ms;
 			try {
-				ms = std::dynamic_pointer_cast<SMFSource> (
-					SourceFactory::createExternal (DataType::MIDI, *_session,
-												   path, 0, Source::Flag (0), false));
+				ms = std::dynamic_pointer_cast<SMFSource> (SourceFactory::createExternal (DataType::MIDI, *_session, path, 0, Source::Flag (0), false));
 			} catch (const std::exception& e) {
-				error << string_compose(_("Could not read file: %1 (%2)."),
-										path, e.what()) << endmsg;
+				error << string_compose(_("Could not read file: %1 (%2)."), path, e.what()) << endmsg;
 			}
 
 			if (ms) {

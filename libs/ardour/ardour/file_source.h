@@ -56,6 +56,7 @@ public:
         void mark_immutable ();
         void mark_immutable_except_write();
 	void mark_nonremovable ();
+	void mark_removable ();
 
 	bool                 within_session () const { return _within_session; }
 	uint16_t             channel()         const { return _channel; }

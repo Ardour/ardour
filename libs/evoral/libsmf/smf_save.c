@@ -65,7 +65,9 @@ smf_extend(smf_t *smf, const int length)
 		if (smf->file_buffer_capacity == 0) {
 			smf->file_buffer_capacity = length * 2;
 		} else {
-			smf->file_buffer_capacity *= 2;
+			do {
+				smf->file_buffer_capacity *= 2;
+			} while (smf->file_buffer_capacity < smf->file_buffer_length + length);
 		}
 		smf->file_buffer = realloc(smf->file_buffer, smf->file_buffer_capacity);
 		if (smf->file_buffer == NULL) {

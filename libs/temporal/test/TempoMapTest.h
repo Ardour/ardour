@@ -6,6 +6,7 @@ class TempoMapTest : public CppUnit::TestFixture
 	CPPUNIT_TEST_SUITE(TempoMapTest);
 	CPPUNIT_TEST(createTest);
 	CPPUNIT_TEST(addTest);
+	CPPUNIT_TEST(addRemoveTest);
 	CPPUNIT_TEST(subtractTest);
 	CPPUNIT_TEST(multiplyTest);
 	CPPUNIT_TEST(convertTest);
@@ -15,6 +16,7 @@ class TempoMapTest : public CppUnit::TestFixture
 public:
 	void createTest();
 	void addTest();
+	void addRemoveTest();
 	void subtractTest();
 	void multiplyTest();
 	void convertTest();

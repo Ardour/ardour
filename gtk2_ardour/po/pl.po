@@ -9,15 +9,15 @@ msgstr ""
 "Project-Id-Version: gtk2_ardour\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-12-06 16:50+0100\n"
-"PO-Revision-Date: 2025-12-11 14:59+0100\n"
+"PO-Revision-Date: 2025-12-24 00:12+0100\n"
 "Last-Translator: Krzysztof Gajdemski <songo@debian.org.pl>\n"
 "Language-Team: Polish <songo@debian.org.pl>\n"
 "Language: pl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
-"|| n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 |"
+"| n%100>=20) ? 1 : 2);\n"
 "X-Poedit-Language: Polish\n"
 "X-Poedit-Country: POLAND\n"
 "X-Generator: Lokalize 25.04.0\n"
@@ -468,8 +468,6 @@ msgid ""
 "Portuguese:\n"
 "\tRui Nuno Capela <rncbc@rncbc.org>\n"
 msgstr ""
-"Portuguese:\n"
-"\tRui Nuno Capela <rncbc@rncbc.org>\n"
 
 #: about.cc:258
 msgid ""
@@ -477,9 +475,6 @@ msgid ""
 "\tAlexander da Franca Fernandes <alexander@nautae.eti.br>\n"
 "\tChris Ross <chris@tebibyte.org>\n"
 msgstr ""
-"Brazilian Portuguese:\n"
-"\tAlexander da Franca Fernandes <alexander@nautae.eti.br>\n"
-"\tChris Ross <chris@tebibyte.org>\n"
 
 #: about.cc:260
 msgid ""
@@ -502,8 +497,6 @@ msgid ""
 "Greek:\n"
 "\t Klearchos Gourgourinis <muadib@in.gr>\n"
 msgstr ""
-"Greek:\n"
-"\t Klearchos Gourgourinis <muadib@in.gr>\n"
 
 #: about.cc:267
 msgid ""
@@ -1104,7 +1097,7 @@ msgstr ""
 " <b>Nie-warstwowe</b>, niższy region zostanie podzielony w miejscu nagrania "
 "i zamieniony przez region nowo nagrany.\n"
 "<b>SoundOnSound</b>, podobnie jak <i>Warstwowe</i>, z tym, że niższe regiony "
-"będą słyszalne.\n"
+"będą słyszalne."
 
 #: application_bar.cc:429
 msgid ""
@@ -1330,7 +1323,7 @@ msgstr "Duży zegar"
 
 #: ardour_ui.cc:328 big_transport_window.cc:31
 msgid "Transport Controls"
-msgstr "Sterowanie nagrywaniem i odtwarzaniam"
+msgstr "Sterowanie nagrywaniem i odtwarzaniem"
 
 #: ardour_ui.cc:329 rc_option_editor.cc:3636
 msgid "Virtual Keyboard"
@@ -5687,7 +5680,7 @@ msgstr "Nazwa nowej listy odtwarzania:"
 
 #: editor.cc:3649 route_ui.cc:2848
 msgid "That name is already in use.  Use this instead?"
-msgstr ""
+msgstr "Ta nazwa jest już używana. Użyć w zamian tej?"
 
 #: editor.cc:3674
 msgid "clear playlists"
@@ -6949,12 +6942,18 @@ msgid ""
 "The session already contains a source file named %1.  Do you want to import "
 "%1 as a new file, or skip it?"
 msgstr ""
+"Ta sesja zawiera już plik źródłowy o nazwie %1. Zaimportować %1 jako nowy plik"
+", "
+"czy go pominąć?"
 
 #: editor_audio_import.cc:180
 msgid ""
 "The session already contains a source file named %1.  Do you want to import "
 "%2 as a new source, or skip it?"
 msgstr ""
+"Ta sesja zawiera już plik źródłowy o nazwie %1. Zaimportować %2 jako nowe źród"
+"ło, "
+"czy go pominąć?"
 
 #: editor_audio_import.cc:287
 msgid "import"
@@ -10458,7 +10457,7 @@ msgstr "Nie można dodać portu"
 
 #: io_button.cc:687
 msgid "Add %1 port"
-msgstr "Dodano port %1"
+msgstr "Dodaj port %1"
 
 #: io_button.cc:696 io_button.cc:698 io_plugin_window.cc:572
 #: plugin_pin_dialog.cc:1938
@@ -13227,11 +13226,9 @@ msgid ""
 "Left-button to play a note, left-button-drag to play a series of notes\n"
 "%1-left-button to select or extend selection to all notes with this pitch\n"
 msgstr ""
-"Lewy klawisz myszy – odtwarzanie nuty, prawy klawisz – odtwarzanie serii "
-"nut\n"
-"%1-lewy klawisz – zaznaczenie bądź rozszerzenie zaznaczenia do wszystkich "
-"nut\n"
-"o tej samej wysokości."
+"Lewy klawisz myszy – odtwarzanie nuty, prawy klawisz – odtwarzanie serii nut\n"
+"%1-lewy klawisz – zaznaczenie bądź rozszerzenie zaznaczenia do wszystkich nut "
+"o tej samej wysokości.\n"
 
 #: pianoroll.cc:248
 msgid "Expression"

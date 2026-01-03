@@ -31,6 +31,7 @@ ArdourMessageDialog::ArdourMessageDialog (const Glib::ustring& message,
 	, _splash_pushed (false)
 {
 	set_position (UIConfiguration::instance().get_default_window_position());
+	set_keep_above (true);
 }
 
 ArdourMessageDialog::ArdourMessageDialog (Gtk::Window& parent,

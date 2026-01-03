@@ -540,6 +540,9 @@ PannerUI::pan_automation_state_button_event (GdkEventButton *ev)
 void
 PannerUI::pan_automation_state_changed ()
 {
+	if (!_panner) {
+		return;
+	}
 	std::shared_ptr<Pannable> pannable (_panner->pannable());
 	pan_automation_state_button.set_label (GainMeterBase::short_astate_string(pannable->automation_state()));
 

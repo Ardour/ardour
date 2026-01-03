@@ -3141,7 +3141,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 		/* it was moved */
 		_editor.mid_tempo_change (Editor::MeterChanged);
 		show_verbose_cursor_time (timepos_t (_marker->meter ().beats ()));
-		editing_context.set_snapped_cursor_position (timepos_t (_marker->meter ().sample (editing_context.session ()->sample_rate ())));
+		editing_context.set_snapped_cursor_position (timepos_t (_marker->meter ().sample_is_dangerous (editing_context.session ()->sample_rate ())));
 	}
 }
 
@@ -3806,7 +3806,7 @@ TempoEndDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	if ((prev = map->previous_tempo (*_tempo)) != 0) {
 		_editor.tempo_curve_selected (prev, true);
 		const samplecnt_t sr = _editor.session ()->sample_rate ();
-		sstr << "end: " << fixed << setprecision (3) << map->tempo_at (samples_to_superclock (_tempo->sample (sr) - 1, sr)).end_note_types_per_minute () << "\n";
+		sstr << "end: " << fixed << setprecision (3) << map->tempo_at (samples_to_superclock (_tempo->sample_is_dangerous (sr) - 1, sr)).end_note_types_per_minute () << "\n";
 	}
 
 	if (_tempo->continuing ()) {
@@ -3846,7 +3846,7 @@ TempoEndDrag::motion (GdkEvent* event, bool first_move)
 
 	ostringstream     sstr;
 	const samplecnt_t sr = editing_context.session ()->sample_rate ();
-	sstr << "end: " << fixed << setprecision (3) << map->tempo_at (samples_to_superclock (_tempo->sample (sr) - 1, sr)).end_note_types_per_minute () << "\n";
+	sstr << "end: " << fixed << setprecision (3) << map->tempo_at (samples_to_superclock (_tempo->sample_is_dangerous (sr) - 1, sr)).end_note_types_per_minute () << "\n";
 
 	if (_tempo->continuing ()) {
 		sstr << "start: " << fixed << setprecision (3) << _tempo->note_types_per_minute ();
