@@ -116,7 +116,7 @@ ControlProtocolManager::ControlProtocolManager ()
 
 ControlProtocolManager::~ControlProtocolManager()
 {
-	Glib::Threads::RWLock::WriterLock lm (protocols_lock);
+	PBD::RWLock::WriterLock lm (protocols_lock);
 
 	for (list<ControlProtocol*>::iterator i = control_protocols.begin(); i != control_protocols.end(); ++i) {
 		delete (*i);
@@ -196,7 +196,7 @@ ControlProtocolManager::set_session (Session* s)
 int
 ControlProtocolManager::activate (ControlProtocolInfo& cpi)
 {
-	Glib::Threads::RWLock::WriterLock lm (protocols_lock);
+	PBD::RWLock::WriterLock lm (protocols_lock);
 	ControlProtocol* cp;
 
 	if (cpi.protocol && cpi.protocol->active()) {
@@ -259,7 +259,7 @@ ControlProtocolManager::drop_protocols ()
 	 * before the process cycle stops and ports vanish.
 	 */
 
-	Glib::Threads::RWLock::WriterLock lm (protocols_lock);
+	PBD::RWLock::WriterLock lm (protocols_lock);
 
 	for (list<ControlProtocolInfo*>::iterator p = control_protocol_info.begin(); p != control_protocol_info.end(); ++p) {
 		// mark existing protocols as requested
@@ -343,7 +343,7 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi, bool lock_required)
 
 	cpi.descriptor->destroy (cpi.protocol);
 
-	Glib::Threads::RWLock::WriterLock lm (protocols_lock, Glib::Threads::NOT_LOCK);
+	PBD::RWLock::WriterLock lm (protocols_lock, PBD::RWLock::NotLock);
 	if (lock_required) {
 		/* the lock is required when the protocol is torn down by a user from the GUI. */
 		lm.acquire ();
@@ -527,7 +527,7 @@ ControlProtocolManager::set_state (const XMLNode& node, int session_specific_sta
 	XMLNodeList clist;
 	XMLNodeConstIterator citer;
 
-	Glib::Threads::RWLock::WriterLock lm (protocols_lock);
+	PBD::RWLock::WriterLock lm (protocols_lock);
 
 	clist = node.children();
 
@@ -581,7 +581,7 @@ XMLNode&
 ControlProtocolManager::get_state () const
 {
 	XMLNode* root = new XMLNode (state_node_name);
-	Glib::Threads::RWLock::ReaderLock lm (protocols_lock);
+	PBD::RWLock::ReaderLock lm (protocols_lock);
 
 	for (list<ControlProtocolInfo*>::const_iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
 
@@ -621,7 +621,7 @@ ControlProtocolManager::instance ()
 void
 ControlProtocolManager::midi_connectivity_established (bool yn)
 {
-	Glib::Threads::RWLock::ReaderLock lm (protocols_lock);
+	PBD::RWLock::ReaderLock lm (protocols_lock);
 
 	for (list<ControlProtocol*>::iterator p = control_protocols.begin(); p != control_protocols.end(); ++p) {
 		(*p)->midi_connectivity_established (yn);
@@ -706,7 +706,7 @@ ControlProtocolManager::stripable_selection_changed (StripableNotificationListPt
 	 */
 
 	{
-		Glib::Threads::RWLock::ReaderLock lm (protocols_lock);
+		PBD::RWLock::ReaderLock lm (protocols_lock);
 
 		for (list<ControlProtocol*>::iterator p = control_protocols.begin(); p != control_protocols.end(); ++p) {
 			DEBUG_TRACE (DEBUG::Selection, string_compose ("selection change notification for surface \"%1\"\n", (*p)->name()));

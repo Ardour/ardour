@@ -27,8 +27,7 @@
 #include <list>
 
 
-#include <glibmm/threads.h>
-
+#include "pbd/rwlock.h"
 #include "pbd/stateful.h"
 
 #include "control_protocol/types.h"
@@ -96,8 +95,8 @@ class LIBARDOUR_API ControlProtocolManager : public PBD::Stateful, public ARDOUR
 	ControlProtocolManager ();
 	static ControlProtocolManager* _instance;
 
-	mutable Glib::Threads::RWLock protocols_lock;
-	std::list<ControlProtocol*>    control_protocols;
+	mutable PBD::RWLock          protocols_lock;
+	std::list<ControlProtocol*>  control_protocols;
 
 	void session_going_away ();
 
