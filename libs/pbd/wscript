@@ -64,6 +64,7 @@ libpbd_sources = [
     'reallocpool.cc',
     'receiver.cc',
     'resource.cc',
+    'rwlock.cc',
     'search_path.cc',
     'semutils.cc',
     'shortpath.cc',
