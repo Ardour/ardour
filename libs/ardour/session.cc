@@ -8075,7 +8075,7 @@ Session::had_destructive_tracks() const
 bool
 Session::nth_mixer_scene_valid (size_t nth) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_mixer_scenes_lock);
+	PBD::RWLock::ReaderLock lm (_mixer_scenes_lock);
 	if (_mixer_scenes.size () <= nth) {
 		return false;
 	}
@@ -8090,7 +8090,7 @@ Session::apply_nth_mixer_scene (size_t nth)
 {
 	std::shared_ptr<MixerScene> scene;
 	{
-		Glib::Threads::RWLock::ReaderLock lm (_mixer_scenes_lock);
+		PBD::RWLock::ReaderLock lm (_mixer_scenes_lock);
 		if (_mixer_scenes.size () <= nth) {
 			return false;
 		}
@@ -8110,7 +8110,7 @@ Session::apply_nth_mixer_scene (size_t nth, RouteList const& rl)
 {
 	std::shared_ptr<MixerScene> scene;
 	{
-		Glib::Threads::RWLock::ReaderLock lm (_mixer_scenes_lock);
+		PBD::RWLock::ReaderLock lm (_mixer_scenes_lock);
 		if (_mixer_scenes.size () <= nth) {
 			return false;
 		}
@@ -8148,13 +8148,13 @@ Session::store_nth_mixer_scene (size_t nth)
 std::shared_ptr<MixerScene>
 Session::nth_mixer_scene (size_t nth, bool create_if_missing)
 {
-	Glib::Threads::RWLock::ReaderLock lm (_mixer_scenes_lock);
+	PBD::RWLock::ReaderLock lm (_mixer_scenes_lock);
 	if (create_if_missing) {
 		if (_mixer_scenes.size() > nth && _mixer_scenes[nth]) {
 			return _mixer_scenes[nth];
 		}
 		lm.release ();
-		Glib::Threads::RWLock::WriterLock lw (_mixer_scenes_lock);
+		PBD::RWLock::WriterLock lw (_mixer_scenes_lock);
 		if (_mixer_scenes.size() <= nth) {
 			_mixer_scenes.resize (nth + 1);
 		}
@@ -8170,7 +8170,7 @@ Session::nth_mixer_scene (size_t nth, bool create_if_missing)
 std::vector<std::shared_ptr<MixerScene>>
 Session::mixer_scenes () const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_mixer_scenes_lock);
+	PBD::RWLock::ReaderLock lm (_mixer_scenes_lock);
 	return _mixer_scenes;
 }
 

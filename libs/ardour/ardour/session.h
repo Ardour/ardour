@@ -57,6 +57,7 @@
 #include "pbd/file_archive.h"
 #include "pbd/history_owner.h"
 #include "pbd/rcu.h"
+#include "pbd/rwlock.h"
 #include "pbd/statefuldestructible.h"
 #include "pbd/signals.h"
 #include "pbd/undo.h"
@@ -1660,7 +1661,7 @@ private:
 	SerializedRCUManager<IOPlugList> _io_plugins;
 
 	std::vector<std::shared_ptr<MixerScene>> _mixer_scenes;
-	mutable Glib::Threads::RWLock              _mixer_scenes_lock;
+	mutable PBD::RWLock                      _mixer_scenes_lock;
 
 	Butler* _butler;
 

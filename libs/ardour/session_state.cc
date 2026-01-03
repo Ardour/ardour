@@ -1863,7 +1863,7 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 	}
 
 	{
-		Glib::Threads::RWLock::ReaderLock lm (_mixer_scenes_lock);
+		PBD::RWLock::ReaderLock lm (_mixer_scenes_lock);
 		uint64_t idx = 0;
 		uint64_t last = 0;
 		for (auto const& i : _mixer_scenes) {
@@ -2378,7 +2378,7 @@ Session::set_state (const XMLNode& node, int version)
 	}
 
 	if ((child = find_named_node (node, "MixerScenes"))) {
-		Glib::Threads::RWLock::WriterLock lm (_mixer_scenes_lock);
+		PBD::RWLock::WriterLock lm (_mixer_scenes_lock);
 		uint64_t n_scenes = 0;
 		child->get_property("n_scenes", n_scenes);
 		_mixer_scenes.resize (n_scenes);
