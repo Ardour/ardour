@@ -33,6 +33,7 @@
 #include "temporal/tempo.h"
 
 #include "pbd/undo.h"
+#include "pbd/rwlock.h"
 #include "pbd/signals.h"
 #include "ardour/ardour.h"
 #include "ardour/data_type.h"
@@ -519,17 +520,17 @@ public:
 	virtual void reorder_plugins (RegionFxList const&);
 
 	bool has_region_fx () const {
-		Glib::Threads::RWLock::ReaderLock lm (_fx_lock);
+		PBD::RWLock::ReaderLock lm (_fx_lock);
 		return !_plugins.empty ();
 	}
 
 	size_t n_region_fx () const {
-		Glib::Threads::RWLock::ReaderLock lm (_fx_lock);
+		PBD::RWLock::ReaderLock lm (_fx_lock);
 		return _plugins.size ();
 	}
 
 	std::shared_ptr<RegionFxPlugin> nth_plugin (uint32_t n) const {
-		Glib::Threads::RWLock::ReaderLock lm (_fx_lock);
+		PBD::RWLock::ReaderLock lm (_fx_lock);
 		for (auto const& i : _plugins) {
 			if (0 == n--) {
 				return i;
@@ -539,7 +540,7 @@ public:
 	}
 
 	void foreach_plugin (std::function<void(std::weak_ptr<RegionFxPlugin>)> method) const {
-		Glib::Threads::RWLock::ReaderLock lm (_fx_lock);
+		PBD::RWLock::ReaderLock lm (_fx_lock);
 		for (auto const& i : _plugins) {
 			method (std::weak_ptr<RegionFxPlugin> (i));
 		}
@@ -599,10 +600,10 @@ protected:
 
 	DataType _type;
 
-	mutable Glib::Threads::RWLock _fx_lock;
-	uint32_t                      _fx_latency;
-	uint32_t                      _fx_tail;
-	RegionFxList                  _plugins;
+	mutable PBD::RWLock _fx_lock;
+	uint32_t            _fx_latency;
+	uint32_t            _fx_tail;
+	RegionFxList        _plugins;
 
 	PBD::Property<bool>      _sync_marked;
 	PBD::Property<bool>      _left_of_split;

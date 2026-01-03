@@ -1482,7 +1482,7 @@ Region::state () const
 	}
 
 	{
-		Glib::Threads::RWLock::ReaderLock lm (_fx_lock);
+		PBD::RWLock::ReaderLock lm (_fx_lock);
 		for (auto const & p : _plugins) {
 			node->add_child_nocopy (p->get_state ());
 		}
@@ -1607,7 +1607,7 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 	}
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (_fx_lock);
+		PBD::RWLock::WriterLock lm (_fx_lock);
 		bool changed = !_plugins.empty ();
 
 		for (auto const& rfx : _plugins) {
@@ -2458,7 +2458,7 @@ Region::add_plugin (std::shared_ptr<RegionFxPlugin> rfx, std::shared_ptr<RegionF
 void
 Region::reorder_plugins (RegionFxList const& new_order)
 {
-	Glib::Threads::RWLock::WriterLock lm (_fx_lock);
+	PBD::RWLock::WriterLock lm (_fx_lock);
 
 	RegionFxList                 as_it_will_be;
 	RegionFxList::iterator       oiter = _plugins.begin ();
