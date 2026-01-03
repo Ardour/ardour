@@ -47,7 +47,7 @@ TransportMasterManager::TransportMasterManager()
 
 TransportMasterManager::~TransportMasterManager ()
 {
-	Glib::Threads::RWLock::WriterLock lm (lock);
+	PBD::RWLock::WriterLock lm (_lock);
 	_current_master.reset ();
 	_transport_masters.clear ();
 }
@@ -102,7 +102,7 @@ TransportMasterManager::set_session (Session* s)
 	 * call to ::pre_process_transport_masters().
 	 */
 
-	Glib::Threads::RWLock::ReaderLock lm (lock);
+	PBD::RWLock::ReaderLock lm (_lock);
 
 	maybe_restore_tc_format ();
 
@@ -154,7 +154,7 @@ TransportMasterManager::destroy()
 double
 TransportMasterManager::pre_process_transport_masters (pframes_t nframes, samplepos_t now)
 {
-	Glib::Threads::RWLock::ReaderLock lm (lock, Glib::Threads::TRY_LOCK);
+	PBD::RWLock::ReaderLock lm (_lock, PBD::RWLock::TryLock);
 
 	if (!lm.locked()) {
 		return 1.0;
@@ -398,7 +398,7 @@ TransportMasterManager::add (SyncSource type, std::string const & name, bool rem
 	DEBUG_TRACE (DEBUG::Slave, string_compose ("adding new transport master, type %1 name %2 removeable %3\n", enum_2_string (type), name, removeable));
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (lock);
+		PBD::RWLock::WriterLock lm (_lock);
 
 		for (TransportMasters::const_iterator t = _transport_masters.begin(); t != _transport_masters.end(); ++t) {
 			if ((*t)->name() == name) {
@@ -448,7 +448,7 @@ TransportMasterManager::remove (std::string const & name)
 	std::shared_ptr<TransportMaster> tm;
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (lock);
+		PBD::RWLock::WriterLock lm (_lock);
 
 		for (TransportMasters::iterator t = _transport_masters.begin(); t != _transport_masters.end(); ++t) {
 			if ((*t)->name() == name) {
@@ -520,7 +520,7 @@ TransportMasterManager::set_current (std::shared_ptr<TransportMaster> c)
 	std::shared_ptr<TransportMaster> old (_current_master);
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (lock);
+		PBD::RWLock::WriterLock lm (_lock);
 		ret = set_current_locked (c);
 	}
 
@@ -538,7 +538,7 @@ TransportMasterManager::set_current (SyncSource ss)
 	std::shared_ptr<TransportMaster> old (_current_master);
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (lock);
+		PBD::RWLock::WriterLock lm (_lock);
 
 		for (TransportMasters::iterator t = _transport_masters.begin(); t != _transport_masters.end(); ++t) {
 			if ((*t)->type() == ss) {
@@ -563,7 +563,7 @@ TransportMasterManager::set_current (std::string const & str)
 	std::shared_ptr<TransportMaster> old (_current_master);
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (lock);
+		PBD::RWLock::WriterLock lm (_lock);
 
 		for (TransportMasters::iterator t = _transport_masters.begin(); t != _transport_masters.end(); ++t) {
 			if ((*t)->name() == str) {
@@ -585,7 +585,7 @@ void
 TransportMasterManager::clear (bool emit)
 {
 	{
-		Glib::Threads::RWLock::WriterLock lm (lock);
+		PBD::RWLock::WriterLock lm (_lock);
 		_current_master.reset ();
 		_transport_masters.clear ();
 	}
@@ -603,7 +603,7 @@ TransportMasterManager::set_state (XMLNode const & node, int version)
 	XMLNodeList const & children = node.children();
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (lock);
+		PBD::RWLock::WriterLock lm (_lock);
 
 		_current_master.reset ();
 #if 0
@@ -656,7 +656,7 @@ TransportMasterManager::get_state () const
 		node->set_property (X_("current"), _current_master->name());
 	}
 
-	Glib::Threads::RWLock::ReaderLock lm (lock);
+	PBD::RWLock::ReaderLock lm (_lock);
 
 	for (TransportMasters::const_iterator t = _transport_masters.begin(); t != _transport_masters.end(); ++t) {
 		node->add_child_nocopy ((*t)->get_state());
@@ -668,7 +668,7 @@ TransportMasterManager::get_state () const
 std::shared_ptr<TransportMaster>
 TransportMasterManager::master_by_type (SyncSource src) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (lock);
+	PBD::RWLock::ReaderLock lm (_lock);
 
 	for (TransportMasters::const_iterator tm = _transport_masters.begin(); tm != _transport_masters.end(); ++tm) {
 		if ((*tm)->type() == src) {
@@ -682,7 +682,7 @@ TransportMasterManager::master_by_type (SyncSource src) const
 std::shared_ptr<TransportMaster>
 TransportMasterManager::master_by_port (std::shared_ptr<Port> const &p) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (lock);
+	PBD::RWLock::ReaderLock lm (_lock);
 
 	for (TransportMasters::const_iterator tm = _transport_masters.begin(); tm != _transport_masters.end(); ++tm) {
 		if ((*tm)->port() == p) {
@@ -699,7 +699,7 @@ TransportMasterManager::engine_stopped ()
 {
 	DEBUG_TRACE (DEBUG::Slave, "engine stopped, reset all transport masters\n");
 	{
-		Glib::Threads::RWLock::ReaderLock lm (lock);
+		PBD::RWLock::ReaderLock lm (_lock);
 
 		for (TransportMasters::const_iterator tm = _transport_masters.begin(); tm != _transport_masters.end(); ++tm) {
 			(*tm)->reset (false);
@@ -715,7 +715,7 @@ TransportMasterManager::restart ()
 	if ((node = Config->transport_master_state()) != 0) {
 
 		{
-			Glib::Threads::RWLock::ReaderLock lm (lock);
+			PBD::RWLock::ReaderLock lm (_lock);
 
 			for (TransportMasters::const_iterator tm = _transport_masters.begin(); tm != _transport_masters.end(); ++tm) {
 				(*tm)->connect_port_using_state ();
