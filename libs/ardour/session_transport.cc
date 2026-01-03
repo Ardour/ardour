@@ -225,7 +225,7 @@ Session::locate (samplepos_t target_sample, bool for_loop_end, bool force, bool 
 
 		/* this is functionally what clear_clicks() does but with a tentative lock */
 
-		Glib::Threads::RWLock::WriterLock clickm (click_lock, Glib::Threads::TRY_LOCK);
+		PBD::RWLock::WriterLock clickm (_click_lock, PBD::RWLock::TryLock);
 
 		if (clickm.locked()) {
 

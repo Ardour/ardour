@@ -79,7 +79,7 @@ Session::click (samplepos_t cycle_start, samplecnt_t nframes)
 	 */
 	samplecnt_t offset = _click_io_latency;
 
-	Glib::Threads::RWLock::WriterLock clickm (click_lock, Glib::Threads::TRY_LOCK);
+	PBD::RWLock::WriterLock clickm (_click_lock, PBD::RWLock::TryLock);
 
 	/* how far have we moved since the last time the clicks got cleared */
 	const samplecnt_t click_distance = cycle_start + offset - _clicks_cleared;
@@ -159,7 +159,7 @@ Session::click (samplepos_t cycle_start, samplecnt_t nframes)
 void
 Session::run_click (samplepos_t start, samplepos_t nframes)
 {
-	Glib::Threads::RWLock::ReaderLock clickm (click_lock, Glib::Threads::TRY_LOCK);
+	PBD::RWLock::ReaderLock clickm (_click_lock, PBD::RWLock::TryLock);
 
 	/* align to output */
 	start += _click_io_latency;
@@ -349,7 +349,7 @@ Session::setup_click_sounds (int which)
 void
 Session::clear_clicks ()
 {
-	Glib::Threads::RWLock::WriterLock lm (click_lock);
+	PBD::RWLock::WriterLock lm (_click_lock);
 
 	for (Clicks::iterator i = clicks.begin(); i != clicks.end(); ++i) {
 		delete *i;
