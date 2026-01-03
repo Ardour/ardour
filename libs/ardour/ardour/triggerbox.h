@@ -34,6 +34,7 @@
 #include "pbd/pool.h"
 #include "pbd/properties.h"
 #include "pbd/ringbuffer.h"
+#include "pbd/rwlock.h"
 #include "pbd/stateful.h"
 
 #include "midi++/types.h"
@@ -1000,7 +1001,7 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 
 	DataType _data_type;
 	int32_t _order;
-	mutable Glib::Threads::RWLock trigger_lock; /* protects all_triggers */
+	mutable PBD::RWLock trigger_lock; /* protects all_triggers */
 	Triggers all_triggers;
 
 	typedef std::vector<Trigger*> PendingTriggers;

@@ -4400,7 +4400,7 @@ TriggerBox::trigger_by_id (PBD::ID check)
 void
 TriggerBox::deep_sources (std::set<std::shared_ptr<Source> >& sources)
 {
-	Glib::Threads::RWLock::ReaderLock lm (trigger_lock);
+	PBD::RWLock::ReaderLock lm (trigger_lock);
 
 	for (uint64_t n = 0; n < all_triggers.size(); ++n) {
 		std::shared_ptr<Region> r (trigger(n)->the_region ());
@@ -4413,7 +4413,7 @@ TriggerBox::deep_sources (std::set<std::shared_ptr<Source> >& sources)
 void
 TriggerBox::used_regions (std::set<std::shared_ptr<Region> >& regions)
 {
-	Glib::Threads::RWLock::ReaderLock lm (trigger_lock);
+	PBD::RWLock::ReaderLock lm (trigger_lock);
 
 	for (uint64_t n = 0; n < all_triggers.size(); ++n) {
 		std::shared_ptr<Region> r (trigger(n)->the_region ());
@@ -4619,14 +4619,14 @@ TriggerBox::unbang_trigger_at (Triggers::size_type row)
 void
 TriggerBox::drop_triggers ()
 {
-	Glib::Threads::RWLock::WriterLock lm (trigger_lock);
+	PBD::RWLock::WriterLock lm (trigger_lock);
 	all_triggers.clear ();
 }
 
 TriggerPtr
 TriggerBox::trigger (Triggers::size_type n)
 {
-	Glib::Threads::RWLock::ReaderLock lm (trigger_lock);
+	PBD::RWLock::ReaderLock lm (trigger_lock);
 
 	if (n >= all_triggers.size()) {
 		return 0;
@@ -4667,7 +4667,7 @@ TriggerBox::configure_io (ChanCount in, ChanCount out)
 void
 TriggerBox::add_trigger (TriggerPtr trigger)
 {
-	Glib::Threads::RWLock::WriterLock lm (trigger_lock);
+	PBD::RWLock::WriterLock lm (trigger_lock);
 	all_triggers.push_back (trigger);
 }
 
@@ -5511,7 +5511,7 @@ TriggerBox::get_state () const
 	XMLNode* trigger_child (new XMLNode (X_("Triggers")));
 
 	{
-		Glib::Threads::RWLock::ReaderLock lm (trigger_lock);
+		PBD::RWLock::ReaderLock lm (trigger_lock);
 		for (auto const & t : all_triggers) {
 			trigger_child->add_child_nocopy (t->get_state());
 		}
@@ -5540,7 +5540,7 @@ TriggerBox::set_state (const XMLNode& node, int version)
 	drop_triggers ();
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (trigger_lock);
+		PBD::RWLock::WriterLock lm (trigger_lock);
 
 		for (XMLNodeList::const_iterator t = tchildren.begin(); t != tchildren.end(); ++t) {
 			TriggerPtr trig;
