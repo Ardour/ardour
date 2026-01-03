@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-12-26 15:25+0100\n"
-"PO-Revision-Date: 2026-01-03 12:00+0100\n"
+"PO-Revision-Date: 2026-01-03 12:51+0100\n"
 "Last-Translator: Martin Vlk <martin@vlkk.cz>\n"
 "Language-Team: Czech <translation-team-cs@lists.sourceforge.net>\n"
 "Language: cs\n"
@@ -16563,17 +16563,19 @@ msgstr "2,0 sekundy"
 
 #: rc_option_editor.cc:3809
 msgid "Create a marker when a MIDI program change is received (and RECORDING)"
-msgstr ""
+msgstr "Vytvořit značku, když přijde změna MIDI programu (a nahrává se)"
 
 #: rc_option_editor.cc:3816
 msgid ""
 "Locate to the next matching scene marker when a MIDI program change is "
 "received (and NOT recording)"
 msgstr ""
+"Přesunout na následující odpovídající scénu když přijde změna MIDI programu \n"
+"(a nenahrává se)"
 
 #: rc_option_editor.cc:3824
 msgid "Stop transport using the current grid (if any)"
-msgstr ""
+msgstr "Zastavit transport s použitím aktuální mřížky (pokud existuje)"
 
 #: rc_option_editor.cc:3830
 msgid "Looping"
@@ -16667,11 +16669,11 @@ msgstr "ID zařízení MMC (ovládání stroje MIDI) na vstupu"
 
 #: rc_option_editor.cc:3908
 msgid "MMC Fast-wind behavior"
-msgstr ""
+msgstr "MMC přetáčení"
 
 #: rc_option_editor.cc:3912
 msgid "Off (MMC fast-forward+rewind are ignored)"
-msgstr ""
+msgstr "Vyp (MMC přetáčení se ignoruje)"
 
 #: rc_option_editor.cc:3913 varispeed_dialog.cc:33
 msgid "Varispeed"
@@ -16679,7 +16681,7 @@ msgstr "Varispeed"
 
 #: rc_option_editor.cc:3914
 msgid "Marker Locate (MMC ffwd/rewd jumps to next/prior marker)"
-msgstr ""
+msgstr "Přesun na značku (MMC přetáčení skočí na příští/předcházející značku)"
 
 #: rc_option_editor.cc:3920
 msgid "Show Transport Masters Window"
@@ -16853,7 +16855,7 @@ msgstr "Vyhledat přídavné moduly"
 
 #: rc_option_editor.cc:4069
 msgid "Scan for [New] Plugins on Application Start"
-msgstr ""
+msgstr "Najít [nové] pluginy při startu aplikace"
 
 #: rc_option_editor.cc:4075
 msgid ""
@@ -16951,13 +16953,13 @@ msgstr "Rozhraní pro přídavný modul"
 
 #: rc_option_editor.cc:4132
 msgid "Automatically open the plugin GUI when adding a new plugin"
-msgstr ""
-"Automaticky otevřít rozhraní přídavného modulu při přidání nového modulu"
+msgstr "Automaticky otevřít rozhraní pluginu při jeho přidání"
 
 #: rc_option_editor.cc:4140
 msgid ""
 "Automatically open instrument plugin GUI when adding a new MIDI Track/Bus"
 msgstr ""
+"Automaticky otevřít GUI nástrojového pluginu při přidání nové stopy / sběrnice"
 
 #: rc_option_editor.cc:4147
 msgid "Show only one plugin window at a time"
@@ -17001,6 +17003,16 @@ msgid ""
 "they are not currently displayed. This option allows one to work around the "
 "issue."
 msgstr ""
+"Uzavření okna pluginu ho obvykle pouze schová. Tím se dosáhne rychlého"
+" otevření "
+"stejného UI později.\n"
+"\n"
+"Většina UI pluginů je neaktivních a nepotřebují žádné CPU zdroje "
+"když nejsou viditelné na obrazovce.\n"
+"\n"
+"Ale některé pluginy potřebují významné CPU a GPU zdroje i když "
+"nejsou právě zobrazené. Toto nastavení umožňuje vyhnout se tomuto "
+"problému."
 
 #: rc_option_editor.cc:4169
 msgid "Mixer Strip Inline Display"
@@ -17020,7 +17032,7 @@ msgstr ""
 
 #: rc_option_editor.cc:4188
 msgid "VST3 UI"
-msgstr ""
+msgstr "VST3 UI"
 
 #: rc_option_editor.cc:4193
 msgid "Automatically show 'Micro Edit' tagged controls on the mixer-strip"
@@ -17029,29 +17041,31 @@ msgstr ""
 
 #: rc_option_editor.cc:4200
 msgid "VST3 Knob Mode"
-msgstr ""
+msgstr "Režim VST3 knoflíků"
 
 #: rc_option_editor.cc:4205
 msgid "Plugin Default"
-msgstr ""
+msgstr "Výchozí pro plugin"
 
 #: rc_option_editor.cc:4206
 msgid "Circular with jump to clicked position (discouraged)"
-msgstr ""
+msgstr "Kruhový se skokem na pozici cvaknutí (nedoporučujeme)"
 
 #: rc_option_editor.cc:4207
 msgid "Circular without jump to clicked position"
-msgstr ""
+msgstr "Kruhový bez skoku na pozici cvaknutí"
 
 #: rc_option_editor.cc:4208
 msgid "Linear: depending on vertical movement"
-msgstr ""
+msgstr "Lineární: závislý na vertikálním pohybu"
 
 #: rc_option_editor.cc:4210
 msgid ""
 "These settings apply to new VST3 plugin instances only.\n"
 "Already loaded plugins retain the previous setting."
 msgstr ""
+"Tato nastavení platí pouze pro nové instance VST3 pluginů.\n"
+"Již načtené pluginy si zachovají předchozí nastavení."
 
 #: rc_option_editor.cc:4218 rc_option_editor.cc:4220 rc_option_editor.cc:4232
 #: rc_option_editor.cc:4244 rc_option_editor.cc:4254 rc_option_editor.cc:4264
@@ -17435,11 +17449,11 @@ msgstr "Použít Pevný vstup/výstup pro nové stopy nebo sběrnice"
 
 #: rc_option_editor.cc:4707
 msgid "Hardware Patchbay"
-msgstr ""
+msgstr "Hardwarový propojovací panel"
 
 #: rc_option_editor.cc:4711
 msgid "Restore hardware to hardware connections"
-msgstr ""
+msgstr "Obnovit hardware propojení"
 
 #: rc_option_editor.cc:4718
 msgid ""
@@ -17447,6 +17461,9 @@ msgid ""
 "restored on session load. This applies to internal backends (ALSA, Portaudio/"
 "ASIO, CoreAudio) only."
 msgstr ""
+"Zapnutím se při načtení sezení obnoví "
+"hardwarová propojení. Týká se to pouze interních backendů (ALSA, Portaudio/"
+"ASIO, CoreAudio)."
 
 #: rc_option_editor.cc:4730
 msgid "Enable metronome only while recording"
@@ -17618,35 +17635,35 @@ msgstr "Povolit automatický rozbor zvuku"
 
 #: rc_option_editor.cc:4913
 msgid "Realtime Analyzer"
-msgstr ""
+msgstr "Analyzátor v reálném čase"
 
 #: rc_option_editor.cc:4917
 msgid "Limit concurrent RTA spectra"
-msgstr ""
+msgstr "Omezit souběžná RTA spektra"
 
 #: rc_option_editor.cc:4921
 msgid "4"
-msgstr ""
+msgstr "4"
 
 #: rc_option_editor.cc:4922
 msgid "8"
-msgstr ""
+msgstr "8"
 
 #: rc_option_editor.cc:4923
 msgid "12"
-msgstr ""
+msgstr "12"
 
 #: rc_option_editor.cc:4924
 msgid "16 (fast CPUs)"
-msgstr ""
+msgstr "16 (pro ryhlé CPU)"
 
 #: rc_option_editor.cc:4925
 msgid "20 (very fast CPUs)"
-msgstr ""
+msgstr "20 (pro velmi rychlé CPU)"
 
 #: rc_option_editor.cc:4926
 msgid "No Limit"
-msgstr ""
+msgstr "Bez omezení"
 
 #: rc_option_editor.cc:4936 rc_option_editor.cc:4954 rc_option_editor.cc:5005
 #: rc_option_editor.cc:5011 rc_option_editor.cc:5013 rc_option_editor.cc:5060
@@ -17747,27 +17764,27 @@ msgstr "Vyrovnávací paměť pro disk I/O"
 
 #: rc_option_editor.cc:5070
 msgid "Disk I/O threads"
-msgstr ""
+msgstr "Vlákna pro disk I/O"
 
 #: rc_option_editor.cc:5075
 msgid "all but two processor"
-msgstr ""
+msgstr "všechny kromě dvouprocesorů"
 
 #: rc_option_editor.cc:5090
 msgid "Disk I/O thread scheduling policy"
-msgstr ""
+msgstr "Politika plánování vláken pro disk I/O"
 
 #: rc_option_editor.cc:5094
 msgid "No priority"
-msgstr ""
+msgstr "Bez priority"
 
 #: rc_option_editor.cc:5095
 msgid "Realtime (FIFO)"
-msgstr ""
+msgstr "Realtime (FIFO)"
 
 #: rc_option_editor.cc:5096
 msgid "Realtime (Round Robin)"
-msgstr ""
+msgstr "Realtime (Round Robin)"
 
 #: rc_option_editor.cc:5102
 msgid "Memory Usage"
@@ -17825,6 +17842,16 @@ msgid ""
 "Note: This only affects newly added plugins and is applied to plugin on "
 "session-reload. Already automated parameters are retained."
 msgstr ""
+"Některé pluginy vystavují nerozumné množství ovládacích vstupů. Toto"
+" nastavení "
+"omezuje počet parametrů pro automatizaci, aniž by "
+"omezilo celkový počet ovladačů.\n"
+"\n"
+"Tím se zredukuje prodleva v GUI a zkrátí se nadměrně dlouhé drop-down seznamy "
+"pro pluginy s velkým množstvím ovládacích portů.\n"
+"\n"
+"Pozn.: Toto ovlivní pouze nově načítané pluginy a aplikuje se při novém"
+" načtení sezení. Již automatizované parametry se zachovají."
 
 #: rc_option_editor.cc:5155 rc_option_editor.cc:5156
 msgid "Video"
@@ -17974,6 +18001,8 @@ msgid ""
 "Auto-input: when enabled, track input monitoring automatically follows "
 "transport state"
 msgstr ""
+"Auto-input: při zapnutí bude monitoring vstupu stopy automaticky následovat "
+"ukazatel polohy"
 
 #: recorder_ui.cc:385
 msgid "Reset Input Peak Hold"
@@ -18065,27 +18094,27 @@ msgstr "zkušební výstup této oblasti"
 
 #: region_editor.cc:127
 msgid "Sync point (relative to region)"
-msgstr ""
+msgstr "Bod synchronizace (relativně k oblasti)"
 
 #: region_editor.cc:129
 msgid "Sync point (absolute)"
-msgstr ""
+msgstr "Bod synchronizace (absolutní)"
 
 #: region_editor.cc:131
 msgid "File start"
-msgstr ""
+msgstr "Začátek souboru"
 
 #: region_editor.cc:133
 msgid "Region Effects"
-msgstr ""
+msgstr "Efekty oblasti"
 
 #: region_editor.cc:136
 msgid "Region Tempo (bpm)"
-msgstr ""
+msgstr "Tempo oblasti (bpm)"
 
 #: region_editor.cc:138
 msgid "Region Meter"
-msgstr ""
+msgstr "Rytmus oblasti"
 
 #: region_editor.cc:141
 msgid "Sources:"
@@ -18097,7 +18126,7 @@ msgstr "Zdroj:"
 
 #: region_editor.cc:332 region_editor.cc:340
 msgid "undefined"
-msgstr ""
+msgstr "nedefinováno"
 
 #: region_editor.cc:407
 msgid "change region start position"
@@ -18117,29 +18146,31 @@ msgstr "Změnit bod zapadnutí oblasti"
 
 #: region_editor.cc:775
 msgid "Automation Enable"
-msgstr ""
+msgstr "Zapnout automatizaci"
 
 #: region_editor.cc:776
 msgid "Clear All Automation"
-msgstr ""
+msgstr "Vymazat veškerou automatizaci"
 
 #: region_editor.cc:905
 msgid "Clear region fx automation"
-msgstr ""
+msgstr "Vymazat automatizaci fx oblasti"
 
 #: region_editor.cc:947
 msgid "Failed to load Region Effect Plugin"
-msgstr ""
+msgstr "Selhalo načtení pluginu pro efekty oblasti"
 
 #: region_editor.cc:1150
 msgid ""
 "<b>%1</b>\n"
 "Double-click to show generic GUI."
 msgstr ""
+"<b>%1</b>\n"
+"Dvojklikem zobrazíte obecné GUI."
 
 #: region_editor_window.cc:28
 msgid "Region Properties"
-msgstr ""
+msgstr "Vlastnosti oblasti"
 
 #: region_layering_order_editor.cc:44
 msgid "RegionLayeringOrderEditor"
@@ -18163,7 +18194,7 @@ msgstr "(CHYBÍ) "
 
 #: region_ui_settings.cc:161
 msgid "Could not save region GUI settings to %1"
-msgstr ""
+msgstr "Nelze uložit nastavení GUI oblasti do %1"
 
 #: region_view.cc:338
 msgid "SilenceText"
@@ -18301,11 +18332,11 @@ msgstr "Rozdělit oblasti (rytmická páska)"
 
 #: route_comment_editor.cc:111
 msgid "Comment Editor"
-msgstr ""
+msgstr "Úpravy komentáře"
 
 #: route_comment_editor.cc:122
 msgid "Show this comment on next session load"
-msgstr ""
+msgstr "Zobrazit tento komentář při příštím načtení sezení"
 
 #: route_group_dialog.cc:46
 msgid "Track/bus Group"
@@ -18675,6 +18706,8 @@ msgid ""
 "The name includes special characters (<>:\"/\\|?*) which is discouraged in "
 "track and bus names, due to filename restrictions on some systems.\n"
 msgstr ""
+"Název obsahuje speciální znaky (<>:\"/\\|?*) což se v názvech stop a sběrnic "
+"nedoporučuje, kvůli omezením názvů souborů na některých systémech.\n"
 
 #: route_ui.cc:1770
 msgid "Rename Track"
@@ -18788,43 +18821,43 @@ msgstr "Nový název pro seznam skladeb:"
 
 #: rta_window.cc:47 rta_window.cc:242 rta_window.cc:247
 msgid "Realtime Perceptual Analyzer"
-msgstr ""
+msgstr "Analyzátor vnímání v reálném čase"
 
 #: rta_window.cc:77
 msgid "Rapid"
-msgstr ""
+msgstr "Rychlý"
 
 #: rta_window.cc:79
 msgid "Moderate"
-msgstr ""
+msgstr "Umírněný"
 
 #: rta_window.cc:81
 msgid "Noise Measurement"
-msgstr ""
+msgstr "Měření hluku"
 
 #: rta_window.cc:93
 msgid "Bark"
-msgstr ""
+msgstr "Bark"
 
 #: rta_window.cc:94
 msgid "Medium"
-msgstr ""
+msgstr "Střední"
 
 #: rta_window.cc:95
 msgid "High"
-msgstr ""
+msgstr "Vysoký"
 
 #: rta_window.cc:104
 msgid "Speed:"
-msgstr ""
+msgstr "Rychlost:"
 
 #: rta_window.cc:106
 msgid "Warp:"
-msgstr ""
+msgstr "Deformace:"
 
 #: rta_window.cc:123
 msgid "Clear current set of analyzed signals (except for the master bus)."
-msgstr ""
+msgstr "Vyčistit současnou sadu analyzovaných signálů (kromě master sběrnice)."
 
 #: rta_window.cc:124
 msgid ""
