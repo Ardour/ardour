@@ -24,7 +24,7 @@
 
 #include <map>
 
-#include <glibmm/threads.h>
+#include "pbd/rwlock.h"
 
 #include "evoral/Event.h"
 #include "evoral/EventSink.h"
@@ -134,16 +134,16 @@ class LIBARDOUR_API RTMidiBufferBase : public Evoral::EventSink<TimeType>
 	uint32_t _pool_capacity;
 	uint8_t* _pool;
 
-	Glib::Threads::RWLock _lock;
+	PBD::RWLock _lock;
 
   public:
 	class WriteProtectRender {
           public:
-		WriteProtectRender (RTMidiBufferBase& rtm) : lm (rtm._lock, Glib::Threads::NOT_LOCK) {}
+		WriteProtectRender (RTMidiBufferBase& rtm) : lm (rtm._lock, PBD::RWLock::NotLock) {}
 		void acquire () { lm.acquire(); }
 
           private:
-		Glib::Threads::RWLock::WriterLock lm;
+		PBD::RWLock::WriterLock lm;
 	};
 };
 

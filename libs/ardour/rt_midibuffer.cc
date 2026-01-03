@@ -258,7 +258,7 @@ template<class TimeType, class DistanceType>
 void
 RTMidiBufferBase<TimeType,DistanceType>::track (MidiStateTracker& mst, TimeType start, TimeType end)
 {
-	Glib::Threads::RWLock::ReaderLock lm (_lock, Glib::Threads::TRY_LOCK);
+	PBD::RWLock::ReaderLock lm (_lock, PBD::RWLock::TryLock);
 
 	if (!lm.locked()) {
 		return;
@@ -338,7 +338,7 @@ template<class TimeType, class DistanceType>
 uint32_t
 RTMidiBufferBase<TimeType,DistanceType>::read (MidiBuffer& dst, TimeType start, TimeType  end, MidiNoteTracker& tracker, DistanceType offset)
 {
-	Glib::Threads::RWLock::ReaderLock lm (_lock, Glib::Threads::TRY_LOCK);
+	PBD::RWLock::ReaderLock lm (_lock, PBD::RWLock::TryLock);
 
 	if (!lm.locked()) {
 		return 0;
