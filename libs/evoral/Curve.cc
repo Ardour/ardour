@@ -182,7 +182,7 @@ Curve::solve () const
 bool
 Curve::rt_safe_get_vector (Temporal::timepos_t const & x0, Temporal::timepos_t const & x1, float *vec, int32_t veclen) const
 {
-	Glib::Threads::RWLock::ReaderLock lm(_list.lock(), Glib::Threads::TRY_LOCK);
+	PBD::RWLock::ReaderLock lm (_list.lock(), PBD::RWLock::TryLock);
 
 	if (!lm.locked()) {
 		return false;
@@ -195,7 +195,7 @@ Curve::rt_safe_get_vector (Temporal::timepos_t const & x0, Temporal::timepos_t c
 void
 Curve::get_vector (Temporal::timepos_t const & x0, Temporal::timepos_t const & x1, float *vec, int32_t veclen) const
 {
-	Glib::Threads::RWLock::ReaderLock lm(_list.lock());
+	PBD::RWLock::ReaderLock lm (_list.lock());
 	_get_vector (x0, x1, vec, veclen);
 }
 

@@ -207,7 +207,7 @@ AutomationList::maybe_signal_changed ()
 AutoState
 AutomationList::automation_state() const
 {
-	Glib::Threads::RWLock::ReaderLock lm (Evoral::ControlList::_lock);
+	PBD::RWLock::ReaderLock lm (Evoral::ControlList::_lock);
 	return _state;
 }
 
@@ -215,7 +215,7 @@ void
 AutomationList::set_automation_state (AutoState s)
 {
 	{
-		Glib::Threads::RWLock::ReaderLock lm (Evoral::ControlList::_lock);
+		PBD::RWLock::ReaderLock lm (Evoral::ControlList::_lock);
 
 		if (s == _state) {
 			return;
@@ -370,7 +370,7 @@ AutomationList::serialize_events (bool need_lock) const
 	XMLNode* node = new XMLNode (X_("events"));
 	stringstream str;
 
-	Glib::Threads::RWLock::ReaderLock lm (Evoral::ControlList::_lock, Glib::Threads::NOT_LOCK);
+	PBD::RWLock::ReaderLock lm (Evoral::ControlList::_lock, PBD::RWLock::NotLock);
 	if (need_lock) {
 		lm.acquire ();
 	}
