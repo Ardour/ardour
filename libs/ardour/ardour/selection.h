@@ -23,6 +23,7 @@
 #include <set>
 #include <vector>
 
+#include "pbd/rwlock.h"
 #include "pbd/stateful.h"
 
 #include "ardour/presentation_info.h"
@@ -85,8 +86,8 @@ class LIBARDOUR_API CoreSelection : public PBD::Stateful {
 	void remove_stripable_by_id (PBD::ID const &);
 
   private:
-	mutable Glib::Threads::RWLock _lock;
-	std::atomic<int>             _selection_order;
+	mutable PBD::RWLock _lock;
+	std::atomic<int>    _selection_order;
 
 	Session& session;
 

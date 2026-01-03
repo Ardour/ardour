@@ -288,7 +288,7 @@ CoreSelection::set (StripableList& sl, std::shared_ptr<AutomationControl> c, std
 	bool changed = false;
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 
 		removed.reserve (_stripables.size());
 
@@ -331,7 +331,7 @@ CoreSelection::add (StripableList& sl, std::shared_ptr<AutomationControl> c)
 	bool changed = false;
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 
 		for (auto & s : sl) {
 			SelectedStripable ss (s, c, _selection_order.fetch_add (1));
@@ -361,7 +361,7 @@ CoreSelection::remove (StripableList & sl, std::shared_ptr<AutomationControl> c)
 	bool changed = false;
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 
 		for (auto const& s : sl) {
 			SelectedStripable ss (s, c, 0);
@@ -392,7 +392,7 @@ CoreSelection::clear_stripables ()
 
 	DEBUG_TRACE (DEBUG::Selection, "clearing s/c selection\n");
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 
 		if (!_stripables.empty()) {
 
@@ -429,7 +429,7 @@ CoreSelection::clear_stripables ()
 std::shared_ptr<Stripable>
 CoreSelection::first_selected_stripable () const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
+	PBD::RWLock::ReaderLock lm (_lock);
   return _first_selected_stripable.lock();
 }
 
@@ -440,7 +440,7 @@ CoreSelection::selected (std::shared_ptr<const Stripable> s) const
 		return false;
 	}
 
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
+	PBD::RWLock::ReaderLock lm (_lock);
 
 	for (SelectedStripables::const_iterator x = _stripables.begin(); x != _stripables.end(); ++x) {
 
@@ -468,7 +468,7 @@ CoreSelection::selected (std::shared_ptr<const AutomationControl> c) const
 		return false;
 	}
 
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
+	PBD::RWLock::ReaderLock lm (_lock);
 
 	for (SelectedStripables::const_iterator x = _stripables.begin(); x != _stripables.end(); ++x) {
 		if ((*x).controllable == c->id()) {
@@ -495,7 +495,7 @@ struct StripableControllerSort {
 void
 CoreSelection::get_stripables (StripableAutomationControls& sc) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
+	PBD::RWLock::ReaderLock lm (_lock);
 
 	for (SelectedStripables::const_iterator x = _stripables.begin(); x != _stripables.end(); ++x) {
 
@@ -522,7 +522,7 @@ CoreSelection::get_stripables (StripableAutomationControls& sc) const
 void
 CoreSelection::remove_control_by_id (PBD::ID const & id)
 {
-	Glib::Threads::RWLock::WriterLock lm (_lock);
+	PBD::RWLock::WriterLock lm (_lock);
 
 	for (SelectedStripables::iterator x = _stripables.begin(); x != _stripables.end(); ++x) {
 		if ((*x).controllable == id) {
@@ -535,7 +535,7 @@ CoreSelection::remove_control_by_id (PBD::ID const & id)
 void
 CoreSelection::remove_stripable_by_id (PBD::ID const & id)
 {
-	Glib::Threads::RWLock::WriterLock lm (_lock);
+	PBD::RWLock::WriterLock lm (_lock);
 
 	for (SelectedStripables::iterator x = _stripables.begin(); x != _stripables.end(); ) {
 		if ((*x).stripable == id) {
@@ -560,7 +560,7 @@ CoreSelection::get_state () const
 {
 	XMLNode* node = new XMLNode (X_("Selection"));
 
-	Glib::Threads::RWLock::WriterLock lm (_lock);
+	PBD::RWLock::WriterLock lm (_lock);
 
 	for (SelectedStripables::const_iterator x = _stripables.begin(); x != _stripables.end(); ++x) {
 		XMLNode* child = new XMLNode (X_("StripableAutomationControl"));
@@ -577,7 +577,7 @@ int
 CoreSelection::set_state (const XMLNode& node, int /* version */)
 {
 	XMLNodeList children (node.children());
-	Glib::Threads::RWLock::WriterLock lm (_lock);
+	PBD::RWLock::WriterLock lm (_lock);
 
 	_stripables.clear ();
 
@@ -614,7 +614,7 @@ CoreSelection::set_state (const XMLNode& node, int /* version */)
 uint32_t
 CoreSelection::selected () const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
+	PBD::RWLock::ReaderLock lm (_lock);
 	return _stripables.size();
 }
 
