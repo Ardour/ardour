@@ -71,7 +71,7 @@ MIDISceneChanger::gather (const Locations::LocationList& locations)
 {
 	std::shared_ptr<SceneChange> sc;
 
-	Glib::Threads::RWLock::WriterLock lm (scene_lock);
+	PBD::RWLock::WriterLock lm (scene_lock);
 
 	scenes.clear ();
 
@@ -174,7 +174,7 @@ MIDISceneChanger::run (samplepos_t start, samplepos_t end)
 		return;
 	}
 
-	Glib::Threads::RWLock::ReaderLock lm (scene_lock, Glib::Threads::TRY_LOCK);
+	PBD::RWLock::ReaderLock lm (scene_lock, PBD::RWLock::TryLock);
 
 	if (!lm.locked()) {
 		return;
@@ -203,7 +203,7 @@ MIDISceneChanger::locate (samplepos_t pos)
 	std::shared_ptr<MIDISceneChange> msc;
 
 	{
-		Glib::Threads::RWLock::ReaderLock lm (scene_lock);
+		PBD::RWLock::ReaderLock lm (scene_lock);
 
 		if (scenes.empty()) {
 			return;
