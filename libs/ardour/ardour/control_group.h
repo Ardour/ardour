@@ -25,6 +25,7 @@
 #include <glibmm/threads.h>
 
 #include "pbd/controllable.h"
+#include "pbd/rwlock.h"
 
 #include "evoral/Parameter.h"
 
@@ -84,11 +85,11 @@ class LIBARDOUR_API ControlGroup : public std::enable_shared_from_this<ControlGr
 	}
 
 	typedef std::map<PBD::ID,std::shared_ptr<AutomationControl> > ControlMap;
-	ControlMap::size_type size() const { Glib::Threads::RWLock::ReaderLock lm (controls_lock); return _controls.size(); }
+	ControlMap::size_type size() const { PBD::RWLock::ReaderLock lm (controls_lock); return _controls.size(); }
 
   protected:
 	Evoral::Parameter _parameter;
-	mutable Glib::Threads::RWLock controls_lock;
+	mutable PBD::RWLock controls_lock;
 	ControlMap _controls;
 	bool _active;
 	Mode _mode;

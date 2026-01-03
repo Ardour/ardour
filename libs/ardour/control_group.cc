@@ -69,7 +69,7 @@ ControlGroup::clear (bool pop)
 
 	std::vector<std::shared_ptr<AutomationControl> > controls;
 	{
-		Glib::Threads::RWLock::WriterLock lm (controls_lock);
+		PBD::RWLock::WriterLock lm (controls_lock);
 		for (ControlMap::const_iterator i = _controls.begin(); i != _controls.end(); ++i) {
 			controls.push_back (i->second);
 		}
@@ -92,7 +92,7 @@ ControlGroup::controls () const
 	AutomationControlList c;
 
 	if (_active) {
-		Glib::Threads::RWLock::WriterLock lm (controls_lock);
+		PBD::RWLock::WriterLock lm (controls_lock);
 		for (ControlMap::const_iterator i = _controls.begin(); i != _controls.end(); ++i) {
 			c.push_back (i->second);
 		}
@@ -118,7 +118,7 @@ ControlGroup::remove_control (std::shared_ptr<AutomationControl> ac, bool pop)
 	int erased;
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (controls_lock);
+		PBD::RWLock::WriterLock lm (controls_lock);
 		erased = _controls.erase (ac->id());
 	}
 
@@ -142,7 +142,7 @@ ControlGroup::add_control (std::shared_ptr<AutomationControl> ac, bool push)
 			return -1;
 		}
 		/* allow plugin-automation - first control sets Evoral::parameter */
-		Glib::Threads::RWLock::ReaderLock lm (controls_lock);
+		PBD::RWLock::ReaderLock lm (controls_lock);
 		if (!_controls.empty () && _controls.begin()->second->parameter() != ac->parameter()) {
 			return -1;
 		}
@@ -151,7 +151,7 @@ ControlGroup::add_control (std::shared_ptr<AutomationControl> ac, bool push)
 	std::pair<ControlMap::iterator,bool> res;
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (controls_lock);
+		PBD::RWLock::WriterLock lm (controls_lock);
 		res = _controls.insert (std::make_pair (ac->id(), ac));
 	}
 
@@ -177,7 +177,7 @@ ControlGroup::add_control (std::shared_ptr<AutomationControl> ac, bool push)
 void
 ControlGroup::pre_realtime_queue_stuff (double val)
 {
-	Glib::Threads::RWLock::ReaderLock lm (controls_lock);
+	PBD::RWLock::ReaderLock lm (controls_lock);
 
 	for (ControlMap::iterator c = _controls.begin(); c != _controls.end(); ++c) {
 		c->second->do_pre_realtime_queue_stuff (val);
@@ -195,7 +195,7 @@ ControlGroup::set_group_value (std::shared_ptr<AutomationControl> control, doubl
 
 	/* now propagate across the group */
 
-	Glib::Threads::RWLock::ReaderLock lm (controls_lock);
+	PBD::RWLock::ReaderLock lm (controls_lock);
 
 	if (_mode & Relative) {
 
@@ -319,7 +319,7 @@ GainControlGroup::get_max_factor (gain_t factor)
 void
 GainControlGroup::set_group_value (std::shared_ptr<AutomationControl> control, double val)
 {
-	Glib::Threads::RWLock::ReaderLock lm (controls_lock);
+	PBD::RWLock::ReaderLock lm (controls_lock);
 
 	if (_mode & Relative) {
 
