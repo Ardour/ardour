@@ -408,7 +408,7 @@ MidiTrack::no_roll_unlocked (pframes_t nframes, samplepos_t start_sample, sample
 void
 MidiTrack::realtime_locate (bool for_loop_end)
 {
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
+	PBD::RWLock::ReaderLock lm (_processor_lock, PBD::RWLock::TryLock);
 
 	if (!lm.locked ()) {
 		return;
@@ -567,7 +567,7 @@ MidiTrack::export_stuff (BufferSet&                   buffers,
 		return -1;
 	}
 
-	Glib::Threads::RWLock::ReaderLock rlock (_processor_lock);
+	PBD::RWLock::ReaderLock rlock (_processor_lock);
 
 	std::shared_ptr<MidiPlaylist> mpl = _disk_writer->midi_playlist();
 	if (!mpl) {

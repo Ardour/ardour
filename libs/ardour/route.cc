@@ -323,7 +323,7 @@ Route::init ()
 	{
 		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		{
-			Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+			PBD::RWLock::WriterLock lm (_processor_lock);
 			_processors.push_back (_amp);
 		}
 		if (!_session.loading()) {
@@ -347,7 +347,7 @@ Route::~Route ()
 	   be half-destroyed by now
 	*/
 
-	Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+	PBD::RWLock::WriterLock lm (_processor_lock);
 	for (auto & proc : _processors) {
 		proc->drop_references ();
 	}
@@ -392,7 +392,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	/* Caller must hold process lock */
 	assert (!AudioEngine::instance()->process_lock().trylock());
 
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
+	PBD::RWLock::ReaderLock lm (_processor_lock, PBD::RWLock::TryLock);
 	if (!lm.locked()) {
 		// can this actually happen?
 		// Places that need a WriterLock on (_processor_lock) must also take the process-lock.
@@ -710,7 +710,7 @@ Route::bounce_get_output_streams (ChanCount &cc, std::shared_ptr<Processor> endp
 		return cc;
 	}
 
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 
 	for (auto & proc : _processors) {
 		if (!include_endpoint && (proc) == endpoint) {
@@ -741,7 +741,7 @@ void
 Route::monitor_run (samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes)
 {
 	assert (is_monitor());
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
+	PBD::RWLock::ReaderLock lm (_processor_lock, PBD::RWLock::TryLock);
 	run_route (start_sample, end_sample, nframes, true, false);
 }
 
@@ -861,7 +861,7 @@ dump_processors(const string& name, const list<std::shared_ptr<Processor> >& pro
 std::shared_ptr<Processor>
 Route::before_processor_for_placement (Placement p)
 {
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 
 	ProcessorList::iterator loc;
 
@@ -886,7 +886,7 @@ Route::before_processor_for_index (int index)
 		return std::shared_ptr<Processor> ();
 	}
 
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 
 	ProcessorList::iterator i = _processors.begin ();
 	int j = 0;
@@ -1157,7 +1157,7 @@ Route::add_processors (const ProcessorList& others, std::shared_ptr<Processor> b
 
 	{
 		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
-		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+		PBD::RWLock::WriterLock lm (_processor_lock);
 		ProcessorState pstate (this);
 
 		for (auto const & other : others) {
@@ -1280,7 +1280,7 @@ Route::placement_range(Placement p, ProcessorList::iterator& start, ProcessorLis
 void
 Route::disable_processors (Placement p)
 {
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 
 	ProcessorList::iterator start, end;
 	placement_range(p, start, end);
@@ -1297,7 +1297,7 @@ Route::disable_processors (Placement p)
 void
 Route::disable_processors ()
 {
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 
 	for (auto & proc : _processors) {
 		proc->enable (false);
@@ -1312,7 +1312,7 @@ Route::disable_processors ()
 void
 Route::disable_plugins (Placement p)
 {
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 
 	ProcessorList::iterator start, end;
 	placement_range(p, start, end);
@@ -1331,7 +1331,7 @@ Route::disable_plugins (Placement p)
 void
 Route::disable_plugins ()
 {
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 
 	for (auto & proc : _processors) {
 		if (std::dynamic_pointer_cast<PluginInsert> (proc)) {
@@ -1346,7 +1346,7 @@ Route::disable_plugins ()
 void
 Route::ab_plugins (bool forward)
 {
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 
 	if (forward) {
 
@@ -1414,7 +1414,7 @@ Route::clear_processors (Placement p)
 	ProcessorList old_list = _processors;
 	{
 		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
-		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+		PBD::RWLock::WriterLock lm (_processor_lock);
 		ProcessorList new_list;
 		ProcessorStreams err;
 		bool seen_amp = false;
@@ -1524,7 +1524,7 @@ Route::remove_processor (std::shared_ptr<Processor> processor, ProcessorStreams*
 		/* Caller must hold process lock */
 		assert (!AudioEngine::instance()->process_lock().trylock());
 
-		Glib::Threads::RWLock::WriterLock lm (_processor_lock); // XXX deadlock after export
+		PBD::RWLock::WriterLock lm (_processor_lock); // XXX deadlock after export
 
 		ProcessorState pstate (this);
 
@@ -1627,7 +1627,7 @@ Route::replace_processor (std::shared_ptr<Processor> old, std::shared_ptr<Proces
 
 	{
 		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
-		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+		PBD::RWLock::WriterLock lm (_processor_lock);
 		ProcessorState pstate (this);
 
 		assert (find (_processors.begin(), _processors.end(), sub) == _processors.end ());
@@ -1706,7 +1706,7 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 
 	{
 		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
-		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+		PBD::RWLock::WriterLock lm (_processor_lock);
 		ProcessorState pstate (this);
 
 		ProcessorList::iterator i;
@@ -1825,7 +1825,7 @@ Route::configure_processors (ProcessorStreams* err)
 #endif
 
 	if (!_in_configure_processors) {
-		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+		PBD::RWLock::WriterLock lm (_processor_lock);
 		return configure_processors_unlocked (err, &lm);
 	}
 
@@ -1841,7 +1841,7 @@ Route::input_streams () const
 list<pair<ChanCount, ChanCount> >
 Route::try_configure_processors (ChanCount in, ProcessorStreams* err)
 {
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 
 	return try_configure_processors_unlocked (in, err);
 }
@@ -1970,7 +1970,7 @@ Route::try_configure_processors_unlocked (ChanCount in, ProcessorStreams* err)
  *  Return 0 on success, otherwise configuration is impossible.
  */
 int
-Route::configure_processors_unlocked (ProcessorStreams* err, Glib::Threads::RWLock::WriterLock* lm)
+Route::configure_processors_unlocked (ProcessorStreams* err, PBD::RWLock::WriterLock* lm)
 {
 #ifndef PLATFORM_WINDOWS
 	assert (!AudioEngine::instance()->process_lock().trylock());
@@ -2018,7 +2018,7 @@ Route::configure_processors_unlocked (ProcessorStreams* err, Glib::Threads::RWLo
 	lm->release ();
 
 	// TODO check for a potential ReaderLock after ReaderLock ??
-	Glib::Threads::RWLock::ReaderLock lr (_processor_lock);
+	PBD::RWLock::ReaderLock lr (_processor_lock);
 
 	list< pair<ChanCount,ChanCount> >::iterator c = configuration.begin();
 	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p, ++c) {
@@ -2092,7 +2092,7 @@ Route::configure_processors_unlocked (ProcessorStreams* err, Glib::Threads::RWLo
 void
 Route::all_visible_processors_active (bool state)
 {
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 
 	if (_processors.empty()) {
 		return;
@@ -2121,7 +2121,7 @@ Route::processors_reorder_needs_configure (const ProcessorList& new_order)
 	/* check if re-order requires re-configuration of any processors
 	 * -> compare channel configuration for all processors
 	 */
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 	ChanCount c = input_streams ();
 
 	for (auto const & nproc : new_order) {
@@ -2273,7 +2273,7 @@ Route::apply_processor_order (const ProcessorList& new_order)
 void
 Route::move_instrument_down (bool postfader)
 {
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 	ProcessorList new_order;
 	std::shared_ptr<Processor> instrument;
 	for (auto & proc : _processors) {
@@ -2308,7 +2308,7 @@ Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err
 	while (_pending_process_reorder.load ()) {
 		if (!AudioEngine::instance()->running()) {
 			DEBUG_TRACE (DEBUG::Processors, "offline apply queued processor re-order.\n");
-			Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+			PBD::RWLock::WriterLock lm (_processor_lock);
 
 			_pending_process_reorder.store (0);
 			_pending_listen_change.store (0);
@@ -2332,7 +2332,7 @@ Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err
 	if (processors_reorder_needs_configure (new_order) || !AudioEngine::instance()->running()) {
 
 		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
-		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+		PBD::RWLock::WriterLock lm (_processor_lock);
 		ProcessorState pstate (this);
 
 		apply_processor_order (new_order);
@@ -2356,7 +2356,7 @@ Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err
 
 	} else {
 		DEBUG_TRACE (DEBUG::Processors, "Queue clickless processor re-order.\n");
-		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+		PBD::RWLock::ReaderLock lm (_processor_lock);
 
 		// _pending_processor_order is protected by _processor_lock
 		_pending_processor_order = new_order;
@@ -2383,7 +2383,7 @@ Route::add_remove_sidechain (std::shared_ptr<Processor> proc, bool add)
 	}
 
 	{
-		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+		PBD::RWLock::ReaderLock lm (_processor_lock);
 		ProcessorList::iterator i = find (_processors.begin(), _processors.end(), proc);
 		if (i == _processors.end ()) {
 			return false;
@@ -2408,7 +2408,7 @@ Route::add_remove_sidechain (std::shared_ptr<Processor> proc, bool add)
 		}
 
 		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ()); // take before Writerlock to avoid deadlock
-		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+		PBD::RWLock::WriterLock lm (_processor_lock);
 
 		list<pair<ChanCount, ChanCount> > c = try_configure_processors_unlocked (n_inputs (), 0);
 
@@ -2451,7 +2451,7 @@ Route::plugin_preset_output (std::shared_ptr<Processor> proc, ChanCount outs)
 	}
 
 	{
-		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+		PBD::RWLock::ReaderLock lm (_processor_lock);
 		ProcessorList::iterator i = find (_processors.begin(), _processors.end(), proc);
 		if (i == _processors.end ()) {
 			return false;
@@ -2460,7 +2460,7 @@ Route::plugin_preset_output (std::shared_ptr<Processor> proc, ChanCount outs)
 
 	{
 		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
-		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+		PBD::RWLock::WriterLock lm (_processor_lock);
 
 		const ChanCount& old (pi->preset_out ());
 		if (!pi->set_preset_out (outs)) {
@@ -2500,7 +2500,7 @@ Route::customize_plugin_insert (std::shared_ptr<Processor> proc, uint32_t count,
 	}
 
 	{
-		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+		PBD::RWLock::ReaderLock lm (_processor_lock);
 		ProcessorList::iterator i = find (_processors.begin(), _processors.end(), proc);
 		if (i == _processors.end ()) {
 			return false;
@@ -2509,7 +2509,7 @@ Route::customize_plugin_insert (std::shared_ptr<Processor> proc, uint32_t count,
 
 	{
 		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
-		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+		PBD::RWLock::WriterLock lm (_processor_lock);
 
 		bool      old_cust  = pi->custom_cfg ();
 		uint32_t  old_cnt   = pi->get_count ();
@@ -2551,7 +2551,7 @@ Route::set_strict_io (const bool enable)
 
 	if (_strict_io != enable) {
 		_strict_io = enable;
-		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+		PBD::RWLock::ReaderLock lm (_processor_lock);
 		for (auto & proc : _processors) {
 			std::shared_ptr<PluginInsert> pi;
 			if ((pi = std::dynamic_pointer_cast<PluginInsert>(proc)) != 0) {
@@ -2670,7 +2670,7 @@ Route::state (bool save_template) const
 	}
 
 	{
-		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+		PBD::RWLock::ReaderLock lm (_processor_lock);
 		for (auto const & p : _processors) {
 			if (p == _delayline) {
 				continue;
@@ -2874,7 +2874,7 @@ Route::set_state (const XMLNode& node, int version)
 	std::string id_string;
 	if (node.get_property (X_("processor-after-last-custom-meter"), id_string)) {
 		PBD::ID id (id_string);
-		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+		PBD::RWLock::ReaderLock lm (_processor_lock);
 		ProcessorList::const_iterator i = _processors.begin ();
 		while (i != _processors.end() && (*i)->id() != id) {
 			++i;
@@ -3368,7 +3368,7 @@ Route::import_state (const XMLNode& node, bool use_pbd_ids, bool processor_only)
 	/* now remove any plugins not present in the list.. */
 	ProcessorList to_remove;
 	{
-		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+		PBD::RWLock::ReaderLock lm (_processor_lock);
 		for (auto const& p : _processors) {
 			if (is_internal_processor (p)) {
 				continue;
@@ -3529,7 +3529,7 @@ Route::set_processor_state (const XMLNode& node, int version)
 	ProcessorList old_list = _processors; // keep a copy
 	{
 		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
-		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+		PBD::RWLock::WriterLock lm (_processor_lock);
 		/* re-assign _processors w/o process-lock.
 		 * if there's an IO-processor present in _processors but
 		 * not in new_order, it will be deleted and ~IO takes
@@ -3692,7 +3692,7 @@ Route::set_processor_state (XMLNode const& node, int version, XMLProperty const*
 int
 Route::silence (pframes_t nframes)
 {
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
+	PBD::RWLock::ReaderLock lm (_processor_lock, PBD::RWLock::TryLock);
 	if (!lm.locked()) {
 		return 1;
 	}
@@ -3742,7 +3742,7 @@ Route::add_internal_return ()
 void
 Route::add_send_to_internal_return (InternalSend* send)
 {
-	Glib::Threads::RWLock::ReaderLock rm (_processor_lock);
+	PBD::RWLock::ReaderLock rm (_processor_lock);
 	for (auto & proc : _processors) {
 		std::shared_ptr<InternalReturn> d = std::dynamic_pointer_cast<InternalReturn>(proc);
 
@@ -3755,7 +3755,7 @@ Route::add_send_to_internal_return (InternalSend* send)
 void
 Route::remove_send_from_internal_return (InternalSend* send)
 {
-	Glib::Threads::RWLock::ReaderLock rm (_processor_lock);
+	PBD::RWLock::ReaderLock rm (_processor_lock);
 	for (auto & proc : _processors) {
 		std::shared_ptr<InternalReturn> d = std::dynamic_pointer_cast<InternalReturn>(proc);
 
@@ -3796,7 +3796,7 @@ Route::add_aux_send (std::shared_ptr<Route> route, std::shared_ptr<Processor> be
 	assert (route != _session.monitor_out ());
 
 	{
-		Glib::Threads::RWLock::ReaderLock rm (_processor_lock);
+		PBD::RWLock::ReaderLock rm (_processor_lock);
 		for (auto & proc : _processors) {
 			std::shared_ptr<InternalSend> d = std::dynamic_pointer_cast<InternalSend> (proc);
 
@@ -3837,7 +3837,7 @@ Route::add_foldback_send (std::shared_ptr<Route> route, bool post_fader)
 	}
 
 	{
-		Glib::Threads::RWLock::ReaderLock rm (_processor_lock);
+		PBD::RWLock::ReaderLock rm (_processor_lock);
 		for (auto & proc : _processors) {
 
 			std::shared_ptr<InternalSend> d = std::dynamic_pointer_cast<InternalSend> (proc);
@@ -3900,7 +3900,7 @@ Route::all_inputs () const
 	IOVector ios;
 	ios.push_back (_input);
 
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 	for (auto & proc : _processors) {
 		std::shared_ptr<IOProcessor> iop = std::dynamic_pointer_cast<IOProcessor> (proc);
 		std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert> (proc);
@@ -3921,7 +3921,7 @@ Route::all_outputs () const
 {
 	IOVector ios;
 	// _output is included via Delivery
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 	for (auto & proc : _processors) {
 		std::shared_ptr<IOProcessor> iop = std::dynamic_pointer_cast<IOProcessor>(proc);
 		if (iop != 0 && iop->output()) {
@@ -3949,7 +3949,7 @@ Route::direct_feeds_according_to_reality (std::shared_ptr<GraphNode> node, bool*
 		return true;
 	}
 
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 
 	/* our surround send always feeds the surround master */
 	if (other->is_surround_master () && _surround_send) {
@@ -4069,7 +4069,7 @@ Route::output_effectively_connected_real () const
 void
 Route::non_realtime_transport_stop (samplepos_t now, bool flush)
 {
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 
 	Automatable::non_realtime_transport_stop (now, flush);
 
@@ -4085,7 +4085,7 @@ Route::non_realtime_transport_stop (samplepos_t now, bool flush)
 void
 Route::realtime_handle_transport_stopped ()
 {
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 
 	/* currently only by Plugin, queue note-off events */
 	for (auto & proc : _processors) {
@@ -4290,7 +4290,7 @@ Route::flush_processor_buffers_locked (samplecnt_t nframes)
 void
 Route::flush_processors ()
 {
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 	for (auto & proc : _processors) {
 		proc->flush ();
 	}
@@ -4349,7 +4349,7 @@ Route::latency_preroll (pframes_t nframes, samplepos_t& start_sample, samplepos_
 int
 Route::roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool& need_butler)
 {
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
+	PBD::RWLock::ReaderLock lm (_processor_lock, PBD::RWLock::TryLock);
 
 	if (!lm.locked()) {
 		return 0;
@@ -4376,7 +4376,7 @@ Route::roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample
 int
 Route::no_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool session_state_changing)
 {
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
+	PBD::RWLock::ReaderLock lm (_processor_lock, PBD::RWLock::TryLock);
 
 	if (!lm.locked()) {
 		return 0;
@@ -4419,7 +4419,7 @@ Route::no_roll_unlocked (pframes_t nframes, samplepos_t start_sample, samplepos_
 void
 Route::update_send_delaylines ()
 {
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 	for (auto & proc : _processors) {
 		if (std::shared_ptr<LatentSend> snd = std::dynamic_pointer_cast<LatentSend> (proc)) {
 			snd->update_delaylines (true);
@@ -4436,7 +4436,7 @@ Route::apply_processor_changes_rt ()
 	int emissions = EmitNone;
 
 	if (_pending_meter_point != _meter_point) {
-		Glib::Threads::RWLock::WriterLock pwl (_processor_lock, Glib::Threads::TRY_LOCK);
+		PBD::RWLock::WriterLock pwl (_processor_lock, PBD::RWLock::TryLock);
 		if (pwl.locked()) {
 			/* meters always have buffers for 'processor_max_streams'
 			 * they can be re-positioned without re-allocation */
@@ -4451,7 +4451,7 @@ Route::apply_processor_changes_rt ()
 	bool changed = false;
 
 	if (_pending_process_reorder.load ()) {
-		Glib::Threads::RWLock::WriterLock pwl (_processor_lock, Glib::Threads::TRY_LOCK);
+		PBD::RWLock::WriterLock pwl (_processor_lock, PBD::RWLock::TryLock);
 		if (pwl.locked()) {
 			_pending_process_reorder.store (0);
 			_pending_listen_change.store (0);
@@ -4464,7 +4464,7 @@ Route::apply_processor_changes_rt ()
 	}
 
 	if (_pending_listen_change.load ()) {
-		Glib::Threads::RWLock::WriterLock pwl (_processor_lock, Glib::Threads::TRY_LOCK);
+		PBD::RWLock::WriterLock pwl (_processor_lock, PBD::RWLock::TryLock);
 		if (pwl.locked()) {
 			_pending_listen_change.store (0);
 			setup_invisible_processors ();
@@ -4482,7 +4482,7 @@ Route::apply_processor_changes_rt ()
 	}
 
 	if (_pending_surround_send.load ()) {
-		Glib::Threads::RWLock::WriterLock pwl (_processor_lock, Glib::Threads::TRY_LOCK);
+		PBD::RWLock::WriterLock pwl (_processor_lock, PBD::RWLock::TryLock);
 		if (pwl.locked()) {
 			_pending_surround_send.store (0);
 			emissions |= EmitSendReturnChange;
@@ -4551,7 +4551,7 @@ Route::set_meter_point (MeterPoint p)
 		bool meter_visibly_changed = false;
 		{
 			Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
-			Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+			PBD::RWLock::WriterLock lm (_processor_lock);
 			_pending_meter_point = p;
 			if (set_meter_point_unlocked ()) {
 				meter_visibly_changed = true;
@@ -4575,7 +4575,7 @@ Route::set_meter_point_unlocked ()
 #ifndef NDEBUG
 	/* Caller must hold process and processor write lock */
 	assert (!AudioEngine::instance()->process_lock().trylock());
-	Glib::Threads::RWLock::WriterLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
+	PBD::RWLock::WriterLock lm (_processor_lock, PBD::RWLock::TryLock);
 	assert (!lm.locked ());
 #endif
 
@@ -4673,14 +4673,14 @@ Route::listen_position_changed ()
 	}
 
 	if (c == _monitor_send->input_streams () && AudioEngine::instance()->running()) {
-		Glib::Threads::RWLock::ReaderLock lm (_processor_lock); // XXX is this needed?
+		PBD::RWLock::ReaderLock lm (_processor_lock); // XXX is this needed?
 		_pending_listen_change.store (1);
 		return;
 	}
 
 	{
 		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
-		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+		PBD::RWLock::WriterLock lm (_processor_lock);
 		ProcessorState pstate (this);
 
 		if (configure_processors_unlocked (0, &lm)) {
@@ -4701,7 +4701,7 @@ Route::add_export_point()
 	assert (!_capturing_processor);
 
 	Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
-	Glib::Threads::RWLock::WriterLock lw (_processor_lock);
+	PBD::RWLock::WriterLock lw (_processor_lock);
 
 	/* Align all tracks for stem-export w/o processing.
 	 * Compensate for all plugins between the this route's disk-reader
@@ -4720,7 +4720,7 @@ Route::update_signal_latency (bool apply_to_delayline, bool* delayline_update_ne
 	if (!active()) {
 		_signal_latency = 0;
 		/* mark all send are inactive, set internal-return "delay-out" to zero. */
-		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+		PBD::RWLock::ReaderLock lm (_processor_lock);
 		for (auto & proc : _processors) {
 			if (std::shared_ptr<LatentSend> snd = std::dynamic_pointer_cast<LatentSend> (proc)) {
 				snd->set_delay_in (0);
@@ -4758,7 +4758,7 @@ Route::update_signal_latency (bool apply_to_delayline, bool* delayline_update_ne
 		_output_latency = 0;
 	}
 
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 
 	samplecnt_t l_in  = 0;
 	samplecnt_t l_out = 0;
@@ -4876,7 +4876,7 @@ Route::apply_latency_compensation ()
 void
 Route::set_block_size (pframes_t nframes)
 {
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 	for (auto & proc : _processors) {
 		proc->set_block_size (nframes);
 	}
@@ -4888,7 +4888,7 @@ Route::set_block_size (pframes_t nframes)
 void
 Route::protect_automation ()
 {
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 	for (auto & proc : _processors) {
 		proc->protect_automation();
 	}
@@ -5084,7 +5084,7 @@ Route::set_name_in_state (XMLNode& node, string const & name)
 std::shared_ptr<Send>
 Route::internal_send_for (std::shared_ptr<const Route> target) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 
 	for (auto & proc : _processors) {
 		std::shared_ptr<InternalSend> send;
@@ -5223,7 +5223,7 @@ Route::get_control (const Evoral::Parameter& param)
 
 		/* maybe one of our processors does or ... */
 
-		Glib::Threads::RWLock::ReaderLock rm (_processor_lock);
+		PBD::RWLock::ReaderLock rm (_processor_lock);
 		for (auto & proc : _processors) {
 			if ((c = std::dynamic_pointer_cast<AutomationControl>(proc->control (param))) != 0) {
 				break;
@@ -5245,7 +5245,7 @@ Route::get_control (const Evoral::Parameter& param)
 std::shared_ptr<Processor>
 Route::nth_plugin (uint32_t n) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 	for (auto & proc : _processors) {
 		if (std::dynamic_pointer_cast<PluginInsert> (proc)) {
 			if (n-- == 0) {
@@ -5260,7 +5260,7 @@ Route::nth_plugin (uint32_t n) const
 std::shared_ptr<Processor>
 Route::nth_send (uint32_t n) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 	for (auto & proc : _processors) {
 		if (std::dynamic_pointer_cast<Send> (proc)) {
 
@@ -5283,7 +5283,7 @@ Route::nth_send (uint32_t n) const
 bool
 Route::has_io_processor_named (const string& name)
 {
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 	ProcessorList::iterator i;
 
 	for (i = _processors.begin(); i != _processors.end(); ++i) {
@@ -5300,7 +5300,7 @@ Route::has_io_processor_named (const string& name)
 void
 Route::set_processor_positions ()
 {
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 
 	bool had_amp = false;
 	for (auto & proc : _processors) {
@@ -5353,7 +5353,7 @@ Route::unknown_processors () const
 		return p;
 	}
 
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 	for (auto & proc : _processors) {
 		if (std::dynamic_pointer_cast<UnknownProcessor const> (proc)) {
 			p.push_back (proc->name ());
@@ -5475,7 +5475,7 @@ void
 Route::set_public_port_latencies (samplecnt_t value, bool playback, bool with_latcomp) const
 {
 	/* publish private latencies */
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 	for (auto & proc : _processors) {
 		std::shared_ptr<IOProcessor> iop = std::dynamic_pointer_cast<IOProcessor>(proc);
 		if (!iop) {
@@ -5519,7 +5519,7 @@ void
 Route::setup_invisible_processors ()
 {
 #ifndef NDEBUG
-	Glib::Threads::RWLock::WriterLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
+	PBD::RWLock::WriterLock lm (_processor_lock, PBD::RWLock::TryLock);
 	assert (!lm.locked ());
 #endif
 
@@ -5840,7 +5840,7 @@ void
 Route::unpan ()
 {
 	Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-	Glib::Threads::RWLock::ReaderLock lp (_processor_lock);
+	PBD::RWLock::ReaderLock lp (_processor_lock);
 
 	_pannable.reset ();
 
@@ -5898,7 +5898,7 @@ Route::maybe_note_meter_position ()
 std::shared_ptr<Processor>
 Route::processor_by_id (PBD::ID id) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 	for (auto & proc : _processors) {
 		if (proc->id() == id) {
 			return proc;
@@ -5911,7 +5911,7 @@ Route::processor_by_id (PBD::ID id) const
 std::shared_ptr<Processor>
 Route::plugin_by_uri (std::string const& uri, int offset) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 	for (auto const& p : _processors) {
 		std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert>(p);
 		if (!pi) {
@@ -5955,7 +5955,7 @@ Route::can_freeze_processor (std::shared_ptr<Processor> p, bool allow_routing) c
 bool
 Route::has_external_redirects () const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 	for (auto & proc : _processors) {
 		if (!can_freeze_processor (proc)) {
 			return true;
@@ -5967,7 +5967,7 @@ Route::has_external_redirects () const
 std::shared_ptr<Processor>
 Route::the_instrument () const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 	return the_instrument_unlocked ();
 }
 
@@ -6006,7 +6006,7 @@ Route::non_realtime_locate (samplepos_t pos)
 
 	{
 		//Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
-		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+		PBD::RWLock::ReaderLock lm (_processor_lock);
 
 		for (auto & proc : _processors) {
 			proc->non_realtime_locate (pos);
@@ -6323,7 +6323,7 @@ Route::automation_control_recurse (PBD::ID const & id) const
 		}
 	}
 
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 
 	for (auto const & proc : _processors) {
 		if ((ac = proc->automation_control (id))) {
@@ -6341,7 +6341,7 @@ Route::automatables (PBD::ControllableSet& s) const
 	if  (_pannable) {
 		_pannable->automatables (s);
 	}
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 	for (auto const& i : _processors) {
 		i->automatables (s);
 	}
@@ -6417,7 +6417,7 @@ void
 Route::set_loop (Location* l)
 {
 	_loop_location = l;
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 	for (auto const & proc : _processors) {
 		proc->set_loop (l);
 	}
@@ -6594,7 +6594,7 @@ Route::enable_surround_send ()
 		_surround_send->activate ();
 	}
 
-	Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+	PBD::RWLock::WriterLock lm (_processor_lock);
 	configure_processors_unlocked (0, &lm);
 	/* We cannot emit `processors_changed` while holing the `process lock`
 	 * This can lead to deadlock in ARDOUR::Session::route_processors_changed
@@ -6614,7 +6614,7 @@ Route::remove_surround_send ()
 
 	_surround_send.reset ();
 
-	Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+	PBD::RWLock::WriterLock lm (_processor_lock);
 	configure_processors_unlocked (0, &lm);
 	/* We cannot emit `processors_changed` while holing the `process lock`
 	 * This can lead to deadlock in ARDOUR::Session::route_processors_changed

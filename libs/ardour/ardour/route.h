@@ -39,6 +39,7 @@
 #include "pbd/stateful.h"
 #include "pbd/controllable.h"
 #include "pbd/destructible.h"
+#include "pbd/rwlock.h"
 
 #include "temporal/domain_swap.h"
 #include "temporal/types.h"
@@ -233,14 +234,14 @@ public:
 	void flush_processors ();
 
 	void foreach_processor (std::function<void(std::weak_ptr<Processor>)> method) const {
-		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+		PBD::RWLock::ReaderLock lm (_processor_lock);
 		for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
 			method (std::weak_ptr<Processor> (*i));
 		}
 	}
 
 	std::shared_ptr<Processor> nth_processor (uint32_t n) {
-		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+		PBD::RWLock::ReaderLock lm (_processor_lock);
 		ProcessorList::iterator i;
 		for (i = _processors.begin(); i != _processors.end() && n; ++i, --n) {}
 		if (i == _processors.end()) {
@@ -621,7 +622,7 @@ protected:
 	samplecnt_t    _output_latency;
 
 	ProcessorList  _processors;
-	mutable Glib::Threads::RWLock _processor_lock;
+	mutable PBD::RWLock _processor_lock;
 
 	std::shared_ptr<IO>               _input;
 	std::shared_ptr<IO>               _output;
@@ -734,7 +735,7 @@ private:
 	bool output_effectively_connected_real () const;
 	mutable std::map<Route*, bool> _connection_cache;
 
-	int configure_processors_unlocked (ProcessorStreams*, Glib::Threads::RWLock::WriterLock*);
+	int configure_processors_unlocked (ProcessorStreams*, PBD::RWLock::WriterLock*);
 	bool set_meter_point_unlocked ();
 	void apply_processor_order (const ProcessorList& new_order);
 

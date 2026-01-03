@@ -210,7 +210,7 @@ AudioTrack::export_stuff (BufferSet& buffers, samplepos_t start, samplecnt_t nfr
 	std::unique_ptr<gain_t[]> gain_buffer (new gain_t[nframes]);
 	std::unique_ptr<Sample[]> mix_buffer (new Sample[nframes]);
 
-	Glib::Threads::RWLock::ReaderLock rlock (_processor_lock);
+	PBD::RWLock::ReaderLock rlock (_processor_lock);
 
 	std::shared_ptr<AudioPlaylist> apl = std::dynamic_pointer_cast<AudioPlaylist>(playlist());
 
@@ -253,7 +253,7 @@ AudioTrack::bounceable (std::shared_ptr<Processor> endpoint, bool include_endpoi
 		return true;
 	}
 
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	PBD::RWLock::ReaderLock lm (_processor_lock);
 	uint32_t naudio = n_inputs().n_audio();
 
 	for (ProcessorList::const_iterator r = _processors.begin(); r != _processors.end(); ++r) {
@@ -351,7 +351,7 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 	_freeze_record.processor_info.clear ();
 
 	{
-		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+		PBD::RWLock::ReaderLock lm (_processor_lock);
 
 		for (ProcessorList::iterator r = _processors.begin(); r != _processors.end(); ++r) {
 
@@ -433,7 +433,7 @@ AudioTrack::unfreeze ()
 		_freeze_record.playlist->release();
 
 		{
-			Glib::Threads::RWLock::ReaderLock lm (_processor_lock); // should this be a write lock? jlc
+			PBD::RWLock::ReaderLock lm (_processor_lock); // should this be a write lock? jlc
 			for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 				for (vector<FreezeRecordProcessorInfo*>::iterator ii = _freeze_record.processor_info.begin(); ii != _freeze_record.processor_info.end(); ++ii) {
 					if ((*ii)->id == (*i)->id()) {
