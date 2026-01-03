@@ -193,12 +193,12 @@ void
 ControlList::copy_events (const ControlList& other)
 {
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 		for (EventList::iterator x = _events.begin (); x != _events.end (); ++x) {
 			delete (*x);
 		}
 		_events.clear ();
-		Glib::Threads::RWLock::ReaderLock olm (other._lock);
+		PBD::RWLock::ReaderLock olm (other._lock);
 		for (const_iterator i = other.begin (); i != other.end (); ++i) {
 			_events.push_back (new ControlEvent ((*i)->when, (*i)->value));
 		}
@@ -246,7 +246,7 @@ void
 ControlList::clear ()
 {
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 		for (EventList::iterator x = _events.begin (); x != _events.end (); ++x) {
 			delete (*x);
 		}
@@ -261,7 +261,7 @@ ControlList::clear ()
 void
 ControlList::x_scale (ratio_t const& factor)
 {
-	Glib::Threads::RWLock::WriterLock lm (_lock);
+	PBD::RWLock::WriterLock lm (_lock);
 	_x_scale (factor);
 }
 
@@ -287,7 +287,7 @@ ControlList::extend_to (timepos_t const& end)
 {
 	timepos_t actual_end = ensure_time_domain (end);
 
-	Glib::Threads::RWLock::WriterLock lm (_lock);
+	PBD::RWLock::WriterLock lm (_lock);
 
 	if (_events.empty () || _events.back ()->when == actual_end) {
 		return false;
@@ -303,7 +303,7 @@ void
 ControlList::y_transform (std::function<double (double)> callback)
 {
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 		for (iterator i = _events.begin (); i != _events.end (); ++i) {
 			(*i)->value = callback ((*i)->value);
 		}
@@ -316,7 +316,7 @@ void
 ControlList::list_merge (ControlList const& other, std::function<double (double, double)> callback)
 {
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 		/* First scale existing events, copy into a new list.
 		 * The original list is needed later to interpolate
 		 * for new events only present in the master list.
@@ -396,7 +396,7 @@ ControlList::thin (double thinning_factor)
 	bool changed = false;
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 
 		ControlEvent* prevprev = 0;
 		ControlEvent* cur      = 0;
@@ -462,7 +462,7 @@ ControlList::thin (double thinning_factor)
 void
 ControlList::fast_simple_add (timepos_t const& time, double value)
 {
-	Glib::Threads::RWLock::WriterLock lm (_lock);
+	PBD::RWLock::WriterLock lm (_lock);
 	/* to be used only for loading pre-sorted data from saved state */
 
 	_events.insert (_events.end (), new ControlEvent (ensure_time_domain (time), value));
@@ -476,7 +476,7 @@ ControlList::fast_simple_add (timepos_t const& time, double value)
 void
 ControlList::invalidate_insert_iterator ()
 {
-	Glib::Threads::RWLock::WriterLock lm (_lock);
+	PBD::RWLock::WriterLock lm (_lock);
 	unlocked_invalidate_insert_iterator ();
 }
 
@@ -507,7 +507,7 @@ ControlList::unlocked_remove_duplicates ()
 void
 ControlList::start_write_pass (timepos_t const& time)
 {
-	Glib::Threads::RWLock::WriterLock lm (_lock);
+	PBD::RWLock::WriterLock lm (_lock);
 
 	timepos_t when = ensure_time_domain (time);
 
@@ -558,7 +558,7 @@ ControlList::set_in_write_pass (bool yn, bool add_point, timepos_t when)
 	_in_write_pass = yn;
 
 	if (yn && add_point) {
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 		add_guard_point (when, timecnt_t (time_domain()));
 	}
 }
@@ -669,8 +669,8 @@ ControlList::editor_add (timepos_t const& time, double value, bool with_guard)
 {
 	/* this is for making changes from a graphical line editor */
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
-		timepos_t                         when = ensure_time_domain (time);
+		PBD::RWLock::WriterLock lm (_lock);
+		timepos_t               when = ensure_time_domain (time);
 
 		ControlEvent cp (when, 0.0f);
 		iterator     i = lower_bound (_events.begin (), _events.end (), &cp, time_comparator);
@@ -730,7 +730,7 @@ ControlList::editor_add_ordered (OrderedPoints const & points, bool with_guard)
 	}
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 
 		Temporal::timepos_t earliest = ensure_time_domain (points.front().when);
 		Temporal::timepos_t latest   = ensure_time_domain (points.back().when);
@@ -888,7 +888,7 @@ ControlList::add (timepos_t const& time, double value, bool with_guards, bool wi
 	                             this, value, when, with_guards, _in_write_pass, new_write_pass,
 	                             (most_recent_insert_iterator == _events.end ())));
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 
 		ControlEvent cp (when, 0.0f);
 		iterator     insertion_point;
@@ -1032,7 +1032,7 @@ void
 ControlList::erase (iterator i)
 {
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 		if (most_recent_insert_iterator == i) {
 			unlocked_invalidate_insert_iterator ();
 		}
@@ -1046,7 +1046,7 @@ void
 ControlList::erase (iterator start, iterator end)
 {
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 		_events.erase (start, end);
 		unlocked_invalidate_insert_iterator ();
 		mark_dirty ();
@@ -1059,7 +1059,7 @@ void
 ControlList::erase (timepos_t const& time, double value)
 {
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 
 		timepos_t when = ensure_time_domain (time);
 
@@ -1086,7 +1086,7 @@ ControlList::erase_range (timepos_t const& start, timepos_t const& endt)
 	bool erased = false;
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 
 		erased = erase_range_internal (start, endt, _events);
 
@@ -1142,7 +1142,7 @@ void
 ControlList::slide (iterator before, timecnt_t const& distance)
 {
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 
 		if (before == _events.end ()) {
 			return;
@@ -1166,7 +1166,7 @@ ControlList::shift (timepos_t const& time, timecnt_t const& distance)
 	timepos_t pos = time;
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 
 		double v0, v1;
 
@@ -1226,7 +1226,7 @@ void
 ControlList::simple_shift (timepos_t const & distance)
 {
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 		for (auto & e : _events) {
 			e->when = e->when + distance;
 		}
@@ -1248,7 +1248,7 @@ ControlList::modify (iterator iter, timepos_t const& time, double val)
 	val = std::min ((double)_desc.upper, std::max ((double)_desc.lower, val));
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 
 		timepos_t when = ensure_time_domain (time);
 
@@ -1274,7 +1274,7 @@ ControlList::modify (iterator iter, timepos_t const& time, double val)
 std::pair<ControlList::iterator, ControlList::iterator>
 ControlList::control_points_adjacent (timepos_t const& xtime)
 {
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
+	PBD::RWLock::ReaderLock lm (_lock);
 
 	timepos_t    xval = xtime;
 	ControlEvent cp (xval, 0.0f);
@@ -1321,7 +1321,7 @@ ControlList::thaw ()
 	}
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 
 		if (_sort_pending) {
 			_events.sort (event_time_less_than);
@@ -1351,7 +1351,7 @@ void
 ControlList::truncate_end (timepos_t const& last_time)
 {
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 
 		timepos_t    last_coordinate = last_time;
 		ControlEvent cp (last_coordinate, 0);
@@ -1451,7 +1451,7 @@ void
 ControlList::truncate_start (timecnt_t const& overall)
 {
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 
 		iterator   i;
 		double     first_legal_value;
@@ -1962,7 +1962,7 @@ ControlList::cut_copy_clear (timepos_t const& start_time, timepos_t const& end_t
 	ControlEvent cp (start, 0.0);
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 
 		/* first, determine s & e, two iterators that define the range of points
 		 * affected by this operation
@@ -2069,7 +2069,7 @@ ControlList::paste (const ControlList& alist, timepos_t const& time)
 	add_guard_point (time + last->when, GUARD_POINT_DELTA (*this));
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 
 		iterator     where;
 		iterator     prev;
@@ -2151,7 +2151,7 @@ ControlList::move_ranges (const list<RangeMove>& movements)
 	typedef list<RangeMove> RangeMoveList;
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 
 		/* a copy of the events list before we started moving stuff around */
 		EventList old_events = _events;
@@ -2274,7 +2274,7 @@ ControlList::start_domain_bounce (Temporal::DomainBounceInfo& dbi)
 		return;
 	}
 
-	Glib::Threads::RWLock::ReaderLock olm (_lock);
+	PBD::RWLock::ReaderLock olm (_lock);
 
 	for (auto const & e : _events) {
 		timepos_t t (e->when);
@@ -2291,7 +2291,7 @@ ControlList::finish_domain_bounce (Temporal::DomainBounceInfo& dbi)
 	}
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 		for (auto const & e : _events) {
 			Temporal::TimeDomainPosChanges::iterator tdc = dbi.positions.find (&e->when);
 			assert (tdc != dbi.positions.end());
@@ -2335,7 +2335,7 @@ ControlList::operator!= (ControlList const& other) const
 bool
 ControlList::is_sorted () const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
+	PBD::RWLock::ReaderLock lm (_lock);
 	if (_events.size () == 0) {
 		return true;
 	}

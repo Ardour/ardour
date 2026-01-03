@@ -30,8 +30,7 @@
 #include <boost/pool/pool.hpp>
 #include <boost/pool/pool_alloc.hpp>
 
-#include <glibmm/threads.h>
-
+#include "pbd/rwlock.h"
 #include "pbd/signals.h"
 
 #include "temporal/domain_provider.h"
@@ -122,7 +121,7 @@ public:
 
 	/** @return time-stamp of first or last event in the list */
 	Temporal::timepos_t when (bool at_start) const {
-		Glib::Threads::RWLock::ReaderLock lm (_lock);
+		PBD::RWLock::ReaderLock lm (_lock);
 		if (_events.empty()) {
 			return std::numeric_limits<Temporal::timepos_t>::min();
 		}
@@ -130,7 +129,7 @@ public:
 	}
 
 	Temporal::timecnt_t length() const {
-		Glib::Threads::RWLock::ReaderLock lm (_lock);
+		PBD::RWLock::ReaderLock lm (_lock);
 		return _events.empty() ? std::numeric_limits<Temporal::timecnt_t>::min() : Temporal::timecnt_t (_events.back()->when);
 	}
 	bool empty() const { return _events.empty(); }
@@ -252,7 +251,7 @@ public:
 	std::pair<ControlList::iterator,ControlList::iterator> control_points_adjacent (Temporal::timepos_t const & when);
 
 	template<class T> void apply_to_points (T& obj, void (T::*method)(const ControlList&)) {
-		Glib::Threads::RWLock::WriterLock lm (_lock);
+		PBD::RWLock::WriterLock lm (_lock);
 		(obj.*method)(*this);
 	}
 
@@ -263,7 +262,7 @@ public:
 	 * @returns parameter value
 	 */
 	double eval (Temporal::timepos_t const & where) const {
-		Glib::Threads::RWLock::ReaderLock lm (_lock);
+		PBD::RWLock::ReaderLock lm (_lock);
 		return unlocked_eval (where);
 	}
 
@@ -276,7 +275,7 @@ public:
 	 */
 	double rt_safe_eval (Temporal::timepos_t const & where, bool& ok) const {
 
-		Glib::Threads::RWLock::ReaderLock lm (_lock, Glib::Threads::TRY_LOCK);
+		PBD::RWLock::ReaderLock lm (_lock, PBD::RWLock::TryLock);
 
 		if ((ok = lm.locked())) {
 			return unlocked_eval (where);
@@ -307,7 +306,7 @@ public:
 	const EventList& events() const { return _events; }
 
 	// FIXME: const violations for Curve
-	Glib::Threads::RWLock& lock()       const { return _lock; }
+	PBD::RWLock& lock()         const { return _lock; }
 	LookupCache& lookup_cache() const { return _lookup_cache; }
 	SearchCache& search_cache() const { return _search_cache; }
 
@@ -399,7 +398,7 @@ public:
 	mutable LookupCache   _lookup_cache;
 	mutable SearchCache   _search_cache;
 
-	mutable Glib::Threads::RWLock _lock;
+	mutable PBD::RWLock _lock;
 
 	Parameter             _parameter;
 	ParameterDescriptor   _desc;
