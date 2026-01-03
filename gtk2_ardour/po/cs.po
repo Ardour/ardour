@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-26 15:25+0100\n"
-"PO-Revision-Date: 2026-01-03 14:07+0100\n"
+"POT-Creation-Date: 2026-01-03 15:07+0100\n"
+"PO-Revision-Date: 2026-01-03 15:09+0100\n"
 "Last-Translator: Martin Vlk <martin@vlkk.cz>\n"
 "Language-Team: Czech <translation-team-cs@lists.sourceforge.net>\n"
 "Language: cs\n"
@@ -640,8 +640,8 @@ msgid " - debug"
 msgstr " - ladění"
 
 #: about.cc:647
-msgid "Copyright (C) 1999-2025 Paul Davis\n"
-msgstr "Copyright (C) 1999-2025 Paul Davis\n"
+msgid "Copyright (C) 1999-2026 Paul Davis\n"
+msgstr "Copyright (C) 1999-2026 Paul Davis\n"
 
 #: about.cc:651
 msgid "http://ardour.org/"
@@ -844,7 +844,8 @@ msgstr "Zpětné sběrnice"
 #: add_route_dialog.cc:162
 msgid "Use these settings to create one or more foldback busses."
 msgstr ""
-"Tato nastavení použijte k vytvoření jedné nebo více sběrnic zpětného poslechu."
+"Tato nastavení použijte k vytvoření jedné nebo více sběrnic zpětného "
+"poslechu."
 
 #: add_route_dialog.cc:163
 msgid ""
@@ -1158,10 +1159,10 @@ msgid ""
 msgstr ""
 "<b>Vrstvené</b>, nové nahrávky budou přidány jako oblasti na vrstvu nad "
 "stávajícími oblastmi.\n"
-"<b>Nevrstvené</b>, oblast vespod bude rozdělena a nahrazena "
-"nově nahranou oblastí.\n"
-"<b>ZvukPřesZvuk</b>, chová se jako <i>Vrstvené</i>, jen oblasti vespod "
-"budou také slyšet."
+"<b>Nevrstvené</b>, oblast vespod bude rozdělena a nahrazena nově nahranou "
+"oblastí.\n"
+"<b>ZvukPřesZvuk</b>, chová se jako <i>Vrstvené</i>, jen oblasti vespod budou "
+"také slyšet."
 
 #: application_bar.cc:429
 msgid ""
@@ -1915,16 +1916,15 @@ msgstr ""
 "<b>MMCSS prioritu nelze nastavit!</b>\n"
 "\n"
 "Windows Multimedia Class Scheduler Service (MMCSS) se používá pro plynulé "
-"zpracování zvuku. V základním nastavení Microsoft omezil počet MMCSS "
-"vláken na 32 a tohoto limitu bylo dosaženo.\n"
+"zpracování zvuku. V základním nastavení Microsoft omezil počet MMCSS vláken "
+"na 32 a tohoto limitu bylo dosaženo.\n"
 "\n"
-"Počet vláken pro zpracování můžete omezit v Nastavení &gt; "
-"Výkon, ale nemusí to stačit, protože MMCSS vlákna jsou také "
-"využívána pro Audio a MIDI I/O.\n"
-"Jedno možné řešení je zvýšit počet dostupných MMCSS vláken "
-"úpravou windows registru. Pohodlně to lze provést nástrojem, který najdete "
-"<a href=\"https://helpcenter.steinberg.de/hc/en-us/articles/13338094735762-"
-"Error-message-on-Windows-MMCSS-priority-cannot-be-set\">zde</a>."
+"Počet vláken pro zpracování můžete omezit v Nastavení &gt; Výkon, ale nemusí "
+"to stačit, protože MMCSS vlákna jsou také využívána pro Audio a MIDI I/O.\n"
+"Jedno možné řešení je zvýšit počet dostupných MMCSS vláken úpravou windows "
+"registru. Pohodlně to lze provést nástrojem, který najdete <a href=\"https://"
+"helpcenter.steinberg.de/hc/en-us/articles/13338094735762-Error-message-on-"
+"Windows-MMCSS-priority-cannot-be-set\">zde</a>."
 
 #: ardour_ui.cc:3016
 msgid "Crash Recovery"
@@ -3743,18 +3743,16 @@ msgid ""
 "out by the region fade (e.g. reverb, delay)"
 msgstr ""
 "Aplikovat efekty oblasti až po aplikaci prolnutí.\n"
-"To se hodí v případech, kdy efekt(y) mají koncovku, která by jinak byla"
-" ovlivněna "
-"prolnutím oblasti (např. reverb, delay)"
+"To se hodí v případech, kdy efekt(y) mají koncovku, která by jinak byla "
+"ovlivněna prolnutím oblasti (např. reverb, delay)"
 
 #: audio_region_editor.cc:127
 msgid ""
 "When touching a control in a region effect plugin UI, the corresponding "
 "region-automation line is shown the editor, and edit mode is set to 'draw'."
 msgstr ""
-"Při dotyku ovladače v UI modulu efektu oblasti, se zobrazí "
-"v editoru odpovídající pás automatizace oblasti a režim úprav se nastaví na"
-" 'kreslení'."
+"Při dotyku ovladače v UI modulu efektu oblasti, se zobrazí v editoru "
+"odpovídající pás automatizace oblasti a režim úprav se nastaví na 'kreslení'."
 
 #: audio_region_editor.cc:143 strip_silence_dialog.cc:127
 #: strip_silence_dialog.cc:316
@@ -4026,7 +4024,7 @@ msgid "Source"
 msgstr "Zdroj"
 
 #: bundle_manager.cc:276 editor.cc:1981 editor_actions.cc:108
-#: editor_actions.cc:121 editor_markers.cc:1863 lua_script_manager.cc:44
+#: editor_actions.cc:121 editor_markers.cc:1862 lua_script_manager.cc:44
 #: rc_option_editor.cc:4285 rc_option_editor.cc:4304 rc_option_editor.cc:4334
 msgid "Edit"
 msgstr "Úpravy"
@@ -4346,7 +4344,7 @@ msgstr "Nastavit vybrané noty na tento čas"
 msgid "Set selected notes to this length"
 msgstr "Nastavit vybrané noty na tuto délku"
 
-#: edit_note_dialog.cc:64 editor_markers.cc:1899 midi_list_editor.cc:106
+#: edit_note_dialog.cc:64 editor_markers.cc:1898 midi_list_editor.cc:106
 #: patch_change_dialog.cc:92 step_entry.cc:309 virtual_keyboard_window.cc:134
 msgid "Channel"
 msgstr "Kanál"
@@ -7345,7 +7343,7 @@ msgstr "Sdílení činného stavu?"
 #: editor_markers.cc:1405 editor_markers.cc:1435 editor_markers.cc:1466
 #: editor_markers.cc:1491 editor_markers.cc:1521 editor_markers.cc:1555
 #: editor_markers.cc:1586 editor_markers.cc:1611 editor_markers.cc:1661
-#: editor_markers.cc:1780 editor_markers.cc:1806 editor_markers.cc:1828
+#: editor_markers.cc:1779 editor_markers.cc:1805 editor_markers.cc:1827
 #: editor_mouse.cc:2106
 msgid "programming error: marker canvas item has no marker object pointer!"
 msgstr ""
@@ -7429,11 +7427,11 @@ msgstr "Začátek"
 msgid "end"
 msgstr "Konec"
 
-#: editor_markers.cc:849 editor_markers.cc:2018
+#: editor_markers.cc:849 editor_markers.cc:2017
 msgid "set loop range"
 msgstr "Nastavit rozsah smyčky"
 
-#: editor_markers.cc:865 editor_markers.cc:2024
+#: editor_markers.cc:865 editor_markers.cc:2023
 msgid "set punch range"
 msgstr "nastavit rozsah přepsání"
 
@@ -7537,50 +7535,50 @@ msgstr "Připnout tempo k předchozímu"
 msgid "set tempo to ramp to next"
 msgstr "Nastavit tempo na mizející k dalšímu"
 
-#: editor_markers.cc:1865 editor_mouse.cc:2123 io_plugin_window.cc:342
+#: editor_markers.cc:1864 editor_mouse.cc:2123 io_plugin_window.cc:342
 #: io_plugin_window.cc:384 mixer_ui.cc:4211 mixer_ui.cc:4246
 #: processor_box.cc:3639 processor_box.cc:4226 route_ui.cc:1776
 #: route_ui.cc:2837 template_dialog.cc:250 vca_master_strip.cc:490
 msgid "Rename"
 msgstr "Přejmenovat"
 
-#: editor_markers.cc:1868 editor_ops.cc:1869
+#: editor_markers.cc:1867 editor_ops.cc:1869
 msgid "New Name:"
 msgstr "Nový název:"
 
-#: editor_markers.cc:1871
+#: editor_markers.cc:1870
 msgid "%1 Arrangement Section"
 msgstr "%1 sekce aranže"
 
-#: editor_markers.cc:1873
+#: editor_markers.cc:1872
 msgid "%1 Range"
 msgstr "%1 rozsah"
 
-#: editor_markers.cc:1875
+#: editor_markers.cc:1874
 msgid "%1 Marker"
 msgstr "%1 značka"
 
-#: editor_markers.cc:1897
+#: editor_markers.cc:1896
 msgid "Program Number"
 msgstr "Číslo programu"
 
-#: editor_markers.cc:1898
+#: editor_markers.cc:1897
 msgid "Bank Number"
 msgstr "Číslo banky"
 
-#: editor_markers.cc:1912
+#: editor_markers.cc:1911
 msgid "Scene Change"
 msgstr "Změna scény"
 
-#: editor_markers.cc:1933
+#: editor_markers.cc:1932
 msgid "Clear scene change"
 msgstr "Vymazat změnu scény"
 
-#: editor_markers.cc:1968
+#: editor_markers.cc:1967
 msgid "edit marker"
 msgstr "upravit značku"
 
-#: editor_markers.cc:1968
+#: editor_markers.cc:1967
 msgid "rename marker"
 msgstr "Přejmenovat značku"
 
@@ -7589,27 +7587,27 @@ msgid "This screen is not tall enough to display the editor mixer"
 msgstr ""
 "Tato obrazovka není dostatečně velká na to, aby zobrazila směšovač editoru"
 
-#: editor_mouse.cc:1356 editor_mouse.cc:1391 editor_tempodisplay.cc:553
+#: editor_mouse.cc:1356 editor_mouse.cc:1391 editor_tempodisplay.cc:556
 msgid ""
 "programming error: tempo marker canvas item has no marker object pointer!"
 msgstr ""
 "chyba programu: položka plátna značka tempa nemá žádný ukazatel objektu "
 "značky!"
 
-#: editor_mouse.cc:1361 editor_tempodisplay.cc:558
+#: editor_mouse.cc:1361 editor_tempodisplay.cc:561
 msgid "programming error: marker for tempo is not a tempo marker!"
 msgstr "chyba programu: značka pro tempo není značkou tempa!"
 
-#: editor_mouse.cc:1373 editor_tempodisplay.cc:534
+#: editor_mouse.cc:1373 editor_tempodisplay.cc:537
 msgid "programming error: bbt marker canvas item has no marker object pointer!"
 msgstr ""
 "chyba programu: položka plátna značky BBT nemá ukazatel na objekt značky!"
 
-#: editor_mouse.cc:1378 editor_tempodisplay.cc:539
+#: editor_mouse.cc:1378 editor_tempodisplay.cc:542
 msgid "programming error: marker for bbt is not a bbt marker!"
 msgstr "chyba programu: značka pro bbt není značka bbt!"
 
-#: editor_mouse.cc:1396 editor_tempodisplay.cc:776
+#: editor_mouse.cc:1396 editor_tempodisplay.cc:779
 msgid "programming error: marker for meter is not a meter marker!"
 msgstr "chyba programu: značka pro druh taktu není značkou druhu taktu!"
 
@@ -8789,58 +8787,58 @@ msgstr "Přidat značku změny tempa"
 msgid "add"
 msgstr "Přidat"
 
-#: editor_tempodisplay.cc:477
+#: editor_tempodisplay.cc:476
 msgid "add time signature"
 msgstr "Přidat předznamenání"
 
-#: editor_tempodisplay.cc:523
+#: editor_tempodisplay.cc:526
 msgid "add BBT marker"
 msgstr "Přidat značku BBT"
 
-#: editor_tempodisplay.cc:570 editor_tempodisplay.cc:663
+#: editor_tempodisplay.cc:573 editor_tempodisplay.cc:666
 msgid "done"
 msgstr "Hotovo"
 
-#: editor_tempodisplay.cc:598
+#: editor_tempodisplay.cc:601
 msgid "edit BBT meter"
 msgstr "Upravit značku BBT"
 
-#: editor_tempodisplay.cc:631
+#: editor_tempodisplay.cc:634
 msgid "edit time signature"
 msgstr "Upravit předznamenání"
 
-#: editor_tempodisplay.cc:655 editor_tempodisplay.cc:722
+#: editor_tempodisplay.cc:658 editor_tempodisplay.cc:725
 msgid "edit tempo"
 msgstr "Upravit tempo"
 
-#: editor_tempodisplay.cc:689
+#: editor_tempodisplay.cc:692
 msgid "edit BBT tempo"
 msgstr "Upravit tempo BBT"
 
-#: editor_tempodisplay.cc:751
+#: editor_tempodisplay.cc:754
 msgid "remove BBT marker"
 msgstr "Odstranit značku BBT"
 
-#: editor_tempodisplay.cc:759
+#: editor_tempodisplay.cc:762
 msgid "remove tempo change"
 msgstr "Odstranit změnu tempa"
 
-#: editor_tempodisplay.cc:771
+#: editor_tempodisplay.cc:774
 msgid ""
 "programming error: meter marker canvas item has no marker object pointer!"
 msgstr ""
 "chyba programu: položka plátna značka druhu taktu nemá žádný ukazatel "
 "objektu značky!"
 
-#: editor_tempodisplay.cc:788
+#: editor_tempodisplay.cc:791
 msgid "remove tempo mark"
 msgstr "Odstranit značku změny tempa"
 
-#: editor_tempodisplay.cc:970 editor_tempodisplay.cc:973
+#: editor_tempodisplay.cc:973 editor_tempodisplay.cc:976
 msgid "clear earlier tempos"
 msgstr "Smazat dřívější tempa"
 
-#: editor_tempodisplay.cc:991 editor_tempodisplay.cc:994
+#: editor_tempodisplay.cc:994 editor_tempodisplay.cc:997
 msgid "clear later tempos"
 msgstr "Smazat pozdější tempa"
 
@@ -9977,12 +9975,12 @@ msgstr ""
 msgid "Writing Export Analysis Image: %1."
 msgstr "Zapisuje se obraz rozboru vyvedení: %1."
 
-#: export_report.cc:918 sfdb_ui.cc:528 trigger_clip_picker.cc:513
-#: trigger_clip_picker.cc:990
+#: export_report.cc:918 sfdb_ui.cc:528 trigger_clip_picker.cc:511
+#: trigger_clip_picker.cc:987
 msgid "Could not read file: %1 (%2)."
 msgstr "Nepodařilo se přečíst soubor: %1 (%2)."
 
-#: export_report.cc:944 sfdb_ui.cc:577 trigger_clip_picker.cc:1036
+#: export_report.cc:944 sfdb_ui.cc:577 trigger_clip_picker.cc:1033
 msgid "Could not access soundfile: "
 msgstr "Nepodařilo se přistupovat ke zvukovému souboru: "
 
@@ -11158,8 +11156,8 @@ msgid " and GCC version "
 msgstr " a GCC verze "
 
 #: main.cc:366
-msgid "Copyright (C) 1999-2025 Paul Davis"
-msgstr "Copyright (C) 1999-2025 Paul Davis"
+msgid "Copyright (C) 1999-2026 Paul Davis"
+msgstr "Copyright (C) 1999-2026 Paul Davis"
 
 #: main.cc:367
 msgid ""
@@ -12998,15 +12996,14 @@ msgid ""
 "<i>(You can store samples anywhere you want, this is just an initial "
 "default)</i></span>"
 msgstr ""
-"<span size=\"larger\">Pokud máte stávající sbírku vzorků, povězte "
-"%1\n"
+"<span size=\"larger\">Pokud máte stávající sbírku vzorků, povězte %1\n"
 "kde jsou a ulehčíte si jejich použití v programu.\n"
 "\n"
 "Jaké je výchozí umístění, kde by měl %1 hledal vzorky? Pokud\n"
 "nemáte žádné vzorky, prostě ponechte toto nastavení jak je.\n"
 "\n"
-"<i>(Vzorky můžete ukládat kam chcete, toto je pouze úvodní "
-"výchozí nastavení)</i></span>"
+"<i>(Vzorky můžete ukládat kam chcete, toto je pouze úvodní výchozí "
+"nastavení)</i></span>"
 
 #: new_user_wizard.cc:324
 msgid "Default sample library location"
@@ -13071,9 +13068,8 @@ msgid ""
 "%1 is a digital audio workstation, used for multitrack recording, nonlinear, "
 "nondestructive editing and much more."
 msgstr ""
-"%1 je digitální pracovní stanice pro audio, používaná pro vícestopé"
-" nahrávání, nelineární, "
-"nedestruktivní úpravy a mnoho dalšího."
+"%1 je digitální pracovní stanice pro audio, používaná pro vícestopé "
+"nahrávání, nelineární, nedestruktivní úpravy a mnoho dalšího."
 
 #: opts.cc:70
 msgid "Options:\n"
@@ -15259,8 +15255,8 @@ msgid ""
 "<b>When enabled</b> all selected tracks are assumed to be in a group. "
 "Operations like toggling solo, mute or changing gain are synchronized."
 msgstr ""
-"<b>Zapnutí</b> způsobí, že všechny vybrané stopy jsou ve skupině."
-"Operace jako přepnutí sóla, ztlumení nebo změna gainu jsou synchronizované."
+"<b>Zapnutí</b> způsobí, že všechny vybrané stopy jsou ve skupině.Operace "
+"jako přepnutí sóla, ztlumení nebo změna gainu jsou synchronizované."
 
 #: rc_option_editor.cc:2454
 msgid "Drag and drop import always copies files to session"
@@ -15689,8 +15685,8 @@ msgid ""
 msgstr ""
 "Tímto nastavíte jak daleko je třeba pohnout myší, než se spustí operace "
 "přetažení.\n"
-"Vyšší hodnty vyžadují více pohybu než začne přetažení, menší hodnoty "
-"ho vyžadují mnohem méně"
+"Vyšší hodnty vyžadují více pohybu než začne přetažení, menší hodnoty ho "
+"vyžadují mnohem méně"
 
 #: rc_option_editor.cc:3016 rc_option_editor.cc:3017 rc_option_editor.cc:3018
 #: rc_option_editor.cc:3030 rc_option_editor.cc:3042 rc_option_editor.cc:3055
@@ -15851,8 +15847,8 @@ msgid ""
 "When enabled, macOS is in charge of what areas of the GUI are redrawn.\n"
 "When disabled, %1 manages this by itself"
 msgstr ""
-"Při zapnutí je ponecháno na macOS, aby zjistil, které plochy v GUI budou"
-" překresleny.\n"
+"Při zapnutí je ponecháno na macOS, aby zjistil, které plochy v GUI budou "
+"překresleny.\n"
 "Při vypnutí si toto %1 řídí sám za sebe"
 
 #: rc_option_editor.cc:3150
@@ -15988,8 +15984,8 @@ msgstr "Chování posunu a pohledu"
 #: rc_option_editor.cc:3264
 msgid "Zoom to mouse position when zooming with scroll wheel"
 msgstr ""
-"Pohled na polohu ukazatele myši, když se "
-"přibližuje/oddaluje pomocí kolečka myši"
+"Pohled na polohu ukazatele myši, když se přibližuje/oddaluje pomocí kolečka "
+"myši"
 
 #: rc_option_editor.cc:3273
 msgid "Zoom with vertical drag in rulers"
@@ -16569,7 +16565,8 @@ msgid ""
 "Locate to the next matching scene marker when a MIDI program change is "
 "received (and NOT recording)"
 msgstr ""
-"Přesunout na následující odpovídající scénu když přijde změna MIDI programu \n"
+"Přesunout na následující odpovídající scénu když přijde změna MIDI "
+"programu \n"
 "(a nenahrává se)"
 
 #: rc_option_editor.cc:3824
@@ -16958,7 +16955,8 @@ msgstr "Automaticky otevřít rozhraní pluginu při jeho přidání"
 msgid ""
 "Automatically open instrument plugin GUI when adding a new MIDI Track/Bus"
 msgstr ""
-"Automaticky otevřít GUI nástrojového pluginu při přidání nové stopy / sběrnice"
+"Automaticky otevřít GUI nástrojového pluginu při přidání nové stopy / "
+"sběrnice"
 
 #: rc_option_editor.cc:4147
 msgid "Show only one plugin window at a time"
@@ -17002,16 +17000,14 @@ msgid ""
 "they are not currently displayed. This option allows one to work around the "
 "issue."
 msgstr ""
-"Uzavření okna pluginu ho obvykle pouze schová. Tím se dosáhne rychlého"
-" otevření "
-"stejného UI později.\n"
+"Uzavření okna pluginu ho obvykle pouze schová. Tím se dosáhne rychlého "
+"otevření stejného UI později.\n"
 "\n"
-"Většina UI pluginů je neaktivních a nepotřebují žádné CPU zdroje "
-"když nejsou viditelné na obrazovce.\n"
+"Většina UI pluginů je neaktivních a nepotřebují žádné CPU zdroje když nejsou "
+"viditelné na obrazovce.\n"
 "\n"
-"Ale některé pluginy potřebují významné CPU a GPU zdroje i když "
-"nejsou právě zobrazené. Toto nastavení umožňuje vyhnout se tomuto "
-"problému."
+"Ale některé pluginy potřebují významné CPU a GPU zdroje i když nejsou právě "
+"zobrazené. Toto nastavení umožňuje vyhnout se tomuto problému."
 
 #: rc_option_editor.cc:4169
 msgid "Mixer Strip Inline Display"
@@ -17460,9 +17456,8 @@ msgid ""
 "restored on session load. This applies to internal backends (ALSA, Portaudio/"
 "ASIO, CoreAudio) only."
 msgstr ""
-"Zapnutím se při načtení sezení obnoví "
-"hardwarová propojení. Týká se to pouze interních backendů (ALSA, Portaudio/"
-"ASIO, CoreAudio)."
+"Zapnutím se při načtení sezení obnoví hardwarová propojení. Týká se to pouze "
+"interních backendů (ALSA, Portaudio/ASIO, CoreAudio)."
 
 #: rc_option_editor.cc:4730
 msgid "Enable metronome only while recording"
@@ -17841,16 +17836,15 @@ msgid ""
 "Note: This only affects newly added plugins and is applied to plugin on "
 "session-reload. Already automated parameters are retained."
 msgstr ""
-"Některé pluginy vystavují nerozumné množství ovládacích vstupů. Toto"
-" nastavení "
-"omezuje počet parametrů pro automatizaci, aniž by "
-"omezilo celkový počet ovladačů.\n"
+"Některé pluginy vystavují nerozumné množství ovládacích vstupů. Toto "
+"nastavení omezuje počet parametrů pro automatizaci, aniž by omezilo celkový "
+"počet ovladačů.\n"
 "\n"
-"Tím se zredukuje prodleva v GUI a zkrátí se nadměrně dlouhé drop-down seznamy "
-"pro pluginy s velkým množstvím ovládacích portů.\n"
+"Tím se zredukuje prodleva v GUI a zkrátí se nadměrně dlouhé drop-down "
+"seznamy pro pluginy s velkým množstvím ovládacích portů.\n"
 "\n"
-"Pozn.: Toto ovlivní pouze nově načítané pluginy a aplikuje se při novém"
-" načtení sezení. Již automatizované parametry se zachovají."
+"Pozn.: Toto ovlivní pouze nově načítané pluginy a aplikuje se při novém "
+"načtení sezení. Již automatizované parametry se zachovají."
 
 #: rc_option_editor.cc:5155 rc_option_editor.cc:5156
 msgid "Video"
@@ -18863,8 +18857,8 @@ msgid ""
 "Toggle analysis enable, pause the visual update. Left mouse press on the "
 "analysis area can temporarily freeze the display"
 msgstr ""
-"Přepnout analýzu, pozastavit aktualizaci pohledu. Levým tlačítkem myši "
-"na ploše analýzy můžete dočasně zastavit zobrazení"
+"Přepnout analýzu, pozastavit aktualizaci pohledu. Levým tlačítkem myši na "
+"ploše analýzy můžete dočasně zastavit zobrazení"
 
 #: rta_window.cc:125
 msgid ""
@@ -18873,10 +18867,9 @@ msgid ""
 "fast enough to be frequency dependent with Fast mode falling 96dB/s."
 msgstr ""
 "Nastavit dobu návratu analýzy. Měření hluku má dobu klesání 1dB za 2 "
-"sekundy. Pomalý režim klesá o 5dB/s, střední o 48dB/s. Rychlý a velmi rychlý"
-" režim jsou "
-"dostatečně rychlé, aby byly závislé na frekvenci, přičemž Rychlý režim klesá"
-" o 96dB/s."
+"sekundy. Pomalý režim klesá o 5dB/s, střední o 48dB/s. Rychlý a velmi rychlý "
+"režim jsou dostatečně rychlé, aby byly závislé na frekvenci, přičemž Rychlý "
+"režim klesá o 96dB/s."
 
 #: rta_window.cc:126
 msgid ""
@@ -18885,11 +18878,10 @@ msgid ""
 "frequency scale on which equal distances correspond with perceptually equal "
 "distances."
 msgstr ""
-"Frekvenčně zkreslí spektrum pro zaměření na daný rozsah. Vysoký faktor"
-" zkreslení "
-"zvyšuje rozlišení v nízkofrekvenčním rozsahu, zatímco Barkova stupnice je "
-"frekvenční stupnice, na které se dané vzdálenosti shodují se vzdálenostmi"
-" vnímanými."
+"Frekvenčně zkreslí spektrum pro zaměření na daný rozsah. Vysoký faktor "
+"zkreslení zvyšuje rozlišení v nízkofrekvenčním rozsahu, zatímco Barkova "
+"stupnice je frekvenční stupnice, na které se dané vzdálenosti shodují se "
+"vzdálenostmi vnímanými."
 
 #: save_as_dialog.cc:36
 msgid "Switch to newly-saved version"
@@ -20252,9 +20244,9 @@ msgid ""
 "midnight boundary. Try moving the export-range earlier on the product "
 "timeline."
 msgstr ""
-"Chyba: Soubor pro export obsahuje neplatnou hodnotu timecode poblíž "
-"hranice půlnoci. Zkuste posunout rozsah exportu na časové ose projektu na"
-" dřívější pozici."
+"Chyba: Soubor pro export obsahuje neplatnou hodnotu timecode poblíž hranice "
+"půlnoci. Zkuste posunout rozsah exportu na časové ose projektu na dřívější "
+"pozici."
 
 #: simple_export_dialog.cc:330
 msgid "_Abort"
@@ -20548,34 +20540,32 @@ msgid ""
 "\n"
 "                http://ardour.org/support</span>\n"
 msgstr ""
-"<span size=\"x-large\" weight=\"bold\">Vítejte v tomto ještě velmi"
-" nedokončeném "
-"vydání %1 %2</span>\n"
+"<span size=\"x-large\" weight=\"bold\">Vítejte v tomto ještě velmi "
+"nedokončeném vydání %1 %2</span>\n"
 "\n"
-"<span size=\"large\">Jedná se stále o velmi nedokončenou verzi a mnoho"
-" stávajících\n"
-"funkcí pro úpravy může být nefunkčních. Kromě toho se rychle vyvíjí funkčnost "
-"editace MIDI klipů\n"
-"na stránce řadiče, ale pokud vidíte tuto zprávu, "
-"není\n"
+"<span size=\"large\">Jedná se stále o velmi nedokončenou verzi a mnoho "
+"stávajících\n"
+"funkcí pro úpravy může být nefunkčních. Kromě toho se rychle vyvíjí "
+"funkčnost editace MIDI klipů\n"
+"na stránce řadiče, ale pokud vidíte tuto zprávu, není\n"
 "v tuto chvíli považována za dokončenou.\n"
-"1) Prosím <b>NEPOUŽÍVEJTE</b> tento software s očekáváním, že je "
-"stabilní nebo spolehlivý\n"
+"1) Prosím <b>NEPOUŽÍVEJTE</b> tento software s očekáváním, že je stabilní "
+"nebo spolehlivý\n"
 " , i když tomu tak může být v závislosti na vašem pracovním postupu.\n"
 "2) Počkejte prosím na užitečný popis nových funkcí.\n"
 "3) <b>Nepoužívejte prosím fóra na ardour.org k hlášení problémů</b>.\n"
 "4) <b>V tuto chvíli prosím NEHLASTE chyby této alfa verze</b>.\n"
 "   Před dokončením počátečního vývoje se chyby netřídí a\n"
-"   hlášení problémů u neúplné, probíhající práce je většinou "
-"zbytečné.\n"
-"5) <b>Připojte</b> se prosím k nám na IRC k diskuzím o %1 %2 v reálném čase.\n"
+"   hlášení problémů u neúplné, probíhající práce je většinou zbytečné.\n"
+"5) <b>Připojte</b> se prosím k nám na IRC k diskuzím o %1 %2 v reálném "
+"čase.\n"
 "5) <b>PŘIPOJTE SE</b> k nám na IRC pro diskuse v reálném čase o %1 %2. "
 "Můžete\n"
 "   se tam dostat přímo z programu přes nabídku Nápověda -> Chat\n"
 "6) <b>NEZAPOMEŇTE</b> zaslat opravy problémů po jejich projednání na IRC.\n"
 "\n"
-"Úplné informace o všech výše uvedených skutečnostech naleznete na stránce"
-" podpory na adrese\n"
+"Úplné informace o všech výše uvedených skutečnostech naleznete na stránce "
+"podpory na adrese\n"
 "\n"
 "                http://ardour.org/support</span>\n"
 
@@ -21685,23 +21675,23 @@ msgstr "Stáhnout..."
 msgid "%1 Bundled Content"
 msgstr "%1 přibalený obsah"
 
-#: trigger_clip_picker.cc:521
+#: trigger_clip_picker.cc:518
 msgid "%1 (%2 Tracks, only the first track will be used)"
 msgstr "%1 (%2 stop, bude použita pouze první stopa)"
 
-#: trigger_clip_picker.cc:524
+#: trigger_clip_picker.cc:521
 msgid "%1 notes on channel: %2%3 "
 msgstr "%1 not v kanálu: %2%3 "
 
-#: trigger_clip_picker.cc:527
+#: trigger_clip_picker.cc:524
 msgid ", with pgms"
 msgstr ", s programy"
 
-#: trigger_clip_picker.cc:1020
+#: trigger_clip_picker.cc:1017
 msgid "Cannot get info from audio file %1 (%2)"
 msgstr "Nelze získat info ze zvukového souboru %1 (%2)"
 
-#: trigger_clip_picker.cc:1097
+#: trigger_clip_picker.cc:1094
 msgid "Audition Synth"
 msgstr "Syntezátor poslechu"
 
@@ -22731,6 +22721,12 @@ msgstr ""
 msgid "Input Video File"
 msgstr "Vstupní video soubor"
 
+#~ msgid "Copyright (C) 1999-2025 Paul Davis\n"
+#~ msgstr "Copyright (C) 1999-2025 Paul Davis\n"
+
+#~ msgid "Copyright (C) 1999-2025 Paul Davis"
+#~ msgstr "Copyright (C) 1999-2025 Paul Davis"
+
 #~ msgid ""
 #~ "Italian:\n"
 #~ "\tVincenzo Reale <smart2128@baslug.org>\n"
@@ -23182,5 +23178,4 @@ msgstr "Vstupní video soubor"
 
 #~ msgid "Color file for %1 not found along %2"
 #~ msgstr "Soubor s barvou pro %1 nebyl pod %2 nalezen"
-
 
