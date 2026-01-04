@@ -138,7 +138,7 @@ class LIBPBD_API Stateful {
 
   private:
 	friend struct ForceIDRegeneration;
-	static Glib::Threads::Private<bool> _regenerate_xml_or_string_ids;
+	static thread_local bool _regenerate_xml_or_string_ids;
 
 	PBD::ID           _id;
 	std::atomic<int> _stateful_frozen;
