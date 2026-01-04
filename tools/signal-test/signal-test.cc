@@ -43,12 +43,12 @@ public:
 	MyEventLoop (std::string const& name)
 	: EventLoop (name)
 	{
-		run_loop_thread = Glib::Threads::Thread::self ();
+		run_loop_thread = g_thread_self ();
 	}
 
 	void call_slot (InvalidationRecord* ir, const std::function<void ()>& f)
 	{
-		if (Glib::Threads::Thread::self () == run_loop_thread) {
+		if (g_thread_self () == run_loop_thread) {
 			f ();
 		} else {
 			assert (!ir);
@@ -68,8 +68,8 @@ public:
 	}
 
 private:
-	Glib::Threads::Thread* run_loop_thread;
-	PBD::RWLock            request_buffer_map_lock;
+	GThread*    run_loop_thread;
+	PBD::RWLock request_buffer_map_lock;
 };
 
 struct MyInvalidationRecord : public PBD::EventLoop::InvalidationRecord {
