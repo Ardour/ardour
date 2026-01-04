@@ -466,7 +466,7 @@ MidiTrack::non_realtime_locate (samplepos_t spos)
 		_disk_reader->midi_chase (spos);
 	}
 
-	Glib::Threads::Mutex::Lock lm (_control_lock, Glib::Threads::TRY_LOCK);
+	PBD::Mutex::Lock lm (_control_lock, PBD::Mutex::TryLock);
 	if (!lm.locked()) {
 		return;
 	}

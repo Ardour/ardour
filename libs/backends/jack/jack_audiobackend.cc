@@ -47,8 +47,8 @@ using std::vector;
 
 #define GET_PRIVATE_JACK_POINTER(localvar)  jack_client_t* localvar = _jack_connection->jack(); if (!(localvar)) { return; }
 #define GET_PRIVATE_JACK_POINTER_RET(localvar,r) jack_client_t* localvar = _jack_connection->jack(); if (!(localvar)) { return r; }
-// #define JACK_SERVER_CALL(expr) { std::cerr << "JACK SERVER CALL: " << DEBUG_THREAD_SELF << '/' << pthread_name() << ' ' << #expr << std::endl; Glib::Threads::Mutex::Lock lm (server_call_mutex); expr; }
-#define JACK_SERVER_CALL(expr) { Glib::Threads::Mutex::Lock lm (server_call_mutex); expr; }
+// #define JACK_SERVER_CALL(expr) { std::cerr << "JACK SERVER CALL: " << DEBUG_THREAD_SELF << '/' << pthread_name() << ' ' << #expr << std::endl; PBD::Mutex::Lock lm (server_call_mutex); expr; }
+#define JACK_SERVER_CALL(expr) { PBD::Mutex::Lock lm (server_call_mutex); expr; }
 
 JACKAudioBackend::JACKAudioBackend (AudioEngine& e, AudioBackendInfo& info, std::shared_ptr<JackConnection> jc)
 	: AudioBackend (e, info)

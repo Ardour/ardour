@@ -27,8 +27,6 @@
 #include <cmath>
 #include <vector>
 
-#include <glibmm/threads.h>
-
 #include "pbd/control_math.h"
 
 #include "evoral/Curve.h"

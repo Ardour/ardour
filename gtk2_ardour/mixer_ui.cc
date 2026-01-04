@@ -34,8 +34,6 @@
 #include <sigc++/bind.h>
 
 
-#include <glibmm/threads.h>
-
 #include <ytkmm/accelmap.h>
 #include <ytkmm/menu.h>
 #include <ytkmm/offscreenwindow.h>

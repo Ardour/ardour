@@ -25,14 +25,13 @@
 #include <vector>
 #include <string>
 
-#include <glibmm/threads.h>
+#include "pbd/mutex.h"
+#include "pbd/signals.h"
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 
 #include "temporal/domain_swap.h"
-
-#include "pbd/signals.h"
 
 class XMLNode;
 
@@ -94,7 +93,7 @@ private:
 	int load_unused (Session &, const XMLNode&);
 	std::shared_ptr<Playlist> XMLPlaylistFactory (Session &, const XMLNode&);
 
-	mutable Glib::Threads::Mutex lock;
+	mutable PBD::Mutex lock;
 
 	PlaylistSet playlists;
 	PlaylistSet unused_playlists;

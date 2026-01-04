@@ -22,8 +22,6 @@
 #include <memory>
 #include <vector>
 
-#include <glibmm/threads.h>
-
 #include "pbd/controllable.h"
 #include "pbd/rwlock.h"
 

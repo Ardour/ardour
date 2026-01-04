@@ -76,7 +76,7 @@ Automatable::Automatable (const Automatable& other)
 	, _a_session (other._a_session)
 	, _automated_controls (new AutomationControlList)
 {
-	Glib::Threads::Mutex::Lock lm (other._control_lock);
+	PBD::Mutex::Lock lm (other._control_lock);
 
 	for (Controls::const_iterator i = other._controls.begin(); i != other._controls.end(); ++i) {
 		std::shared_ptr<Evoral::Control> ac (control_factory (i->first));
@@ -93,7 +93,7 @@ Automatable::~Automatable ()
 	}
 	_automated_controls.flush ();
 
-	Glib::Threads::Mutex::Lock lm (_control_lock);
+	PBD::Mutex::Lock lm (_control_lock);
 	for (Controls::const_iterator li = _controls.begin(); li != _controls.end(); ++li) {
 		std::dynamic_pointer_cast<AutomationControl>(li->second)->drop_references ();
 	}
@@ -133,7 +133,7 @@ Automatable::load_automation (const string& path)
 		return 1;
 	}
 
-	Glib::Threads::Mutex::Lock lm (control_lock());
+	PBD::Mutex::Lock lm (control_lock());
 	set<Evoral::Parameter> tosave;
 	controls().clear ();
 
@@ -270,7 +270,7 @@ Automatable::all_automatable_params () const
 int
 Automatable::set_automation_xml_state (const XMLNode& node, Evoral::Parameter legacy_param)
 {
-	Glib::Threads::Mutex::Lock lm (control_lock());
+	PBD::Mutex::Lock lm (control_lock());
 
 	/* Don't clear controls, since some may be special derived Controllable classes */
 
@@ -339,7 +339,7 @@ Automatable::set_automation_xml_state (const XMLNode& node, Evoral::Parameter le
 XMLNode&
 Automatable::get_automation_xml_state () const
 {
-	Glib::Threads::Mutex::Lock lm (control_lock());
+	PBD::Mutex::Lock lm (control_lock());
 	XMLNode* node = new XMLNode (Automatable::xml_node_name);
 
 	if (controls().empty()) {
@@ -363,7 +363,7 @@ Automatable::get_automation_xml_state () const
 void
 Automatable::set_parameter_automation_state (Evoral::Parameter param, AutoState s)
 {
-	Glib::Threads::Mutex::Lock lm (control_lock());
+	PBD::Mutex::Lock lm (control_lock());
 
 	std::shared_ptr<AutomationControl> c = automation_control (param, true);
 

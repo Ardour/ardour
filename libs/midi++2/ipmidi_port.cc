@@ -298,7 +298,7 @@ int
 IPMIDIPort::write (const MIDI::byte* msg, size_t msglen, timestamp_t /* ignored */) {
 
 	if (sockout) {
-		Glib::Threads::Mutex::Lock lm (write_lock);
+		PBD::Mutex::Lock lm (write_lock);
 		if (::sendto (sockout, (const char *) msg, msglen, 0, (struct sockaddr *) &addrout, sizeof(struct sockaddr_in)) < 0) {
 			::perror("sendto");
 			return -1;

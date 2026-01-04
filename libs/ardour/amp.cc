@@ -408,7 +408,7 @@ Amp::set_state (const XMLNode& node, int version)
 void
 Amp::setup_gain_automation (samplepos_t start_sample, samplepos_t end_sample, samplecnt_t nframes)
 {
-	Glib::Threads::Mutex::Lock am (control_lock(), Glib::Threads::TRY_LOCK);
+	PBD::Mutex::Lock am (control_lock(), PBD::Mutex::TryLock);
 
 	if (am.locked()
 	    && (_session.transport_rolling() || _session.bounce_processing())

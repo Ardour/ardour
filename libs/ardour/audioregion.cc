@@ -30,7 +30,6 @@
 #include <set>
 
 #include <glibmm/fileutils.h>
-#include <glibmm/threads.h>
 
 #include "pbd/gstdio_compat.h"
 #include "pbd/basename.h"
@@ -743,9 +742,9 @@ AudioRegion::read_at (Sample*     buf,
 	 *  (envelope/fades/regionFX) will not make a
 	 *  significant difference.
 	 */
-	Glib::Threads::Mutex::Lock crl (_read_lock);
+	PBD::Mutex::Lock crl (_read_lock);
 
-	Glib::Threads::Mutex::Lock cl (_cache_lock);
+	PBD::Mutex::Lock cl (_cache_lock);
 	if (chan_n == 0 && _invalidated.exchange (false)) {
 		_cache_start = _cache_end = -1;
 		_cache_tail  = 0;
@@ -2608,7 +2607,7 @@ AudioRegion::remove_plugin (std::shared_ptr<RegionFxPlugin> fx)
 	_plugins.erase (i);
 
 	if (_plugins.empty ()) {
-		Glib::Threads::Mutex::Lock cl (_cache_lock);
+		PBD::Mutex::Lock cl (_cache_lock);
 		_cache_start = _cache_end = -1;
 		_cache_tail  = 0;
 		_readcache.clear ();

@@ -241,7 +241,7 @@ AsyncMIDIPort::write (const MIDI::byte * msg, size_t msglen, MIDI::timestamp_t t
 			}
 		}
 
-		Glib::Threads::Mutex::Lock lm (output_fifo_lock);
+		PBD::Mutex::Lock lm (output_fifo_lock);
 		RingBuffer< Evoral::Event<double> >::rw_vector vec = { { 0, 0 }, { 0, 0} };
 
 		output_fifo.get_write_vector (&vec);

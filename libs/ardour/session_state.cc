@@ -66,7 +66,6 @@
 #include "pbd/strsplit.h"
 
 #include <glibmm.h>
-#include <glibmm/threads.h>
 #include <glibmm/fileutils.h>
 
 #include <boost/algorithm/string.hpp>
@@ -783,8 +782,8 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 
 	/* prevent concurrent saves from different threads */
 
-	Glib::Threads::Mutex::Lock lm (save_state_lock);
-	Glib::Threads::Mutex::Lock lx (save_source_lock, Glib::Threads::NOT_LOCK);
+	PBD::Mutex::Lock lm (save_state_lock);
+	PBD::Mutex::Lock lx (save_source_lock, PBD::Mutex::NotLock);
 	if (!for_archive) {
 		lx.acquire ();
 	}
@@ -1635,7 +1634,7 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 	child = node->add_child ("Sources");
 
 	if (!save_template) {
-		Glib::Threads::Mutex::Lock sl (source_lock);
+		PBD::Mutex::Lock sl (source_lock);
 
 		set<std::shared_ptr<Source> > sources_used_by_this_snapshot;
 
@@ -1694,7 +1693,7 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 	child = node->add_child ("Regions");
 
 	if (!save_template) {
-		Glib::Threads::Mutex::Lock rl (region_lock);
+		PBD::Mutex::Lock rl (region_lock);
 
 		if (!only_used_assets) {
 			const RegionFactory::RegionMap& region_map (RegionFactory::all_regions());
@@ -1872,7 +1871,7 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 	}
 
 	{
-		Glib::Threads::Mutex::Lock lm (lua_lock);
+		PBD::Mutex::Lock lm (lua_lock);
 		std::string saved;
 		{
 			luabridge::LuaRef savedstate ((*_lua_save)());
@@ -2394,7 +2393,7 @@ Session::set_state (const XMLNode& node, int version)
 			gsize size;
 			guchar* buf = g_base64_decode ((*n)->content ().c_str (), &size);
 			try {
-				Glib::Threads::Mutex::Lock lm (lua_lock);
+				PBD::Mutex::Lock lm (lua_lock);
 				(*_lua_load)(std::string ((const char*)buf, size));
 			} catch (luabridge::LuaException const& e) {
 #ifndef NDEBUG
@@ -3019,7 +3018,7 @@ Session::get_sources_as_xml ()
 
 {
 	XMLNode* node = new XMLNode (X_("Sources"));
-	Glib::Threads::Mutex::Lock lm (source_lock);
+	PBD::Mutex::Lock lm (source_lock);
 
 	for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
 		node->add_child_nocopy (i->second->get_state());
@@ -3289,7 +3288,7 @@ Session::refresh_disk_space ()
 {
 #if __APPLE__ || __FreeBSD__ || __NetBSD__ || (HAVE_SYS_VFS_H && HAVE_SYS_STATVFS_H)
 
-	Glib::Threads::Mutex::Lock lm (space_lock);
+	PBD::Mutex::Lock lm (space_lock);
 
 	/* get freespace on every FS that is part of the session path */
 
@@ -3914,7 +3913,7 @@ Session::can_cleanup_peakfiles () const
 int
 Session::cleanup_peakfiles ()
 {
-	Glib::Threads::Mutex::Lock lm (peak_cleanup_lock, Glib::Threads::TRY_LOCK);
+	PBD::Mutex::Lock lm (peak_cleanup_lock, PBD::Mutex::TryLock);
 	if (!lm.locked()) {
 		return -1;
 	}
@@ -3958,7 +3957,7 @@ void
 Session::close_all_sources ()
 {
 	/* this is mainly useful on Windows, sources are re-opened when needed */
-	Glib::Threads::Mutex::Lock lm (source_lock);
+	PBD::Mutex::Lock lm (source_lock);
 	for (auto const& s : sources) {
 		std::shared_ptr<FileSource> fs = std::dynamic_pointer_cast<FileSource> (s.second);
 		if (fs) {
@@ -3988,7 +3987,7 @@ Session::cleanup_sources (CleanupReport& rep)
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state | InCleanup);
 
-	Glib::Threads::Mutex::Lock ls (source_lock, Glib::Threads::NOT_LOCK);
+	PBD::Mutex::Lock ls (source_lock, PBD::Mutex::NotLock);
 
 	/* this is mostly for windows which doesn't allow file
 	 * renaming if the file is in use. But we don't special
@@ -4367,14 +4366,14 @@ Session::add_controllable (std::shared_ptr<Controllable> c)
 	   as part of the session.
 	*/
 
-	Glib::Threads::Mutex::Lock lm (controllables_lock);
+	PBD::Mutex::Lock lm (controllables_lock);
 	controllables.insert (c);
 }
 
 std::shared_ptr<Controllable>
 Session::controllable_by_id (const PBD::ID& id)
 {
-	Glib::Threads::Mutex::Lock lm (controllables_lock);
+	PBD::Mutex::Lock lm (controllables_lock);
 
 	for (Controllables::iterator i = controllables.begin(); i != controllables.end(); ++i) {
 		if ((*i)->id() == id) {
@@ -5337,7 +5336,7 @@ Session::bring_all_sources_into_session (std::function<void(uint32_t,uint32_t,st
 
 	{
 
-		Glib::Threads::Mutex::Lock lm (source_lock);
+		PBD::Mutex::Lock lm (source_lock);
 
 		for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
 			std::shared_ptr<FileSource> fs = std::dynamic_pointer_cast<FileSource> (i->second);
@@ -5896,7 +5895,7 @@ Session::archive_session (const std::string& dest,
 
 	/* We are going to temporarily change some source properties,
 	 * don't allow any concurrent saves (periodic or otherwise */
-	Glib::Threads::Mutex::Lock lm (save_source_lock);
+	PBD::Mutex::Lock lm (save_source_lock);
 
 	disable_record (false);
 
@@ -5983,7 +5982,7 @@ Session::archive_session (const std::string& dest,
 	 */
 	size_t total_size = 0;
 	{
-		Glib::Threads::Mutex::Lock lm (source_lock);
+		PBD::Mutex::Lock lm (source_lock);
 
 		/* build a list of used names */
 		std::set<std::string> audio_file_names;
@@ -6077,7 +6076,7 @@ Session::archive_session (const std::string& dest,
 			progress->set_progress (0);
 		}
 
-		Glib::Threads::Mutex::Lock lm (source_lock);
+		PBD::Mutex::Lock lm (source_lock);
 		for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
 			if (std::dynamic_pointer_cast<SilentFileSource> (i->second)) {
 				continue;

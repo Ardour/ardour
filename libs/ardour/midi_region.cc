@@ -29,7 +29,6 @@
 
 #include <set>
 
-#include <glibmm/threads.h>
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 

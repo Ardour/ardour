@@ -110,7 +110,7 @@ ARDOUR::UserBundle::get_state () const
 	node->set_property ("name", name ());
 
 	{
-		Glib::Threads::Mutex::Lock lm (_channel_mutex);
+		PBD::Mutex::Lock lm (_channel_mutex);
 
 		for (std::vector<Channel>::const_iterator i = _channel.begin(); i != _channel.end(); ++i) {
 			XMLNode* c = new XMLNode ("Channel");

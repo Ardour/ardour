@@ -222,7 +222,7 @@ bool
 MackieControlProtocol::stripable_is_locked_to_strip (std::shared_ptr<Stripable> r) const
 {
 	{
-		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		PBD::Mutex::Lock lm (surfaces_lock);
 		for (Surfaces::const_iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
 			if ((*si)->stripable_is_locked_to_strip (r)) {
 				return true;
@@ -383,7 +383,7 @@ MackieControlProtocol::n_strips (bool with_locked_strips) const
 	uint32_t strip_count = 0;
 
 	{
-		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		PBD::Mutex::Lock lm (surfaces_lock);
 		for (Surfaces::const_iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
 			strip_count += (*si)->n_strips (with_locked_strips);
 		}
@@ -438,7 +438,7 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 		Sorted::iterator r = sorted.begin() + _current_initial_bank;
 
 		{
-			Glib::Threads::Mutex::Lock lm (surfaces_lock);
+			PBD::Mutex::Lock lm (surfaces_lock);
 			for (Surfaces::iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
 				vector<std::shared_ptr<Stripable> > stripables;
 				uint32_t added = 0;
@@ -465,7 +465,7 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("clear all strips, bank target %1  is outside route range %2\n",
 		                                                   _current_initial_bank, sorted.size()));
 		{
-			Glib::Threads::Mutex::Lock lm (surfaces_lock);
+			PBD::Mutex::Lock lm (surfaces_lock);
 			for (Surfaces::iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
 				vector<std::shared_ptr<Stripable> > stripables;
 				/* pass in an empty stripables list, so that all strips will be reset */
@@ -546,7 +546,7 @@ MackieControlProtocol::set_active (bool yn)
 bool
 MackieControlProtocol::hui_heartbeat ()
 {
-	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+	PBD::Mutex::Lock lm (surfaces_lock);
 
 	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
 		(*s)->hui_heartbeat ();
@@ -574,7 +574,7 @@ MackieControlProtocol::periodic ()
 	PBD::microseconds_t now_usecs = PBD::get_microseconds ();
 
 	{
-		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		PBD::Mutex::Lock lm (surfaces_lock);
 
 		for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
 			(*s)->periodic (now_usecs);
@@ -603,7 +603,7 @@ MackieControlProtocol::redisplay ()
 	PBD::microseconds_t now = PBD::get_microseconds ();
 
 	{
-		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		PBD::Mutex::Lock lm (surfaces_lock);
 
 		for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
 			(*s)->redisplay (now, false);
@@ -643,7 +643,7 @@ MackieControlProtocol::update_global_button (int id, MACKIE_NAMESPACE::LedState 
 	std::shared_ptr<MACKIE_NAMESPACE::Surface> surface;
 
 	{
-		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		PBD::Mutex::Lock lm (surfaces_lock);
 
 		if (!_master_surface) {
 			return;
@@ -668,7 +668,7 @@ MackieControlProtocol::update_global_button (int id, MACKIE_NAMESPACE::LedState 
 void
 MackieControlProtocol::update_global_led (int id, MACKIE_NAMESPACE::LedState ls)
 {
-	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+	PBD::Mutex::Lock lm (surfaces_lock);
 
 	if (surfaces.empty()) {
 		return;
@@ -696,7 +696,7 @@ MackieControlProtocol::device_ready ()
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("device ready init (active=%1)\n", active()));
 	// Clear the surface so that any left over control from other programs are reset.
 	{
-		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		PBD::Mutex::Lock lm (surfaces_lock);
 		for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
 			(*s)->zero_all ();
 		}
@@ -726,7 +726,7 @@ void
 MackieControlProtocol::initialize()
 {
 	{
-		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		PBD::Mutex::Lock lm (surfaces_lock);
 
 		if (surfaces.empty()) {
 			return;
@@ -823,7 +823,7 @@ MackieControlProtocol::set_device (const string& device_name, bool force)
 	*/
 
 	{
-		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		PBD::Mutex::Lock lm (surfaces_lock);
 		if (!surfaces.empty()) {
 			update_configuration_state ();
 		}
@@ -940,7 +940,7 @@ MackieControlProtocol::create_surfaces ()
 		}
 
 		{
-			Glib::Threads::Mutex::Lock lm (surfaces_lock);
+			PBD::Mutex::Lock lm (surfaces_lock);
 			if (is_master) {
 				_master_surface = surface;
 			}
@@ -1008,7 +1008,7 @@ MackieControlProtocol::create_surfaces ()
 	}
 
 	if (!_device_info.uses_ipmidi()) {
-		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		PBD::Mutex::Lock lm (surfaces_lock);
 		for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
 			(*s)->port().reconnect ();
 		}
@@ -1077,7 +1077,7 @@ MackieControlProtocol::get_state() const
 	node.set_property (X_("device-name"), _device_info.name());
 
 	{
-		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		PBD::Mutex::Lock lm (surfaces_lock);
 		update_configuration_state ();
 	}
 
@@ -1225,7 +1225,7 @@ MackieControlProtocol::format_timecode_timecode (samplepos_t now_sample)
 void
 MackieControlProtocol::update_timecode_display()
 {
-	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+	PBD::Mutex::Lock lm (surfaces_lock);
 
 	if (surfaces.empty()) {
 		return;
@@ -1306,7 +1306,7 @@ void
 MackieControlProtocol::notify_routes_added (ARDOUR::RouteList & rl)
 {
 	{
-		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		PBD::Mutex::Lock lm (surfaces_lock);
 
 		if (surfaces.empty()) {
 			return;
@@ -1324,7 +1324,7 @@ MackieControlProtocol::notify_routes_added (ARDOUR::RouteList & rl)
 void
 MackieControlProtocol::notify_monitor_added_or_removed ()
 {
-	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+	PBD::Mutex::Lock lm (surfaces_lock);
 	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
 		(*s)->master_monitor_may_have_changed ();
 	}
@@ -1336,7 +1336,7 @@ MackieControlProtocol::notify_solo_active_changed (bool active)
 	std::shared_ptr<MACKIE_NAMESPACE::Surface> surface;
 
 	{
-		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		PBD::Mutex::Lock lm (surfaces_lock);
 
 		if (surfaces.empty()) {
 			return;
@@ -1368,7 +1368,7 @@ MackieControlProtocol::notify_presentation_info_changed (PBD::PropertyChange con
 	}
 
 	{
-		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		PBD::Mutex::Lock lm (surfaces_lock);
 
 		if (surfaces.empty()) {
 			return;
@@ -1411,7 +1411,7 @@ MackieControlProtocol::notify_transport_state_changed()
 void
 MackieControlProtocol::notify_metering_state_changed()
 {
-	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+	PBD::Mutex::Lock lm (surfaces_lock);
 
 	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
 		(*s)->notify_metering_state_changed ();
@@ -1428,7 +1428,7 @@ MackieControlProtocol::notify_record_state_changed ()
 	std::shared_ptr<MACKIE_NAMESPACE::Surface> surface;
 
 	{
-		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		PBD::Mutex::Lock lm (surfaces_lock);
 		if (surfaces.empty()) {
 			return;
 		}
@@ -1793,7 +1793,7 @@ MackieControlProtocol::redisplay_subview_mode ()
 	Surfaces copy; /* can't hold surfaces lock while calling Strip::subview_mode_changed */
 
 	{
-		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		PBD::Mutex::Lock lm (surfaces_lock);
 		copy = surfaces;
 	}
 
@@ -1819,7 +1819,7 @@ MackieControlProtocol::set_subview_mode (MACKIE_NAMESPACE::Subview::Mode sm, std
 
 		DEBUG_TRACE (DEBUG::MackieControl, "subview mode not OK\n");
 
-		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		PBD::Mutex::Lock lm (surfaces_lock);
 
 		if (!surfaces.empty()) {
 			if (!reason_why_subview_not_possible.empty()) {
@@ -1886,7 +1886,7 @@ void
 MackieControlProtocol::display_view_mode ()
 {
 	{
-		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		PBD::Mutex::Lock lm (surfaces_lock);
 
 		for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
 			(*s)->update_view_mode_display (true);
@@ -1905,7 +1905,7 @@ MackieControlProtocol::set_flip_mode (FlipMode fm)
 		update_global_button (Button::Flip, on);
 	}
 
-	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+	PBD::Mutex::Lock lm (surfaces_lock);
 
 	_flip_mode = fm;
 
@@ -1933,7 +1933,7 @@ MackieControlProtocol::force_special_stripable_to_strip (std::shared_ptr<Stripab
 		return;
 	}
 
-	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+	PBD::Mutex::Lock lm (surfaces_lock);
 
 	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
 		if ((*s)->number() == surface) {
@@ -2204,7 +2204,7 @@ MackieControlProtocol::pull_stripable_range (DownButtonList& down, StripableList
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("PRR %5 in list %1.%2 - %3.%4\n", first_surface, first_strip, last_surface, last_strip,
 							   down.size()));
 
-	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+	PBD::Mutex::Lock lm (surfaces_lock);
 
 	for (Surfaces::const_iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
 
@@ -2281,7 +2281,7 @@ MackieControlProtocol::clear_surfaces ()
 	clear_ports ();
 
 	{
-		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		PBD::Mutex::Lock lm (surfaces_lock);
 		_master_surface.reset ();
 		surfaces.clear ();
 	}
@@ -2293,7 +2293,7 @@ MackieControlProtocol::set_touch_sensitivity (int sensitivity)
 	sensitivity = min (9, sensitivity);
 	sensitivity = max (0, sensitivity);
 
-	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+	PBD::Mutex::Lock lm (surfaces_lock);
 
 	for (Surfaces::const_iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
 		(*s)->set_touch_sensitivity (sensitivity);
@@ -2303,7 +2303,7 @@ MackieControlProtocol::set_touch_sensitivity (int sensitivity)
 void
 MackieControlProtocol::recalibrate_faders ()
 {
-	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+	PBD::Mutex::Lock lm (surfaces_lock);
 
 	for (auto const& s : surfaces) {
 		s->recalibrate_faders ();
@@ -2313,7 +2313,7 @@ MackieControlProtocol::recalibrate_faders ()
 void
 MackieControlProtocol::toggle_backlight ()
 {
-	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+	PBD::Mutex::Lock lm (surfaces_lock);
 
 	for (auto const& s : surfaces) {
 		s->toggle_backlight ();
@@ -2323,7 +2323,7 @@ MackieControlProtocol::toggle_backlight ()
 std::shared_ptr<MACKIE_NAMESPACE::Surface>
 MackieControlProtocol::get_surface_by_raw_pointer (void* ptr) const
 {
-	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+	PBD::Mutex::Lock lm (surfaces_lock);
 
 	for (auto const& s : surfaces) {
 		if (s.get() == (MACKIE_NAMESPACE::Surface*) ptr) {
@@ -2337,7 +2337,7 @@ MackieControlProtocol::get_surface_by_raw_pointer (void* ptr) const
 std::shared_ptr<MACKIE_NAMESPACE::Surface>
 MackieControlProtocol::nth_surface (uint32_t n) const
 {
-	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+	PBD::Mutex::Lock lm (surfaces_lock);
 
 	for (Surfaces::const_iterator s = surfaces.begin(); s != surfaces.end(); ++s, --n) {
 		if (n == 0) {
@@ -2353,7 +2353,7 @@ MackieControlProtocol::connection_handler (std::weak_ptr<ARDOUR::Port> wp1, std:
 {
 	Surfaces scopy;
 	{
-		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		PBD::Mutex::Lock lm (surfaces_lock);
 		scopy = surfaces;
 	}
 
@@ -2418,7 +2418,7 @@ MackieControlProtocol::has_instrument (std::shared_ptr<Stripable> r) const
 bool
 MackieControlProtocol::is_mapped (std::shared_ptr<Stripable> r) const
 {
-	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+	PBD::Mutex::Lock lm (surfaces_lock);
 
 	for (Surfaces::const_iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
 		if ((*s)->stripable_is_mapped (r)) {
@@ -2434,7 +2434,7 @@ MackieControlProtocol::stripable_selection_changed ()
 {
 	//this function is called after the stripable selection is "stable", so this is the place to check surface selection state
 	{
-		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		PBD::Mutex::Lock lm (surfaces_lock);
 		for (Surfaces::iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
 			(*si)->update_strip_selection ();
 		}
@@ -2446,7 +2446,7 @@ MackieControlProtocol::stripable_selection_changed ()
 		Sorted sorted = get_sorted_stripables();
 
 		{
-			Glib::Threads::Mutex::Lock lm (surfaces_lock);
+			PBD::Mutex::Lock lm (surfaces_lock);
 			Sorted::iterator r = sorted.begin();
 			for (Surfaces::iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
 				vector<std::shared_ptr<Stripable> > stripables;
@@ -2511,7 +2511,7 @@ MackieControlProtocol::first_selected_stripable () const
 uint32_t
 MackieControlProtocol::global_index (MACKIE_NAMESPACE::Strip& strip)
 {
-	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+	PBD::Mutex::Lock lm (surfaces_lock);
 	return global_index_locked (strip);
 }
 

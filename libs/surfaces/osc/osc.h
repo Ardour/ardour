@@ -94,7 +94,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	bool get_active () const;
 
 	// generic osc send
-	Glib::Threads::Mutex _lo_lock;
+	PBD::Mutex _lo_lock;
 	int float_message (std::string, float value, lo_address addr);
 	int int_message (std::string, int value, lo_address addr);
 	int text_message (std::string path, std::string val, lo_address addr);
@@ -207,7 +207,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		 */
 
 // storage for  each surface's settings
-	mutable Glib::Threads::Mutex surfaces_lock;
+	mutable PBD::Mutex surfaces_lock;
 	typedef std::vector<OSCSurface> Surface;
 	Surface _surface;
 

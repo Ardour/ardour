@@ -110,7 +110,7 @@ PluginInsert::drop_references ()
 	 * controllable, but that runs after ~PluginInsert.
 	 */
 	{
-		Glib::Threads::Mutex::Lock lm (_control_lock);
+		PBD::Mutex::Lock lm (_control_lock);
 		for (Controls::const_iterator li = _controls.begin(); li != _controls.end(); ++li) {
 			std::dynamic_pointer_cast<AutomationControl>(li->second)->drop_references ();
 		}
@@ -1358,7 +1358,7 @@ PluginInsert::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		if (_session.transport_rolling() || _session.bounce_processing()) {
 			automate_and_run (bufs, start_sample, end_sample, speed, nframes);
 		} else {
-			Glib::Threads::Mutex::Lock lm (control_lock(), Glib::Threads::TRY_LOCK);
+			PBD::Mutex::Lock lm (control_lock(), PBD::Mutex::TryLock);
 			connect_and_run (bufs, start_sample, end_sample, speed, nframes, 0, lm.locked());
 		}
 #if defined MIXBUS && defined NDEBUG
@@ -1389,7 +1389,7 @@ PluginInsert::automate_and_run (BufferSet& bufs, samplepos_t start, samplepos_t 
 	Evoral::ControlEvent next_event (timepos_t (Temporal::AudioTime), 0.0f);
 	samplecnt_t offset = 0;
 
-	Glib::Threads::Mutex::Lock lm (control_lock(), Glib::Threads::TRY_LOCK);
+	PBD::Mutex::Lock lm (control_lock(), PBD::Mutex::TryLock);
 
 	if (!lm.locked()) {
 		connect_and_run (bufs, start, end, speed, nframes, offset, false);

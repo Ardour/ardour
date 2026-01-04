@@ -22,7 +22,6 @@
 
 
 #include "pbd/error.h"
-#include <glibmm/threads.h>
 #include <glibmm/timer.h>
 
 #include <midi++/mmc.h>

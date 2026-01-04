@@ -124,7 +124,7 @@ class /*LIBAUDIOGRAPHER_API*/ Threader : public Source<T>, public Sink<T>
 	std::atomic<int> readers;
 	long         wait_timeout;
 
-	Glib::Threads::Mutex exception_mutex;
+	PBD::Mutex exception_mutex;
 	std::shared_ptr<ThreaderException> exception;
 
 };

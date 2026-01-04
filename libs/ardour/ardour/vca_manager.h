@@ -24,8 +24,7 @@
 
 #include <memory>
 
-#include <glibmm/threads.h>
-
+#include "pbd/mutex.h"
 #include "pbd/signals.h"
 #include "pbd/statefuldestructible.h"
 
@@ -64,7 +63,7 @@ public:
 	static std::string xml_node_name;
 
 private:
-	mutable Glib::Threads::Mutex lock;
+	mutable PBD::Mutex lock;
 	VCAList _vcas;
 	bool _vcas_loaded;
 

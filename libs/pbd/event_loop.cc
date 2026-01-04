@@ -37,7 +37,7 @@ static void do_not_delete_the_loop_pointer (void*) { }
 
 Glib::Threads::Private<EventLoop> EventLoop::thread_event_loop (do_not_delete_the_loop_pointer);
 
-Glib::Threads::Mutex EventLoop::thread_buffer_requests_lock;
+PBD::Mutex EventLoop::thread_buffer_requests_lock;
 EventLoop::ThreadRequestBufferList EventLoop::thread_buffer_requests;
 EventLoop::RequestBufferSuppliers EventLoop::request_buffer_suppliers;
 
@@ -131,7 +131,7 @@ vector<EventLoop::ThreadBufferMapping>
 EventLoop::get_request_buffers_for_target_thread (const std::string& target_thread)
 {
 	vector<ThreadBufferMapping> ret;
-	Glib::Threads::Mutex::Lock lm (thread_buffer_requests_lock);
+	PBD::Mutex::Lock lm (thread_buffer_requests_lock);
 
 	DEBUG_TRACE (PBD::DEBUG::EventLoop, string_compose ("%1 look for request buffers via %2\n",  pthread_name(), target_thread));
 
@@ -160,7 +160,7 @@ EventLoop::pre_register (const string& emitting_thread_name, uint32_t num_reques
 	 */
 
 	ThreadBufferMapping mapping;
-	Glib::Threads::Mutex::Lock lm (thread_buffer_requests_lock);
+	PBD::Mutex::Lock lm (thread_buffer_requests_lock);
 
 	mapping.emitting_thread = pthread_self();
 	mapping.num_requests = num_requests;
@@ -206,7 +206,7 @@ EventLoop::pre_register (const string& emitting_thread_name, uint32_t num_reques
 void
 EventLoop::remove_request_buffer_from_map (pthread_t pth)
 {
-	Glib::Threads::Mutex::Lock lm (thread_buffer_requests_lock);
+	PBD::Mutex::Lock lm (thread_buffer_requests_lock);
 
 	for (ThreadRequestBufferList::iterator x = thread_buffer_requests.begin(); x != thread_buffer_requests.end(); ++x) {
 		if (pthread_equal (x->emitting_thread, pth)) {

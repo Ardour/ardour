@@ -20,7 +20,7 @@
 #ifndef __libardour_process_thread__
 #define __libardour_process_thread__
 
-#include <glibmm/threads.h>
+#include <glibmm/threads.h> // // Glib::Threads::Private
 
 #include "ardour/chan_count.h"
 #include "ardour/libardour_visibility.h"

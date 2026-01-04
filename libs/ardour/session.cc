@@ -39,7 +39,6 @@
 #include <limits.h>
 
 #include <glibmm/datetime.h>
-#include <glibmm/threads.h>
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
 
@@ -701,7 +700,7 @@ Session::destroy ()
 	_click_io_connection.disconnect ();
 
 	{
-		Glib::Threads::Mutex::Lock lm (controllables_lock);
+		PBD::Mutex::Lock lm (controllables_lock);
 		for (Controllables::iterator i = controllables.begin(); i != controllables.end(); ++i) {
 			(*i)->DropReferences (); /* EMIT SIGNAL */
 		}
@@ -721,7 +720,7 @@ Session::destroy ()
 
 	{
 		/* unregister all lua functions, drop held references (if any) */
-		Glib::Threads::Mutex::Lock tm (lua_lock, Glib::Threads::TRY_LOCK);
+		PBD::Mutex::Lock tm (lua_lock, PBD::Mutex::TryLock);
 		if (_lua_cleanup) {
 			(*_lua_cleanup)();
 		}
@@ -833,7 +832,7 @@ Session::destroy ()
 
 	{
 		DEBUG_TRACE (DEBUG::Destruction, "delete sources\n");
-		Glib::Threads::Mutex::Lock lm (source_lock);
+		PBD::Mutex::Lock lm (source_lock);
 		for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
 			DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for source %1 ; pre-ref = %2\n", i->second->name(), i->second.use_count()));
 			i->second->drop_references ();
@@ -2453,7 +2452,7 @@ Session::set_block_size (pframes_t nframes)
 
 	DEBUG_TRACE (DEBUG::LatencyCompensation, "Session::set_block_size -> update worst i/o latency\n");
 	/* when this is called from the auto-connect thread, the process-lock is held */
-	Glib::Threads::Mutex::Lock lx (_update_latency_lock);
+	PBD::Mutex::Lock lx (_update_latency_lock);
 	set_worst_output_latency ();
 	set_worst_input_latency ();
 }
@@ -4829,7 +4828,7 @@ Session::find_whole_file_parent (std::shared_ptr<Region const> child) const
 	RegionFactory::RegionMap::const_iterator i;
 	std::shared_ptr<Region> region;
 
-	Glib::Threads::Mutex::Lock lm (region_lock);
+	PBD::Mutex::Lock lm (region_lock);
 
 	for (i = regions.begin(); i != regions.end(); ++i) {
 
@@ -4875,7 +4874,7 @@ Session::destroy_sources (list<std::shared_ptr<Source> > const& srcs)
 	for (list<std::shared_ptr<Source> >::const_iterator s = srcs.begin(); s != srcs.end(); ++s) {
 
 		{
-			Glib::Threads::Mutex::Lock ls (source_lock);
+			PBD::Mutex::Lock ls (source_lock);
 			/* remove from the main source list */
 			sources.erase ((*s)->id());
 		}
@@ -4965,7 +4964,7 @@ Session::add_source (std::shared_ptr<Source> source)
 	entry.second = source;
 
 	{
-		Glib::Threads::Mutex::Lock lm (source_lock);
+		PBD::Mutex::Lock lm (source_lock);
 		result = sources.insert (entry);
 	}
 
@@ -5016,7 +5015,7 @@ Session::remove_source (std::weak_ptr<Source> src, bool drop_references)
 	}
 
 	{
-		Glib::Threads::Mutex::Lock lm (source_lock);
+		PBD::Mutex::Lock lm (source_lock);
 
 		if ((i = sources.find (source->id())) != sources.end()) {
 			sources.erase (i);
@@ -5054,7 +5053,7 @@ Session::remove_source (std::weak_ptr<Source> src, bool drop_references)
 std::shared_ptr<Source>
 Session::source_by_id (const PBD::ID& id)
 {
-	Glib::Threads::Mutex::Lock lm (source_lock);
+	PBD::Mutex::Lock lm (source_lock);
 	SourceMap::iterator i;
 	std::shared_ptr<Source> source;
 
@@ -5072,7 +5071,7 @@ Session::audio_source_by_path_and_channel (const string& path, uint16_t chn) con
 	   as a property.
 	*/
 
-	Glib::Threads::Mutex::Lock lm (source_lock);
+	PBD::Mutex::Lock lm (source_lock);
 
 	for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
 		std::shared_ptr<AudioFileSource> afs
@@ -5093,7 +5092,7 @@ Session::midi_source_by_path (const std::string& path, bool need_source_lock) co
 	   for unique identification, in addition to a path.
 	*/
 
-	Glib::Threads::Mutex::Lock lm (source_lock, Glib::Threads::NOT_LOCK);
+	PBD::Mutex::Lock lm (source_lock, PBD::Mutex::NotLock);
 	if (need_source_lock) {
 		lm.acquire ();
 	}
@@ -5116,7 +5115,7 @@ uint32_t
 Session::count_sources_by_origin (const string& path)
 {
 	uint32_t cnt = 0;
-	Glib::Threads::Mutex::Lock lm (source_lock);
+	PBD::Mutex::Lock lm (source_lock);
 
 	for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
 		std::shared_ptr<FileSource> fs
@@ -5518,7 +5517,7 @@ Session::create_midi_source_by_stealing_name (std::shared_ptr<Track> track)
 bool
 Session::playlist_is_active (std::shared_ptr<Playlist> playlist)
 {
-	Glib::Threads::Mutex::Lock lm (_playlists->lock);
+	PBD::Mutex::Lock lm (_playlists->lock);
 	for (PlaylistSet::iterator i = _playlists->playlists.begin(); i != _playlists->playlists.end(); i++) {
 		if ( (*i) == playlist ) {
 			return true;
@@ -5614,7 +5613,7 @@ Session::register_lua_function (
 		const LuaScriptParamList& args
 		)
 {
-	Glib::Threads::Mutex::Lock lm (lua_lock);
+	PBD::Mutex::Lock lm (lua_lock);
 
 	lua_State* L = lua.getState();
 
@@ -5634,7 +5633,7 @@ Session::register_lua_function (
 void
 Session::unregister_lua_function (const std::string& name)
 {
-	Glib::Threads::Mutex::Lock lm (lua_lock);
+	PBD::Mutex::Lock lm (lua_lock);
 	(*_lua_del)(name); // throws luabridge::LuaException
 	lua.collect_garbage ();
 	lm.release();
@@ -5646,7 +5645,7 @@ Session::unregister_lua_function (const std::string& name)
 std::vector<std::string>
 Session::registered_lua_functions ()
 {
-	Glib::Threads::Mutex::Lock lm (lua_lock);
+	PBD::Mutex::Lock lm (lua_lock);
 	std::vector<std::string> rv;
 
 	try {
@@ -5670,7 +5669,7 @@ void
 Session::try_run_lua (pframes_t nframes)
 {
 	if (_n_lua_scripts == 0) return;
-	Glib::Threads::Mutex::Lock tm (lua_lock, Glib::Threads::TRY_LOCK);
+	PBD::Mutex::Lock tm (lua_lock, PBD::Mutex::TryLock);
 	if (tm.locked ()) {
 		try { (*_lua_run)(nframes); } catch (...) { }
 		lua.collect_garbage_step ();
@@ -5916,7 +5915,7 @@ Session::graph_reordered (bool called_from_backend)
 std::optional<samplecnt_t>
 Session::available_capture_duration ()
 {
-	Glib::Threads::Mutex::Lock lm (space_lock);
+	PBD::Mutex::Lock lm (space_lock);
 
 	if (_total_free_4k_blocks_uncertain) {
 		return std::optional<samplecnt_t> ();
@@ -7425,7 +7424,7 @@ Session::update_latency (bool playback)
 		 */
 
 		/* prevent any concurrent latency updates */
-		Glib::Threads::Mutex::Lock lx (_update_latency_lock);
+		PBD::Mutex::Lock lx (_update_latency_lock);
 		update_route_latency (true, /*apply_to_delayline*/ true, NULL);
 
 		/* release before emitting signals */
@@ -7434,7 +7433,7 @@ Session::update_latency (bool playback)
 	} else {
 		/* process lock is not needed to update worst-case latency */
 		lm.release ();
-		Glib::Threads::Mutex::Lock lx (_update_latency_lock);
+		PBD::Mutex::Lock lx (_update_latency_lock);
 		update_route_latency (false, false, NULL);
 	}
 
@@ -7450,10 +7449,10 @@ Session::update_latency (bool playback)
 	set_owned_port_public_latency (playback);
 
 	if (playback) {
-		Glib::Threads::Mutex::Lock lx (_update_latency_lock);
+		PBD::Mutex::Lock lx (_update_latency_lock);
 		set_worst_output_latency ();
 	} else {
-		Glib::Threads::Mutex::Lock lx (_update_latency_lock);
+		PBD::Mutex::Lock lx (_update_latency_lock);
 		set_worst_input_latency ();
 	}
 
@@ -7538,7 +7537,7 @@ Session::update_latency_compensation (bool force_whole_graph, bool called_from_b
 	 * GUI thread (via route_processors_changed) and
 	 * auto_connect_thread_run may race.
 	 */
-	Glib::Threads::Mutex::Lock lx (_update_latency_lock, Glib::Threads::TRY_LOCK);
+	PBD::Mutex::Lock lx (_update_latency_lock, PBD::Mutex::TryLock);
 	if (!lx.locked()) {
 		/* no need to do this twice */
 		return;
@@ -7824,7 +7823,7 @@ Session::auto_connect_route (std::shared_ptr<Route> route,
 		const ChanCount& input_offset,
 		const ChanCount& output_offset)
 {
-	Glib::Threads::Mutex::Lock lx (_auto_connect_queue_lock);
+	PBD::Mutex::Lock lx (_auto_connect_queue_lock);
 
 	DEBUG_TRACE (DEBUG::PortConnectAuto,
 	             string_compose ("Session::auto_connect_route '%1' ci: %2 co: %3 is=(%4) os=(%5) io=(%6) oo=(%7)\n",
@@ -7959,7 +7958,7 @@ Session::auto_connect_thread_start ()
 		return;
 	}
 
-	Glib::Threads::Mutex::Lock lx (_auto_connect_queue_lock);
+	PBD::Mutex::Lock lx (_auto_connect_queue_lock);
 	while (!_auto_connect_queue.empty ()) {
 		_auto_connect_queue.pop ();
 	}
@@ -7981,7 +7980,7 @@ Session::auto_connect_thread_terminate ()
 	}
 
 	{
-		Glib::Threads::Mutex::Lock lx (_auto_connect_queue_lock);
+		PBD::Mutex::Lock lx (_auto_connect_queue_lock);
 		while (!_auto_connect_queue.empty ()) {
 			_auto_connect_queue.pop ();
 		}
@@ -8015,7 +8014,7 @@ Session::auto_connect_thread_run ()
 	PBD::notify_event_loops_about_thread_creation (pthread_self(), X_("autoconnect"), 1024);
 	pthread_mutex_lock (&_auto_connect_mutex);
 
-	Glib::Threads::Mutex::Lock lx (_auto_connect_queue_lock);
+	PBD::Mutex::Lock lx (_auto_connect_queue_lock);
 	while (_ac_thread_active.load ()) {
 
 		if (!_auto_connect_queue.empty ()) {

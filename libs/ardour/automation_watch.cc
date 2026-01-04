@@ -64,7 +64,7 @@ AutomationWatch::~AutomationWatch ()
 		_thread = 0;
 	}
 
-	Glib::Threads::Mutex::Lock lm (automation_watch_lock);
+	PBD::Mutex::Lock lm (automation_watch_lock);
 	automation_watches.clear ();
 	automation_connections.clear ();
 }
@@ -72,7 +72,7 @@ AutomationWatch::~AutomationWatch ()
 void
 AutomationWatch::add_automation_watch (std::shared_ptr<AutomationControl> ac)
 {
-	Glib::Threads::Mutex::Lock lm (automation_watch_lock);
+	PBD::Mutex::Lock lm (automation_watch_lock);
 	DEBUG_TRACE (DEBUG::Automation, string_compose ("now watching control %1 for automation, astate = %2\n", ac->name(), enum_2_string (ac->automation_state())));
 	std::pair<AutomationWatches::iterator, bool> r = automation_watches.insert (ac);
 
@@ -124,7 +124,7 @@ AutomationWatch::remove_weak_automation_watch (std::weak_ptr<AutomationControl> 
 void
 AutomationWatch::remove_automation_watch (std::shared_ptr<AutomationControl> ac)
 {
-	Glib::Threads::Mutex::Lock lm (automation_watch_lock);
+	PBD::Mutex::Lock lm (automation_watch_lock);
 	DEBUG_TRACE (DEBUG::Automation, string_compose ("remove control %1 from automation watch\n", ac->name()));
 	automation_watches.erase (ac);
 	automation_connections.erase (ac);
@@ -139,7 +139,7 @@ AutomationWatch::transport_stop_automation_watches (samplepos_t when)
 	AutomationWatches tmp;
 
 	{
-		Glib::Threads::Mutex::Lock lm (automation_watch_lock);
+		PBD::Mutex::Lock lm (automation_watch_lock);
 		/* copy automation watches */
 		tmp = automation_watches;
 		/* clear existing container so that each
@@ -166,7 +166,7 @@ AutomationWatch::timer ()
 	(void) Temporal::TempoMap::fetch ();
 
 	{
-		Glib::Threads::Mutex::Lock lm (automation_watch_lock);
+		PBD::Mutex::Lock lm (automation_watch_lock);
 
 		samplepos_t time = _session->audible_sample ();
 		if (time > _last_time) {  //we only write automation in the forward direction; this fixes automation-recording in a loop
@@ -241,7 +241,7 @@ AutomationWatch::transport_state_change ()
 	_last_time = _session->audible_sample ();
 
 	{
-		Glib::Threads::Mutex::Lock lm (automation_watch_lock);
+		PBD::Mutex::Lock lm (automation_watch_lock);
 
 		for (AutomationWatches::iterator aw = automation_watches.begin(); aw != automation_watches.end(); ++aw) {
 			DEBUG_TRACE (DEBUG::Automation, string_compose ("%1: transport state changed, speed %2, in write pass ? %3 writing ? %4\n",

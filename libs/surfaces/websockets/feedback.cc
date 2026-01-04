@@ -212,7 +212,7 @@ ArdourFeedback::poll () const
 	update_all (Node::transport_time, transport ().time ());
 	update_all (Node::transport_bbt, transport ().bbt ());
 
-	Glib::Threads::Mutex::Lock lock (mixer ().mutex ());
+	PBD::Mutex::Lock lock (mixer ().mutex ());
 
 	for (ArdourMixer::StripMap::iterator it = mixer ().strips ().begin (); it != mixer ().strips ().end (); ++it) {
 		double db = it->second->meter_level_db ();

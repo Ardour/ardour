@@ -26,8 +26,6 @@
 #include <vector>
 #include <cmath>
 
-#include <glibmm/threads.h>
-
 #include "pbd/fastlog.h"
 #include "pbd/undo.h"
 #include "pbd/rcu.h"

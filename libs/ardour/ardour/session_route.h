@@ -23,8 +23,6 @@
 
 #include <iostream>
 
-#include <glibmm/threads.h>
-
 #include "ardour/session.h"
 #include "ardour/route.h"
 

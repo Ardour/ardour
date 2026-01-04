@@ -484,7 +484,7 @@ FFTSpectrum::FFTSpectrum (uint32_t window_size, double rate)
 FFTSpectrum::~FFTSpectrum ()
 {
 	{
-		Glib::Threads::Mutex::Lock lk (ARDOUR::fft_planner_lock);
+		PBD::Mutex::Lock lk (ARDOUR::fft_planner_lock);
 		fftwf_destroy_plan (_fftplan);
 	}
 	fftwf_free (_fft_data_in);
@@ -497,7 +497,7 @@ void
 FFTSpectrum::init (uint32_t window_size, double rate)
 {
 	assert (window_size > 0);
-	Glib::Threads::Mutex::Lock lk (ARDOUR::fft_planner_lock);
+	PBD::Mutex::Lock lk (ARDOUR::fft_planner_lock);
 
 	_fft_window_size  = window_size;
 	_fft_data_size    = window_size / 2;
@@ -602,7 +602,7 @@ PerceptualAnalyzer::PerceptualAnalyzer (double sample_rate, int ipsize)
 PerceptualAnalyzer::~PerceptualAnalyzer ()
 {
 	if (_fftplan) {
-		Glib::Threads::Mutex::Lock lk (ARDOUR::fft_planner_lock);
+		PBD::Mutex::Lock lk (ARDOUR::fft_planner_lock);
 		fftwf_destroy_plan (_fftplan);
 	}
 	delete _power;
@@ -615,7 +615,7 @@ PerceptualAnalyzer::~PerceptualAnalyzer ()
 void
 PerceptualAnalyzer::init ()
 {
-	Glib::Threads::Mutex::Lock lk (ARDOUR::fft_planner_lock);
+	PBD::Mutex::Lock lk (ARDOUR::fft_planner_lock);
 	if (_fftplan) {
 		fftwf_destroy_plan (_fftplan);
 	}

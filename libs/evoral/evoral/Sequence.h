@@ -30,8 +30,7 @@
 #include <utility>
 #include <vector>
 
-#include <glibmm/threads.h>
-
+#include "pbd/mutex.h"
 #include "pbd/rwlock.h"
 
 #include "evoral/visibility.h"
@@ -75,15 +74,15 @@ public:
 
 protected:
 	struct WriteLockImpl {
-		WriteLockImpl(PBD::RWLock& s, Glib::Threads::Mutex& c)
+		WriteLockImpl(PBD::RWLock& s, PBD::Mutex& c)
 			: sequence_lock(new PBD::RWLock::WriterLock(s))
-			, control_lock(new Glib::Threads::Mutex::Lock(c)) { }
+			, control_lock(new PBD::Mutex::Lock(c)) { }
 		~WriteLockImpl() {
 			delete sequence_lock;
 			delete control_lock;
 		}
 		PBD::RWLock::WriterLock* sequence_lock;
-		Glib::Threads::Mutex::Lock*        control_lock;
+		PBD::Mutex::Lock*        control_lock;
 	};
 
 public:

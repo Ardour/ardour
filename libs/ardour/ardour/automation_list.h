@@ -28,8 +28,6 @@
 #include <list>
 #include <cmath>
 
-#include <glibmm/threads.h>
-
 #include "evoral/ControlList.h"
 #include "evoral/Parameter.h"
 

@@ -74,7 +74,7 @@ IOPlug::~IOPlug ()
 		std::dynamic_pointer_cast<ReadOnlyControl>(i->second)->drop_references ();
 	}
 
-	Glib::Threads::Mutex::Lock lm (_control_lock);
+	PBD::Mutex::Lock lm (_control_lock);
 	for (Controls::const_iterator li = _controls.begin(); li != _controls.end(); ++li) {
 		std::dynamic_pointer_cast<AutomationControl>(li->second)->drop_references ();
 	}

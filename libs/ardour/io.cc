@@ -31,7 +31,6 @@
 #include <errno.h>
 
 #include <glibmm.h>
-#include <glibmm/threads.h>
 
 #include "pbd/xml++.h"
 #include "pbd/replace_all.h"

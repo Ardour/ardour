@@ -420,7 +420,7 @@ PortManager::filter_midi_ports (vector<string>& ports, MidiPortFlags include, Mi
 		return;
 	}
 
-	Glib::Threads::Mutex::Lock lm (_port_info_mutex);
+	PBD::Mutex::Lock lm (_port_info_mutex);
 	fill_midi_port_info_locked ();
 
 	for (vector<string>::iterator si = ports.begin (); si != ports.end ();) {
@@ -903,7 +903,7 @@ PortManager::reestablish_ports ()
 void
 PortManager::set_pretty_names (std::vector<std::string> const& port_names, DataType dt, bool input)
 {
-	Glib::Threads::Mutex::Lock lm (_port_info_mutex);
+	PBD::Mutex::Lock lm (_port_info_mutex);
 	for (std::vector<std::string>::const_iterator p = port_names.begin (); p != port_names.end (); ++p) {
 		if (port_is_mine (*p)) {
 			continue;
@@ -1554,7 +1554,7 @@ PortManager::port_is_physical_input_monitor_enable (std::string const& name)
 MidiPortFlags
 PortManager::midi_port_metadata (std::string const& name)
 {
-	Glib::Threads::Mutex::Lock lm (_port_info_mutex);
+	PBD::Mutex::Lock lm (_port_info_mutex);
 	fill_midi_port_info_locked ();
 
 	PortID             pid (_backend, DataType::MIDI, true, name);
@@ -1580,7 +1580,7 @@ PortManager::get_configurable_midi_ports (vector<string>& copy, bool for_input)
 	}
 
 	{
-		Glib::Threads::Mutex::Lock lm (_port_info_mutex);
+		PBD::Mutex::Lock lm (_port_info_mutex);
 		fill_midi_port_info_locked ();
 	}
 
@@ -1602,7 +1602,7 @@ PortManager::get_configurable_midi_ports (vector<string>& copy, bool for_input)
 void
 PortManager::get_midi_selection_ports (vector<string>& copy)
 {
-	Glib::Threads::Mutex::Lock lm (_port_info_mutex);
+	PBD::Mutex::Lock lm (_port_info_mutex);
 	fill_midi_port_info_locked ();
 
 	for (PortInfo::const_iterator x = _port_info.begin (); x != _port_info.end (); ++x) {
@@ -1631,7 +1631,7 @@ PortManager::set_port_pretty_name (string const& port, string const& pretty)
 	{
 		/* backend IsOutput ports = capture = input ports for libardour */
 		PortID                     pid (_backend, _backend->port_data_type (ph), _backend->get_port_flags (ph) & IsOutput, port);
-		Glib::Threads::Mutex::Lock lm (_port_info_mutex);
+		PBD::Mutex::Lock lm (_port_info_mutex);
 		fill_midi_port_info_locked ();
 
 		if (!pretty.empty ()) {
@@ -1663,7 +1663,7 @@ PortManager::add_midi_port_flags (string const& port, MidiPortFlags flags)
 
 	{
 		PortID                     pid (_backend, _backend->port_data_type (ph), _backend->get_port_flags (ph) & IsOutput, port);
-		Glib::Threads::Mutex::Lock lm (_port_info_mutex);
+		PBD::Mutex::Lock lm (_port_info_mutex);
 		fill_midi_port_info_locked ();
 
 		/* Add MIDI port if present */
@@ -1701,7 +1701,7 @@ PortManager::remove_midi_port_flags (string const& port, MidiPortFlags flags)
 
 	{
 		PortID                     pid (_backend, _backend->port_data_type (ph), _backend->get_port_flags (ph) & IsOutput, port);
-		Glib::Threads::Mutex::Lock lm (_port_info_mutex);
+		PBD::Mutex::Lock lm (_port_info_mutex);
 		fill_midi_port_info_locked ();
 		PortInfo::iterator x = _port_info.find (pid);
 
@@ -1752,7 +1752,7 @@ PortManager::save_port_info ()
 	root->set_property ("version", 1);
 
 	{
-		Glib::Threads::Mutex::Lock lm (_port_info_mutex);
+		PBD::Mutex::Lock lm (_port_info_mutex);
 		for (PortInfo::const_iterator i = _port_info.begin (); i != _port_info.end (); ++i) {
 			if (port_is_virtual_piano (i->first.port_name)) {
 				continue;

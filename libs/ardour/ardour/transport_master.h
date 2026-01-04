@@ -22,12 +22,12 @@
 
 #include <optional>
 
-#include <glibmm/threads.h>
 #include <glibmm/timer.h>
 
 #include <ltc.h>
 
 #include "pbd/properties.h"
+#include "pbd/mutex.h"
 #include "pbd/signals.h"
 #include "pbd/statefuldestructible.h"
 
@@ -551,7 +551,7 @@ private:
 	samplepos_t              window_end;
 	samplepos_t              first_mtc_timestamp;
 
-	Glib::Threads::Mutex     reset_lock;
+	PBD::Mutex     reset_lock;
 	uint32_t                 reset_pending;
 	bool                     reset_position;
 	int                      transport_direction;

@@ -24,10 +24,12 @@
 #ifndef __ardour_lv2_plugin_h__
 #define __ardour_lv2_plugin_h__
 
-#include <glibmm/threads.h>
 #include <set>
 #include <string>
 #include <vector>
+
+#include "pbd/mutex.h"
+#include "pbd/ringbuffer.h"
 
 #include "temporal/tempo.h"
 
@@ -35,7 +37,7 @@
 #include "ardour/plugin_scan_result.h"
 #include "ardour/uri_map.h"
 #include "ardour/worker.h"
-#include "pbd/ringbuffer.h"
+
 
 #ifdef LV2_EXTENDED // -> needs to eventually go upstream to lv2plug.in
 #include "ardour/lv2_extensions.h"
@@ -313,9 +315,9 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	PBD::RingBuffer<uint8_t>* _to_ui;
 	PBD::RingBuffer<uint8_t>* _from_ui;
 
-	Glib::Threads::Mutex _work_mutex;
+	PBD::Mutex _work_mutex;
 
-	Glib::Threads::Mutex                   _slave_lock;
+	PBD::Mutex                   _slave_lock;
 	std::set<std::shared_ptr<LV2Plugin>> _slaves;
 
 #ifdef LV2_EXTENDED
