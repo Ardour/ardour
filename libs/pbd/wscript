@@ -53,6 +53,7 @@ libpbd_sources = [
     'md5.cc',
     'microseconds.cc',
     'mountpoint.cc',
+    'mutex.cc',
     'openuri.cc',
     'pathexpand.cc',
     'pbd.cc',
