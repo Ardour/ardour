@@ -1354,7 +1354,7 @@ Push2::set_percussive_mode (bool yn)
 Push2Layout*
 Push2::current_layout () const
 {
-	Glib::Threads::Mutex::Lock lm (layout_lock);
+	PBD::Mutex::Lock lm (layout_lock);
 	return _current_layout;
 }
 

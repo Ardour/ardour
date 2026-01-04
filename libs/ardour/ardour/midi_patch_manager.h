@@ -169,7 +169,7 @@ private:
 	DeviceNamesByMaker                      _devices_by_manufacturer;
 	MasterDeviceNames::Models               _all_models;
 
-	Glib::Threads::Mutex _lock;
+	PBD::Mutex _lock;
 	bool no_patch_changed_messages;
 	bool stop_thread;
 	PBD::Thread* _midnam_load_thread;

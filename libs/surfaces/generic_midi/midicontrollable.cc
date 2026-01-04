@@ -131,7 +131,7 @@ MIDIControllable::get_controllable () const
 void
 MIDIControllable::set_controllable (std::shared_ptr<PBD::Controllable> c)
 {
-	Glib::Threads::Mutex::Lock lm (controllable_lock);
+	PBD::Mutex::Lock lm (controllable_lock);
 	if (c && c == _controllable) {
 		return;
 	}
@@ -680,7 +680,7 @@ MIDIControllable::bind_midi (channel_t chn, eventType ev, MIDI::byte additional)
 MIDI::byte*
 MIDIControllable::write_feedback (MIDI::byte* buf, int32_t& bufsize, bool /*force*/)
 {
-	Glib::Threads::Mutex::Lock lm (controllable_lock, Glib::Threads::TRY_LOCK);
+	PBD::Mutex::Lock lm (controllable_lock, PBD::Mutex::TryLock);
 	if (!lm.locked ()) {
 		return buf;
 	}

@@ -5958,7 +5958,7 @@ TriggerBoxThread::build_midi_source (MIDITrigger* t, Temporal::timecnt_t const &
 std::shared_ptr<MidiBuffer>
 TriggerBox::get_gui_feed_buffer () const
 {
-	Glib::Threads::Mutex::Lock lm (_gui_feed_reset_mutex);
+	PBD::Mutex::Lock lm (_gui_feed_reset_mutex);
 	std::shared_ptr<MidiBuffer> b (new MidiBuffer (AudioEngine::instance()->raw_buffer_size (DataType::MIDI)));
 
 	std::vector<MIDI::byte> buffer (_gui_feed_fifo.capacity());

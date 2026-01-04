@@ -224,7 +224,7 @@ AnalysisWindow::analyze_data (Gtk::Button * /*button*/)
 {
 	track_list_ready = false;
 	{
-		Glib::Threads::Mutex::Lock lm  (track_list_lock);
+		PBD::Mutex::Lock lm  (track_list_lock);
 
 		// Empty track list & free old graphs
 		clear_tracklist();

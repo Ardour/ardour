@@ -22,14 +22,16 @@
 #include <atomic>
 #include <functional>
 #include <string>
+#include <list>
 #include <vector>
 #include <stdint.h>
 #include <pthread.h>
 
-#include <glibmm/threads.h>
-
 #include "pbd/libpbd_visibility.h"
+#include "pbd/mutex.h"
 #include "pbd/rwlock.h"
+
+#include <glibmm/threads.h> // Glib::Threads::Private
 
 namespace PBD
 {
@@ -116,7 +118,7 @@ private:
 
 	typedef std::vector<ThreadBufferMapping> ThreadRequestBufferList;
 	static ThreadRequestBufferList thread_buffer_requests;
-	static Glib::Threads::Mutex   thread_buffer_requests_lock;
+	static PBD::Mutex   thread_buffer_requests_lock;
 
 	struct RequestBufferSupplier {
 

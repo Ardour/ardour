@@ -1152,7 +1152,7 @@ OSC::get_surfaces ()
 
 	PBD::info << string_compose ("\nList of known Surfaces (%1):\n", _surface.size());
 
-	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+	PBD::Mutex::Lock lm (surfaces_lock);
 	for (uint32_t it = 0; it < _surface.size(); it++) {
 		OSCSurface* sur = &_surface[it];
 		char *chost = lo_url_get_hostname (sur->remote_url.c_str());

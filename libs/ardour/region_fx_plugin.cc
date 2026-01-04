@@ -52,7 +52,7 @@ public:
 		}
 		samplepos_t when = p->session().audible_sample ();
 
-		Glib::Threads::Mutex::Lock lm (_history_mutex);
+		PBD::Mutex::Lock lm (_history_mutex);
 		auto it = _history.lower_bound (when);
 		if (it != _history.begin ()) {
 			--it;
@@ -74,7 +74,7 @@ public:
 			return;
 		}
 		double value = p->get_parameter (_parameter_num);
-		Glib::Threads::Mutex::Lock lm (_history_mutex);
+		PBD::Mutex::Lock lm (_history_mutex);
 		if (_flush) {
 			_flush = false;
 			_history.clear ();
@@ -103,7 +103,7 @@ public:
 
 private:
 	std::map<samplepos_t, double> _history;
-	mutable Glib::Threads::Mutex  _history_mutex;
+	mutable PBD::Mutex  _history_mutex;
 	bool                          _flush;
 };
 
@@ -126,7 +126,7 @@ public:
 	double get_value (void) const
 	{
 		samplepos_t when = _session.audible_sample ();
-		Glib::Threads::Mutex::Lock lm (_history_mutex);
+		PBD::Mutex::Lock lm (_history_mutex);
 		auto it = _history.lower_bound (when);
 		if (it != _history.begin ()) {
 			--it;
@@ -161,7 +161,7 @@ public:
 		if (automation_playback ()) {
 			_flush = true;
 		} else {
-			Glib::Threads::Mutex::Lock lm (_history_mutex);
+			PBD::Mutex::Lock lm (_history_mutex);
 			_history.clear ();
 		}
 	}
@@ -169,7 +169,7 @@ public:
 	void store_value (samplepos_t start, samplepos_t end)
 	{
 		double value = PlugInsertBase::PluginControl::get_value ();
-		Glib::Threads::Mutex::Lock lm (_history_mutex);
+		PBD::Mutex::Lock lm (_history_mutex);
 		if (_flush) {
 			_flush = false;
 			_history.clear ();
@@ -199,7 +199,7 @@ public:
 
 private:
 	std::map<samplepos_t, double> _history;
-	mutable Glib::Threads::Mutex  _history_mutex;
+	mutable PBD::Mutex  _history_mutex;
 	double                        _last_value;
 	bool                          _replay_param;
 	bool                          _flush;
@@ -231,7 +231,7 @@ RegionFxPlugin::~RegionFxPlugin ()
 		std::dynamic_pointer_cast<ReadOnlyControl>(i.second)->drop_references ();
 	}
 
-	Glib::Threads::Mutex::Lock lm (_control_lock);
+	PBD::Mutex::Lock lm (_control_lock);
 	for (auto const& i : _controls) {
 		std::dynamic_pointer_cast<AutomationControl>(i.second)->drop_references ();
 	}
@@ -1303,7 +1303,7 @@ RegionFxPlugin::run (BufferSet& bufs, samplepos_t start, samplepos_t end, sample
 	Evoral::ControlEvent next_event (timepos_t (Temporal::AudioTime), 0.0f);
 	samplecnt_t          offset = 0;
 
-	Glib::Threads::Mutex::Lock lm (control_lock ());
+	PBD::Mutex::Lock lm (control_lock ());
 
 	if (no_split_cycle || !find_next_event (timepos_t (start), timepos_t (end), next_event)) {
 		/* no events have a time within the relevant range */

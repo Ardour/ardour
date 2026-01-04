@@ -25,11 +25,9 @@
 #include <memory>
 #include <vector>
 #include <string>
-#include <exception>
-
-#include <glibmm/threads.h>
 
 #include "pbd/crossthread.h"
+#include "pbd/mutex.h"
 #include "pbd/pcg_rand.h"
 #include "pbd/pool.h"
 #include "pbd/properties.h"
@@ -1081,7 +1079,7 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 	 * the GUI to read (so that it can update itself).
 	 */
 	mutable EventRingBuffer<samplepos_t> _gui_feed_fifo;
-	mutable Glib::Threads::Mutex         _gui_feed_reset_mutex;
+	mutable PBD::Mutex         _gui_feed_reset_mutex;
 
 	typedef  std::map<std::vector<uint8_t>,std::pair<int,int> > CustomMidiMap;
 	static CustomMidiMap _custom_midi_map;

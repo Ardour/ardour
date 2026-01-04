@@ -172,7 +172,7 @@ IOTaskList::io_thread ()
 
 		while (1) {
 			std::function<void()> fn;
-			Glib::Threads::Mutex::Lock lm (_tasks_mutex);
+			PBD::Mutex::Lock lm (_tasks_mutex);
 			if (_tasks.empty ()) {
 				break;
 			}

@@ -51,7 +51,7 @@ class LIBARDOUR_API ExportStatus {
 		assert (!_run_lock.trylock()); // must hold lock
 		_running = r;
 	}
-	Glib::Threads::Mutex& lock () { return _run_lock; }
+	PBD::Mutex& lock () { return _run_lock; }
 
 	PBD::Signal<void(TransportRequestSource)> Finished;
 	void finish (TransportRequestSource);
@@ -89,7 +89,7 @@ class LIBARDOUR_API ExportStatus {
 	volatile bool          _errors;
 	volatile bool          _running;
 
-	Glib::Threads::Mutex   _run_lock;
+	PBD::Mutex   _run_lock;
 };
 
 } // namespace ARDOUR

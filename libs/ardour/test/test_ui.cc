@@ -18,8 +18,6 @@
 
 #include "test_ui.h"
 
-#include <glibmm/threads.h>
-
 #include "pbd/error.h"
 
 #include "ardour/session_event.h"

@@ -105,7 +105,7 @@ MidiPatchManager::remove_custom_midnam (const std::string& id)
 bool
 MidiPatchManager::update_custom_midnam (const std::string& id, char const* midnam)
 {
-	Glib::Threads::Mutex::Lock lm (_lock);
+	PBD::Mutex::Lock lm (_lock);
 	remove_midi_name_document ("custom:" + id, false);
 	return add_custom_midnam (id, midnam);
 }
@@ -279,7 +279,7 @@ MidiPatchManager::load_midnams ()
 	{
 		PBD::Unwinder<bool> npc (no_patch_changed_messages, true);
 		for (Searchpath::const_iterator i = _search_path.begin(); i != _search_path.end(); ++i) {
-			Glib::Threads::Mutex::Lock lm (_lock);
+			PBD::Mutex::Lock lm (_lock);
 			add_midnam_files_from_directory (*i);
 		}
 	}
@@ -302,7 +302,7 @@ MidiPatchManager::maybe_use (PBD::ScopedConnectionList& cl,
                              PBD::EventLoop* event_loop)
 {
 	{
-		Glib::Threads::Mutex::Lock lm (_lock);
+		PBD::Mutex::Lock lm (_lock);
 
 		if (!_documents.empty()) {
 			/* already have documents loaded, so call closure to use them */

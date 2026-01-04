@@ -28,8 +28,6 @@
 #include <algorithm>
 #include <sstream>
 
-#include <glibmm/threads.h>
-
 #include "pbd/types_convert.h"
 #include "pbd/xml++.h"
 
@@ -102,7 +100,7 @@ uint64_t Region::_retained_take_cnt = 0;
 uint64_t Region::_next_group_id     = 0;
 
 std::map<uint64_t, uint64_t> Region::_operation_rgroup_map;
-Glib::Threads::Mutex         Region::_operation_rgroup_mutex;
+PBD::Mutex         Region::_operation_rgroup_mutex;
 
 /* access the group-id for an operation on a region, honoring the existing region's group status */
 uint64_t
@@ -124,7 +122,7 @@ Region::get_region_operation_group_id (uint64_t old_region_group, RegionOperatio
 	/* since the GUI is single-threaded, and it's hard/impossible to edit
 	 * during a rec-stop, this 'should' never be contentious
 	 */
-	Glib::Threads::Mutex::Lock lm (_operation_rgroup_mutex);
+	PBD::Mutex::Lock lm (_operation_rgroup_mutex);
 
 	/* if a region group has not been assigned for this key, assign one */
 	if (_operation_rgroup_map.find (region_group_key) == _operation_rgroup_map.end ()) {
@@ -1786,7 +1784,7 @@ Region::master_source_names ()
 void
 Region::set_master_sources (const SourceList& srcs)
 {
-	Glib::Threads::Mutex::Lock lx (_source_list_lock);
+	PBD::Mutex::Lock lx (_source_list_lock);
 	for (SourceList::const_iterator i = _master_sources.begin (); i != _master_sources.end(); ++i) {
 		(*i)->dec_use_count ();
 	}
@@ -2146,7 +2144,7 @@ Region::rename_cue_marker (CueMarker& cm, std::string const & str)
 void
 Region::drop_sources ()
 {
-	Glib::Threads::Mutex::Lock lx (_source_list_lock);
+	PBD::Mutex::Lock lx (_source_list_lock);
 	for (SourceList::const_iterator i = _sources.begin (); i != _sources.end(); ++i) {
 		(*i)->dec_use_count ();
 	}
@@ -2164,7 +2162,7 @@ Region::drop_sources ()
 void
 Region::use_sources (SourceList const & s)
 {
-	Glib::Threads::Mutex::Lock lx (_source_list_lock);
+	PBD::Mutex::Lock lx (_source_list_lock);
 	for (SourceList::const_iterator i = s.begin (); i != s.end(); ++i) {
 		_sources.push_back (*i);
 		(*i)->inc_use_count ();

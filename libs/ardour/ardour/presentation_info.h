@@ -303,7 +303,7 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 	int     _selection_cnt;
 
 	static PBD::PropertyChange _pending_static_changes;
-	static Glib::Threads::Mutex static_signal_lock;
+	static PBD::Mutex static_signal_lock;
 	static std::atomic<int>   _change_signal_suspended;
 
 	static int selection_counter;

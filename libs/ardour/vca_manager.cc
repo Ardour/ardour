@@ -53,7 +53,7 @@ VCAManager::clear ()
 {
 	bool send = false;
 	{
-		Mutex::Lock lm (lock);
+		PBD::Mutex::Lock lm (lock);
 		for (VCAList::const_iterator i = _vcas.begin(); i != _vcas.end(); ++i) {
 			if ((*i)->is_selected ()) {
 				_session.selection().remove_stripable_by_id ((*i)->id());
@@ -74,7 +74,7 @@ VCAManager::clear ()
 VCAList
 VCAManager::vcas () const
 {
-	Mutex::Lock lm (lock);
+	PBD::Mutex::Lock lm (lock);
 	return _vcas;
 }
 
@@ -87,7 +87,7 @@ VCAManager::create_vca (uint32_t howmany, std::string const & name_template)
 
 	{
 		PresentationInfo::ChangeSuspender cs;
-		Mutex::Lock lm (lock);
+		PBD::Mutex::Lock lm (lock);
 
 		for (uint32_t n = 0; n < howmany; ++n) {
 
@@ -125,7 +125,7 @@ void
 VCAManager::remove_vca (std::shared_ptr<VCA> vca)
 {
 	{
-		Mutex::Lock lm (lock);
+		PBD::Mutex::Lock lm (lock);
 		_vcas.remove (vca);
 	}
 
@@ -145,7 +145,7 @@ VCAManager::remove_vca (std::shared_ptr<VCA> vca)
 std::shared_ptr<VCA>
 VCAManager::vca_by_number (int32_t n) const
 {
-	Mutex::Lock lm (lock);
+	PBD::Mutex::Lock lm (lock);
 
 	for (VCAList::const_iterator i = _vcas.begin(); i != _vcas.end(); ++i) {
 		if ((*i)->number() == n) {
@@ -159,7 +159,7 @@ VCAManager::vca_by_number (int32_t n) const
 std::shared_ptr<VCA>
 VCAManager::vca_by_name (std::string const& name) const
 {
-	Mutex::Lock lm (lock);
+	PBD::Mutex::Lock lm (lock);
 
 	for (VCAList::const_iterator i = _vcas.begin(); i != _vcas.end(); ++i) {
 		if ((*i)->name() == name || (*i)->full_name() == name) {
@@ -176,7 +176,7 @@ VCAManager::get_state () const
 	XMLNode* node = new XMLNode (xml_node_name);
 
 	{
-		Mutex::Lock lm (lock);
+		PBD::Mutex::Lock lm (lock);
 
 		for (VCAList::const_iterator i = _vcas.begin(); i != _vcas.end(); ++i) {
 			node->add_child_nocopy ((*i)->get_state());
@@ -215,7 +215,7 @@ VCAManager::set_state (XMLNode const& node, int version)
 			 */
 
 			{
-				Mutex::Lock lm (lock);
+				PBD::Mutex::Lock lm (lock);
 				_vcas.push_back (vca);
 				vcal.push_back (vca);
 			}
@@ -232,7 +232,7 @@ VCAManager::set_state (XMLNode const& node, int version)
 void
 VCAManager::clear_all_solo_state ()
 {
-	Mutex::Lock lm (lock);
+	PBD::Mutex::Lock lm (lock);
 
 	for (VCAList::const_iterator i = _vcas.begin(); i != _vcas.end(); ++i) {
 		(*i)->clear_all_solo_state ();

@@ -169,7 +169,7 @@ private:
 	void loop (samplepos_t);
 
 	CaptureInfos                 capture_info;
-	mutable Glib::Threads::Mutex capture_info_lock;
+	mutable PBD::Mutex capture_info_lock;
 
 	samplepos_t get_capture_start_sample_locked (uint32_t n = 0) const;
 
@@ -205,7 +205,7 @@ private:
 	 * the GUI to read (so that it can update itself).
 	 */
 	mutable EventRingBuffer<samplepos_t> _gui_feed_fifo;
-	mutable Glib::Threads::Mutex         _gui_feed_reset_mutex;
+	mutable PBD::Mutex         _gui_feed_reset_mutex;
 };
 
 } // namespace

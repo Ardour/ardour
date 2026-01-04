@@ -20,7 +20,6 @@
 #define _ardour_maschine2_canvas_h_
 
 #include <cairomm/refptr.h>
-#include <glibmm/threads.h>
 
 #include "canvas/canvas.h"
 

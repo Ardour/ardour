@@ -22,7 +22,6 @@
 
 #include <cairomm/cairomm.h>
 
-#include <glibmm/threads.h>
 #include <ydkmm/general.h>
 
 #include "pbd/base_ui.h"

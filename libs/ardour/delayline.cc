@@ -62,7 +62,7 @@ void
 DelayLine::run (BufferSet& bufs, samplepos_t /* start_sample */, samplepos_t /* end_sample */, double /* speed */, pframes_t n_samples, bool)
 {
 #ifndef NDEBUG
-	Glib::Threads::Mutex::Lock lm (_set_delay_mutex, Glib::Threads::TRY_LOCK);
+	PBD::Mutex::Lock lm (_set_delay_mutex, PBD::Mutex::TryLock);
 	assert (lm.locked ());
 #endif
 	assert (n_samples <= MAX_BUFFER_SIZE);
@@ -294,7 +294,7 @@ bool
 DelayLine::set_delay (samplecnt_t signal_delay)
 {
 #ifndef NDEBUG
-	Glib::Threads::Mutex::Lock lm (_set_delay_mutex, Glib::Threads::TRY_LOCK);
+	PBD::Mutex::Lock lm (_set_delay_mutex, PBD::Mutex::TryLock);
 	assert (lm.locked ());
 #endif
 
@@ -403,7 +403,7 @@ bool
 DelayLine::configure_io (ChanCount in, ChanCount out)
 {
 #ifndef NDEBUG
-	Glib::Threads::Mutex::Lock lm (_set_delay_mutex, Glib::Threads::TRY_LOCK);
+	PBD::Mutex::Lock lm (_set_delay_mutex, PBD::Mutex::TryLock);
 	assert (lm.locked ());
 #endif
 

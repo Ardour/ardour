@@ -330,7 +330,7 @@ DiskWriter::disengage_record_safe ()
 ARDOUR::samplepos_t
 DiskWriter::get_capture_start_sample (uint32_t n) const
 {
-	Glib::Threads::Mutex::Lock lm (capture_info_lock);
+	PBD::Mutex::Lock lm (capture_info_lock);
 	return get_capture_start_sample_locked (n);
 }
 
@@ -367,7 +367,7 @@ DiskWriter::current_capture_end () const
 ARDOUR::samplecnt_t
 DiskWriter::get_captured_samples (uint32_t n) const
 {
-	Glib::Threads::Mutex::Lock lm (capture_info_lock);
+	PBD::Mutex::Lock lm (capture_info_lock);
 
 	if (capture_info.size() > n) {
 		/* this is a completed capture */
@@ -741,7 +741,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		/* not recording this time, but perhaps we were before .. */
 
 		if (_was_recording) {
-			Glib::Threads::Mutex::Lock lm (capture_info_lock);
+			PBD::Mutex::Lock lm (capture_info_lock);
 			finish_capture (c);
 			_accumulated_capture_offset = 0;
 			_capture_start_sample.reset ();
@@ -824,7 +824,7 @@ DiskWriter::finish_capture (std::shared_ptr<ChannelList const> c)
 std::shared_ptr<MidiBuffer>
 DiskWriter::get_gui_feed_buffer () const
 {
-	Glib::Threads::Mutex::Lock lm (_gui_feed_reset_mutex);
+	PBD::Mutex::Lock lm (_gui_feed_reset_mutex);
 	std::shared_ptr<MidiBuffer> b (new MidiBuffer (AudioEngine::instance()->raw_buffer_size (DataType::MIDI)));
 
 	vector<MIDI::byte> buffer (_gui_feed_fifo.capacity());
@@ -1201,7 +1201,7 @@ DiskWriter::use_new_write_source (DataType dt, uint32_t n)
 void
 DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abort_capture)
 {
-	Glib::Threads::Mutex::Lock lm (capture_info_lock);
+	PBD::Mutex::Lock lm (capture_info_lock);
 	bool more_work = true;
 	int err = 0;
 	SourceList audio_srcs;
@@ -1214,7 +1214,7 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 	finish_capture (c);
 
 	{
-		Glib::Threads::Mutex::Lock lm (_gui_feed_reset_mutex);
+		PBD::Mutex::Lock lm (_gui_feed_reset_mutex);
 		_gui_feed_fifo.reset ();
 	}
 
@@ -1379,7 +1379,7 @@ DiskWriter::loop (samplepos_t transport_sample)
 {
 	_transport_looped = false;
 	if (_was_recording) {
-		Glib::Threads::Mutex::Lock lm (capture_info_lock);
+		PBD::Mutex::Lock lm (capture_info_lock);
 		// all we need to do is finish this capture, with modified capture length
 		std::shared_ptr<ChannelList const> c = channels.reader();
 

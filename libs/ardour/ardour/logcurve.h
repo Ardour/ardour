@@ -21,7 +21,7 @@
 #pragma once
 
 #include "pbd/fastlog.h"
-#include <glibmm/threads.h>
+#include "pbd/mutex.h"
 
 #include "ardour/libardour_visibility.h"
 
@@ -97,7 +97,7 @@ class LIBARDOUR_API LogCurve {
 	}
 	void set_length (uint32_t len) { l = len; }
 
-	mutable Glib::Threads::Mutex lock;
+	mutable PBD::Mutex lock;
 
   protected:
 	float a;

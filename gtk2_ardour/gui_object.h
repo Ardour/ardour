@@ -21,6 +21,7 @@
 #pragma once
 
 #include <map>
+#include <list>
 #include <string>
 
 #include "pbd/xml++.h"

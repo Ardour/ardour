@@ -28,8 +28,8 @@
 #include <map>
 #include <set>
 #include <vector>
-#include <glibmm/threads.h>
 
+#include "pbd/mutex.h"
 #include "pbd/stacktrace.h"
 #include "pbd/boost_debug.h"
 
@@ -134,11 +134,11 @@ IPointerMap& interesting_pointers()
 	return *_interesting_pointers;
 }
 
-static Glib::Threads::Mutex* _the_lock;
-static Glib::Threads::Mutex& the_lock()
+static PBD::Mutex* _the_lock;
+static PBD::Mutex& the_lock()
 {
 	if (_the_lock == 0) {
-		_the_lock = new Glib::Threads::Mutex;
+		_the_lock = new PBD::Mutex;
 	}
 	return *_the_lock;
 }
@@ -167,7 +167,7 @@ boost_debug_shared_ptr_show_live_debugging (bool yn)
 void
 boost_debug_shared_ptr_mark_interesting (void* ptr, const char* type)
 {
-	Glib::Threads::Mutex::Lock guard (the_lock());
+	PBD::Mutex::Lock guard (the_lock());
 	pair<void*,const char*> newpair (ptr, type);
 	interesting_pointers().insert (newpair);
 	if (debug_out) {
@@ -182,7 +182,7 @@ boost_debug_shared_ptr_operator_equals (void const *sp, void const *old_obj, int
 		return;
 	}
 
-	Glib::Threads::Mutex::Lock guard (the_lock());
+	PBD::Mutex::Lock guard (the_lock());
 
 	if (is_interesting_object  (old_obj) || is_interesting_object (obj)) {
 		if (debug_out) {
@@ -230,7 +230,7 @@ boost_debug_shared_ptr_reset (void const *sp, void const *old_obj, int old_use_c
 		return;
 	}
 
-	Glib::Threads::Mutex::Lock guard (the_lock());
+	PBD::Mutex::Lock guard (the_lock());
 
 	if (is_interesting_object  (old_obj) || is_interesting_object (obj)) {
 		if (debug_out) {
@@ -274,7 +274,7 @@ boost_debug_shared_ptr_reset (void const *sp, void const *old_obj, int old_use_c
 void
 boost_debug_shared_ptr_destructor (void const *sp, volatile void const *obj, int use_count)
 {
-	Glib::Threads::Mutex::Lock guard (the_lock());
+	PBD::Mutex::Lock guard (the_lock());
 	PointerMap::iterator x = sptrs().find (sp);
 
 	if (x != sptrs().end()) {
@@ -289,7 +289,7 @@ void
 boost_debug_shared_ptr_constructor (void const *sp, volatile void const *obj, int use_count)
 {
 	if (is_interesting_object (obj)) {
-		Glib::Threads::Mutex::Lock guard (the_lock());
+		PBD::Mutex::Lock guard (the_lock());
 		pair<void const*, SPDebug*> newpair;
 
 		newpair.first = sp;
@@ -306,14 +306,14 @@ boost_debug_shared_ptr_constructor (void const *sp, volatile void const *obj, in
 void
 boost_debug_count_ptrs ()
 {
-	Glib::Threads::Mutex::Lock guard (the_lock());
+	PBD::Mutex::Lock guard (the_lock());
 	// cerr << "Tracking " << interesting_pointers().size() << " interesting objects with " << sptrs().size () << " shared ptrs\n";
 }
 
 void
 boost_debug_list_ptrs ()
 {
-	Glib::Threads::Mutex::Lock guard (the_lock());
+	PBD::Mutex::Lock guard (the_lock());
 
 	if (sptrs().empty()) {
 		cerr << "There are no dangling shared ptrs\n";

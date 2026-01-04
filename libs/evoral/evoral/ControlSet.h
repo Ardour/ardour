@@ -27,7 +27,8 @@
 #include <memory>
 
 #include <boost/noncopyable.hpp>
-#include <glibmm/threads.h>
+
+#include "pbd/mutex.h"
 #include "pbd/signals.h"
 
 #include "temporal/domain_swap.h"
@@ -71,7 +72,7 @@ public:
 
 	void what_has_data(std::set<Parameter>&) const;
 
-	Glib::Threads::Mutex& control_lock() const { return _control_lock; }
+	PBD::Mutex& control_lock() const { return _control_lock; }
 
 	void start_domain_bounce (Temporal::DomainBounceInfo&);
 	void finish_domain_bounce (Temporal::DomainBounceInfo&);
@@ -80,7 +81,7 @@ protected:
 	virtual void control_list_marked_dirty () {}
 	virtual void control_list_interpolation_changed (Parameter const&, ControlList::InterpolationStyle) {}
 
-	mutable Glib::Threads::Mutex _control_lock;
+	mutable PBD::Mutex _control_lock;
 	Controls            _controls;
 
 	PBD::ScopedConnectionList _list_connections;

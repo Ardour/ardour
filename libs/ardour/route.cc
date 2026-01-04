@@ -957,7 +957,7 @@ Route::processor_selfdestruct (std::weak_ptr<Processor> wp)
 	 * with various locks held - in case of sends also io_locks).
 	 * Queue for deletion in low-priority thread.
 	 */
-	Glib::Threads::Mutex::Lock lx (selfdestruct_lock);
+	PBD::Mutex::Lock lx (selfdestruct_lock);
 	selfdestruct_sequence.push_back (wp);
 }
 
@@ -4529,7 +4529,7 @@ Route::emit_pending_signals ()
 	 * of xruns when taking the locks.
 	 */
 	while (!selfdestruct_sequence.empty ()) {
-		Glib::Threads::Mutex::Lock lx (selfdestruct_lock);
+		PBD::Mutex::Lock lx (selfdestruct_lock);
 		if (selfdestruct_sequence.empty ()) { break; } // re-check with lock
 		std::shared_ptr<Processor> proc = selfdestruct_sequence.back ().lock ();
 		selfdestruct_sequence.pop_back ();

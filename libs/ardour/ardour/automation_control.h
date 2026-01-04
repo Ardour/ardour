@@ -25,8 +25,6 @@
 #include <map>
 #include <memory>
 
-#include <glibmm/threads.h>
-
 #include "pbd/controllable.h"
 
 #include "evoral/types.h"

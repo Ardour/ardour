@@ -25,8 +25,7 @@
 #include <string>
 #include <vector>
 
-#include <glibmm/threads.h>
-
+#include "pbd/mutex.h"
 #include "pbd/signals.h"
 
 #include "ardour/data_type.h"
@@ -143,7 +142,7 @@ class LIBARDOUR_API Bundle : public PBD::ScopedConnectionList
 
 	/// mutex for _channel_ports and _channel_names
 	/// XXX: is this necessary?
-	mutable Glib::Threads::Mutex _channel_mutex;
+	mutable PBD::Mutex _channel_mutex;
 	std::vector<Channel> _channel;
 
   private:

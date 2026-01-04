@@ -1838,7 +1838,7 @@ LV2Plugin::add_slave (std::shared_ptr<Plugin> p, bool)
 {
 	std::shared_ptr<LV2Plugin> lv2 = std::dynamic_pointer_cast<LV2Plugin> (p);
 	if (lv2) {
-		Glib::Threads::Mutex::Lock lm (_slave_lock);
+		PBD::Mutex::Lock lm (_slave_lock);
 		_slaves.insert (lv2);
 	}
 }
@@ -1848,7 +1848,7 @@ LV2Plugin::remove_slave (std::shared_ptr<Plugin> p)
 {
 	std::shared_ptr<LV2Plugin> lv2 = std::dynamic_pointer_cast<LV2Plugin> (p);
 	if (lv2) {
-		Glib::Threads::Mutex::Lock lm (_slave_lock);
+		PBD::Mutex::Lock lm (_slave_lock);
 		_slaves.erase (lv2);
 	}
 }
@@ -1952,7 +1952,7 @@ LV2Plugin::write_from_ui(uint32_t       index,
 	}
 #endif
 
-	Glib::Threads::Mutex::Lock lm (_slave_lock, Glib::Threads::TRY_LOCK);
+	PBD::Mutex::Lock lm (_slave_lock, PBD::Mutex::TryLock);
 	if (lm.locked()) {
 		for (auto const& i : _slaves) {
 			i->write_from_ui (index, protocol, size, body);
@@ -2301,7 +2301,7 @@ LV2Plugin::emit_to_ui(void* controller, UIMessageSink sink)
 int
 LV2Plugin::work(Worker& worker, uint32_t size, const void* data)
 {
-	Glib::Threads::Mutex::Lock lm(_work_mutex);
+	PBD::Mutex::Lock lm(_work_mutex);
 	return _impl->work_iface->work(
 		_impl->instance->lv2_handle, work_respond, &worker, size, data);
 }

@@ -24,8 +24,6 @@
 #include <boost/intrusive/list.hpp>
 #include <boost/rational.hpp>
 
-#include <glibmm/threads.h>
-
 #include "pbd/pool.h"
 #include "pbd/ringbuffer.h"
 #include "pbd/stateful.h"
@@ -216,7 +214,7 @@ class StepSequence : public PBD::Stateful
   private:
 	StepSequencer& _sequencer;
 	int         _index;
-	mutable Glib::Threads::Mutex _step_lock;
+	mutable PBD::Mutex _step_lock;
 	typedef std::vector<Step*> Steps;
 
 	Steps       _steps;
@@ -265,7 +263,7 @@ class StepSequencer : public PBD::Stateful
 	std::shared_ptr<Source> write_to_source (Session& s, std::string p = std::string()) const;
 
   private:
-	mutable Glib::Threads::Mutex       _sequence_lock;
+	mutable PBD::Mutex       _sequence_lock;
 	TempoMap&       _tempo_map;
 
 	typedef std::vector<StepSequence*> StepSequences;

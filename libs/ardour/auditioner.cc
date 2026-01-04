@@ -20,8 +20,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <glibmm/threads.h>
-
 #include "pbd/error.h"
 
 #include "ardour/amp.h"
@@ -374,7 +372,7 @@ Auditioner::audition_region (std::shared_ptr<Region> region, bool loop)
 
 	_loop = loop;
 
-	Glib::Threads::Mutex::Lock lm (lock);
+	PBD::Mutex::Lock lm (lock);
 
 	if (std::dynamic_pointer_cast<AudioRegion>(region) != 0) {
 

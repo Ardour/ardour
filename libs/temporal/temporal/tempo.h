@@ -27,8 +27,6 @@
 
 #include <boost/intrusive/list.hpp>
 
-#include <glibmm/threads.h>
-
 #include "pbd/command.h"
 #include "pbd/enum_convert.h"
 #include "pbd/integer_division.h"

@@ -20,7 +20,6 @@
 #pragma once
 
 #include <vector>
-#include <glibmm/threads.h>
 #include "ardour/bundle.h"
 
 namespace ARDOUR {

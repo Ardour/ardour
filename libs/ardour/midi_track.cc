@@ -443,7 +443,7 @@ MidiTrack::non_realtime_locate (samplepos_t spos)
 		return;
 	}
 
-	Glib::Threads::Mutex::Lock lm (_control_lock, Glib::Threads::TRY_LOCK);
+	PBD::Mutex::Lock lm (_control_lock, PBD::Mutex::TryLock);
 	if (!lm.locked()) {
 		return;
 	}

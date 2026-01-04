@@ -20,9 +20,10 @@
 #define _ardour_io_tasklist_h_
 
 #include <atomic>
+#include <functional>
 #include <vector>
-#include <glibmm/threads.h>
 
+#include "pbd/mutex.h"
 #include "pbd/semutils.h"
 
 #include "ardour/libardour_visibility.h"
@@ -53,7 +54,7 @@ private:
 	std::atomic <bool>     _terminate;
 	PBD::Semaphore         _exec_sem;
 	PBD::Semaphore         _idle_sem;
-	Glib::Threads::Mutex   _tasks_mutex;
+	PBD::Mutex   _tasks_mutex;
 };
 
 } // namespace ARDOUR

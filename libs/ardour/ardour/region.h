@@ -186,7 +186,7 @@ public:
 	struct RegionGroupRetainer {
 		RegionGroupRetainer ()
 		{
-			Glib::Threads::Mutex::Lock lm (_operation_rgroup_mutex);
+			PBD::Mutex::Lock lm (_operation_rgroup_mutex);
 			if (_retained_group_id == 0) {
 				_retained_take_cnt = 0;
 				++_next_group_id;
@@ -200,7 +200,7 @@ public:
 		~RegionGroupRetainer ()
 		{
 			if (_clear_on_destruction) {
-				Glib::Threads::Mutex::Lock lm (_operation_rgroup_mutex);
+				PBD::Mutex::Lock lm (_operation_rgroup_mutex);
 				_retained_group_id = 0;
 				_next_group_id += _retained_take_cnt;
 				_operation_rgroup_map.clear();
@@ -686,11 +686,11 @@ private:
 	static uint64_t _retained_take_cnt;
 	static uint64_t _next_group_id;
 
-	static Glib::Threads::Mutex         _operation_rgroup_mutex;
+	static PBD::Mutex         _operation_rgroup_mutex;
 	static std::map<uint64_t, uint64_t> _operation_rgroup_map;
 
 	std::atomic<int>          _source_deleted;
-	Glib::Threads::Mutex      _source_list_lock;
+	PBD::Mutex      _source_list_lock;
 	PBD::ScopedConnectionList _source_deleted_connections;
 };
 

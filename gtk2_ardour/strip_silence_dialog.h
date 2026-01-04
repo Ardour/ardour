@@ -21,7 +21,6 @@
 
 #include <ytkmm/progressbar.h>
 #include <ytkmm/spinbutton.h>
-#include <glibmm/threads.h>
 
 #include <pbd/mutex.h>
 #include <pbd/xml++.h>

@@ -138,7 +138,7 @@ public:
 	}
 
 	void clear () {
-		Glib::Threads::Mutex::Lock lm (_lock);
+		PBD::Mutex::Lock lm (_lock);
 		for (auto it = _event_handlers.begin (); it != _event_handlers.end (); ++it) {
 			g_source_remove (it->second._source_id);
 			g_io_channel_unref (it->second._gio_channel);
@@ -157,7 +157,7 @@ public:
 			return kInvalidArgument;
 		}
 
-		Glib::Threads::Mutex::Lock lm (_lock);
+		PBD::Mutex::Lock lm (_lock);
 		GIOChannel* gio_channel = g_io_channel_unix_new (fd);
 		guint id = g_io_add_watch (gio_channel, (GIOCondition) (G_IO_IN /*| G_IO_OUT*/ | G_IO_ERR | G_IO_HUP), event, handler);
 		_event_handlers[fd] = EventHandler (handler, gio_channel, id);
@@ -171,7 +171,7 @@ public:
 		}
 
 		tresult rv = false;
-		Glib::Threads::Mutex::Lock lm (_lock);
+		PBD::Mutex::Lock lm (_lock);
 		for (auto it = _event_handlers.begin (); it != _event_handlers.end ();) {
 			if (it->second._handler == handler) {
 				g_source_remove (it->second._source_id);
@@ -190,7 +190,7 @@ public:
 		if (!handler || milliseconds == 0) {
 			return kInvalidArgument;
 		}
-		Glib::Threads::Mutex::Lock lm (_lock);
+		PBD::Mutex::Lock lm (_lock);
 		guint id = g_timeout_add_full (G_PRIORITY_HIGH_IDLE, milliseconds, timeout, handler, NULL);
 		_timer_handlers[id] = handler;
 		return kResultTrue;
@@ -204,7 +204,7 @@ public:
 		}
 
 		tresult rv = false;
-		Glib::Threads::Mutex::Lock lm (_lock);
+		PBD::Mutex::Lock lm (_lock);
 		for (std::unordered_map<guint, Linux::ITimerHandler*>::const_iterator it = _timer_handlers.begin (); it != _timer_handlers.end ();) {
 			if (it->second == handler) {
 				g_source_remove (it->first);
@@ -229,7 +229,7 @@ public:
 	}
 
 private:
-	Glib::Threads::Mutex _lock;
+	PBD::Mutex _lock;
 };
 
 AVST3Runloop static_runloop;

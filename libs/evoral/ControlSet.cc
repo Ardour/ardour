@@ -59,7 +59,7 @@ ControlSet::add_control(std::shared_ptr<Control> ac)
 void
 ControlSet::what_has_data (set<Parameter>& s) const
 {
-	Glib::Threads::Mutex::Lock lm (_control_lock);
+	PBD::Mutex::Lock lm (_control_lock);
 
 	for (Controls::const_iterator li = _controls.begin(); li != _controls.end(); ++li) {
 		if (li->second->list() && !li->second->list()->empty()) {
@@ -93,7 +93,7 @@ ControlSet::control (const Parameter& parameter, bool create_if_missing)
 void
 ControlSet::clear_controls ()
 {
-	Glib::Threads::Mutex::Lock lm (_control_lock);
+	PBD::Mutex::Lock lm (_control_lock);
 
 	_control_connections.drop_connections ();
 	_list_connections.drop_connections ();

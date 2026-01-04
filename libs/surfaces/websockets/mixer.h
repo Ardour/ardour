@@ -19,7 +19,7 @@
 #ifndef _ardour_surface_websockets_mixer_h_
 #define _ardour_surface_websockets_mixer_h_
 
-#include <glibmm/threads.h>
+#include "pbd/mutex.h"
 
 #include "component.h"
 #include "typed_value.h"
@@ -125,11 +125,11 @@ public:
 	ArdourMixerStrip& strip (uint32_t);
 	void              on_drop_strip (uint32_t);
 
-	Glib::Threads::Mutex& mutex ();
+	PBD::Mutex& mutex ();
 
 private:
 	StripMap             _strips;
-	Glib::Threads::Mutex _mutex;
+	PBD::Mutex _mutex;
 };
 
 } // namespace ArdourSurface

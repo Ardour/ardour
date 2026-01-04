@@ -274,8 +274,8 @@ class LIBARDOUR_API AudioRegion : public Region, public AudioReadable
 	pframes_t           _fx_block_size;
 	mutable bool        _fx_latent_read;
 
-	mutable Glib::Threads::Mutex _read_lock;
-	mutable Glib::Threads::Mutex _cache_lock;
+	mutable PBD::Mutex _read_lock;
+	mutable PBD::Mutex _cache_lock;
 	mutable BufferSet            _readcache;
 	mutable samplepos_t          _cache_start;
 	mutable samplepos_t          _cache_end;

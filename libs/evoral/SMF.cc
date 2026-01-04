@@ -71,14 +71,14 @@ SMF::smf_format () const
 uint16_t
 SMF::num_tracks() const
 {
-	Glib::Threads::Mutex::Lock lm (_smf_lock);
+	PBD::Mutex::Lock lm (_smf_lock);
 	return (uint16_t) (_smf ? _smf->number_of_tracks : 0);
 }
 
 uint16_t
 SMF::ppqn() const
 {
-	Glib::Threads::Mutex::Lock lm (_smf_lock);
+	PBD::Mutex::Lock lm (_smf_lock);
 	return _smf->ppqn;
 }
 
@@ -88,7 +88,7 @@ SMF::ppqn() const
 int
 SMF::seek_to_track(int track)
 {
-	Glib::Threads::Mutex::Lock lm (_smf_lock);
+	PBD::Mutex::Lock lm (_smf_lock);
 	_smf_track = smf_get_track_by_number(_smf, track);
 	if (_smf_track != NULL) {
 		_smf_track->next_event_number = (_smf_track->number_of_events == 0) ? 0 : 1;
@@ -132,7 +132,7 @@ SMF::test(const std::string& path)
 int
 SMF::open(const std::string& path, int track, bool scan)
 {
-	Glib::Threads::Mutex::Lock lm (_smf_lock);
+	PBD::Mutex::Lock lm (_smf_lock);
 
 	_num_channels     = 0;
 	_n_note_on_events = 0;
@@ -229,7 +229,7 @@ SMF::open(const std::string& path, int track, bool scan)
 int
 SMF::create(const std::string& path, int track, uint16_t ppqn)
 {
-	Glib::Threads::Mutex::Lock lm (_smf_lock);
+	PBD::Mutex::Lock lm (_smf_lock);
 
 	assert(track >= 1);
 	if (_smf) {
@@ -284,7 +284,7 @@ SMF::create(const std::string& path, int track, uint16_t ppqn)
 void
 SMF::close()
 {
-	Glib::Threads::Mutex::Lock lm (_smf_lock);
+	PBD::Mutex::Lock lm (_smf_lock);
 
 	if (_smf) {
 		smf_delete(_smf);
@@ -297,7 +297,7 @@ SMF::close()
 void
 SMF::seek_to_start() const
 {
-	Glib::Threads::Mutex::Lock lm (_smf_lock);
+	PBD::Mutex::Lock lm (_smf_lock);
 	if (_smf_track) {
 		_smf_track->next_event_number = std::min(_smf_track->number_of_events, (size_t)1);
 	} else {
@@ -325,7 +325,7 @@ SMF::seek_to_start() const
 int
 SMF::read_event(uint32_t* delta_t, uint32_t* bufsize, uint8_t** buf, event_id_t* note_id) const
 {
-	Glib::Threads::Mutex::Lock lm (_smf_lock);
+	PBD::Mutex::Lock lm (_smf_lock);
 
 	smf_event_t* event;
 	bool is_meta;
@@ -477,7 +477,7 @@ SMF::is_tempo_or_meter_related (uint8_t const* buf, uint32_t size)
 int
 SMF::append_event_delta (uint32_t delta_t, uint32_t size, const uint8_t* buf, event_id_t note_id, bool allow_meta)
 {
-	Glib::Threads::Mutex::Lock lm (_smf_lock);
+	PBD::Mutex::Lock lm (_smf_lock);
 
 	if (size == 0) {
 		return 0;
@@ -589,7 +589,7 @@ SMF::append_event_delta (uint32_t delta_t, uint32_t size, const uint8_t* buf, ev
 void
 SMF::begin_write()
 {
-	Glib::Threads::Mutex::Lock lm (_smf_lock);
+	PBD::Mutex::Lock lm (_smf_lock);
 
 	assert(_smf_track);
 	smf_track_delete(_smf_track);
@@ -612,7 +612,7 @@ SMF::end_track ()
 void
 SMF::end_write (string const & path)
 {
-	Glib::Threads::Mutex::Lock lm (_smf_lock);
+	PBD::Mutex::Lock lm (_smf_lock);
 
 	if (!_smf) {
 		return;
@@ -685,7 +685,7 @@ SMF::track_names(vector<string>& names) const
 
 	names.clear ();
 
-	Glib::Threads::Mutex::Lock lm (_smf_lock);
+	PBD::Mutex::Lock lm (_smf_lock);
 
 	for (uint16_t n = 0; n < _smf->number_of_tracks; ++n) {
 		smf_track_t* trk = smf_get_track_by_number (_smf, n+1);
@@ -714,7 +714,7 @@ SMF::instrument_names(vector<string>& names) const
 
 	names.clear ();
 
-	Glib::Threads::Mutex::Lock lm (_smf_lock);
+	PBD::Mutex::Lock lm (_smf_lock);
 
 	for (uint16_t n = 0; n < _smf->number_of_tracks; ++n) {
 		smf_track_t* trk = smf_get_track_by_number (_smf, n+1);
@@ -771,7 +771,7 @@ SMF::load_markers ()
 		return;
 	}
 
-	Glib::Threads::Mutex::Lock lm (_smf_lock);
+	PBD::Mutex::Lock lm (_smf_lock);
 
 	if (_smf_track) {
 		_smf_track->next_event_number = std::min(_smf_track->number_of_events, (size_t)1);

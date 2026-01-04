@@ -22,10 +22,10 @@
 #ifndef EVORAL_SMF_HPP
 #define EVORAL_SMF_HPP
 
-#include <glibmm/threads.h>
-
 #include <memory>
 #include <set>
+
+#include "pbd/mutex.h"
 
 #include "temporal/beats.h"
 
@@ -160,7 +160,7 @@ public:
 	smf_track_t* _smf_track;
 	bool         _empty; ///< true iff file contains(non-empty) events
 
-	mutable Glib::Threads::Mutex _smf_lock;
+	mutable PBD::Mutex _smf_lock;
 
 	mutable Markers _markers;
 

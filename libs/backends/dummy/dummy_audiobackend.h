@@ -86,7 +86,7 @@ class DummyPort : public BackendPort {
 
 		// signal generator
 		volatile bool _gen_cycle;
-		Glib::Threads::Mutex generator_lock;
+		PBD::Mutex generator_lock;
 
         private:
 		AudioBackend& _engine;

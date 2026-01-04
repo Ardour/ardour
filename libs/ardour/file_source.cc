@@ -39,7 +39,6 @@
 
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
-#include <glibmm/threads.h>
 
 #include "ardour/data_type.h"
 #include "ardour/file_source.h"

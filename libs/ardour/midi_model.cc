@@ -1706,7 +1706,7 @@ void
 MidiModel::source_interpolation_changed (Evoral::Parameter const& p, AutomationList::InterpolationStyle s)
 {
 	{
-		Glib::Threads::Mutex::Lock lm (_control_lock);
+		PBD::Mutex::Lock lm (_control_lock);
 		control(p)->list()->set_interpolation (s);
 	}
 	/* re-read MIDI */
@@ -1726,7 +1726,7 @@ void
 MidiModel::source_automation_state_changed (Evoral::Parameter const& p, AutoState s)
 {
 	{
-		Glib::Threads::Mutex::Lock lm (_control_lock);
+		PBD::Mutex::Lock lm (_control_lock);
 		std::shared_ptr<AutomationList> al = std::dynamic_pointer_cast<AutomationList> (control(p)->list ());
 		al->set_automation_state (s);
 	}

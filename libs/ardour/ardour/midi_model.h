@@ -28,9 +28,8 @@
 #include <queue>
 #include <utility>
 
-#include <glibmm/threads.h>
-
 #include "pbd/command.h"
+#include "pbd/mutex.h"
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/automation_list.h"
@@ -358,7 +357,7 @@ public:
 
   private:
 	struct WriteLockImpl : public AutomatableSequence<TimeType>::WriteLockImpl {
-		WriteLockImpl(Source::WriterLock* slock, PBD::RWLock& s, Glib::Threads::Mutex& c)
+		WriteLockImpl(Source::WriterLock* slock, PBD::RWLock& s, PBD::Mutex& c)
 			: AutomatableSequence<TimeType>::WriteLockImpl(s, c)
 			, source_lock (slock)
 		{}

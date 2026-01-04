@@ -122,7 +122,7 @@ protected:
 
 	void init ();
 
-	Glib::Threads::Mutex state_lock;
+	PBD::Mutex state_lock;
 
 	static bool get_buffering_presets (BufferingPreset bp,
 	                                   samplecnt_t& read_chunk_size,

@@ -25,10 +25,9 @@
 #include <atomic>
 #include <memory>
 #include <string>
-#include <set>
 
-#include <glibmm/threads.h>
-
+#include "pbd/mutex.h"
+#include "pbd/rwlock.h"
 #include "pbd/statefuldestructible.h"
 
 #include "ardour/ardour.h"
@@ -178,7 +177,7 @@ public:
 	SegmentDescriptors segment_descriptors;
 
 	mutable PBD::RWLock _lock;
-	mutable Glib::Threads::Mutex _analysis_lock;
+	mutable PBD::Mutex _analysis_lock;
 
   private:
 	void fix_writable_flags ();

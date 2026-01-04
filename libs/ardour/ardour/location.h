@@ -32,8 +32,6 @@
 
 #include <sys/types.h>
 
-#include <glibmm/threads.h>
-
 #include "pbd/undo.h"
 #include "pbd/rwlock.h"
 #include "pbd/stateful.h"

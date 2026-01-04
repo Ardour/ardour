@@ -20,8 +20,6 @@
 
 #pragma once
 
-#include <glibmm/threads.h>
-
 #include "temporal/beats.h"
 #include "ardour/midi_buffer.h"
 #include "ardour/source.h"

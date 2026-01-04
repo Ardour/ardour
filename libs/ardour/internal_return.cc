@@ -19,7 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <glibmm/threads.h>
+#include "pbd/mutex.h"
 
 #include "ardour/internal_return.h"
 #include "ardour/internal_send.h"
@@ -41,7 +41,7 @@ InternalReturn::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t 
 		return;
 	}
 
-	Glib::Threads::Mutex::Lock lm (_sends_mutex, Glib::Threads::TRY_LOCK);
+	PBD::Mutex::Lock lm (_sends_mutex, PBD::Mutex::TryLock);
 
 	if (!lm.locked ()) {
 		return;
@@ -57,14 +57,14 @@ InternalReturn::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t 
 void
 InternalReturn::add_send (InternalSend* send)
 {
-	Glib::Threads::Mutex::Lock lm (_sends_mutex);
+	PBD::Mutex::Lock lm (_sends_mutex);
 	_sends.push_back (send);
 }
 
 void
 InternalReturn::remove_send (InternalSend* send)
 {
-	Glib::Threads::Mutex::Lock lm (_sends_mutex);
+	PBD::Mutex::Lock lm (_sends_mutex);
 	_sends.remove (send);
 }
 
@@ -73,7 +73,7 @@ InternalReturn::set_playback_offset (samplecnt_t cnt)
 {
 	Processor::set_playback_offset (cnt);
 
-	Glib::Threads::Mutex::Lock lm (_sends_mutex); // TODO reader lock
+	PBD::Mutex::Lock lm (_sends_mutex); // TODO reader lock
 	for (list<InternalSend*>::iterator i = _sends.begin(); i != _sends.end(); ++i) {
 		(*i)->set_delay_out (cnt);
 	}

@@ -307,7 +307,7 @@ ArdourMixer::start ()
 int
 ArdourMixer::stop ()
 {
-	Glib::Threads::Mutex::Lock lock (mixer ().mutex ());
+	PBD::Mutex::Lock lock (mixer ().mutex ());
 	_strips.clear ();
 	return 0;
 }
@@ -332,11 +332,11 @@ ArdourMixer::strip (uint32_t strip_id)
 void
 ArdourMixer::on_drop_strip (uint32_t strip_id)
 {
-	Glib::Threads::Mutex::Lock lock (_mutex);
+	PBD::Mutex::Lock lock (_mutex);
 	_strips.erase (strip_id);
 }
 
-Glib::Threads::Mutex&
+PBD::Mutex&
 ArdourMixer::mutex ()
 {
 	return _mutex;

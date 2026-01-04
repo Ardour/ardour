@@ -317,7 +317,7 @@ class LIBARDOUR_API ExportGraphBuilder
 	samplecnt_t _master_align;
 
 	Glib::ThreadPool     thread_pool;
-	Glib::Threads::Mutex engine_request_lock;
+	PBD::Mutex engine_request_lock;
 };
 
 } // namespace ARDOUR

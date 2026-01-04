@@ -30,8 +30,6 @@
 #include "pbd/enumwriter.h"
 #include "pbd/pthread_utils.h"
 
-#include <glibmm/threads.h>
-
 #include "temporal/tempo.h"
 
 #include "ardour/audioengine.h"
@@ -858,7 +856,7 @@ Session::queue_event (SessionEvent* ev)
 	} else if (loading ()) {
 		merge_event (ev);
 	} else {
-		Glib::Threads::Mutex::Lock lm (rb_write_lock);
+		PBD::Mutex::Lock lm (rb_write_lock);
 		pending_events.write (&ev, 1);
 	}
 }

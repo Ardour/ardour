@@ -20,7 +20,6 @@
 #pragma once
 
 #include <vector>
-#include <glibmm/threads.h>
 #include "pbd/stateful.h"
 #include "ardour/bundle.h"
 

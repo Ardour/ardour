@@ -459,7 +459,7 @@ PluginManager::conceal_duplicates (ARDOUR::PluginInfoList* old, ARDOUR::PluginIn
 void
 PluginManager::refresh (bool cache_only)
 {
-	Glib::Threads::Mutex::Lock lm (_lock, Glib::Threads::TRY_LOCK);
+	PBD::Mutex::Lock lm (_lock, PBD::Mutex::TryLock);
 
 	if (!lm.locked()) {
 		return;
@@ -777,7 +777,7 @@ PluginManager::lua_refresh ()
 void
 PluginManager::lua_refresh_cb ()
 {
-	Glib::Threads::Mutex::Lock lm (_lock, Glib::Threads::TRY_LOCK);
+	PBD::Mutex::Lock lm (_lock, PBD::Mutex::TryLock);
 	if (!lm.locked()) {
 		return;
 	}

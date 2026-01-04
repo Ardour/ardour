@@ -34,7 +34,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using std::string;
 
-Glib::Threads::Mutex VCA::number_lock;
+PBD::Mutex VCA::number_lock;
 int32_t VCA::next_number = 1;
 string VCA::xml_node_name (X_("VCA"));
 
@@ -50,21 +50,21 @@ VCA::next_vca_number ()
 	/* we could use atomic inc here, but elsewhere we need more complete
 	   mutex semantics, so we have to do it here also.
 	*/
-	Glib::Threads::Mutex::Lock lm (number_lock);
+	PBD::Mutex::Lock lm (number_lock);
 	return next_number++;
 }
 
 void
 VCA::set_next_vca_number (int32_t n)
 {
-	Glib::Threads::Mutex::Lock lm (number_lock);
+	PBD::Mutex::Lock lm (number_lock);
 	next_number = n;
 }
 
 int32_t
 VCA::get_next_vca_number ()
 {
-	Glib::Threads::Mutex::Lock lm (number_lock);
+	PBD::Mutex::Lock lm (number_lock);
 	return next_number;
 }
 
@@ -93,13 +93,13 @@ VCA::~VCA ()
 {
 	DEBUG_TRACE (DEBUG::Destruction, string_compose ("delete VCA %1\n", number()));
 	{
-		Glib::Threads::Mutex::Lock lm (_control_lock);
+		PBD::Mutex::Lock lm (_control_lock);
 		for (Controls::const_iterator li = _controls.begin(); li != _controls.end(); ++li) {
 			std::dynamic_pointer_cast<AutomationControl>(li->second)->drop_references ();
 		}
 	}
 	{
-		Glib::Threads::Mutex::Lock lm (number_lock);
+		PBD::Mutex::Lock lm (number_lock);
 		if (_number == next_number - 1) {
 			/* this was the "last" VCA added, so rewind the next number so
 			 * that future VCAs get numbered as intended

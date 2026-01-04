@@ -19,8 +19,6 @@
 
 #include <vector>
 
-#include <glibmm/threads.h>
-
 #include "pbd/convert.h"
 #include "pbd/error.h"
 #include "pbd/xml++.h"
