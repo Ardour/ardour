@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include "pbd/thread_pool.h"
+
 #include "ardour/export_handler.h"
 #include "ardour/export_analysis.h"
 #include "ardour/export_smf_writer.h"
@@ -28,7 +30,6 @@
 #include "audiographer/utils/identity_vertex.h"
 
 #include <boost/ptr_container/ptr_list.hpp>
-#include <glibmm/threadpool.h>
 
 namespace AudioGrapher {
 	class SampleRateConverter;
@@ -316,7 +317,7 @@ class LIBARDOUR_API ExportGraphBuilder
 	bool        _realtime;
 	samplecnt_t _master_align;
 
-	Glib::ThreadPool     thread_pool;
+	PBD::ThreadPool thread_pool;
 	PBD::Mutex engine_request_lock;
 };
 
