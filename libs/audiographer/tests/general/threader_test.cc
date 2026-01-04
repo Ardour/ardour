@@ -22,7 +22,7 @@ class ThreaderTest : public CppUnit::TestFixture
 		zero_data = new float[samples];
 		memset (zero_data, 0, samples * sizeof(float));
 
-		thread_pool = new Glib::ThreadPool (3);
+		thread_pool = new PBD::ThreadPool (3);
 		threader.reset (new Threader<float> (*thread_pool));
 
 		sink_a.reset (new VectorSink<float>());
@@ -135,7 +135,7 @@ class ThreaderTest : public CppUnit::TestFixture
 	}
 
   private:
-	Glib::ThreadPool * thread_pool;
+	PBD::ThreadPool* thread_pool;
 
 	std::shared_ptr<Threader<float> > threader;
 	std::shared_ptr<VectorSink<float> > sink_a;

@@ -5,13 +5,13 @@
 #include <vector>
 #include <algorithm>
 
-#include <glibmm/threadpool.h>
-#include <glibmm/timeval.h>
 #include <sigc++/slot.h>
+#include <sigc++/bind.h>
 
 #include "pbd/atomic.h"
 #include "pbd/compose.h"
 #include "pbd/mutex.h"
+#include "pbd/thread_pool.h"
 
 #include "audiographer/visibility.h"
 #include "audiographer/source.h"
@@ -45,7 +45,7 @@ class /*LIBAUDIOGRAPHER_API*/ Threader : public Source<T>, public Sink<T>
 	  * \param thread_pool a thread pool from which all tasks are scheduled
 	  * \param wait_timeout_milliseconds maximum time allowed for threads to use in processing
 	  */
-	Threader (Glib::ThreadPool & thread_pool, long wait_timeout_milliseconds = 500)
+	Threader (PBD::ThreadPool& thread_pool, long wait_timeout_milliseconds = 500)
 	  : thread_pool (thread_pool)
 	  , wait_timeout (wait_timeout_milliseconds)
 	{
@@ -117,7 +117,8 @@ class /*LIBAUDIOGRAPHER_API*/ Threader : public Source<T>, public Sink<T>
 
 	OutputVec outputs;
 
-	Glib::ThreadPool&    thread_pool;
+	PBD::ThreadPool& thread_pool;
+
 	PBD::Mutex wait_mutex;
 	PBD::Cond  wait_cond;
 
