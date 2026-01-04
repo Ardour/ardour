@@ -34,12 +34,13 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-Glib::Threads::Mutex          Analyser::analysis_active_lock;
-Glib::Threads::Mutex          Analyser::analysis_queue_lock;
-Glib::Threads::Cond           Analyser::SourcesToAnalyse;
+PBD::Mutex Analyser::analysis_active_lock;
+PBD::Mutex Analyser::analysis_queue_lock;
+PBD::Cond  Analyser::SourcesToAnalyse;
+
 list<std::weak_ptr<Source>> Analyser::analysis_queue;
-bool                          Analyser::analysis_thread_run = false;
-PBD::Thread*                  Analyser::analysis_thread     = 0;
+bool                        Analyser::analysis_thread_run = false;
+PBD::Thread*                Analyser::analysis_thread     = 0;
 
 Analyser::Analyser ()
 {
@@ -77,9 +78,9 @@ Analyser::queue_source_for_analysis (std::shared_ptr<Source> src, bool force)
 		return;
 	}
 
-	Glib::Threads::Mutex::Lock lm (analysis_queue_lock);
+	PBD::Mutex::Lock lm (analysis_queue_lock);
 	analysis_queue.push_back (std::weak_ptr<Source> (src));
-	SourcesToAnalyse.broadcast ();
+	SourcesToAnalyse.signal ();
 }
 
 void
@@ -111,7 +112,7 @@ Analyser::work ()
 		std::shared_ptr<AudioFileSource> afs = std::dynamic_pointer_cast<AudioFileSource> (src);
 
 		if (afs && !afs->empty ()) {
-			Glib::Threads::Mutex::Lock lm (analysis_active_lock);
+			PBD::Mutex::Lock lm (analysis_active_lock);
 			analyse_audio_file_source (afs);
 		}
 	}
@@ -141,7 +142,7 @@ Analyser::analyse_audio_file_source (std::shared_ptr<AudioFileSource> src)
 void
 Analyser::flush ()
 {
-	Glib::Threads::Mutex::Lock lq (analysis_queue_lock);
-	Glib::Threads::Mutex::Lock la (analysis_active_lock);
+	PBD::Mutex::Lock lq (analysis_queue_lock);
+	PBD::Mutex::Lock la (analysis_active_lock);
 	analysis_queue.clear ();
 }

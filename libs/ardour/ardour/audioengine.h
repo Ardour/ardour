@@ -34,8 +34,7 @@
 #include <exception>
 #include <string>
 
-#include <glibmm/threads.h>
-
+#include "pbd/mutex.h"
 #include "pbd/signals.h"
 #include "pbd/pthread_utils.h"
 
@@ -131,8 +130,8 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 
 	std::string backend_id (bool for_input);
 
-	Glib::Threads::Mutex& process_lock() { return _process_lock; }
-	Glib::Threads::Mutex& latency_lock() { return _latency_lock; }
+	PBD::Mutex& process_lock() { return _process_lock; }
+	PBD::Mutex& latency_lock() { return _latency_lock; }
 
 	int request_buffer_size (pframes_t samples) {
 		return set_buffer_size (samples);
@@ -261,10 +260,10 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 
 	static AudioEngine*       _instance;
 
-	Glib::Threads::Mutex       _process_lock;
-	Glib::Threads::Mutex       _latency_lock;
-	Glib::Threads::RecMutex    _state_lock;
-	Glib::Threads::Cond        session_removed;
+	PBD::Mutex                _process_lock;
+	PBD::Mutex                _latency_lock;
+	PBD::Cond                 _session_removed;
+	std::recursive_mutex      _state_lock;
 	bool                       session_remove_pending;
 	sampleoffset_t             session_removal_countdown;
 	bool                       session_deleted;
@@ -293,21 +292,20 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 	bool                      _in_destructor;
 
 	std::string               _last_backend_error_string;
-
 	PBD::Thread*              _hw_reset_event_thread;
-	std::atomic<int>         _hw_reset_request_count;
-	Glib::Threads::Cond       _hw_reset_condition;
-	Glib::Threads::Mutex      _reset_request_lock;
-	std::atomic<int>         _stop_hw_reset_processing;
+	std::atomic<int>          _hw_reset_request_count;
+	PBD::Cond                 _hw_reset_condition;
+	PBD::Mutex                _reset_request_lock;
+	std::atomic<int>          _stop_hw_reset_processing;
 	PBD::Thread*              _hw_devicelist_update_thread;
-	std::atomic<int>         _hw_devicelist_update_count;
-	Glib::Threads::Cond       _hw_devicelist_update_condition;
-	Glib::Threads::Mutex      _devicelist_update_lock;
-	std::atomic<int>         _stop_hw_devicelist_processing;
+	std::atomic<int>          _hw_devicelist_update_count;
+	PBD::Cond                 _hw_devicelist_update_condition;
+	PBD::Mutex                _devicelist_update_lock;
+	std::atomic<int>          _stop_hw_devicelist_processing;
 	uint32_t                  _start_cnt;
 	uint32_t                  _init_countdown;
-	std::atomic<int>         _pending_playback_latency_callback;
-	std::atomic<int>         _pending_capture_latency_callback;
+	std::atomic<int>          _pending_playback_latency_callback;
+	std::atomic<int>          _pending_capture_latency_callback;
 
 	void start_hw_event_processing();
 	void stop_hw_event_processing();

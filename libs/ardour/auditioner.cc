@@ -163,7 +163,7 @@ Auditioner::load_synth ()
 			error << _("Failed to load synth for MIDI-Audition.") << endmsg;
 		}
 
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 		if (configure_processors (&ps)) {
 			error << _("Cannot setup auditioner processing flow.") << endmsg;
 			unload_synth (true);
@@ -397,7 +397,7 @@ Auditioner::audition_region (std::shared_ptr<Region> region, bool loop)
 
 		{
 			ProcessorStreams ps;
-			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+			PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 
 			if (configure_processors (&ps)) {
 				error << string_compose (_("Cannot setup auditioner processing flow for %1 channels"),

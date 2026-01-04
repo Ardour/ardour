@@ -103,7 +103,7 @@ BackendPort::store_connection (BackendPortHandle port)
 	 * solution. Eventually connection changes SHOULD be done in sync with processing.
 	 * delegate via _port_connection_queue (and perhaps maintain a separate list for is_connected())
 	 */
-	Glib::Threads::Mutex::Lock lm (AudioEngine::instance ()->process_lock (), Glib::Threads::TRY_LOCK);
+	PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock (), PBD::Mutex::TryLock);
 	_connections.insert (port);
 }
 
@@ -136,7 +136,7 @@ void BackendPort::remove_connection (BackendPortHandle port)
 	 * solution. Eventually connection changes SHOULD be done in sync with processing.
 	 * delegate via _port_connection_queue (and perhaps maintain a separate list for is_connected())
 	 */
-	Glib::Threads::Mutex::Lock lm (AudioEngine::instance ()->process_lock (), Glib::Threads::TRY_LOCK);
+	PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock (), PBD::Mutex::TryLock);
 
 	std::set<BackendPortPtr>::iterator it = _connections.find (port);
 	assert (it != _connections.end ());
@@ -151,7 +151,7 @@ void BackendPort::disconnect_all (BackendPortHandle self)
 	 * solution. Eventually connection changes SHOULD be done in sync with processing.
 	 * delegate via _port_connection_queue (and perhaps maintain a separate list for is_connected())
 	 */
-	Glib::Threads::Mutex::Lock lm (AudioEngine::instance ()->process_lock (), Glib::Threads::TRY_LOCK);
+	PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock (), PBD::Mutex::TryLock);
 	while (!_connections.empty ()) {
 		std::set<BackendPortPtr>::iterator it = _connections.begin ();
 		(*it)->remove_connection (self);

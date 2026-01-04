@@ -905,7 +905,7 @@ LaunchPadPro::ports_release ()
 	asp->drain (10000, 500000);
 
 	{
-		Glib::Threads::Mutex::Lock em (AudioEngine::instance()->process_lock());
+		PBD::Mutex::Lock em (AudioEngine::instance()->process_lock());
 		AudioEngine::instance()->unregister_port (_daw_in);
 		AudioEngine::instance()->unregister_port (_daw_out);
 	}

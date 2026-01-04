@@ -914,7 +914,7 @@ Port::setup_resampler (uint32_t q)
 	if (cur_quality != _resampler_quality) {
 		ResamplerQualityChanged (); /* EMIT SIGNAL */
 		if (port_manager) {
-			Glib::Threads::Mutex::Lock lm (port_manager->process_lock ());
+			PBD::Mutex::Lock lm (port_manager->process_lock ());
 			port_manager->reinit (true);
 			return false;
 		}

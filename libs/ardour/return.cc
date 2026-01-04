@@ -147,7 +147,7 @@ Return::configure_io (ChanCount in, ChanCount out)
 
 	// Ensure there are enough buffers (since we add some)
 	if (_session.get_scratch_buffers(in).count() < out) {
-		Glib::Threads::Mutex::Lock em (_session.engine().process_lock());
+		PBD::Mutex::Lock em (_session.engine().process_lock());
 		IO::PortCountChanged(out);
 	}
 

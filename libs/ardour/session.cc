@@ -668,7 +668,7 @@ Session::destroy ()
 	_state_of_the_state = StateOfTheState (CannotSave | Deletion);
 
 	{
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 		ltc_tx_cleanup();
 		if (_ltc_output_port) {
 			AudioEngine::instance()->unregister_port (_ltc_output_port);
@@ -866,7 +866,7 @@ Session::destroy ()
 	 * those anymore, but they do leak memory if not removed
 	 */
 	while (!immediate_events.empty ()) {
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 		SessionEvent *ev = immediate_events.front ();
 		DEBUG_TRACE (DEBUG::SessionEvents, string_compose ("Drop event: %1\n", enum_2_string (ev->type)));
 		immediate_events.pop_front ();
@@ -898,7 +898,7 @@ Session::destroy ()
 		/* unregister all dropped ports, process pending port deletion. */
 		// this may call ARDOUR::Port::drop ... jack_port_unregister ()
 		// jack1 cannot cope with removing ports while processing
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 		AudioEngine::instance()->clear_pending_port_deletions ();
 	}
 
@@ -950,9 +950,9 @@ Session::block_processing()
 	 * of the next cycle. So wait until any ongoing
 	 * process-callback returns.
 	 */
-	Glib::Threads::Mutex::Lock lm (_engine.process_lock());
+	PBD::Mutex::Lock lm (_engine.process_lock());
 	/* latency callback may be in process, wait until it completed */
-	Glib::Threads::Mutex::Lock lx (_engine.latency_lock());
+	PBD::Mutex::Lock lx (_engine.latency_lock());
 }
 
 void
@@ -961,7 +961,7 @@ Session::setup_ltc ()
 	_ltc_output_port = AudioEngine::instance()->register_output_port (DataType::AUDIO, X_("LTC-Out"), false, TransportGenerator);
 
 	{
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 		/* TODO use auto-connect thread */
 		reconnect_ltc_output ();
 	}
@@ -1162,7 +1162,7 @@ Session::add_monitor_section ()
 	BOOST_MARK_ROUTE(r);
 
 	try {
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 		r->input()->ensure_io (_master_out->output()->n_ports(), false);
 		r->output()->ensure_io (_master_out->output()->n_ports(), false);
 	} catch (...) {
@@ -1284,7 +1284,7 @@ Session::auto_connect_monitor_bus ()
 void
 Session::setup_route_monitor_sends (bool enable, bool need_process_lock)
 {
-	Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
+	PBD::Mutex::Lock lx (AudioEngine::instance()->process_lock (), PBD::Mutex::NotLock);
 	if (need_process_lock) {
 		/* Hold process lock while doing this so that we don't hear bits and
 		 * pieces of audio as we work on each route.
@@ -1526,7 +1526,7 @@ Session::add_surround_master ()
 	BOOST_MARK_ROUTE(r);
 
 	try {
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 		r->input()->ensure_io (ChanCount (), false);
 		r->output()->ensure_io (ChanCount (DataType::AUDIO, 16), false);
 	} catch (...) {
@@ -1560,7 +1560,7 @@ Session::auto_connect_surround_master ()
 	std::shared_ptr<IO> io    = _surround_master->output ();
 	uint32_t            limit = io->n_ports ().n_audio ();
 
-	Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+	PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 	/* connect binaural outputs, port 12, 13 */
 	for (uint32_t n = 12, p = 0; n < limit && outputs.size () > p; ++n, ++p) {
 		std::shared_ptr<AudioPort> ap = io->audio (n);
@@ -1581,7 +1581,7 @@ Session::auto_connect_surround_master ()
 void
 Session::setup_route_surround_sends (bool enable, bool need_process_lock)
 {
-	Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
+	PBD::Mutex::Lock lx (AudioEngine::instance()->process_lock (), PBD::Mutex::NotLock);
 	if (need_process_lock) {
 		/* Hold process lock while doing this so that we don't hear bits and
 		 * pieces of audio as we work on each route.
@@ -1620,7 +1620,7 @@ Session::add_master_bus (ChanCount const& count)
 	BOOST_MARK_ROUTE(r);
 
 	{
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 		r->input()->ensure_io (count, false);
 		r->output()->ensure_io (count, false);
 	}
@@ -2787,7 +2787,7 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, bool s
 			BOOST_MARK_TRACK (track);
 
 			{
-				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+				PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 				if (track->input()->ensure_io (input, false )) {
 					error << "cannot configure " << input << " out configuration for new midi track" << endmsg;
 					goto failed;
@@ -2871,7 +2871,7 @@ Session::new_midi_route (std::shared_ptr<RouteGroup> route_group, uint32_t how_m
 			BOOST_MARK_ROUTE(bus);
 
 			{
-				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+				PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 
 				if (bus->input()->ensure_io (ChanCount(DataType::MIDI, 1), false)) {
 					error << _("cannot configure new midi bus input") << endmsg;
@@ -3049,7 +3049,7 @@ Session::new_audio_routes_tracks_bulk (RouteList& routes, AudioTrackList& tracks
 			BOOST_MARK_TRACK (track);
 
 			{
-				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+				PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 
 				if (track->input()->ensure_io (ChanCount(DataType::AUDIO, input_channels), false)) {
 					error << string_compose (
@@ -3164,7 +3164,7 @@ Session::new_audio_route (int input_channels, int output_channels, std::shared_p
 			BOOST_MARK_ROUTE(bus);
 
 			{
-				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+				PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 
 				if (bus->input()->ensure_io (ChanCount(DataType::AUDIO, input_channels), false)) {
 					error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
@@ -3449,7 +3449,7 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 				   loading this normally happens in a different way.
 				*/
 
-				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+				PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 
 				IOChange change (IOChange::Type (IOChange::ConfigurationChanged | IOChange::ConnectionsChanged));
 				change.after = route->input()->n_ports();
@@ -3485,7 +3485,7 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 
 	if (!ret.empty()) {
 		/* set/unset monitor-send */
-		Glib::Threads::Mutex::Lock lm (_engine.process_lock());
+		PBD::Mutex::Lock lm (_engine.process_lock());
 		for (RouteList::iterator x = ret.begin(); x != ret.end(); ++x) {
 			if ((*x)->can_monitor ()) {
 				if (_monitor_out) {
@@ -3679,7 +3679,7 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 	}
 
 	if (_monitor_out && !loading()) {
-		Glib::Threads::Mutex::Lock lm (_engine.process_lock());
+		PBD::Mutex::Lock lm (_engine.process_lock());
 
 		for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x) {
 			if ((*x)->can_monitor ()) {
@@ -3689,7 +3689,7 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 	}
 
 	if (_surround_master && !loading()) {
-		Glib::Threads::Mutex::Lock lm (_engine.process_lock());
+		PBD::Mutex::Lock lm (_engine.process_lock());
 		for (auto & r : new_routes) {
 			r->enable_surround_send ();
 		}
@@ -3878,7 +3878,7 @@ Session::remove_routes (std::shared_ptr<RouteList> routes_to_remove)
 			(*iter)->output()->disconnect ();
 
 			if (!deletion_in_progress ()) {
-				Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
+				PBD::Mutex::Lock lx (AudioEngine::instance()->process_lock (), PBD::Mutex::NotLock);
 				ProcessorChangeBlocker pcb (this, false);
 
 				if ((*iter)->internal_return() || (_monitor_out && (*iter)->can_monitor ())) {
@@ -5579,7 +5579,7 @@ Session::load_io_plugin (std::shared_ptr<IOPlug> ioplugin)
 	{
 		RCUWriter<IOPlugList> writer (_io_plugins);
 		std::shared_ptr<IOPlugList> iop = writer.get_copy ();
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 		ioplugin->ensure_io ();
 		iop->push_back (ioplugin);
 		ioplugin->LatencyChanged.connect_same_thread (*this, std::bind (&Session::update_latency_compensation, this, true, false));
@@ -5973,7 +5973,7 @@ Session::ensure_buffers_unlocked (ChanCount howmany)
 	if (_required_thread_buffers >= howmany) {
 		return;
 	}
-	Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+	PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 	ensure_buffers (howmany);
 }
 
@@ -7369,7 +7369,7 @@ Session::update_latency (bool playback)
 	 *  IO::* uses  BLOCK_PROCESS_CALLBACK to prevent concurrency,
 	 *  so the same has to be done here to prevent a race.
 	 */
-	Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock (), Glib::Threads::TRY_LOCK);
+	PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock (), PBD::Mutex::TryLock);
 	if (!lm.locked()) {
 		/* IO::ensure_ports() calls jack_port_register() while holding the process-lock,
 		 * JACK2 may block and call JACKAudioBackend::_latency_callback() which
@@ -7584,7 +7584,7 @@ Session::update_latency_compensation (bool force_whole_graph, bool called_from_b
 		DEBUG_TRACE (DEBUG::LatencyCompensation, "update_latency_compensation: directly apply to routes\n");
 		lx.release (); // XXX cannot hold this lock when acquiring process_lock ?!
 #ifndef MIXBUS
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
+		PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock (), PBD::Mutex::NotLock);
 #endif
 		lm.acquire ();
 
@@ -8026,7 +8026,7 @@ Session::auto_connect_thread_run ()
 			 *   graph_order_callback() -> resort_routes() -> direct_feeds_according_to_reality () -> backend::connected_to()
 			 * Ardour::IO uses the process-lock to avoid concurrency, too
 			 */
-			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+			PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 
 			while (!_auto_connect_queue.empty ()) {
 				const AutoConnectRequest ar (_auto_connect_queue.front());
@@ -8065,7 +8065,7 @@ Session::auto_connect_thread_run ()
 		if (_engine.port_deletions_pending ().read_space () > 0) {
 			// this may call ARDOUR::Port::drop ... jack_port_unregister ()
 			// jack1 cannot cope with removing ports while processing
-			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+			PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 			_engine.clear_pending_port_deletions ();
 		}
 

@@ -1289,7 +1289,7 @@ RegionFxPlugin::run (BufferSet& bufs, samplepos_t start, samplepos_t end, sample
 		return true;
 	}
 
-	Glib::Threads::Mutex::Lock lp (_process_lock);
+	PBD::Mutex::Lock lp (_process_lock);
 
 	int canderef (1);
 	if (_flush.compare_exchange_strong (canderef,  0)) {
@@ -1500,7 +1500,7 @@ RegionFxPlugin::maybe_emit_changed_signals () const
 		_last_emit = when;
 	}
 
-	Glib::Threads::Mutex::Lock lp (_process_lock);
+	PBD::Mutex::Lock lp (_process_lock);
 	for (auto const& i : _controls) {
 		shared_ptr<TimedPluginControl> tpc = std::dynamic_pointer_cast<TimedPluginControl>(i.second);
 		if (tpc && tpc->automation_playback ()) {

@@ -299,7 +299,7 @@ WaveViewThreads::enqueue_draw_request (std::shared_ptr<WaveViewDrawRequest>& req
 void
 WaveViewThreads::_enqueue_draw_request (std::shared_ptr<WaveViewDrawRequest>& request)
 {
-	Glib::Threads::Mutex::Lock lm (_queue_mutex);
+	PBD::Mutex::Lock lm (_queue_mutex);
 	_queue.push_back (request);
 	/* wake one (random) thread */
 	_cond.signal ();
@@ -363,7 +363,7 @@ WaveViewThreads::stop_threads ()
 	assert (_threads.size());
 
 	{
-		Glib::Threads::Mutex::Lock lm (_queue_mutex);
+		PBD::Mutex::Lock lm (_queue_mutex);
 		_quit = true;
 		_cond.broadcast ();
 	}
