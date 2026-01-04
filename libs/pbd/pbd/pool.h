@@ -26,6 +26,7 @@
 
 #include "pbd/libpbd_visibility.h"
 #include "pbd/mutex.h"
+#include "pbd/private.h"
 #include "pbd/ringbuffer.h"
 
 namespace PBD {
@@ -149,7 +150,7 @@ class LIBPBD_API PerThreadPool
 public:
 	PerThreadPool ();
 
-	const Glib::Threads::Private<CrossThreadPool>& key () const
+	const PBD::Private<CrossThreadPool>& key () const
 	{
 		return _key;
 	}
@@ -163,8 +164,8 @@ public:
 	void add_to_trash (CrossThreadPool*);
 
 private:
-	Glib::Threads::Private<CrossThreadPool> _key;
-	std::string                             _name;
+	PBD::Private<CrossThreadPool> _key;
+	std::string                   _name;
 
 	/** mutex to protect either changes to the _trash variable, or writes to the RingBuffer */
 	PBD::Mutex               _trash_mutex;

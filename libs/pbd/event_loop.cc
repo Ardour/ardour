@@ -35,7 +35,7 @@ using namespace std;
 
 static void do_not_delete_the_loop_pointer (void*) { }
 
-Glib::Threads::Private<EventLoop> EventLoop::thread_event_loop (do_not_delete_the_loop_pointer);
+PBD::Private<EventLoop> EventLoop::thread_event_loop (do_not_delete_the_loop_pointer);
 
 PBD::Mutex EventLoop::thread_buffer_requests_lock;
 EventLoop::ThreadRequestBufferList EventLoop::thread_buffer_requests;
