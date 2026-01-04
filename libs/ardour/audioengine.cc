@@ -211,7 +211,7 @@ AudioEngine::sample_rate_change (pframes_t nframes)
 int
 AudioEngine::buffer_size_change (pframes_t bufsiz)
 {
-	Glib::Threads::Mutex::Lock pl (_process_lock);
+	PBD::Mutex::Lock pl (_process_lock);
 	set_port_buffer_sizes (bufsiz);
 
 	if (_session) {
@@ -234,7 +234,7 @@ int
 AudioEngine::process_callback (pframes_t nframes)
 {
 	TimerRAII tr (dsp_stats[ProcessCallback]);
-	Glib::Threads::Mutex::Lock tm (_process_lock, Glib::Threads::TRY_LOCK);
+	PBD::Mutex::Lock tm (_process_lock, PBD::Mutex::TryLock);
 	Port::set_varispeed_ratio (1.0);
 
 	/// The number of samples that will have been processed when we've finished
@@ -315,7 +315,7 @@ AudioEngine::process_callback (pframes_t nframes)
 			 * This lock is not contended by this thread, but acts
 			 * as barrier for Session::block_processing (Session::write_one_track).
 			 */
-			Glib::Threads::Mutex::Lock ll (_latency_lock, Glib::Threads::TRY_LOCK);
+			PBD::Mutex::Lock ll (_latency_lock, PBD::Mutex::TryLock);
 			/* re-check after talking latency-lock */
 			if (!ll.locked () || _session->processing_blocked ()) {
 				if (lc) {
@@ -467,7 +467,7 @@ AudioEngine::process_callback (pframes_t nframes)
 #endif
 			session_removal_countdown = -1; // reset to "not in progress"
 			session_remove_pending = false;
-			session_removed.signal(); // wakes up thread that initiated session removal
+			_session_removed.signal(); // wakes up thread that initiated session removal
 		}
 	}
 
@@ -652,7 +652,7 @@ AudioEngine::reset_silence_countdown ()
 void
 AudioEngine::launch_device_control_app()
 {
-	if (_state_lock.trylock () ) {
+	if (_state_lock.try_lock ()) {
 		_backend->launch_control_app ();
 		_state_lock.unlock ();
 	}
@@ -662,7 +662,7 @@ AudioEngine::launch_device_control_app()
 void
 AudioEngine::request_backend_reset()
 {
-	Glib::Threads::Mutex::Lock guard (_reset_request_lock);
+	PBD::Mutex::Lock guard (_reset_request_lock);
 	_hw_reset_request_count.fetch_add (1);
 	_hw_reset_condition.signal ();
 }
@@ -678,7 +678,7 @@ AudioEngine::do_reset_backend()
 {
 	SessionEvent::create_per_thread_pool (X_("Backend reset processing thread"), 1024);
 
-	Glib::Threads::Mutex::Lock guard (_reset_request_lock);
+	PBD::Mutex::Lock guard (_reset_request_lock);
 
 	while (!_stop_hw_reset_processing.load ()) {
 
@@ -686,7 +686,7 @@ AudioEngine::do_reset_backend()
 
 			_reset_request_lock.unlock();
 
-			Glib::Threads::RecMutex::Lock pl (_state_lock);
+			std::lock_guard<std::recursive_mutex> pl (_state_lock);
 			PBD::atomic_dec_and_test (_hw_reset_request_count);
 
 			std::cout << "AudioEngine::RESET::Reset request processing. Requests left: " << _hw_reset_request_count << std::endl;
@@ -728,7 +728,7 @@ AudioEngine::do_reset_backend()
 void
 AudioEngine::request_device_list_update()
 {
-	Glib::Threads::Mutex::Lock guard (_devicelist_update_lock);
+	PBD::Mutex::Lock guard (_devicelist_update_lock);
 	_hw_devicelist_update_count.fetch_add (1);
 	_hw_devicelist_update_condition.signal ();
 }
@@ -738,7 +738,7 @@ AudioEngine::do_devicelist_update()
 {
 	SessionEvent::create_per_thread_pool (X_("Device list update processing thread"), 512);
 
-	Glib::Threads::Mutex::Lock guard (_devicelist_update_lock);
+	PBD::Mutex::Lock guard (_devicelist_update_lock);
 
 	while (!_stop_hw_devicelist_processing) {
 
@@ -746,7 +746,7 @@ AudioEngine::do_devicelist_update()
 
 			_devicelist_update_lock.unlock();
 
-			Glib::Threads::RecMutex::Lock pl (_state_lock);
+			std::lock_guard<std::recursive_mutex> pl (_state_lock);
 
 			PBD::atomic_dec_and_test (_hw_devicelist_update_count);
 			DeviceListChanged (); /* EMIT SIGNAL */
@@ -800,7 +800,7 @@ AudioEngine::stop_hw_event_processing()
 void
 AudioEngine::set_session (Session *s)
 {
-	Glib::Threads::Mutex::Lock pl (_process_lock);
+	PBD::Mutex::Lock pl (_process_lock);
 
 	SessionHandlePtr::set_session (s);
 
@@ -815,7 +815,7 @@ AudioEngine::set_session (Session *s)
 void
 AudioEngine::remove_session ()
 {
-	Glib::Threads::Mutex::Lock lm (_process_lock);
+	PBD::Mutex::Lock lm (_process_lock);
 
 	if (_running) {
 
@@ -823,7 +823,7 @@ AudioEngine::remove_session ()
 			session_remove_pending = true;
 			/* signal the start of the fade out countdown */
 			session_removal_countdown = -1;
-			session_removed.wait(_process_lock);
+			_session_removed.wait(_process_lock);
 		}
 
 	} else {
@@ -1113,7 +1113,7 @@ AudioEngine::stop (bool for_latency)
 		return 0;
 	}
 
-	Glib::Threads::Mutex::Lock pl (_process_lock, Glib::Threads::NOT_LOCK);
+	PBD::Mutex::Lock pl (_process_lock, PBD::Mutex::NotLock);
 
 	if (running()) {
 		pl.acquire ();
@@ -1472,7 +1472,7 @@ AudioEngine::latency_callback (bool for_playback)
 		 * async to connect/disconnect or port creation/deletion.
 		 * All is fine.
 		 */
-		Glib::Threads::Mutex::Lock ll (_latency_lock, Glib::Threads::TRY_LOCK);
+		PBD::Mutex::Lock ll (_latency_lock, PBD::Mutex::TryLock);
 		if (!ll.locked () || _session->processing_blocked ()) {
 		 /* Except Session::write_one_track() might just have called block_processing() */
 			queue_latency_update (for_playback);

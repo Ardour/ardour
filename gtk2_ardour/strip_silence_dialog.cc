@@ -236,7 +236,7 @@ void
 StripSilenceDialog::update_silence_rects ()
 {
 	/* Lock so that we don't contend with the detection thread for access to the silence regions */
-	Glib::Threads::Mutex::Lock lm (_lock);
+	PBD::Mutex::Lock lm (_lock);
 	double const y = _threshold.get_value();
 
 	for (list<ViewInterval>::iterator v = views.begin(); v != views.end(); ++v) {

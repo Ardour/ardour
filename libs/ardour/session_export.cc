@@ -161,7 +161,7 @@ Session::start_audio_export (samplepos_t position, bool realtime, bool region_ex
 	*/
 
 	{
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 		_butler->wait_until_finished ();
 
 		/* This method may be called from a thread start_timespan_bg(),
@@ -217,7 +217,7 @@ Session::start_audio_export (samplepos_t position, bool realtime, bool region_ex
 	assert (!_engine.in_process_thread ());
 
 	if (realtime) {
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 		_export_rolling = true;
 		_realtime_export = true;
 		export_status->stop = false;
@@ -228,7 +228,7 @@ Session::start_audio_export (samplepos_t position, bool realtime, bool region_ex
 		return 0;
 	} else {
 		if (_realtime_export) {
-			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+			PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 			process_function = &Session::process_with_events;
 		}
 		_realtime_export = false;
@@ -449,7 +449,7 @@ Session::finalize_audio_export (TransportRequestSource trs)
 	/* Clean up */
 
 	if (_realtime_export) {
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 		process_function = &Session::process_with_events;
 	}
 	_engine.freewheel (false);

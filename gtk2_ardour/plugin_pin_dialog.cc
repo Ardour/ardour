@@ -1838,7 +1838,7 @@ PluginPinWidget::add_send_from (std::weak_ptr<ARDOUR::Port> wp, std::weak_ptr<AR
 	std::shared_ptr<Send> send (new Send (*_session, r->pannable (), r->mute_master ()));
 	const ChanCount& outs (r->amp ()->input_streams ());
 	try {
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance ()->process_lock ());
+		PBD::Mutex::Lock lm (AudioEngine::instance ()->process_lock ());
 		send->output()->ensure_io (outs, false, this);
 	} catch (AudioEngine::PortRegistrationFailure& err) {
 		error << string_compose (_("Cannot set up new send: %1"), err.what ()) << endmsg;

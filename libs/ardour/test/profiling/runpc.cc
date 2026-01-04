@@ -33,7 +33,7 @@ main (int argc, char* argv[])
 	cout << "INFO: " << session->get_routes()->size() << " routes.\n";
 
 	{
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance ()->process_lock ());
+		PBD::Mutex::Lock lm (AudioEngine::instance ()->process_lock ());
 		for (int i = 0; i < 32768; ++i) {
 			session->process (session->engine().samples_per_cycle ());
 		}

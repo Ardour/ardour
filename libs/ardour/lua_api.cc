@@ -133,7 +133,7 @@ ARDOUR::LuaAPI::new_send (Session* s, std::shared_ptr<Route> r, std::shared_ptr<
 	ChanCount outs = before ? before->input_streams () : r->n_outputs();
 
 	try {
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance ()->process_lock ());
+		PBD::Mutex::Lock lm (AudioEngine::instance ()->process_lock ());
 		send->output()->ensure_io (outs, false, r.get());
 	} catch (AudioEngine::PortRegistrationFailure& err) {
 		error << string_compose (_("Cannot set up new send: %1"), err.what ()) << endmsg;

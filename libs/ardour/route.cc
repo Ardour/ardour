@@ -321,7 +321,7 @@ Route::init ()
 
 	/* now set up processor chain and invisible processors */
 	{
-		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+		PBD::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		{
 			PBD::RWLock::WriterLock lm (_processor_lock);
 			_processors.push_back (_amp);
@@ -1067,7 +1067,7 @@ Route::add_processors (const ProcessorList& others, std::shared_ptr<Processor> b
 
 	if (_pending_process_reorder.load () || _pending_listen_change.load ()) {
 		/* we need to flush any pending re-order changes */
-		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+		PBD::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		apply_processor_changes_rt ();
 	}
 
@@ -1156,7 +1156,7 @@ Route::add_processors (const ProcessorList& others, std::shared_ptr<Processor> b
 	bool routing_processor_added = false;
 
 	{
-		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+		PBD::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		PBD::RWLock::WriterLock lm (_processor_lock);
 		ProcessorState pstate (this);
 
@@ -1413,7 +1413,7 @@ Route::clear_processors (Placement p)
 
 	ProcessorList old_list = _processors;
 	{
-		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+		PBD::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		PBD::RWLock::WriterLock lm (_processor_lock);
 		ProcessorList new_list;
 		ProcessorStreams err;
@@ -1489,7 +1489,7 @@ Route::remove_processor (std::shared_ptr<Processor> processor, ProcessorStreams*
 {
 	// TODO once the export point can be configured properly, do something smarter here
 	if (processor == _capturing_processor) {
-		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
+		PBD::Mutex::Lock lx (AudioEngine::instance()->process_lock (), PBD::Mutex::NotLock);
 		if (need_process_lock) {
 			lx.acquire();
 		}
@@ -1516,7 +1516,7 @@ Route::remove_processor (std::shared_ptr<Processor> processor, ProcessorStreams*
 	processor_max_streams.reset();
 
 	{
-		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
+		PBD::Mutex::Lock lx (AudioEngine::instance()->process_lock (), PBD::Mutex::NotLock);
 		if (need_process_lock) {
 			lx.acquire();
 		}
@@ -1626,7 +1626,7 @@ Route::replace_processor (std::shared_ptr<Processor> old, std::shared_ptr<Proces
 	}
 
 	{
-		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+		PBD::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		PBD::RWLock::WriterLock lm (_processor_lock);
 		ProcessorState pstate (this);
 
@@ -1705,7 +1705,7 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 	processor_max_streams.reset();
 
 	{
-		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+		PBD::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		PBD::RWLock::WriterLock lm (_processor_lock);
 		ProcessorState pstate (this);
 
@@ -2331,7 +2331,7 @@ Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err
 
 	if (processors_reorder_needs_configure (new_order) || !AudioEngine::instance()->running()) {
 
-		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+		PBD::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		PBD::RWLock::WriterLock lm (_processor_lock);
 		ProcessorState pstate (this);
 
@@ -2407,7 +2407,7 @@ Route::add_remove_sidechain (std::shared_ptr<Processor> proc, bool add)
 			}
 		}
 
-		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ()); // take before Writerlock to avoid deadlock
+		PBD::Mutex::Lock lx (AudioEngine::instance()->process_lock ()); // take before Writerlock to avoid deadlock
 		PBD::RWLock::WriterLock lm (_processor_lock);
 
 		list<pair<ChanCount, ChanCount> > c = try_configure_processors_unlocked (n_inputs (), 0);
@@ -2459,7 +2459,7 @@ Route::plugin_preset_output (std::shared_ptr<Processor> proc, ChanCount outs)
 	}
 
 	{
-		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+		PBD::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		PBD::RWLock::WriterLock lm (_processor_lock);
 
 		const ChanCount& old (pi->preset_out ());
@@ -2508,7 +2508,7 @@ Route::customize_plugin_insert (std::shared_ptr<Processor> proc, uint32_t count,
 	}
 
 	{
-		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+		PBD::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		PBD::RWLock::WriterLock lm (_processor_lock);
 
 		bool      old_cust  = pi->custom_cfg ();
@@ -2547,7 +2547,7 @@ Route::customize_plugin_insert (std::shared_ptr<Processor> proc, uint32_t count,
 bool
 Route::set_strict_io (const bool enable)
 {
-	Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+	PBD::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 
 	if (_strict_io != enable) {
 		_strict_io = enable;
@@ -3528,7 +3528,7 @@ Route::set_processor_state (const XMLNode& node, int version)
 
 	ProcessorList old_list = _processors; // keep a copy
 	{
-		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+		PBD::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		PBD::RWLock::WriterLock lm (_processor_lock);
 		/* re-assign _processors w/o process-lock.
 		 * if there's an IO-processor present in _processors but
@@ -3812,7 +3812,7 @@ Route::add_aux_send (std::shared_ptr<Route> route, std::shared_ptr<Processor> be
 		std::shared_ptr<InternalSend> listener;
 
 		{
-			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+			PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 			listener.reset (new InternalSend (_session, _pannable, _mute_master, std::dynamic_pointer_cast<ARDOUR::Route>(shared_from_this()), route, Delivery::Aux));
 		}
 
@@ -3854,7 +3854,7 @@ Route::add_foldback_send (std::shared_ptr<Route> route, bool post_fader)
 		std::shared_ptr<InternalSend> listener;
 
 		{
-			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+			PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 			listener.reset (new InternalSend (_session, _pannable, _mute_master, std::dynamic_pointer_cast<ARDOUR::Route>(shared_from_this()), route, Delivery::Foldback));
 		}
 
@@ -4550,7 +4550,7 @@ Route::set_meter_point (MeterPoint p)
 	if (!AudioEngine::instance()->running()) {
 		bool meter_visibly_changed = false;
 		{
-			Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+			PBD::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 			PBD::RWLock::WriterLock lm (_processor_lock);
 			_pending_meter_point = p;
 			if (set_meter_point_unlocked ()) {
@@ -4679,7 +4679,7 @@ Route::listen_position_changed ()
 	}
 
 	{
-		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+		PBD::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		PBD::RWLock::WriterLock lm (_processor_lock);
 		ProcessorState pstate (this);
 
@@ -4700,7 +4700,7 @@ Route::add_export_point()
 {
 	assert (!_capturing_processor);
 
-	Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+	PBD::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 	PBD::RWLock::WriterLock lw (_processor_lock);
 
 	/* Align all tracks for stem-export w/o processing.
@@ -5198,7 +5198,7 @@ Route::set_volume_applies_to_output (bool en)
 		main_outs()->set_gain_control (_volume_control);
 		{
 			/* remove hidden processor */
-			Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+			PBD::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 			configure_processors (NULL);
 		}
 		processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
@@ -5839,7 +5839,7 @@ Route::setup_invisible_processors ()
 void
 Route::unpan ()
 {
-	Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+	PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 	PBD::RWLock::ReaderLock lp (_processor_lock);
 
 	_pannable.reset ();
@@ -6005,7 +6005,7 @@ Route::non_realtime_locate (samplepos_t pos)
 #endif
 
 	{
-		//Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+		//PBD::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		PBD::RWLock::ReaderLock lm (_processor_lock);
 
 		for (auto & proc : _processors) {
@@ -6404,7 +6404,7 @@ Route::set_disk_io_point (DiskIOPoint diop)
 	}
 
 	if (changed) {
-		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+		PBD::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		configure_processors (0);
 	}
 

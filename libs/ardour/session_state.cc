@@ -314,7 +314,7 @@ Session::post_engine_init ()
 		 * and IOChange are complete.
 		 */
 		{
-			Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+			PBD::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 			ProcessorChangeBlocker pcb (this);
 			std::shared_ptr<RouteList const> r = routes.reader ();
 			for (auto const& i : *r) {
@@ -356,7 +356,7 @@ Session::post_engine_init ()
 		ControlProtocolManager::instance().midi_connectivity_established (true);
 
 		if (_is_new && !no_auto_connect()) {
-			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock());
+			PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock());
 			auto_connect_master_bus ();
 		}
 
@@ -2403,7 +2403,7 @@ Session::set_state (const XMLNode& node, int version)
 				/* TODO Unknown I/O Plugin, retain state */
 			}
 		}
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 		for (auto const& i : *iopl) {
 			i->ensure_io ();
 		}

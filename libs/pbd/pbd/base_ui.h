@@ -26,12 +26,12 @@
 #include <sigc++/slot.h>
 #include <sigc++/trackable.h>
 
-#include <glibmm/threads.h>
 #include <glibmm/main.h>
 
 #include "pbd/libpbd_visibility.h"
 #include "pbd/crossthread.h"
 #include "pbd/event_loop.h"
+#include "pbd/mutex.h"
 #include "pbd/pthread_utils.h"
 
 /** A BaseUI is an abstraction designed to be used with any "user
@@ -76,11 +76,11 @@ class LIBPBD_API BaseUI : public sigc::trackable, public PBD::EventLoop
   protected:
 	bool _ok;
 
-	Glib::RefPtr<Glib::MainLoop> _main_loop;
+	Glib::RefPtr<Glib::MainLoop>    _main_loop;
 	Glib::RefPtr<Glib::MainContext> m_context;
-	PBD::Thread*                _run_loop_thread;
-	Glib::Threads::Mutex        _run_lock;
-	Glib::Threads::Cond         _running;
+	PBD::Thread*                    _run_loop_thread;
+	PBD::Mutex                      _run_lock;
+	PBD::Cond                       _running;
 
 	/* this signals _running from within the event loop,
 	   from an idle callback

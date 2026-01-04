@@ -21,6 +21,7 @@
 
 #include <deque>
 
+#include "pbd/mutex.h"
 #include "pbd/pthread_utils.h"
 #include "waveview/wave_view.h"
 
@@ -339,9 +340,8 @@ private:
 	bool _quit;
 	WaveViewThreadList _threads;
 
-
-	mutable Glib::Threads::Mutex _queue_mutex;
-	Glib::Threads::Cond _cond;
+	mutable PBD::Mutex _queue_mutex;
+	PBD::Cond          _cond;
 
 	typedef std::deque<std::shared_ptr<WaveViewDrawRequest> > DrawRequestQueueType;
 	DrawRequestQueueType _queue;

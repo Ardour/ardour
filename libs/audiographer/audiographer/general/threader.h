@@ -5,15 +5,13 @@
 #include <vector>
 #include <algorithm>
 
-#include "glibmm/threads.h"
 #include <glibmm/threadpool.h>
 #include <glibmm/timeval.h>
 #include <sigc++/slot.h>
 
-#include <glib.h>
-
 #include "pbd/atomic.h"
 #include "pbd/compose.h"
+#include "pbd/mutex.h"
 
 #include "audiographer/visibility.h"
 #include "audiographer/source.h"
@@ -91,8 +89,7 @@ class /*LIBAUDIOGRAPHER_API*/ Threader : public Source<T>, public Sink<T>
 	void wait()
 	{
 		while (readers.load () != 0) {
-			gint64 end_time = g_get_monotonic_time () + (wait_timeout * G_TIME_SPAN_MILLISECOND);
-			wait_cond.wait_until(wait_mutex, end_time);
+			wait_cond.wait_for (wait_mutex, std::chrono::milliseconds (wait_timeout));
 		}
 
 		wait_mutex.unlock();
@@ -121,8 +118,8 @@ class /*LIBAUDIOGRAPHER_API*/ Threader : public Source<T>, public Sink<T>
 	OutputVec outputs;
 
 	Glib::ThreadPool&    thread_pool;
-	Glib::Threads::Mutex wait_mutex;
-	Glib::Threads::Cond  wait_cond;
+	PBD::Mutex wait_mutex;
+	PBD::Cond  wait_cond;
 
 	std::atomic<int> readers;
 	long         wait_timeout;

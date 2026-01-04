@@ -24,9 +24,9 @@
 #include <vector>
 
 #include <optional>
-#include <glibmm/threads.h>
 
 #include "pbd/search_path.h"
+#include "pbd/mutex.h"
 #include "pbd/signals.h"
 
 #include "ardour/plugin.h"
@@ -166,7 +166,7 @@ public:
 	std::string  format_parameter (uint32_t p) const;
 	Vst::ParamID index_to_id (uint32_t) const;
 
-	Glib::Threads::Mutex& process_lock () { return _process_lock; }
+	PBD::Mutex& process_lock () { return _process_lock; }
 	bool& component_is_synced () { return _restart_component_is_synced; }
 
 
@@ -285,7 +285,7 @@ private:
 
 	IPtr<Vst::IAudioProcessor> _processor;
 	Vst::ProcessContext        _context;
-	Glib::Threads::Mutex       _process_lock;
+	PBD::Mutex                 _process_lock;
 
 	/* Parameters */
 	Vst3ParameterChanges _input_param_changes;

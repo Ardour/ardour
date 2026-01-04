@@ -26,9 +26,8 @@
 
 #include <pthread.h>
 
-#include <glibmm/threads.h>
-
 #include "pbd/crossthread.h"
+#include "pbd/mutex.h"
 #include "pbd/pool.h"
 #include "pbd/ringbuffer.h"
 #include "pbd/mpmc_queue.h"
@@ -106,9 +105,9 @@ private:
 	pthread_t thread;
 	bool      have_thread;
 
-	Glib::Threads::Mutex request_lock;
-	Glib::Threads::Cond  paused;
-	bool                 should_run;
+	PBD::Mutex request_lock;
+	PBD::Cond  paused;
+	bool       should_run;
 
 	samplecnt_t _audio_capture_buffer_size;
 	samplecnt_t _audio_playback_buffer_size;

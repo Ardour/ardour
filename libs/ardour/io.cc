@@ -55,7 +55,7 @@
 
 #include "pbd/i18n.h"
 
-#define BLOCK_PROCESS_CALLBACK() Glib::Threads::Mutex::Lock em (AudioEngine::instance()->process_lock())
+#define BLOCK_PROCESS_CALLBACK() PBD::Mutex::Lock em (AudioEngine::instance()->process_lock())
 
 using namespace std;
 using namespace ARDOUR;
@@ -860,7 +860,7 @@ IO::create_ports (const XMLNode& node, int version)
 	get_port_counts (node, version, n, c);
 
 	{
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		BLOCK_PROCESS_CALLBACK ();
 
 		if (ensure_ports (n, !_session.inital_connect_or_deletion_in_progress (), this)) {
 			error << string_compose(_("%1: cannot create I/O ports"), _name) << endmsg;
@@ -1021,7 +1021,7 @@ IO::set_ports (const string& str)
 	}
 
 	{
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		BLOCK_PROCESS_CALLBACK ();
 
 		// FIXME: audio-only
 		if (ensure_ports (ChanCount(DataType::AUDIO, nports), true, this)) {

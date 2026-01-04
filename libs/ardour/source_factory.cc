@@ -53,11 +53,11 @@ using namespace std;
 using namespace PBD;
 
 PBD::Signal<void(std::shared_ptr<Source>)> SourceFactory::SourceCreated;
-Glib::Threads::Cond                           SourceFactory::PeaksToBuild;
-Glib::Threads::Mutex                          SourceFactory::peak_building_lock;
-std::list<std::weak_ptr<AudioSource>>       SourceFactory::files_with_peaks;
-std::vector<PBD::Thread*>                     SourceFactory::peak_thread_pool;
-bool                                          SourceFactory::peak_thread_run = false;
+PBD::Cond                                  SourceFactory::PeaksToBuild;
+PBD::Mutex                                 SourceFactory::peak_building_lock;
+std::list<std::weak_ptr<AudioSource>>      SourceFactory::files_with_peaks;
+std::vector<PBD::Thread*>                  SourceFactory::peak_thread_pool;
+bool                                       SourceFactory::peak_thread_run = false;
 
 static int active_threads = 0;
 
@@ -142,9 +142,9 @@ SourceFactory::setup_peakfile (std::shared_ptr<Source> s, bool async)
 	if (as) {
 		// immediately set 'peakfile-path' for empty and NoPeakFile sources
 		if (async && !as->empty () && !(as->flags () & Source::NoPeakFile)) {
-			Glib::Threads::Mutex::Lock lm (peak_building_lock);
+			PBD::Mutex::Lock lm (peak_building_lock);
 			files_with_peaks.push_back (std::weak_ptr<AudioSource> (as));
-			PeaksToBuild.broadcast ();
+			PeaksToBuild.signal ();
 
 		} else {
 			if (as->setup_peakfile ()) {

@@ -751,7 +751,7 @@ VST3Plugin::connect_and_run (BufferSet&  bufs,
                              ChanMapping const& in_map, ChanMapping const& out_map,
                              pframes_t n_samples, samplecnt_t offset)
 {
-	Glib::Threads::Mutex::Lock tm (_plug->process_lock (), Glib::Threads::TRY_LOCK);
+	PBD::Mutex::Lock tm (_plug->process_lock (), PBD::Mutex::TryLock);
 	if (!tm.locked ()) {
 		return 0;
 	}
@@ -915,7 +915,7 @@ VST3Plugin::load_preset (PresetRecord r)
 
 
 	if (tmp[0] == "VST3-P") {
-		Glib::Threads::Mutex::Lock lx (_plug->process_lock ());
+		PBD::Mutex::Lock lx (_plug->process_lock ());
 		PBD::Unwinder<bool> uw (_plug->component_is_synced (), true);
 		int program = PBD::atoi (tmp[2]);
 		assert (!r.user);
@@ -933,7 +933,7 @@ VST3Plugin::load_preset (PresetRecord r)
 		std::string const& fn = _preset_uri_map[r.uri];
 
 		if (Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
-			Glib::Threads::Mutex::Lock lx (_plug->process_lock ());
+			PBD::Mutex::Lock lx (_plug->process_lock ());
 			PBD::Unwinder<bool> uw (_plug->component_is_synced (), true);
 			RAMStream stream (fn);
 			ok = _plug->load_state (stream);
@@ -1603,7 +1603,7 @@ VST3PI::restartComponent (int32 flags)
 	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::restartComponent %1%2\n", std::hex, flags));
 
 	if (flags & Vst::kReloadComponent) {
-		Glib::Threads::Mutex::Lock pl (_process_lock, Glib::Threads::NOT_LOCK);
+		PBD::Mutex::Lock pl (_process_lock, PBD::Mutex::NotLock);
 		if (!AudioEngine::instance ()->in_process_thread () && !_is_loading_state && !_restart_component_is_synced && !_process_offline) {
 			pl.acquire ();
 		} else {
@@ -1621,7 +1621,7 @@ VST3PI::restartComponent (int32 flags)
 		activate ();
 	}
 	if (flags & Vst::kParamValuesChanged) {
-		Glib::Threads::Mutex::Lock pl (_process_lock, Glib::Threads::NOT_LOCK);
+		PBD::Mutex::Lock pl (_process_lock, PBD::Mutex::NotLock);
 		if (!AudioEngine::instance ()->in_process_thread () && !_is_loading_state && !_restart_component_is_synced && !_process_offline) {
 			pl.acquire ();
 		}
@@ -1636,7 +1636,7 @@ VST3PI::restartComponent (int32 flags)
 		 * the latency changes, and Ardour does not require it either, latency
 		 * changes are automatically picked up.
 		 */
-		Glib::Threads::Mutex::Lock pl (_process_lock, Glib::Threads::NOT_LOCK);
+		PBD::Mutex::Lock pl (_process_lock, PBD::Mutex::NotLock);
 		if (!AudioEngine::instance ()->in_process_thread () && !_is_loading_state && !_restart_component_is_synced && !_process_offline) {
 			/* Some plugins (e.g BlendEQ) call this from the process,
 			 * IPlugProcessor::ProcessBuffers. In that case taking the

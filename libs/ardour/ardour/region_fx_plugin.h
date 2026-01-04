@@ -22,6 +22,8 @@
 
 #include "temporal/domain_provider.h"
 
+#include "pbd/mutex.h"
+
 #include "ardour/ardour.h"
 #include "ardour/automation_control.h"
 #include "ardour/chan_mapping.h"
@@ -203,7 +205,7 @@ private:
 
 	XMLNode* _state;
 
-	mutable Glib::Threads::Mutex _process_lock;
+	mutable PBD::Mutex _process_lock;
 };
 
 } // namespace ARDOUR
