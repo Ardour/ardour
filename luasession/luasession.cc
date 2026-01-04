@@ -106,12 +106,12 @@ public:
 	MyEventLoop (std::string const& name)
 	    : EventLoop (name)
 	{
-		run_loop_thread = Glib::Threads::Thread::self ();
+		run_loop_thread = g_thread_self ();
 	}
 
 	bool call_slot (InvalidationRecord* ir, const std::function<void ()>& f)
 	{
-		if (Glib::Threads::Thread::self () == run_loop_thread) {
+		if (g_thread_self () == run_loop_thread) {
 			cout << string_compose ("%1/%2 direct dispatch of call slot via functor @ %3, invalidation %4\n", event_loop_name (), pthread_name (), &f, ir);
 			f ();
 		} else {
@@ -133,8 +133,8 @@ public:
 	}
 
 private:
-	Glib::Threads::Thread* run_loop_thread;
-	PBD::RWLock            request_buffer_map_lock;
+	GThread*    run_loop_thread;
+	PBD::RWLock request_buffer_map_lock;
 };
 
 static MyEventLoop* event_loop = NULL;
