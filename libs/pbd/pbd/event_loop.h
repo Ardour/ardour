@@ -19,6 +19,9 @@
 
 #pragma once
 
+#include <sigc++/trackable.h>
+#include <sigc++/connection.h>
+
 #include <atomic>
 #include <functional>
 #include <string>
@@ -29,9 +32,8 @@
 
 #include "pbd/libpbd_visibility.h"
 #include "pbd/mutex.h"
+#include "pbd/private.h"
 #include "pbd/rwlock.h"
-
-#include <glibmm/threads.h> // Glib::Threads::Private
 
 namespace PBD
 {
@@ -113,7 +115,7 @@ public:
 	static InvalidationRecord* __invalidator (sigc::trackable& trackable, const char*, int);
 
 private:
-	static Glib::Threads::Private<EventLoop> thread_event_loop;
+	static PBD::Private<EventLoop> thread_event_loop;
 	std::string _name;
 
 	typedef std::vector<ThreadBufferMapping> ThreadRequestBufferList;

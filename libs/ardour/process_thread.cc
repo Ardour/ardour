@@ -37,7 +37,7 @@ release_thread_buffer (void* arg)
 	BufferManager::put_thread_buffers ((ThreadBuffers*) arg);
 }
 
-Glib::Threads::Private<ThreadBuffers> ProcessThread::_private_thread_buffers (release_thread_buffer);
+PBD::Private<ThreadBuffers> ProcessThread::_private_thread_buffers (release_thread_buffer);
 
 void
 ProcessThread::init ()
