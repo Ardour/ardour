@@ -71,8 +71,8 @@ using namespace PBD;
 static const std::string base_url = "https://freesound.org/apiv2";
 
 // Ardour 7
-static const std::string default_token = "t3TjQ67WNh6zJLZRnWmArSiZ8bKlgTc2aEsV1cP7";
-static const std::string client_id = "yesyr1g4StTtg2F50KT1";
+static const std::string default_token = "Dwfk4N2CheXTZw5WzRBrgVEIusIMWxnBY4W2BUVl";
+static const std::string client_id = "QOY3ZLPUfOA9v2AkuaIM";
 
 static const std::string fields = "id,name,duration,filesize,samplerate,license,download,previews";
 
