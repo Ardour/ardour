@@ -34,7 +34,7 @@ namespace Gdk
 
 bool PixbufAnimationIter::advance()
 {
-  return gdk_pixbuf_animation_iter_advance(gobj(), NULL);
+  return gdk_pixbuf_animation_iter_advance(gobj());
 }
 
 } //namespace Gdk
@@ -162,12 +162,4 @@ bool PixbufAnimationIter::on_currently_loading_frame() const
   return gdk_pixbuf_animation_iter_on_currently_loading_frame(const_cast<GdkPixbufAnimationIter*>(gobj()));
 }
 
-bool PixbufAnimationIter::advance(const Glib::TimeVal& current_time)
-{
-  return gdk_pixbuf_animation_iter_advance(gobj(), static_cast<const GTimeVal*>(&current_time));
-}
-
-
 } // namespace Gdk
-
-

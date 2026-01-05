@@ -94,7 +94,7 @@ struct _GdkPixbufNonAnimIterClass {
 
 static GType gdk_pixbuf_non_anim_iter_get_type (void) G_GNUC_CONST;
 
-G_DEFINE_TYPE (GdkPixbufAnimation, gdk_pixbuf_animation, G_TYPE_OBJECT);
+G_DEFINE_TYPE (GdkPixbufAnimation, gdk_pixbuf_animation, G_TYPE_OBJECT)
 
 static void
 gdk_pixbuf_animation_class_init (GdkPixbufAnimationClass *klass)
@@ -686,23 +686,14 @@ gdk_pixbuf_animation_get_height (GdkPixbufAnimation *animation)
  * Return value: (transfer full): an iterator to move over the animation
  **/
 GdkPixbufAnimationIter*
-gdk_pixbuf_animation_get_iter (GdkPixbufAnimation *animation,
-                               const GTimeVal     *start_time)
+gdk_pixbuf_animation_get_iter (GdkPixbufAnimation *animation)
 {
-        GTimeVal val;
-        
         g_return_val_if_fail (GDK_IS_PIXBUF_ANIMATION (animation), NULL);
 
-
-        if (start_time)
-                val = *start_time;
-        else
-                g_get_current_time (&val);
-        
-        return GDK_PIXBUF_ANIMATION_GET_CLASS (animation)->get_iter (animation, &val);
+        return GDK_PIXBUF_ANIMATION_GET_CLASS (animation)->get_iter (animation);
 }
 
-G_DEFINE_TYPE (GdkPixbufAnimationIter, gdk_pixbuf_animation_iter, G_TYPE_OBJECT);
+G_DEFINE_TYPE (GdkPixbufAnimationIter, gdk_pixbuf_animation_iter, G_TYPE_OBJECT)
 
 static void
 gdk_pixbuf_animation_iter_class_init (GdkPixbufAnimationIterClass *klass)
@@ -811,20 +802,16 @@ gdk_pixbuf_animation_iter_on_currently_loading_frame (GdkPixbufAnimationIter *it
  * 
  **/
 gboolean
-gdk_pixbuf_animation_iter_advance (GdkPixbufAnimationIter *iter,
-                                   const GTimeVal         *current_time)
+gdk_pixbuf_animation_iter_advance (GdkPixbufAnimationIter *iter)
 {
         GTimeVal val;
 
         g_return_val_if_fail (GDK_IS_PIXBUF_ANIMATION_ITER (iter), FALSE);
         g_return_val_if_fail (GDK_PIXBUF_ANIMATION_ITER_GET_CLASS (iter)->advance, FALSE);
 
-        if (current_time)
-                val = *current_time;
-        else
-                g_get_current_time (&val);
+				g_get_current_time (&val);
 
-        return GDK_PIXBUF_ANIMATION_ITER_GET_CLASS (iter)->advance (iter, &val);
+        return GDK_PIXBUF_ANIMATION_ITER_GET_CLASS (iter)->advance (iter);
 }
 
 static void                    gdk_pixbuf_non_anim_finalize         (GObject            *object);
@@ -833,8 +820,7 @@ static GdkPixbuf*              gdk_pixbuf_non_anim_get_static_image (GdkPixbufAn
 static void                    gdk_pixbuf_non_anim_get_size         (GdkPixbufAnimation *anim,
                                                                      int                *width,
                                                                      int                *height);
-static GdkPixbufAnimationIter* gdk_pixbuf_non_anim_get_iter         (GdkPixbufAnimation *anim,
-                                                                     const GTimeVal     *start_time);
+static GdkPixbufAnimationIter* gdk_pixbuf_non_anim_get_iter         (GdkPixbufAnimation *anim);
 
 G_DEFINE_TYPE (GdkPixbufNonAnim, gdk_pixbuf_non_anim, GDK_TYPE_PIXBUF_ANIMATION);
 
@@ -917,8 +903,7 @@ gdk_pixbuf_non_anim_get_size (GdkPixbufAnimation *anim,
 }
 
 static GdkPixbufAnimationIter*
-gdk_pixbuf_non_anim_get_iter (GdkPixbufAnimation *anim,
-                              const GTimeVal     *start_time)
+gdk_pixbuf_non_anim_get_iter (GdkPixbufAnimation *anim)
 {
         GdkPixbufNonAnimIter *iter;
 
@@ -935,12 +920,11 @@ static void       gdk_pixbuf_non_anim_iter_finalize                   (GObject  
 static int        gdk_pixbuf_non_anim_iter_get_delay_time             (GdkPixbufAnimationIter *iter);
 static GdkPixbuf* gdk_pixbuf_non_anim_iter_get_pixbuf                 (GdkPixbufAnimationIter *iter);
 static gboolean   gdk_pixbuf_non_anim_iter_on_currently_loading_frame (GdkPixbufAnimationIter *iter);
-static gboolean   gdk_pixbuf_non_anim_iter_advance                    (GdkPixbufAnimationIter *iter,
-                                                                       const GTimeVal         *current_time);
+static gboolean   gdk_pixbuf_non_anim_iter_advance                    (GdkPixbufAnimationIter *iter);
 
 G_DEFINE_TYPE (GdkPixbufNonAnimIter,
                gdk_pixbuf_non_anim_iter,
-               GDK_TYPE_PIXBUF_ANIMATION_ITER);
+               GDK_TYPE_PIXBUF_ANIMATION_ITER)
 
 static void
 gdk_pixbuf_non_anim_iter_class_init (GdkPixbufNonAnimIterClass *klass)
@@ -992,8 +976,7 @@ gdk_pixbuf_non_anim_iter_on_currently_loading_frame (GdkPixbufAnimationIter *ite
 }
         
 static gboolean
-gdk_pixbuf_non_anim_iter_advance (GdkPixbufAnimationIter *iter,
-                                  const GTimeVal         *current_time)
+gdk_pixbuf_non_anim_iter_advance (GdkPixbufAnimationIter *iter)
 {
 
         /* Advancing never requires a refresh */

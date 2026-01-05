@@ -1359,7 +1359,7 @@ gdk_pixbuf_new_from_file_at_scale (const char *filename,
                 
                 animation = gdk_pixbuf_loader_get_animation (loader);
                 if (animation) {
-                        iter = gdk_pixbuf_animation_get_iter (animation, NULL);
+                        iter = gdk_pixbuf_animation_get_iter (animation);
                         if (!gdk_pixbuf_animation_iter_on_currently_loading_frame (iter)) {
                                 has_frame = TRUE;
                         }

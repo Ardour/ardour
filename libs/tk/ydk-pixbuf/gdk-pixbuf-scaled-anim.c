@@ -78,7 +78,7 @@ _gdk_pixbuf_scaled_anim_new (GdkPixbufAnimation *anim,
 	return scaled;
 }
 
-G_DEFINE_TYPE (GdkPixbufScaledAnim, gdk_pixbuf_scaled_anim, GDK_TYPE_PIXBUF_ANIMATION);
+G_DEFINE_TYPE (GdkPixbufScaledAnim, gdk_pixbuf_scaled_anim, GDK_TYPE_PIXBUF_ANIMATION)
 
 static void
 gdk_pixbuf_scaled_anim_init (GdkPixbufScaledAnim *scaled)
@@ -173,8 +173,7 @@ get_size (GdkPixbufAnimation *anim,
 }
 
 static GdkPixbufAnimationIter *
-get_iter (GdkPixbufAnimation *anim,
-          const GTimeVal     *start_time)
+get_iter (GdkPixbufAnimation *anim)
 {
 	GdkPixbufScaledAnim *scaled = (GdkPixbufScaledAnim *)anim;
 	GdkPixbufScaledAnimIter *iter;
@@ -182,7 +181,7 @@ get_iter (GdkPixbufAnimation *anim,
 	iter = g_object_new (GDK_TYPE_PIXBUF_SCALED_ANIM_ITER, NULL);
 
 	iter->scaled = g_object_ref (scaled);
-	iter->iter = gdk_pixbuf_animation_get_iter (scaled->anim, start_time);
+	iter->iter = gdk_pixbuf_animation_get_iter (scaled->anim);
 	
 	return (GdkPixbufAnimationIter*)iter;
 }
@@ -205,7 +204,7 @@ gdk_pixbuf_scaled_anim_class_init (GdkPixbufScaledAnimClass *klass)
 }
 
 
-G_DEFINE_TYPE (GdkPixbufScaledAnimIter, gdk_pixbuf_scaled_anim_iter, GDK_TYPE_PIXBUF_ANIMATION_ITER);
+G_DEFINE_TYPE (GdkPixbufScaledAnimIter, gdk_pixbuf_scaled_anim_iter, GDK_TYPE_PIXBUF_ANIMATION_ITER)
 
 static void
 gdk_pixbuf_scaled_anim_iter_init (GdkPixbufScaledAnimIter *iter)
@@ -243,12 +242,11 @@ on_currently_loading_frame (GdkPixbufAnimationIter *iter)
 }
 
 static gboolean
-advance (GdkPixbufAnimationIter *iter,
-	 const GTimeVal         *current_time)
+advance (GdkPixbufAnimationIter *iter)
 {
 	GdkPixbufScaledAnimIter *scaled = (GdkPixbufScaledAnimIter *)iter;
 
-	return gdk_pixbuf_animation_iter_advance (scaled->iter, current_time);
+	return gdk_pixbuf_animation_iter_advance (scaled->iter);
 }
 
 static void

@@ -1610,7 +1610,7 @@ animation_timeout (gpointer data)
   
   image->data.anim.frame_timeout = 0;
 
-  gdk_pixbuf_animation_iter_advance (image->data.anim.iter, NULL);
+  gdk_pixbuf_animation_iter_advance (image->data.anim.iter);
 
   delay = gdk_pixbuf_animation_iter_get_delay_time (image->data.anim.iter);
   if (delay >= 0)
@@ -1992,7 +1992,7 @@ gtk_image_expose (GtkWidget      *widget,
           {
             if (image->data.anim.iter == NULL)
               {
-                image->data.anim.iter = gdk_pixbuf_animation_get_iter (image->data.anim.anim, NULL);
+                image->data.anim.iter = gdk_pixbuf_animation_get_iter (image->data.anim.anim);
                 
                 if (gdk_pixbuf_animation_iter_get_delay_time (image->data.anim.iter) >= 0)
                   image->data.anim.frame_timeout =
