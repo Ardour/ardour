@@ -33,7 +33,7 @@ public:
 
 	std::string Get_Auth_Token(std::string username, std::string password);
 	std::string Upload (std::string file_path, std::string title, std::string token, bool ispublic, bool downloadable, ARDOUR::ExportHandler *caller);
-	static int  progress_callback(void *caller, double dltotal, double dlnow, double ultotal, double ulnow);
+	static int  progress_callback(void *caller, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow);
 
 
 private:
