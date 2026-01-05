@@ -6737,6 +6737,20 @@ Session::nstripables (bool with_monitor) const
 }
 
 bool
+Session::empty() const
+{
+	StripableList sl;
+	get_stripables (sl);
+	for (auto const& s: sl) {
+		if (s->is_singleton ()) {
+			continue;
+		}
+		return false;
+	}
+	return true;
+}
+
+bool
 Session::plot_process_graph (std::string const& file_name) const {
 	return _graph_chain ? _graph_chain->plot (file_name) : false;
 }

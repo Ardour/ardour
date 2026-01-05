@@ -359,6 +359,7 @@ public:
 	uint32_t ntracks () const;
 	uint32_t naudiotracks () const;
 	uint32_t nbusses () const;
+	bool     empty () const;
 
 	bool plot_process_graph (std::string const& file_name) const;
 
