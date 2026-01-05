@@ -617,7 +617,7 @@ Mootcher::updateProgress(double dlnow, double dltotal)
 }
 
 int
-Mootcher::progress_callback(void *caller, double dltotal, double dlnow, double /*ultotal*/, double /*ulnow*/)
+Mootcher::progress_callback(void *caller, curl_off_t dltotal, curl_off_t dlnow, curl_off_t /*ultotal*/, curl_off_t /*ulnow*/)
 {
 	// It may seem curious to pass a pointer to an instance of an object to a static
 	// member function, but we can't use a normal member function as a curl progress callback,
