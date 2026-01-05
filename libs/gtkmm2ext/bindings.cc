@@ -399,7 +399,12 @@ string
 Bindings::ardour_action_name (RefPtr<Action> action)
 {
 	/* Skip "<Actions>/" */
-	return action->get_accel_path ().substr (10);
+	string ap (action->get_accel_path());
+	if (ap.size() > 10) {
+		return ap.substr (10);
+	}
+	/* No idea what this */
+	return ap;
 }
 
 KeyboardKey
