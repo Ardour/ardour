@@ -203,7 +203,7 @@ SoundcloudUploader::Upload(std::string file_path, std::string title, std::string
 
 		curl_easy_setopt (curl_handle, CURLOPT_NOPROGRESS, 0); // turn on the progress bar
 		curl_easy_setopt (curl_handle, CURLOPT_XFERINFOFUNCTION, &SoundcloudUploader::progress_callback);
-		curl_easy_setopt (curl_handle, CURLOPT_PROGRESSDATA, this);
+		curl_easy_setopt (curl_handle, CURLOPT_XFERINFODATA, this);
 
 		curl_multi_add_handle(multi_handle, curl_handle);
 
