@@ -551,7 +551,7 @@ Mootcher::fetchAudioFile(std::string originalFileName, std::string theID, std::s
 
 	cancel_download = false;
 	curl_easy_setopt (curl, CURLOPT_NOPROGRESS, 0); // turn on the progress bar
-	curl_easy_setopt (curl, CURLOPT_PROGRESSFUNCTION, progress_callback);
+	curl_easy_setopt (curl, CURLOPT_XFERINFOFUNCTION, progress_callback);
 	curl_easy_setopt (curl, CURLOPT_PROGRESSDATA, this);
 
 	if (oauth_token == "") {
