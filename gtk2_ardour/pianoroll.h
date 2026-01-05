@@ -23,6 +23,7 @@
 #include "pbd/timer.h"
 
 #include <ytkmm/adjustment.h>
+#include <ytkmm/radiotoolbutton.h>
 
 #include "canvas/ruler.h"
 #include "widgets/eventboxext.h"
@@ -51,6 +52,25 @@ namespace ArdourWidgets {
 
 class PianorollMidiView;
 class PianorollMidiBackground;
+
+struct ControllerControls : public Gtk::HBox {
+	ControllerControls (int num, std::string const & name, Gtk::RadioButtonGroup& group);
+	~ControllerControls();
+
+	ArdourWidgets::ArdourButton* show_hide_button;
+	ArdourWidgets::ArdourButton* edit_button;
+	Gtk::Label name;
+	int number;
+
+	bool showing() const;
+	bool editing() const;
+
+	sigc::signal<void> show_clicked;
+	sigc::signal<void> edit_clicked;
+
+	void set_showing (bool);
+	void set_editing (bool);
+};
 
 class Pianoroll : public CueEditor
 {
@@ -156,16 +176,17 @@ class Pianoroll : public CueEditor
 	ArdourCanvas::Rectangle* meter_bar;
 	ArdourCanvas::PianoRollHeader* prh;
 
-	ArdourWidgets::ArdourButton* velocity_button;
-	ArdourWidgets::ArdourButton* bender_button;
-	ArdourWidgets::ArdourButton* pressure_button;
-	ArdourWidgets::ArdourButton* expression_button;
-	ArdourWidgets::ArdourButton* modulation_button;
-	ArdourWidgets::MetaButton* cc_dropdown1;
-	ArdourWidgets::MetaButton* cc_dropdown2;
-	ArdourWidgets::MetaButton* cc_dropdown3;
-
-	typedef std::map<ArdourWidgets::ArdourButton*,Evoral::Parameter> ParameterButtonMap;
+	ControllerControls* velocity_button;
+	ControllerControls* bender_button;
+	ControllerControls* pressure_button;
+	ControllerControls* expression_button;
+	ControllerControls* modulation_button;
+#ifdef PIANOROLL_USER_BUTTONS
+	ControllerControls cc_dropdown1;
+	ControllerControls cc_dropdown2;
+	ControllerControls cc_dropdown3;
+#endif
+	typedef std::map<ControllerControls*,Evoral::Parameter> ParameterButtonMap;
 	ParameterButtonMap parameter_button_map;
 	void rebuild_parameter_button_map ();
 
@@ -205,11 +226,11 @@ class Pianoroll : public CueEditor
 
 	bool idle_data_captured ();
 
-	bool user_automation_button_event (GdkEventButton* ev, ArdourWidgets::MetaButton* mb);
-	bool automation_button_event (GdkEventButton*, Evoral::ParameterType type, int id);
-	bool automation_button_click (Evoral::ParameterType type, int id, ARDOUR::SelectionOperation);
-	void automation_led_click (GdkEventButton*, Evoral::ParameterType type, int id);
-	void user_led_click (GdkEventButton* ev, ArdourWidgets::MetaButton* metabutton);
+	bool user_automation_active_button_click (GdkEventButton* ev, ArdourWidgets::MetaButton* mb);
+	void user_automation_show_button_click (GdkEventButton* ev, ArdourWidgets::MetaButton* metabutton);
+
+	void automation_active_button_click (Evoral::ParameterType type, int id);
+	void automation_show_button_click (Evoral::ParameterType type, int id);
 
 	int _visible_channel;
 
