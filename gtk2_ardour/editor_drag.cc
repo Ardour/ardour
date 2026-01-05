@@ -3438,7 +3438,7 @@ BBTMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		_editor.abort_tempo_map_edit ();
 
 		if (was_double_click ()) {
-			_editor.edit_bbt (point);
+			_editor.edit_bbt (*_marker);
 		}
 
 		return;

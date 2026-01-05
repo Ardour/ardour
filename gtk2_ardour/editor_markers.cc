@@ -1680,7 +1680,7 @@ Editor::marker_menu_edit ()
 	} else if (tm) {
 		edit_tempo_section (const_cast<Temporal::TempoPoint&>(tm->tempo()));
 	} else if (bm) {
-		edit_bbt (const_cast<Temporal::MusicTimePoint&>(bm->mt_point()));
+		edit_bbt (*bm);
 	}
 }
 
