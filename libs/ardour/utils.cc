@@ -687,7 +687,8 @@ ARDOUR::matching_unsuffixed_filename_exists_in (const string& dir, const string&
 			}
 		}
 	} catch (const Glib::Error& e) {
-		error << string_compose (_("cannot open directory %1 (%2)"), dir, e.what()) << endl;
+		// error << string_compose (_("cannot open directory %1 (%2)"), dir, e.what()) << endl;
+		error << string_compose (_("cannot open directory %1 (some exception)"), dir) << endl;
 		return false;
 	}
 
