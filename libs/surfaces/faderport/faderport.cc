@@ -145,7 +145,7 @@ FaderPort::FaderPort (Session& s)
 	get_button (Punch).set_action (std::bind (&FaderPort::punch, this), true);
 
 	get_button (Loop).set_action (std::bind (&BasicUI::loop_toggle, this), true);
-	get_button (Loop).set_action (std::bind (&BasicUI::add_marker, this, string()), true, ShiftDown);
+	get_button (Loop).set_action (std::bind (&BasicUI::add_marker, this, string(), Location::IsMark), true, ShiftDown);
 
 	get_button (Punch).set_action (std::bind (&BasicUI::prev_marker, this), true, ShiftDown);
 	get_button (User).set_action (std::bind (&BasicUI::next_marker, this), true, ShiftDown);

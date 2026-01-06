@@ -152,10 +152,10 @@ BasicUI::goto_end ()
 }
 
 void
-BasicUI::add_marker (const std::string& markername)
+BasicUI::add_marker (const std::string& markername, Location::Flags flags)
 {
 	timepos_t where (session->audible_sample());
-	Location *location = new Location (*session, where, where, markername, Location::IsMark);
+	Location *location = new Location (*session, where, where, markername, flags);
 	session->begin_reversible_command (_("add marker"));
 	XMLNode &before = session->locations()->get_state();
 	session->locations()->add (location, true);
