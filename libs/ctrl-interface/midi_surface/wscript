@@ -8,7 +8,11 @@ def configure(conf):
     pass
 
 def build(bld):
-    obj = bld(features = 'cxx cxxshlib')
+    features = 'cxx cxxshlib'
+    if bld.env['build_target'] == 'msvc':
+        features += ' gendef'
+    
+    obj = bld(features=features)
     obj.source = '''
             midi_surface.cc
             midi_byte_array.cc
