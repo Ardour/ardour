@@ -23,14 +23,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "pbd/pthread_utils.h"
 #include "pbd/memento_command.h"
 
 #include "temporal/tempo.h"
 
 #include "ardour/session.h"
 #include "ardour/location.h"
-#include "ardour/tempo.h"
 #include "ardour/transport_master_manager.h"
 #include "ardour/utils.h"
 
