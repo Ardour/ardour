@@ -71,6 +71,7 @@ using namespace Temporal;
 Pianoroll::Pianoroll (std::string const & name, bool with_transport)
 	: CueEditor (name, with_transport)
 	, prh (nullptr)
+	, layered_automation (true)
 	, bg (nullptr)
 	, view (nullptr)
 	, bbt_metric (*this)
@@ -240,12 +241,31 @@ Pianoroll::add_multi_controller_item (Gtk::Menu_Helpers::MenuList&,
 }
 
 void
+Pianoroll::layered_automation_button_clicked ()
+{
+	if ((layered_automation = !layered_automation)) {
+		layered_automation_button->set_active_state (Gtkmm2ext::ExplicitActive);
+	} else {
+		layered_automation_button->set_active_state (Gtkmm2ext::Off);
+	}
+}
+
+void
 Pianoroll::build_lower_toolbar ()
 {
 	EC_LOCAL_TEMPO_SCOPE;
 	Gtk::RadioButtonGroup edit_group;
 
 	horizontal_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &Pianoroll::scrolled));
+
+	layered_automation_button = new ArdourButton (ArdourButton::Element (ArdourButton::VectorIcon|ArdourButton::Edge|ArdourButton::Body));
+	layered_automation_button->set_icon (ArdourIcon::PsetBrowse);
+	layered_automation_button->signal_clicked.connect (sigc::mem_fun (*this, &Pianoroll::layered_automation_button_clicked));
+
+	Gtk::HBox* stupid (manage (new Gtk::HBox));
+	Gtk::Label* layer_label (manage (new Gtk::Label (_("Layered"))));
+	stupid->pack_start (*layered_automation_button, false, false);
+	stupid->pack_start (*layer_label, false, false, 6);
 
 	velocity_button = new ControllerControls (-1, _("Velocity"), edit_group);
 	bender_button = new ControllerControls (MIDI_CMD_BENDER, _("Bender"), edit_group);
@@ -271,6 +291,9 @@ Pianoroll::build_lower_toolbar ()
 	// button_bar.set_homogeneous (true);
 	button_bar.set_spacing (6);
 	button_bar.set_border_width (6);
+
+	button_bar.pack_start (*stupid, false, false);
+
 	button_bar.pack_start (*velocity_button, false, false);
 	button_bar.pack_start (*bender_button, false, false);
 	button_bar.pack_start (*pressure_button, false, false);
@@ -1457,6 +1480,9 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 	view->show_start (true);
 	view->show_end (true);
 
+	layered_automation_button->set_active_state (Gtkmm2ext::Off);
+	layered_automation = false;
+
 	set_visible_channel (view->pick_visible_channel());
 
 	/* Compute zoom level to show entire source plus some margin if possible */
@@ -2154,7 +2180,6 @@ ControllerControls::ControllerControls (int num, std::string const & str, Gtk::R
 	edit_button->set_fallthrough_to_parent (false);
 
 	set_spacing (6);
-	set_border_width (12);
 	pack_start (*show_hide_button, false, false);
 	pack_start (*edit_button, false, false);
 	pack_start (name, false, false, 6);

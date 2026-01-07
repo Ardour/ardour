@@ -176,6 +176,10 @@ class Pianoroll : public CueEditor
 	ArdourCanvas::Rectangle* meter_bar;
 	ArdourCanvas::PianoRollHeader* prh;
 
+	ArdourWidgets::ArdourButton* layered_automation_button;
+	bool layered_automation;
+	void layered_automation_button_clicked();
+
 	ControllerControls* velocity_button;
 	ControllerControls* bender_button;
 	ControllerControls* pressure_button;
