@@ -781,6 +781,12 @@ BasicUI::locked ()
 	return session->transport_locked ();
 }
 
+bool
+BasicUI::session_empty () const
+{
+	return session->empty ();
+}
+
 ARDOUR::samplecnt_t
 BasicUI::timecode_frames_per_hour ()
 {

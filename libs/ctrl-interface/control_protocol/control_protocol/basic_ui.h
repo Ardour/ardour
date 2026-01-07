@@ -88,6 +88,8 @@ class LIBCONTROLCP_API BasicUI {
 	bool locked ();
 
 	void save_state ();
+	bool session_empty () const;
+
 	void prev_marker ();
 	void next_marker ();
 	void undo ();
