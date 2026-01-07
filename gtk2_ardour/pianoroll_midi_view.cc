@@ -207,6 +207,7 @@ PianorollMidiView::scroll (GdkEventScroll* ev)
 			_editing_context.reset_zoom (_editing_context.get_current_zoom() / 2);
 			return true;
 		}
+		break;
 	case GDK_SCROLL_DOWN:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollHorizontalModifier)) {
 			_editing_context.scroll_right_step ();
