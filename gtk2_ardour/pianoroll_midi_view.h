@@ -50,6 +50,7 @@ class PianorollMidiView : public MidiView
 
 	~PianorollMidiView();
 
+	void set_region (std::shared_ptr<ARDOUR::MidiRegion>);
 	void set_samples_per_pixel (double);
 	void set_height (double);
 
@@ -61,6 +62,7 @@ class PianorollMidiView : public MidiView
 	void ghost_sync_selection (NoteBase*);
 
 	void toggle_visibility (Evoral::Parameter const & param);
+	void hide_all_automation ();
 	void swap_automation_channel (int);
 	void set_active_automation (Evoral::Parameter const &);
 	bool is_active_automation (Evoral::Parameter const &) const;

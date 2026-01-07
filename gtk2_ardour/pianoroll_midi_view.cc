@@ -466,6 +466,20 @@ PianorollMidiView::have_visible_automation () const
 }
 
 void
+PianorollMidiView::hide_all_automation ()
+{
+	unset_active_automation ();
+
+	for (auto & [parameter,ads] : automation_map) {
+		ads.hide ();
+	}
+
+	automation_map.clear ();
+	delete velocity_display;
+	velocity_display = nullptr;
+}
+
+void
 PianorollMidiView::toggle_visibility (Evoral::Parameter const & param)
 {
 	using namespace ARDOUR;
@@ -935,4 +949,11 @@ PianorollMidiView::cut_copy_clear_one (AutomationLine& line, ::Selection& select
 			(*x)->value = val;
 		}
 	}
+}
+
+void
+PianorollMidiView::set_region (std::shared_ptr<MidiRegion> mr)
+{
+	MidiView::set_region (mr);
+	hide_all_automation ();
 }
