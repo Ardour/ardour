@@ -97,6 +97,7 @@ class VelocityDisplay
 	bool selected;
 	GhostEvent::EventList::iterator _optimization_iterator;
 	bool _sensitive;
+	sigc::connection base_connection;
 
 	virtual bool base_event (GdkEvent*) = 0;
 	void set_size_and_position (GhostEvent&);
