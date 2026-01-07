@@ -2144,11 +2144,12 @@ ControllerControls::ControllerControls (int num, std::string const & str, Gtk::R
 	show_hide_button->signal_clicked.connect (sigc::mem_fun (show_clicked, &sigc::signal<void>::emit));
 	edit_button->signal_clicked.connect (sigc::mem_fun (edit_clicked, &sigc::signal<void>::emit));
 
-	show_hide_button->set_active_color (0xff0000ff);
+	Gtkmm2ext::Color c = UIConfiguration::instance().color (X_("alert:yellow"));
+	show_hide_button->set_active_color (c);
 	show_hide_button->set_act_on_release (false);
 	show_hide_button->set_fallthrough_to_parent (false);
 
-	edit_button->set_active_color (0xff0000ff);
+	edit_button->set_active_color (c);
 	edit_button->set_act_on_release (false);
 	edit_button->set_fallthrough_to_parent (false);
 
