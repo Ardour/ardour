@@ -67,6 +67,7 @@
 #include "actions.h"
 #include "meter_patterns.h"
 #include "meterbridge.h"
+#include "keyeditor.h"
 #include "luawindow.h"
 #include "mixer_ui.h"
 #include "recorder_ui.h"
@@ -276,6 +277,8 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (main_actions, X_("FlushWastebasket"), _("Flush Wastebasket"),  sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::flush_trash));
+
+	act = ActionManager::register_action (main_actions, X_("PrintKeyBindings"), _("Print Keyboard Shortcuts"),  sigc::ptr_fun (&KeyEditor::print));
 
 	ActionManager::write_sensitive_actions.push_back (act);
 	ActionManager::session_sensitive_actions.push_back (act);

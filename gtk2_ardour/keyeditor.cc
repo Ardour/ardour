@@ -128,7 +128,7 @@ KeyEditor::KeyEditor ()
 	print_button.add (print_label);
 	print_label.set_markup (string_compose ("  <span size=\"large\" weight=\"bold\">%1</span>  ", _("Print Bindings (to your web browser)")));
 
-	print_button.signal_clicked().connect (sigc::mem_fun (*this, &KeyEditor::print));
+	print_button.signal_clicked().connect (sigc::ptr_fun (&KeyEditor::print));
 
 	reset_box.pack_start (reset_button, true, false);
 	reset_box.pack_start (print_button, true, false);
@@ -585,10 +585,10 @@ KeyEditor::search_string_updated (const std::string& filter)
 }
 
 void
-KeyEditor::print () const
+KeyEditor::print ()
 {
 	stringstream sstr;
-	Bindings::save_all_bindings_as_html (sstr);
+	Bindings::save_all_bindings_as_html (sstr, false);
 
 	if (sstr.str().empty()) {
 		return;
