@@ -75,8 +75,13 @@ probe_lk4_midi_protocol ()
 
 
 static ControlProtocolDescriptor lk4_descriptor = {
-	/* name       */ "Novation LaunchKey 4",
+#ifdef LAUNCHPAD_MINI
+	/* name       */ "Novation Launchkey Mini",
+	/* id         */ "uri://ardour.org/surfaces/launchkey_mini:0",
+#else
+	/* name       */ "Novation Launchkey 4",
 	/* id         */ "uri://ardour.org/surfaces/launchkey4:0",
+#endif
 	/* module     */ 0,
 	/* available  */ 0,
 	/* probe_port */ probe_lk4_midi_protocol,
