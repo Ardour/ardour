@@ -867,7 +867,8 @@ Bindings::save_all_bindings_as_html (ostream& ostr)
 	ostr << "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n";
 	ostr << "<style>\n";
 	ostr << "  table { border: 2px outset gray; line-height: 0.8em; box-sizing: border-box; }\n";
-	ostr << "  h2 { margin: 1em 0; }\n";
+	ostr << "  h2 { margin: 1em 0 0.25em 0; line-height: 1em; }\n";
+	ostr << "  h3 { margin: 0.75em 0 0.25em 0; line-height: 1em; }\n";
 	ostr << "  td, th { padding: 6px; border: 1px inset; }\n";
 	ostr << "  span { font-family:monospace; margin: 0px; }\n";
 	ostr << "</style>\n";
