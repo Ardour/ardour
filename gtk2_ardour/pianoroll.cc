@@ -243,7 +243,13 @@ Pianoroll::add_multi_controller_item (Gtk::Menu_Helpers::MenuList&,
 void
 Pianoroll::layered_automation_button_clicked ()
 {
-	if ((layered_automation = !layered_automation)) {
+	set_layered_automation (!layered_automation);
+}
+
+void
+Pianoroll::set_layered_automation (bool yn)
+{
+	if ((layered_automation = yn)) {
 		layered_automation_button->set_active_state (Gtkmm2ext::ExplicitActive);
 		if (view && view->n_visible_automation() > 1) {
 			view->hide_all_automation ();

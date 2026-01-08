@@ -167,6 +167,8 @@ class Pianoroll : public CueEditor
 	bool key_press_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool key_release_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
 
+	void set_layered_automation (bool);
+
 	void escape ();
 	void session_going_away ();
 
