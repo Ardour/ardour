@@ -854,7 +854,7 @@ Bindings::save (XMLNode& root)
 }
 
 void
-Bindings::save_all_bindings_as_html (ostream& ostr)
+Bindings::save_all_bindings_as_html (ostream& ostr, bool include_action_list)
 {
 	if (bindings.empty()) {
 		return;
@@ -896,6 +896,10 @@ Bindings::save_all_bindings_as_html (ostream& ostr)
 	ostr << "</tr>\n\n";
 	ostr << "</tbody></table>\n\n";
 
+	if (!include_action_list) {
+		goto out;
+	}
+
 	ostr << "<br/>\n\n";
 	ostr << "<div style=\"page-break-before: always;\"></div>\n\n";
 	ostr << "<table border=\"2\" cellpadding=\"6\"><tbody>\n\n";
@@ -928,6 +932,7 @@ Bindings::save_all_bindings_as_html (ostream& ostr)
 	ostr << "</tr>\n\n";
 	ostr << "</tbody></table>\n\n";
 
+	out:
 	ostr << "</body>\n";
 	ostr << "</html>\n";
 }
