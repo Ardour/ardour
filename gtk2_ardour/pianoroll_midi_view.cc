@@ -466,7 +466,7 @@ PianorollMidiView::have_visible_automation () const
 }
 
 void
-PianorollMidiView::hide_all_automation ()
+PianorollMidiView::remove_all_automation ()
 {
 	unset_active_automation ();
 
@@ -477,6 +477,28 @@ PianorollMidiView::hide_all_automation ()
 	automation_map.clear ();
 	delete velocity_display;
 	velocity_display = nullptr;
+}
+
+void
+PianorollMidiView::hide_all_automation ()
+{
+	unset_active_automation ();
+
+	for (auto & [parameter,ads] : automation_map) {
+		ads.hide ();
+	}
+
+	AutomationStateChange (); /* EMIT SIGNAL */
+}
+
+size_t
+PianorollMidiView::n_visible_automation() const
+{
+	size_t n = 0;
+	for (auto const & [parameter,ads] : automation_map) {
+		n += ads.visible;
+	}
+	return n;
 }
 
 void
@@ -955,5 +977,5 @@ void
 PianorollMidiView::set_region (std::shared_ptr<MidiRegion> mr)
 {
 	MidiView::set_region (mr);
-	hide_all_automation ();
+	remove_all_automation ();
 }

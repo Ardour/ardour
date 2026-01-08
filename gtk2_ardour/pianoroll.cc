@@ -245,8 +245,14 @@ Pianoroll::layered_automation_button_clicked ()
 {
 	if ((layered_automation = !layered_automation)) {
 		layered_automation_button->set_active_state (Gtkmm2ext::ExplicitActive);
+		if (view && view->n_visible_automation() > 1) {
+			view->hide_all_automation ();
+		}
 	} else {
 		layered_automation_button->set_active_state (Gtkmm2ext::Off);
+		if (view && view->n_visible_automation() > 1) {
+			view->hide_all_automation ();
+		}
 	}
 }
 
@@ -1555,10 +1561,13 @@ Pianoroll::automation_active_button_click (Evoral::ParameterType type, int id)
 	EC_LOCAL_TEMPO_SCOPE;
 
 	if (view)  {
-		Evoral::Parameter p (type, id);
-		std::string str (ARDOUR::EventTypeMap::instance().to_symbol (p));
-		std::cerr << "set active for " << str << std::endl;
-		view->set_active_automation (Evoral::Parameter (type, _visible_channel, id));
+		Evoral::Parameter p (type, _visible_channel, id);
+
+		if (!layered_automation && !view->is_visible_automation (p)) {
+			view->hide_all_automation ();
+		}
+
+		view->set_active_automation (p);
 	}
 }
 
@@ -1569,6 +1578,10 @@ Pianoroll::automation_show_button_click (Evoral::ParameterType type, int id)
 
 	if (view)  {
 		Evoral::Parameter param (type, _visible_channel, id);
+		if (!layered_automation && !view->is_visible_automation (param)) {
+			/* Param is about to become visible, hide everything else */
+			view->hide_all_automation ();
+		}
 		view->toggle_visibility (param);
 	}
 }

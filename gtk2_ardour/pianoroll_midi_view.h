@@ -62,11 +62,13 @@ class PianorollMidiView : public MidiView
 	void ghost_sync_selection (NoteBase*);
 
 	void toggle_visibility (Evoral::Parameter const & param);
+	void remove_all_automation ();
 	void hide_all_automation ();
 	void swap_automation_channel (int);
 	void set_active_automation (Evoral::Parameter const &);
 	bool is_active_automation (Evoral::Parameter const &) const;
 	bool is_visible_automation (Evoral::Parameter const &) const;
+	size_t n_visible_automation () const;
 
 	AutomationLine* active_automation_line() const;
 	ArdourCanvas::Duple automation_group_position() const;
