@@ -1143,6 +1143,17 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 #undef UI_CONFIG_VARIABLE
 		.endClass()
 
+		/* enums */
+		.beginNamespace ("Gtk")
+		.beginNamespace ("WindowPosition")
+		.addConst ("None", Gtk::WIN_POS_NONE)
+		.addConst ("Center", Gtk::WIN_POS_CENTER)
+		.addConst ("Mouse", Gtk::WIN_POS_MOUSE)
+		.addConst ("CenterAlways", Gtk::WIN_POS_CENTER_ALWAYS)
+		.addConst ("CenterOnParent", Gtk::WIN_POS_CENTER_ON_PARENT)
+		.endNamespace ()
+		.endNamespace ()
+
 		.addFunction ("config", &_ui_config)
 
 		.endNamespace (); // end ArdourUI
@@ -1168,6 +1179,7 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 #define IMPORTPOSITION(NAME) .addConst (stringify(NAME), (Editing::ImportPosition)Editing::NAME)
 #define IMPORTDISPOSITION(NAME) .addConst (stringify(NAME), (Editing::ImportDisposition)Editing::NAME)
 #define NOTENAMEDISPLAY(NAME) .addConst (stringify(NAME), (Editing::NoteNameDisplay)Editing::NAME)
+#define REGIONEDITDISPOSITION(NAME) .addConst (stringify(NAME), (Editing::RegionEditDisposition)Editing::NAME)
 	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("Editing")
 #		include "editing_syms.inc.h"
