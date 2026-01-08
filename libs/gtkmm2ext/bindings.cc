@@ -871,6 +871,7 @@ Bindings::save_all_bindings_as_html (ostream& ostr, bool include_action_list)
 	ostr << "  h3 { margin: 0.75em 0 0.25em 0; line-height: 1em; }\n";
 	ostr << "  td, th { padding: 6px; border: 1px inset; }\n";
 	ostr << "  span { font-family:monospace; margin: 0px; }\n";
+	ostr << "  div.mono { font-family:monospace; margin: 0px; }\n";
 	ostr << "</style>\n";
 
 	ostr << "</head>\n<body>\n";
@@ -905,7 +906,8 @@ Bindings::save_all_bindings_as_html (ostream& ostr, bool include_action_list)
 	ostr << "<table border=\"2\" cellpadding=\"6\"><tbody>\n\n";
 	ostr << "<tr>\n\n";
 	ostr << "<td>\n\n";
-	ostr << "<h2><u> Partial List of Available Actions { => with current shortcut, where applicable } </u></h2>\n\n";
+	ostr << "<h2><u> Partial List of Available Actions { => with current shortcut, where applicable } </u></h2>\n";
+	ostr << "<div class=\"mono\">\n";
 	{
 		vector<string> paths;
 		vector<string> labels;
@@ -928,6 +930,7 @@ Bindings::save_all_bindings_as_html (ostream& ostr, bool include_action_list)
 			}
 		}
 	}
+	ostr << "<div>\n";
 	ostr << "</td>\n\n";
 	ostr << "</tr>\n\n";
 	ostr << "</tbody></table>\n\n";
