@@ -2387,6 +2387,9 @@ LuaBindings::common (lua_State* L)
 		.beginStdMap <PBD::ID, PBD::ID> ("IDMap")
 		.endClass ()
 
+		.beginStdMap <PBD::ID, Session::RouteImportInfo> ("RouteStateMap")
+		.endClass ()
+
 		//std::list<std::shared_ptr<Port> > PortList
 		.beginConstStdList <std::shared_ptr<Port> > ("PortList")
 		.endClass ()
@@ -2667,6 +2670,12 @@ LuaBindings::common (lua_State* L)
 		.beginNamespace ("CueBehavior")
 		.addConst ("FollowCues", ARDOUR::CueBehavior(FollowCues))
 		.addConst ("ImplicitlyIgnoreCues", ARDOUR::CueBehavior(ImplicitlyIgnoreCues))
+		.endNamespace ()
+
+		.beginNamespace ("RouteGroupImportMode")
+		.addConst ("IgnoreRouteGroup", ARDOUR::Session::RouteGroupImportMode(Session::IgnoreRouteGroup))
+		.addConst ("UseRouteGroup", ARDOUR::Session::RouteGroupImportMode(Session::UseRouteGroup))
+		.addConst ("CreateRouteGroup", ARDOUR::Session::RouteGroupImportMode(Session::CreateRouteGroup))
 		.endNamespace ()
 
 		.beginNamespace ("WellKnownCtrl")
