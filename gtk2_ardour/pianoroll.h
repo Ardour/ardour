@@ -145,6 +145,8 @@ class Pianoroll : public CueEditor
 	void set_show_source (bool);
 	Temporal::timepos_t source_to_timeline (Temporal::timepos_t const & source_pos) const;
 
+	void set_layered_automation (bool);
+
   protected:
 	Temporal::timepos_t snap_to_grid (Temporal::timepos_t const & start,
 	                                  Temporal::RoundMode   direction,
@@ -166,8 +168,6 @@ class Pianoroll : public CueEditor
 	bool leave_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool key_press_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool key_release_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
-
-	void set_layered_automation (bool);
 
 	void escape ();
 	void session_going_away ();
