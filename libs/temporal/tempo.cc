@@ -3140,6 +3140,8 @@ TempoMap::fill_grid_by_walking (TempoMapPoints& ret, Points::const_iterator& p_i
 
 		DEBUG_TRACE (DEBUG::Grid, string_compose ("pre-check overrun of next point with bbt @ %1 audio %2 point %3\n", bbt, start, *p));
 
+	  find_next_point:
+
 		bool reset = false;
 
 		if (!mtp) {
@@ -3298,6 +3300,16 @@ TempoMap::fill_grid_by_walking (TempoMapPoints& ret, Points::const_iterator& p_i
 				}
 			}
 
+		}
+
+		if (p != _points.end() && p->bbt() < bbt) {
+			/* We reached a point that didn't coincide with the one
+			   we were looking at, but we have not yet reached the BBT
+			   value for the next grid point. Go back and run the
+			   "find next point" loop again.
+			*/
+			mtp = dynamic_cast<MusicTimePoint const *> (&*p);
+			goto find_next_point;
 		}
 
 		DEBUG_TRACE (DEBUG::Grid, string_compose ("reset done, bbt now at %1 with metric %2, get superclock\n", bbt, metric));
