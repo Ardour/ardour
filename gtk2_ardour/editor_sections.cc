@@ -402,7 +402,7 @@ EditorSections::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& contex
 		/* paste at end */
 		TreeModel::Children rows = _model->children ();
 		assert (!rows.empty ());
-		Gtk::TreeModel::Row row = *rows.rbegin ();
+		Gtk::TreeModel::Row row = *prev(rows.end ());
 		to                      = row[_columns.end];
 #ifndef NDEBUG
 		cout << "EditorSections::drag_data_received - paste at end\n";
