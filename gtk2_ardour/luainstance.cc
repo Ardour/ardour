@@ -1169,6 +1169,7 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 #undef IMPORTDISPOSITION
 #undef TEMPOEDITBEHAVIOR
 #undef NOTENAMEDISPLAY
+#undef REGIONEDITDISPOSITION
 
 #define ZOOMFOCUS(NAME) .addConst (stringify(NAME), (Editing::ZoomFocus)Editing::NAME)
 #define GRIDTYPE(NAME) .addConst (stringify(NAME), (Editing::GridType)Editing::NAME)
