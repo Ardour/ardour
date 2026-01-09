@@ -3102,6 +3102,7 @@ TempoMap::fill_grid_by_walking (TempoMapPoints& ret, Points::const_iterator& p_i
 			/* Advance by the number of bars specified by bar_mod */
 
 			bbt.bars += bar_mod;
+			DEBUG_TRACE (DEBUG::Grid, string_compose ("advanced BBT by %1 bars to %2\n", bar_mod, bbt));
 
 		} else {
 
@@ -3132,9 +3133,11 @@ TempoMap::fill_grid_by_walking (TempoMapPoints& ret, Points::const_iterator& p_i
 			if (beat_div == 1) {
 				/* Advance beats by 1 meter-defined "beat */
 				bbt = metric.bbt_add (bbt, BBT_Offset (0, 1, 0));
+				DEBUG_TRACE (DEBUG::Grid, string_compose ("advanced BBT by 1 beat to %1\n", bbt));
 			} else {
 				/* Advance beats by a fraction of the * meter-defined "beat"  */
 				bbt = metric.bbt_add (bbt, BBT_Offset (0, 0, Temporal::ticks_per_beat / beat_div));
+				DEBUG_TRACE (DEBUG::Grid, string_compose ("advanced BBT by beat_div %1 to %2\n", beat_div, bbt));
 			}
 		}
 
@@ -3275,16 +3278,16 @@ TempoMap::fill_grid_by_walking (TempoMapPoints& ret, Points::const_iterator& p_i
 					++p;
 
 					if (p != _points.end()) {
-						DEBUG_TRACE (DEBUG::Grid, string_compose ("next point is @ %1 %2\n", &(*p), *p));
+						DEBUG_TRACE (DEBUG::Grid, string_compose ("\tnext point is @ %1 %2, rebuild_metric = %3\n", &(*p), *p, rebuild_metric));
 					} else {
-						DEBUG_TRACE (DEBUG::Grid, "\tthat was that\n");
+						DEBUG_TRACE (DEBUG::Grid, string_compose ("\tthat was that, rebuild_metric = %1\n", rebuild_metric));
 					}
 
 				}
 
 				if (p != _points.end()) {
-					DEBUG_TRACE (DEBUG::Grid, string_compose ("left loop with %5, to find next, p->bbt %1 vs bbt %2 p->sc %3 vs %4\n",
-					                                          p->bbt(), bbt, p->sclock(), sc, *p));
+					DEBUG_TRACE (DEBUG::Grid, string_compose ("left inner find-next loop with %1 vs bbt %2 p->sc %3 vs %4\n",
+					                                          *p, bbt, p->sclock(), sc));
 				} else {
 					DEBUG_TRACE (DEBUG::Grid, "left loop because we reached the end of points\n");
 				}
