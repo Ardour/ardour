@@ -604,19 +604,30 @@ TempoPoint::superclock_at (Temporal::Beats const & qn) const
 
 		// std::cerr << "logexpr " << log_expr << " from " << superclocks_per_quarter_note() << " * " << _omega << " * " << (qn - _quarters) << std::endl;
 
-		if (log_expr < -1) {
+		if (log_expr < -1.) {
 
-			r = _sclock + llrint (log (-log_expr - 1.0) / -_omega);
+			/* The overwhelmingly likely reason for arriving here
+			 * is using the wrong TempoMetric to compute
+			 * superclocks at a BBT time. The omega value is only
+			 * valid for the range over which a ramp was computed,
+			 * so if the TempoPoint is "too early" and being used
+			 * to compute superclocks_at() a BBT time that is
+			 * further away than the ramp was long, we will end up
+			 * here, despite the math being correct.
+			 *
+			 * So before revisiting all the math here (which has
+			 * been checked many times), go back and investigate
+			 * the TempoMetric being used, and how it was arrived
+			 * at.
+			 */
 
-			if (r < 0) {
-				std::cerr << "CASE 1: " << *this << endl << " scpqn = " << superclocks_per_quarter_note() << std::endl;
-				std::cerr << " for " << qn << " @ " << _quarters << " | " << _sclock << " + log (" << log_expr << ") "
-				          << log (-log_expr - 1.0)
-				          << " - omega = " << -_omega
-				          << " => "
-				          << r << std::endl;
-				abort ();
-			}
+			std::cerr << "CASE 1: " << *this << endl << " scpqn = " << superclocks_per_quarter_note() << std::endl;
+			std::cerr << " for " << qn << " @ " << _quarters << " | " << _sclock << " + log (" << log_expr << ") "
+			          << log (-log_expr - 1.0)
+			          << " - omega = " << -_omega
+			          << " => "
+			          << r << std::endl;
+			abort ();
 
 		} else {
 			r = _sclock + llrint (log1p (log_expr) / _omega);
