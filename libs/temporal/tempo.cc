@@ -3155,6 +3155,7 @@ TempoMap::fill_grid_by_walking (TempoMapPoints& ret, Points::const_iterator& p_i
 	  find_next_point:
 
 		bool reset = false;
+		bool can_goto = true;
 
 		if (!mtp) {
 			if (bbt == p->bbt()) {
@@ -3180,6 +3181,7 @@ TempoMap::fill_grid_by_walking (TempoMapPoints& ret, Points::const_iterator& p_i
 				reset = true;
 			} else {
 				DEBUG_TRACE (DEBUG::Grid, string_compose ("confirmed that BBT %1 has audio time %2 before next point %3\n", bbt, start, *p));
+				can_goto = false;
 			}
 		}
 
@@ -3314,7 +3316,7 @@ TempoMap::fill_grid_by_walking (TempoMapPoints& ret, Points::const_iterator& p_i
 
 		}
 
-		if (p != _points.end() && p->bbt() < bbt) {
+		if (can_goto && (p != _points.end()) && (p->bbt() < bbt)) {
 			/* We reached a point that didn't coincide with the one
 			   we were looking at, but we have not yet reached the BBT
 			   value for the next grid point. Go back and run the
