@@ -2674,6 +2674,7 @@ Editor::setup_toolbar ()
 		mouse_mode_size_group->add_widget (tav_expand_button);
 		mouse_mode_size_group->add_widget (follow_playhead_button);
 		mouse_mode_size_group->add_widget (follow_edits_button);
+		mouse_mode_size_group->add_widget (auto_return_button);
 	} else {
 		mouse_mode_size_group->add_widget (zoom_preset_selector);
 		mouse_mode_size_group->add_widget (visible_tracks_selector);
@@ -2812,6 +2813,7 @@ Editor::setup_toolbar ()
 	follow_mode_hbox->set_border_width (spc);
 	follow_mode_hbox->pack_start (follow_playhead_button, false, false);
 	follow_mode_hbox->pack_start (follow_edits_button, false, false);
+	follow_mode_hbox->pack_start (auto_return_button, false, false);
 
 	/* Pack everything in... */
 

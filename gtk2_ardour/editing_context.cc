@@ -149,6 +149,7 @@ EditingContext::EditingContext (std::string const & name)
 	, play_note_selection_button (ArdourButton::default_elements)
 	, follow_playhead_button (_("Follow Playhead"), ArdourButton::Element (ArdourButton::Edge | ArdourButton::Body | ArdourButton::VectorIcon), true)
 	, follow_edits_button (_("Follow Range"), ArdourButton::Element (ArdourButton::Edge | ArdourButton::Body | ArdourButton::VectorIcon), true)
+	, auto_return_button (_("Auto Return"), ArdourButton::Element (ArdourButton::Edge | ArdourButton::Body | ArdourButton::VectorIcon), true)
 	, visible_channel_label (S_("MIDI|Ch:"))
 	, _drags (new DragManager (this))
 	, _leftmost_sample (0)
@@ -235,6 +236,7 @@ EditingContext::EditingContext (std::string const & name)
 	set_tooltip (play_note_selection_button, _("Play notes when selected"));
 	set_tooltip (note_mode_button, _("Switch between sustained and percussive mode"));
 	set_tooltip (follow_edits_button, _("Playhead follows Range tool clicks, and Range selections"));
+	set_tooltip (auto_return_button, _("Auto Return: When enabled, playhead returns to start position after transport stop"));
 	/* Leave tip for full zoom button to derived class */
 	set_tooltip (visible_channel_selector, _("Select visible MIDI channel"));
 
@@ -244,6 +246,7 @@ EditingContext::EditingContext (std::string const & name)
 
 	follow_playhead_button.set_icon (ArdourIcon::EditorFollowPlayhead);
 	follow_edits_button.set_icon (ArdourIcon::EditorFollowEdits);
+	auto_return_button.set_icon (ArdourIcon::TransportAutoReturn);
 
 	zoom_in_button.set_name ("zoom button");
 	zoom_in_button.set_icon (ArdourIcon::ZoomIn);
@@ -256,6 +259,7 @@ EditingContext::EditingContext (std::string const & name)
 
 	follow_playhead_button.set_name ("transport option button");
 	follow_edits_button.set_name ("transport option button");
+	auto_return_button.set_name ("transport option button");
 
 	note_mode_button.set_icon (ArdourIcon::Drum);
 #define PX_SCALE(px) std::max((float)px, rintf((float)px * UIConfiguration::instance().get_ui_scale()))
@@ -2362,6 +2366,9 @@ EditingContext::bind_mouse_mode_buttons ()
 
 	act = ActionManager::get_action (X_("Transport"), X_("ToggleFollowEdits"));
 	follow_edits_button.set_related_action (act);
+
+	act = ActionManager::get_action (X_("Transport"), X_("ToggleAutoReturn"));
+	auto_return_button.set_related_action (act);
 
 	mouse_move_button.set_related_action (mouse_mode_actions[Editing::MouseObject]);
 	mouse_move_button.set_icon (ArdourWidgets::ArdourIcon::ToolGrab);
