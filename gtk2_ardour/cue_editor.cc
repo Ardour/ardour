@@ -281,15 +281,6 @@ CueEditor::set_zoom_focus (Editing::ZoomFocus zf)
 
 	using namespace Editing;
 
-	/* this is driven by a toggle on a radio group, and so is invoked twice,
-	   once for the item that became inactive and once for the one that became
-	   active.
-	*/
-
-	if (!zoom_focus_actions[zf]->get_active()) {
-		return;
-	}
-
 	/* We don't allow playhead for zoom focus here */
 
 	if (zf == ZoomFocusPlayhead) {
