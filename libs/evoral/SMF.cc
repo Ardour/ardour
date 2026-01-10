@@ -871,7 +871,6 @@ SMF::tempo_map (bool& provided) const
 			sc = 0;
 		} else {
 			sc =  new_map->superclock_at (beats);
-			new_map->dump (std::cerr);
 		}
 
 		if (have_initial_meter) {
