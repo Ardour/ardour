@@ -623,10 +623,8 @@ TempoPoint::superclock_at (Temporal::Beats const & qn) const
 
 			std::cerr << "CASE 1: " << *this << endl << " scpqn = " << superclocks_per_quarter_note() << std::endl;
 			std::cerr << " for " << qn << " @ " << _quarters << " | " << _sclock << " + log (" << log_expr << ") "
-			          << log (-log_expr - 1.0)
-			          << " - omega = " << -_omega
-			          << " => "
-			          << r << std::endl;
+			          << " omega = " << _omega
+			          << std::endl;
 			abort ();
 
 		} else {
