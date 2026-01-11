@@ -559,7 +559,7 @@ Section "${PROGRAM_NAME}${PROGRAM_VERSION} (required)" SecMainProg
   WriteRegDWORD HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}-${WARCH}" "NoRepair" 1
   WriteUninstaller "\$INSTDIR\uninstall.exe"
   CreateShortCut "\$INSTDIR\\${PROGRAM_NAME}${PROGRAM_VERSION}.lnk" "\$INSTDIR\\bin\\${PRODUCT_EXE}" "" "\$INSTDIR\\bin\\${PRODUCT_EXE}" 0
-  \${registerExtension} "\$INSTDIR\\bin\\${STATEFILE_SUFFIX}" ".${PRODUCT_NAME}" "${PROGRAM_NAME} Session"
+  \${registerExtension} "\$INSTDIR\\bin\\${PRODUCT_EXE}" ".${STATEFILE_SUFFIX}" "${PROGRAM_NAME} Session"
 SectionEnd
 EOF
 
