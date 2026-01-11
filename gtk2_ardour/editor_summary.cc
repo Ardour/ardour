@@ -25,11 +25,12 @@
 
 #include "ardour/session.h"
 
+#include <ydk/gdk.h>
+
 #include <ytkmm/menu.h>
 #include <ytkmm/menuitem.h>
 
 #include "context_menu_helper.h"
-#include "gdk.h"
 #include "streamview.h"
 #include "editor_summary.h"
 #include "gui_thread.h"
