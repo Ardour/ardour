@@ -5187,6 +5187,7 @@ These settings will only take effect after %1 is restarted.\n\
 	parameter_changed ("send-ltc");
 	parameter_changed ("sync-source");
 	parameter_changed ("open-gui-after-adding-plugin");
+	parameter_changed ("use-monitor-bus");
 
 #ifdef __APPLE__
 	parameter_changed ("use-opengl-view");
