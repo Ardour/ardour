@@ -104,6 +104,7 @@ PianorollMidiView::PianorollMidiView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 	_note_group->raise_to_top ();
 
 	automation_group = new ArdourCanvas::Rectangle (&parent);
+	automation_group->Event.connect (sigc::mem_fun (*this, &PianorollMidiView::automation_group_event));
 	CANVAS_DEBUG_NAME (automation_group, "cue automation group");
 	automation_group->set_fill_color (UIConfiguration::instance().color ("midi automation track fill"));
 	automation_group->set_data ("linemerger", this);
@@ -116,6 +117,16 @@ PianorollMidiView::PianorollMidiView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 PianorollMidiView::~PianorollMidiView ()
 {
 	delete velocity_display;
+}
+
+bool
+PianorollMidiView::automation_group_event (GdkEvent* ev)
+{
+	if (!active_automation) {
+		/* Eat the event to prevent the parent seeing it */
+		return true;
+	}
+	return false;
 }
 
 bool
