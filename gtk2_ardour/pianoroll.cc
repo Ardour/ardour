@@ -1564,37 +1564,41 @@ Pianoroll::user_automation_show_button_click (GdkEventButton* ev, MetaButton* me
 void
 Pianoroll::automation_active_button_click (Evoral::ParameterType type, int id)
 {
+	if (!view)  {
+		return;
+	}
+
 	EC_LOCAL_TEMPO_SCOPE;
 
-	if (view)  {
-		Evoral::Parameter p (type, _visible_channel, id);
+	Evoral::Parameter p (type, _visible_channel, id);
 
-		if (view->is_active_automation (p)) {
-			view->unset_active_automation ();
-			return;
-		}
-
-		if (!layered_automation && !view->is_visible_automation (p)) {
-			view->hide_all_automation ();
-		}
-
-		view->set_active_automation (p);
+	if (view->is_active_automation (p)) {
+		view->unset_active_automation ();
+		return;
 	}
+
+	if (!layered_automation && !view->is_visible_automation (p)) {
+		view->hide_all_automation ();
+	}
+
+	view->set_active_automation (p);
 }
 
 void
 Pianoroll::automation_show_button_click (Evoral::ParameterType type, int id)
 {
+	if (!view)  {
+		return;
+	}
+
 	EC_LOCAL_TEMPO_SCOPE;
 
-	if (view)  {
-		Evoral::Parameter param (type, _visible_channel, id);
-		if (!layered_automation && !view->is_visible_automation (param)) {
-			/* Param is about to become visible, hide everything else */
-			view->hide_all_automation ();
-		}
-		view->toggle_visibility (param);
+	Evoral::Parameter param (type, _visible_channel, id);
+	if (!layered_automation && !view->is_visible_automation (param)) {
+		/* Param is about to become visible, hide everything else */
+		view->hide_all_automation ();
 	}
+	view->toggle_visibility (param);
 }
 
 void
@@ -1603,7 +1607,6 @@ Pianoroll::automation_state_changed ()
 	EC_LOCAL_TEMPO_SCOPE;
 
 	assert (view);
-
 
 	for (ParameterButtonMap::iterator i = parameter_button_map.begin(); i != parameter_button_map.end(); ++i) {
 		std::string str (ARDOUR::EventTypeMap::instance().to_symbol (i->second));
