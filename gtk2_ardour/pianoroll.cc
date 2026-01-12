@@ -1569,6 +1569,11 @@ Pianoroll::automation_active_button_click (Evoral::ParameterType type, int id)
 	if (view)  {
 		Evoral::Parameter p (type, _visible_channel, id);
 
+		if (view->is_active_automation (p)) {
+			view->unset_active_automation ();
+			return;
+		}
+
 		if (!layered_automation && !view->is_visible_automation (p)) {
 			view->hide_all_automation ();
 		}

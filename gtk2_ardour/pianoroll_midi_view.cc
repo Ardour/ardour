@@ -588,13 +588,6 @@ PianorollMidiView::unset_active_automation ()
 		}
 	}
 
-	/* If the currently active automation is the only one visible, hide it */
-
-	if (active_automation->visible && visible == 1) {
-		active_automation->hide ();
-		set_height (_height);
-	}
-
 	active_automation = nullptr;
 
 	AutomationStateChange(); /* EMIT SIGNAL */

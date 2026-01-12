@@ -66,6 +66,7 @@ class PianorollMidiView : public MidiView
 	void hide_all_automation ();
 	void swap_automation_channel (int);
 	void set_active_automation (Evoral::Parameter const &);
+	void unset_active_automation ();
 	bool is_active_automation (Evoral::Parameter const &) const;
 	bool is_visible_automation (Evoral::Parameter const &) const;
 	size_t n_visible_automation () const;
@@ -143,7 +144,6 @@ class PianorollMidiView : public MidiView
 
 	AutomationDisplayState* find_or_create_automation_display_state (Evoral::Parameter const &);
 	void internal_set_active_automation (AutomationDisplayState&);
-	void unset_active_automation ();
 
 	bool midi_canvas_group_event (GdkEvent*);
 	bool automation_group_event (GdkEvent*);
