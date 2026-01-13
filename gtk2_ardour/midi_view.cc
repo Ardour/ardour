@@ -4333,8 +4333,8 @@ MidiView::paste_internal (timepos_t const & pos, unsigned paste_count, float tim
 	DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("Paste data spans from %1 to %2 (%3) ; paste pos beats = %4 (based on %5 - %6)\n",
 	                                               first_time,
 	                                               last_time,
-	                                               duration, pos, _midi_region->position(),
-	                                               quarter_note));
+	                                               duration, pos.beats(), _midi_region->position().beats().str(),
+	                                               quarter_note.str()));
 
 	for (int n = 0; n < (int) times; ++n) {
 
