@@ -526,12 +526,18 @@ FileArchive::create (const std::map<std::string, std::string>& filemap, Compress
 		archive_write_set_options (a, buf);
 	}
 
-	archive_write_open_filename (a, _req.url);
+	if (ARCHIVE_OK != archive_write_open_filename (a, _req.url)) {
+		archive_write_free (a);
+		return -2;
+	}
+
 	entry = archive_entry_new ();
 
 #ifndef NDEBUG
 	  const int64_t archive_start_time = g_get_monotonic_time();
 #endif
+
+		bool error = false;
 
 	for (std::map<std::string, std::string>::const_iterator f = filemap.begin (); f != filemap.end (); ++f) {
 		char buf[8192];
@@ -566,7 +572,10 @@ FileArchive::create (const std::map<std::string, std::string>& filemap, Compress
 		ssize_t len = read (fd, buf, sizeof (buf));
 		while (len > 0) {
 			read_bytes += len;
-			archive_write_data (a, buf, len);
+			if (len != archive_write_data (a, buf, len)) {
+				error = true;
+				break;
+			}
 			if (_progress) {
 				_progress->set_progress ((float)read_bytes / total_bytes);
 				if (_progress->cancelled ()) {
@@ -576,16 +585,19 @@ FileArchive::create (const std::map<std::string, std::string>& filemap, Compress
 			len = read (fd, buf, sizeof (buf));
 		}
 		close (fd);
-		if (_progress && _progress->cancelled ()) {
+		if (error || (_progress && _progress->cancelled ())) {
 			break;
 		}
 	}
 
 	archive_entry_free (entry);
-	archive_write_close (a);
-	archive_write_free (a);
 
-	if (_progress) {
+	error |= archive_write_close (a) == ARCHIVE_FATAL;
+	error |= archive_write_free (a) == ARCHIVE_FATAL;
+
+	if (error) {
+		g_unlink (_req.url);
+	} else if (_progress) {
 		if (_progress->cancelled ()) {
 			g_unlink (_req.url);
 		} else {
@@ -598,7 +610,7 @@ FileArchive::create (const std::map<std::string, std::string>& filemap, Compress
 	std::cerr << "archived in " << std::fixed << std::setprecision (2) << elapsed_time_us / 1000000. << " sec\n";
 #endif
 
-	return 0;
+	return error ? -3 : 0;
 }
 
 struct archive*
