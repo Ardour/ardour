@@ -1126,8 +1126,28 @@ ARDOUR_UI::archive_session ()
 		return;
 	}
 
-	if (_session->archive_session (sad.target_folder(), sad.name(), sad.encode_option (), sad.compression_level (), sad.only_used_sources (), &sad)) {
-		ArdourMessageDialog msg (_("Session Archiving failed."));
+	std::string errmsg;
+	switch (_session->archive_session (sad.target_folder(), sad.name(), sad.encode_option (), sad.compression_level (), sad.only_used_sources (), &sad)) {
+		case 0:
+			break;
+
+		default:
+#if 0 // CAN BREAK STRING FREEZE
+		case -1:
+			errmsg = _("Session Archiving failed. See Log window for further info.");
+			break;
+		case -2:
+			errmsg = _("Session Archiving failed.\nCannot create archive file in destination folder.");
+			break;
+		case -3:
+			errmsg = _("Session Archiving failed.\nCannot write archive. Disk full or file size exceeded.");
+			break;
+#else
+			errmsg = _("Session Archiving failed.");
+#endif
+	}
+	if (!errmsg.empty ()) {
+		ArdourMessageDialog msg (errmsg);
 		msg.run ();
 	}
 }
