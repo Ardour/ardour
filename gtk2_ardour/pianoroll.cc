@@ -48,6 +48,7 @@
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "midi_util.h"
+#include "paste_context.h"
 #include "pianoroll_background.h"
 #include "pianoroll.h"
 #include "pianoroll_midi_view.h"
@@ -1710,8 +1711,19 @@ Pianoroll::paste (float times, bool from_context_menu)
 void
 Pianoroll::keyboard_paste ()
 {
+	if (!view || !_region) {
+		return;
+	}
+
 	EC_LOCAL_TEMPO_SCOPE;
 
+	timepos_t where (get_preferred_edit_position (Editing::EDIT_IGNORE_NONE, false, false));
+	timepos_t absolute_where = _region->region_beats_to_absolute_time (where.beats());
+
+	PasteContext pc (0, 1, ItemCounts(), true);
+	begin_reversible_command (string_compose (_("paste %1"), X_("MIDI")));
+	view->paste (absolute_where, get_cut_buffer(), pc);
+	commit_reversible_command ();
 }
 
 /** Cut, copy or clear selected regions, automation points or a time range.
