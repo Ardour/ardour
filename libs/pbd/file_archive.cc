@@ -71,11 +71,11 @@ get_url (void* arg)
 
 	/* get size */
 	if (r->mp.query_length) {
-		double content_length = 0;
+		curl_off_t content_length = 0;
 		curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
 		curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
 		curl_easy_perform (curl);
-		if (CURLE_OK == curl_easy_getinfo (curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &content_length) && content_length > 0) {
+		if (CURLE_OK == curl_easy_getinfo (curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &content_length) && content_length > 0) {
 			r->mp.length = content_length;
 		}
 	}

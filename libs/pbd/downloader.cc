@@ -151,8 +151,8 @@ Downloader::download ()
 		CURLcode res = curl_easy_perform (curl);
 
 		if (res == CURLE_OK) {
-			double dsize;
-			curl_easy_getinfo (curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &dsize);
+			curl_off_t dsize;
+			curl_easy_getinfo (curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &dsize);
 			_download_size = dsize;
 		}
 
