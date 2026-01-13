@@ -405,3 +405,25 @@ index 47f28d2a50..2ef0aee066 100644
  {
      fluid_tuning_t *tuning;
      fluid_real_t x, pitch;
+diff --git a/libs/fluidsynth/src/fluid_synth.c b/libs/fluidsynth/src/fluid_synth.c
+index 27e7022c5b..fcd4d72645 100644
+--- a/libs/fluidsynth/src/fluid_synth.c
++++ b/libs/fluidsynth/src/fluid_synth.c
+@@ -223,7 +223,7 @@ void fluid_synth_settings(fluid_settings_t *settings)
+     fluid_settings_register_int(settings, "synth.audio-groups", 1, 1, 128, 0);
+     fluid_settings_register_int(settings, "synth.effects-channels", 2, 2, 2, 0);
+     fluid_settings_register_int(settings, "synth.effects-groups", 1, 1, 128, 0);
+-    fluid_settings_register_num(settings, "synth.sample-rate", 44100.0f, 8000.0f, 96000.0f, 0);
++    fluid_settings_register_num(settings, "synth.sample-rate", 44100.0f, 8000.0f, 192000.0f, 0);
+     fluid_settings_register_int(settings, "synth.device-id", 0, 0, 126, 0);
+ #ifdef ENABLE_MIXER_THREADS
+     fluid_settings_register_int(settings, "synth.cpu-cores", 1, 1, 256, 0);
+@@ -3321,7 +3321,7 @@ static void
+ fluid_synth_set_sample_rate_LOCAL(fluid_synth_t *synth, float sample_rate)
+ {
+     int i;
+-    fluid_clip(sample_rate, 8000.0f, 96000.0f);
++    fluid_clip(sample_rate, 8000.0f, 192000.0f);
+     synth->sample_rate = sample_rate;
+ 
+     synth->min_note_length_ticks = fluid_synth_get_min_note_length_LOCAL(synth);

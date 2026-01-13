@@ -416,6 +416,12 @@ instantiate (const LV2_Descriptor*     descriptor,
 		return NULL;
 	}
 
+	if (rate < 8000 || rate > 192000) {
+		lv2_log_error (&self->logger, "a-fluidsynth.lv2: Sample-rate is out of bounds. Valid range is 8kHz - 192kHz.\n");
+		free (self);
+		return NULL;
+	}
+
 	if (!self->schedule) {
 		lv2_log_error (&self->logger, "a-fluidsynth.lv2: Host does not support worker:schedule\n");
 		free (self);
