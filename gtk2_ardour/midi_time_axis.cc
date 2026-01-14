@@ -126,7 +126,6 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanva
 	, _piano_roll_header(nullptr)
 	, _note_mode_item(0)
 	, _percussion_mode_item(nullptr)
-	, _color_mode(MeterColors)
 	, _meter_color_mode_item(nullptr)
 	, _channel_color_mode_item(nullptr)
 	, _track_color_mode_item(0)
@@ -290,13 +289,9 @@ MidiTimeAxisView::set_route (std::shared_ptr<Route> rt)
 
 	const string color_mode = gui_property ("color-mode");
 	if (!color_mode.empty()) {
-		_color_mode = ColorMode (string_2_enum(color_mode, _color_mode));
-		if (_channel_selector && _color_mode == ChannelColors) {
-			_channel_selector->set_channel_colors(NoteBase::midi_channel_colors);
-		}
+		ColorMode cm;
+		set_color_mode (ColorMode (string_2_enum(color_mode, cm)), true, false);
 	}
-
-	set_color_mode (_color_mode, true, false);
 
 	const string note_mode = gui_property ("note-mode");
 	if (!note_mode.empty()) {
@@ -659,7 +654,7 @@ MidiTimeAxisView::custom_device_mode_changed(const std::string& mode)
 }
 
 MidiStreamView*
-MidiTimeAxisView::midi_view()
+MidiTimeAxisView::midi_view() const
 {
 	return dynamic_cast<MidiStreamView*>(_view);
 }
@@ -766,10 +761,16 @@ MidiTimeAxisView::toggle_restore_pgm_on_load ()
 void
 MidiTimeAxisView::toggle_channel_selector ()
 {
+	if (!midi_view()) {
+		return;
+	}
+
+	ColorMode cm = midi_view()->color_mode();
+
 	if (!_channel_selector) {
 		_channel_selector = new MidiChannelSelectorWindow (midi_track());
 
-		if (_color_mode == ChannelColors) {
+		if (cm == ChannelColors) {
 			_channel_selector->set_channel_colors(NoteBase::midi_channel_colors);
 		} else {
 			_channel_selector->set_default_channel_color ();
@@ -1128,27 +1129,30 @@ MidiTimeAxisView::build_color_mode_menu()
 	MenuList& items = mode_menu->items();
 	mode_menu->set_name ("ArdourContextMenu");
 
+	assert (midi_view());
+	ColorMode cm = midi_view()->color_mode ();
+
 	RadioMenuItem::Group mode_group;
 	items.push_back (
 		RadioMenuElem (mode_group, _("Meter Colors"),
 		               sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_color_mode),
 		                           MeterColors, false, true, true)));
 	_meter_color_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
-	_meter_color_mode_item->set_active(_color_mode == MeterColors);
+	_meter_color_mode_item->set_active(cm == MeterColors);
 
 	items.push_back (
 		RadioMenuElem (mode_group, _("Channel Colors"),
 		               sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_color_mode),
 		                           ChannelColors, false, true, true)));
 	_channel_color_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
-	_channel_color_mode_item->set_active(_color_mode == ChannelColors);
+	_channel_color_mode_item->set_active(cm == ChannelColors);
 
 	items.push_back (
 		RadioMenuElem (mode_group, _("Track Color"),
 		               sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_color_mode),
 		                           TrackColor, false, true, true)));
 	_channel_color_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
-	_channel_color_mode_item->set_active(_color_mode == TrackColor);
+	_channel_color_mode_item->set_active(cm == TrackColor);
 
 	return mode_menu;
 }
@@ -1179,21 +1183,23 @@ MidiTimeAxisView::set_color_mode (ColorMode mode, bool force, bool redisplay, bo
 	if (apply_to_selection) {
 		_editor.get_selection().tracks.foreach_midi_time_axis (
 			std::bind (&MidiTimeAxisView::set_color_mode, _1, mode, force, redisplay, false));
-	} else {
-		if (_color_mode == mode && !force) {
+
+	} else if (midi_view()) {
+
+		if (color_mode() == mode && !force) {
 			return;
 		}
 
 		if (_channel_selector) {
 			if (mode == ChannelColors) {
-				_channel_selector->set_channel_colors(NoteBase::midi_channel_colors);
+				_channel_selector->set_channel_colors (NoteBase::midi_channel_colors);
 			} else {
 				_channel_selector->set_default_channel_color();
 			}
 		}
 
-		_color_mode = mode;
-		set_gui_property ("color-mode", enum_2_string(_color_mode));
+		midi_view()->set_color_mode (mode);
+		set_gui_property ("color-mode", enum_2_string(color_mode()));
 		if (redisplay) {
 			_view->redisplay_track();
 		}
@@ -1817,4 +1823,14 @@ MidiTimeAxisView::create_velocity_automation_child (Evoral::Parameter const &, b
 	}
 
 	add_automation_child (Evoral::Parameter(MidiVelocityAutomation), velocity_track, show);
+}
+
+ARDOUR::ColorMode
+MidiTimeAxisView::color_mode() const
+{
+	if (midi_view()) {
+		return midi_view()->color_mode();
+	}
+
+	return ARDOUR::TrackColor;
 }
