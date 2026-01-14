@@ -2072,7 +2072,7 @@ class MidiPortOptions : public OptionEditorMiniPage, public sigc::trackable
 
 			input_scroller.add (midi_input_view);
 			input_scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
-			input_scroller.set_size_request (-1, 180);
+			input_scroller.set_size_request (-1, 300);
 			input_scroller.show ();
 
 			int n = table.property_n_rows();
@@ -2083,7 +2083,7 @@ class MidiPortOptions : public OptionEditorMiniPage, public sigc::trackable
 
 			output_scroller.add (midi_output_view);
 			output_scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
-			output_scroller.set_size_request (-1, 180);
+			output_scroller.set_size_request (-1, 300);
 			output_scroller.show ();
 
 			n = table.property_n_rows();
