@@ -113,7 +113,7 @@ AutomationStreamView::add_region_view_internal (std::shared_ptr<Region> region, 
 	region_view = new AutomationRegionView (
 		_canvas_group, _automation_view, region,
 		_automation_view.parameter (), list,
-		_samples_per_pixel, region_color
+		_samples_per_pixel, _region_color
 		);
 
 	region_view->init (false);

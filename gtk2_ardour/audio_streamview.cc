@@ -111,14 +111,14 @@ AudioStreamView::create_region_view (std::shared_ptr<Region> r, bool wait_for_wa
 	case Normal:
 		if (recording) {
 			region_view = new AudioRegionView (_region_group, _trackview, region,
-							   _samples_per_pixel, region_color, recording, TimeAxisViewItem::Visibility(
+							   _samples_per_pixel, _region_color, recording, TimeAxisViewItem::Visibility(
 								   TimeAxisViewItem::ShowFrame |
 								   TimeAxisViewItem::HideFrameRight |
 								   TimeAxisViewItem::HideFrameLeft |
 								   TimeAxisViewItem::HideFrameTB));
 		} else {
 			region_view = new AudioRegionView (_region_group, _trackview, region,
-					_samples_per_pixel, region_color);
+					_samples_per_pixel, _region_color);
 		}
 		break;
 

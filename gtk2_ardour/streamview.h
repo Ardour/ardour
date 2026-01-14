@@ -102,7 +102,6 @@ public:
 		StreamBaseColor
 	};
 
-	uint32_t get_region_color () const { return region_color; }
 	void     apply_color (uint32_t, ColorTarget t);
 	void     apply_color (Gdk::Color const &, ColorTarget t);
 
@@ -184,7 +183,6 @@ protected:
 	bool                    rec_updating;
 	bool                    rec_active;
 
-	uint32_t region_color;      ///< Contained region color
 	uint32_t stream_base_color; ///< Background color
 
 	PBD::ScopedConnectionList playlist_connections;
