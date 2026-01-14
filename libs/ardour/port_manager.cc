@@ -470,7 +470,9 @@ PortManager::get_physical_outputs (DataType type, std::vector<std::string>& s, M
 		return;
 	}
 	_backend->get_physical_outputs (type, s);
-	filter_midi_ports (s, include, exclude);
+	if (type == DataType::MIDI) {
+		filter_midi_ports (s, include, exclude);
+	}
 }
 
 void
@@ -482,7 +484,9 @@ PortManager::get_physical_inputs (DataType type, std::vector<std::string>& s, Mi
 	}
 
 	_backend->get_physical_inputs (type, s);
-	filter_midi_ports (s, include, exclude);
+	if (type == DataType::MIDI) {
+		filter_midi_ports (s, include, exclude);
+	}
 }
 
 ChanCount
@@ -1669,17 +1673,19 @@ PortManager::add_midi_port_flags (string const& port, MidiPortFlags flags)
 		}
 	}
 
-	if (emit) {
-		if (flags & MidiPortSelection) {
-			MidiSelectionPortsChanged (); /* EMIT SIGNAL */
-		}
-
-		if (flags != MidiPortSelection) {
-			MidiPortInfoChanged (); /* EMIT SIGNAL */
-		}
-
-		save_port_info ();
+	if (!emit) {
+		return;
 	}
+
+	if (flags & MidiPortSelection) {
+		MidiSelectionPortsChanged (); /* EMIT SIGNAL */
+	}
+
+	if (flags != MidiPortSelection) {
+		MidiPortInfoChanged (); /* EMIT SIGNAL */
+	}
+
+	save_port_info ();
 }
 
 void
@@ -1711,17 +1717,18 @@ PortManager::remove_midi_port_flags (string const& port, MidiPortFlags flags)
 		}
 	}
 
-	if (emit) {
-		if (flags & MidiPortSelection) {
-			MidiSelectionPortsChanged (); /* EMIT SIGNAL */
-		}
-
-		if (flags != MidiPortSelection) {
-			MidiPortInfoChanged (); /* EMIT SIGNAL */
-		}
-
-		save_port_info ();
+	if (!emit) {
+		return;
 	}
+	if (flags & MidiPortSelection) {
+		MidiSelectionPortsChanged (); /* EMIT SIGNAL */
+	}
+
+	if (flags != MidiPortSelection) {
+		MidiPortInfoChanged (); /* EMIT SIGNAL */
+	}
+
+	save_port_info ();
 }
 
 string
