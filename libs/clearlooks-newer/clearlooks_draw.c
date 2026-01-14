@@ -1595,8 +1595,14 @@ clearlooks_draw_scrollbar_trough (cairo_t *cr,
 
 	cairo_translate (cr, x, y);
 
+  double radius = MIN (widget->radius, MIN ((width - 4.0) / 2.0, (height - 4.0) / 2.0));
+
 	/* Draw fill */
-	cairo_rectangle (cr, 1, 0, width-2, height);
+	// cairo_rectangle (cr, 1, 0, width-2, height);
+  ge_cairo_rounded_rectangle (cr, 1, 0, width-2, height, radius, CR_CORNER_TOPLEFT |
+                                                                 CR_CORNER_TOPRIGHT |
+                                                                 CR_CORNER_BOTTOMLEFT |
+                                                                 CR_CORNER_BOTTOMRIGHT);
 	ge_cairo_set_color (cr, bg);
 	cairo_fill (cr);
 }
