@@ -630,6 +630,7 @@ ColorThemeManager::on_color_theme_changed ()
 		if (row) {
 			string new_theme = row[color_theme_columns.path];
 			UIConfiguration::instance().set_color_file (new_theme);
+			// reset_canvas_colors();
 		}
 	}
 }

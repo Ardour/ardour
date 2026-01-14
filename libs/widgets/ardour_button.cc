@@ -565,7 +565,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 		const float triw2 = ceil(.577 * _diameter * .5); // 1/sqrt(3) Equilateral triangle
 		//menu arrow
 		cairo_set_source_rgba (cr, 1, 1, 1, 0.4);
-		cairo_move_to(cr, get_width() - triw2 - 3. , rint((get_height() + trih) * .5));
+		cairo_move_to(cr, get_width() - triw2 - 5, rint((get_height() + trih) * .5));
 		cairo_rel_line_to(cr, -triw2, -trih);
 		cairo_rel_line_to(cr, 2. * triw2, 0);
 		cairo_close_path(cr);
@@ -573,7 +573,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 		cairo_set_source_rgba (cr, 1, 1, 1, 0.4);
 		cairo_fill(cr);
 
-		cairo_move_to(cr, get_width() - triw2 - 3 , rint((get_height() + trih) * .5));
+		cairo_move_to(cr, get_width() - triw2 - 5, rint((get_height() + trih) * .5));
 		cairo_rel_line_to(cr, .5 - triw2, .5 - trih);
 		cairo_rel_line_to(cr, 2. * triw2 - 1, 0);
 		cairo_close_path(cr);
