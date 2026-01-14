@@ -1731,7 +1731,7 @@ clearlooks_draw_scrollbar_slider (cairo_t *cr,
 	ge_mix_color (border, &fill, scrollbar->has_color? 0.4 : 0.2, &composite);
 	ge_cairo_set_color (cr, &composite);
 
-	ge_cairo_rounded_rectangle (cr, 0.5, 0.5, width-1, height-1, radius, widget->corners);
+  ge_cairo_rounded_rectangle (cr, 0.5, 1.5, width-1, height-3, radius, widget->corners);
 	cairo_stroke (cr);
 }
 
