@@ -51,6 +51,7 @@ public:
 	ArdourWidgets::ArdourButton& rec_button () { return _rec_button; }
 	ArdourWidgets::ArdourButton& midi_panic_button () { return _midi_panic_button; }
 	ArdourWidgets::ArdourButton& click_button () { return _click_button; }
+	ArdourWidgets::ArdourButton& auto_return_button() { return _auto_return_button; }
 
 protected:
 
@@ -73,6 +74,7 @@ protected:
 	ArdourWidgets::ArdourButton _rec_button;
 	ArdourWidgets::ArdourButton _midi_panic_button;
 	ArdourWidgets::ArdourButton _click_button;
+	ArdourWidgets::ArdourButton _auto_return_button;
 
 private:
 	PBD::ScopedConnection config_connection;

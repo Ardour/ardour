@@ -67,6 +67,9 @@ TransportControlUI::map_actions ()
 	act = ActionManager::get_action (X_("MIDI"), X_("panic"));
 	_midi_panic_button.set_related_action (act);
 
+	act = ActionManager::get_action (X_("Transport"), X_("ToggleAutoReturn"));
+	_auto_return_button.set_related_action (act);
+
 	/* tooltips depend on actions */
 	set_tooltip (_roll_button, _("Play from playhead"));
 	set_tooltip (_stop_button, _("Stop playback"));
@@ -76,6 +79,7 @@ TransportControlUI::map_actions ()
 	set_tooltip (_goto_end_button, _("Go to end of session"));
 	set_tooltip (_auto_loop_button, _("Play loop range"));
 	set_tooltip (_midi_panic_button, _("MIDI Panic\nSend note off and reset controller messages on all MIDI channels"));
+	set_tooltip (_auto_return_button, _("Auto Return: When enabled, playhead returns to start position after transport stop"));
 
 	/* set _click_button tooltip */
 	parameter_changed ("click-gain");
@@ -98,6 +102,7 @@ TransportControlUI::setup (TransportControlProvider* ui)
 	_auto_loop_button.set_icon (ArdourIcon::TransportLoop);
 	_rec_button.set_icon (ArdourIcon::RecButton);
 	_midi_panic_button.set_icon (ArdourIcon::TransportPanic);
+	_auto_return_button.set_icon (ArdourIcon::TransportAutoReturn);
 
 	/* transport control size-group */
 
@@ -112,6 +117,7 @@ TransportControlUI::setup (TransportControlProvider* ui)
 		transport_button_size_group->add_widget (_stop_button);
 		transport_button_size_group->add_widget (_midi_panic_button);
 		transport_button_size_group->add_widget (_click_button);
+		transport_button_size_group->add_widget (_auto_return_button);
 	}
 
 #define PX_SCALE(px) std::max((float)px, rintf((float)px * UIConfiguration::instance().get_ui_scale()))
@@ -124,6 +130,7 @@ TransportControlUI::setup (TransportControlProvider* ui)
 	if (!ARDOUR::Profile->get_mixbus()) {
 		pack_start (_midi_panic_button, true, true, 0);
 		pack_start (_click_button, true, true, 0);
+		pack_start (_auto_return_button, true, true, 0);
 		pack_start (_goto_start_button, true, true);
 		pack_start (_goto_end_button, true, true);
 		pack_start (_auto_loop_button, true, true);
@@ -142,6 +149,7 @@ TransportControlUI::setup (TransportControlProvider* ui)
 	_rec_button.set_name ("transport recenable button");
 	_midi_panic_button.set_name ("transport button"); // XXX ???
 	_click_button.set_name ("transport button");
+	_auto_return_button.set_name ("transport button");
 
 	_roll_button.set_controllable (ui->roll_controllable);
 	_stop_button.set_controllable (ui->stop_controllable);
