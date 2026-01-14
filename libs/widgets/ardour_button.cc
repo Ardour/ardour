@@ -583,9 +583,9 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	}
 
 	if (_elements & MetaMenu) {
-		cairo_move_to(cr, get_width() - floor (_diameter) - 5.5 , 1);
-		cairo_line_to(cr, get_width() - floor (_diameter) - 5.5 , get_height () -1);
-		cairo_set_source_rgba (cr, 0, 0, 0, 0.8);
+		cairo_move_to(cr, get_width() - floor (_diameter) - 6.5, 1);
+		cairo_line_to(cr, get_width() - floor (_diameter) - 6.5, get_height () -1);
+		Gtkmm2ext::set_source_rgba (cr, outline_color);
 		cairo_set_line_width(cr, 1);
 		cairo_stroke(cr);
 	}
