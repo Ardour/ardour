@@ -511,6 +511,8 @@ Session::Session (AudioEngine &eng,
 
 	bool was_dirty = dirty();
 
+	AudioEngine::instance()->MidiPortInfoChanged.connect_same_thread (*this, std::bind (&Session::setup_bundles, this));
+
 	PresentationInfo::Change.connect_same_thread (*this, std::bind (&Session::notify_presentation_info_change, this, _1));
 
 	Config->ParameterChanged.connect_same_thread (*this, std::bind (&Session::config_changed, this, _1, false));
