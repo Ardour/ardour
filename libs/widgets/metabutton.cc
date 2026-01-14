@@ -257,7 +257,7 @@ MetaButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*
 		if (_hover_dropdown) {
 			Gtkmm2ext::rounded_right_half_rectangle (cr, get_width () - _diameter - 6, 1, _diameter + 5, get_height () - 2, corner_radius);
 		} else {
-			Gtkmm2ext::rounded_left_half_rectangle (cr, 1, 1, get_width () - _diameter - 7, get_height () - 2, corner_radius);
+			Gtkmm2ext::rounded_left_half_rectangle (cr, 1, 1, get_width () - _diameter - 8, get_height () - 2, corner_radius);
 		}
 		cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.2);
 		cairo_fill (cr);
