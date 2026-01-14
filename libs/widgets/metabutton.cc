@@ -251,13 +251,14 @@ MetaButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*
 		ArdourButton::render (ctx, rect);
 	}
 	if (_hovering && UIConfigurationBase::instance ().get_widget_prelight ()) {
+		const float scale = UIConfigurationBase::instance().get_ui_scale();
 		const bool  boxy          = (_tweaks & ForceBoxy) | boxy_buttons ();
-		const float corner_radius = boxy ? 0 : std::max (2.f, _corner_radius * UIConfigurationBase::instance ().get_ui_scale ());
+		const float corner_radius = boxy ? 0 : std::max (2.f, _corner_radius * scale);
 		cairo_t*    cr            = ctx->cobj ();
 		if (_hover_dropdown) {
-			Gtkmm2ext::rounded_right_half_rectangle (cr, get_width () - _diameter - 6, 1, _diameter + 5, get_height () - 2, corner_radius);
+			Gtkmm2ext::rounded_right_half_rectangle (cr, get_width () - _diameter - 6 * scale, 1, _diameter + 5 * scale, get_height () - 2, corner_radius);
 		} else {
-			Gtkmm2ext::rounded_left_half_rectangle (cr, 1, 1, get_width () - _diameter - 8, get_height () - 2, corner_radius);
+			Gtkmm2ext::rounded_left_half_rectangle (cr, 1, 1, get_width () - _diameter - 8 * scale, get_height () - 2 * scale, corner_radius);
 		}
 		cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.2);
 		cairo_fill (cr);
