@@ -549,7 +549,7 @@
     <Modifier name="silence" modifier="= alpha:0.4784"/>
     <Modifier name="stereo panner inverted" modifier="= alpha:0.7882"/>
     <Modifier name="stereo panner inverted bg" modifier="= alpha:0.7529"/>
-    <Modifier name="summary track alpha" modifier="= alpha:0.5"/>
+    <Modifier name="summary track alpha" modifier="= alpha:0.65"/>
     <Modifier name="summary view rect alpha" modifier="= alpha:0.15"/>
     <Modifier name="time axis view item base" modifier="= alpha:0.7"/>
     <Modifier name="transparent region base" modifier="= alpha:0.6"/>
