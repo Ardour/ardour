@@ -64,6 +64,8 @@ namespace ArdourWidgets { namespace ArdourIcon {
 		ScrollRight,
 		NudgeLeft,
 		NudgeRight,
+		ArrowLeft,
+		ArrowRight,
 		DinMidi,
 		PsetAdd,
 		PsetSave,
