@@ -287,7 +287,7 @@ EditorSummary::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle
 	cairo_fill (cr);
 
 	/* horiz zoom */
-	cairo_rectangle (cr, _view_rectangle_x.first, 0, width, get_height ());
+	cairo_rectangle (cr, _view_rectangle_x.first + 0.5, 0.5, width - 1, get_height () - 1);
 	cairo_set_line_width (cr, 1);
 	cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(_viewrect_color), UINT_RGBA_G_FLT(_viewrect_color), UINT_RGBA_B_FLT(_viewrect_color), 0.5);
 	cairo_stroke (cr);
