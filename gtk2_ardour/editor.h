@@ -1008,8 +1008,8 @@ private:
 		DOWN
 	};
 
-	bool scroll_press (Direction);
-	void scroll_release ();
+	bool scroll_press (GdkEventButton* ev, Direction);
+	bool scroll_release (GdkEventButton* ev);
 	sigc::connection _scroll_connection;
 	int _scroll_callbacks;
 
