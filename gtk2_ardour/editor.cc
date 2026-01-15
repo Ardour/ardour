@@ -587,17 +587,22 @@ Editor::Editor ()
 	VBox* summary_arrows_right = manage (new VBox);
 	summary_arrows_right->pack_start (*summary_arrow_right);
 
-	Gtk::Frame* summary_frame = manage (new Gtk::Frame);
-	summary_frame->set_shadow_type (Gtk::SHADOW_ETCHED_IN);
+	Gtk::EventBox* summary_left_spacer = manage (new Gtk::EventBox); // extra space before the left arrow
+	summary_left_spacer->set_size_request(4, -1);
+	summary_left_spacer->show();
+	Gtk::EventBox* summary_bottom_spacer = manage (new Gtk::EventBox); // extra space after the summary
+	summary_bottom_spacer->set_size_request(-1, 3);
+	summary_bottom_spacer->show();
 
-	summary_frame->add (*_summary);
-	summary_frame->show ();
-
+	_summary_hbox.pack_start (*summary_left_spacer, false, false);
 	_summary_hbox.pack_start (*summary_arrows_left, false, false);
-	_summary_hbox.pack_start (*summary_frame, true, true);
+	_summary_hbox.pack_start (*_summary, true, true);
 	_summary_hbox.pack_start (*summary_arrows_right, false, false);
 
-	editor_summary_pane.add (_summary_hbox);
+	_summary_vbox.pack_start (_summary_hbox, true, true);
+	_summary_vbox.pack_start (*summary_bottom_spacer, false, false);
+
+	editor_summary_pane.add (_summary_vbox);
 
 	HBox* tabbox = manage (new HBox (true));
 	tabbox->set_spacing (3);

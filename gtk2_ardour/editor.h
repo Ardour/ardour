@@ -2134,6 +2134,7 @@ private:
 	bool _pending_initial_locate;
 
 	Gtk::HBox _summary_hbox;
+	Gtk::VBox _summary_vbox;
 	EditorSummary* _summary;
 
 	void region_view_added (RegionView*);
