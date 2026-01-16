@@ -1,0 +1,184 @@
+# Copyright (C) YEAR "Paul Davis"
+# This file is distributed under the same license as the ardour package.
+#
+# Daniel Nylander <po@danielnylander.se>, 2026.
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-12-26 15:25+0100\n"
+"PO-Revision-Date: 2026-01-16 21:20+0100\n"
+"Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
+"Language-Team: sv\n"
+"Language: sv\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.8\n"
+
+#: actions.cc:219
+msgid "Unknown action name: %1/%2"
+msgstr "Okänt åtgärdsnamn: %1/%2"
+
+#: action_model.cc:56 action_model.cc:171
+msgid "Disabled"
+msgstr "Inaktiverad"
+
+#: action_model.cc:83
+msgid "Main_menu"
+msgstr "Huvudmeny"
+
+#: action_model.cc:85
+msgid "JACK"
+msgstr "JACK"
+
+#: action_model.cc:87
+msgid "redirectmenu"
+msgstr "omdirigeringsmeny"
+
+#: action_model.cc:89
+msgid "Editor_menus"
+msgstr "Redigerarmenyer"
+
+#: action_model.cc:91
+msgid "RegionList"
+msgstr "Regionlista"
+
+#: action_model.cc:93
+msgid "ProcessorMenu"
+msgstr "ProcessorMeny"
+
+#: bindings.cc:514
+msgid "Escape"
+msgstr "Escape"
+
+#: bindings.cc:937 bindings.cc:939
+msgid "Window"
+msgstr "Fönster"
+
+#: bindings.cc:937
+msgid " (Categorized)"
+msgstr " (Kategoriserad)"
+
+#: bindings.cc:939
+msgid " (Alphabetical)"
+msgstr " (Alfabetisk)"
+
+#: bindings.cc:955
+msgid "Uncategorized"
+msgstr "Okategoriserad"
+
+#: cursors.cc:81
+msgid "cursor hotspots info file %1 has an error on line %2"
+msgstr "markörens hotspots info-fil %1 har ett fel på rad %2"
+
+#: emscale.cc:52
+msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+msgstr "ABCDEFGHIJLKMNOPQRSTUVWXYZÅÄÖabcdefghijklmnopqrstuvwxyzåäö0123456789"
+
+#: gtk_ui.cc:135
+msgid "Log"
+msgstr "Logg"
+
+#: gtk_ui.cc:432
+msgid ""
+"\n"
+"\n"
+"Shortcut: "
+msgstr ""
+"\n"
+"\n"
+"Genväg: "
+
+#: gtk_ui.cc:724
+msgid "Press To Exit"
+msgstr "Tryck för att avsluta"
+
+#: gtk_ui.cc:761
+msgid "I'm sorry %1, I can't do that"
+msgstr "Jag är ledsen %1, jag kan inte göra det"
+
+#: keyboard.cc:80
+msgid "Command"
+msgstr "Kommando"
+
+#: keyboard.cc:85 keyboard.cc:146
+msgid "Control"
+msgstr "Kontroll"
+
+#: keyboard.cc:90 keyboard.cc:120 keyboard.cc:156 keyboard.cc:186
+msgid "Key|Shift"
+msgstr "Skift"
+
+#: keyboard.cc:95
+msgid "Option"
+msgstr "Alternativ"
+
+#: keyboard.cc:100
+msgid "Middle Click (or Ctrl+Alt+Click)"
+msgstr "Mittenklick (eller Ctrl+Alt+klick)"
+
+#: keyboard.cc:105
+msgid "Cmd+Click (or Middle-Click)"
+msgstr "Cmd+klicka (eller mittenklicka)"
+
+#: keyboard.cc:110
+msgid "Cmd"
+msgstr "Cmd"
+
+#: keyboard.cc:115 keyboard.cc:176
+msgid "Ctrl"
+msgstr "Ctrl"
+
+#: keyboard.cc:125
+msgid "Opt"
+msgstr "Opt"
+
+#: keyboard.cc:151 keyboard.cc:181
+msgid "Alt"
+msgstr "Alt"
+
+#: keyboard.cc:161
+msgid "Windows"
+msgstr "Windows"
+
+#: keyboard.cc:166 keyboard.cc:171
+msgid "Middle-Click"
+msgstr "Mittenklick"
+
+#: keyboard.cc:191
+msgid "Win"
+msgstr "Win"
+
+#: keyboard.cc:204
+msgid "CapsLock"
+msgstr "CapsLock"
+
+#: keyboard.cc:210
+msgid "Lock"
+msgstr "Lås"
+
+#: keyboard.cc:301 keyboard.cc:785
+msgid "Unknown"
+msgstr "Okänd"
+
+#: keyboard.cc:795
+msgid "key bindings file not found at \"%2\" or contains errors."
+msgstr "tangentbindningsfilen hittades inte på \"%2\" eller innehåller fel."
+
+#: keyboard.cc:821
+msgid "Keyboard binding found without a name"
+msgstr "Tangentbindning hittad utan namn"
+
+#: keyboard.cc:853
+msgid "Cannot save key bindings to %1"
+msgstr "Det går inte att spara tangentbindningar till %1"
+
+#: keyboard.cc:868
+msgid "Cannot rename your own keybinding file (%1)"
+msgstr "Det går inte att byta namn på din egen tangentbindningsfil (%1)"
+
+#: textviewer.cc:32
+msgid "Close"
+msgstr "Stäng"

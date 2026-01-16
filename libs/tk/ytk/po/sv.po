@@ -1,15 +1,15 @@
 # Swedish messages for GTK+.
-# Copyright (C) 1999-2010 Free Software Foundation, Inc.
+# Copyright (C) 1999-2026 Free Software Foundation, Inc.
 # Tomas Ögren <stric@ing.umu.se>, 1999.
 # Christian Rose <menthos@menthos.com>, 2000, 2001, 2002, 2003, 2004, 2005.
-# Daniel Nylander <po@danielnylander.se>, 2006, 2007, 2008, 2009, 2010.
+# Daniel Nylander <po@danielnylander.se>, 2006, 2007, 2008, 2009, 2010, 2026.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: gtk+\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-11-19 21:59+0100\n"
-"PO-Revision-Date: 2010-09-06 15:25+0100\n"
+"PO-Revision-Date: 2026-01-16 20:38+0100\n"
 "Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -17,6 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.8\n"
 
 #: gtkaboutdialog.c:245
 msgid "Could not show link"
@@ -290,18 +291,20 @@ msgstr ""
 
 #: gtkfilechooserdefault.c:1016
 msgid "You need to choose a valid filename."
-msgstr ""
+msgstr "Du måste välja ett giltigt filnamn."
 
 #: gtkfilechooserdefault.c:1019
 #, c-format
 msgid "Cannot create a file under %s as it is not a folder"
-msgstr ""
+msgstr "Det går inte att skapa en fil under %s eftersom det inte är en mapp"
 
 #: gtkfilechooserdefault.c:1031
 msgid ""
 "You may only select folders.  The item that you selected is not a folder; "
 "try using a different item."
 msgstr ""
+"Du kan endast välja mappar.  Det objekt du har valt är inte en mapp. Försök "
+"med ett annat objekt."
 
 #: gtkfilechooserdefault.c:1041
 msgid "Invalid file name"
@@ -417,11 +420,11 @@ msgstr "Ange ett filnamn"
 
 #: gtkfilechooserdefault.c:4757 gtkfilechooserdefault.c:4768
 msgid "Please select a folder below"
-msgstr ""
+msgstr "Välj en mapp nedan"
 
 #: gtkfilechooserdefault.c:4763
 msgid "Please type a file name"
-msgstr ""
+msgstr "Ange ett filnamn"
 
 #: gtkfilechooserdefault.c:4834
 msgid "Create Fo_lder"
