@@ -824,6 +824,7 @@ struct SlotArmInfo {
 	Temporal::Beats end_beats;
 	samplepos_t end_samples;
 	samplecnt_t captured;
+	MidiNoteTracker tracker;
 	RTMidiBufferBeats* midi_buf;
 	AudioTrigger::AudioData audio_buf;
 	RubberBand::RubberBandStretcher* stretcher;

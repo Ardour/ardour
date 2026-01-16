@@ -3808,6 +3808,12 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 	pframes_t offset = 0;
 	bool reached_end = false;
 
+	if (bufs.count().n_midi() && _record_state != Recording) {
+		/* Keep track of notes that are turned on before we actually start recording */
+		const MidiBuffer& buf = bufs.get_midi (0);
+		ai->tracker.track (buf.begin(), buf.end());
+	}
+
 	if (!ai->slot->armed()) {
 		/* since _arm_info is set, we have been capturing for a slot,
 		   but now the slot is no longer armed.
@@ -3852,11 +3858,14 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 		return;
 	}
 
+	bool did_start_recording = false;
+
 	if (ai->start_samples >= start_sample && ai->start_samples < end_sample) {
 		/* Let's get going */
 		offset = ai->start_samples - start_sample;
 		nframes -= offset;
 		_record_state = Recording;
+		did_start_recording = true;
 		RecEnableChanged(); /* EMIT SIGNAL */
 		// std::cerr << "Hit start @ " << ai->start_samples << " within " << start_sample << " ... " << end_sample << " offset will be " << offset << " nf " << nframes << std::endl;
 	}
@@ -3896,6 +3905,12 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 		MidiChannelFilter* filter = mt ? &mt->capture_filter() : 0;
 		TempoMap::SharedPtr tmap (TempoMap::use());
 
+		if (did_start_recording) {
+			/* Catch any notes that are already on as we start recording */
+			ai->tracker.flush_notes<Beats> (*ai->midi_buf, Beats(), false);
+			ai->tracker.flush_notes<samplepos_t> (_gui_feed_fifo, 0, true);
+		}
+
 		for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
 			Evoral::Event<MidiBuffer::TimeType> ev (*i, false);
 			if (ev.time() > nframes) {
@@ -3915,15 +3930,18 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 			}
 
 			if (!skip_event && (!filter || !filter->filter(ev.buffer(), ev.size()))) {
+
 				const samplepos_t event_time (start_sample + ev.time());
+				const Temporal::Beats event_beats (tmap->quarters_at_sample (event_time) - ai->start_beats);
+
 				if (!ai->end_samples || (event_time < ai->end_samples)) {
-					/* First write (to an * * RTMidiBufferBeats) uses beat time.
+					/* First write (to an RTMidiBufferBeats) uses beat time.
 					 * Second write (to a FIFO) uses sample time.
 					 *
 					 * Both are relative to where we
 					 * started capturing.
 					 */
-					ai->midi_buf->write (tmap->quarters_at_sample (event_time) - ai->start_beats,  ev.event_type(), ev.size(), ev.buffer());
+					ai->midi_buf->write (event_beats,  ev.event_type(), ev.size(), ev.buffer());
 					_gui_feed_fifo.write (event_time - ai->start_samples, Evoral::MIDI_EVENT, ev.size(), ev.buffer());
 				}
 			}
