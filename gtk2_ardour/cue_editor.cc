@@ -674,8 +674,6 @@ CueEditor::trigger_arm_change ()
 	} else {
 		maybe_set_count_in ();
 	}
-
-	rec_enable_change ();
 }
 
 void
