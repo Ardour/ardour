@@ -1227,9 +1227,9 @@ Editor::parameter_changed (std::string p)
 
 		bool const s = _session->config.get_show_summary ();
 		if (s) {
-			_summary_hbox.show ();
+			_summary_vbox.show ();
 		} else {
-			_summary_hbox.hide ();
+			_summary_vbox.hide ();
 		}
 
 		Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("ToggleSummary"));
