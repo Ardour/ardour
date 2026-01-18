@@ -30,6 +30,7 @@
 #include "canvas/canvas.h"
 
 #include "gtkmm2ext/bindings.h"
+#include "gtkmm2ext/utils.h"
 
 #include "ardour_ui.h"
 #include "cue_editor.h"
@@ -512,6 +513,7 @@ CueEditor::build_upper_toolbar ()
 		length_selector.add_menu_elem (MenuElem (label, sigc::bind (sigc::mem_fun (*this, &CueEditor::set_recording_length), Temporal::BBT_Offset (n, 0, 0))));
 	}
 	length_selector.set_active (_("Until Stopped"));
+	Gtkmm2ext::set_size_request_to_display_given_text (length_selector, _("Until Stopped"), 30, 2);
 
 	ArdourVSpacer* rec_spacer = manage (new ArdourVSpacer (0));
 	rec_box.set_spacing (2);
