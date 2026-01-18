@@ -674,6 +674,32 @@ CueEditor::trigger_arm_change ()
 	} else {
 		maybe_set_count_in ();
 	}
+
+	setup_record_blink ();
+}
+
+void
+CueEditor::setup_record_blink ()
+{
+	rec_blink_connection.disconnect ();
+
+	switch (ref.box()->record_enabled()) {
+	case Recording:
+		rec_enable_button.set_active_state (Gtkmm2ext::ExplicitActive);
+		rec_blink_connection.disconnect ();
+		break;
+	case Enabled:
+		if (!UIConfiguration::instance().get_no_strobe() && ref.trigger()->armed()) {
+			rec_blink_connection = Timers::blink_connect (sigc::mem_fun (*this, &CueEditor::blink_rec_enable));
+		} else {
+			rec_enable_button.set_active_state (Gtkmm2ext::Off);
+		}
+		break;
+	case Disabled:
+		rec_enable_button.set_active_state (Gtkmm2ext::Off);
+		break;
+	}
+
 }
 
 void
@@ -685,28 +711,21 @@ CueEditor::rec_enable_change ()
 		return;
 	}
 
-	rec_blink_connection.disconnect ();
 	count_in_connection.disconnect ();
+	setup_record_blink ();
 
 	switch (ref.box()->record_enabled()) {
 	case Recording:
-		rec_enable_button.set_active_state (Gtkmm2ext::ExplicitActive);
-		rec_blink_connection.disconnect ();
 		begin_write ();
 		break;
 	case Enabled:
-		if (!UIConfiguration::instance().get_no_strobe() && ref.trigger()->armed()) {
-			rec_blink_connection = Timers::blink_connect (sigc::mem_fun (*this, &CueEditor::blink_rec_enable));
-		} else {
-			rec_enable_button.set_active_state (Gtkmm2ext::Off);
-		}
 		maybe_set_count_in ();
 		break;
 	case Disabled:
-		rec_enable_button.set_active_state (Gtkmm2ext::Off);
 		hide_count_in ();
 		break;
 	}
+
 }
 
 void
@@ -1301,6 +1320,8 @@ CueEditor::set_trigger (TriggerReference& tref)
 		set_region (nullptr);
 		_update_connection = Timers::super_rapid_connect (sigc::mem_fun (*this, &CueEditor::maybe_update));
 	}
+
+	setup_record_blink ();
 }
 
 void

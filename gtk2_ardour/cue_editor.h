@@ -218,6 +218,7 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner
 	bool rec_button_press (GdkEventButton*);
 	virtual void rec_enable_change ();
 	void blink_rec_enable (bool);
+	void setup_record_blink ();
 	sigc::connection rec_blink_connection;
 
 	sigc::connection _update_connection;
