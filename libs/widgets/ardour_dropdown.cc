@@ -61,7 +61,8 @@ ArdourDropdown::~ArdourDropdown ()
 }
 
 void
-ArdourDropdown::menu_size_request(Requisition *req) {
+ArdourDropdown::menu_size_request(Requisition *req)
+{
 	req->width = max(req->width, get_allocation().get_width());
 }
 
