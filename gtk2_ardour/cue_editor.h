@@ -209,7 +209,6 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner
 	bool loop_button_press (GdkEventButton*);
 
 	ArdourWidgets::ArdourDropdown length_selector;
-	Temporal::BBT_Offset rec_length;
 
 	bool zoom_in_allocate;
 
