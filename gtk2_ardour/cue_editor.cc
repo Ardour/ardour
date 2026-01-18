@@ -1487,7 +1487,6 @@ CueEditor::count_in (Temporal::timepos_t audible, unsigned int clock_interval_ms
 	TempoMapPoints grid_points;
 	TempoMap::SharedPtr tmap (TempoMap::use());
 	Temporal::Beats audible_beats = tmap->quarters_at_sample (audible.samples());
-	samplepos_t audible_samples = audible.samples ();
 
 	if (audible_beats >= count_in_to) {
 		/* passed the count_in_to time */
