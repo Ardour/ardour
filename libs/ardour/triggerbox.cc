@@ -3758,7 +3758,18 @@ TriggerBox::arm_from_another_thread (Trigger& slot, samplepos_t now, uint32_t ch
 	ai->start_samples = t_samples;
 	ai->start_beats = t_beats;
 
-	if (!duration) {
+	if (duration == Temporal::BBT_Offset()) {
+
+		/* not given, use slot's capture_duration */
+
+		if (slot.capture_duration() != Temporal::BBT_Offset()) {
+			timepos_t sb (ai->start_beats);
+			sb += slot.capture_duration();
+			ai->end_beats = sb.beats ();
+			ai->end_samples = timepos_t (ai->end_beats).samples();
+		}
+	} else {
+		/* explicitly given in this call to arm() so use it */
 		timepos_t sb (ai->start_beats);
 		sb += duration;
 		ai->end_beats = sb.beats ();
