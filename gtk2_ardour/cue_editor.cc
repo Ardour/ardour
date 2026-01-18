@@ -642,7 +642,7 @@ CueEditor::rec_button_press (GdkEventButton* ev)
 	if (trigger->armed()) {
 		trigger->disarm ();
 	} else {
-		trigger->arm (rec_length);
+		trigger->arm ();
 	}
 
 	return true;
