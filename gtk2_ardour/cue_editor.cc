@@ -505,8 +505,8 @@ CueEditor::build_upper_toolbar ()
 	std::string noun;
 
 	length_selector.add_menu_elem (MenuElem (_("Until Stopped"), sigc::bind (sigc::mem_fun (*this, &CueEditor::set_recording_length), Temporal::BBT_Offset ())));
-	std::vector<int> b ({ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 16, 20, 24, 32 });
-	for (auto & n : b) {
+	const std::vector<int> b ({ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 16, 20, 24, 32 });
+	for (auto const & n : b) {
 		noun = P_("Bar", "Bars", n);
 		label = string_compose (X_("%1 %2"), n, noun);
 		length_selector.add_menu_elem (MenuElem (label, sigc::bind (sigc::mem_fun (*this, &CueEditor::set_recording_length), Temporal::BBT_Offset (n, 0, 0))));
@@ -1316,6 +1316,21 @@ CueEditor::set_trigger (TriggerReference& tref)
 
 	trigger->PropertyChanged.connect (trigger_connections, invalidator (*this), std::bind (&CueEditor::trigger_prop_change, this, _1), gui_context());
 	trigger->ArmChanged.connect (trigger_connections, invalidator (*this), std::bind (&CueEditor::trigger_arm_change, this), gui_context());
+	BBT_Offset dur (trigger->capture_duration());
+	if (dur != Temporal::BBT_Offset()) {
+		const std::vector<int> b ({ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 16, 20, 24, 32 });
+		int n = 1;
+		for (auto const & bars : b) {
+			if (dur.bars == bars) {
+				length_selector.set_active (n);
+				break;
+			}
+			++n;
+		}
+		/* hmm, what do if not set ? */
+	} else {
+		length_selector.set_active (0); /* "until stopped" */
+	}
 
 	if (trigger) {
 		set_region (trigger->the_region());
