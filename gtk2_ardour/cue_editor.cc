@@ -666,13 +666,16 @@ CueEditor::trigger_arm_change ()
 	EC_LOCAL_TEMPO_SCOPE;
 
 	if (!ref.trigger()) {
+		play_button.set_sensitive (false);
 		return;
 	}
 
 	if (!ref.trigger()->armed()) {
 		end_write ();
+		play_button.set_sensitive (true);
 	} else {
 		maybe_set_count_in ();
+		play_button.set_sensitive (false);
 	}
 
 	setup_record_blink ();
@@ -1293,6 +1296,9 @@ CueEditor::set_trigger (TriggerReference& tref)
 	TriggerPtr trigger (ref.trigger());
 
 	if (!trigger) {
+		set_region (nullptr);
+		_update_connection = Timers::super_rapid_connect (sigc::mem_fun (*this, &CueEditor::maybe_update));
+		play_button.set_sensitive (false);
 		return;
 	}
 
@@ -1332,11 +1338,11 @@ CueEditor::set_trigger (TriggerReference& tref)
 		length_selector.set_active (0); /* "until stopped" */
 	}
 
-	if (trigger) {
-		set_region (trigger->the_region());
+	set_region (trigger->the_region());
+	if (trigger->armed()) {
+		play_button.set_sensitive (false);
 	} else {
-		set_region (nullptr);
-		_update_connection = Timers::super_rapid_connect (sigc::mem_fun (*this, &CueEditor::maybe_update));
+		play_button.set_sensitive (true);
 	}
 
 	setup_record_blink ();
