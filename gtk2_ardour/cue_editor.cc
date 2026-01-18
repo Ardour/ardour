@@ -745,7 +745,10 @@ CueEditor::set_recording_length (Temporal::BBT_Offset dur)
 	}
 
 	length_selector.set_active (label);
-	rec_length = dur;
+
+	if (ref.trigger()) {
+		ref.trigger()->set_capture_duration (dur);
+	}
 }
 
 void
