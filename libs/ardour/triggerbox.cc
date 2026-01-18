@@ -81,6 +81,7 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<bool> use_follow_length;
 		PBD::PropertyDescriptor<Temporal::BBT_Offset> quantization;
 		PBD::PropertyDescriptor<Temporal::BBT_Offset> follow_length;
+		PBD::PropertyDescriptor<Temporal::BBT_Offset> capture_duration;
 		PBD::PropertyDescriptor<Trigger::LaunchStyle> launch_style;
 		PBD::PropertyDescriptor<ARDOUR::FollowAction> follow_action0;
 		PBD::PropertyDescriptor<ARDOUR::FollowAction> follow_action1;
@@ -112,6 +113,7 @@ TriggerBox::all_trigger_props()
 	all.add(Properties::use_follow_length);
 	all.add(Properties::quantization);
 	all.add(Properties::follow_length);
+	all.add(Properties::capture_duration);
 	all.add(Properties::follow_count);
 	all.add(Properties::launch_style);
 	all.add(Properties::follow_action0);
@@ -223,6 +225,7 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	, _follow_count (Properties::follow_count, 1)
 	, _quantization (Properties::quantization, Temporal::BBT_Offset (1, 0, 0))
 	, _follow_length (Properties::follow_length, Temporal::BBT_Offset (1, 0, 0))
+	, _capture_duration (Properties::capture_duration, Temporal::BBT_Offset (1, 0, 0))
 	, _use_follow_length (Properties::use_follow_length, false)
 	, _legato (Properties::legato, false)
 	, _gain (Properties::gain, 1.0)
@@ -266,6 +269,7 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	add_property (_follow_count);
 	add_property (_quantization);
 	add_property (_follow_length);
+	add_property (_capture_duration);
 	add_property (_use_follow_length);
 	add_property (_legato);
 	add_property (_name);
@@ -354,6 +358,7 @@ Trigger::get_ui_state (Trigger::UIState &state) const
 	state.follow_count = _follow_count;
 	state.quantization = _quantization;
 	state.follow_length = _follow_length;
+	state.capture_duration = _capture_duration;
 	state.use_follow_length = _use_follow_length;
 	state.legato = _legato;
 	state.gain = _gain;
@@ -410,6 +415,7 @@ Trigger::update_properties ()
 		_follow_count = ui_state.follow_count;
 		_quantization = ui_state.quantization;
 		_follow_length = ui_state.follow_length;
+		_capture_duration = ui_state.capture_duration;
 		_use_follow_length = ui_state.use_follow_length;
 		_legato = ui_state.legato;
 		_gain = ui_state.gain;
@@ -464,6 +470,7 @@ Trigger::copy_to_ui_state ()
 	ui_state.follow_count = _follow_count;
 	ui_state.quantization = _quantization;
 	ui_state.follow_length = _follow_length;
+	ui_state.capture_duration = _capture_duration;
 	ui_state.use_follow_length = _use_follow_length;
 	ui_state.legato = _legato;
 	ui_state.gain = _gain;
@@ -569,6 +576,7 @@ TRIGGER_UI_SET_CONST_REF (follow_action0, FollowAction)
 TRIGGER_UI_SET_CONST_REF (follow_action1, FollowAction)
 TRIGGER_UI_SET (launch_style, Trigger::LaunchStyle)
 TRIGGER_UI_SET_CONST_REF (follow_length, Temporal::BBT_Offset)
+TRIGGER_UI_SET_CONST_REF (capture_duration, Temporal::BBT_Offset)
 TRIGGER_UI_SET (use_follow_length, bool)
 TRIGGER_UI_SET (legato, bool)
 TRIGGER_UI_SET (follow_action_probability, int)
@@ -3546,6 +3554,8 @@ Trigger::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for use_follow_length = %1\n", Properties::use_follow_length.property_id));
 	Properties::follow_length.property_id = g_quark_from_static_string (X_("follow-length"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for follow_length = %1\n", Properties::follow_length.property_id));
+	Properties::capture_duration.property_id = g_quark_from_static_string (X_("capture-duration"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for capture_duration = %1\n", Properties::capture_duration.property_id));
 	Properties::legato.property_id = g_quark_from_static_string (X_("legato"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for legato = %1\n", Properties::legato.property_id));
 	Properties::velocity_effect.property_id = g_quark_from_static_string (X_("velocity-effect"));

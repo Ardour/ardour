@@ -155,6 +155,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	PBD::Property<uint32_t>             _follow_count;
 	PBD::Property<Temporal::BBT_Offset> _quantization;
 	PBD::Property<Temporal::BBT_Offset> _follow_length;
+	PBD::Property<Temporal::BBT_Offset> _capture_duration;
 	PBD::Property<bool>                 _use_follow_length;
 	PBD::Property<bool>                 _legato;
 	PBD::Property<gain_t>               _gain;
@@ -183,6 +184,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 		uint32_t follow_count = 1;
 		Temporal::BBT_Offset quantization = Temporal::BBT_Offset (1, 0, 0);
 		Temporal::BBT_Offset follow_length = Temporal::BBT_Offset (1, 0, 0);
+		Temporal::BBT_Offset capture_duration = Temporal::BBT_Offset (1, 0, 0);
 		bool use_follow_length = false;
 		bool legato = false;
 		gain_t gain = 1.0;
@@ -214,6 +216,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 			follow_count = other.follow_count;
 			quantization = other.quantization;
 			follow_length = other.follow_length;
+			capture_duration = other.capture_duration;
 			use_follow_length = other.use_follow_length;
 			legato = other.legato;
 			gain = other.gain;
@@ -248,6 +251,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	TRIGGERBOX_PROPERTY_DECL (follow_count, uint32_t);
 	TRIGGERBOX_PROPERTY_DECL_CONST_REF (quantization, Temporal::BBT_Offset);
 	TRIGGERBOX_PROPERTY_DECL_CONST_REF (follow_length, Temporal::BBT_Offset);
+	TRIGGERBOX_PROPERTY_DECL_CONST_REF (capture_duration, Temporal::BBT_Offset);
 	TRIGGERBOX_PROPERTY_DECL (use_follow_length, bool);
 	TRIGGERBOX_PROPERTY_DECL (legato, bool);
 	TRIGGERBOX_PROPERTY_DECL (velocity_effect, float);
@@ -1131,6 +1135,7 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> use_follow_length;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<Temporal::BBT_Offset> quantization;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<Temporal::BBT_Offset> follow_length;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<Temporal::BBT_Offset> capture_duration;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<Trigger::LaunchStyle> launch_style;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<FollowAction> follow_action0;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<FollowAction> follow_action1;
