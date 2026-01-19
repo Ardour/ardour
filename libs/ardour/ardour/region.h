@@ -118,8 +118,6 @@ public:
 
 	static PBD::Signal<void(std::shared_ptr<RegionList>, const PBD::PropertyChange&)> RegionsPropertyChanged;
 
-	PBD::Signal<void()> RegionFxChanged;
-
 	typedef std::map <PBD::PropertyChange, RegionList> ChangeMap;
 
 	virtual ~Region();

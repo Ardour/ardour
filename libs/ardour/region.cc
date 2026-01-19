@@ -1640,7 +1640,6 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 			fx_tail_changed (true);
 			send_change (PropertyChange (Properties::region_fx)); // trigger DiskReader overwrite
 			send_change (PropertyChange (Properties::region_fx_changed));
-			RegionFxChanged (); /* EMIT SIGNAL */
 		}
 	}
 
