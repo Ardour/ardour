@@ -146,34 +146,34 @@
           <Patch Number=" 98" Name="Gt Synth 2" ProgramChange="97"/>
           <Patch Number=" 99" Name="Bass Synth 1" ProgramChange="98"/>
           <Patch Number="100" Name="Bass Synth 2" ProgramChange="99"/>
-          <Patch Number="101" Name="Kb Multi 1" ProgramChange="100"/>
-          <Patch Number="102" Name="Kb Multi 2" ProgramChange="101"/>
-          <Patch Number="103" Name="Kb Multi 3" ProgramChange="102"/>
-          <Patch Number="104" Name="Kb Multi 4" ProgramChange="103"/>
-          <Patch Number="105" Name="Ring Mod 1" ProgramChange="104"/>
-          <Patch Number="106" Name="Ring Mod 2" ProgramChange="105"/>
-          <Patch Number="107" Name="Synth Lead" ProgramChange="106"/>
-          <Patch Number="108" Name="Rotary Fast" ProgramChange="107"/>
-          <Patch Number="109" Name="Rotary Slow" ProgramChange="108"/>
-          <Patch Number="110" Name="Rotary Drive" ProgramChange="109"/>
-          <Patch Number="111" Name="Rhodes 1" ProgramChange="110"/>
-          <Patch Number="112" Name="Rhodes 2" ProgramChange="111"/>
-          <Patch Number="113" Name="A.Piano" ProgramChange="112"/>
-          <Patch Number="114" Name="Concert Hall" ProgramChange="113"/>
-          <Patch Number="115" Name="Large Hall" ProgramChange="114"/>
-          <Patch Number="116" Name="Dark Hall" ProgramChange="115"/>
-          <Patch Number="117" Name="Cathedral" ProgramChange="116"/>
-          <Patch Number="118" Name="Mid Room" ProgramChange="117"/>
-          <Patch Number="119" Name="Live Room" ProgramChange="118"/>
-          <Patch Number="120" Name="Dead Room" ProgramChange="119"/>
-          <Patch Number="121" Name="Bright Room" ProgramChange="120"/>
-          <Patch Number="122" Name="Large Room" ProgramChange="121"/>
-          <Patch Number="123" Name="Rich Plate" ProgramChange="122"/>
-          <Patch Number="124" Name="Vocal Plate" ProgramChange="123"/>
-          <Patch Number="125" Name="St Mid Rev" ProgramChange="124"/>
-          <Patch Number="126" Name="St Room Rev" ProgramChange="125"/>
-          <Patch Number="127" Name="Vocal Echo" ProgramChange="126"/>
-          <Patch Number="128" Name="Analog Echo" ProgramChange="127"/>
+          <Patch Number="101" Name="Hall" ProgramChange="100"/>
+          <Patch Number="102" Name="Room 1" ProgramChange="101"/>
+          <Patch Number="103" Name="Room 2" ProgramChange="102"/>
+          <Patch Number="104" Name="Plate" ProgramChange="103"/>
+          <Patch Number="105" Name="St Reverb" ProgramChange="104"/>
+          <Patch Number="106" Name="Gate Reverb" ProgramChange="105"/>
+          <Patch Number="107" Name="Ambience" ProgramChange="106"/>
+          <Patch Number="108" Name="Simple Delay" ProgramChange="107"/>
+          <Patch Number="109" Name="Mono Delay" ProgramChange="108"/>
+          <Patch Number="110" Name="Mod Delay" ProgramChange="109"/>
+          <Patch Number="111" Name="Stereo Delay" ProgramChange="110"/>
+          <Patch Number="112" Name="20Tap Delay" ProgramChange="111"/>
+          <Patch Number="113" Name="St Chorus" ProgramChange="112"/>
+          <Patch Number="114" Name="Band Chorus" ProgramChange="113"/>
+          <Patch Number="115" Name="Wave Chorus" ProgramChange="114"/>
+          <Patch Number="116" Name="Super Chorus" ProgramChange="115"/>
+          <Patch Number="117" Name="Pitch Shift" ProgramChange="116"/>
+          <Patch Number="118" Name="St P Shift" ProgramChange="117"/>
+          <Patch Number="119" Name="St Phaser" ProgramChange="118"/>
+          <Patch Number="120" Name="St Flanger" ProgramChange="119"/>
+          <Patch Number="121" Name="Vocoder 1" ProgramChange="120"/>
+          <Patch Number="122" Name="Vocoder 2" ProgramChange="121"/>
+          <Patch Number="123" Name="KB Multi" ProgramChange="122"/>
+          <Patch Number="124" Name="Rotary Multi" ProgramChange="123"/>
+          <Patch Number="125" Name="Rhodes Multi" ProgramChange="124"/>
+          <Patch Number="126" Name="Gt Multi 1" ProgramChange="125"/>
+          <Patch Number="127" Name="Gt Multi 2" ProgramChange="126"/>
+          <Patch Number="128" Name="Gt Multi 3" ProgramChange="127"/>
         </PatchNameList>
       </PatchBank>
     </ChannelNameSet>
