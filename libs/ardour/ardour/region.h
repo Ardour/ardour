@@ -79,6 +79,7 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<uint64_t>          reg_group;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              contents; // type doesn't matter here, used for signal only
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              region_fx; // type doesn't matter here, used for signal only
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              region_fx_changed; // type doesn't matter here, used for signal only
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              region_tempo; // type doesn't matter here, used for signal only
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              region_meter; // type doesn't matter here, used for signal only
 };
