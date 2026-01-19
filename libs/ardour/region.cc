@@ -1638,8 +1638,9 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 		if (changed) {
 			fx_latency_changed (true);
 			fx_tail_changed (true);
-			send_change (PropertyChange (Properties::region_fx)); // trigger DiskReader overwrite
-			send_change (PropertyChange (Properties::region_fx_changed));
+			PropertyChange pc (Properties::region_fx_changed);
+			pc.add (Properties::region_fx); // trigger DiskReader overwrite
+			send_change (pc);
 		}
 	}
 
