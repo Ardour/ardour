@@ -49,7 +49,7 @@
 #include "keyboard.h"
 #include "public_editor.h"
 #include "region_view.h"
-#include "stripable_colorpicker.h"
+#include "ardour_color_dialog.h"
 #include "trigger_jump_dialog.h"
 #include "ui_config.h"
 

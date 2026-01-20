@@ -28,8 +28,6 @@
 #include "widgets/ardour_button.h"
 #include "widgets/frame.h"
 
-#include "stripable_colorpicker.h"
-
 namespace Gtk
 {
 	class FileChooserDialog;
@@ -37,6 +35,7 @@ namespace Gtk
 }
 
 class TriggerJumpDialog;
+class ArdourColorDialog;
 
 class TriggerUI : virtual public sigc::trackable
 {
