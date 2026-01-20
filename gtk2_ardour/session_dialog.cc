@@ -458,7 +458,7 @@ SessionDialog::session_folder ()
 			break;
 		case 2:
 			/* existing session chosen from file chooser */
-			return Glib::path_get_dirname (existing_session_chooser.get_current_folder ());
+			return existing_session_chooser.get_current_folder ();
 		default:
 			break;
 	}
