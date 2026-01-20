@@ -21,7 +21,6 @@
 #include "ardour/stripable.h"
 
 #include "gtkmm2ext/colors.h"
-#include "gtkmm2ext/doi.h"
 
 #include "gui_thread.h"
 #include "public_editor.h"
