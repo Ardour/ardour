@@ -197,7 +197,8 @@ ARDOUR_UI::session_dialog_response_handler (int response, SessionDialog* session
 			msg.run ();
 			return; /* back to main event loop */
 		} else if (rv == 0) {
-			session_dialog->set_provided_session (session_name, session_path);
+			const string statefile_path = Glib::build_filename (session_path, session_name + ARDOUR::statefile_suffix);
+			session_name = statefile_path;
 		} else {
 
 			rv = new_session_from_aaf (session_name, Config->get_default_session_parent_dir(), session_path, session_name);
@@ -206,7 +207,8 @@ ARDOUR_UI::session_dialog_response_handler (int response, SessionDialog* session
 				msg.run ();
 				return; /* back to main event loop */
 			} else if (rv == 0) {
-				session_dialog->set_provided_session (session_name, session_path);
+				const string statefile_path = Glib::build_filename (session_path, session_name + ARDOUR::statefile_suffix);
+				session_name = statefile_path;
 				/* we got a session now */
 				session_dialog->hide ();
 				delete_when_idle (session_dialog);
