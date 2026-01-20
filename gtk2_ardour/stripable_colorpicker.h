@@ -26,10 +26,23 @@
 #include "ardour/presentation_info.h"
 
 namespace ARDOUR {
-class Stripable;
+	class Stripable;
 }
 
-class StripableColorDialog : public Gtk::ColorSelectionDialog
+class ArdourColorDialog : public Gtk::ColorSelectionDialog
+{
+  public:
+	ArdourColorDialog ();
+
+  private:
+	void initialize_color_palette ();
+
+	static bool palette_initialized;
+	static void palette_changed_hook (const Glib::RefPtr<Gdk::Screen>&, const Gdk::ArrayHandle_Color&);
+	static Gtk::ColorSelection::SlotChangePaletteHook gtk_palette_changed_hook;
+};
+
+class StripableColorDialog : public ArdourColorDialog
 {
 public:
 	StripableColorDialog (std::shared_ptr<ARDOUR::Stripable>);
@@ -38,7 +51,6 @@ public:
 	sigc::signal<void, uint32_t> ColorChanged;
 
 private:
-	void initialize_color_palette ();
 	void finish_color_edit (int response);
 	void color_changed ();
 	void popup (const std::string& name, uint32_t color, Gtk::Window* parent);
@@ -48,8 +60,4 @@ private:
 
 	sigc::connection _color_changed_connection;
 	PBD::ScopedConnectionList _connections;
-
-	static bool palette_initialized;
-	static void palette_changed_hook (const Glib::RefPtr<Gdk::Screen>&, const Gdk::ArrayHandle_Color&);
-	static Gtk::ColorSelection::SlotChangePaletteHook gtk_palette_changed_hook;
 };

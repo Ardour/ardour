@@ -31,20 +31,52 @@
 
 using namespace Gtk;
 
-bool StripableColorDialog::palette_initialized = false;
-Gtk::ColorSelection::SlotChangePaletteHook StripableColorDialog::gtk_palette_changed_hook;
+bool ArdourColorDialog::palette_initialized = false;
+Gtk::ColorSelection::SlotChangePaletteHook ArdourColorDialog::gtk_palette_changed_hook;
+
+ArdourColorDialog::ArdourColorDialog ()
+{
+	initialize_color_palette ();
+	get_color_selection()->set_has_opacity_control (false);
+	get_color_selection()->set_has_palette (true);
+}
+
+void
+ArdourColorDialog::palette_changed_hook (const Glib::RefPtr<Gdk::Screen>& s, const Gdk::ArrayHandle_Color& c)
+{
+	std::string p = std::string (ColorSelection::palette_to_string (c));
+	UIConfiguration::instance ().set_stripable_color_palette (p);
+	gtk_palette_changed_hook (s, c);
+}
+
+void
+ArdourColorDialog::initialize_color_palette ()
+{
+	// non-static member, because it needs a screen()
+	if (palette_initialized) {
+		return;
+	}
+	gtk_palette_changed_hook = get_color_selection()->set_change_palette_hook (&ArdourColorDialog::palette_changed_hook);
+
+	std::string cp = UIConfiguration::instance ().get_stripable_color_palette ();
+	if (!cp.empty()) {
+		Gdk::ArrayHandle_Color c = ColorSelection::palette_from_string (cp);
+		gtk_palette_changed_hook (get_screen (), c);
+	}
+	palette_initialized = true;
+}
+
+/* ---------- */
 
 StripableColorDialog::StripableColorDialog (std::shared_ptr<ARDOUR::Stripable> s)
 {
 	assert (s);
 
-	initialize_color_palette ();
-	signal_response().connect (sigc::mem_fun (*this, &StripableColorDialog::finish_color_edit));
-
 	_stripable = s;
 	_stripable->set_active_color_picker (this);
 	_stripable->DropReferences.connect (_connections, invalidator (*this), [this]() { delete this; }, gui_context ());
 
+	signal_response().connect (sigc::mem_fun (*this, &StripableColorDialog::finish_color_edit));
 }
 
 StripableColorDialog::~StripableColorDialog ()
@@ -54,31 +86,6 @@ StripableColorDialog::~StripableColorDialog ()
 	_stripable.reset ();
 	_connections.drop_connections ();
 	_color_changed_connection.disconnect ();
-}
-
-void
-StripableColorDialog::palette_changed_hook (const Glib::RefPtr<Gdk::Screen>& s, const Gdk::ArrayHandle_Color& c)
-{
-	std::string p = std::string (ColorSelection::palette_to_string (c));
-	UIConfiguration::instance ().set_stripable_color_palette (p);
-	gtk_palette_changed_hook (s, c);
-}
-
-void
-StripableColorDialog::initialize_color_palette ()
-{
-	// non-static member, because it needs a screen()
-	if (palette_initialized) {
-		return;
-	}
-	gtk_palette_changed_hook = get_color_selection()->set_change_palette_hook (&StripableColorDialog::palette_changed_hook);
-
-	std::string cp = UIConfiguration::instance ().get_stripable_color_palette ();
-	if (!cp.empty()) {
-		Gdk::ArrayHandle_Color c = ColorSelection::palette_from_string (cp);
-		gtk_palette_changed_hook (get_screen (), c);
-	}
-	palette_initialized = true;
 }
 
 void
@@ -121,9 +128,6 @@ StripableColorDialog::popup (const std::string& name, uint32_t color, Gtk::Windo
 	_initial_color = color;
 
 	Gtk::ColorSelection* color_selection (get_color_selection());
-
-	color_selection->set_has_opacity_control (false);
-	color_selection->set_has_palette (true);
 
 	Gdk::Color c = Gtkmm2ext::gdk_color_from_rgba (_initial_color);
 
