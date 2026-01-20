@@ -149,6 +149,11 @@ RouteUI::~RouteUI()
 {
 	if (_route) {
 		ARDOUR_UI::instance()->gui_object_state->remove_node (route_state_id());
+		StripableColorDialog* scd = _route->active_color_picker();
+		if (scd) {
+			delete scd;
+			_route->set_active_color_picker (nullptr);
+		}
 	}
 
 	delete_patch_change_dialog ();

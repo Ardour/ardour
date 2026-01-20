@@ -34,7 +34,6 @@ StripableColorDialog::StripableColorDialog (std::shared_ptr<ARDOUR::Stripable> s
 
 	_stripable = s;
 	_stripable->set_active_color_picker (this);
-	_stripable->DropReferences.connect (_connections, invalidator (*this), [this]() { delete this; }, gui_context ());
 
 	signal_response().connect (sigc::mem_fun (*this, &StripableColorDialog::finish_color_edit));
 }
