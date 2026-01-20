@@ -147,7 +147,7 @@ void
 TriggerUI::choose_color (Gtk::Window* parent)
 {
 	if (!_color_dialog) {
-		_color_dialog = new Gtk::ColorSelectionDialog;
+		_color_dialog = new ArdourColorDialog;
 		tref.box()->DropReferences.connect (trigger_connections, invalidator (*this), [this]() { delete _color_dialog; _color_dialog = nullptr; }, gui_context());
 	}
 
