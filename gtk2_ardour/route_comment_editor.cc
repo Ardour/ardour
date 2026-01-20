@@ -23,6 +23,7 @@
 #include "ardour/session_configuration.h"
 
 #include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/doi.h"
 
 #include "gui_thread.h"
 #include "option_editor.h"
@@ -34,7 +35,7 @@
 using namespace Gtk;
 using namespace ARDOUR;
 
-RouteCommentEditor::RouteCommentEditor ()
+RouteCommentEditor::RouteCommentEditor (std::shared_ptr<Route> r)
 	: ArdourWindow ("")
 	, _bo (nullptr)
 	, _ignore_change (false)
@@ -52,64 +53,12 @@ RouteCommentEditor::RouteCommentEditor ()
 
 	signal_hide ().connect (sigc::mem_fun (*this, &RouteCommentEditor::commit_change));
 	_comment_area.get_buffer ()->signal_changed ().connect (sigc::mem_fun (*this, &RouteCommentEditor::commit_change));
-}
 
-RouteCommentEditor::~RouteCommentEditor ()
-{
-	reset ();
-}
-
-void
-RouteCommentEditor::reset ()
-{
-	hide ();
-	delete _bo;
-	_bo = nullptr;
-	if (_route && _route->comment_editor () == this) {
-		_route->set_comment_editor (nullptr);
-	}
-	_route.reset ();
-	_connections.drop_connections ();
-}
-
-void
-RouteCommentEditor::toggle (std::shared_ptr<ARDOUR::Route> r)
-{
-	if (r && r->comment_editor ()) {
-		ArdourWindow* self = r->comment_editor ();
-		if (self->get_visible ()) {
-			self->hide ();
-		} else {
-			self->present ();
-		}
-		return;
-	}
-	open (r);
-}
-
-void
-RouteCommentEditor::open (std::shared_ptr<ARDOUR::Route> r)
-{
-	if (r && r->comment_editor ()) {
-		r->comment_editor ()->present ();
-		return;
-	}
-	if (_route == r) {
-		present ();
-		return;
-	}
-	if (!r) {
-		assert (0);
-		reset ();
-		return;
-	}
+	assert (r);
 	_route = r;
 	_route->set_comment_editor (this);
 	_route->comment_changed.connect (_connections, invalidator (*this), std::bind (&RouteCommentEditor::comment_changed, this), gui_context ());
-	_route->DropReferences.connect (_connections, invalidator (*this), std::bind (&RouteCommentEditor::reset, this), gui_context ());
-
-	set_title (string_compose ("%1: %2", _route->name (), _("Comment Editor")));
-	_comment_area.get_buffer ()->set_text (_route->comment ());
+	_route->DropReferences.connect (_connections, invalidator (*this), std::bind (&delete_when_idle<RouteCommentEditor>, this), gui_context ());
 
 	Gtkmm2ext::container_clear (_vbox, false);
 	_vbox.pack_start (_comment_area);
@@ -133,6 +82,44 @@ RouteCommentEditor::open (std::shared_ptr<ARDOUR::Route> r)
 
 	_vbox.show_all ();
 	set_position (Gtk::WIN_POS_CENTER_ON_PARENT);
+}
+
+RouteCommentEditor::~RouteCommentEditor ()
+{
+	hide ();
+	delete _bo;
+	_bo = nullptr;
+	if (_route) {
+		_route->set_comment_editor (nullptr);
+		_route.reset ();
+	}
+	_connections.drop_connections ();
+}
+
+void
+RouteCommentEditor::toggle ()
+{
+	if (!_route) {
+		return;
+	}
+	if (get_visible ()) {
+		hide ();
+	} else {
+		set_title (string_compose ("%1: %2", _route->name (), _("Comment Editor")));
+		present ();
+	}
+}
+
+void
+RouteCommentEditor::open ()
+{
+	if (!_route) {
+		return;
+	}
+
+	set_title (string_compose ("%1: %2", _route->name (), _("Comment Editor")));
+	_comment_area.get_buffer ()->set_text (_route->comment ());
+
 	present ();
 }
 

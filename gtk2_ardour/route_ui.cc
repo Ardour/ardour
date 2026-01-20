@@ -1808,14 +1808,29 @@ RouteUI::route_rename ()
 void
 RouteUI::toggle_comment_editor ()
 {
-	_comment_editor.toggle (_route);
-}
+	if (!_route) {
+		return;
+	}
 
+	RouteCommentEditor* rce = _route->comment_editor();
+	if (!rce) {
+		rce = new RouteCommentEditor (_route);
+	}
+	rce->toggle ();
+}
 
 void
 RouteUI::open_comment_editor ()
 {
-	_comment_editor.open (_route);
+	if (!_route) {
+		return;
+	}
+
+	RouteCommentEditor* rce = _route->comment_editor();
+	if (!rce) {
+		rce = new RouteCommentEditor (_route);
+	}
+	rce->open ();
 }
 
 void
