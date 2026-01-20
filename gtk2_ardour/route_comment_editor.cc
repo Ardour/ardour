@@ -57,7 +57,6 @@ RouteCommentEditor::RouteCommentEditor (std::shared_ptr<Route> r)
 	_route = r;
 	_route->set_comment_editor (this);
 	_route->comment_changed.connect (_connections, invalidator (*this), std::bind (&RouteCommentEditor::comment_changed, this), gui_context ());
-	_route->DropReferences.connect (_connections, invalidator (*this), [this] { delete this; }, gui_context ());
 
 	Gtkmm2ext::container_clear (_vbox, false);
 	_vbox.pack_start (_comment_area);

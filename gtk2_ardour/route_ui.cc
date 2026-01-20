@@ -152,7 +152,10 @@ RouteUI::~RouteUI()
 		StripableColorDialog* scd = _route->active_color_picker();
 		if (scd) {
 			delete scd;
-			_route->set_active_color_picker (nullptr);
+		}
+		RouteCommentEditor* rce = _route->comment_editor();
+		if (rce) {
+			delete rce;
 		}
 	}
 
