@@ -441,21 +441,15 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 	}
 
 	catch (SessionException const& e) {
-		gchar* escaped_error_txt = 0;
 		stringstream ss;
 		dump_errors (ss, 6);
 		dump_errors (cerr);
 		clear_errors ();
 
-		{
-			const std::string& tmp = ss.str();
-			escaped_error_txt = g_markup_escape_text (tmp.c_str(), -1);
-		}
-
-		ArdourMessageDialog msg (string_compose(
-			                         _("Session \"%1 (snapshot %2)\" did not load successfully:\n%3%4%5"),
-			                         path, snap_name, e.what(), ss.str().empty() ? "" : "\n\n---", escaped_error_txt),
-		                         false,
+		ArdourMessageDialog msg (Gtkmm2ext::markup_escape_text (string_compose(
+		                         _("Session \"%1 (snapshot %2)\" did not load successfully:\n%3%4%5"),
+		                         path, snap_name, e.what(), ss.str().empty() ? "" : "\n\n---", ss.str())),
+		                         true,
 		                         Gtk::MESSAGE_INFO,
 		                         BUTTONS_OK);
 
@@ -464,7 +458,6 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 
 		(void) msg.run ();
 		msg.hide ();
-		g_free (escaped_error_txt);
 
 		goto out;
 	}
@@ -487,22 +480,16 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 
 	catch (Glib::Error const& e) {
 		const std::string& glib_what = e.what();
-		gchar* escaped_error_txt = 0;
 		stringstream ss;
 		dump_errors (ss, 6);
 		dump_errors (cerr);
 		clear_errors ();
 
-		{
-			const std::string& tmp = ss.str();
-			escaped_error_txt = g_markup_escape_text (tmp.c_str(), -1);
-		}
-
-		ArdourMessageDialog msg (string_compose(
+		ArdourMessageDialog msg (Gtkmm2ext::markup_escape_text (string_compose(
 		                           _("Session \"%1 (snapshot %2)\" did not load successfully.\nGlib Error\nDomain: %3\nCode: %4\nWhat: %5\n%6%7"),
 		                           path, snap_name,
 		                           g_quark_to_string(e.domain()), e.code(), glib_what.c_str(),
-		                           ss.str().empty() ? "" : "\n\n---", escaped_error_txt),
+		                           ss.str().empty() ? "" : "\n\n---", ss.str())),
 		                         true,
 		                         Gtk::MESSAGE_INFO,
 		                         BUTTONS_OK);
@@ -512,26 +499,19 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 
 		(void) msg.run ();
 		msg.hide ();
-		g_free (escaped_error_txt);
 
 		goto out;
 	}
 
 	catch (...) {
-		gchar* escaped_error_txt = 0;
 		stringstream ss;
 		dump_errors (ss, 6);
 		dump_errors (cerr);
 		clear_errors ();
 
-		{
-			const std::string& tmp = ss.str();
-			escaped_error_txt = g_markup_escape_text (tmp.c_str(), -1);
-		}
-
-		ArdourMessageDialog msg (string_compose(
+		ArdourMessageDialog msg (Gtkmm2ext::markup_escape_text (string_compose(
 		                           _("Session \"%1 (snapshot %2)\" did not load successfully.%3%4"),
-		                           path, snap_name, ss.str().empty() ? "" : "\n\n---", escaped_error_txt),
+		                           path, snap_name, ss.str().empty() ? "" : "\n\n---", ss.str())),
 		                         true,
 		                         Gtk::MESSAGE_INFO,
 		                         BUTTONS_OK);
@@ -541,7 +521,6 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 
 		(void) msg.run ();
 		msg.hide ();
-		g_free (escaped_error_txt);
 
 		goto out;
 	}
@@ -734,7 +713,6 @@ ARDOUR_UI::build_session_stage_two (std::string const& path, std::string const& 
 		new_session = new Session (*AudioEngine::instance(), path, snap_name, bus_profile.master_out_channels > 0 ? &bus_profile : NULL, meta_session ? "" : session_template, unnamed, samplerate);
 	}
 	catch (SessionException const& e) {
-		gchar* escaped_error_txt = 0;
 		stringstream ss;
 		dump_errors (ss, 6);
 		cerr << "Here are the errors associated with this failed session:\n";
@@ -742,44 +720,32 @@ ARDOUR_UI::build_session_stage_two (std::string const& path, std::string const& 
 		cerr << "---------\n";
 		clear_errors ();
 
-		{
-			const std::string& tmp = ss.str();
-			escaped_error_txt = g_markup_escape_text (tmp.c_str(), -1);
-		}
-
-		ArdourMessageDialog msg (string_compose(_("Could not create session in \"%1\": %2%3%4"), path, e.what(), ss.str().empty() ? "" : "\n\n---", escaped_error_txt));
+		ArdourMessageDialog msg (Gtkmm2ext::markup_escape_text (string_compose(
+		                         _("Could not create session in \"%1\": %2%3%4"),
+		                         path, e.what(), ss.str().empty() ? "" : "\n\n---", ss.str())), true);
 		msg.set_title (_("Loading Error"));
 		msg.set_position (Gtk::WIN_POS_CENTER);
 		msg.run ();
-		g_free (escaped_error_txt);
 		return -1;
 	}
 	catch (Glib::Error const& e) {
 		const std::string& glib_what = e.what();
-		gchar* escaped_error_txt = 0;
 		stringstream ss;
 		dump_errors (ss, 6);
 		dump_errors (cerr);
 		clear_errors ();
 
-		{
-			const std::string& tmp = ss.str();
-			escaped_error_txt = g_markup_escape_text (tmp.c_str(), -1);
-		}
-
-		ArdourMessageDialog msg (string_compose(
+		ArdourMessageDialog msg (Gtkmm2ext::markup_escape_text (string_compose(
 		                           _("Could not create session in \"%1\".\n\nGlib Error\nDomain: %2\nCode: %3\nWhat: %4\n%5%6"),
 		                           path,
 		                           g_quark_to_string(e.domain()), e.code(), glib_what.c_str(),
-		                           ss.str().empty() ? "" : "\n\n---", escaped_error_txt));
+		                           ss.str().empty() ? "" : "\n\n---", ss.str())), true);
 		msg.set_title (_("Loading Error"));
 		msg.set_position (Gtk::WIN_POS_CENTER);
 		msg.run ();
-		g_free (escaped_error_txt);
 		return -1;
 	}
 	catch (...) {
-		gchar* escaped_error_txt = 0;
 		stringstream ss;
 		dump_errors (ss, 6);
 		cerr << "Here are the errors associated with this failed session:\n";
@@ -787,16 +753,12 @@ ARDOUR_UI::build_session_stage_two (std::string const& path, std::string const& 
 		cerr << "---------\n";
 		clear_errors ();
 
-		{
-			const std::string& tmp = ss.str();
-			escaped_error_txt = g_markup_escape_text (tmp.c_str(), -1);
-		}
-
-		ArdourMessageDialog msg (string_compose(_("Could not create session in \"%1\"%2%3"), path, ss.str().empty() ? "" : "\n\n---", escaped_error_txt));
+		ArdourMessageDialog msg (Gtkmm2ext::markup_escape_text (string_compose(
+		                         _("Could not create session in \"%1\": %2%3"),
+		                         path,  ss.str().empty() ? "" : "\n\n---", ss.str())), true);
 		msg.set_title (_("Loading Error"));
 		msg.set_position (Gtk::WIN_POS_CENTER);
 		msg.run ();
-		g_free (escaped_error_txt);
 		return -1;
 	}
 
