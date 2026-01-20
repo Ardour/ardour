@@ -57,7 +57,7 @@ private:
 	Gtk::CheckButton _route_active;
 	Gtk::CheckButton _share_color;
 	Gtk::CheckButton _share_monitoring;
-	ArdourColorButton _color;
+	Gtk::ColorButton _color;
 
 	void gain_toggled ();
 	void update ();
