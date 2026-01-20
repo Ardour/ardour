@@ -297,7 +297,6 @@ RouteUI::reset ()
 	mute_menu = 0;
 
 	delete_patch_change_dialog ();
-	_color_picker.reset ();
 
 	denormal_menu_item = 0;
 }
@@ -1714,7 +1713,11 @@ RouteUI::select_midi_patch ()
 void
 RouteUI::choose_color (Gtk::Window* parent)
 {
-	_color_picker.popup (_route, parent);
+	StripableColorDialog* scd = _route->active_color_picker();
+	if (!scd) {
+		scd = new StripableColorDialog (_route);
+	}
+	scd->popup (parent);
 }
 
 /** Set the route's own color.  This may not be used for display if

@@ -23,44 +23,33 @@
 #include <ytkmm/colorbutton.h>
 #include <ytkmm/colorselection.h>
 
-#include "ardour/stripable.h"
+#include "ardour/presentation_info.h"
+
+namespace ARDOUR {
+class Stripable;
+}
 
 class StripableColorDialog : public Gtk::ColorSelectionDialog
 {
 public:
-	StripableColorDialog ();
+	StripableColorDialog (std::shared_ptr<ARDOUR::Stripable>);
 	~StripableColorDialog ();
-	void reset ();
-	void popup (std::shared_ptr<ARDOUR::Stripable> s, Gtk::Window*);
-	void popup (const std::string&, uint32_t, Gtk::Window*);
+	void popup (Gtk::Window*);
 	sigc::signal<void, uint32_t> ColorChanged;
 
 private:
 	void initialize_color_palette ();
 	void finish_color_edit (int response);
 	void color_changed ();
+	void popup (const std::string& name, uint32_t color, Gtk::Window* parent);
 
 	std::shared_ptr<ARDOUR::Stripable> _stripable;
 	ARDOUR::PresentationInfo::color_t _initial_color;
 
 	sigc::connection _color_changed_connection;
-
+	PBD::ScopedConnectionList _connections;
 
 	static bool palette_initialized;
 	static void palette_changed_hook (const Glib::RefPtr<Gdk::Screen>&, const Gdk::ArrayHandle_Color&);
 	static Gtk::ColorSelection::SlotChangePaletteHook gtk_palette_changed_hook;
 };
-
-class ArdourColorButton : public Gtk::ColorButton
-{
-public:
-	ArdourColorButton ();
-
-protected:
-	void on_clicked();
-	void color_selected (uint32_t color);
-
-private:
-	StripableColorDialog _color_picker;
-};
-
