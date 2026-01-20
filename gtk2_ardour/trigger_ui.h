@@ -35,7 +35,6 @@ namespace Gtk
 }
 
 class TriggerJumpDialog;
-class StripableColorDialog;
 
 class TriggerUI : virtual public sigc::trackable
 {
