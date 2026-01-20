@@ -35,6 +35,7 @@ bool ArdourColorDialog::palette_initialized = false;
 Gtk::ColorSelection::SlotChangePaletteHook ArdourColorDialog::gtk_palette_changed_hook;
 
 ArdourColorDialog::ArdourColorDialog ()
+	: _initial_color (0)
 {
 	initialize_color_palette ();
 	get_color_selection()->set_has_opacity_control (false);
@@ -66,6 +67,67 @@ ArdourColorDialog::initialize_color_palette ()
 	palette_initialized = true;
 }
 
+void
+ArdourColorDialog::popup (const std::string& name, uint32_t color, Gtk::Window* parent)
+{
+	set_title (string_compose (_("Color Selection: %1"), name));
+	_initial_color = color;
+
+	Gtk::ColorSelection* color_selection (get_color_selection());
+
+	Gdk::Color c = Gtkmm2ext::gdk_color_from_rgba (_initial_color);
+
+	color_selection->set_previous_color (c);
+	color_selection->set_current_color (c);
+
+	color_selection->signal_color_changed().connect (sigc::mem_fun (*this, &ArdourColorDialog::color_changed));
+
+ 	if (parent) {
+ 		set_transient_for (*parent);
+ 	}
+
+	present ();
+}
+
+/* ---------- */
+
+ArdourColorButton::ArdourColorButton ()
+{
+	_color_picker.get_color_selection()->signal_color_changed().connect (sigc::mem_fun(*this, &ArdourColorButton::color_selected));
+	_color_picker.signal_response().connect (sigc::mem_fun (*this, &ArdourColorButton::finish));
+}
+
+void
+ArdourColorButton::finish (int response)
+{
+	switch (response) {
+	case Gtk::RESPONSE_OK:
+		break;
+	default:
+		Gdk::Color c (Gtkmm2ext::gdk_color_from_rgba (_color_picker.initial_color()));
+		set_color (c);
+		g_signal_emit_by_name (GTK_WIDGET(gobj()), "color-set", 0);
+		break;
+	}
+
+	_color_picker.hide ();
+}
+
+void
+ArdourColorButton::on_clicked ()
+{
+	_color_picker.popup ("", Gtkmm2ext::gdk_color_to_rgba (get_color ()), dynamic_cast<Gtk::Window*> (get_toplevel()));
+	_color_picker.get_window ()->set_transient_for (get_window ());
+}
+
+void
+ArdourColorButton::color_selected ()
+{
+	Gdk::Color c (_color_picker.get_color_selection()->get_current_color());
+	set_color (c);
+	g_signal_emit_by_name (GTK_WIDGET(gobj()), "color-set", 0);
+}
+
 /* ---------- */
 
 StripableColorDialog::StripableColorDialog (std::shared_ptr<ARDOUR::Stripable> s)
@@ -85,23 +147,18 @@ StripableColorDialog::~StripableColorDialog ()
 	_stripable->set_active_color_picker (nullptr);
 	_stripable.reset ();
 	_connections.drop_connections ();
-	_color_changed_connection.disconnect ();
 }
 
 void
 StripableColorDialog::popup (Gtk::Window* parent)
 {
-	popup (_stripable->name(), _stripable->presentation_info().color(), parent);
+	ArdourColorDialog::popup (_stripable->name(), _stripable->presentation_info().color(), parent);
 }
 
 void
 StripableColorDialog::finish_color_edit (int response)
 {
 	ARDOUR::RouteList rl = PublicEditor::instance().get_selection().tracks.routelist();
-
-	if (response == RESPONSE_OK) {
-		ColorChanged (Gtkmm2ext::gdk_color_to_rgba (get_color_selection()->get_current_color())); /* EMIT SIGNAL */
-	}
 
 	if (response == RESPONSE_OK) {
 		for (ARDOUR::RouteList::iterator i = rl.begin(); i != rl.end(); ++i) {
@@ -121,25 +178,3 @@ StripableColorDialog::color_changed ()
 	_stripable->presentation_info().set_color (Gtkmm2ext::gdk_color_to_rgba (get_color_selection()->get_current_color()));
 }
 
-void
-StripableColorDialog::popup (const std::string& name, uint32_t color, Gtk::Window* parent)
-{
-	set_title (string_compose (_("Color Selection: %1"), name));
-	_initial_color = color;
-
-	Gtk::ColorSelection* color_selection (get_color_selection());
-
-	Gdk::Color c = Gtkmm2ext::gdk_color_from_rgba (_initial_color);
-
-	color_selection->set_previous_color (c);
-	color_selection->set_current_color (c);
-
-	_color_changed_connection.disconnect ();
-
- 	if (parent) {
- 		set_transient_for (*parent);
- 	}
-
- 	set_position (UIConfiguration::instance().get_default_window_position());
- 	present ();
-}

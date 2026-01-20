@@ -34,6 +34,13 @@ class ArdourColorDialog : public Gtk::ColorSelectionDialog
   public:
 	ArdourColorDialog ();
 
+	void popup (const std::string& name, uint32_t color, Gtk::Window* parent);
+	ARDOUR::PresentationInfo::color_t initial_color() const { return _initial_color; }
+	virtual void color_changed() {}
+
+  protected:
+	ARDOUR::PresentationInfo::color_t _initial_color;
+
   private:
 	void initialize_color_palette ();
 
@@ -48,16 +55,27 @@ public:
 	StripableColorDialog (std::shared_ptr<ARDOUR::Stripable>);
 	~StripableColorDialog ();
 	void popup (Gtk::Window*);
-	sigc::signal<void, uint32_t> ColorChanged;
 
 private:
 	void finish_color_edit (int response);
 	void color_changed ();
-	void popup (const std::string& name, uint32_t color, Gtk::Window* parent);
 
 	std::shared_ptr<ARDOUR::Stripable> _stripable;
-	ARDOUR::PresentationInfo::color_t _initial_color;
 
 	sigc::connection _color_changed_connection;
 	PBD::ScopedConnectionList _connections;
+};
+
+class ArdourColorButton : public Gtk::ColorButton
+{
+public:
+	ArdourColorButton ();
+
+protected:
+	void on_clicked();
+	void color_selected ();
+	void finish (int response);
+
+private:
+	ArdourColorDialog _color_picker;
 };
