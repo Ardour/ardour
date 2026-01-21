@@ -949,6 +949,7 @@ Trigger::begin_switch (TriggerPtr nxt)
 	   stop, but wait for quantization first.
 	*/
 	_state = WaitingToSwitch;
+	_explicitly_stopped = true;
 	_nxt_quantization = nxt->_quantization;
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 begin_switch() requested state %2\n", index(), enum_2_string (_state)));
 	send_property_change (ARDOUR::Properties::running);
@@ -1306,7 +1307,12 @@ Trigger::when_stopped_during_run (BufferSet& bufs, pframes_t dest_offset)
 	                                              _loop_cnt,
 	                                              _follow_count));
 
-	if ((_state == Stopped) && !_explicitly_stopped && (launch_style() == Trigger::Gate || launch_style() == Trigger::Repeat)) {
+	if ((_state == Stopped) && _explicitly_stopped) {
+
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 explicitly stopped\n", index()));
+		shutdown (bufs, dest_offset);
+
+	} else if ((_state == Stopped) && !_explicitly_stopped && (launch_style() == Trigger::Gate || launch_style() == Trigger::Repeat)) {
 
 		jump_start ();
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopped, repeat/gate ret\n", index()));
