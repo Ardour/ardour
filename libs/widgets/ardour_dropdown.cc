@@ -83,8 +83,9 @@ ArdourDropdown::on_button_press_event (GdkEventButton* ev)
 void
 ArdourDropdown::set_active (int c)
 {
+	int n = c;
 	for (auto& i : _menu.items()) {
-		if (0 == c--) {
+		if (0 == n--) {
 			_menu.set_active (c);
 			_menu.activate_item (i);
 			break;
