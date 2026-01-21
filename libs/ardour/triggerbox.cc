@@ -247,6 +247,7 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	, _loop_cnt (0)
 	, _ui (0)
 	, _explicitly_stopped (false)
+	, _scene_switch (false)
 	, _pending_velocity_gain (1.0)
 	, _velocity_gain (1.0)
 	, _cue_launched (false)
@@ -887,6 +888,8 @@ Trigger::shutdown_from_fwd ()
 	_loop_cnt = 0;
 	_cue_launched = false;
 	_pending_velocity_gain = _velocity_gain = 1.0;
+	_scene_switch = false;
+	_explicitly_stopped = false;
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 [%3] shuts down\n", _box.order(), index(), name()));
 	send_property_change (ARDOUR::Properties::running);
 }
@@ -1299,17 +1302,18 @@ Trigger::when_stopped_during_run (BufferSet& bufs, pframes_t dest_offset)
 		return;
 	}
 
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 stopped during run, state %2 explicit %3 ls %4 lc %5 fc %6\n",
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 stopped during run, state %2 explicit %3 ls %4 lc %5 fc %6 ss %7\n",
 	                                              index(),
 	                                              enum_2_string (_state),
 	                                              _explicitly_stopped,
 	                                              enum_2_string (launch_style()),
 	                                              _loop_cnt,
-	                                              _follow_count));
+	                                              _follow_count,
+	                                              _scene_switch));
 
-	if ((_state == Stopped) && _explicitly_stopped) {
+	if ((_state == Stopped) && _scene_switch) {
 
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 explicitly stopped\n", index()));
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 stopped by scene switch\n", index()));
 		shutdown (bufs, dest_offset);
 
 	} else if ((_state == Stopped) && !_explicitly_stopped && (launch_style() == Trigger::Gate || launch_style() == Trigger::Repeat)) {
@@ -5093,6 +5097,9 @@ TriggerBox::run_cycle (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 		if (_active_scene < (int32_t) all_triggers.size()) {
 			if (!all_triggers[_active_scene]->cue_isolated()) {
 				if (all_triggers[_active_scene]->playable()) {
+					if (_currently_playing) {
+						_currently_playing->set_scene_switch (true);
+					}
 					all_triggers[_active_scene]->bang ();
 				} else {
 					stop_all_quantized ();  //empty slot, this should work as a Stop for the running clips

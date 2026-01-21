@@ -378,6 +378,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void begin_switch (TriggerPtr);
 
 	bool explicitly_stopped() const { return _explicitly_stopped; }
+	void set_scene_switch (bool yn);
 
 	uint32_t loop_count() const { return _loop_cnt; }
 
@@ -455,6 +456,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	uint32_t                  _loop_cnt; /* how many times in a row has this played */
 	void*                     _ui;
 	bool                      _explicitly_stopped;
+	bool                      _scene_switch;
 	gain_t                    _pending_velocity_gain;
 	gain_t                    _velocity_gain;
 	bool                      _cue_launched;
