@@ -1298,6 +1298,14 @@ Trigger::when_stopped_during_run (BufferSet& bufs, pframes_t dest_offset)
 		return;
 	}
 
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 stopped during run, state %2 explicit %3 ls %4 lc %5 fc %6\n",
+	                                              index(),
+	                                              enum_2_string (_state),
+	                                              _explicitly_stopped,
+	                                              enum_2_string (launch_style()),
+	                                              _loop_cnt,
+	                                              _follow_count));
+
 	if ((_state == Stopped) && !_explicitly_stopped && (launch_style() == Trigger::Gate || launch_style() == Trigger::Repeat)) {
 
 		jump_start ();
