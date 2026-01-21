@@ -252,6 +252,12 @@ cp gtk2_ardour/icons/cursor_square/* $DESTDIR/share/${LOWERCASE_DIRNAME}/icons/
 echo " === bundle completed, cleaning up"
 ./waf uninstall
 find $DESTDIR -name "*.dll.a" -print0 | xargs -0 -r rm
+
+# no need for MIDNAM
+if test -n "$VBM" -o test -n "$LIVETRAX"; then
+	rm -rf $DESTDIR/share/*/patchfiles
+fi
+
 echo " === complete"
 du -sh $DESTDIR
 

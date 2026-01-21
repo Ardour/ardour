@@ -192,7 +192,7 @@ mkdir -p $OSC
 mkdir -p $LuaScripts
 mkdir -p $Themes
 
-if test -z "$VBM"; then
+if test -z "$VBM" -a -z "$LIVETRAX"; then
 mkdir -p $PatchFiles
 fi
 
@@ -369,7 +369,7 @@ done
 
 # MIDNAM Patch Files
 # got to be careful with names here
-if test -z "$VBM"; then
+if test -z "$VBM" -a -z "$LIVETRAX"; then
 	for x in $BUILD_ROOT/../share/patchfiles/*.midnam ; do
 		cp "$x" $PatchFiles
 	done

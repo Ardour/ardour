@@ -248,7 +248,6 @@ mkdir -p $Themes
 mkdir -p $Locale
 mkdir -p $Surfaces
 mkdir -p $MidiMaps
-mkdir -p $PatchFiles
 mkdir -p $LuaScripts
 mkdir -p $MackieControl
 mkdir -p $OSC
@@ -256,6 +255,10 @@ mkdir -p $ExportFormats
 mkdir -p $Panners
 mkdir -p $Backends
 mkdir -p $Shared/doc
+
+if test -z "$VBM" -a -z "$LIVETRAX"; then
+mkdir -p $PatchFiles
+fi
 
 # maybe set variables
 ENVIRONMENT=environment
@@ -377,9 +380,11 @@ done
 
 # MIDNAM Patch Files
 # got to be careful with names here
-for x in $BUILD_ROOT/../share/patchfiles/*.midnam ; do
-    cp "$x" $PatchFiles
-done
+if test -z "$VBM" -a -z "$LIVETRAX"; then
+	for x in $BUILD_ROOT/../share/patchfiles/*.midnam ; do
+		cp "$x" $PatchFiles
+	done
+fi
 
 # Lua Scripts Files
 # got to be careful with names here
