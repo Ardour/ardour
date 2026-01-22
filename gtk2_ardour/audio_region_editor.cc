@@ -176,13 +176,9 @@ AudioRegionEditor::region_changed (const PBD::PropertyChange& what_changed)
 		/* ask the peak thread to run again */
 		signal_peak_thread ();
 	}
-}
-
-void
-AudioRegionEditor::region_fx_changed ()
-{
-	RegionEditor::region_fx_changed ();
-	refill_region_line ();
+	if (what_changed.contains (ARDOUR::Properties::region_fx_changed)) {
+		refill_region_line ();
+	}
 }
 
 void

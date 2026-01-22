@@ -241,7 +241,6 @@ RegionView::init (bool wfd)
 	//set_height (trackview.current_height());
 
 	_region->PropertyChanged.connect (*this, invalidator (*this), std::bind (&RegionView::region_changed, this, _1), gui_context());
-	_region->RegionFxChanged.connect (*this, invalidator (*this), std::bind (&RegionView::region_renamed, this), gui_context());
 
 	/* derived class calls set_colors () including RegionView::set_colors() in ::init() */
 	//set_colors ();
@@ -459,6 +458,9 @@ RegionView::region_changed (const PropertyChange& what_changed)
 	}
 	if (what_changed.contains (ARDOUR::Properties::locked)) {
 		region_locked ();
+	}
+	if (what_changed.contains (ARDOUR::Properties::region_fx_changed)) {
+		region_renamed ();
 	}
 }
 

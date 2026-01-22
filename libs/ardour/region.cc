@@ -85,6 +85,7 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<uint64_t> reg_group;
 		PBD::PropertyDescriptor<bool> contents;
 		PBD::PropertyDescriptor<bool> region_fx;
+		PBD::PropertyDescriptor<bool> region_fx_changed;
 		PBD::PropertyDescriptor<bool> region_tempo;
 		PBD::PropertyDescriptor<bool> region_meter;
 
@@ -191,6 +192,8 @@ Region::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for contents = %1\n",	Properties::contents.property_id));
 	Properties::region_fx.property_id = g_quark_from_static_string (X_("region-fx"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for region-fx = %1\n",	Properties::region_fx.property_id));
+	Properties::region_fx_changed.property_id = g_quark_from_static_string (X_("region-fx-changed"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for region-fx-changed = %1\n",	Properties::region_fx_changed.property_id));
 	Properties::time_domain.property_id = g_quark_from_static_string (X_("time_domain"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for time_domain = %1\n",	Properties::time_domain.property_id));
 	Properties::reg_group.property_id = g_quark_from_static_string (X_("rgroup"));
@@ -1635,8 +1638,9 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 		if (changed) {
 			fx_latency_changed (true);
 			fx_tail_changed (true);
-			send_change (PropertyChange (Properties::region_fx)); // trigger DiskReader overwrite
-			RegionFxChanged (); /* EMIT SIGNAL */
+			PropertyChange pc (Properties::region_fx_changed);
+			pc.add (Properties::region_fx); // trigger DiskReader overwrite
+			send_change (pc);
 		}
 	}
 

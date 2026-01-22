@@ -458,7 +458,7 @@ SessionDialog::session_folder ()
 			break;
 		case 2:
 			/* existing session chosen from file chooser */
-			return Glib::path_get_dirname (existing_session_chooser.get_current_folder ());
+			return existing_session_chooser.get_current_folder ();
 		default:
 			break;
 	}
@@ -1297,14 +1297,4 @@ SessionDialog::on_delete_event (GdkEventAny* ev)
 {
 	response (RESPONSE_CANCEL);
 	return ArdourDialog::on_delete_event (ev);
-}
-
-void
-SessionDialog::set_provided_session (string const & name, string const & path)
-{
-	/* Note: path is required to be the full path to the session file, not
-	   just the folder name
-	*/
-	new_name_entry.set_text (name);
-	existing_session_chooser.set_current_folder (Glib::path_get_dirname (path));
 }

@@ -560,6 +560,13 @@ VCATimeAxisView::drop_all_slaves ()
 }
 
 void
-VCATimeAxisView::choose_color () {
-	_color_picker.popup (_vca, PublicEditor::instance ().current_toplevel());
+VCATimeAxisView::choose_color ()
+{
+	StripableColorDialog* scd = _vca->active_color_picker();
+
+	if (!scd) {
+		scd = new StripableColorDialog (_vca);
+	}
+
+	scd->popup (dynamic_cast<Gtk::Window*> (PublicEditor::instance ().current_toplevel()));
 }

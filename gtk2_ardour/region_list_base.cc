@@ -492,7 +492,7 @@ RegionListBase::populate_row (std::shared_ptr<Region> region, TreeModel::Row con
 		populate_row_end (region, row);
 		populate_row_length (region, row);
 	}
-	if (all || what_changed.contains (Properties::region_fx)) {
+	if (all || what_changed.contains (Properties::region_fx_changed)) {
 		populate_row_regionfx (region, row);
 	}
 	if (all) {

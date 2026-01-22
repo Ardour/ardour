@@ -684,8 +684,8 @@ TriggerEntry::play_button_event (GdkEvent* ev)
 								/* Record till done */
 								trigger()->arm ();
 							} else {
-								/* use trigger follow length */
-								trigger()->arm (trigger()->follow_length());
+								/* use trigger capture duration */
+								trigger()->arm ();
 							}
 						}
 						return true;

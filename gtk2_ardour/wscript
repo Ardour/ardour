@@ -21,6 +21,7 @@ gtk2_ardour_sources = [
         'ambiguous_file_dialog.cc',
         'analysis_window.cc',
         'application_bar.cc',
+        'ardour_color_dialog.cc',
         'ardour_dialog.cc',
         'ardour_http.cc',
         'ardour_message.cc',

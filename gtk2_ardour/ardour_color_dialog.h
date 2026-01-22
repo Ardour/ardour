@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2017 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2026 Paul Davis <paul@linuxaudiosystems.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,25 +24,42 @@
 #include <ytkmm/colorbutton.h>
 #include <ytkmm/colorselection.h>
 
-#include "ardour_color_dialog.h"
+#include "ardour/presentation_info.h"
 
 namespace ARDOUR {
 	class Stripable;
 }
 
-class StripableColorDialog : public ArdourColorDialog
+class ArdourColorDialog : public Gtk::ColorSelectionDialog
 {
-public:
-	StripableColorDialog (std::shared_ptr<ARDOUR::Stripable>);
-	~StripableColorDialog ();
-	void popup (Gtk::Window*);
+  public:
+	ArdourColorDialog ();
 
-private:
-	void finish_color_edit (int response);
-	void color_changed ();
+	void popup (const std::string& name, uint32_t color, Gtk::Window* parent);
+	ARDOUR::PresentationInfo::color_t initial_color() const { return _initial_color; }
+	virtual void color_changed() {}
 
-	std::shared_ptr<ARDOUR::Stripable> _stripable;
+  protected:
+	ARDOUR::PresentationInfo::color_t _initial_color;
 
-	PBD::ScopedConnectionList _connections;
+  private:
+	void initialize_color_palette ();
+
+	static bool palette_initialized;
+	static void palette_changed_hook (const Glib::RefPtr<Gdk::Screen>&, const Gdk::ArrayHandle_Color&);
+	static Gtk::ColorSelection::SlotChangePaletteHook gtk_palette_changed_hook;
 };
 
+class ArdourColorButton : public Gtk::ColorButton
+{
+public:
+	ArdourColorButton ();
+
+protected:
+	void on_clicked();
+	void color_selected ();
+	void finish (int response);
+
+private:
+	ArdourColorDialog _color_picker;
+};

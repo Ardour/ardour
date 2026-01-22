@@ -593,7 +593,13 @@ VCAMasterStrip::state_id () const
 void
 VCAMasterStrip::start_color_edit ()
 {
-	_color_picker.popup (_vca, dynamic_cast<Gtk::Window*> (get_toplevel()));
+	StripableColorDialog* scd = _vca->active_color_picker();
+
+	if (!scd) {
+		scd = new StripableColorDialog (_vca);
+	}
+
+	scd->popup (dynamic_cast<Gtk::Window*> (get_toplevel()));
 }
 
 bool

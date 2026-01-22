@@ -70,7 +70,6 @@ public:
 
 protected:
 	virtual void region_changed (const PBD::PropertyChange&);
-	virtual void region_fx_changed ();
 
 	Gtk::Table _table_main;
 	Gtk::Table _table_clocks;
@@ -192,7 +191,6 @@ private:
 
 	PBD::ScopedConnection _state_connection;
 	PBD::ScopedConnection _audition_connection;
-	PBD::ScopedConnection _region_connection;
 
 	void bounds_changed (const PBD::PropertyChange&);
 	void tempo_changed (const PBD::PropertyChange&);

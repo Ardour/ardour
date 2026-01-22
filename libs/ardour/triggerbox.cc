@@ -81,6 +81,7 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<bool> use_follow_length;
 		PBD::PropertyDescriptor<Temporal::BBT_Offset> quantization;
 		PBD::PropertyDescriptor<Temporal::BBT_Offset> follow_length;
+		PBD::PropertyDescriptor<Temporal::BBT_Offset> capture_duration;
 		PBD::PropertyDescriptor<Trigger::LaunchStyle> launch_style;
 		PBD::PropertyDescriptor<ARDOUR::FollowAction> follow_action0;
 		PBD::PropertyDescriptor<ARDOUR::FollowAction> follow_action1;
@@ -112,6 +113,7 @@ TriggerBox::all_trigger_props()
 	all.add(Properties::use_follow_length);
 	all.add(Properties::quantization);
 	all.add(Properties::follow_length);
+	all.add(Properties::capture_duration);
 	all.add(Properties::follow_count);
 	all.add(Properties::launch_style);
 	all.add(Properties::follow_action0);
@@ -223,6 +225,7 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	, _follow_count (Properties::follow_count, 1)
 	, _quantization (Properties::quantization, Temporal::BBT_Offset (1, 0, 0))
 	, _follow_length (Properties::follow_length, Temporal::BBT_Offset (1, 0, 0))
+	, _capture_duration (Properties::capture_duration, Temporal::BBT_Offset (1, 0, 0))
 	, _use_follow_length (Properties::use_follow_length, false)
 	, _legato (Properties::legato, false)
 	, _gain (Properties::gain, 1.0)
@@ -244,6 +247,7 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	, _loop_cnt (0)
 	, _ui (0)
 	, _explicitly_stopped (false)
+	, _scene_switch (false)
 	, _pending_velocity_gain (1.0)
 	, _velocity_gain (1.0)
 	, _cue_launched (false)
@@ -266,6 +270,7 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	add_property (_follow_count);
 	add_property (_quantization);
 	add_property (_follow_length);
+	add_property (_capture_duration);
 	add_property (_use_follow_length);
 	add_property (_legato);
 	add_property (_name);
@@ -354,6 +359,7 @@ Trigger::get_ui_state (Trigger::UIState &state) const
 	state.follow_count = _follow_count;
 	state.quantization = _quantization;
 	state.follow_length = _follow_length;
+	state.capture_duration = _capture_duration;
 	state.use_follow_length = _use_follow_length;
 	state.legato = _legato;
 	state.gain = _gain;
@@ -410,6 +416,7 @@ Trigger::update_properties ()
 		_follow_count = ui_state.follow_count;
 		_quantization = ui_state.quantization;
 		_follow_length = ui_state.follow_length;
+		_capture_duration = ui_state.capture_duration;
 		_use_follow_length = ui_state.use_follow_length;
 		_legato = ui_state.legato;
 		_gain = ui_state.gain;
@@ -464,6 +471,7 @@ Trigger::copy_to_ui_state ()
 	ui_state.follow_count = _follow_count;
 	ui_state.quantization = _quantization;
 	ui_state.follow_length = _follow_length;
+	ui_state.capture_duration = _capture_duration;
 	ui_state.use_follow_length = _use_follow_length;
 	ui_state.legato = _legato;
 	ui_state.gain = _gain;
@@ -569,6 +577,7 @@ TRIGGER_UI_SET_CONST_REF (follow_action0, FollowAction)
 TRIGGER_UI_SET_CONST_REF (follow_action1, FollowAction)
 TRIGGER_UI_SET (launch_style, Trigger::LaunchStyle)
 TRIGGER_UI_SET_CONST_REF (follow_length, Temporal::BBT_Offset)
+TRIGGER_UI_SET_CONST_REF (capture_duration, Temporal::BBT_Offset)
 TRIGGER_UI_SET (use_follow_length, bool)
 TRIGGER_UI_SET (legato, bool)
 TRIGGER_UI_SET (follow_action_probability, int)
@@ -626,6 +635,12 @@ void
 Trigger::set_ui (void* p)
 {
 	_ui = p;
+}
+
+void
+Trigger::set_scene_switch (bool yn)
+{
+	_scene_switch = yn;
 }
 
 void
@@ -879,6 +894,8 @@ Trigger::shutdown_from_fwd ()
 	_loop_cnt = 0;
 	_cue_launched = false;
 	_pending_velocity_gain = _velocity_gain = 1.0;
+	_scene_switch = false;
+	_explicitly_stopped = false;
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 [%3] shuts down\n", _box.order(), index(), name()));
 	send_property_change (ARDOUR::Properties::running);
 }
@@ -941,6 +958,7 @@ Trigger::begin_switch (TriggerPtr nxt)
 	   stop, but wait for quantization first.
 	*/
 	_state = WaitingToSwitch;
+	_explicitly_stopped = true;
 	_nxt_quantization = nxt->_quantization;
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 begin_switch() requested state %2\n", index(), enum_2_string (_state)));
 	send_property_change (ARDOUR::Properties::running);
@@ -1281,50 +1299,69 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 void
 Trigger::when_stopped_during_run (BufferSet& bufs, pframes_t dest_offset)
 {
-	if (_state == Stopped || _state == Stopping) {
+	switch (_state) {
+	case Stopped:
+	case Stopping:
+	case WaitingToSwitch:
+		break;
+	default:
+		return;
+	}
 
-		if ((_state == Stopped) && !_explicitly_stopped && (launch_style() == Trigger::Gate || launch_style() == Trigger::Repeat)) {
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 stopped during run, state %2 explicit %3 ls %4 lc %5 fc %6 ss %7\n",
+	                                              index(),
+	                                              enum_2_string (_state),
+	                                              _explicitly_stopped,
+	                                              enum_2_string (launch_style()),
+	                                              _loop_cnt,
+	                                              _follow_count,
+	                                              _scene_switch));
 
-			jump_start ();
-			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopped, repeat/gate ret\n", index()));
+	if ((_state == Stopped) && _scene_switch) {
+
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 stopped by scene switch\n", index()));
+		shutdown (bufs, dest_offset);
+
+	} else if ((_state == Stopped) && !_explicitly_stopped && (launch_style() == Trigger::Gate || launch_style() == Trigger::Repeat)) {
+
+		jump_start ();
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopped, repeat/gate ret\n", index()));
+
+	} else {
+
+		if ((launch_style() != Repeat) && (launch_style() != Gate) && (_loop_cnt == _follow_count)) {
+
+			/* have played the specified number of times, we're done */
+
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 loop cnt %2 satisfied, now stopped with ls %3\n", index(), _follow_count, enum_2_string (launch_style())));
+			shutdown (bufs, dest_offset);
+
+		} else if (_state == Stopping) {
+
+			/* did not reach the end of the data. Presumably
+			 * another trigger was explicitly queued, and we
+			 * stopped
+			 */
+
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 not at end, but ow stopped\n", index()));
+			shutdown (bufs, dest_offset);
 
 		} else {
 
-			if ((launch_style() != Repeat) && (launch_style() != Gate) && (_loop_cnt == _follow_count)) {
+			/* reached the end, but we haven't done that enough
+			 * times yet for a follow action/stop to take
+			 * effect. Time to get played again.
+			 */
 
-				/* have played the specified number of times, we're done */
-
-				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 loop cnt %2 satisfied, now stopped with ls %3\n", index(), _follow_count, enum_2_string (launch_style())));
-				shutdown (bufs, dest_offset);
-
-
-			} else if (_state == Stopping) {
-
-				/* did not reach the end of the data. Presumably
-				 * another trigger was explicitly queued, and we
-				 * stopped
-				 */
-
-				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 not at end, but ow stopped\n", index()));
-				shutdown (bufs, dest_offset);
-
-			} else {
-
-				/* reached the end, but we haven't done that enough
-				 * times yet for a follow action/stop to take
-				 * effect. Time to get played again.
-				 */
-
-				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopping, now waiting to retrigger, loop cnt %2 fc %3\n", index(), _loop_cnt, _follow_count));
-				/* we will "restart" at the beginning of the
-				   next iteration of the trigger.
-				*/
-				_state = WaitingToStart;
-				retrigger ();
-			}
-
-			send_property_change (ARDOUR::Properties::running);
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopping, now waiting to retrigger, loop cnt %2 fc %3\n", index(), _loop_cnt, _follow_count));
+			/* we will "restart" at the beginning of the
+			   next iteration of the trigger.
+			*/
+			_state = WaitingToStart;
+			retrigger ();
 		}
+
+		send_property_change (ARDOUR::Properties::running);
 	}
 }
 
@@ -3546,6 +3583,8 @@ Trigger::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for use_follow_length = %1\n", Properties::use_follow_length.property_id));
 	Properties::follow_length.property_id = g_quark_from_static_string (X_("follow-length"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for follow_length = %1\n", Properties::follow_length.property_id));
+	Properties::capture_duration.property_id = g_quark_from_static_string (X_("capture-duration"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for capture_duration = %1\n", Properties::capture_duration.property_id));
 	Properties::legato.property_id = g_quark_from_static_string (X_("legato"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for legato = %1\n", Properties::legato.property_id));
 	Properties::velocity_effect.property_id = g_quark_from_static_string (X_("velocity-effect"));
@@ -3748,7 +3787,18 @@ TriggerBox::arm_from_another_thread (Trigger& slot, samplepos_t now, uint32_t ch
 	ai->start_samples = t_samples;
 	ai->start_beats = t_beats;
 
-	if (!duration) {
+	if (duration == Temporal::BBT_Offset()) {
+
+		/* not given, use slot's capture_duration */
+
+		if (slot.capture_duration() != Temporal::BBT_Offset()) {
+			timepos_t sb (ai->start_beats);
+			sb += slot.capture_duration();
+			ai->end_beats = sb.beats ();
+			ai->end_samples = timepos_t (ai->end_beats).samples();
+		}
+	} else {
+		/* explicitly given in this call to arm() so use it */
 		timepos_t sb (ai->start_beats);
 		sb += duration;
 		ai->end_beats = sb.beats ();
@@ -5053,6 +5103,9 @@ TriggerBox::run_cycle (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 		if (_active_scene < (int32_t) all_triggers.size()) {
 			if (!all_triggers[_active_scene]->cue_isolated()) {
 				if (all_triggers[_active_scene]->playable()) {
+					if (_currently_playing) {
+						_currently_playing->set_scene_switch (true);
+					}
 					all_triggers[_active_scene]->bang ();
 				} else {
 					stop_all_quantized ();  //empty slot, this should work as a Stop for the running clips

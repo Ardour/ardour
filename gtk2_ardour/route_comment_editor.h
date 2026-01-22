@@ -32,12 +32,11 @@ class BoolOption;
 class RouteCommentEditor : public ArdourWindow
 {
 public:
-	RouteCommentEditor ();
+	RouteCommentEditor (std::shared_ptr<ARDOUR::Route>);
 	~RouteCommentEditor ();
 
-	void reset ();
-	void toggle (std::shared_ptr<ARDOUR::Route>);
-	void open (std::shared_ptr<ARDOUR::Route>);
+	void toggle ();
+	void open ();
 
 private:
 	void comment_changed ();

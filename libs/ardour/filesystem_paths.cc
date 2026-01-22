@@ -194,18 +194,18 @@ user_cache_directory (int version)
 std::string
 ardour_dll_directory ()
 {
+	std::string dll_dir_path = Glib::getenv("ARDOUR_DLL_PATH");
+	if (dll_dir_path.empty()) {
 #ifdef PLATFORM_WINDOWS
-	std::string dll_dir_path(windows_package_directory_path());
-	dll_dir_path = Glib::build_filename (dll_dir_path, "lib");
-	return Glib::build_filename (dll_dir_path, LIBARDOUR);
+		dll_dir_path = windows_package_directory_path();
+		dll_dir_path = Glib::build_filename (dll_dir_path, "lib");
+		dll_dir_path = Glib::build_filename (dll_dir_path, LIBARDOUR);
 #else
-	std::string s = Glib::getenv("ARDOUR_DLL_PATH");
-	if (s.empty()) {
 		std::cerr << _("ARDOUR_DLL_PATH not set in environment - exiting\n");
 		::exit (EXIT_FAILURE);
-	}
-	return s;
 #endif
+	}
+	return dll_dir_path;
 }
 
 #ifdef PLATFORM_WINDOWS

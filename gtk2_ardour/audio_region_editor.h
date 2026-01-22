@@ -64,7 +64,6 @@ public:
 
 private:
 	void region_changed (PBD::PropertyChange const&);
-	void region_fx_changed ();
 
 	void gain_changed ();
 	void gain_adjustment_changed ();

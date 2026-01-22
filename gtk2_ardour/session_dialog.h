@@ -78,7 +78,6 @@ public:
 	uint32_t master_channel_count();
 	void on_show ();
 
-	void set_provided_session (std::string const & name, std::string const & path);
 	void clear_name ();
 	bool was_new_name_edited() const { return new_name_was_edited; }
 
