@@ -4578,11 +4578,6 @@ TriggerBox::set_from_path (uint32_t slot, std::string const & path)
 
 		std::shared_ptr<Region> r = RegionFactory::create (src_list, plist);
 
-		std::cerr << "Created a whole file region created " << r->name() << std::endl;
-		for (auto const & src : src_list) {
-			std::cerr << '\t' << " source is " << src->name() << std::endl;
-		}
-
 		if (std::dynamic_pointer_cast<AudioRegion>(r)) {
 			std::dynamic_pointer_cast<AudioRegion>(r)->special_set_position(src_list[0]->natural_position());
 		}
