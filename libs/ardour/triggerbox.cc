@@ -4556,7 +4556,7 @@ TriggerBox::set_from_path (uint32_t slot, std::string const & path)
 			src_list.push_back (src);
 		}
 
-		/* take all the sources we have and package them up as a while file region */
+		/* take all the sources we have and package them up as a whole file region */
 
 		std::string wf_region_name = region_name_from_path (path, false, false);
 
