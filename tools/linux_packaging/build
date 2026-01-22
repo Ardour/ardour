@@ -248,7 +248,6 @@ mkdir -p $Themes
 mkdir -p $Locale
 mkdir -p $Surfaces
 mkdir -p $MidiMaps
-mkdir -p $LuaScripts
 mkdir -p $MackieControl
 mkdir -p $OSC
 mkdir -p $ExportFormats
@@ -257,7 +256,11 @@ mkdir -p $Backends
 mkdir -p $Shared/doc
 
 if test -z "$VBM" -a -z "$LIVETRAX"; then
-mkdir -p $PatchFiles
+	mkdir -p $PatchFiles
+fi
+
+if -z "$LIVETRAX"; then
+	mkdir -p $LuaScripts
 fi
 
 # maybe set variables
@@ -386,15 +389,17 @@ if test -z "$VBM" -a -z "$LIVETRAX"; then
 	done
 fi
 
-# Lua Scripts Files
-# got to be careful with names here
-for x in $BUILD_ROOT/../share/scripts/*.lua ; do
-		BN=$(basename $x)
-	  if test "${BN:0:1}" = "_"; then
-			continue;
-		fi
-    cp "$x" $LuaScripts
-done
+if test -z "$LIVETRAX"; then
+	# Lua Scripts Files
+	# got to be careful with names here
+	for x in $BUILD_ROOT/../share/scripts/*.lua ; do
+			BN=$(basename $x)
+			if test "${BN:0:1}" = "_"; then
+				continue;
+			fi
+			cp "$x" $LuaScripts
+	done
+fi
 
 # recursively copy web-surface html/js
 cp -a $BUILD_ROOT/../share/web_surfaces $WebSurfaces

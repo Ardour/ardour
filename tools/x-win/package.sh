@@ -257,6 +257,9 @@ find $DESTDIR -name "*.dll.a" -print0 | xargs -0 -r rm
 if test -n "$VBM" -o -n "$LIVETRAX"; then
 	rm -rf $DESTDIR/share/*/patchfiles
 fi
+if test -n "$LIVETRAX"; then
+	rm -rf $DESTDIR/share/*/scripts
+fi
 
 echo " === complete"
 du -sh $DESTDIR
