@@ -708,6 +708,12 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 	size_t nfiles = newsrcs.size();
 	size_t n = 0;
 	int32_t meta_track = -1;
+	vector<std::shared_ptr<Source>>::iterator nsi;
+
+	/* If we're splitting channels, do the inner loop once for each
+	   channel; otherwise, just do it once.
+	*/
+	int channel_limit = (split_midi_channels ? 16 : 1);
 
 	switch (source->smf_format()) {
 	case 0:
@@ -732,7 +738,6 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 		break;
 
 	case 1:
-		channel = 0;
 
 		for (uint16_t n = 0; n < source->num_tracks(); ++n) {
 			if (track_contains_tempo_or_key_metadata (source, n)) {
@@ -741,32 +746,34 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 			}
 		}
 
-		for (auto nsi = newsrcs.begin(); nsi != newsrcs.end(); ) {
+		for (n = 0, nsi = newsrcs.begin(); n < source->num_tracks(); ++n) {
+			for (int channel = 0; channel < channel_limit; ++channel) {
 
-			std::shared_ptr<SMFSource> smfs = std::dynamic_pointer_cast<SMFSource> (*nsi);
-			assert (smfs);
+				std::shared_ptr<SMFSource> smfs = std::dynamic_pointer_cast<SMFSource> (*nsi);
+				assert (smfs);
 
-			bool meta_only = write_midi_type1_data_to_one_file (source, status, smfs, n, split_midi_channels, channel, meta_track);
+				/* Note that "channel" is irrelevant if
+				 * split_midi_channels is false - all events
+				 * for this track will be written to the new
+				 * file. It matters only if split_midi_channels
+				 * is true, and if so, we'll run this inner
+				 * loop for every channel.
+				 */
 
-			if (meta_only) {
-				std::shared_ptr<FileSource> fs (std::dynamic_pointer_cast<FileSource>(*nsi));
-				assert (fs);
-				fs->mark_removable ();
-				nsi = newsrcs.erase (nsi);
-			}
+				bool meta_only = write_midi_type1_data_to_one_file (source, status, smfs, n, split_midi_channels, channel, meta_track);
 
-			if (split_midi_channels) {
-				channel = (channel + 1) % 16;
-			}
+				if (meta_only) {
+					std::shared_ptr<FileSource> fs (std::dynamic_pointer_cast<FileSource>(*nsi));
+					assert (fs);
+					fs->mark_removable ();
+					nsi = newsrcs.erase (nsi);
+				} else {
+					++nsi;
+				}
 
-			if (status.cancel) {
-				break;
-			}
-
-			++n;
-
-			if (!meta_only) {
-				++nsi;
+				if (status.cancel) {
+					break;
+				}
 			}
 		}
 		break;
