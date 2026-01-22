@@ -254,7 +254,7 @@ echo " === bundle completed, cleaning up"
 find $DESTDIR -name "*.dll.a" -print0 | xargs -0 -r rm
 
 # no need for MIDNAM
-if test -n "$VBM" -o test -n "$LIVETRAX"; then
+if test -n "$VBM" -o -n "$LIVETRAX"; then
 	rm -rf $DESTDIR/share/*/patchfiles
 fi
 
