@@ -4556,15 +4556,48 @@ TriggerBox::set_from_path (uint32_t slot, std::string const & path)
 			src_list.push_back (src);
 		}
 
+		/* take all the sources we have and package them up as a while file region */
+
+		std::string wf_region_name = region_name_from_path (path, false, false);
+
+		/* we checked in import_sndfiles() that there were not too many */
+
+		while (RegionFactory::region_by_name (wf_region_name)) {
+			wf_region_name = bump_name_once (wf_region_name, '.');
+		}
+
 		PropertyList plist;
 
-		plist.add (Properties::start, 0);
-		plist.add (Properties::length, src_list.front()->length ());
-		plist.add (Properties::name, basename_nosuffix (path));
-		plist.add (Properties::layer, 0);
-		plist.add (Properties::layering_index, 0);
+		plist.add (ARDOUR::Properties::start, timecnt_t (src_list[0]->type() == DataType::AUDIO ? Temporal::AudioTime : Temporal::BeatTime));
+		plist.add (ARDOUR::Properties::length, src_list[0]->length ());
+		plist.add (ARDOUR::Properties::name, wf_region_name);
+		plist.add (ARDOUR::Properties::layer, 0);
+		plist.add (ARDOUR::Properties::whole_file, true);
+		plist.add (ARDOUR::Properties::external, true);
+		plist.add (ARDOUR::Properties::opaque, true);
 
-		std::shared_ptr<Region> the_region (RegionFactory::create (src_list, plist, true));
+		std::shared_ptr<Region> r = RegionFactory::create (src_list, plist);
+
+		std::cerr << "Created a whole file region created " << r->name() << std::endl;
+		for (auto const & src : src_list) {
+			std::cerr << '\t' << " source is " << src->name() << std::endl;
+		}
+
+		if (std::dynamic_pointer_cast<AudioRegion>(r)) {
+			std::dynamic_pointer_cast<AudioRegion>(r)->special_set_position(src_list[0]->natural_position());
+		}
+
+		/* Now create a non-whole-file region */
+
+		PropertyList plist2;
+
+		plist2.add (Properties::start, 0);
+		plist2.add (Properties::length, src_list.front()->length ());
+		plist2.add (Properties::name, basename_nosuffix (path));
+		plist2.add (Properties::layer, 0);
+		plist2.add (Properties::layering_index, 0);
+
+		std::shared_ptr<Region> the_region (RegionFactory::create (src_list, plist2, true));
 
 		all_triggers[slot]->set_region (the_region);
 
