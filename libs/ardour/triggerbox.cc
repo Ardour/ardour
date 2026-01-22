@@ -638,6 +638,12 @@ Trigger::set_ui (void* p)
 }
 
 void
+Trigger::set_scene_switch (bool yn)
+{
+	_scene_switch = yn;
+}
+
+void
 Trigger::bang (float velocity)
 {
 	if (!_region) {
