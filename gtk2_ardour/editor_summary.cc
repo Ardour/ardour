@@ -775,14 +775,18 @@ EditorSummary::on_scroll_event (GdkEventScroll* ev)
 	get_editor (&xr);
 	double x = xr.first;
 
+	bool user_needs_to_buy_a_proper_mouse = false;
+
 	GdkScrollDirection direction = ev->direction;
 
 	if (ev->state & Keyboard::TertiaryModifier) {
 		switch (ev->direction) {
 			case GDK_SCROLL_UP:
+				user_needs_to_buy_a_proper_mouse = true;
 				direction = GDK_SCROLL_LEFT;
 				break;
 			case GDK_SCROLL_DOWN:
+				user_needs_to_buy_a_proper_mouse = true;
 				direction = GDK_SCROLL_RIGHT;
 				break;
 			default:
@@ -810,7 +814,7 @@ EditorSummary::on_scroll_event (GdkEventScroll* ev)
 				_editor.temporal_zoom_step (false);
 			} else if (Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier)) {
 				x -= 64;
-			} else if (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
+			} else if (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier) && !user_needs_to_buy_a_proper_mouse) {
 				x -= 1;
 			} else {
 				_editor.scroll_left_half_page ();
@@ -822,7 +826,7 @@ EditorSummary::on_scroll_event (GdkEventScroll* ev)
 				_editor.temporal_zoom_step (true);
 			} else if (Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier)) {
 				x += 64;
-			} else if (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
+			} else if (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier) && !user_needs_to_buy_a_proper_mouse) {
 				x += 1;
 			} else {
 				_editor.scroll_right_half_page ();
