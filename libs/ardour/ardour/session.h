@@ -2359,6 +2359,7 @@ private:
 	void setup_click ();
 	void setup_click_state (const XMLNode*);
 	void setup_bundles ();
+	void setup_bundles_rcu ();
 
 	void port_registry_changed ();
 	void probe_ctrl_surfaces ();
