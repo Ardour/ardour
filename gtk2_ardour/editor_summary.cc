@@ -779,7 +779,7 @@ EditorSummary::on_scroll_event (GdkEventScroll* ev)
 
 	GdkScrollDirection direction = ev->direction;
 
-	if (ev->state & Keyboard::TertiaryModifier) {
+	if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollHorizontalModifier)) {
 		switch (ev->direction) {
 			case GDK_SCROLL_UP:
 				user_needs_to_buy_a_proper_mouse = true;
