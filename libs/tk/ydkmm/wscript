@@ -51,7 +51,11 @@ def configure(conf):
     autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0', mandatory=True)
 
 def build(bld):
-    obj = bld.shlib(features = 'cxx cxxshlib', source=libydkmm_sources)
+    features = 'cxx cxxshlib'
+    if bld.env['build_target'] == 'msvc':
+        features += ' gendef'
+    
+    obj = bld.shlib(features=features, source=libydkmm_sources)
     obj.cxxflags        = [ bld.env['compiler_flags_dict']['pic'] ]
     obj.cflags          = [ bld.env['compiler_flags_dict']['pic'] ]
     obj.export_includes = ['.']
