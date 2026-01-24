@@ -37,7 +37,9 @@
 #include <cstring>
 #include <cerrno>
 #include <iostream>
+#ifndef COMPILER_MSVC
 #include <sys/time.h>
+#endif
 #include <errno.h>
 #include <fcntl.h>
 
@@ -777,7 +779,12 @@ ARDOUR::compute_sha1_of_file (std::string path)
 	Sha1Digest s;
 	sha1_init (&s);
 
-	while ((n_read = ::read(fd, buf, sizeof(buf))) > 0) {
+#ifdef COMPILER_MSVC
+	while ((n_read = ::_read(fd, buf, sizeof(buf))) > 0)
+#else
+	while ((n_read = ::read(fd, buf, sizeof(buf))) > 0)
+#endif
+	{
 		sha1_write (&s, (const uint8_t*) buf, n_read);
 	}
 

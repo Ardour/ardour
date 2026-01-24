@@ -28,6 +28,7 @@
 
 #ifdef COMPILER_MSVC
 #include <sys/utime.h>
+#include <io.h>
 #else
 #include <utime.h>
 #endif

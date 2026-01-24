@@ -1331,7 +1331,7 @@ PluginInsert::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		_timing_stats.reset ();
 	}
 
-	if (_active != _pending_active && !_pending_active) {
+	if (_active && _pending_active == 0) {
 		/* deactivate */
 		for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 			(*i)->deactivate ();

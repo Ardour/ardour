@@ -213,7 +213,7 @@ FollowAction::to_string () const
 }
 
 
-Trigger * const Trigger::MagicClearPointerValue = (Trigger*) 0xfeedface;
+Trigger * const Trigger::MagicClearPointerValue = reinterpret_cast<Trigger*>(uintptr_t(0xfeedface));
 PBD::Signal<void(PropertyChange,Trigger*)> Trigger::TriggerPropertyChange;
 PBD::Signal<void(Trigger const *)> Trigger::TriggerArmChanged;
 
@@ -1170,7 +1170,7 @@ Trigger::compute_next_transition (samplepos_t start_sample, Temporal::Beats cons
 	BBT_Offset q (_start_quantization);
 
 	/* Clips don't stop on their own quantize; in Live they stop on the Global Quantize setting; we will choose 1 bar (Live's default) for now */
-#warning when Global Quantize is implemented, use that instead of '1 bar' here
+#pragma message("WARNING: when Global Quantize is implemented, use that instead of '1 bar' here")
 	if (_state == WaitingToStop) {
 
 		q = BBT_Offset(1,0,0);
@@ -3310,7 +3310,7 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 
 		RTMidiBufferBeats::Item const & item ((*rtmb)[iter]);
 #ifndef NDEBUG
-#warning paul, please remove these debug messages
+#pragma message("WARNING: paul, please remove these debug messages")
 		std::cerr << "Looking at event #" << iter << " @ " << item.timestamp << " transition was " << transition_beats << " rs " << region_start << std::endl;
 #endif
 
