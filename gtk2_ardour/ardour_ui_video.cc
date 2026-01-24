@@ -36,6 +36,12 @@
 #include "gtk2ardour-version.h"
 #endif
 
+#ifdef COMPILER_MSVC
+#include <sys/stat.h>
+#define S_ISDIR(mode) (((mode) & _S_IFDIR) != 0)
+#define S_IXUSR _S_IEXEC
+#endif
+
 #include "pbd/gstdio_compat.h"
 
 #include <ytkmm/stock.h>

@@ -34,6 +34,11 @@
 #include <windows.h>
 #endif
 
+#ifdef COMPILER_MSVC
+#include <sys/stat.h>
+#define S_ISREG(m) (((m) & _S_IFMT) == _S_IFREG)
+#endif
+
 #include <map>
 #include <cerrno>
 #include <sstream>
