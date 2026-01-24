@@ -217,6 +217,18 @@ EditorSummary::render_background_image ()
 		y += _track_height;
 	}
 
+	/* top and bottom border */
+
+	cairo_set_line_width (cr, 1);
+	Gtkmm2ext::set_source_rgba (cr, _background_color);
+
+	cairo_move_to (cr, 0, 0.5);
+	cairo_line_to (cr, get_width(), 0.5);
+	cairo_stroke (cr);
+	cairo_move_to (cr, 0, get_height() - 0.5);
+	cairo_line_to (cr, get_width(), get_height() - 0.5);
+	cairo_stroke (cr);
+
 	/* start and end markers */
 
 	cairo_set_line_width (cr, 1);
