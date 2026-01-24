@@ -24,5 +24,7 @@ def build(bld):
     obj.name         = 'libardour_osc'
     obj.target       = 'ardour_osc'
     obj.uselib       = 'LO XML OSX GLIBMM GIOMM PANGOMM'
+    if bld.env['build_target'] == 'msvc':
+        obj.env['LIB_LO'] = ['liblo']
     obj.use          = 'libardour libardour_cp libgtkmm2ext libpbd libytkmm'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')

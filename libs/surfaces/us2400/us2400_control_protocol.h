@@ -24,7 +24,9 @@
 #include <list>
 #include <set>
 
+#ifndef COMPILER_MSVC
 #include <sys/time.h>
+#endif
 #include <pthread.h>
 #define ABSTRACT_UI_EXPORTS
 #include "pbd/abstract_ui.h"

@@ -29,7 +29,9 @@
 #include <cerrno>
 #include <algorithm>
 
+#ifndef COMPILER_MSVC
 #include <unistd.h>
+#endif
 #include <fcntl.h>
 
 #include "pbd/gstdio_compat.h"

@@ -29,7 +29,9 @@
 
 #ifdef COMPILER_MSVC
 #include <io.h> // Microsoft's nearest equivalent to <unistd.h>
+#ifndef WAF_BUILD
 #include <ardourext/misc.h>
+#endif
 #else
 #include <regex.h>
 #endif

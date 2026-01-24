@@ -16,6 +16,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#ifdef COMPILER_MSVC
+#define _WINSOCKAPI_
+#endif
+
 #include <libusb.h>
 
 #include <ytkmm/adjustment.h>
