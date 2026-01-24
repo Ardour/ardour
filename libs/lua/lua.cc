@@ -50,7 +50,11 @@ extern "C"
 #  undef LUA_API
 #  undef LUALIB_API
 #  undef LUAMOD_API
-#  define LUA_API     extern "C"
+#  if defined(COMPILER_MSVC) && defined(WAF_BUILD)
+#    define LUA_API     extern "C" __declspec(dllexport)
+#  else
+#    define LUA_API     extern "C"
+#  endif
 #  define LUALIB_API  LUA_API
 #  define LUAMOD_API  LUALIB_API
 #endif
