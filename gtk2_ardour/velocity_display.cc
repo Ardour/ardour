@@ -70,7 +70,7 @@ VelocityDisplay::VelocityDisplay (EditingContext& ec, MidiViewBackground& backgr
 	, _sensitive (false)
 {
 	base.set_data (X_("ghostregionview"), this);
-	base.Event.connect (sigc::mem_fun (*this, &VelocityDisplay::base_event));
+	base_connection = base.Event.connect (sigc::mem_fun (*this, &VelocityDisplay::base_event));
 	base.set_fill_color (UIConfiguration::instance().color_mod ("ghost track base", "ghost track midi fill"));
 	base.set_outline_color (UIConfiguration::instance().color ("automation track outline"));
 	base.set_outline (true);
@@ -79,6 +79,7 @@ VelocityDisplay::VelocityDisplay (EditingContext& ec, MidiViewBackground& backgr
 
 VelocityDisplay::~VelocityDisplay ()
 {
+	base_connection.disconnect ();
 }
 
 bool

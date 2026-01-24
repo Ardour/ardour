@@ -329,7 +329,7 @@ EditorSections::drag_motion (Glib::RefPtr<Gdk::DragContext> const& context, int 
 {
 	std::string const& target = _view.drag_dest_find_target (context, _view.drag_dest_get_target_list ());
 
-	if (target != "x-ardour/section") {
+	if (target != "x-ardour/section" || _model->children ().empty ()) {
 		context->drag_status (Gdk::DragAction (0), time);
 		return false;
 	}
@@ -346,7 +346,6 @@ EditorSections::drag_motion (Glib::RefPtr<Gdk::DragContext> const& context, int 
 	TreeViewDropPosition pos;
 
 	if (!_view.get_dest_row_at_pos (x, y, path, pos)) {
-		assert (_model->children ().size () > 0);
 		pos  = Gtk::TREE_VIEW_DROP_AFTER;
 		path = TreeModel::Path ();
 		path.push_back (_model->children ().size () - 1);
@@ -402,7 +401,7 @@ EditorSections::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& contex
 		/* paste at end */
 		TreeModel::Children rows = _model->children ();
 		assert (!rows.empty ());
-		Gtk::TreeModel::Row row = *rows.rbegin ();
+		Gtk::TreeModel::Row row = *prev(rows.end ());
 		to                      = row[_columns.end];
 #ifndef NDEBUG
 		cout << "EditorSections::drag_data_received - paste at end\n";

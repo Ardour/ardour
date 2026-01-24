@@ -23,6 +23,8 @@
 #include <glibmm/threads.h>
 
 #include "temporal/beats.h"
+
+#include "ardour/debug.h"
 #include "ardour/midi_buffer.h"
 #include "ardour/source.h"
 
@@ -57,6 +59,11 @@ public:
 
 	void flush_notes (MidiBuffer& buffer, samplepos_t time, bool reset = true);
 
+	template<typename Time>
+	void flush_notes (Evoral::EventSink<Time> &sink, Time time, bool reset = true) {
+		push_notes<Time> (sink, time, reset, MIDI_CMD_NOTE_ON, 64);
+	}
+
 	bool empty() const { return _on == 0; }
 	uint16_t on() const { return _on; }
 	bool active (uint8_t note, uint8_t channel) const {
@@ -74,6 +81,36 @@ private:
 
 	void push_notes (MidiBuffer &dst, samplepos_t time, bool reset, int cmd, int velocity);
 
+	template<typename Time>
+	void push_notes (Evoral::EventSink<Time> &dst, Time time, bool reset, int cmd, int velocity) {
+		DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1 ES::push_notes @ %2 on = %3\n", this, time, _on));
+
+		if (!_on) {
+			return;
+		}
+
+		for (int channel = 0; channel < 16; ++channel) {
+			const int coff = channel << 7;
+			for (int note = 0; note < 128; ++note) {
+				uint8_t cnt = _active_notes[note + coff];
+				while (cnt) {
+					uint8_t buffer[3] = { ((uint8_t) (cmd | channel)), uint8_t (note), (uint8_t) velocity };
+					/* note that we do not care about failure from
+					   write() ... should we warn someone ?
+					*/
+					dst.write (time, Evoral::MIDI_EVENT, 3, buffer);
+					cnt--;
+					DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1: MB-push note %2/%3 at %4\n", this, (int) note, (int) channel, time));
+				}
+				if (reset) {
+					_active_notes [note + coff] = 0;
+				}
+			}
+		}
+		if (reset) {
+			_on = 0;
+		}
+	}
 };
 
 class LIBARDOUR_API MidiStateTracker : public MidiNoteTracker

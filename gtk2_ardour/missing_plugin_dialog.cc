@@ -21,6 +21,8 @@
 
 #include <ytkmm/label.h>
 
+#include "gtkmm2ext/utils.h"
+
 #include "pbd/compose.h"
 #include "missing_plugin_dialog.h"
 
@@ -43,7 +45,7 @@ MissingPluginDialog::MissingPluginDialog (Gtk::Window& parent, Session* s, list<
 	t << _("This session contains the following plugins that cannot be found on this system:\n\n");
 
 	for (list<string>::const_iterator i = plugins.begin(); i != plugins.end(); ++i) {
-		t << *i << "\n";
+		t << Gtkmm2ext::markup_escape_text (*i) << "\n";
 	}
 	t << _("\nThose plugins will be replaced with inactive stubs until the session is reloaded.\n");
 

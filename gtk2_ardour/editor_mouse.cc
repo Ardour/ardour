@@ -574,7 +574,10 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		if (ArdourKeyboard::indicates_constraint (event->button.state)) {
 			_drags->set (new TempoEndDrag (*this, item), event);
 		} else {
-			_drags->set (new TempoMarkerDrag (*this, item), event);
+			try {
+				_drags->set (new TempoMarkerDrag (*this, item), event);
+			} catch (...) {
+			}
 		}
 
 		return true;
@@ -588,8 +591,10 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		return true;
 
 	case MeterMarkerItem:
-		_drags->set (
-			new MeterMarkerDrag (*this, item, ArdourKeyboard::indicates_copy (event->button.state)), event);
+		try {
+			_drags->set (new MeterMarkerDrag (*this, item, ArdourKeyboard::indicates_copy (event->button.state)), event);
+		} catch (...) {
+		}
 		return true;
 
 	case VideoBarItem:

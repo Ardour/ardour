@@ -30,6 +30,7 @@
 
 #include "temporal/timeline.h"
 
+#include "ardour/location.h"
 #include "ardour/types.h"
 #include "ardour/presentation_info.h"
 
@@ -49,7 +50,7 @@ class LIBCONTROLCP_API BasicUI {
 	BasicUI (ARDOUR::Session&);
 	virtual ~BasicUI ();
 
-	void add_marker (const std::string& = std::string());
+	void add_marker (const std::string& = std::string(), ARDOUR::Location::Flags flags = ARDOUR::Location::IsMark);
 	void remove_marker_at_playhead ();
 
 //	void mark_in();
@@ -87,6 +88,8 @@ class LIBCONTROLCP_API BasicUI {
 	bool locked ();
 
 	void save_state ();
+	bool session_empty () const;
+
 	void prev_marker ();
 	void next_marker ();
 	void undo ();

@@ -359,6 +359,7 @@ public:
 	uint32_t ntracks () const;
 	uint32_t naudiotracks () const;
 	uint32_t nbusses () const;
+	bool     empty () const;
 
 	bool plot_process_graph (std::string const& file_name) const;
 
@@ -768,6 +769,22 @@ public:
 	/* fundamental operations. duh. */
 
 	std::list<std::shared_ptr<AudioTrack> > new_audio_track (
+		int input_channels,
+		int output_channels,
+		std::shared_ptr<RouteGroup> route_group,
+		uint32_t how_many,
+		std::string name_template,
+		PresentationInfo::order_t order,
+		TrackMode mode = Normal,
+		bool input_auto_connect = true,
+		bool trigger_visibility = false
+		);
+
+	/* Call this repeatedly with different track name templates and finally call add_routes.
+	 * useful for speeding up imports of various kinds that involve lots of tracks */
+	bool new_audio_routes_tracks_bulk (
+		RouteList& routes,
+		std::list<std::shared_ptr<AudioTrack> >& tracks,
 		int input_channels,
 		int output_channels,
 		std::shared_ptr<RouteGroup> route_group,
@@ -1348,7 +1365,7 @@ public:
 	void import_pt_rest (PTFFormat& ptf);
 	bool import_sndfile_as_region (std::string path, SrcQuality quality, timepos_t& pos, SourceList& sources, ImportStatus& status, uint32_t current, uint32_t total);
 
-	struct ptflookup {
+	typedef struct ptflookup {
 		uint16_t index1;
 		uint16_t index2;
 		PBD::ID  id;
@@ -1356,9 +1373,8 @@ public:
 		bool operator ==(const struct ptflookup& other) {
 			return (this->index1 == other.index1);
 		}
-	};
-	std::vector<struct ptflookup> ptfwavpair;
-	SourceList pt_imported_sources;
+	} PtfLookup;
+	std::vector<PtfLookup> ptfregpair;
 
 	enum TimingTypes {
 		OverallProcess = 0,
@@ -2343,6 +2359,7 @@ private:
 	void setup_click ();
 	void setup_click_state (const XMLNode*);
 	void setup_bundles ();
+	void setup_bundles_rcu ();
 
 	void port_registry_changed ();
 	void probe_ctrl_surfaces ();

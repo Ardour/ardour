@@ -860,11 +860,10 @@ SMF::tempo_map (bool& provided) const
 		Evoral::SMF::Tempo* t = nth_tempo (n);
 		assert (t);
 
-		Temporal::Tempo tempo (t->tempo(), 32.0 / (double) t->notes_per_note);
+		Temporal::Tempo tempo (t->tempo(), t->notes_per_note == 0 ? t->denominator : 32.0 / (double) t->notes_per_note);
 		Meter meter (t->numerator, t->denominator);
 
-		Beats beats (t->time_pulses / (uint64_t) ppqn(),
-		                       ((t->time_pulses % (uint64_t) ppqn()) * ticks_per_beat) / ppqn());;
+		Beats beats (t->time_pulses / (uint64_t) ppqn(), ((t->time_pulses % (uint64_t) ppqn()) * ticks_per_beat) / ppqn());;
 		BBT_Argument bbt; /* 1|1|0 which is correct for the no-meter case */
 		superclock_t sc;
 
@@ -891,6 +890,10 @@ SMF::tempo_map (bool& provided) const
 		empty = false;
 	}
 	new_map->smf_end();
+
+	if (new_map->n_tempos() == 0 || new_map->n_meters() == 0) {
+		return nullptr;
+	}
 
 	provided = true;
 	return new_map;

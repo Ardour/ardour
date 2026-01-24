@@ -2072,23 +2072,23 @@ class MidiPortOptions : public OptionEditorMiniPage, public sigc::trackable
 
 			input_scroller.add (midi_input_view);
 			input_scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
-			input_scroller.set_size_request (-1, 180);
+			input_scroller.set_size_request (-1, 300);
 			input_scroller.show ();
 
 			int n = table.property_n_rows();
-			table.attach (input_scroller, 0, 3, n, n + 1, FILL | EXPAND);
-			table.attach (no_input_label, 1, 3, n + 1, n + 2, FILL | EXPAND);
+			table.attach (input_scroller, 0, 3, n, n + 1);
+			table.attach (no_input_label, 1, 3, n + 1, n + 2);
 
 			output_heading.add_to_page (this);
 
 			output_scroller.add (midi_output_view);
 			output_scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
-			output_scroller.set_size_request (-1, 180);
+			output_scroller.set_size_request (-1, 300);
 			output_scroller.show ();
 
 			n = table.property_n_rows();
-			table.attach (output_scroller, 0, 3, n, n + 1, FILL | EXPAND);
-			table.attach (no_output_label, 1, 3, n + 1, n + 2, FILL | EXPAND);
+			table.attach (output_scroller, 0, 3, n, n + 1);
+			table.attach (no_output_label, 1, 3, n + 1, n + 2);
 
 			midi_output_view.show ();
 			midi_input_view.show ();
@@ -5187,6 +5187,7 @@ These settings will only take effect after %1 is restarted.\n\
 	parameter_changed ("send-ltc");
 	parameter_changed ("sync-source");
 	parameter_changed ("open-gui-after-adding-plugin");
+	parameter_changed ("use-monitor-bus");
 
 #ifdef __APPLE__
 	parameter_changed ("use-opengl-view");

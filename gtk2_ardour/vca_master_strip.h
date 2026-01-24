@@ -114,7 +114,6 @@ private:
 	void update_bottom_padding ();
 
 	void start_color_edit ();
-	StripableColorDialog _color_picker;
 };
 
 

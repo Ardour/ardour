@@ -28,6 +28,7 @@
 
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/gui_thread.h"
+#include "gtkmm2ext/keyboard.h"
 
 #include "ardour/audioengine.h"
 #include "ardour/disk_reader.h"
@@ -792,6 +793,24 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 	bind_dialog (L);
 
 	luabridge::getGlobalNamespace (L)
+
+		.beginNamespace ("Keyboard")
+		.addConst ("PrimaryModifier", Gtkmm2ext::Keyboard::PrimaryModifier)
+		.addConst ("SecondaryModifier", Gtkmm2ext::Keyboard::SecondaryModifier)
+		.addConst ("TertiaryModifier", Gtkmm2ext::Keyboard::TertiaryModifier)
+		.addConst ("Level4Modifier", Gtkmm2ext::Keyboard::Level4Modifier)
+		.addConst ("CapsLockModifier", Gtkmm2ext::Keyboard::CapsLockModifier)
+
+		.addVariable ("CopyModifier", &Gtkmm2ext::Keyboard::CopyModifier)
+		.addVariable ("RangeSelectModifier", &Gtkmm2ext::Keyboard::RangeSelectModifier)
+		.addVariable ("GainFineScaleModifier", &Gtkmm2ext::Keyboard::GainFineScaleModifier)
+		.addVariable ("GainExtraFineScaleModifier", &Gtkmm2ext::Keyboard::GainExtraFineScaleModifier)
+
+		.addVariable ("ScrollZoomVerticalModifier", &Gtkmm2ext::Keyboard::ScrollZoomVerticalModifier)
+		.addVariable ("ScrollZoomHorizontalModifier", &Gtkmm2ext::Keyboard::ScrollZoomHorizontalModifier)
+		.addVariable ("ScrollHorizontalModifier", &Gtkmm2ext::Keyboard::ScrollHorizontalModifier)
+		.endNamespace ()
+
 		.beginNamespace ("ArdourUI")
 
 		.addFunction ("http_get", &http_get_unlogged)
@@ -1143,6 +1162,17 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 #undef UI_CONFIG_VARIABLE
 		.endClass()
 
+		/* enums */
+		.beginNamespace ("Gtk")
+		.beginNamespace ("WindowPosition")
+		.addConst ("None", Gtk::WIN_POS_NONE)
+		.addConst ("Center", Gtk::WIN_POS_CENTER)
+		.addConst ("Mouse", Gtk::WIN_POS_MOUSE)
+		.addConst ("CenterAlways", Gtk::WIN_POS_CENTER_ALWAYS)
+		.addConst ("CenterOnParent", Gtk::WIN_POS_CENTER_ON_PARENT)
+		.endNamespace ()
+		.endNamespace ()
+
 		.addFunction ("config", &_ui_config)
 
 		.endNamespace (); // end ArdourUI
@@ -1158,6 +1188,7 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 #undef IMPORTDISPOSITION
 #undef TEMPOEDITBEHAVIOR
 #undef NOTENAMEDISPLAY
+#undef REGIONEDITDISPOSITION
 
 #define ZOOMFOCUS(NAME) .addConst (stringify(NAME), (Editing::ZoomFocus)Editing::NAME)
 #define GRIDTYPE(NAME) .addConst (stringify(NAME), (Editing::GridType)Editing::NAME)
@@ -1168,6 +1199,7 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 #define IMPORTPOSITION(NAME) .addConst (stringify(NAME), (Editing::ImportPosition)Editing::NAME)
 #define IMPORTDISPOSITION(NAME) .addConst (stringify(NAME), (Editing::ImportDisposition)Editing::NAME)
 #define NOTENAMEDISPLAY(NAME) .addConst (stringify(NAME), (Editing::NoteNameDisplay)Editing::NAME)
+#define REGIONEDITDISPOSITION(NAME) .addConst (stringify(NAME), (Editing::RegionEditDisposition)Editing::NAME)
 	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("Editing")
 #		include "editing_syms.inc.h"

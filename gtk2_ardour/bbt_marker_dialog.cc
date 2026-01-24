@@ -37,12 +37,13 @@ BBTMarkerDialog::BBTMarkerDialog (timepos_t const & pos, BBT_Time const& bbt)
 	, bar_label (_("Bar"))
 	, beat_label (_("Beat"))
 	, name_label (_("Name"))
+	, name_changed (false)
 
 {
 	init (true);
 }
 
-BBTMarkerDialog::BBTMarkerDialog (MusicTimePoint& p)
+BBTMarkerDialog::BBTMarkerDialog (MusicTimePoint const & p)
 	: ArdourDialog (_("Edit Music Time"))
 	, _point (&p)
 	, _position (timepos_t::from_superclock (p.sclock()))
@@ -50,6 +51,7 @@ BBTMarkerDialog::BBTMarkerDialog (MusicTimePoint& p)
 	, bar_label (_("Bar"))
 	, beat_label (_("Beat"))
 	, name_label (_("Name"))
+	, name_changed (false)
 {
 	init (false);
 }
@@ -81,6 +83,7 @@ BBTMarkerDialog::init (bool add)
 	}
 
 	name_entry.signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &BBTMarkerDialog::response), Gtk::RESPONSE_OK));
+	name_entry.signal_changed().connect ([&]() { name_changed = true; });
 
 	get_vbox()->pack_start (name_box);
 	get_vbox()->pack_start (bbt_box);

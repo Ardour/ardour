@@ -149,6 +149,14 @@ RouteUI::~RouteUI()
 {
 	if (_route) {
 		ARDOUR_UI::instance()->gui_object_state->remove_node (route_state_id());
+		StripableColorDialog* scd = _route->active_color_picker();
+		if (scd) {
+			delete scd;
+		}
+		RouteCommentEditor* rce = _route->comment_editor();
+		if (rce) {
+			delete rce;
+		}
 	}
 
 	delete_patch_change_dialog ();
@@ -297,7 +305,6 @@ RouteUI::reset ()
 	mute_menu = 0;
 
 	delete_patch_change_dialog ();
-	_color_picker.reset ();
 
 	denormal_menu_item = 0;
 }
@@ -1714,7 +1721,11 @@ RouteUI::select_midi_patch ()
 void
 RouteUI::choose_color (Gtk::Window* parent)
 {
-	_color_picker.popup (_route, parent);
+	StripableColorDialog* scd = _route->active_color_picker();
+	if (!scd) {
+		scd = new StripableColorDialog (_route);
+	}
+	scd->popup (parent);
 }
 
 /** Set the route's own color.  This may not be used for display if
@@ -1808,14 +1819,29 @@ RouteUI::route_rename ()
 void
 RouteUI::toggle_comment_editor ()
 {
-	_comment_editor.toggle (_route);
-}
+	if (!_route) {
+		return;
+	}
 
+	RouteCommentEditor* rce = _route->comment_editor();
+	if (!rce) {
+		rce = new RouteCommentEditor (_route);
+	}
+	rce->toggle ();
+}
 
 void
 RouteUI::open_comment_editor ()
 {
-	_comment_editor.open (_route);
+	if (!_route) {
+		return;
+	}
+
+	RouteCommentEditor* rce = _route->comment_editor();
+	if (!rce) {
+		rce = new RouteCommentEditor (_route);
+	}
+	rce->open ();
 }
 
 void

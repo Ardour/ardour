@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include "ytkmm/colorselection.h"
 #include "ytkmm/entry.h"
 
 #include "gtkmm2ext/actions.h"
@@ -34,7 +35,7 @@ namespace Gtk
 }
 
 class TriggerJumpDialog;
-class StripableColorDialog;
+class ArdourColorDialog;
 
 class TriggerUI : virtual public sigc::trackable
 {
@@ -121,7 +122,7 @@ protected:
 	Gtk::Menu*              _context_menu;
 	bool                    _ignore_menu_action;
 
-	StripableColorDialog*   _color_dialog;
+	ArdourColorDialog*   _color_dialog;
 
 	void                  trigger_swap (uint32_t);
 	PBD::ScopedConnection trigger_swap_connection;

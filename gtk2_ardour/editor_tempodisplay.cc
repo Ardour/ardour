@@ -636,8 +636,9 @@ Editor::edit_meter_section (Temporal::MeterPoint& section)
 }
 
 void
-Editor::edit_bbt (MusicTimePoint& point)
+Editor::edit_bbt (BBTMarker& bm)
 {
+	MusicTimePoint const & point (bm.mt_point());
 	BBTMarkerDialog dialog (point);
 
 	switch (dialog.run ()) {
@@ -648,16 +649,24 @@ Editor::edit_bbt (MusicTimePoint& point)
 		return;
 	}
 
-	if (dialog.bbt_value() == point.bbt()) {
-		/* just a name change, no need to modify the map */
-		point.set_name (dialog.name());
-		/* XXX need to update marker label */
-		return;
-	}
+	BBT_Time bbt (dialog.bbt_value());
+	Temporal::timepos_t pos (dialog.position());
+	std::string name (dialog.name());
 
-	TempoMapChange tmc (*this, _("edit tempo"));
-	tmc.map().remove_bartime (point);
-	tmc.map().set_bartime (dialog.bbt_value(), dialog.position(), dialog.name());
+	if (bbt != point.bbt() ||
+	    pos.superclocks() != point.sclock() ||
+	    name != point.name()) {
+		TempoMapChange tmc (*this, _("edit tempo"));
+		tmc.map().remove_bartime (point);
+		tmc.map().set_bartime (bbt, pos, name);
+
+		/* XXX this ought to be set via MVC-style design, but currently
+		 * there is no signal to notify anyone that the
+		 * MusicTimePoint's name has been changed.
+		 */
+
+		bm.set_name (name);
+	}
 }
 
 void
@@ -745,7 +754,7 @@ Editor::edit_meter_marker (MeterMarker& mm)
 void
 Editor::edit_bbt_marker (BBTMarker& bm)
 {
-	edit_bbt (const_cast<Temporal::MusicTimePoint&>(bm.mt_point()));
+	edit_bbt (bm);
 }
 
 gint

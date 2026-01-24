@@ -137,15 +137,19 @@ MidiNoteTracker::push_notes (MidiBuffer &dst, samplepos_t time, bool reset, int 
 	for (int channel = 0; channel < 16; ++channel) {
 		const int coff = channel << 7;
 		for (int note = 0; note < 128; ++note) {
-			while (_active_notes[note + coff]) {
+			uint8_t cnt = _active_notes[note + coff];
+			while (cnt) {
 				uint8_t buffer[3] = { ((uint8_t) (cmd | channel)), uint8_t (note), (uint8_t) velocity };
 				Evoral::Event<MidiBuffer::TimeType> ev (Evoral::MIDI_EVENT, time, 3, buffer, false);
 				/* note that we do not care about failure from
 				   push_back() ... should we warn someone ?
 				*/
 				dst.push_back (ev);
-				_active_notes[note + coff]--;
+				cnt--;
 				DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1: MB-push note %2/%3 at %4\n", this, (int) note, (int) channel, time));
+			}
+			if (reset) {
+				_active_notes [note + coff] = 0;
 			}
 		}
 	}

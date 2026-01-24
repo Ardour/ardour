@@ -399,7 +399,12 @@ string
 Bindings::ardour_action_name (RefPtr<Action> action)
 {
 	/* Skip "<Actions>/" */
-	return action->get_accel_path ().substr (10);
+	string ap (action->get_accel_path());
+	if (ap.size() > 10) {
+		return ap.substr (10);
+	}
+	/* No idea what this */
+	return ap;
 }
 
 KeyboardKey
@@ -849,7 +854,7 @@ Bindings::save (XMLNode& root)
 }
 
 void
-Bindings::save_all_bindings_as_html (ostream& ostr)
+Bindings::save_all_bindings_as_html (ostream& ostr, bool include_action_list)
 {
 	if (bindings.empty()) {
 		return;
@@ -862,9 +867,11 @@ Bindings::save_all_bindings_as_html (ostream& ostr)
 	ostr << "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n";
 	ostr << "<style>\n";
 	ostr << "  table { border: 2px outset gray; line-height: 0.8em; box-sizing: border-box; }\n";
-	ostr << "  h2 { margin: 1em 0; }\n";
+	ostr << "  h2 { margin: 1em 0 0.25em 0; line-height: 1em; }\n";
+	ostr << "  h3 { margin: 0.75em 0 0.25em 0; line-height: 1em; }\n";
 	ostr << "  td, th { padding: 6px; border: 1px inset; }\n";
 	ostr << "  span { font-family:monospace; margin: 0px; }\n";
+	ostr << "  div.mono { font-family:monospace; margin: 0px; }\n";
 	ostr << "</style>\n";
 
 	ostr << "</head>\n<body>\n";
@@ -890,12 +897,17 @@ Bindings::save_all_bindings_as_html (ostream& ostr)
 	ostr << "</tr>\n\n";
 	ostr << "</tbody></table>\n\n";
 
+	if (!include_action_list) {
+		goto out;
+	}
+
 	ostr << "<br/>\n\n";
 	ostr << "<div style=\"page-break-before: always;\"></div>\n\n";
 	ostr << "<table border=\"2\" cellpadding=\"6\"><tbody>\n\n";
 	ostr << "<tr>\n\n";
 	ostr << "<td>\n\n";
-	ostr << "<h2><u> Partial List of Available Actions { => with current shortcut, where applicable } </u></h2>\n\n";
+	ostr << "<h2><u> Partial List of Available Actions { => with current shortcut, where applicable } </u></h2>\n";
+	ostr << "<div class=\"mono\">\n";
 	{
 		vector<string> paths;
 		vector<string> labels;
@@ -918,10 +930,12 @@ Bindings::save_all_bindings_as_html (ostream& ostr)
 			}
 		}
 	}
+	ostr << "<div>\n";
 	ostr << "</td>\n\n";
 	ostr << "</tr>\n\n";
 	ostr << "</tbody></table>\n\n";
 
+	out:
 	ostr << "</body>\n";
 	ostr << "</html>\n";
 }

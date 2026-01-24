@@ -1105,7 +1105,7 @@ MidiView::find_canvas_note (Evoral::event_id_t id)
 	return nullptr;
 }
 
-std::shared_ptr<PatchChange>
+PatchChange*
 MidiView::find_canvas_patch_change (MidiModel::PatchChangePtr p)
 {
 	PatchChanges::const_iterator f = _patch_changes.find (p);
@@ -1114,10 +1114,10 @@ MidiView::find_canvas_patch_change (MidiModel::PatchChangePtr p)
 		return f->second;
 	}
 
-	return std::shared_ptr<PatchChange>();
+	return nullptr;
 }
 
-std::shared_ptr<SysEx>
+SysEx*
 MidiView::find_canvas_sys_ex (MidiModel::SysExPtr s)
 {
 	SysExes::const_iterator f = _sys_exes.find (s);
@@ -1126,7 +1126,7 @@ MidiView::find_canvas_sys_ex (MidiModel::SysExPtr s)
 		return f->second;
 	}
 
-	return std::shared_ptr<SysEx>();
+	return nullptr;
 }
 
 void
@@ -1442,7 +1442,7 @@ MidiView::display_patch_changes_on_channel (uint8_t channel, bool active_channel
 	}
 
 	for (MidiModel::PatchChanges::const_iterator i = _model->patch_changes().begin(); i != _model->patch_changes().end(); ++i) {
-		std::shared_ptr<PatchChange> p;
+		PatchChange* p;
 
 		if ((*i)->channel() != channel) {
 			continue;
@@ -1478,23 +1478,21 @@ MidiView::update_patch_changes ()
 		return;
 	}
 
-	for (PatchChanges::iterator p = _patch_changes.begin(); p != _patch_changes.end(); ++p) {
+	for (auto & [model,gui] : _patch_changes) {
 
-		std::shared_ptr<PatchChange> pc (p->second);
-
-		const timepos_t region_time (_midi_region->source_beats_to_region_time (p->first->time()));
+		const timepos_t region_time (_midi_region->source_beats_to_region_time (model->time()));
 
 		if (region_time < timepos_t() || region_time >= _midi_region->length()) {
-			pc->hide();
+			gui->hide();
 		} else {
-			const timepos_t flag_time = _midi_region->source_beats_to_absolute_time (p->first->time());
+			const timepos_t flag_time = _midi_region->source_beats_to_absolute_time (model->time());
 			const double flag_x = _editing_context.time_to_pixel (flag_time);
 
 			const double region_x = _editing_context.time_to_pixel (_midi_region->position());
 
-			pc->canvas_item()->set_position (ArdourCanvas::Duple (flag_x-region_x, 1.0));
-			pc->update_name ();
-			pc->show();
+			gui->canvas_item()->set_position (ArdourCanvas::Duple (flag_x-region_x, 1.0));
+			gui->update_name ();
+			gui->show();
 		}
 	}
 }
@@ -1569,10 +1567,10 @@ MidiView::display_sysexes()
 
 		// CAIROCANVAS: no longer passing *i (the sysex event) to the
 		// SysEx canvas object!!!
-		std::shared_ptr<SysEx> sysex = find_canvas_sys_ex (sysex_ptr);
+		SysEx* sysex = find_canvas_sys_ex (sysex_ptr);
 
 		if (!sysex) {
-			sysex = std::shared_ptr<SysEx>(new SysEx (*this, _note_group, text, height, x, 1.0, sysex_ptr));
+			sysex = new SysEx (*this, _note_group, text, height, x, 1.0, sysex_ptr);
 			_sys_exes.insert (make_pair (sysex_ptr, sysex));
 		} else {
 			sysex->set_height (height);
@@ -1597,23 +1595,22 @@ MidiView::update_sysexes ()
 
 	int height = _midi_context.contents_height();
 
-	for (SysExes::iterator s = _sys_exes.begin(); s != _sys_exes.end(); ++s) {
+	for (auto & [model,gui] : _sys_exes) {
 
-		const timepos_t time (s->first->time());
-		std::shared_ptr<SysEx> sysex (s->second);
+		const timepos_t time (model->time());
 
 		// Show unless message is beyond the region bounds
 		if (_midi_region->source_relative_position (time) >= _midi_region->length() || time < _midi_region->start()) {
-			sysex->hide();
+			gui->hide();
 			continue;
 		} else {
-			sysex->show();
+			gui->show();
 		}
 
 		const double x = _editing_context.time_to_pixel (_midi_region->source_beats_to_region_time (time.beats()));
 
-		sysex->set_height (height);
-		sysex->item().set_position (ArdourCanvas::Duple (x, 1.0));
+		gui->set_height (height);
+		gui->item().set_position (ArdourCanvas::Duple (x, 1.0));
 	}
 }
 
@@ -2198,14 +2195,12 @@ MidiView::add_canvas_patch_change (MidiModel::PatchChangePtr patch)
 	// so we need to do something more sophisticated to keep its color
 	// appearance (MidiPatchChangeFill/MidiPatchChangeInactiveChannelFill)
 	// up to date.
-	std::shared_ptr<PatchChange> patch_change = std::shared_ptr<PatchChange>(
-		new PatchChange(*this, _note_group->parent(),
-				height, x, 1.0,
-		                _midi_track->instrument_info(),
-				patch,
-				_patch_change_outline,
-				_patch_change_fill)
-		);
+	PatchChange* patch_change = new PatchChange (*this, _note_group->parent(),
+	                                             height, x, 1.0,
+	                                             _midi_track->instrument_info(),
+	                                             patch,
+	                                             _patch_change_outline,
+	                                             _patch_change_fill);
 
 	_patch_changes.insert (make_pair (patch, patch_change));
 }
@@ -4338,8 +4333,8 @@ MidiView::paste_internal (timepos_t const & pos, unsigned paste_count, float tim
 	DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("Paste data spans from %1 to %2 (%3) ; paste pos beats = %4 (based on %5 - %6)\n",
 	                                               first_time,
 	                                               last_time,
-	                                               duration, pos, _midi_region->position(),
-	                                               quarter_note));
+	                                               duration, pos.beats(), _midi_region->position().beats().str(),
+	                                               quarter_note.str()));
 
 	for (int n = 0; n < (int) times; ++n) {
 

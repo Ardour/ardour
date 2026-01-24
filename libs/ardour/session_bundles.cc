@@ -94,19 +94,17 @@ Session::bundle_by_name (string name) const
 }
 
 void
-Session::setup_bundles ()
+Session::setup_bundles_rcu ()
 {
+	RCUWriter<BundleList> writer (_bundles);
+	std::shared_ptr<BundleList> b = writer.get_copy ();
 
-	{
-		RCUWriter<BundleList> writer (_bundles);
-		std::shared_ptr<BundleList> b = writer.get_copy ();
-		for (BundleList::iterator i = b->begin(); i != b->end();) {
-			if (std::dynamic_pointer_cast<UserBundle>(*i)) {
-				++i;
-				continue;
-			}
-			i = b->erase(i);
+	for (BundleList::iterator i = b->begin(); i != b->end();) {
+		if (std::dynamic_pointer_cast<UserBundle>(*i)) {
+			++i;
+			continue;
 		}
+		i = b->erase(i);
 	}
 
 	std::vector<string> inputs[DataType::num_types];
@@ -158,7 +156,7 @@ Session::setup_bundles ()
 		c->add_channel (_("mono"), DataType::AUDIO);
 		c->set_port (0, outputs[DataType::AUDIO][np]);
 
-		add_bundle (c, false);
+		b->push_back (c);
 	}
 
 	/* stereo output bundles */
@@ -180,7 +178,7 @@ Session::setup_bundles ()
 			c->add_channel (_("R"), DataType::AUDIO);
 			c->set_port (1, outputs[DataType::AUDIO][np + 1]);
 
-			add_bundle (c, false);
+			b->push_back (c);
 		}
 	}
 
@@ -200,7 +198,7 @@ Session::setup_bundles ()
 		c->add_channel (_("mono"), DataType::AUDIO);
 		c->set_port (0, inputs[DataType::AUDIO][np]);
 
-		add_bundle (c, false);
+		b->push_back (c);
 	}
 
 	/* stereo input bundles */
@@ -223,7 +221,7 @@ Session::setup_bundles ()
 			c->add_channel (_("R"), DataType::AUDIO);
 			c->set_port (1, inputs[DataType::AUDIO][np + 1]);
 
-			add_bundle (c, false);
+			b->push_back (c);
 		}
 	}
 
@@ -241,7 +239,7 @@ Session::setup_bundles ()
 		std::shared_ptr<Bundle> c (new Bundle (n, false));
 		c->add_channel ("", DataType::MIDI);
 		c->set_port (0, inputs[DataType::MIDI][np]);
-		add_bundle (c, false);
+		b->push_back (c);
 	}
 
 	/* MIDI output bundles */
@@ -257,9 +255,14 @@ Session::setup_bundles ()
 		std::shared_ptr<Bundle> c (new Bundle (n, true));
 		c->add_channel ("", DataType::MIDI);
 		c->set_port (0, outputs[DataType::MIDI][np]);
-		add_bundle (c, false);
+		b->push_back (c);
 	}
+	/* RCUWriter leaves scope, commit changes */
+}
 
-	// we trust the backend to only calls us if there's a change
+void
+Session::setup_bundles ()
+{
+	setup_bundles_rcu ();
 	BundleAddedOrRemoved (); /* EMIT SIGNAL */
 }

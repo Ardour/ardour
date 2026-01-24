@@ -170,10 +170,12 @@ function decl2args ($decl) {
 	$start = strrpos ($decl, '(');
 	$end = strrpos ($decl, ')');
 	$args = substr ($decl, $start + 1, $end - $start - 1);
+	$args = preg_replace ('/std::map<([^,]*),([^,]*)>/', 'std::map<$1@$2>', $args);
 	$arglist = preg_split ('/, */', $args);
 	$rv = array ();
 	foreach ($arglist as $a) {
 		if (empty ($a)) { continue; }
+		$a = preg_replace ('/std::map<([^,]*)@([^,]*)>/', 'std::map<$1,$2>', $a);
 		$rv[] = arg2lua ($a);
 	}
 	return $rv;

@@ -252,6 +252,15 @@ cp gtk2_ardour/icons/cursor_square/* $DESTDIR/share/${LOWERCASE_DIRNAME}/icons/
 echo " === bundle completed, cleaning up"
 ./waf uninstall
 find $DESTDIR -name "*.dll.a" -print0 | xargs -0 -r rm
+
+# no need for MIDNAM
+if test -n "$VBM" -o -n "$LIVETRAX"; then
+	rm -rf $DESTDIR/share/*/patchfiles
+fi
+if test -n "$LIVETRAX"; then
+	rm -rf $DESTDIR/share/*/scripts
+fi
+
 echo " === complete"
 du -sh $DESTDIR
 
@@ -559,7 +568,7 @@ Section "${PROGRAM_NAME}${PROGRAM_VERSION} (required)" SecMainProg
   WriteRegDWORD HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}-${WARCH}" "NoRepair" 1
   WriteUninstaller "\$INSTDIR\uninstall.exe"
   CreateShortCut "\$INSTDIR\\${PROGRAM_NAME}${PROGRAM_VERSION}.lnk" "\$INSTDIR\\bin\\${PRODUCT_EXE}" "" "\$INSTDIR\\bin\\${PRODUCT_EXE}" 0
-  \${registerExtension} "\$INSTDIR\\bin\\${STATEFILE_SUFFIX}" ".${PRODUCT_NAME}" "${PROGRAM_NAME} Session"
+  \${registerExtension} "\$INSTDIR\\bin\\${PRODUCT_EXE}" ".${STATEFILE_SUFFIX}" "${PROGRAM_NAME} Session"
 SectionEnd
 EOF
 

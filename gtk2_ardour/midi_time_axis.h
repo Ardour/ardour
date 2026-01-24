@@ -82,7 +82,7 @@ public:
 
 	void set_route (std::shared_ptr<ARDOUR::Route>);
 
-	MidiStreamView* midi_view();
+	MidiStreamView* midi_view() const;
 
 	void set_height (uint32_t, TrackHeightMode m = OnlySelf, bool from_idle = false);
 	void set_layer_display (LayerDisplay d);
@@ -97,8 +97,7 @@ public:
 
 	bool paste (Temporal::timepos_t const &, const Selection&, PasteContext& ctx);
 
-	// ARDOUR::NoteMode  note_mode() const { return _note_mode; }
-	ARDOUR::ColorMode color_mode() const { return _color_mode; }
+	ARDOUR::ColorMode color_mode() const;
 
 	Gtk::CheckMenuItem* automation_child_menu_item (Evoral::Parameter);
 
@@ -155,7 +154,6 @@ private:
 	PianoRollHeader*              _piano_roll_header;
 	Gtk::RadioMenuItem*           _note_mode_item;
 	Gtk::RadioMenuItem*           _percussion_mode_item;
-	ARDOUR::ColorMode             _color_mode;
 	Gtk::RadioMenuItem*           _meter_color_mode_item;
 	Gtk::RadioMenuItem*           _channel_color_mode_item;
 	Gtk::RadioMenuItem*           _track_color_mode_item;
