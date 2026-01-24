@@ -17,7 +17,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <optional>
 #include <vector>
+#include <cstdlib>
 
 void
 CoreAudioPCM::destroy_aggregate_device ()
@@ -92,7 +94,7 @@ CoreAudioPCM::create_aggregate_device (
 	//---------------------------------------------------------------------------
 	// Setup SR of both devices otherwise creating AD may fail...
 	//---------------------------------------------------------------------------
-	UInt32 keptclockdomain = 0;
+	std::optional <UInt32> common_clock_domain;
 	UInt32 clockdomain = 0;
 	size = sizeof(UInt32);
 	bool need_clock_drift_compensation = false;
@@ -103,8 +105,14 @@ CoreAudioPCM::create_aggregate_device (
 		// Check clock domain
 		err = GetPropertyWrapper (input_device_ids[i], 0, 0, kAudioDevicePropertyClockDomain, &size, &clockdomain);
 		if (err == noErr) {
-			keptclockdomain = (keptclockdomain == 0) ? clockdomain : keptclockdomain;
-			if (clockdomain != 0 && clockdomain != keptclockdomain) {
+#ifndef NDEBUG
+			printf("AggregateDevice: Clock Domain for Input(%zu) = %d\n", i, clockdomain);
+#endif
+			if (!common_clock_domain.has_value ()) {
+				common_clock_domain = clockdomain;
+				continue;
+			}
+			if (clockdomain != common_clock_domain.value ()) {
 #ifndef NDEBUG
 				printf("AggregateDevice: devices do not share the same clock.\n");
 #endif
@@ -113,14 +121,20 @@ CoreAudioPCM::create_aggregate_device (
 		}
 	}
 
-	for (UInt32 i = 0; i < output_device_ids.size(); i++) {
+	for (size_t i = 0; i < output_device_ids.size(); i++) {
 		set_device_sample_rate_id(output_device_ids[i], sample_rate, true);
 
 		// Check clock domain
 		err = GetPropertyWrapper (output_device_ids[i], 0, 0, kAudioDevicePropertyClockDomain, &size, &clockdomain);
 		if (err == noErr) {
-			keptclockdomain = (keptclockdomain == 0) ? clockdomain : keptclockdomain;
-			if (clockdomain != 0 && clockdomain != keptclockdomain) {
+#ifndef NDEBUG
+			printf("AggregateDevice: Clock Domain for Output(%zu) = %d\n", i, clockdomain);
+#endif
+			if (!common_clock_domain.has_value ()) {
+				common_clock_domain = clockdomain;
+				continue;
+			}
+			if (clockdomain != common_clock_domain.value ()) {
 #ifndef NDEBUG
 				printf("AggregateDevice: devices do not share the same clock.\n");
 #endif
@@ -130,9 +144,13 @@ CoreAudioPCM::create_aggregate_device (
 	}
 
 	// If no valid clock domain was found, then assume we have to compensate...
-	if (keptclockdomain == 0) {
+	if (!common_clock_domain.has_value ()) {
 		need_clock_drift_compensation = true;
 	}
+
+#ifndef NDEBUG
+	printf("AggregateDevice: need_clock_drift_compensation = %d\n", need_clock_drift_compensation);
+#endif
 
 	//---------------------------------------------------------------------------
 	// Start to create a new aggregate by getting the base audio hardware plugin
@@ -183,8 +201,14 @@ CoreAudioPCM::create_aggregate_device (
 	CFDictionaryAddValue(aggDeviceDict, CFSTR(kAudioAggregateDeviceNameKey), AggregateDeviceNameRef);
 	CFDictionaryAddValue(aggDeviceDict, CFSTR(kAudioAggregateDeviceUIDKey), AggregateDeviceUIDRef);
 
-	// hide from list
-	int value = 1;
+	char const* p = getenv ("ARDOUR_COREAUDIO_DEBUG");
+	int debug_flags = 0;
+	if (p && *p) {
+		debug_flags = atoi (p);
+	}
+
+	/* hide from list */
+	int value = (debug_flags & 1) ? 0 : 1;
 	CFNumberRef AggregateDeviceNumberRef = CFNumberCreate(NULL, kCFNumberIntType, &value);
 	CFDictionaryAddValue(aggDeviceDict, CFSTR(kAudioAggregateDeviceIsPrivateKey), AggregateDeviceNumberRef);
 
@@ -270,14 +294,27 @@ CoreAudioPCM::create_aggregate_device (
 	pluginAOPA.mScope = kAudioObjectPropertyScopeGlobal;
 	pluginAOPA.mElement = kAudioObjectPropertyElementMaster;
 	outDataSize = sizeof(CFStringRef);
-	err = AudioObjectSetPropertyData(*created_device, &pluginAOPA, 0, NULL, outDataSize, &playbackDeviceUID[0]);
-	if (err != noErr) {
-		fprintf(stderr, "AggregateDevice: AudioObjectSetPropertyData for playback-master device error\n");
-		// try playback
+
+	if (debug_flags & 2) {
+		/* try capture device first */
 		err = AudioObjectSetPropertyData(*created_device, &pluginAOPA, 0, NULL, outDataSize, &captureDeviceUID[0]);
+	} else {
+		err = AudioObjectSetPropertyData(*created_device, &pluginAOPA, 0, NULL, outDataSize, &playbackDeviceUID[0]);
 	}
+
 	if (err != noErr) {
-		fprintf(stderr, "AggregateDevice: AudioObjectSetPropertyData for capture-master device error\n");
+		/* fall back */
+		if (debug_flags & 2) {
+			fprintf(stderr, "AggregateDevice: AudioObjectSetPropertyData for capture-master device error\n");
+			err = AudioObjectSetPropertyData(*created_device, &pluginAOPA, 0, NULL, outDataSize, &playbackDeviceUID[0]);
+		} else {
+			fprintf(stderr, "AggregateDevice: AudioObjectSetPropertyData for playback-master device error\n");
+			err = AudioObjectSetPropertyData(*created_device, &pluginAOPA, 0, NULL, outDataSize, &captureDeviceUID[0]);
+		}
+	}
+
+	if (err != noErr) {
+		fprintf(stderr, "AggregateDevice: AudioObjectSetPropertyData for clock-master device error\n");
 		goto error;
 	}
 
@@ -288,15 +325,15 @@ CoreAudioPCM::create_aggregate_device (
 	// Workaround for bug in the HAL : until 10.6.2
 	if (need_clock_drift_compensation) {
 
-		AudioObjectPropertyAddress theAddressOwned = { kAudioObjectPropertyOwnedObjects, kAudioObjectPropertyScopeGlobal, kAudioObjectPropertyElementMaster };
-		AudioObjectPropertyAddress theAddressDrift = { kAudioSubDevicePropertyDriftCompensation, kAudioObjectPropertyScopeGlobal, kAudioObjectPropertyElementMaster };
+		AudioObjectPropertyAddress theAddressOwned  = { kAudioObjectPropertyOwnedObjects, kAudioObjectPropertyScopeGlobal, kAudioObjectPropertyElementMaster };
+		AudioObjectPropertyAddress theAddressDrift  = { kAudioSubDevicePropertyDriftCompensation, kAudioObjectPropertyScopeGlobal, kAudioObjectPropertyElementMaster };
 		UInt32 theQualifierDataSize = sizeof(AudioObjectID);
 		AudioClassID inClass = kAudioSubDeviceClassID;
 		void* theQualifierData = &inClass;
-		UInt32 subDevicesNum = 0;
+		size_t n_subdevices = 0;
 
 #ifndef NDEBUG
-		printf("Clock drift compensation activated...\n");
+		printf("Activate Clock drift compensation...\n");
 #endif
 
 		// Get the property data size
@@ -306,11 +343,11 @@ CoreAudioPCM::create_aggregate_device (
 		}
 
 		// Calculate the number of object IDs
-		subDevicesNum = size / sizeof(AudioObjectID);
+		n_subdevices = size / sizeof(AudioObjectID);
 #ifndef NDEBUG
-		printf("AggregateDevice: clock drift compensation, number of sub-devices = %u\n", (unsigned int)subDevicesNum);
+		printf("AggregateDevice: clock drift compensation, sub-devices = %zu\n", n_subdevices);
 #endif
-		AudioObjectID subDevices[subDevicesNum];
+		AudioObjectID subDevices[n_subdevices];
 		size = sizeof(subDevices);
 
 		err = AudioObjectGetPropertyData(*created_device, &theAddressOwned, theQualifierDataSize, theQualifierData, &size, subDevices);
@@ -319,9 +356,10 @@ CoreAudioPCM::create_aggregate_device (
 		}
 
 		// Set kAudioSubDevicePropertyDriftCompensation property...
-		for (UInt32 index = 0; index < subDevicesNum; ++index) {
+		for (size_t i = 0; i < n_subdevices; ++i) {
 			UInt32 theDriftCompensationValue = 1;
-			err = AudioObjectSetPropertyData(subDevices[index], &theAddressDrift, 0, NULL, sizeof(UInt32), &theDriftCompensationValue);
+			// TODO exclude master clock device
+			err = AudioObjectSetPropertyData(subDevices[i], &theAddressDrift, 0, NULL, sizeof(UInt32), &theDriftCompensationValue);
 			if (err != noErr) {
 				fprintf(stderr, "AggregateDevice: kAudioSubDevicePropertyDriftCompensation error\n");
 			}

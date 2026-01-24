@@ -23,14 +23,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "pbd/pthread_utils.h"
 #include "pbd/memento_command.h"
 
 #include "temporal/tempo.h"
 
 #include "ardour/session.h"
 #include "ardour/location.h"
-#include "ardour/tempo.h"
 #include "ardour/transport_master_manager.h"
 #include "ardour/utils.h"
 
@@ -152,10 +150,10 @@ BasicUI::goto_end ()
 }
 
 void
-BasicUI::add_marker (const std::string& markername)
+BasicUI::add_marker (const std::string& markername, Location::Flags flags)
 {
 	timepos_t where (session->audible_sample());
-	Location *location = new Location (*session, where, where, markername, Location::IsMark);
+	Location *location = new Location (*session, where, where, markername, flags);
 	session->begin_reversible_command (_("add marker"));
 	XMLNode &before = session->locations()->get_state();
 	session->locations()->add (location, true);
@@ -779,6 +777,12 @@ bool
 BasicUI::locked ()
 {
 	return session->transport_locked ();
+}
+
+bool
+BasicUI::session_empty () const
+{
+	return session->empty ();
 }
 
 ARDOUR::samplecnt_t

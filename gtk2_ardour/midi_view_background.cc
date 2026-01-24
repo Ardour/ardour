@@ -81,6 +81,12 @@ MidiViewBackground::color_handler ()
 	setup_note_lines ();
 }
 
+void
+MidiViewBackground::set_color_mode (ARDOUR::ColorMode cm)
+{
+	_color_mode = cm;
+}
+
 uint8_t
 MidiViewBackground::y_to_note (int y) const
 {

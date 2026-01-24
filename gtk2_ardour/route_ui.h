@@ -334,9 +334,6 @@ private:
 
 	std::vector<ArdourWidgets::ArdourButton*> _invert_buttons;
 
-	StripableColorDialog _color_picker;
-	RouteCommentEditor   _comment_editor;
-
 	sigc::connection send_blink_connection;
 	sigc::connection rec_blink_connection;
 

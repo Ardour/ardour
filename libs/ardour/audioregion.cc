@@ -519,10 +519,11 @@ AudioRegion::set_fade_before_fx (bool yn)
 		if (!has_region_fx ()) {
 			return;
 		}
+		PropertyChange pc (Properties::region_fx_changed);
 		if (!_invalidated.exchange (true)) {
-			send_change (PropertyChange (Properties::region_fx)); // trigger DiskReader overwrite
+			pc.add (Properties::region_fx); // trigger DiskReader overwrite
 		}
-		RegionFxChanged (); /* EMIT SIGNAL */
+		send_change (pc);
 	}
 }
 
@@ -2588,10 +2589,11 @@ AudioRegion::_add_plugin (std::shared_ptr<RegionFxPlugin> rfx, std::shared_ptr<R
 	fx_latency_changed (true);
 	fx_tail_changed (true);
 
+	PropertyChange pc (Properties::region_fx_changed);
 	if (!_invalidated.exchange (true)) {
-		send_change (PropertyChange (Properties::region_fx)); // trigger DiskReader overwrite
+		pc.add (Properties::region_fx); // trigger DiskReader overwrite
 	}
-	RegionFxChanged (); /* EMIT SIGNAL */
+	send_change (pc);
 	return true;
 }
 
@@ -2618,10 +2620,11 @@ AudioRegion::remove_plugin (std::shared_ptr<RegionFxPlugin> fx)
 	fx_latency_changed (true);
 	fx_tail_changed (true);
 
+	PropertyChange pc (Properties::region_fx_changed);
 	if (!_invalidated.exchange (true)) {
-		send_change (PropertyChange (Properties::region_fx)); // trigger DiskReader overwrite
+		pc.add (Properties::region_fx); // trigger DiskReader overwrite
 	}
-	RegionFxChanged (); /* EMIT SIGNAL */
+	send_change (pc);
 	_session.set_dirty ();
 	return true;
 }
@@ -2630,10 +2633,11 @@ void
 AudioRegion::reorder_plugins (RegionFxList const& new_order)
 {
 	Region::reorder_plugins (new_order);
+	PropertyChange pc (Properties::region_fx_changed);
 	if (!_invalidated.exchange (true)) {
-		send_change (PropertyChange (Properties::region_fx)); // trigger DiskReader overwrite
+		pc.add (Properties::region_fx); // trigger DiskReader overwrite
 	}
-	RegionFxChanged (); /* EMIT SIGNAL */
+	send_change (pc);
 }
 
 void

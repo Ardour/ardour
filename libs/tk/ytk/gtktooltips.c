@@ -100,8 +100,6 @@ gtk_tooltips_init (GtkTooltips *tooltips)
   tooltips->enabled = TRUE;
   tooltips->timer_tag = 0;
   tooltips->use_sticky_delay = FALSE;
-  tooltips->last_popdown.tv_sec = -1;
-  tooltips->last_popdown.tv_usec = -1;
 
   private->tips_data_table =
     g_hash_table_new_full (NULL, NULL, NULL,

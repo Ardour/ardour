@@ -1783,6 +1783,7 @@ public:
   template <class T>
   Namespace& addVariable (char const* name, T* pt, bool isWritable = true)
   {
+    DATADOC ("Static Data", name, pt)
     assert (lua_istable (L, -1));
 
     rawgetfield (L, -1, "__propget");

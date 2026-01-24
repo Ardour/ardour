@@ -47,7 +47,11 @@ class ViewBackground : public sigc::trackable
 	/** @return y position, or -1 if hidden */
 	virtual int y_position () const { return 0; }
 
+	Gtkmm2ext::Color region_color() const { return _region_color; }
+
   protected:
+	Gtkmm2ext::Color          _region_color;
+
 	virtual void update_contents_height () {}
 	virtual void color_handler () {}
 	virtual void parameter_changed (std::string const &) {}

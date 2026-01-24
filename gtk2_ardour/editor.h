@@ -469,7 +469,7 @@ public:
 	void mouse_add_bbt_marker_event (Temporal::timepos_t where);
 	void add_bbt_marker_at_playhead_cursor ();
 
-	void edit_bbt (Temporal::MusicTimePoint&);
+	void edit_bbt (BBTMarker&);
 
 	bool should_ripple () const;
 	bool should_ripple_all () const;  /* RippleAll will ripple all similar regions and the timeline markers */

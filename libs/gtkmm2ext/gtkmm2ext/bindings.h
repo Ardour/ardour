@@ -165,7 +165,7 @@ class LIBGTKMM2EXT_API Bindings {
 	static std::list<Bindings*> bindings;
 	static Bindings* get_bindings (std::string const & name);
 	static void associate_all ();
-	static void save_all_bindings_as_html (std::ostream&);
+	static void save_all_bindings_as_html (std::ostream&, bool include_action_list = true);
 
 	static PBD::Signal<void(Bindings*)> BindingsChanged;
 

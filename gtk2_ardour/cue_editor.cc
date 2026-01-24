@@ -30,6 +30,7 @@
 #include "canvas/canvas.h"
 
 #include "gtkmm2ext/bindings.h"
+#include "gtkmm2ext/utils.h"
 
 #include "ardour_ui.h"
 #include "cue_editor.h"
@@ -281,15 +282,6 @@ CueEditor::set_zoom_focus (Editing::ZoomFocus zf)
 
 	using namespace Editing;
 
-	/* this is driven by a toggle on a radio group, and so is invoked twice,
-	   once for the item that became inactive and once for the one that became
-	   active.
-	*/
-
-	if (!zoom_focus_actions[zf]->get_active()) {
-		return;
-	}
-
 	/* We don't allow playhead for zoom focus here */
 
 	if (zf == ZoomFocusPlayhead) {
@@ -514,13 +506,14 @@ CueEditor::build_upper_toolbar ()
 	std::string noun;
 
 	length_selector.add_menu_elem (MenuElem (_("Until Stopped"), sigc::bind (sigc::mem_fun (*this, &CueEditor::set_recording_length), Temporal::BBT_Offset ())));
-	std::vector<int> b ({ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 16, 20, 24, 32 });
-	for (auto & n : b) {
+	const std::vector<int> b ({ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 16, 20, 24, 32 });
+	for (auto const & n : b) {
 		noun = P_("Bar", "Bars", n);
 		label = string_compose (X_("%1 %2"), n, noun);
 		length_selector.add_menu_elem (MenuElem (label, sigc::bind (sigc::mem_fun (*this, &CueEditor::set_recording_length), Temporal::BBT_Offset (n, 0, 0))));
 	}
 	length_selector.set_active (_("Until Stopped"));
+	Gtkmm2ext::set_size_request_to_display_given_text (length_selector, _("Until Stopped"), 30, 2);
 
 	ArdourVSpacer* rec_spacer = manage (new ArdourVSpacer (0));
 	rec_box.set_spacing (2);
@@ -651,7 +644,7 @@ CueEditor::rec_button_press (GdkEventButton* ev)
 	if (trigger->armed()) {
 		trigger->disarm ();
 	} else {
-		trigger->arm (rec_length);
+		trigger->arm ();
 	}
 
 	return true;
@@ -675,16 +668,43 @@ CueEditor::trigger_arm_change ()
 	EC_LOCAL_TEMPO_SCOPE;
 
 	if (!ref.trigger()) {
+		play_button.set_sensitive (false);
 		return;
 	}
 
 	if (!ref.trigger()->armed()) {
 		end_write ();
+		play_button.set_sensitive (true);
 	} else {
 		maybe_set_count_in ();
+		play_button.set_sensitive (false);
 	}
 
-	rec_enable_change ();
+	setup_record_blink ();
+}
+
+void
+CueEditor::setup_record_blink ()
+{
+	rec_blink_connection.disconnect ();
+
+	switch (ref.box()->record_enabled()) {
+	case Recording:
+		rec_enable_button.set_active_state (Gtkmm2ext::ExplicitActive);
+		rec_blink_connection.disconnect ();
+		break;
+	case Enabled:
+		if (!UIConfiguration::instance().get_no_strobe() && ref.trigger()->armed()) {
+			rec_blink_connection = Timers::blink_connect (sigc::mem_fun (*this, &CueEditor::blink_rec_enable));
+		} else {
+			rec_enable_button.set_active_state (Gtkmm2ext::Off);
+		}
+		break;
+	case Disabled:
+		rec_enable_button.set_active_state (Gtkmm2ext::Off);
+		break;
+	}
+
 }
 
 void
@@ -696,28 +716,21 @@ CueEditor::rec_enable_change ()
 		return;
 	}
 
-	rec_blink_connection.disconnect ();
 	count_in_connection.disconnect ();
+	setup_record_blink ();
 
 	switch (ref.box()->record_enabled()) {
 	case Recording:
-		rec_enable_button.set_active_state (Gtkmm2ext::ExplicitActive);
-		rec_blink_connection.disconnect ();
 		begin_write ();
 		break;
 	case Enabled:
-		if (!UIConfiguration::instance().get_no_strobe() && ref.trigger()->armed()) {
-			rec_blink_connection = Timers::blink_connect (sigc::mem_fun (*this, &CueEditor::blink_rec_enable));
-		} else {
-			rec_enable_button.set_active_state (Gtkmm2ext::Off);
-		}
 		maybe_set_count_in ();
 		break;
 	case Disabled:
-		rec_enable_button.set_active_state (Gtkmm2ext::Off);
 		hide_count_in ();
 		break;
 	}
+
 }
 
 void
@@ -737,7 +750,10 @@ CueEditor::set_recording_length (Temporal::BBT_Offset dur)
 	}
 
 	length_selector.set_active (label);
-	rec_length = dur;
+
+	if (ref.trigger()) {
+		ref.trigger()->set_capture_duration (dur);
+	}
 }
 
 void
@@ -1282,6 +1298,9 @@ CueEditor::set_trigger (TriggerReference& tref)
 	TriggerPtr trigger (ref.trigger());
 
 	if (!trigger) {
+		set_region (nullptr);
+		_update_connection = Timers::super_rapid_connect (sigc::mem_fun (*this, &CueEditor::maybe_update));
+		play_button.set_sensitive (false);
 		return;
 	}
 
@@ -1305,13 +1324,30 @@ CueEditor::set_trigger (TriggerReference& tref)
 
 	trigger->PropertyChanged.connect (trigger_connections, invalidator (*this), std::bind (&CueEditor::trigger_prop_change, this, _1), gui_context());
 	trigger->ArmChanged.connect (trigger_connections, invalidator (*this), std::bind (&CueEditor::trigger_arm_change, this), gui_context());
-
-	if (trigger) {
-		set_region (trigger->the_region());
+	BBT_Offset dur (trigger->capture_duration());
+	if (dur != Temporal::BBT_Offset()) {
+		const std::vector<int> b ({ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 16, 20, 24, 32 });
+		int n = 1;
+		for (auto const & bars : b) {
+			if (dur.bars == bars) {
+				length_selector.set_active (n);
+				break;
+			}
+			++n;
+		}
+		/* hmm, what do if not set ? */
 	} else {
-		set_region (nullptr);
-		_update_connection = Timers::super_rapid_connect (sigc::mem_fun (*this, &CueEditor::maybe_update));
+		length_selector.set_active (0); /* "until stopped" */
 	}
+
+	set_region (trigger->the_region());
+	if (trigger->armed()) {
+		play_button.set_sensitive (false);
+	} else {
+		play_button.set_sensitive (true);
+	}
+
+	setup_record_blink ();
 }
 
 void
@@ -1498,7 +1534,6 @@ CueEditor::count_in (Temporal::timepos_t audible, unsigned int clock_interval_ms
 	TempoMapPoints grid_points;
 	TempoMap::SharedPtr tmap (TempoMap::use());
 	Temporal::Beats audible_beats = tmap->quarters_at_sample (audible.samples());
-	samplepos_t audible_samples = audible.samples ();
 
 	if (audible_beats >= count_in_to) {
 		/* passed the count_in_to time */

@@ -114,7 +114,7 @@ ApplicationBar::ApplicationBar ()
 	: _have_layout (false)
 	, _basic_ui (0)
 	, _latency_disable_button (ArdourButton::led_default_elements)
-	, _auto_return_button (ArdourButton::led_default_elements)
+	, _auto_return_button (ArdourButton::default_elements)
 	, _primary_clock  (X_("primary"), X_("transport"), MainClock::PrimaryClock)
 	, _secondary_clock (X_("secondary"), X_("secondary"), MainClock::SecondaryClock)
 	, _auditioning_alert_button (_("Audition"))
@@ -158,6 +158,7 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	/* sub-layout for Sync | Shuttle (grow) */
 	HBox* ssbox = manage (new HBox);
 	ssbox->set_spacing (PX_SCALE(2));
+	ssbox->pack_start (_auto_return_button, false, false, 0);
 	ssbox->pack_start (_sync_button, false, false, 0);
 	ssbox->pack_start (_shuttle_box, true, true, 0);
 	ssbox->pack_start (*_shuttle_box.vari_button(), false, false, 0);
@@ -175,7 +176,9 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_record_mode_selector.set_sizing_texts (_record_mode_strings);
 
 	_latency_disable_button.set_text (_("Disable PDC"));
+
 	_auto_return_button.set_text(_("Auto Return"));
+	_auto_return_button.set_icon (ArdourIcon::TransportAutoReturn);
 
 	/* alert box sub-group */
 	VBox* alert_box = manage (new VBox);
@@ -307,7 +310,6 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	_latency_spacer.set_no_show_all ();
 	_latency_disable_button.set_no_show_all ();
 	_route_latency_value.set_no_show_all ();
-	_auto_return_button.set_no_show_all ();
 	_primary_clock_spacer.set_no_show_all ();
 	_secondary_clock_spacer.set_no_show_all ();
 	_monitor_dim_button.set_no_show_all ();
@@ -456,8 +458,6 @@ ApplicationBar::ui_actions_ready ()
 
 	act = ActionManager::get_action ("Transport", "ToggleAutoReturn");
 	_auto_return_button.set_related_action (act);
-
-	_auto_return_button.set_text(_("Auto Return"));
 
 	/* CANNOT sigc::bind these to clicked or toggled, must use pressed or released */
 	act = ActionManager::get_action (X_("Main"), X_("cancel-solo"));

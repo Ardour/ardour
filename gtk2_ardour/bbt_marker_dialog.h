@@ -33,15 +33,16 @@ class BBTMarkerDialog : public ArdourDialog
 {
 public:
 	BBTMarkerDialog (Temporal::timepos_t const &, Temporal::BBT_Time const&);
-	BBTMarkerDialog (Temporal::MusicTimePoint&);
+	BBTMarkerDialog (Temporal::MusicTimePoint const &);
 
 	Temporal::timepos_t position() const;
 	Temporal::BBT_Time  bbt_value () const;
 	std::string         name() const;
+	bool name_edited() const { return name_changed; }
 
 private:
 	void init (bool add);
-	Temporal::MusicTimePoint* _point;
+	Temporal::MusicTimePoint const * _point;
 	Temporal::timepos_t       _position;
 	Temporal::BBT_Time        _bbt;
 
@@ -54,5 +55,6 @@ private:
 	Gtk::HBox       name_box;
 	Gtk::Entry      name_entry;
 	Gtk::Label      name_label;
+	bool name_changed;
 };
 

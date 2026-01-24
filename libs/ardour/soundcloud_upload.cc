@@ -71,39 +71,25 @@ SoundcloudUploader::Get_Auth_Token( std::string username, std::string password )
 	curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
 	curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *) &xml_page);
 
-	struct curl_httppost *formpost=NULL;
-	struct curl_httppost *lastptr=NULL;
+	curl_mime *mime = curl_mime_init(curl_handle);
+	curl_mimepart* part;
 
-	/* Fill in the filename field */
-	curl_formadd(&formpost,
-			&lastptr,
-			CURLFORM_COPYNAME, "client_id",
-			CURLFORM_COPYCONTENTS, "6dd9cf0ad281aa57e07745082cec580b",
-			CURLFORM_END);
+	part = curl_mime_addpart (mime);
+	curl_mime_name (part, "client_id");
+	curl_mime_data (part, "6dd9cf0ad281aa57e07745082cec580b", CURL_ZERO_TERMINATED);
+	part = curl_mime_addpart (mime);
+	curl_mime_name (part, "client_secret");
+	curl_mime_data (part, "53f5b0113fb338800f8a7a9904fc3569", CURL_ZERO_TERMINATED);
+	part = curl_mime_addpart (mime);
+	curl_mime_name (part, "grant_type");
+	curl_mime_data (part, "password", CURL_ZERO_TERMINATED);
+	part = curl_mime_addpart (mime);
+	curl_mime_name (part, "username");
+	curl_mime_data (part, username.c_str(), CURL_ZERO_TERMINATED);
+	part = curl_mime_addpart (mime);
+	curl_mime_name (part, "password");
+	curl_mime_data (part, password.c_str(), CURL_ZERO_TERMINATED);
 
-	curl_formadd(&formpost,
-			&lastptr,
-			CURLFORM_COPYNAME, "client_secret",
-			CURLFORM_COPYCONTENTS, "53f5b0113fb338800f8a7a9904fc3569",
-			CURLFORM_END);
-
-	curl_formadd(&formpost,
-			&lastptr,
-			CURLFORM_COPYNAME, "grant_type",
-			CURLFORM_COPYCONTENTS, "password",
-			CURLFORM_END);
-
-	curl_formadd(&formpost,
-			&lastptr,
-			CURLFORM_COPYNAME, "username",
-			CURLFORM_COPYCONTENTS, username.c_str(),
-			CURLFORM_END);
-
-	curl_formadd(&formpost,
-			&lastptr,
-			CURLFORM_COPYNAME, "password",
-			CURLFORM_COPYCONTENTS, password.c_str(),
-			CURLFORM_END);
 
 	struct curl_slist *headerlist=NULL;
 	headerlist = curl_slist_append(headerlist, "Expect:");
@@ -113,12 +99,15 @@ SoundcloudUploader::Get_Auth_Token( std::string username, std::string password )
 	/* what URL that receives this POST */
 	std::string url = "https://api.soundcloud.com/oauth2/token";
 	curl_easy_setopt(curl_handle, CURLOPT_URL, url.c_str());
-	curl_easy_setopt(curl_handle, CURLOPT_HTTPPOST, formpost);
+	curl_easy_setopt(curl_handle, CURLOPT_MIMEPOST, mime);
 
 	// curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1L);
 
 	// perform online request
 	CURLcode res = curl_easy_perform(curl_handle);
+
+	curl_mime_free (mime);
+
 	if (res != 0) {
 		DEBUG_TRACE (DEBUG::Soundcloud, string_compose ("curl error %1 (%2)\n", res, curl_easy_strerror(res) ) );
 		return "";
@@ -145,7 +134,7 @@ SoundcloudUploader::Get_Auth_Token( std::string username, std::string password )
 }
 
 int
-SoundcloudUploader::progress_callback(void *caller, double dltotal, double dlnow, double ultotal, double ulnow)
+SoundcloudUploader::progress_callback(void *caller, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow)
 {
 	SoundcloudUploader *scu = (SoundcloudUploader *) caller;
 	DEBUG_TRACE (DEBUG::Soundcloud, string_compose ("%1: uploaded %2 of %3\n", scu->title, ulnow, ultotal) );
@@ -168,42 +157,28 @@ SoundcloudUploader::Upload(std::string file_path, std::string title, std::string
 	curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
 	curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *) &xml_page);
 
-	struct curl_httppost *formpost=NULL;
-	struct curl_httppost *lastptr=NULL;
+	curl_mime *mime = curl_mime_init(curl_handle);
+	curl_mimepart* part;
 
-	/* Fill in the file upload field. This makes libcurl load data from
-	   the given file name when curl_easy_perform() is called. */
-	curl_formadd(&formpost,
-			&lastptr,
-			CURLFORM_COPYNAME, "track[asset_data]",
-			CURLFORM_FILE, file_path.c_str(),
-			CURLFORM_END);
+	part = curl_mime_addpart (mime);
+	curl_mime_name (part, "track[asset_data]");
+	curl_mime_filedata (part, file_path.c_str());
 
-	/* Fill in the filename field */
-	curl_formadd(&formpost,
-			&lastptr,
-			CURLFORM_COPYNAME, "oauth_token",
-			CURLFORM_COPYCONTENTS, token.c_str(),
-			CURLFORM_END);
+	part = curl_mime_addpart (mime);
+	curl_mime_name (part, "oauth_token");
+	curl_mime_data (part, token.c_str(), CURL_ZERO_TERMINATED);
 
-	curl_formadd(&formpost,
-			&lastptr,
-			CURLFORM_COPYNAME, "track[title]",
-			CURLFORM_COPYCONTENTS, title.c_str(),
-			CURLFORM_END);
+	part = curl_mime_addpart (mime);
+	curl_mime_name (part, "track[title]");
+	curl_mime_data (part, title.c_str(), CURL_ZERO_TERMINATED);
 
-	curl_formadd(&formpost,
-			&lastptr,
-			CURLFORM_COPYNAME, "track[sharing]",
-			CURLFORM_COPYCONTENTS, ispublic ? "public" : "private",
-			CURLFORM_END);
+	part = curl_mime_addpart (mime);
+	curl_mime_name (part, "track[sharing]");
+	curl_mime_data (part, ispublic ? "public" : "private", CURL_ZERO_TERMINATED);
 
-	curl_formadd(&formpost,
-			&lastptr,
-			CURLFORM_COPYNAME, "track[downloadable]",
-			CURLFORM_COPYCONTENTS, downloadable ? "true" : "false",
-			CURLFORM_END);
-
+	part = curl_mime_addpart (mime);
+	curl_mime_name (part, "track[downloadable]");
+	curl_mime_data (part, downloadable ? "true" : "false", CURL_ZERO_TERMINATED);
 
 
 	/* initalize custom header list (stating that Expect: 100-continue is not
@@ -221,14 +196,14 @@ SoundcloudUploader::Upload(std::string file_path, std::string title, std::string
 		// curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1L);
 
 		curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, headerlist);
-		curl_easy_setopt(curl_handle, CURLOPT_HTTPPOST, formpost);
+		curl_easy_setopt(curl_handle, CURLOPT_MIMEPOST, mime);
 
 		this->title = title; // save title to show in progress bar
 		this->caller = caller;
 
 		curl_easy_setopt (curl_handle, CURLOPT_NOPROGRESS, 0); // turn on the progress bar
-		curl_easy_setopt (curl_handle, CURLOPT_PROGRESSFUNCTION, &SoundcloudUploader::progress_callback);
-		curl_easy_setopt (curl_handle, CURLOPT_PROGRESSDATA, this);
+		curl_easy_setopt (curl_handle, CURLOPT_XFERINFOFUNCTION, &SoundcloudUploader::progress_callback);
+		curl_easy_setopt (curl_handle, CURLOPT_XFERINFODATA, this);
 
 		curl_multi_add_handle(multi_handle, curl_handle);
 
@@ -286,8 +261,7 @@ SoundcloudUploader::Upload(std::string file_path, std::string title, std::string
 			}
 		}
 
-		/* then cleanup the formpost chain */
-		curl_formfree(formpost);
+		curl_mime_free (mime);
 
 		/* free slist */
 		curl_slist_free_all (headerlist);

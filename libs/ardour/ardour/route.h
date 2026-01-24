@@ -66,7 +66,7 @@
 
 class RoutePinWindowProxy;
 class PatchChangeGridDialog;
-class ArdourWindow;
+class RouteCommentEditor;
 
 namespace ARDOUR {
 
@@ -139,8 +139,8 @@ public:
 	std::string comment() { return _comment; }
 	void set_comment (std::string str, void *src);
 
-	ArdourWindow* comment_editor () const { return _comment_editor_window; }
-	void set_comment_editor (ArdourWindow* w) { _comment_editor_window = w; }
+	RouteCommentEditor* comment_editor () const { return _comment_editor_window; }
+	void set_comment_editor (RouteCommentEditor* w) { _comment_editor_window = w; }
 
 	bool set_name (const std::string& str);
 	static void set_name_in_state (XMLNode &, const std::string &);
@@ -668,11 +668,11 @@ protected:
 	std::shared_ptr<SoloIsolateControl> _solo_isolate_control;
 	std::shared_ptr<SoloSafeControl> _solo_safe_control;
 
-	std::string    _comment;
-	ArdourWindow*  _comment_editor_window;
+	std::string          _comment;
+	RouteCommentEditor*  _comment_editor_window;
+
 	bool           _have_internal_generator;
 	DataType       _default_type;
-
 	InstrumentInfo _instrument_info;
 	bool           _instrument_fanned_out;
 	Location*      _loop_location;

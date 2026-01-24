@@ -115,8 +115,11 @@ EditorSources::selection_changed ()
 			if ((iter = _model->get_iter (*i))) {
 				/* highlight any regions in the editor that use this region's source */
 				std::shared_ptr<ARDOUR::Region> region = (*iter)[_columns.region];
-				if (!region)
+				if (!region) {
 					continue;
+				}
+
+
 
 				std::shared_ptr<ARDOUR::Source> source = region->source ();
 				if (source) {

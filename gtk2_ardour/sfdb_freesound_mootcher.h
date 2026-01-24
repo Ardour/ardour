@@ -40,8 +40,6 @@
 #include <stdio.h>
 #include <cstring>
 #include <string>
-#include <sstream>
-#include <vector>
 #include <ytkmm/progressbar.h>
 //#include <ctime>
 
@@ -101,7 +99,7 @@ private:
 	void setcUrlOptions();
 
 	static size_t WriteMemoryCallback (void *ptr, size_t size, size_t nmemb, void *data);
-	static int progress_callback (void *clientp, double dltotal, double dlnow, double ultotal, double ulnow);
+	static int progress_callback (void *clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow);
 	std::string sortMethodString (enum sortMethod sort);
 	std::string getSoundResourceFile (std::string ID);
 

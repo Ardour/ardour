@@ -52,6 +52,8 @@ public:
 		_refresh_connection.disconnect ();
 	}
 
+	static void print ();
+
 private:
 	class Tab : public Gtk::VBox
 	{
@@ -131,7 +133,6 @@ private:
 	Gtk::SortType sort_type;
 	void toggle_sort_type ();
 	void search_string_updated (const std::string&);
-	void print () const;
 
 	sigc::connection _refresh_connection;
 };

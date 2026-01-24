@@ -1191,7 +1191,7 @@ EditingContext::set_snap_mode (SnapMode mode)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	snap_mode_actions[mode]->set_active (true);;
+	snap_mode_actions[mode]->set_active (true);
 }
 
 void

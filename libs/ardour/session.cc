@@ -511,6 +511,8 @@ Session::Session (AudioEngine &eng,
 
 	bool was_dirty = dirty();
 
+	AudioEngine::instance()->MidiPortInfoChanged.connect_same_thread (*this, std::bind (&Session::setup_bundles, this));
+
 	PresentationInfo::Change.connect_same_thread (*this, std::bind (&Session::notify_presentation_info_change, this, _1));
 
 	Config->ParameterChanged.connect_same_thread (*this, std::bind (&Session::config_changed, this, _1, false));
@@ -3004,17 +3006,17 @@ Session::ensure_route_presentation_info_gap (PresentationInfo::order_t first_new
 /** Caller must not hold process lock
  *  @param name_template string to use for the start of the name, or "" to use "Audio".
  */
-list< std::shared_ptr<AudioTrack> >
-Session::new_audio_track (int input_channels, int output_channels, std::shared_ptr<RouteGroup> route_group,
-                          uint32_t how_many, string name_template, PresentationInfo::order_t order,
-                          TrackMode mode, bool input_auto_connect,
-                          bool trigger_visibility)
+bool
+Session::new_audio_routes_tracks_bulk (RouteList& routes, list< std::shared_ptr<AudioTrack> >& tracks,
+                                       int input_channels, int output_channels, std::shared_ptr<RouteGroup> route_group,
+                                       uint32_t how_many, string name_template, PresentationInfo::order_t order,
+                                       TrackMode mode, bool input_auto_connect,
+                                       bool trigger_visibility)
 {
 	string track_name;
 	uint32_t track_id = 0;
 	string port;
-	RouteList new_routes;
-	list<std::shared_ptr<AudioTrack> > ret;
+	bool ret = true;
 
 	const string name_pattern = default_track_name_pattern (DataType::AUDIO);
 	bool const use_number = (how_many != 1) || name_template.empty () || (name_template == name_pattern);
@@ -3067,8 +3069,8 @@ Session::new_audio_track (int input_channels, int output_channels, std::shared_p
 
 			track->presentation_info ().set_trigger_track (trigger_visibility);
 
-			new_routes.push_back (track);
-			ret.push_back (track);
+			routes.push_back (track);
+			tracks.push_back (track);
 		}
 
 		catch (failed_constructor &err) {
@@ -3085,12 +3087,42 @@ Session::new_audio_track (int input_channels, int output_channels, std::shared_p
 		--how_many;
 	}
 
+	return ret;
+
 	failed:
-	if (!new_routes.empty()) {
-		add_routes (new_routes, input_auto_connect, true, order);
+	return false;
+}
+
+/** Caller must not hold process lock
+ *  @param name_template string to use for the start of the name, or "" to use "Audio".
+ */
+list< std::shared_ptr<AudioTrack> >
+Session::new_audio_track (int input_channels, int output_channels, std::shared_ptr<RouteGroup> route_group,
+                          uint32_t how_many, string name_template, PresentationInfo::order_t order,
+                          TrackMode mode, bool input_auto_connect,
+                          bool trigger_visibility)
+{
+	RouteList routes;
+	list<std::shared_ptr<AudioTrack> > tracks;
+
+	new_audio_routes_tracks_bulk (routes,
+				      tracks,
+				      input_channels,
+				      output_channels,
+				      route_group,
+				      how_many,
+				      name_template,
+				      order,
+				      mode,
+				      input_auto_connect,
+				      trigger_visibility
+				     );
+
+	if (!routes.empty ()) {
+		add_routes (routes, input_auto_connect, true, order);
 	}
 
-	return ret;
+	return tracks;
 }
 
 /** Caller must not hold process lock.
@@ -6704,6 +6736,20 @@ Session::nstripables (bool with_monitor) const
 		--rv;
 	}
 	return rv;
+}
+
+bool
+Session::empty() const
+{
+	StripableList sl;
+	get_stripables (sl);
+	for (auto const& s: sl) {
+		if (s->is_singleton ()) {
+			continue;
+		}
+		return false;
+	}
+	return true;
 }
 
 bool

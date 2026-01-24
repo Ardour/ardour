@@ -365,9 +365,9 @@ StreamView::apply_color (uint32_t color, ColorTarget target)
 
 	switch (target) {
 	case RegionColor:
-		region_color = color;
+		_region_color = color;
 		for (i = region_views.begin(); i != region_views.end(); ++i) {
-			(*i)->set_color (region_color);
+			(*i)->set_color (_region_color);
 		}
 		break;
 

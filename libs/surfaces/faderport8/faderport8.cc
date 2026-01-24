@@ -108,7 +108,7 @@ FaderPort8::probe (std::string& i, std::string& o)
 	AudioEngine::instance()->get_ports ("", DataType::MIDI, PortFlags (IsInput|IsTerminal), midi_outputs);
 
 	if (midi_outputs.size () == 0)
-		DEBUG_TRACE (DEBUG::FaderPort8, "prope got no output midi ports at all - perhaps an audio backend problem?\n");
+		DEBUG_TRACE (DEBUG::FaderPort8, "probe got no output midi ports at all - perhaps an audio backend problem?\n");
 	// midi_inputs will never be empty - there is always at least x-virtual-keyboard
 
 	const string needle =
@@ -130,13 +130,13 @@ FaderPort8::probe (std::string& i, std::string& o)
 	auto po = std::find_if (midi_outputs.begin (), midi_outputs.end (), has_fp8);
 
 	if (pi == midi_inputs.end () || po == midi_outputs.end ()) {
-		DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("prope did not find the '%1' midi ports\n", needle));
+		DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("probe did not find the '%1' midi ports\n", needle));
 		return false;
 	}
 
 	i = *pi;
 	o = *po;
-	DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("prope found midi ports '%1' and '%2'\n", i, o));
+	DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("probe found midi ports '%1' and '%2'\n", i, o));
 	return true;
 }
 

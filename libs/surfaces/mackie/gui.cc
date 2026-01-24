@@ -653,11 +653,9 @@ MackieControlProtocolGUI::action_changed (const Glib::ustring &sPath, const Tree
 {
 	string action_path = (*iter)[action_model.columns().path];
 
-	// Remove Binding is not in the action map but still valid
-
 	bool remove = false;
 
-	if (action_path == "Remove Binding") {
+	if (action_path.empty()) {
 		remove = true;
 	}
 

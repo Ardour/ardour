@@ -500,8 +500,8 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	uint8_t get_channel_for_add (ARDOUR::MidiModel::TimeType time) const;
 
 	typedef std::unordered_map<std::shared_ptr<NoteType>, NoteBase*>                             Events;
-	typedef std::unordered_map<ARDOUR::MidiModel::PatchChangePtr, std::shared_ptr<PatchChange> > PatchChanges;
-	typedef std::unordered_map<ARDOUR::MidiModel::constSysExPtr, std::shared_ptr<SysEx> >        SysExes;
+	typedef std::unordered_map<ARDOUR::MidiModel::PatchChangePtr, PatchChange*> PatchChanges;
+	typedef std::unordered_map<ARDOUR::MidiModel::constSysExPtr, SysEx*>        SysExes;
 	typedef std::vector<NoteBase*> CopyDragEvents;
 
 	std::shared_ptr<ARDOUR::MidiTrack>   _midi_track;
@@ -557,8 +557,8 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	NoteBase* find_canvas_note (Evoral::event_id_t id);
 	Events::iterator _optimization_iterator;
 
-	std::shared_ptr<PatchChange> find_canvas_patch_change (ARDOUR::MidiModel::PatchChangePtr p);
-	std::shared_ptr<SysEx> find_canvas_sys_ex (ARDOUR::MidiModel::SysExPtr s);
+	PatchChange* find_canvas_patch_change (ARDOUR::MidiModel::PatchChangePtr p);
+	SysEx* find_canvas_sys_ex (ARDOUR::MidiModel::SysExPtr s);
 
 	friend class VelocityDisplay;
 	void sync_velocity_drag (double factor);

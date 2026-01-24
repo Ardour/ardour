@@ -71,8 +71,8 @@ using namespace PBD;
 static const std::string base_url = "https://freesound.org/apiv2";
 
 // Ardour 7
-static const std::string default_token = "t3TjQ67WNh6zJLZRnWmArSiZ8bKlgTc2aEsV1cP7";
-static const std::string client_id = "yesyr1g4StTtg2F50KT1";
+static const std::string default_token = "Dwfk4N2CheXTZw5WzRBrgVEIusIMWxnBY4W2BUVl";
+static const std::string client_id = "QOY3ZLPUfOA9v2AkuaIM";
 
 static const std::string fields = "id,name,duration,filesize,samplerate,license,download,previews";
 
@@ -551,8 +551,8 @@ Mootcher::fetchAudioFile(std::string originalFileName, std::string theID, std::s
 
 	cancel_download = false;
 	curl_easy_setopt (curl, CURLOPT_NOPROGRESS, 0); // turn on the progress bar
-	curl_easy_setopt (curl, CURLOPT_PROGRESSFUNCTION, progress_callback);
-	curl_easy_setopt (curl, CURLOPT_PROGRESSDATA, this);
+	curl_easy_setopt (curl, CURLOPT_XFERINFOFUNCTION, progress_callback);
+	curl_easy_setopt (curl, CURLOPT_XFERINFODATA, this);
 
 	if (oauth_token == "") {
 		if (!get_oauth_token()) {
@@ -617,7 +617,7 @@ Mootcher::updateProgress(double dlnow, double dltotal)
 }
 
 int
-Mootcher::progress_callback(void *caller, double dltotal, double dlnow, double /*ultotal*/, double /*ulnow*/)
+Mootcher::progress_callback(void *caller, curl_off_t dltotal, curl_off_t dlnow, curl_off_t /*ultotal*/, curl_off_t /*ulnow*/)
 {
 	// It may seem curious to pass a pointer to an instance of an object to a static
 	// member function, but we can't use a normal member function as a curl progress callback,

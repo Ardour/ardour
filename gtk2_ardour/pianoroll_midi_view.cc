@@ -104,6 +104,7 @@ PianorollMidiView::PianorollMidiView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 	_note_group->raise_to_top ();
 
 	automation_group = new ArdourCanvas::Rectangle (&parent);
+	automation_group->Event.connect (sigc::mem_fun (*this, &PianorollMidiView::automation_group_event));
 	CANVAS_DEBUG_NAME (automation_group, "cue automation group");
 	automation_group->set_fill_color (UIConfiguration::instance().color ("midi automation track fill"));
 	automation_group->set_data ("linemerger", this);
@@ -116,6 +117,16 @@ PianorollMidiView::PianorollMidiView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 PianorollMidiView::~PianorollMidiView ()
 {
 	delete velocity_display;
+}
+
+bool
+PianorollMidiView::automation_group_event (GdkEvent* ev)
+{
+	if (!active_automation) {
+		/* Eat the event to prevent the parent seeing it */
+		return true;
+	}
+	return false;
 }
 
 bool
@@ -207,6 +218,7 @@ PianorollMidiView::scroll (GdkEventScroll* ev)
 			_editing_context.reset_zoom (_editing_context.get_current_zoom() / 2);
 			return true;
 		}
+		break;
 	case GDK_SCROLL_DOWN:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollHorizontalModifier)) {
 			_editing_context.scroll_right_step ();
@@ -246,7 +258,7 @@ PianorollMidiView::reset_width_dependent_items (double pixel_width)
 	MidiView::reset_width_dependent_items (pixel_width);
 
 	if (overlay_text) {
-		overlay_text->set_position (ArdourCanvas::Duple ((pixel_width / 2.0) - overlay_text->text_width(), (_height / 2.0 - overlay_text->text_height())));
+		overlay_text->set_position (ArdourCanvas::Duple ((midi_context().width() / 2.0) - (overlay_text->text_width()/2.), (midi_context().height() / 2.0) - (overlay_text->text_height() / 2.)));
 	}
 
 	for (auto & a : automation_map) {
@@ -465,6 +477,42 @@ PianorollMidiView::have_visible_automation () const
 }
 
 void
+PianorollMidiView::remove_all_automation ()
+{
+	unset_active_automation ();
+
+	for (auto & [parameter,ads] : automation_map) {
+		ads.hide ();
+	}
+
+	automation_map.clear ();
+	delete velocity_display;
+	velocity_display = nullptr;
+}
+
+void
+PianorollMidiView::hide_all_automation ()
+{
+	unset_active_automation ();
+
+	for (auto & [parameter,ads] : automation_map) {
+		ads.hide ();
+	}
+
+	AutomationStateChange (); /* EMIT SIGNAL */
+}
+
+size_t
+PianorollMidiView::n_visible_automation() const
+{
+	size_t n = 0;
+	for (auto const & [parameter,ads] : automation_map) {
+		n += ads.visible;
+	}
+	return n;
+}
+
+void
 PianorollMidiView::toggle_visibility (Evoral::Parameter const & param)
 {
 	using namespace ARDOUR;
@@ -538,13 +586,6 @@ PianorollMidiView::unset_active_automation ()
 		if (ads.visible) {
 			visible++;
 		}
-	}
-
-	/* If the currently active automation is the only one visible, hide it */
-
-	if (active_automation->visible && visible == 1) {
-		active_automation->hide ();
-		set_height (_height);
 	}
 
 	active_automation = nullptr;
@@ -934,4 +975,11 @@ PianorollMidiView::cut_copy_clear_one (AutomationLine& line, ::Selection& select
 			(*x)->value = val;
 		}
 	}
+}
+
+void
+PianorollMidiView::set_region (std::shared_ptr<MidiRegion> mr)
+{
+	MidiView::set_region (mr);
+	remove_all_automation ();
 }
