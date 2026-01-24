@@ -18,12 +18,12 @@ def configure(conf):
     # We should find a better way to do this that doesn't involve this
     # kind of dependency.
     #
-    if Options.options.dist_target == 'mingw':
+    if Options.options.dist_target in ['mingw', 'msvc']:
         autowaf.check_pkg(conf, 'portaudio-2.0', uselib_store='PORTAUDIO',
                           atleast_version='19')
 
     if Options.options.libjack_link == 'auto':
-        if Options.options.dist_target == 'mingw' or sys.platform == 'darwin':
+        if Options.options.dist_target in ['mingw', 'msvc'] or sys.platform == 'darwin':
             conf.env['libjack_link'] = "weak"
         else:
             conf.env['libjack_link'] = "link"
@@ -74,7 +74,7 @@ def build(bld):
                    ]
     obj.use      = 'libardour libpbd ardouralsautil'
     obj.install_path  = os.path.join(bld.env['LIBDIR'], 'backends')
-    if bld.env['build_target'] != 'mingw':
+    if bld.env['build_target'] not in ['mingw', 'msvc']:
         obj.cxxflags = [ bld.env['compiler_flags_dict']['pic'] ]
         obj.cflags   = [ bld.env['compiler_flags_dict']['pic'] ]
     else:
@@ -89,21 +89,26 @@ def build(bld):
         obj.cxxflags += [ '-DHAVE_JACK_PORT_RENAME' ]
         obj.cflags += [ '-DHAVE_JACK_PORT_RENAME' ]
 
-    if (bld.env['build_target'] == 'mingw'):
+    if bld.env['build_target'] in ['mingw', 'msvc']:
         obj.uselib   = [ 'PORTAUDIO' ]
     else:
         obj.uselib   = [ ]
 
     if bld.env['libjack_link'] == 'link':
         obj.uselib   += [ 'JACK' ]
-    elif bld.env['build_target'] == 'mingw':
+    elif bld.env['build_target'] in ['mingw', 'msvc']:
         obj.defines += [ 'USE_WEAK_JACK' ]
         obj.deps = [ 'weak_libjack.def' ]
+        if bld.env['build_target'] == 'msvc':
+            obj.cflags.append('/DUSE_WEAK_JACK')
+            obj.cxxflags.append('/DUSE_WEAK_JACK')
     else:
         obj.defines += [ 'USE_WEAK_JACK', 'HAVE_JACK_PORT_RENAME' ]
         obj.deps = [ 'weak_libjack.def' ]
 
     obj.uselib   += [ 'GLIBMM', 'XML', 'OSX']
+    if bld.env['build_target'] == 'msvc':
+        obj.uselib += ['SIGCPP']
 
     #
     # device discovery code in the jack backend needs ALSA
