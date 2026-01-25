@@ -376,7 +376,6 @@ TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float sz,
 				context->fill ();
 				context->stroke ();
 			} else {				/* boxy arrow */
-				context->rel_line_to (0, size);
 				context->move_to (margin, margin);
 				context->rel_line_to (0, size);
 				context->rel_line_to (size * 1 / 3, 0);
