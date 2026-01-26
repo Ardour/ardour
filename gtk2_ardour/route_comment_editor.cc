@@ -103,8 +103,7 @@ RouteCommentEditor::toggle ()
 	if (get_visible ()) {
 		hide ();
 	} else {
-		set_title (string_compose ("%1: %2", _route->name (), _("Comment Editor")));
-		present ();
+		open ();
 	}
 }
 
