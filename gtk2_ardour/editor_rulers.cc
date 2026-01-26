@@ -136,8 +136,10 @@ Editor::initialize_rulers ()
 
 #ifdef __APPLE__
 	Pango::FontDescription font (UIConfiguration::instance().get_VerySmallFont());
+	Pango::FontDescription bold_font (UIConfiguration::instance().get_VerySmallBoldFont());
 #else
 	Pango::FontDescription font (UIConfiguration::instance().get_SmallFont());
+	Pango::FontDescription bold_font (UIConfiguration::instance().get_SmallBoldFont());
 #endif
 
 	_timecode_metric = new TimecodeMetric (this);
@@ -147,24 +149,28 @@ Editor::initialize_rulers ()
 
 	timecode_ruler = new ArdourCanvas::Ruler (_time_markers_group, _timecode_metric,
 						  ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, timebar_height));
-	timecode_ruler->set_font_description (font);
+	timecode_ruler->set_font_description (bold_font);
+	timecode_ruler->set_minor_font_description (font);
 	CANVAS_DEBUG_NAME (timecode_ruler, "timecode ruler");
 	timecode_nmarks = 0;
 
 	samples_ruler = new ArdourCanvas::Ruler (_time_markers_group, _samples_metric,
 						 ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, timebar_height));
-	samples_ruler->set_font_description (font);
+	samples_ruler->set_font_description (bold_font);
+	samples_ruler->set_minor_font_description (font);
 	CANVAS_DEBUG_NAME (samples_ruler, "samples ruler");
 
 	minsec_ruler = new ArdourCanvas::Ruler (_time_markers_group, _minsec_metric,
 						ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, timebar_height));
-	minsec_ruler->set_font_description (font);
+	minsec_ruler->set_font_description (bold_font);
+	minsec_ruler->set_minor_font_description (font);
 	CANVAS_DEBUG_NAME (minsec_ruler, "minsec ruler");
 	minsec_nmarks = 0;
 
 	bbt_ruler = new ArdourCanvas::Ruler (_time_markers_group, _bbt_metric,
 	                                     ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, timebar_height));
-	bbt_ruler->set_font_description (font);
+	bbt_ruler->set_font_description (bold_font);
+	bbt_ruler->set_minor_font_description (font);
 	CANVAS_DEBUG_NAME (bbt_ruler, "bbt ruler");
 	timecode_nmarks = 0;
 
