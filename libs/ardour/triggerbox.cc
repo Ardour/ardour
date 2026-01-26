@@ -941,7 +941,7 @@ Trigger::begin_stop (bool explicit_stop)
 	*/
 	_state = WaitingToStop;
 	_explicitly_stopped = explicit_stop;
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 begin_stop() requested state %2\n", index(), enum_2_string (_state)));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 begin_stop() explicit %2 requested state %3\n", index(), _explicitly_stopped, enum_2_string (_state)));
 	send_property_change (ARDOUR::Properties::running);
 }
 
