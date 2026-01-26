@@ -1858,9 +1858,8 @@ ARDOUR_UI::get_smart_mode() const
 	return ( editor->get_smart_mode() );
 }
 
-
 void
-ARDOUR_UI::spacebar_action (bool with_abort, bool roll_out_of_bounded_mode)
+ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 {
 	if (!_session) {
 		return;
@@ -1870,16 +1869,6 @@ ARDOUR_UI::spacebar_action (bool with_abort, bool roll_out_of_bounded_mode)
 
 	if (armed_tb && _session->transport_rolling()) {
 		armed_tb->finish_recording ();
-		return;
-	}
-
-	toggle_roll (with_abort, roll_out_of_bounded_mode);
-}
-
-void
-ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
-{
-	if (!_session) {
 		return;
 	}
 
