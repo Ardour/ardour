@@ -69,11 +69,12 @@ InternalSend::InternalSend (Session&                      s,
 	init_gain ();
 
 	_send_from->DropReferences.connect_same_thread (source_connection, std::bind (&InternalSend::send_from_going_away, this));
-	CycleStart.connect_same_thread (*this, std::bind (&InternalSend::cycle_start, this, _1));
+	CycleStart.connect_same_thread (cycle_connection, std::bind (&InternalSend::cycle_start, this, _1));
 }
 
 InternalSend::~InternalSend ()
 {
+	cycle_connection.disconnect ();
 	propagate_solo ();
 	if (_send_to) {
 		_send_to->remove_send_from_internal_return (this);
