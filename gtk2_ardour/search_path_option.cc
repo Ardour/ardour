@@ -56,7 +56,7 @@ SearchPathOption::SearchPathOption (const string& pathname, const string& label,
 	vbox.pack_end (*hbox);
 
 	session_label.set_use_markup (true);
-	session_label.set_markup (string_compose ("<i>%1 (%2)</i>", _("the session folder"), short_path (default_path, 32)));
+	session_label.set_markup (string_compose ("<i>%1 (%2)</i>", _("the session folder"), Gtkmm2ext::markup_escape_text (short_path (default_path, 32))));
 	session_label.set_alignment (0.0, 0.5);
 	session_label.show ();
 
