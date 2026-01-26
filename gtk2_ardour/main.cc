@@ -273,12 +273,16 @@ int main (int argc, char *argv[])
 		}
 	} else {
 		/* Force-disable localization if the user wishes so;
-		 * just calling setlocale (...,"C") is not sufficient for this;
-		 * it is probably the LANG env var which gets picked up later somewhere.
+		 * but leave system locale in place, for various user-provided names/paths.
+		 *
+		 * Using the "C" locale implies that only strict ASCII characters are valid
+		 * and causes various issues, notablt `g_convert_error` exceptions.
+		 * "C.utf8" works on system where it is supported but is not widely adopted.
+		 *
+		 * Setting "LANG" "LC_CTYPE" or "LC_ALL" to "C" will break various aspects,
+		 * but at least try to not translate some other system messages.
 		 */
-		Glib::setenv ("LC_ALL", "C", true);
 		Glib::setenv ("LC_MESSAGES", "C", true);
-		Glib::setenv ("LANG", "C", true);
 	}
 #endif
 
