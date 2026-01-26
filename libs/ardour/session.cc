@@ -3868,24 +3868,29 @@ Session::remove_routes (std::shared_ptr<RouteList> routes_to_remove)
 			(*iter)->input()->disconnect (0);
 			(*iter)->output()->disconnect (0);
 
-			/* if the route had internal sends sending to it, remove them */
+			if (!deletion_in_progress ()) {
+				Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
+				ProcessorChangeBlocker pcb (this, false);
 
-			if (!deletion_in_progress () && (*iter)->internal_return()) {
+				if ((*iter)->internal_return() || (_monitor_out && (*iter)->can_monitor ())) {
+					lx.acquire ();
+				}
 
-				std::shared_ptr<RouteList const> r = routes.reader ();
-				for (auto const& i : *r) {
-					std::shared_ptr<Send> s = i->internal_send_for (*iter);
-					if (s) {
-						i->remove_processor (s);
+				/* if the route had internal sends sending to it, remove them */
+				if ((*iter)->internal_return()) {
+					std::shared_ptr<RouteList const> r = routes.reader ();
+					for (auto const& i : *r) {
+						std::shared_ptr<Send> s = i->internal_send_for (*iter);
+						if (s) {
+							i->remove_processor (s, nullptr, false);
+						}
 					}
 				}
-			}
 
-			/* if the monitoring section had a pointer to this route, remove it */
-			if (!deletion_in_progress () && _monitor_out && (*iter)->can_monitor ()) {
-				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-				ProcessorChangeBlocker pcb (this, false);
-				(*iter)->remove_monitor_send ();
+				/* if the monitoring section had a pointer to this route, remove it */
+				if (_monitor_out && (*iter)->can_monitor ()) {
+					(*iter)->remove_monitor_send ();
+				}
 			}
 
 			std::shared_ptr<MidiTrack> mt = std::dynamic_pointer_cast<MidiTrack> (*iter);
