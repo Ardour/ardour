@@ -275,53 +275,7 @@ VST3Plugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) cons
 PluginOutputConfiguration
 VST3Plugin::possible_output () const
 {
-	auto const& bi (_plug->bus_info_out ());
-	if (bi.size () < 2) {
-		return Plugin::possible_output ();
-	}
-#if 0
-	PluginOutputConfiguration oc;
-	int32_t sum = 0;
-	for (auto const& n : bi) {
-		sum += n.second.n_chn;
-		oc.insert (sum);
-	}
-	return oc;
-#else
-	/* first main out, + individual stereo main outs, +all main outs, + individual aux outs */
-
-	auto    i         = bi.begin ();
-	int32_t sum       = i->second.n_chn;
-	bool    seen_aux  = i->second.type == Vst::kAux;
-	bool    seen_mono = sum == 1;
-
-	PluginOutputConfiguration oc;
-	oc.insert (sum);
-
-	for (++i; i != bi.end (); ++i) {
-		if (seen_aux || seen_mono) {
-			sum += i->second.n_chn;
-			oc.insert (sum);
-		} else if (i->second.type == Vst::kAux) {
-			oc.insert (sum);
-			seen_aux = true;
-			sum += i->second.n_chn;
-			oc.insert (sum);
-		} else {
-			sum += i->second.n_chn;
-			if (i->second.n_chn == 1) {
-				seen_mono = true;
-				oc.insert (sum);
-			} else if (!seen_mono) {
-				oc.insert (sum);
-			}
-		}
-	}
-	if (!seen_aux && seen_mono) {
-		oc.insert (sum);
-	}
-	return oc;
-#endif
+	return _plug->output_config ();
 }
 
 ChanCount
@@ -1341,6 +1295,8 @@ VST3PI::VST3PI (std::shared_ptr<ARDOUR::VST3PluginModule> m, std::string unique_
 		query_io_config ();
 	}
 
+	init_output_configuration ();
+
 	if (!connect_components ()) {
 		//_controller->terminate(); // XXX ?
 		_component->terminate ();
@@ -1595,6 +1551,48 @@ VST3PI::query_io_config ()
 	_n_midi_inputs  = count_channels (Vst::kEvent, Vst::kInput,  Vst::kMain);
 	_n_midi_outputs = count_channels (Vst::kEvent, Vst::kOutput, Vst::kMain);
 
+}
+
+void
+VST3PI::init_output_configuration ()
+{
+	_output_configs.clear ();
+
+	auto const& bi (bus_info_out ());
+	if (bi.size () < 2) {
+		return;
+	}
+	/* first main out, + individual stereo main outs, +all main outs, + individual aux outs */
+
+	auto    i         = bi.begin ();
+	int32_t sum       = i->second.n_chn;
+	bool    seen_aux  = i->second.type == Vst::kAux;
+	bool    seen_mono = sum == 1;
+
+	_output_configs.insert (sum);
+
+	for (++i; i != bi.end (); ++i) {
+		if (seen_aux || seen_mono) {
+			sum += i->second.n_chn;
+			_output_configs.insert (sum);
+		} else if (i->second.type == Vst::kAux) {
+			_output_configs.insert (sum);
+			seen_aux = true;
+			sum += i->second.n_chn;
+			_output_configs.insert (sum);
+		} else {
+			sum += i->second.n_chn;
+			if (i->second.n_chn == 1) {
+				seen_mono = true;
+				_output_configs.insert (sum);
+			} else if (!seen_mono) {
+				_output_configs.insert (sum);
+			}
+		}
+	}
+	if (!seen_aux && seen_mono) {
+		_output_configs.insert (sum);
+	}
 }
 
 tresult

@@ -139,6 +139,8 @@ public:
 	uint32_t n_audio_aux_in () const { return _n_aux_inputs; }
 	uint32_t n_audio_aux_out () const { return _n_aux_outputs; }
 
+	ARDOUR::PluginOutputConfiguration output_config () const { return _output_configs; }
+
 	struct AudioBusInfo {
 		AudioBusInfo (Vst::BusType t, int32_t c, bool a) : type (t), n_chn (c), n_used_chn (c), dflt (a) {}
 		AudioBusInfo () : type (Vst::kMain), n_chn (0), n_used_chn (0) {}
@@ -244,6 +246,7 @@ private:
 
 	bool  update_processor ();
 	void  query_io_config ();
+	void  init_output_configuration ();
 	int32 count_channels (Vst::MediaType, Vst::BusDirection, Vst::BusType);
 
 
@@ -341,6 +344,8 @@ private:
 	std::vector<Vst::AudioBusBuffers> _busbuf_in;
 	std::vector<Vst::AudioBusBuffers> _busbuf_out;
 
+	ARDOUR::PluginOutputConfiguration _output_configs;
+
 	/* cache channels/bus Vst::AudioBusBuffers::numChannels */
 	std::map<int, int> _n_buschn_in;
 	std::map<int, int> _n_buschn_out;
@@ -404,6 +409,7 @@ public:
 	std::set<Evoral::Parameter> automatable () const;
 	std::string                 describe_parameter (Evoral::Parameter);
 	IOPortDescription           describe_io_port (DataType dt, bool input, uint32_t id) const;
+
 	PluginOutputConfiguration   possible_output () const;
 
 	void request_bus_layout (ChanCount const& /*in*/, ChanCount const& /*aux_in*/, ChanCount const& /*out*/);
