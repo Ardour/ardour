@@ -75,6 +75,7 @@ $constlist = array ();
 $funclist = array ();
 $classes = array ();
 $consts = array ();
+$datalist = array ();
 
 function my_die ($msg) {
 	fwrite (STDERR, $msg."\n");
@@ -442,6 +443,12 @@ foreach ($doc as $b) {
 	case "Constant/Enum Member":
 		# already handled -> $consts
 		break;
+	case "Static Data":
+		$datalist[luafn2class ($b['lua'])][] = array (
+			'name' => $b['lua'],
+			'ret'  => arg2lua (str_replace ('*', '', $b['ldec']))
+		);
+		break;
 	default:
 		if (strpos ($b['type'], "[C] ") !== 0) {
 			my_die ('unhandled type: ' . $b['type']);
@@ -486,6 +493,15 @@ foreach ($funclist as $ns => $fl) {
 		my_die ('Free Function in existing namespace: '.$ns.' '. print_r ($ns, true));
 	}
 	$classlist[$ns]['func'] = $fl;
+	$classlist[$ns]['free'] = true;
+}
+
+# step 4d: merge free static data into classlist
+foreach ($datalist as $ns => $dl) {
+	if (isset ($classlist[$ns])) {
+		my_die ('Static Data in existing namespace: '.$ns.' '. print_r ($ns, true));
+	}
+	$classlist[$ns]['data'] = $dl;
 	$classlist[$ns]['free'] = true;
 }
 
