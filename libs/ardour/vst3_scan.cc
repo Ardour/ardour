@@ -122,7 +122,12 @@ count_all_count_channels (ARDOUR::VST3Info& nfo, Vst::IComponent* c, bool verbos
 	nfo.n_midi_inputs  = count_channels (c, Vst::kEvent, Vst::kInput,  Vst::kMain, verbose);
 	nfo.n_midi_outputs = count_channels (c, Vst::kEvent, Vst::kOutput, Vst::kMain, verbose);
 
-	return nfo.n_inputs < 0 || nfo.n_outputs < 0;
+	if (nfo.n_inputs < 0 || nfo.n_outputs < 0) {
+		/* failed to get info */
+		return false;
+	}
+
+	return true;
 }
 
 static void
@@ -255,6 +260,9 @@ discover_vst3 (std::shared_ptr<ARDOUR::VST3PluginModule> m, std::vector<ARDOUR::
 
 			/* first try to get default layout ..*/
 			if (!count_all_count_channels (nfo, component, verbose, false)) {
+				if (verbose) {
+					PBD::info << "Bus/Channel detection failed, setting speaker arrangement, and re-scan" << endmsg;
+				}
 				/* some plugins e.g. Altiverb require a valid Bus/SpeakerArrangement */
 				set_speaker_arrangement (component, processor);
 				count_all_count_channels (nfo, component, verbose, true);
