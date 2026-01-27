@@ -79,7 +79,7 @@ RouteCommentEditor::RouteCommentEditor (std::shared_ptr<Route> r)
 	}
 
 	_vbox.show_all ();
-	set_position (Gtk::WIN_POS_CENTER_ON_PARENT);
+	set_position (UIConfiguration::instance().get_default_window_position());
 }
 
 RouteCommentEditor::~RouteCommentEditor ()
