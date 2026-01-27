@@ -560,6 +560,27 @@ int
 smf_track_add_eot_pulses(smf_track_t *track, size_t pulses)
 {
 	smf_event_t *event, *last_event;
+	int i;
+	int all_zero = 1;
+
+	/* Do not add EOT events to tracks that have only events at zero */
+
+	for (i = 0; i < track->events_array->len; ++i) {
+		smf_event_t* ev = (smf_event_t*)g_ptr_array_index(track->events_array, i);
+		if (event->time_pulses != 0) {
+			all_zero = 0;
+			break;
+		}
+	}
+
+	if (all_zero && track->number_of_events != 0) {
+		/* Do not set the End Of Track event time to what was requested
+		   if this track is full of events at zero. If we do that, we
+		   can end up making it appear that the file has an explicit
+		   duration when it does not.
+		*/
+		pulses = 0;
+	}
 
 	last_event = smf_track_get_last_event(track);
 	if (last_event != NULL) {
