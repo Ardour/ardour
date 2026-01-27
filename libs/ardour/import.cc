@@ -399,6 +399,8 @@ write_midi_type0_data_to_one_file (Evoral::SMF* source, ImportStatus& status, si
 				break;
 			}
 
+			t += delta_t;
+
 			if (size == 0) {
 				/* metadata not meant for us */
 				continue;
@@ -412,8 +414,6 @@ write_midi_type0_data_to_one_file (Evoral::SMF* source, ImportStatus& status, si
 			if (size > bufsize) {
 				bufsize = size;
 			}
-
-			t += delta_t;
 
 			/* if requested by user, each sourcefile gets only a single channel's data */
 
