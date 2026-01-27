@@ -127,6 +127,11 @@ count_all_count_channels (ARDOUR::VST3Info& nfo, Vst::IComponent* c, bool verbos
 		return false;
 	}
 
+	if (0 == (nfo.n_outputs + nfo.n_aux_outputs + nfo.n_midi_outputs)) {
+		/* no oututs at all, try to set Bus/SpeakerArrangement */
+		return false;
+	}
+
 	return true;
 }
 
