@@ -131,7 +131,7 @@ EngineControl::EngineControl ()
 	AttachOptions  xopt = AttachOptions (FILL | EXPAND);
 	int            row;
 
-	if (UIConfiguration::instance().get_allow_to_resize_engine_dialog ()) {
+	if (!UIConfiguration::instance().get_allow_to_resize_engine_dialog ()) {
 		set_resizable (false);
 	}
 	set_name (X_("AudioMIDISetup"));
