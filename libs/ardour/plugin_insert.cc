@@ -2264,20 +2264,46 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 bool
 PluginInsert::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 {
+	/* set plugin's natural_i/o_streams */
 	if (plugin()->get_info ()->variable_bus_layout ()) {
-		ChanCount input_streams = natural_input_streams ();
+		/* save old value, compare if changed */
+		ChanCount input_streams  = natural_input_streams ();
+		ChanCount output_streams = natural_output_streams ();
+
 		ChanCount sc;
 		if (_sidechain) {
 			_sidechain->can_support_io_configuration (sc, sc);
 		}
-		for (auto const& p : _plugins) {
-			if (_custom_cfg) {
-				p->request_bus_layout (_custom_sinks, sc, _custom_sinks);
-			} else {
-				p->request_bus_layout (in, sc, in);
+
+		ChanCount request_in = _custom_cfg ? _custom_sinks : in;
+		ChanCount request_out;
+
+		if (_custom_cfg) {
+			request_out = _custom_out;
+		} else if (_preset_out.n_audio () > 0) {
+			request_out = _preset_out;
+		} else {
+			request_out = in;
+
+			if (in.n_midi () > 0 && out.n_audio () == 0) {
+				request_out.set (DataType::AUDIO, 2);
+			}
+
+			if (_strict_io && is_instrument ()) {
+				ChanCount max_out (DataType::AUDIO, 2); // TODO use master-out ?
+				max_out.set (DataType::MIDI, out.get(DataType::MIDI));
+				request_out = ChanCount::min (request_out, max_out);
 			}
 		}
-		if (input_streams != natural_input_streams ()) {
+
+		DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: Request Bus layout in = %2 sc = %3 out = %4\n", name(), request_in, sc, request_out));
+
+		for (auto const& p : _plugins) {
+			p->request_bus_layout (request_in, sc, request_out);
+		}
+
+		if (input_streams != natural_input_streams () || output_streams != natural_output_streams ()) {
+			DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: Natural I/O mapping changed\n", name()));
 			mapping_changed ();
 		}
 	}
@@ -2469,7 +2495,7 @@ PluginInsert::automatic_can_support_io_configuration (ChanCount const& inx, Chan
 		 */
 		//out = in; // hint
 		ChanCount aux_in = sidechain_input_pins ();
-		if (out.n_midi () > 0 && out.n_audio () == 0) { out.set (DataType::AUDIO, 2); }
+		if (in.n_midi () > 0 && out.n_audio () == 0) { out.set (DataType::AUDIO, 2); }
 		if (out.n_audio () == 0) { out.set (DataType::AUDIO, 1); }
 		bool const r = _plugins.front()->match_variable_io (in, aux_in, out);
 		if (!r) {
