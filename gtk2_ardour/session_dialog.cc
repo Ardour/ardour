@@ -243,6 +243,10 @@ SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_
 
 	_tabs.signal_switch_page().connect (sigc::mem_fun (*this, &SessionDialog::tab_page_switched));
 	disallow_idle ();
+
+	if (!UIConfiguration::instance().get_allow_to_resize_init_dialog ()) {
+		set_resizable (false);
+	}
 }
 
 SessionDialog::~SessionDialog()

@@ -131,7 +131,7 @@ EngineControl::EngineControl ()
 	AttachOptions  xopt = AttachOptions (FILL | EXPAND);
 	int            row;
 
-	if (!UIConfiguration::instance().get_allow_to_resize_engine_dialog ()) {
+	if (!UIConfiguration::instance().get_allow_to_resize_init_dialog ()) {
 		set_resizable (false);
 	}
 	set_name (X_("AudioMIDISetup"));
@@ -1087,7 +1087,7 @@ EngineControl::backend_changed ()
 		maybe_display_saved_state ();
 	}
 
-	if (!UIConfiguration::instance().get_allow_to_resize_engine_dialog ()) {
+	if (!UIConfiguration::instance().get_allow_to_resize_init_dialog ()) {
 		resize (1, 1); // shrink window
 	}
 }
@@ -2867,7 +2867,7 @@ EngineControl::on_latency_expand ()
 		lbl_midi_system.hide ();
 		midi_option_combo.hide ();
 		midi_devices_button.hide ();
-		if (!UIConfiguration::instance().get_allow_to_resize_engine_dialog ()) {
+		if (!UIConfiguration::instance().get_allow_to_resize_init_dialog ()) {
 			resize (1, 1); // shrink window
 		}
 	}
