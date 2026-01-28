@@ -1014,7 +1014,7 @@ AudioEngine::drop_backend ()
 }
 
 std::shared_ptr<AudioBackend>
-AudioEngine::set_backend (const std::string& name, const std::string& arg1, const std::string& arg2)
+AudioEngine::set_backend (const std::string& name, const std::string& client_name, const std::string& session_id)
 {
 	BackendMap::iterator b = _backends.find (name);
 
@@ -1025,7 +1025,7 @@ AudioEngine::set_backend (const std::string& name, const std::string& arg1, cons
 	drop_backend ();
 
 	try {
-		if (b->second->instantiate (arg1, arg2)) {
+		if (b->second->instantiate (client_name, session_id)) {
 			throw failed_constructor ();
 		}
 
@@ -1066,11 +1066,7 @@ AudioEngine::start (bool for_latency)
 		return -1;
 	}
 
-	if (_backend->is_realtime ()) {
-		pbd_set_engine_rt_priority (_backend->client_real_time_priority ());
-	} else {
-		pbd_set_engine_rt_priority (0);
-	}
+	pbd_set_engine_rt_priority (_backend->client_real_time_priority ());
 
 	_running = true;
 
