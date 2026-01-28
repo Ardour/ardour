@@ -1295,6 +1295,25 @@ VST3PI::VST3PI (std::shared_ptr<ARDOUR::VST3PluginModule> m, std::string unique_
 		query_io_config ();
 	}
 
+	/* cache default bus width, later calls to setBusArrangements will change these */
+	for (int32 i = 0; i < _n_bus_in; ++i) {
+		Vst::BusInfo bus;
+		if (_component->getBusInfo (Vst::kAudio, Vst::kInput, i, bus) == kResultTrue) {
+			_bus_channel_cnt_in[i] = bus.channelCount;
+		} else {
+			_bus_channel_cnt_in[i] = 0;
+		}
+	}
+
+	for (int32 i = 0; i < _n_bus_out; ++i) {
+		Vst::BusInfo bus;
+		if (_component->getBusInfo (Vst::kAudio, Vst::kOutput, i, bus) == kResultTrue) {
+			_bus_channel_cnt_out[i] = bus.channelCount;
+		} else {
+			_bus_channel_cnt_out[i] = 0;
+		}
+	}
+
 	init_output_configuration ();
 
 	if (!connect_components ()) {
@@ -2304,8 +2323,6 @@ VST3PI::set_event_bus_state (bool enable)
 void
 VST3PI::request_bus_layout (uint32_t in, uint32_t aux_in, uint32_t out)
 {
-	// TODO only if changed .. and if plugin doesn't have defaults
-
 	DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::request_bus_layout: in = %1 aux-in = %2 out = %3\n",  in, aux_in, out));
 
 	bool was_active = _is_processing;
@@ -2317,37 +2334,53 @@ VST3PI::request_bus_layout (uint32_t in, uint32_t aux_in, uint32_t out)
 	VSTSpeakerArrangements sa_in;
 	VSTSpeakerArrangements sa_out;
 
+	/* This needs work for busses >= 64 channels.
+	 * also bitset shifting only work until 1 << 18 (speaker layout 11.2.6)
+	 * ~/src/ardour/libs/vst3/pluginterfaces/vst/vstspeaker.h
+	 */
 	Vst::SpeakerArrangement sa = ((uint64_t)1 << in) - 1;
 	if (in == 1 /*Vst::SpeakerArr::kSpeakerL */ && !_no_kMono) {
 		sa = Vst::SpeakerArr::kMono; /* 1 << 19 */
+	} else if (in > 63) {
+		sa = 0xffffffffffffffff;
 	}
 
-	if (_n_bus_in > 0) {
-		sa_in.push_back (sa);
+	while (sa_in.size () < (VSTSpeakerArrangements::size_type) _n_bus_in) {
+		size_t  const bn    = sa_in.size ();
+		int32_t const n_chn = _bus_channel_cnt_in[bn];
+
+		Vst::SpeakerArrangement s = sa;
+
+		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::request_bus_layout bus-width = %1 ; in[%2] = %3%4 \n", n_chn, bn, std::hex, s));
+		sa_in.push_back (s);
+
+		if (n_chn > 0) {
+			sa = sa >> n_chn;
+		}
+		if (sa_in.size () == 1) {
+			/* add aux inputs */
+			sa |= ((uint64_t)1 << aux_in) - 1;
+		}
 	}
 
 	sa = ((uint64_t)1 << out) - 1;
 	if (out == 1 /*Vst::SpeakerArr::kSpeakerL */ && !_no_kMono) {
 		sa = Vst::SpeakerArr::kMono; /* 1 << 19 */
-	}
-
-	if (_n_bus_out > 0) {
-		sa_out.push_back (sa);
-	}
-
-	sa = ((uint64_t)1 << aux_in) - 1;
-
-	if (_n_bus_in > 1) {
-		sa_in.push_back (sa);
-	}
-
-	sa = 0;
-	while (sa_in.size () < (VSTSpeakerArrangements::size_type) _n_bus_in) {
-		sa_in.push_back (sa);
+	} else if (out > 63) {
+		sa = 0xffffffffffffffff;
 	}
 
 	while (sa_out.size () < (VSTSpeakerArrangements::size_type) _n_bus_out) {
-		sa_out.push_back (sa);
+		size_t  const bn    = sa_out.size ();
+		int32_t const n_chn = _bus_channel_cnt_out[bn];
+
+		Vst::SpeakerArrangement s = sa;
+
+		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::request_bus_layout bus-width = %1 ; out[%2] = %3%4 \n", n_chn, bn, std::hex, s));
+		sa_out.push_back (s);
+		if (n_chn > 0) {
+			sa = sa >> n_chn;
+		}
 	}
 
 	Vst::SpeakerArrangement null_arrangement = {};

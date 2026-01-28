@@ -353,6 +353,9 @@ private:
 	std::map<int, AudioBusInfo> _bus_info_in;
 	std::map<int, AudioBusInfo> _bus_info_out;
 
+	std::map<int, int32_t> _bus_channel_cnt_in;
+	std::map<int, int32_t> _bus_channel_cnt_out;
+
 	int _n_inputs;
 	int _n_outputs;
 	int _n_aux_inputs;
