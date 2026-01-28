@@ -867,7 +867,6 @@ VST3Plugin::load_preset (PresetRecord r)
 		return false;
 	}
 
-
 	if (tmp[0] == "VST3-P") {
 		Glib::Threads::Mutex::Lock lx (_plug->process_lock ());
 		PBD::Unwinder<bool> uw (_plug->component_is_synced (), true);
@@ -1028,7 +1027,6 @@ VST3Plugin::find_presets ()
 
 	// TODO check _plug->unit_data()
 	// IUnitData: programDataSupported -> setUnitProgramData (IBStream)
-
 
 	std::shared_ptr<VST3PluginInfo> info = std::dynamic_pointer_cast<VST3PluginInfo> (get_info ());
 	PBD::Searchpath                 psp  = info->preset_search_path ();
