@@ -567,7 +567,7 @@ smf_track_add_eot_pulses(smf_track_t *track, size_t pulses)
 
 	for (i = 0; i < track->events_array->len; ++i) {
 		smf_event_t* ev = (smf_event_t*)g_ptr_array_index(track->events_array, i);
-		if (event->time_pulses != 0) {
+		if (ev->time_pulses != 0) {
 			all_zero = 0;
 			break;
 		}
