@@ -23,6 +23,9 @@
 
 #ifdef _MSC_VER
 #include <windows.h> // Needed for MSVC 'Sleep()'
+#if !defined(_M_IX86) && !defined(_M_X64) && !defined(_M_ARM) && !defined(_M_ARM64)
+#undef ENABLE_VECTOR_MODE
+#endif
 #else
 #include <unistd.h>  // for usleep ()
 #endif
@@ -425,7 +428,48 @@ Convproc::print (FILE* F)
 }
 
 #ifdef ENABLE_VECTOR_MODE
+#ifdef COMPILER_MSVC
+
+#if defined(_M_IX86) || defined(_M_X64)
+#include <immintrin.h>
+typedef __m128 FV4;
+
+// MSVC operator overloads to match GCC vector extension behavior (x86/x64)
+static inline __m128 operator+(const __m128& a, const __m128& b) {
+    return _mm_add_ps(a, b);
+}
+static inline __m128 operator-(const __m128& a, const __m128& b) {
+    return _mm_sub_ps(a, b);
+}
+static inline __m128 operator*(const __m128& a, const __m128& b) {
+    return _mm_mul_ps(a, b);
+}
+static inline __m128& operator+=(__m128& a, const __m128& b) {
+    return a = _mm_add_ps(a, b);
+}
+
+#elif defined(_M_ARM) || defined(_M_ARM64)
+#include <arm_neon.h>
+typedef float32x4_t FV4;
+
+// MSVC operator overloads to match GCC vector extension behavior (ARM/ARM64)
+static inline float32x4_t operator+(const float32x4_t& a, const float32x4_t& b) {
+    return vaddq_f32(a, b);
+}
+static inline float32x4_t operator-(const float32x4_t& a, const float32x4_t& b) {
+    return vsubq_f32(a, b);
+}
+static inline float32x4_t operator*(const float32x4_t& a, const float32x4_t& b) {
+    return vmulq_f32(a, b);
+}
+static inline float32x4_t& operator+=(float32x4_t& a, const float32x4_t& b) {
+    return a = vaddq_f32(a, b);
+}
+#endif
+
+#else
 typedef float FV4 __attribute__ ((vector_size (16)));
+#endif
 #endif
 
 Convlevel::Convlevel (void)
