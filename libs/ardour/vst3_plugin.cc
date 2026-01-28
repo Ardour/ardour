@@ -2348,6 +2348,9 @@ VST3PI::request_bus_layout (uint32_t in, uint32_t aux_in, uint32_t out)
 		int32_t const n_chn = _bus_channel_cnt_in[bn];
 
 		Vst::SpeakerArrangement s = sa;
+		if (n_chn > 0) {
+			s &= ((uint64_t)1 << n_chn) - 1;
+		}
 
 		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::request_bus_layout bus-width = %1 ; in[%2] = %3%4 \n", n_chn, bn, std::hex, s));
 		sa_in.push_back (s);
@@ -2373,6 +2376,10 @@ VST3PI::request_bus_layout (uint32_t in, uint32_t aux_in, uint32_t out)
 		int32_t const n_chn = _bus_channel_cnt_out[bn];
 
 		Vst::SpeakerArrangement s = sa;
+
+		if (n_chn > 0) {
+			s &= ((uint64_t)1 << n_chn) - 1;
+		}
 
 		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::request_bus_layout bus-width = %1 ; out[%2] = %3%4 \n", n_chn, bn, std::hex, s));
 		sa_out.push_back (s);
