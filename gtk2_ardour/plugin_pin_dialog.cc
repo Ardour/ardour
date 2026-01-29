@@ -853,11 +853,11 @@ PluginPinWidget::draw_plugin_pin (cairo_t* cr, const CtrlWidget& w)
 		layout->set_text (w.name);
 		layout->get_pixel_size (text_width, text_height);
 
-		rounded_rectangle (cr, w.x + dx + .5 * text_width - 2, w.y - text_height - 2,  text_width + 4, text_height + 2, 7);
+		rounded_rectangle (cr, w.x + dx - .5 * text_width - 2, w.y - text_height - 2,  text_width + 4, text_height + 2, 7);
 		cairo_set_source_rgba (cr, 0, 0, 0, .5);
 		cairo_fill (cr);
 
-		cairo_move_to (cr, w.x + dx + .5 * text_width, w.y - text_height - 1);
+		cairo_move_to (cr, w.x + dx - .5 * text_width, w.y - text_height - 1);
 		cairo_set_source_rgba (cr, 1., 1., 1., 1.);
 		pango_cairo_show_layout (cr, layout->gobj ());
 	}
