@@ -1006,7 +1006,6 @@ Bindings::save_as_html (ostream& ostr, bool categorize) const
 
 				string key_name = (*k)->first.native_short_name ();
 				replace_all (key_name, X_("KP_"), X_("Numpad "));
-				replace_all (key_name, X_("nabla"), X_("Tab"));
 
 				string::size_type pos;
 

@@ -131,7 +131,6 @@ if ($html) {
         'greater' => '&gt;',
         'less' => '&lt;',
 	'ISO_Left_Tab' => 'Tab',
-	'nabla' => 'Tab',
         );
 } else {
 

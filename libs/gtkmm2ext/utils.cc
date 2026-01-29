@@ -470,10 +470,6 @@ Gtkmm2ext::possibly_translate_keyval_to_make_legal_accelerator (uint32_t& keyval
 
 	switch (keyval) {
 	case GDK_Tab:
-	case GDK_ISO_Left_Tab:
-		fakekey = GDK_nabla;
-		break;
-
 	case GDK_Up:
 		fakekey = GDK_uparrow;
 		break;
@@ -514,10 +510,6 @@ uint32_t
 Gtkmm2ext::possibly_translate_legal_accelerator_to_real_key (uint32_t keyval)
 {
 	switch (keyval) {
-	case GDK_nabla:
-		return GDK_Tab;
-		break;
-
 	case GDK_uparrow:
 		return GDK_Up;
 		break;
