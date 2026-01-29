@@ -1206,12 +1206,12 @@ CueEditor::max_zoom_extent() const
 		if (show_source) {
 			len = _region->source()->length().beats();
 			if (len != Temporal::Beats()) {
-				return std::make_pair (timepos_t (Temporal::Beats()), timepos_t (_region->end().beats()));
+				return std::make_pair (timepos_t (Temporal::Beats()), timepos_t (len));
 			}
 		} else {
 			len = _region->length().beats();
 			if (len != Temporal::Beats()) {
-				return std::make_pair (timepos_t (_region->start().beats()), timepos_t (_region->end().beats()));
+				return std::make_pair (timepos_t (_region->start().beats()), timepos_t (_region->start().beats() + len));
 			}
 		}
 	}
