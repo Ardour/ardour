@@ -5,7 +5,7 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Ardour 5\n"
+"Project-Id-Version: Ardour 9\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-02-04 22:49+0000\n"
 "PO-Revision-Date: 2016-07-24 16:09+0100\n"
@@ -15,9 +15,9 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Poedit-SourceCharset: UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 1.8.8\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Generator: Poedit 3.6\n"
 
 #: analyser.cc:134 audioregion.cc:2233
 msgid "Transient Analysis failed for %1."
@@ -250,6 +250,17 @@ msgid ""
 "This dialog will not display again.  But you may notice a slight delay in "
 "this and future transient-detection operations.\n"
 msgstr ""
+"You have requested an operation that requires audio analysis.\n"
+"\n"
+"You currently have \"auto-analyse-audio\" disabled, which means that "
+"transient data must be generated every time it is required.\n"
+"\n"
+"If you are doing work that will require transient data on a regular basis, "
+"you should probably enable \"auto-analyse-audio\" in Preferences > Metering, "
+"then quit %1 and restart.\n"
+"\n"
+"This dialogue will not display again.  But you may notice a slight delay in "
+"this and future transient-detection operations.\n"
 
 #: audioregion.cc:2233
 msgid "Audio Region"
@@ -1730,7 +1741,7 @@ msgstr ""
 
 #: parameter_descriptor.cc:140
 msgid "Center Back"
-msgstr ""
+msgstr "Centre Back"
 
 #: parameter_descriptor.cc:141
 msgid "Screen Only"
@@ -1857,7 +1868,7 @@ msgid "Cannot remove plugin factory preset."
 msgstr ""
 
 #: plugin.cc:161
-msgid "A factory presets with given name already exists."
+msgid "A factory preset with given name already exists."
 msgstr ""
 
 #: plugin.cc:170
@@ -2171,11 +2182,11 @@ msgstr ""
 
 #: plugin_manager.cc:2892
 msgid "PluginManager::sanitize_tag could not tokenize string: "
-msgstr ""
+msgstr "PluginManager::sanitize_tag could not tokenise string: "
 
 #: plugin_manager.cc:2955
 msgid "PluginManager: Could not tokenize string: "
-msgstr ""
+msgstr "PluginManager: Could not tokenise string: "
 
 #: plugin_manager.cc:3280
 msgid "VST2"
@@ -2599,7 +2610,7 @@ msgstr ""
 
 #: rb_effect.cc:232 rb_effect.cc:267 sp_stretch.cc:233
 msgid "tempoize: error reading data from %1 at %2 (wanted %3, got %4)"
-msgstr ""
+msgstr "tempoise: error reading data from %1 at %2 (wanted %3, got %4)"
 
 #: rb_effect.cc:293 rb_effect.cc:322 sp_stretch.cc:294
 msgid "error writing tempo-adjusted data to %1"
@@ -2624,10 +2635,11 @@ msgstr ""
 #: session.cc:397
 msgid "Session initialization failed because Audio/MIDI engine is not running."
 msgstr ""
+"Session initialisation failed because Audio/MIDI engine is not running."
 
 #: session.cc:411
 msgid "Session initialization failed"
-msgstr ""
+msgstr "Session initialisation failed"
 
 #: session.cc:427
 msgid "Failed to load template/snapshot state"
@@ -2644,7 +2656,7 @@ msgstr ""
 #: session.cc:465 session.cc:469 session.cc:472 session.cc:475 session.cc:478
 #: session.cc:481 session.cc:487
 msgid "Cannot initialize session/engine: %1"
-msgstr ""
+msgstr "Cannot initialise session/engine: %1"
 
 #: session.cc:465
 msgid "Failed to create background threads."
@@ -2999,7 +3011,7 @@ msgstr ""
 msgid ""
 "The session's interchange dir is tainted.\n"
 "There is more than one folder in '%1'.\n"
-"Please remove extra subdirs to reduce possible filename ambiguties."
+"Please remove extra subdirs to reduce possible filename ambiguities."
 msgstr ""
 
 #: session_events.cc:249
@@ -3359,17 +3371,18 @@ msgid "Cannot reconstruct nested source for region %1"
 msgstr ""
 
 #: session_state.cc:2835
-msgid "Session: XMLNode describing a AudioRegion is incomplete (no source)"
+msgid "Session: XMLNode describing an AudioRegion is incomplete (no source)"
 msgstr ""
 
 #: session_state.cc:2843 session_state.cc:2864 session_state.cc:2884
 msgid ""
-"Session: XMLNode describing a AudioRegion references an unknown source id =%1"
+"Session: XMLNode describing an AudioRegion references an unknown source id "
+"=%1"
 msgstr ""
 
 #: session_state.cc:2849 session_state.cc:2870 session_state.cc:2890
 msgid ""
-"Session: XMLNode describing a AudioRegion references a non-audio source id "
+"Session: XMLNode describing an AudioRegion references a non-audio source id "
 "=%1"
 msgstr ""
 
@@ -3583,7 +3596,7 @@ msgstr ""
 
 #: simple_export.cc:218
 msgid "Export initialization failed: %1"
-msgstr ""
+msgstr "Export initialisation failed: %1"
 
 #: slavable.cc:124
 msgid "Master #%1 not found, assignment lost"
@@ -3731,7 +3744,7 @@ msgstr ""
 
 #: surround_pannable.cc:48
 msgid "Center"
-msgstr ""
+msgstr "Centre"
 
 #: surround_return.cc:74
 msgid "SurrReturn"
@@ -3766,7 +3779,7 @@ msgid "No Description"
 msgstr ""
 
 #: track.cc:764
-msgid "DiskIOProcessor: \"%1\" isn't an playlist"
+msgid "DiskIOProcessor: \"%1\" isn't a playlist"
 msgstr ""
 
 #: track.cc:835
@@ -3839,7 +3852,7 @@ msgstr ""
 
 #: transport_master_manager.cc:739
 msgid "Cannot initialize transport master manager"
-msgstr ""
+msgstr "Cannot initialise transport master manager"
 
 #: triggerbox.cc:153
 msgid "A"
@@ -4087,6 +4100,9 @@ msgstr ""
 #~ "\n"
 #~ "This dialogue will not display again.  But you may notice a slight delay "
 #~ "in this and future transient-detection operations.\n"
+
+#~ msgid "Leveler"
+#~ msgstr "Leveller"
 
 #~ msgid ""
 #~ "You have requested an operation that requires audio analysis.\n"
