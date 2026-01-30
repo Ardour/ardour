@@ -1144,6 +1144,11 @@ Editor::build_marker_menu (Location* loc)
 	items.push_back (MenuElem (_("Move Marker to Playhead"), sigc::mem_fun(*this, &Editor::marker_menu_set_from_playhead)));
 
 	items.push_back (SeparatorElem());
+	ArdourMarker* am = find_marker_from_location_id (loc->id(), true);
+	if (am) {
+		items.push_back (MenuElem (_("Edit Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::edit_marker), am, true)));
+		items.push_back (SeparatorElem());
+	}
 
 	if (!loc->is_cue_marker()) {
 		items.push_back (MenuElem (_("Create Range to Next Marker"), sigc::mem_fun(*this, &Editor::marker_menu_range_to_next)));
