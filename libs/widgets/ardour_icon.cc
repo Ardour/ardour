@@ -1155,6 +1155,39 @@ icon_nudge_right (cairo_t* cr, const int width, const int height, const uint32_t
 	VECTORICONSTROKEOUTLINE (.5 + DEFAULT_LINE_WIDTH, fg_color);
 }
 
+/** tiny "<" */
+static void
+icon_arrow_left (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
+{
+	const double x  = width * .5;
+	const double y  = height * .5;
+	const double wh = std::min (x, y);
+
+  const double tri_x = .15 * wh;
+  const double tri_y = .3 * wh;
+
+	cairo_move_to (cr, x + tri_x, y - tri_y);
+	cairo_line_to (cr, x - tri_x, y);
+	cairo_line_to (cr, x + tri_x, y + tri_y);
+	VECTORICONSTROKEOUTLINE (.5 + DEFAULT_LINE_WIDTH, fg_color);
+}
+
+/** tiny ">" */
+static void
+icon_arrow_right (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
+{
+	const double x  = width * .5;
+	const double y  = height * .5;
+	const double wh = std::min (x, y);
+
+  const double tri_x = .15 * wh;
+  const double tri_y = .3 * wh;
+
+	cairo_move_to (cr, x - tri_x, y - tri_y);
+	cairo_line_to (cr, x + tri_x, y);
+	cairo_line_to (cr, x - tri_x, y + tri_y);
+	VECTORICONSTROKEOUTLINE (.5 + DEFAULT_LINE_WIDTH, fg_color);
+}
 static void
 icon_plus_sign (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
 {
@@ -2166,6 +2199,12 @@ ArdourWidgets::ArdourIcon::render (cairo_t*                                   cr
 			break;
 		case NudgeRight:
 			icon_nudge_right (cr, width, height, fg_color);
+			break;
+		case ArrowLeft:
+			icon_arrow_left (cr, width, height, fg_color);
+			break;
+		case ArrowRight:
+			icon_arrow_right (cr, width, height, fg_color);
 			break;
 		case ZoomIn:
 			/* fallthrough */

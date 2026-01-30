@@ -1008,8 +1008,8 @@ private:
 		DOWN
 	};
 
-	bool scroll_press (Direction);
-	void scroll_release ();
+	bool scroll_press (GdkEventButton* ev, Direction);
+	bool scroll_release (GdkEventButton* ev);
 	sigc::connection _scroll_connection;
 	int _scroll_callbacks;
 
@@ -2134,6 +2134,7 @@ private:
 	bool _pending_initial_locate;
 
 	Gtk::HBox _summary_hbox;
+	Gtk::VBox _summary_vbox;
 	EditorSummary* _summary;
 
 	void region_view_added (RegionView*);
