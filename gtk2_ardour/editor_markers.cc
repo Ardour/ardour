@@ -1929,12 +1929,24 @@ Editor::edit_location (Location& loc, bool with_scene, bool with_command)
 		l3->set_alignment (1.0);
 		b3->pack_start (*channel, true, false);
 
-		use_scene_button = manage (new Gtk::CheckButton (_("Clear scene change")));
+		use_scene_button = manage (new Gtk::CheckButton (_("Use scene change")));
+		use_scene_button->signal_toggled().connect  ([this,use_scene_button,program,bank,channel]() {
+			bool s = use_scene_button->get_active();
+			program->set_sensitive (s);
+			bank->set_sensitive (s);
+			channel->set_sensitive (s);
+		});
+
 		if (!msc) {
-			use_scene_button->set_sensitive (false);
+			/* toggle twice to be sure to trigger toggled callback */
+			use_scene_button->set_active (true);
+			use_scene_button->set_active (false);
 		} else {
-			use_scene_button->signal_toggled().connect  (sigc::bind (sigc::mem_fun (dialog, &Gtk::Dialog::set_response_sensitive), Gtk::RESPONSE_ACCEPT, true));
+			/* toggle twice to be sure to trigger toggled callback */
+			use_scene_button->set_active (false);
+			use_scene_button->set_active (true);
 		}
+
 
 		Gtk::HBox* b4 = manage (new Gtk::HBox);
 		b4->pack_start (*use_scene_button, true, false);
@@ -1972,7 +1984,7 @@ Editor::edit_location (Location& loc, bool with_scene, bool with_command)
 
 	if (with_scene) {
 
-		if (use_scene_button->get_active()) {
+		if (!use_scene_button->get_active()) {
 			loc.set_scene_change (nullptr);
 		} else {
 
