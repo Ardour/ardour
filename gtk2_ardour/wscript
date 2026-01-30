@@ -669,8 +669,11 @@ def build(bld):
         obj.uselib += ' AUDIOUNITS OSX '
         obj.use    += ' libappleutility'
         obj.source += [ 'cocoacarbon.mm', 'bundle_env_cocoa.cc' ]
-    elif bld.env['build_target'] == 'mingw' or bld.env['build_target'] == 'msvc':
+    elif bld.env['build_target'] == 'mingw':
         obj.source += [ 'bundle_env_mingw.cc' ]
+        obj.source += [ 'windows_icon.rc' ]
+    elif bld.env['build_target'] == 'msvc':
+        obj.source += [ 'bundle_env_msvc2.cc' ]
         obj.source += [ 'windows_icon.rc' ]
     else:
         obj.source += [ 'bundle_env_linux.cc' ]
