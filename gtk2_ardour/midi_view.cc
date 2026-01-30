@@ -1737,7 +1737,7 @@ void
 MidiView::end_write()
 {
 	/* do not delete individual notes referenced here, because they are
-	   owned by _events. Just delete the container used for active
+	   (now) owned by _events. Just delete the container used for active
 	   notes only.
 	*/
 	delete [] _unfinished_live_notes;
