@@ -1030,8 +1030,7 @@ Session::import_files (ImportStatus& status)
 		}
 
 		if (source) { // audio
-			status.doing_what = compose_status_message (*p, source->samplerate(),
-			                                            sample_rate(), status.current, status.total);
+			status.doing_what = compose_status_message (*p, source->samplerate(), sample_rate(), status.current, status.total);
 			write_audio_data_to_new_files (source.get(), status, successful_imports);
 		} else if (smf_reader) { // midi
 			status.doing_what = string_compose(_("Loading MIDI file %1"), *p);
