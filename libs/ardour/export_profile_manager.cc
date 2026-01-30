@@ -500,13 +500,14 @@ ExportProfileManager::update_ranges ()
 		return;
 	}
 
+	Locations const* locations = session.locations ();
 	/* Loop */
-	if (session.locations ()->auto_loop_location ()) {
+	if (locations->auto_loop_location ()) {
 		ranges->push_back (session.locations ()->auto_loop_location ());
 	}
 
 	/* Session */
-	if (session.locations ()->session_range_location ()) {
+	if (locations->session_range_location ()) {
 		ranges->push_back (session.locations ()->session_range_location ());
 	}
 
@@ -515,14 +516,20 @@ ExportProfileManager::update_ranges ()
 	if (selection_range) {
 		ranges->push_back (selection_range.get ());
 	}
-
 	/* ranges */
 
-	LocationList const& list (session.locations ()->list ());
-	for (LocationList::const_iterator it = list.begin (); it != list.end (); ++it) {
-		if ((*it)->is_range_marker ()) {
-			ranges->push_back (*it);
+	LocationList const& list (locations->list ());
+	for (auto const& loc : list) {
+		if (loc->is_range_marker ()) {
+			ranges->push_back (loc);
 		}
+	}
+
+	/* arrangements */
+	Location* l = nullptr;
+	timepos_t start, end;
+	while ((l = locations->next_section (l, start, end)) != nullptr) {
+		ranges->push_back (l);
 	}
 }
 
