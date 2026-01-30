@@ -1687,7 +1687,6 @@ SoundFileOmega::reset_options ()
 			channel_strings.push_back (_("sequence files"));
 			if (same_size) {
 				channel_strings.push_back (_("all files in one track"));
-				channel_strings.push_back (_("merge files"));
 			}
 
 		}
@@ -2023,13 +2022,13 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 
 	disposition_map.insert (pair<string,ImportDisposition>(_("one track per file"), ImportDistinctFiles));
 	disposition_map.insert (pair<string,ImportDisposition>(_("one track per channel"), ImportDistinctChannels));
-	disposition_map.insert (pair<string,ImportDisposition>(_("merge files"), ImportMergeFiles));
+	disposition_map.insert (pair<string,ImportDisposition>(_("all files in one track"), ImportMergeFiles));
 	disposition_map.insert (pair<string,ImportDisposition>(_("sequence files"), ImportSerializeFiles));
 
 	disposition_map.insert (pair<string,ImportDisposition>(_("one region per file"), ImportDistinctFiles));
 	disposition_map.insert (pair<string,ImportDisposition>(_("one region per channel"), ImportDistinctChannels));
 	disposition_map.insert (pair<string,ImportDisposition>(_("all files in one region"), ImportMergeFiles));
-	disposition_map.insert (pair<string,ImportDisposition>(_("all files in one track"), ImportMergeFiles));
+	/* no sequence equivalent for importing to the region list */
 
 	chooser.signal_selection_changed().connect (sigc::mem_fun (*this, &SoundFileOmega::file_selection_changed));
 
