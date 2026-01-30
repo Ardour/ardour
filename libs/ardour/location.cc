@@ -1662,7 +1662,7 @@ Locations::next_section (Location* l, timepos_t& start, timepos_t& end) const
 Location*
 Locations::next_section_iter (Location* l, timepos_t& start, timepos_t& end, vector<LocationPair>& locs) const
 {
-	if (!l) {
+	if (!l || locs.empty ()) {
 		/* build cache */
 		locs.clear ();
 		sorted_section_locations (locs);
