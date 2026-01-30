@@ -252,8 +252,7 @@ compose_status_message (const string& path,
 }
 
 static void
-write_audio_data_to_new_files (ImportableSource* source, ImportStatus& status,
-                               vector<std::shared_ptr<Source> >& newfiles)
+write_audio_data_to_new_files (ImportableSource* source, ImportStatus& status, vector<std::shared_ptr<Source> >& newfiles)
 {
 	const samplecnt_t nframes = ResampledImportableSource::blocksize;
 	std::shared_ptr<AudioFileSource> afs;
