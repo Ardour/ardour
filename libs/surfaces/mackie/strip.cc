@@ -438,7 +438,7 @@ Strip::notify_gain_changed (bool force_update)
 
 	/* Keep VCA gain display live-updating in normal view */
 	if (_stripable &&
-		(_stripable->presentation_info().flags() & (ARDOUR::PresentationInfo::VCA | ARDOUR::PresentationInfo::FoldbackBus)) &&
+		(_stripable->presentation_info().flags() & ARDOUR::PresentationInfo::VCA) &&
 		_surface->mcp().subview()->subview_mode() == Subview::None) {
 		return_to_vpot_mode_display();
 	}
@@ -1284,9 +1284,8 @@ Strip::return_to_vpot_mode_display ()
 		return;
 	}
 
-	/* VCA and FB strips: always show current gain in dB permanently */
-	if (_stripable->presentation_info().flags() &
-		(ARDOUR::PresentationInfo::VCA | ARDOUR::PresentationInfo::FoldbackBus)) {
+	/* VCA strips: always show current gain in dB permanently */
+	if (_stripable->presentation_info().flags() & ARDOUR::PresentationInfo::VCA) {
 		float db = -INFINITY;
 		if (auto gain = _stripable->gain_control()) {
 			float coeff = gain->get_value();
@@ -1295,13 +1294,13 @@ Strip::return_to_vpot_mode_display ()
 			}
 		}
 
-		/* Also drive the meter with VCA gain */
-		if (_meter && (_stripable->presentation_info().flags() & ARDOUR::PresentationInfo::VCA)) {
+		/* Also drive the meter with the VCA gain — looks alive and correct */
+		/* Use Ardour's official Mackie meter scaling — perfect match */
+		if (_meter) {
 			_meter->send_update(*_surface, db);
 		}
 		return;
 	}
-
 	/* Normal tracks/buses: show pan mode or value */
 	pending_display[1] = vpot_mode_string();
 }
