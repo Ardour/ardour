@@ -195,7 +195,7 @@ if test -z "$VBM" -a -z "$LIVETRAX"; then
 	mkdir -p $PatchFiles
 fi
 
-if -z "$LIVETRAX"; then
+if test -z "$LIVETRAX"; then
 	mkdir -p $LuaScripts
 fi
 
@@ -373,12 +373,14 @@ done
 # MIDNAM Patch Files
 # got to be careful with names here
 if test -z "$VBM" -a -z "$LIVETRAX"; then
+	echo "Copying MIDNAM Patchfiles"
 	for x in $BUILD_ROOT/../share/patchfiles/*.midnam ; do
 		cp "$x" $PatchFiles
 	done
 fi
 
 if test -z "$LIVETRAX"; then
+	echo "Copying Lua Scripts"
 	# Lua Script Files
 	# got to be careful with names here
 	for x in $BUILD_ROOT/../share/scripts/*.lua ; do
@@ -411,10 +413,12 @@ for x in $BUILD_ROOT/../share/osc/*.preset ; do
 done
 
 # Mixbus MixerSettings (if any)
-for x in $BUILD_ROOT/../share/mixer_settings/*.lua ; do
-	mkdir -p $MixerSettings  # create on demand
-	cp "$x" $MixerSettings
-done
+if test -d $BUILD_ROOT/../share/mixer_settings; then
+	for x in $BUILD_ROOT/../share/mixer_settings/*.lua ; do
+		mkdir -p $MixerSettings  # create on demand
+		cp "$x" $MixerSettings
+	done
+fi
 
 # VAMP plugins that we use
 cp $BUILD_ROOT/libs/vamp-plugins/libardourvampplugins.dylib $Frameworks
