@@ -669,15 +669,18 @@ CueEditor::trigger_arm_change ()
 
 	if (!ref.trigger()) {
 		play_button.set_sensitive (false);
+		length_selector.set_sensitive (false);
 		return;
 	}
 
 	if (!ref.trigger()->armed()) {
 		end_write ();
 		play_button.set_sensitive (true);
+		length_selector.set_sensitive (true);
 	} else {
 		maybe_set_count_in ();
 		play_button.set_sensitive (false);
+		length_selector.set_sensitive (false);
 	}
 
 	setup_record_blink ();
