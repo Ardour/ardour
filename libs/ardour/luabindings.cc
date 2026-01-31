@@ -2981,7 +2981,7 @@ LuaBindings::common (lua_State* L)
 
 		.addFunction ("set_sample_rate", &AudioBackend::set_sample_rate)
 		.addFunction ("set_buffer_size", &AudioBackend::set_buffer_size)
-		.addFunction ("set_peridod_size", &AudioBackend::set_peridod_size)
+		.addFunction ("set_period_size", &AudioBackend::set_period_size)
 
 		.addFunction ("enumerate_drivers", &AudioBackend::enumerate_drivers)
 		.addFunction ("driver_name", &AudioBackend::driver_name)
