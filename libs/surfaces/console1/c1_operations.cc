@@ -27,12 +27,14 @@
 #include "console1.h"
 
 using namespace ARDOUR;
-using namespace ArdourSurface;
 using namespace PBD;
 using namespace Glib;
 using namespace std;
 
 /* Operations */
+
+namespace Console1
+{
 
 void
 Console1::bank (bool up)
@@ -145,7 +147,7 @@ Console1::select (const uint32_t i)
 void
 Console1::shift (const uint32_t val)
 {
-	DEBUG_TRACE (DEBUG::Console1, "shift()\n");
+	DEBUG_TRACE (DEBUG::Console1, string_compose( "shift (%1)\n", val ));
 	shift_state = !shift_state;
 	ShiftChange (val);
 }
@@ -674,11 +676,14 @@ Console1::map_select ()
 void
 Console1::map_shift (bool shift)
 {
-	DEBUG_TRACE (DEBUG::Console1, "map_shift()\n");
+	DEBUG_TRACE (DEBUG::Console1, string_compose ("map_shift(%1)\n", shift));
 	try {
 		ControllerButton* controllerButton = get_button (PRESET);
 		controllerButton->set_led_state (shift);
-		map_stripable_state ();
+        if( in_plugin_state )
+            remap_plugin_parameter (current_plugin_index);
+        else
+            map_stripable_state ();
 	} catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
 	}
@@ -687,7 +692,7 @@ Console1::map_shift (bool shift)
 void
 Console1::map_plugin_state (bool plugin_state)
 {
-	DEBUG_TRACE (DEBUG::Console1, "map_plugin_state()\n");
+	DEBUG_TRACE (DEBUG::Console1, string_compose ("map_plugin_state(%1)\n", plugin_state) );
 	try {
 		ControllerButton* controllerButton = get_button (TRACK_GROUP);
 		controllerButton->set_led_state (in_plugin_state);
@@ -699,10 +704,6 @@ Console1::map_plugin_state (bool plugin_state)
 			stop_blinking (ControllerID (FOCUS1 + i));
 		}
 		map_stripable_state ();
-	} else {
-		// I don't plan shift functionality with plugins...
-		shift (0);
-		// map all plugin related operations
 	}
 }
 
@@ -1035,6 +1036,7 @@ Console1::map_drive ()
 }
 
 // Sends
+// Sends
 void
 Console1::map_mb_send_level (const uint32_t n)
 {
@@ -1045,15 +1047,22 @@ Console1::map_mb_send_level (const uint32_t n)
 	}
 #endif
 	// Theese two sends are available in non-shift state
-	if (n_offset > 9 && shift_state) {
+	if (n_offset > 9 && shift_state) 
+    {
 		return;
+	} else if (n_offset < 10 && !shift_state) // while the rest needs the shift state
+	{
+		return;
+	}
+    else if( !shift_state && !switch_eq_q_dials )
+    {
 	}
 	else if (n_offset < 10 && !shift_state) { // while the rest needs the shift state
 		return;
 	}
 	else if(!shift_state && !switch_eq_q_dials) {
 		return;
-	}
+    }
 	ControllerID controllerID = get_send_controllerid (n_offset);
 	if (map_encoder (controllerID)) {
 		std::shared_ptr<AutomationControl> control = _current_stripable->send_level_controllable (n);
@@ -1153,6 +1162,7 @@ Console1::map_comp_emph ()
 	}
 }
 
+
 void Console1::eqBandQChangeMapping (bool mapValues)
 {
 	DEBUG_TRACE(DEBUG::Console1, string_compose("eqBandQChangeMapping(): band_q_as_send = %1, strip_eq_mode = %2, mapValues = %3 \n", band_q_as_send, strip_eq_mode, mapValues));
@@ -1228,3 +1238,5 @@ Console1::map_encoder (ControllerID controllerID, std::shared_ptr<ARDOUR::Automa
 		DEBUG_TRACE (DEBUG::Console1, "Encoder not found\n");
 	}
 }
+
+} // namespace Console1
