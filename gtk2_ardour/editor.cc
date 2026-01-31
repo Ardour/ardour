@@ -604,8 +604,10 @@ Editor::Editor ()
 	tabbox->pack_start (_notebook_tab1);
 	tabbox->pack_start (_notebook_tab2);
 
-	_editor_list_vbox.pack_start (*tabbox, false, false, 2);
-	_editor_list_vbox.pack_start (_the_notebook);
+	_editor_list_vbox.set_spacing (3);
+	_editor_list_vbox.pack_start (*manage (new ArdourVSpacer (0)), false, false, 2); // align top with editor shadow
+	_editor_list_vbox.pack_start (*tabbox, false, false);
+	_editor_list_vbox.pack_start (_the_notebook, true, true, 3);
 
 	content_right_pane.set_drag_cursor (*_cursors->expand_left_right);
 	editor_summary_pane.set_drag_cursor (*_cursors->expand_up_down);
@@ -2674,6 +2676,8 @@ Editor::setup_toolbar ()
 		mouse_mode_size_group->add_widget (tav_expand_button);
 		mouse_mode_size_group->add_widget (follow_playhead_button);
 		mouse_mode_size_group->add_widget (follow_edits_button);
+		mouse_mode_size_group->add_widget (_notebook_tab1);
+		mouse_mode_size_group->add_widget (_notebook_tab2);
 	} else {
 		mouse_mode_size_group->add_widget (zoom_preset_selector);
 		mouse_mode_size_group->add_widget (visible_tracks_selector);
