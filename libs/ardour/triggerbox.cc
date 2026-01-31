@@ -5429,9 +5429,6 @@ TriggerBox::run_cycle (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 
 		if (nframes == 0 && _currently_playing->state() == Trigger::Stopped) {
 			if (!_stop_all && !_currently_playing->explicitly_stopped()) {
-#ifndef NDEBUG
-				std::cerr << "stopped, do handle thing\n";
-#endif
 				(void) handle_stopped_trigger (bufs, dest_offset);
 			} else {
 				_currently_playing = 0;
