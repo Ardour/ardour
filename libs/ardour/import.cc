@@ -1046,6 +1046,10 @@ Session::import_files (ImportStatus& status)
 			}
 		}
 
+		if (status.cancel) {
+			break;
+		}
+
 		std::copy (successful_imports.begin(), successful_imports.end(), std::back_inserter(status.sources));
 		successful_imports.clear ();
 
