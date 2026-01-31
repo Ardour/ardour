@@ -60,7 +60,7 @@ public:
 protected:
 	void render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*) {
 
-		if (_ratio < 0) {
+		if (_ratio <= 0) {
 			return;
 		}
 
