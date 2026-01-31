@@ -1440,7 +1440,7 @@ AudioTrigger::AudioData::operator= (AudioTrigger::AudioData& other)
 	length = other.length;
 	capacity = other.capacity;
 
-	other.clear ();
+	other.clear (); /* Not drop, because we've stolen the data buffers */
 	other.length = 0;
 	other.capacity = 0;
 
@@ -1457,7 +1457,7 @@ AudioTrigger::AudioData::~AudioData ()
 void
 AudioTrigger::AudioData::alloc (samplecnt_t cnt, uint32_t nchans)
 {
-	clear ();
+	drop ();
 	reserve (nchans);
 	for (uint32_t n = 0; n < nchans; ++n) {
 		push_back (new Sample[cnt]);
@@ -1960,8 +1960,6 @@ int
 AudioTrigger::load_data (std::shared_ptr<AudioRegion> ar, AudioData& audio_data)
 {
 	const uint32_t nchans = ar->n_channels();
-
-	audio_data.drop ();
 
 	try {
 		samplecnt_t len = ar->length_samples();
