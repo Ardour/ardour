@@ -1109,7 +1109,7 @@ Session::import_files (ImportStatus& status)
 
 		/* Now, and only now, announce the newly created and to-be-used sources */
 
-		for (auto & src : successful_imports) {
+		for (auto & src : status.sources) {
 			SourceFactory::SourceCreated (src);
 		}
 
