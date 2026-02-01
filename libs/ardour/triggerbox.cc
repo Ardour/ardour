@@ -3306,10 +3306,7 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 	while (iter < rtmb->size() && !_playout) {
 
 		RTMidiBufferBeats::Item const & item ((*rtmb)[iter]);
-#ifndef NDEBUG
-#warning paul, please remove these debug messages
-		std::cerr << "Looking at event #" << iter << " @ " << item.timestamp << " transition was " << transition_beats << " rs " << region_start << std::endl;
-#endif
+		DEBUG_TRACE (DEBUG::TriggerStop, string_compose ("Looking at event #%1 transition @ %2 was %3 rs %4\n",  iter, item.timestamp, transition_beats, region_start));
 
 		/* Event times are in beats, relative to start of source
 		 * file. We need to conv+ert to region-relative time, and then
@@ -3322,32 +3319,24 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 		/* check that the event is within the bounds for this run() call */
 
 		if (maybe_last_event_timeline_beats < start_beats) {
-#ifndef NDEBUG
-			std::cerr << "out1\n";
-#endif
+			DEBUG_TRACE (DEBUG::TriggerStop, "out1\n");
 			break;
 		}
 
 		if (iter >= last_event_index) {
 			iter = rtmb->size();
-#ifndef NDEBUG
-			std::cerr << "out2\n";
-#endif
+			DEBUG_TRACE (DEBUG::TriggerStop, "out2\n");
 			break;
 		}
 
 		if (maybe_last_event_timeline_beats > final_beat) {
 			iter = rtmb->size();
-#ifndef NDEBUG
-			std::cerr << "out3\n";
-#endif
+			DEBUG_TRACE (DEBUG::TriggerStop, "out3\n");
 			break;
 		}
 
 		if (maybe_last_event_timeline_beats >= end_beats) {
-#ifndef NDEBUG
-			std::cerr << "out4\n";
-#endif
+			DEBUG_TRACE (DEBUG::TriggerStop, "out4\n");
 			break;
 		}
 
@@ -3355,9 +3344,7 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 
 		const samplepos_t timeline_samples = tmap->sample_at (maybe_last_event_timeline_beats);
 
-#ifndef NDEBUG
-		std::cerr << "Plays at " << timeline_samples << std::endl;
-#endif
+		DEBUG_TRACE (DEBUG::TriggerStop, string_compose ("Plays at %1\n", timeline_samples));
 
 		uint32_t evsize;
 		uint8_t const * buf = rtmb->bytes (item, evsize);
