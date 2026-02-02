@@ -1743,6 +1743,17 @@ Editor::region_selection_changed ()
 			_pianoroll->contents().unmap ();
 			_pianoroll->contents().get_parent()->remove (_pianoroll->contents());
 		}
+
+		RegionEditDisposition red (UIConfiguration::instance().get_region_edit_disposition());
+
+		switch (red) {
+		case OpenBottomPane:
+			show_att_bottom (false);
+			break;
+		default:
+			showhide_att_bottom (false);
+			break;
+		}
 	}
 }
 
@@ -1751,11 +1762,13 @@ Editor::maybe_edit_region_in_bottom_pane (RegionView& rv)
 {
 	bool pack_pianoroll = false;
 	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&rv);
+	RegionEditDisposition red (UIConfiguration::instance().get_region_edit_disposition());
 
-	if (mrv && UIConfiguration::instance().get_region_edit_disposition() != Editing::NeverBottomPane) {
+	if (mrv && (red != Editing::NeverBottomPane)) {
+
 		std::shared_ptr<ARDOUR::MidiTrack> mt = std::dynamic_pointer_cast<ARDOUR::MidiTrack> (mrv->midi_view()->track());
 		std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion>(mrv->region());
-		if (mrv && mt && mr) {
+		if (mt && mr) {
 
 			if (!_pianoroll) {
 				// XXX this should really not happen here
@@ -1773,19 +1786,30 @@ Editor::maybe_edit_region_in_bottom_pane (RegionView& rv)
 	}
 
 	if (pack_pianoroll) {
+
+		switch (red) {
+		case OpenBottomPane:
+			show_att_bottom (true);
+			break;
+		default:
+			break;
+		}
+
 		_bottom_hbox.set_child_packing (*_properties_box, false, false);
 
 		if (!_pianoroll->contents().get_parent()) {
 			_bottom_hbox.pack_start (_pianoroll->contents(), true, true);
 		}
+
 		_pianoroll->contents().hide (); // Why is this needed?
 		_pianoroll->contents().show_all ();
-	} else {
-		if (_pianoroll && _pianoroll->contents().get_parent()) {
-			_pianoroll->contents().unmap ();
-			_pianoroll->contents().get_parent()->remove (_pianoroll->contents());
+
+		if (should_show_att_bottom ()) {
+			showhide_att_bottom (true);
 		}
-		_bottom_hbox.set_child_packing (*_properties_box, true, true);
+
+	} else {
+		showhide_att_bottom (false);
 	}
 }
 
