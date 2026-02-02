@@ -224,8 +224,8 @@ PortAudioBackend::enumerate_output_devices () const
 	_pcmio->output_device_list(output_devices);
 
 	for (std::map<int, std::string>::const_iterator i = output_devices.begin (); i != output_devices.end(); ++i) {
-		if (_output_audio_device == "") _output_audio_device = i->second;
-		_output_audio_device_status.push_back (DeviceStatus (i->second, true));
+		if (_output_audio_device == "") _output_audio_device = utf16to8(i->second);
+		_output_audio_device_status.push_back (DeviceStatus (utf16to8 (i->second), true));
 	}
 	return _output_audio_device_status;
 }
