@@ -2026,18 +2026,20 @@ CueEditor::set_start (Temporal::timepos_t const & p)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	begin_reversible_command (_("trim region front"));
+	std::shared_ptr<Region> r (_region);
 
 	if (ref.trigger()) {
-		ref.trigger()->the_region()->clear_changes ();
-		ref.trigger()->the_region()->trim_front (p);
-		add_command (new PBD::StatefulDiffCommand (ref.trigger()->the_region()));
-	} else if (_region) {
-		_region->clear_changes ();
-		_region->trim_front (_region->source_position() + p);
-		add_command (new PBD::StatefulDiffCommand (_region));
+		r = ref.trigger()->the_region();
 	}
 
+	if (!r) {
+		return;
+	}
+
+	begin_reversible_command (_("trim region front"));
+	r->clear_changes ();
+	r->trim_front (_region->source_position() + p);
+	add_command (new PBD::StatefulDiffCommand (r));
 	commit_reversible_command ();
 }
 
@@ -2046,17 +2048,19 @@ CueEditor::set_end (Temporal::timepos_t const & p)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	begin_reversible_command (_("trim region end"));
+	std::shared_ptr<Region> r (_region);
 
 	if (ref.trigger()) {
-		ref.trigger()->the_region()->clear_changes ();
-		ref.trigger()->the_region()->trim_end (p);
-		add_command (new PBD::StatefulDiffCommand (ref.trigger()->the_region()));
-	} else if (_region) {
-		_region->clear_changes ();
-		_region->trim_end (_region->source_position() + p);
-		add_command (new PBD::StatefulDiffCommand (_region));
+		r = ref.trigger()->the_region();
 	}
 
+	if (!r) {
+		return;
+	}
+
+	begin_reversible_command (_("trim region end"));
+	r->clear_changes ();
+	r->trim_end (_region->source_position() + p);
+	add_command (new PBD::StatefulDiffCommand (r));
 	commit_reversible_command ();
 }
