@@ -3264,6 +3264,11 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 	*/
 
 	if (!rt_midibuffer) {
+
+		if (!_region) {
+			return nframes;
+		}
+
 		Route* rt = static_cast<Route*> (box().owner());
 
 		if (!rt || !rt->active()) {
