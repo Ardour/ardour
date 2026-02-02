@@ -59,7 +59,7 @@ static std::string utf16to8 (std::string const& str)
 {
 	glong n_bytes = 0;
 	const auto buf = Glib::make_unique_ptr_gfree(g_utf16_to_utf8(reinterpret_cast<const gunichar2*>(str.data()), str.size(), nullptr, &n_bytes, nullptr));
-	return std::string (buf.get(),  n_bytes);
+	return Glib::Markup::escape_text (std::string (buf.get(),  n_bytes));
 }
 
 static std::string s_instance_name;
