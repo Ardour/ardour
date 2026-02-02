@@ -203,8 +203,8 @@ PortAudioBackend::enumerate_input_devices () const
 	_pcmio->input_device_list(input_devices);
 
 	for (std::map<int, std::string>::const_iterator i = input_devices.begin (); i != input_devices.end(); ++i) {
-		if (_input_audio_device == "") _input_audio_device = i->second;
-		_input_audio_device_status.push_back (DeviceStatus (i->second, true));
+		if (_input_audio_device == "") _input_audio_device = Glib::locale_to_utf8(i->second);
+		_input_audio_device_status.push_back (DeviceStatus (Glib::locale_to_utf8 (i->second), true));
 	}
 	return _input_audio_device_status;
 }
@@ -1026,7 +1026,7 @@ PortAudioBackend::name_to_id(std::string device_name) const {
 	_pcmio->output_device_list(devices);
 
 	for (std::map<int, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
-		if (i->second == device_name) {
+		if (Glib::locale_to_utf8 (i->second) == device_name) {
 			device_id = i->first;
 			break;
 		}
