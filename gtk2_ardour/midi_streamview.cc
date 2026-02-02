@@ -516,9 +516,9 @@ MidiStreamView::get_regions_with_selected_data (RegionSelection& rs)
 }
 
 void
-MidiStreamView::set_note_highlight (bool yn)
+MidiStreamView::set_note_highlight (uint8_t note)
 {
-	dynamic_cast<MidiTimeAxisView*> (&_trackview)->set_note_highlight (yn);
+	dynamic_cast<MidiTimeAxisView*> (&_trackview)->set_note_highlight (note);
 }
 
 uint8_t

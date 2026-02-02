@@ -2057,6 +2057,14 @@ Pianoroll::toggle_note_selection (uint8_t note)
 }
 
 void
+Pianoroll::set_note_highlight (uint8_t note)
+{
+	if (prh) {
+		prh->set_note_highlight (note);
+	}
+}
+
+void
 Pianoroll::begin_write ()
 {
 	EC_LOCAL_TEMPO_SCOPE;

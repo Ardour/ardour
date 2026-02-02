@@ -84,7 +84,7 @@ public:
 	void parameter_changed (std::string const &);
 	uint8_t get_preferred_midi_channel () const;
 	void record_layer_check (std::shared_ptr<ARDOUR::Region>, samplepos_t);
-	void set_note_highlight (bool);
+	void set_note_highlight (uint8_t);
 
 	ARDOUR::InstrumentInfo* instrument_info() const;
 

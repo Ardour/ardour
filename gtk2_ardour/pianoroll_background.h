@@ -44,7 +44,7 @@ class PianorollMidiBackground : public MidiViewBackground
 	int contents_height() const;
 
 	uint8_t get_preferred_midi_channel () const;
-	void set_note_highlight (bool);
+	void set_note_highlight (uint8_t);
 	void record_layer_check (std::shared_ptr<ARDOUR::Region>, samplepos_t);
 
 	void set_size (int w, int h);
