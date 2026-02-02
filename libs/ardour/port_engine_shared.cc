@@ -20,8 +20,10 @@
 
 #include <regex>
 
+#include "glibmm/threads.h"
 #include "pbd/error.h"
 
+#include "ardour/audioengine.h"
 #include "ardour/port_engine_shared.h"
 #include "ardour/port_manager.h"
 
@@ -96,6 +98,12 @@ BackendPort::connect (BackendPortHandle port, BackendPortHandle self)
 void
 BackendPort::store_connection (BackendPortHandle port)
 {
+	/* XXX TODO: _connections MUST NOT CHANGE WHILE PROCESSING.
+	 * Most callers already hold the process-lock, so TRY-LOCK is the sucks-least stopgap
+	 * solution. Eventually connection changes SHOULD be done in sync with processing.
+	 * delegate via _port_connection_queue (and perhaps maintain a separate list for is_connected())
+	 */
+	Glib::Threads::Mutex::Lock lm (AudioEngine::instance ()->process_lock (), Glib::Threads::TRY_LOCK);
 	_connections.insert (port);
 }
 
@@ -123,6 +131,13 @@ BackendPort::disconnect (BackendPortHandle port, BackendPortHandle self)
 
 void BackendPort::remove_connection (BackendPortHandle port)
 {
+	/* XXX TODO: _connections MUST NOT CHANGE WHILE PROCESSING.
+	 * Most callers already hold the process-lock, so TRY-LOCK is the sucks-least stopgap
+	 * solution. Eventually connection changes SHOULD be done in sync with processing.
+	 * delegate via _port_connection_queue (and perhaps maintain a separate list for is_connected())
+	 */
+	Glib::Threads::Mutex::Lock lm (AudioEngine::instance ()->process_lock (), Glib::Threads::TRY_LOCK);
+
 	std::set<BackendPortPtr>::iterator it = _connections.find (port);
 	assert (it != _connections.end ());
 	_connections.erase (it);
@@ -131,6 +146,12 @@ void BackendPort::remove_connection (BackendPortHandle port)
 
 void BackendPort::disconnect_all (BackendPortHandle self)
 {
+	/* XXX TODO: _connections MUST NOT CHANGE WHILE PROCESSING.
+	 * Most callers already hold the process-lock, so TRY-LOCK is the sucks-least stopgap
+	 * solution. Eventually connection changes SHOULD be done in sync with processing.
+	 * delegate via _port_connection_queue (and perhaps maintain a separate list for is_connected())
+	 */
+	Glib::Threads::Mutex::Lock lm (AudioEngine::instance ()->process_lock (), Glib::Threads::TRY_LOCK);
 	while (!_connections.empty ()) {
 		std::set<BackendPortPtr>::iterator it = _connections.begin ();
 		(*it)->remove_connection (self);
