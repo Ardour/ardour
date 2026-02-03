@@ -663,6 +663,36 @@ CueEditor::blink_rec_enable (bool onoff)
 }
 
 void
+CueEditor::count_in_change (Trigger const * t)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	/* This is only called if we locate after rec-arming a trigger. The
+	 * machinery for the count-in was established when it was armed, here
+	 * we are just updating the count.
+	 */
+
+	if (!t) {
+		return;
+	}
+
+	if (t != ref.trigger().get()) {
+		return;
+	}
+
+	if (!t->armed()) {
+		return;
+	}
+
+	bool valid;
+	Temporal::Beats b = ref.box()->start_time (valid);
+
+	if (valid) {
+		count_in_to = b;
+	}
+}
+
+void
 CueEditor::trigger_arm_change ()
 {
 	EC_LOCAL_TEMPO_SCOPE;
@@ -1314,6 +1344,7 @@ CueEditor::set_trigger (TriggerReference& tref)
 
 	ref.box()->Captured.connect (trigger_connections, invalidator (*this), std::bind (&CueEditor::data_captured, this, _1), gui_context());
 	ref.box()->RecEnableChanged.connect (trigger_connections, invalidator (*this), std::bind (&CueEditor::rec_enable_change, this), gui_context());
+	ref.box()->ReCountIn.connect (trigger_connections, invalidator (*this), std::bind (&CueEditor::count_in_change, this, _1), gui_context());
 	maybe_set_count_in ();
 
 	Stripable* st = dynamic_cast<Stripable*> (ref.box()->owner());

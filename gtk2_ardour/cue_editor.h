@@ -226,6 +226,7 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner
 	PBD::ScopedConnectionList track_connections;
 
 	void trigger_arm_change ();
+	void count_in_change (ARDOUR::Trigger const *);
 
 	double timebar_height;
 	size_t n_timebars;
