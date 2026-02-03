@@ -55,11 +55,17 @@ const char * const winmme_driver_name = X_("WinMME");
 
 }
 
+static bool invalid_char (char c)
+{
+	return c < 0;
+}
+
 static std::string utf16to8 (std::string const& str)
 {
 	glong n_bytes = 0;
 	const auto buf = Glib::make_unique_ptr_gfree(g_utf16_to_utf8(reinterpret_cast<const gunichar2*>(str.data()), str.size(), nullptr, &n_bytes, nullptr));
-	return Glib::Markup::escape_text (std::string (buf.get(),  n_bytes));
+	std::string rv = std::string (buf.get(),  n_bytes);
+	rv.erase (remove_if (rv.begin(), rv.end(), invalid_char), rv.end());
 }
 
 static std::string s_instance_name;
