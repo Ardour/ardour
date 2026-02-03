@@ -3433,7 +3433,6 @@ void
 BBTMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (!movement_occurred) {
-		Temporal::MusicTimePoint& point (const_cast<Temporal::MusicTimePoint&>(_marker->mt_point ()));
 		/* reset thread local tempo map to the original state */
 		_editor.abort_tempo_map_edit ();
 
