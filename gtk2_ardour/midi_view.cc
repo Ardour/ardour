@@ -353,6 +353,8 @@ MidiView::set_on_timeline (bool yn)
 void
 MidiView::set_region (std::shared_ptr<MidiRegion> mr)
 {
+	end_write ();
+
 	_midi_region = mr;
 
 	if (!_midi_region) {
