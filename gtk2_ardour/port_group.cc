@@ -674,26 +674,39 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 				*/
 
 				string lp = p;
-				string monitor = _("Monitor");
 
-				boost::to_lower (lp);
-				boost::to_lower (monitor);
+#if 0
+				/* We'd like to be able to clean up pipewire
+				   MIDI port names, but that results in port
+				   names that do not match the actual port
+				   names, and this will cause attempts to
+				   connect ports (and also to display
+				   connections) to fail.
 
-				if ((lp.find (monitor) != string::npos) &&
-				    (lp.find (lpn) != string::npos)) {
-					continue;
-				}
-
-				/* Alter Pipewire's JACK port names to match
-				 * The One True JACK.
-				 *
-				 * Note that if Midi-Bridge was present, it was
-				 * lower-cased above.
+				   We would need some sort of
+				   indirection/aliasing so that the displayed
+				   name and the "real" name were both available
+				   to the port matrix.
+				*/
+				lp = ARDOUR::maybe_clean_pipewire_midi_port_name (lp);
+				/* This is one context where we need the prefix
+				 * to be able to put the ports into a port
+				 * group
 				 */
+				if (lp.find (':') == string::npos) {
+					lp = string (X_("system:")) + lp;
+				}
+#endif
 
-				string::size_type mb = lp.find (X_("midi-bridge"));
-				if (mb != string::npos) {
-					lp.replace (mb, 11, X_("system"));
+				/* Ignore our own monitor ports */
+				string llp = lp;
+				string monitor = _("Monitor");
+				boost::to_lower (llp);
+				boost::to_lower (monitor); /* may have been translated into upper case */
+
+				if ((llp.find (monitor) != string::npos) &&
+				    (llp.find (lpn) != string::npos)) {
+					continue;
 				}
 
 				/* can't use the audio engine for this as we
