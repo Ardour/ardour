@@ -392,11 +392,22 @@ IOButtonBase::set_label (IOButtonBase& self, ARDOUR::Session& session, std::shar
 			}
 			connections.push_back (connection);
 
-			connection = connection.substr (0, connection.find (":"));
+			/* Fix Pipewire's JACK port names for all MIDI
+			   ports. Audio ports (somehow) don't have the client
+			   name for system:XXXX ports, but MIDI ports have
+			   "Midi-Bridge:"
+			*/
+			string::size_type pos = connection.find (X_("Midi-Bridge:"));
+			if (pos != string::npos) {
+				connection = connection.substr (pos + 12);
+			} else {
+				connection = connection.substr (0, connection.find (":"));
+			}
 
 			if (maybe_client.empty ()) {
 				maybe_client = connection;
 			}
+
 			if (maybe_client != connection) {
 				break;
 			}
