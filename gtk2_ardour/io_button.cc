@@ -781,5 +781,12 @@ IOButton::maybe_add_bundle_to_menu (std::shared_ptr<Bundle> b, ARDOUR::BundleLis
 	_menu_bundles.push_back (b);
 
 	MenuList& citems = _menu.items ();
-	citems.push_back (MenuElemNoMnemonic (b->name (), sigc::bind (sigc::mem_fun (*this, &IOButton::bundle_chosen), b)));
+	string n (b->name());
+	string::size_type pos = n.find (X_("system:"));
+
+	if (pos == 0) {
+		n.erase (0, 7);
+	}
+
+	citems.push_back (MenuElemNoMnemonic (n, sigc::bind (sigc::mem_fun (*this, &IOButton::bundle_chosen), b)));
 }
