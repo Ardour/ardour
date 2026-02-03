@@ -41,23 +41,6 @@
 using namespace PBD;
 using namespace ARDOUR;
 
-static bool invalid_char (char c)
-{
-	/* removing non ASCII chars is overkill, but
-	 * desperate times call for desperate debugging.
-	 */
-	return c < 0;
-}
-
-static std::string sanitize_device_name (const char* str)
-{
-	glong n_bytes = 0;
-	const auto buf = Glib::make_unique_ptr_gfree (g_utf16_to_utf8 (reinterpret_cast<const gunichar2*>(str), -1, NULL, &n_bytes, NULL));
-	std::string rv = std::string (buf.get(),  n_bytes);
-	rv.erase (remove_if (rv.begin(), rv.end(), invalid_char), rv.end());
-	return rv;
-}
-
 PortAudioIO::PortAudioIO ()
 	: _capture_channels (0)
 	, _playback_channels (0)
@@ -340,7 +323,7 @@ PortAudioIO::input_device_list(std::map<int, std::string> &devices) const
 	for (std::map<int, paDevice*>::const_iterator i = _input_devices.begin ();
 	     i != _input_devices.end ();
 	     ++i) {
-		devices.insert (std::pair<int, std::string>(i->first, i->second->name));
+		devices.insert (std::pair<int, std::string>(i->first, Glib::locale_to_utf8(i->second->name)));
 	}
 }
 
@@ -350,7 +333,7 @@ PortAudioIO::output_device_list(std::map<int, std::string> &devices) const
 	for (std::map<int, paDevice*>::const_iterator i = _output_devices.begin ();
 	     i != _output_devices.end ();
 	     ++i) {
-		devices.insert (std::pair<int, std::string>(i->first, i->second->name));
+		devices.insert (std::pair<int, std::string>(i->first, Glib::locale_to_utf8(i->second->name)));
 	}
 }
 
@@ -563,14 +546,14 @@ PortAudioIO::add_devices ()
 
 		if (nfo->maxInputChannels > 0) {
 			_input_devices.insert (std::pair<int, paDevice*> (i, new paDevice(
-							sanitize_device_name(nfo->name),
+							nfo->name,
 							nfo->maxInputChannels,
 							nfo->maxOutputChannels
 							)));
 		}
 		if (nfo->maxOutputChannels > 0) {
 			_output_devices.insert (std::pair<int, paDevice*> (i, new paDevice(
-							sanitize_device_name(nfo->name),
+							nfo->name,
 							nfo->maxInputChannels,
 							nfo->maxOutputChannels
 							)));
