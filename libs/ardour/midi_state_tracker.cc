@@ -529,10 +529,6 @@ MidiStateTracker::resolve_diff (MidiStateTracker const & other, Evoral::EventSin
 
 	uint8_t buf[3];
 
-	std::cerr << "MST::rd\n";
-	dump (std::cerr);
-	std::cerr << "MST::rd other\n";
-	other.dump (std::cerr);
 
 	for (int channel = 0; channel < 16; ++channel) {
 
@@ -545,7 +541,6 @@ MidiStateTracker::resolve_diff (MidiStateTracker const & other, Evoral::EventSin
 				buf[1] = n;
 				buf[2] = 64; /* not good, needs nuance */
 				dst.write (time, Evoral::MIDI_EVENT, 3, buf);
-				std::cerr << "MST:rd note " << n << " turned " << (on ? "off" : "on") << std::endl;
 			}
 
 			if (control[channel][n] != other.control[channel][n]) {
@@ -553,7 +548,6 @@ MidiStateTracker::resolve_diff (MidiStateTracker const & other, Evoral::EventSin
 				buf[1] = n;
 				buf[2] = other.control[channel][n];
 				dst.write (time, Evoral::MIDI_EVENT, 3, buf);
-				std::cerr << "MST:rd control" << n << " set to " << (int) other.control[channel][n] << std::endl;
 			}
 		}
 
