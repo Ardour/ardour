@@ -238,7 +238,14 @@ Session::setup_bundles_rcu ()
 		if (!pn.empty()) {
 			n = pn;
 		} else {
-			n.erase (n.find_first_of (X_("alsa_pcm:")), 1);
+			string::size_type pos = n.find (X_("alsa_pcm:"));
+			if (pos != string::npos) {
+				n.erase (pos, 9);
+			}
+			pos = n.find (X_("Midi-Bridge"));
+			if (pos != string::npos) {
+				n.replace (pos, 11, X_("system"));
+			}
 		}
 		std::shared_ptr<Bundle> c (new Bundle (n, false));
 		c->add_channel ("", DataType::MIDI);
@@ -259,7 +266,14 @@ Session::setup_bundles_rcu ()
 		if (!pn.empty()) {
 			n = pn;
 		} else {
-			n.erase (n.find_first_of (X_("alsa_pcm:")), 1);
+			string::size_type pos = n.find (X_("alsa_pcm:"));
+			if (pos != string::npos) {
+				n.erase (pos, 9);
+			}
+			pos = n.find (X_("Midi-Bridge"));
+			if (pos != string::npos) {
+				n.replace (pos, 11, X_("system"));
+			}
 		}
 		std::shared_ptr<Bundle> c (new Bundle (n, true));
 		c->add_channel ("", DataType::MIDI);
