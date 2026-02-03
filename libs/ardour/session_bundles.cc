@@ -230,6 +230,10 @@ Session::setup_bundles_rcu ()
 	for (uint32_t np = 0; np < inputs[DataType::MIDI].size(); ++np) {
 		string n = inputs[DataType::MIDI][np];
 
+		if (n.find ("Midi-Through") != string::npos || n.find ("Midi Through") != string::npos) {
+			continue;
+		}
+
 		std::string pn = _engine.get_pretty_name_by_name (n);
 		if (!pn.empty()) {
 			n = pn;
