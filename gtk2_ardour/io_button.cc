@@ -373,9 +373,9 @@ IOButtonBase::set_label (IOButtonBase& self, ARDOUR::Session& session, std::shar
 		string                   maybe_client = "";
 		vector<string>           connections;
 		std::shared_ptr<PortSet> ps (io->ports ());
-		for (PortSet::iterator port = ps->begin (dt);
-		     port != ps->end (dt);
-		     ++port) {
+
+		for (PortSet::iterator port = ps->begin (dt); port != ps->end (dt); ++port) {
+
 			port_connections.clear ();
 			port->get_connections (port_connections);
 			if (port_connections.empty ()) {
