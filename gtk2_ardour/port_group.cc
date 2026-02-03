@@ -684,6 +684,18 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 					continue;
 				}
 
+				/* Alter Pipewire's JACK port names to match
+				 * The One True JACK.
+				 *
+				 * Note that if Midi-Bridge was present, it was
+				 * lower-cased above.
+				 */
+
+				string::size_type mb = lp.find (X_("midi-bridge"));
+				if (mb != string::npos) {
+					lp.replace (mb, 11, X_("system"));
+				}
+
 				/* can't use the audio engine for this as we
 				 * are looking at ports not owned by the
 				 * application, and the audio engine/port
@@ -708,14 +720,14 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 
 						/* we own this port (named after the program) */
 
-						extra_program[t].push_back (p);
+						extra_program[t].push_back (lp);
 
 					} else if (flags & IsPhysical) {
 
-						extra_system[t].push_back (p);
+						extra_system[t].push_back (lp);
 
 					} else {
-						extra_other[t].push_back (p);
+						extra_other[t].push_back (lp);
 					}
 				}
 			}
