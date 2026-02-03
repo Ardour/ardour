@@ -529,10 +529,16 @@ MidiStateTracker::resolve_diff (MidiStateTracker const & other, Evoral::EventSin
 
 	uint8_t buf[3];
 
+	/* If this loop counter is not volatile, then gcc with -O3 will cause
+	 * the inner loop to never exit (n continues to grow, and we eventually
+	 * crash. Debug builds do not suffer from this issue.
+	 */
+
+	volatile int n;
 
 	for (int channel = 0; channel < 16; ++channel) {
 
-		for (int n = 0; n < 128; ++n) {
+		for (n = 0; n < 128; ++n) {
 
 			bool on;
 
