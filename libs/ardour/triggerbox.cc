@@ -3736,7 +3736,6 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 void
 TriggerBox::arm_from_another_thread (Trigger& slot, samplepos_t now, uint32_t chans, Temporal::BBT_Offset const & duration)
 {
-	using namespace Temporal;
 
 	SlotArmInfo* ai = &_the_arm_info;
 
@@ -3756,6 +3755,18 @@ TriggerBox::arm_from_another_thread (Trigger& slot, samplepos_t now, uint32_t ch
 		ai->stretcher = at->alloc_stretcher ();
 	}
 
+	setup_arm_info_bounds (*ai, now, slot, duration);
+
+	ai->captured = 0;
+
+	_arm_info = ai;
+}
+
+void
+TriggerBox::setup_arm_info_bounds (SlotArmInfo& ai, samplepos_t now, Trigger& slot, Temporal::BBT_Offset const & duration)
+{
+	using namespace Temporal;
+
 	Beats start_b;
 	Beats end_b;
 	BBT_Argument t_bbt;
@@ -3767,36 +3778,32 @@ TriggerBox::arm_from_another_thread (Trigger& slot, samplepos_t now, uint32_t ch
 	slot.compute_quantized_transition (now, now_beats, std::numeric_limits<Beats>::max(),
 	                                   t_bbt, t_beats, t_samples, tmap, slot.quantization());
 
-	if (t_beats == now_beats) {
-		t_bbt = tmap->bbt_walk (t_bbt, slot.quantization());
-		t_beats = tmap->quarters_at (t_bbt);
-		t_samples = tmap->sample_at (t_beats);
-	}
+	t_bbt = tmap->bbt_walk (t_bbt, slot.quantization());
+	t_beats = tmap->quarters_at (t_bbt);
+	t_samples = tmap->sample_at (t_beats);
 
-	ai->start_samples = t_samples;
-	ai->start_beats = t_beats;
+	ai.start_samples = t_samples;
+	ai.start_beats = t_beats;
 
 	if (duration == Temporal::BBT_Offset()) {
 
 		/* not given, use slot's capture_duration */
 
 		if (slot.capture_duration() != Temporal::BBT_Offset()) {
-			timepos_t sb (ai->start_beats);
+			timepos_t sb (ai.start_beats);
 			sb += slot.capture_duration();
-			ai->end_beats = sb.beats ();
-			ai->end_samples = timepos_t (ai->end_beats).samples();
+			ai.end_beats = sb.beats ();
+			ai.end_samples = timepos_t (ai.end_beats).samples();
 		}
 	} else {
 		/* explicitly given in this call to arm() so use it */
-		timepos_t sb (ai->start_beats);
+		timepos_t sb (ai.start_beats);
 		sb += duration;
-		ai->end_beats = sb.beats ();
-		ai->end_samples = timepos_t (ai->end_beats).samples();
+		ai.end_beats = sb.beats ();
+		ai.end_samples = timepos_t (ai.end_beats).samples();
 	}
 
-	ai->captured = 0;
-
-	_arm_info = ai;
+	ReCountIn (&slot); /* EMIT SIGNAL */
 }
 
 void
@@ -5750,7 +5757,11 @@ TriggerBox::non_realtime_locate (samplepos_t now)
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 (%3): non-realtime locate at %2 (lat-adjusted to %4) PO %5 OL %6\n", order(), now, this, now + playback_offset(), playback_offset(), output_latency()));
 
 	for (auto & t : all_triggers) {
-		t->shutdown_from_fwd ();
+		if (t->armed() && _arm_info) {
+			setup_arm_info_bounds (*_arm_info, now, *t, t->capture_duration());
+		} else {
+			t->shutdown_from_fwd ();
+		}
 	}
 
 	fast_forward (_session.cue_events(), now);
