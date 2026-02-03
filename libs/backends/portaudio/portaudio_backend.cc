@@ -55,19 +55,6 @@ const char * const winmme_driver_name = X_("WinMME");
 
 }
 
-static bool invalid_char (char c)
-{
-	return c < 0;
-}
-
-static std::string utf16to8 (std::string const& str)
-{
-	glong n_bytes = 0;
-	const auto buf = Glib::make_unique_ptr_gfree(g_utf16_to_utf8(reinterpret_cast<const gunichar2*>(str.data()), str.size(), nullptr, &n_bytes, nullptr));
-	std::string rv = std::string (buf.get(),  n_bytes);
-	rv.erase (remove_if (rv.begin(), rv.end(), invalid_char), rv.end());
-}
-
 static std::string s_instance_name;
 size_t PortAudioBackend::_max_buffer_size = 8192;
 std::vector<std::string> PortAudioBackend::_midi_options;
@@ -216,8 +203,8 @@ PortAudioBackend::enumerate_input_devices () const
 	_pcmio->input_device_list(input_devices);
 
 	for (std::map<int, std::string>::const_iterator i = input_devices.begin (); i != input_devices.end(); ++i) {
-		if (_input_audio_device == "") _input_audio_device = utf16to8 (i->second);
-		_input_audio_device_status.push_back (DeviceStatus (utf16to8 (i->second), true));
+		if (_input_audio_device == "") _input_audio_device = i->second;
+		_input_audio_device_status.push_back (DeviceStatus (i->second, true));
 	}
 	return _input_audio_device_status;
 }
@@ -230,8 +217,8 @@ PortAudioBackend::enumerate_output_devices () const
 	_pcmio->output_device_list(output_devices);
 
 	for (std::map<int, std::string>::const_iterator i = output_devices.begin (); i != output_devices.end(); ++i) {
-		if (_output_audio_device == "") _output_audio_device = utf16to8(i->second);
-		_output_audio_device_status.push_back (DeviceStatus (utf16to8 (i->second), true));
+		if (_output_audio_device == "") _output_audio_device = i->second;
+		_output_audio_device_status.push_back (DeviceStatus (i->second, true));
 	}
 	return _output_audio_device_status;
 }
@@ -1039,7 +1026,7 @@ PortAudioBackend::name_to_id(std::string device_name) const {
 	_pcmio->output_device_list(devices);
 
 	for (std::map<int, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
-		if (utf16to8 (i->second) == device_name) {
+		if (i->second == device_name) {
 			device_id = i->first;
 			break;
 		}
