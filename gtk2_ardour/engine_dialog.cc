@@ -22,10 +22,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#define DEBUG_SAT(X) \
-	printf ("## %s:%d %s\n", __FILE__, __LINE__, __func__); \
-	cout << "#> set_active_text '" <<  (X) << "'\n";
-
 #include <cmath>
 #include <exception>
 #include <map>
@@ -602,7 +598,6 @@ EngineControl::build_full_control_notebook ()
 		settings_table.attach (lbl_output_device,   0, 1, row, row + 1, xopt, SHRINK);
 		settings_table.attach (output_device_combo, 1, 2, row, row + 1, xopt, SHRINK);
 		/* reset so it isn't used in state comparisons */
-		DEBUG_SAT("");
 		device_combo.set_active_text ("");
 		++row;
 		btn += 2;
@@ -610,7 +605,6 @@ EngineControl::build_full_control_notebook ()
 		settings_table.attach (lbl_device,   0, 1, row, row + 1, xopt, SHRINK);
 		settings_table.attach (device_combo, 1, 2, row, row + 1, xopt, SHRINK);
 		/* reset these so they don't get used in state comparisons */
-		DEBUG_SAT("");
 		input_device_combo.set_active_text ("");
 		output_device_combo.set_active_text ("");
 		++row;
@@ -1108,10 +1102,8 @@ EngineControl::update_midi_options ()
 		set_popdown_strings (midi_option_combo, midi_options);
 
 		if (backend->midi_option ().empty ()) {
-			DEBUG_SAT(midi_options.front ())
 			midi_option_combo.set_active_text (midi_options.front ());
 		} else {
-			DEBUG_SAT(backend->midi_option ())
 			midi_option_combo.set_active_text (backend->midi_option ());
 		}
 	}
@@ -1142,7 +1134,6 @@ EngineControl::set_driver_popdown_strings ()
 	set_popdown_strings (driver_combo, drivers);
 	DEBUG_ECONTROL (
 	    string_compose ("driver_combo.set_active_text: %1", current_driver));
-	DEBUG_SAT(current_driver)
 	driver_combo.set_active_text (current_driver);
 	return true;
 }
@@ -1221,7 +1212,6 @@ EngineControl::set_device_popdown_strings ()
 	DEBUG_ECONTROL (
 	    string_compose ("set device_combo active text: %1", default_device));
 
-	DEBUG_SAT(default_device)
 	device_combo.set_active_text (default_device);
 	return true;
 }
@@ -1251,7 +1241,6 @@ EngineControl::set_input_device_popdown_strings ()
 
 	DEBUG_ECONTROL (
 	    string_compose ("set input_device_combo active text: %1", default_device));
-	DEBUG_SAT(default_device)
 	input_device_combo.set_active_text (default_device);
 	return true;
 }
@@ -1281,7 +1270,6 @@ EngineControl::set_output_device_popdown_strings ()
 
 	DEBUG_ECONTROL (
 	    string_compose ("set output_device_combo active text: %1", default_device));
-	DEBUG_SAT(default_device)
 	output_device_combo.set_active_text (default_device);
 	return true;
 }
@@ -1391,7 +1379,6 @@ EngineControl::set_samplerate_popdown_strings ()
 
 	if (!s.empty ()) {
 		if (ARDOUR::AudioEngine::instance ()->running ()) {
-			DEBUG_SAT(rate_as_string (backend->sample_rate ()))
 			sample_rate_combo.set_active_text (rate_as_string (backend->sample_rate ()));
 		} else if (ARDOUR_UI::instance ()->the_session ()) {
 			float active_sr = ARDOUR_UI::instance ()->the_session ()->nominal_sample_rate ();
@@ -1400,7 +1387,6 @@ EngineControl::set_samplerate_popdown_strings ()
 				active_sr = sr.front ();
 			}
 
-			DEBUG_SAT(rate_as_string (active_sr))
 			sample_rate_combo.set_active_text (rate_as_string (active_sr));
 		} else if (desired.empty ()) {
 			float new_active_sr = backend->default_sample_rate ();
@@ -1409,10 +1395,8 @@ EngineControl::set_samplerate_popdown_strings ()
 				new_active_sr = sr.front ();
 			}
 
-			DEBUG_SAT(rate_as_string (new_active_sr))
 			sample_rate_combo.set_active_text (rate_as_string (new_active_sr));
 		} else {
-			DEBUG_SAT(desired)
 			sample_rate_combo.set_active_text (desired);
 		}
 	}
@@ -1479,10 +1463,8 @@ EngineControl::set_buffersize_popdown_strings ()
 
 	if (!s.empty ()) {
 		if (std::find (bs.begin (), bs.end (), previous_size) != bs.end ()) {
-			DEBUG_SAT(bufsize_as_string (previous_size))
 			buffer_size_combo.set_active_text (bufsize_as_string (previous_size));
 		} else {
-			DEBUG_SAT(s.front ())
 			buffer_size_combo.set_active_text (s.front ());
 
 			uint32_t period = backend->buffer_size ();
@@ -1610,11 +1592,9 @@ EngineControl::input_device_changed ()
 		if (get_output_device_name () != dev_none && get_input_device_name () != dev_none && get_input_device_name () != get_output_device_name ()) {
 			block_changed_signals ();
 			if (contains_value (output_device_combo, get_input_device_name ())) {
-			DEBUG_SAT(get_input_device_name())
 				output_device_combo.set_active_text (get_input_device_name ());
 			} else {
 				assert (contains_value (output_device_combo, dev_none));
-				DEBUG_SAT(dev_none)
 				output_device_combo.set_active_text (dev_none);
 			}
 			unblock_changed_signals ();
@@ -1634,11 +1614,9 @@ EngineControl::output_device_changed ()
 		if (get_input_device_name () != dev_none && get_input_device_name () != dev_none && get_input_device_name () != get_output_device_name ()) {
 			block_changed_signals ();
 			if (contains_value (input_device_combo, get_output_device_name ())) {
-				DEBUG_SAT(get_output_device_name())
 				input_device_combo.set_active_text (get_output_device_name ());
 			} else {
 				assert (contains_value (input_device_combo, dev_none));
-				DEBUG_SAT(dev_none)
 				input_device_combo.set_active_text (dev_none);
 			}
 			unblock_changed_signals ();
@@ -1972,7 +1950,6 @@ EngineControl::maybe_display_saved_state ()
 		PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
 
 		if (0 == _desired_sample_rate && sample_rate_combo.get_sensitive ()) {
-			DEBUG_SAT(rate_as_string (state->sample_rate))
 			sample_rate_combo.set_active_text (rate_as_string (state->sample_rate));
 		}
 		set_active_text_if_present (buffer_size_combo, bufsize_as_string (state->buffer_size));
@@ -1988,7 +1965,6 @@ EngineControl::maybe_display_saved_state ()
 		use_buffered_io_button.set_active (state->use_buffered_io);
 
 		if (!state->midi_option.empty ()) {
-			DEBUG_SAT(state->midi_option)
 			midi_option_combo.set_active_text (state->midi_option);
 			_midi_devices = state->midi_devices;
 			midi_option_changed ();
@@ -2061,7 +2037,6 @@ EngineControl::set_default_state ()
 	for (vector<const ARDOUR::AudioBackendInfo*>::const_iterator b = backends.begin (); b != backends.end (); ++b) {
 		backend_names.push_back ((*b)->name);
 	}
-	DEBUG_SAT(backend_names.front())
 	backend_combo.set_active_text (backend_names.front ());
 
 	// We could set default backends per platform etc here
@@ -2247,7 +2222,6 @@ EngineControl::set_current_state (const State& state)
 
 	// now reflect the change in the backend in the GUI so backend_changed will
 	// do the right thing
-	DEBUG_SAT(state->backend)
 	backend_combo.set_active_text (state->backend);
 
 	if (!ARDOUR::AudioEngine::instance ()->setup_required ()) {
@@ -2315,14 +2289,10 @@ EngineControl::set_current_state (const State& state)
 	// set_current_state is called while signals are connected then a
 	// SignalBlocker will need to be instantiated before setting these.
 
-	DEBUG_SAT(state->device)
 	device_combo.set_active_text (state->device);
-	DEBUG_SAT(state->input_device)
 	input_device_combo.set_active_text (state->input_device);
-	DEBUG_SAT(state->output_device)
 	output_device_combo.set_active_text (state->output_device);
 	if (0 == _desired_sample_rate && sample_rate_combo.get_sensitive ()) {
-		DEBUG_SAT(state->sample_rate)
 		sample_rate_combo.set_active_text (rate_as_string (state->sample_rate));
 	}
 	set_active_text_if_present (buffer_size_combo, bufsize_as_string (state->buffer_size));
@@ -3290,9 +3260,7 @@ EngineControl::engine_running ()
 	std::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance ()->current_backend ();
 	assert (backend);
 
-	DEBUG_SAT(backend->buffer_size ());
 	set_active_text_if_present (buffer_size_combo, bufsize_as_string (backend->buffer_size ()));
-	DEBUG_SAT(backend->sample_rate ());
 	sample_rate_combo.set_active_text (rate_as_string (backend->sample_rate ()));
 
 	if (backend->can_set_period_size ()) {
