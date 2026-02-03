@@ -1195,8 +1195,7 @@ PortAudioBackend::register_system_audio_ports()
 		if (!p) return -1;
 		set_latency_range (p, false, lr);
 		std::shared_ptr<PortAudioPort> audio_port = std::dynamic_pointer_cast<PortAudioPort>(p);
-		audio_port->set_hw_port_name (
-		    _pcmio->get_input_channel_name (name_to_id (_input_audio_device), i));
+		audio_port->set_hw_port_name (Glib::locale_to_utf8 (_pcmio->get_input_channel_name (name_to_id (_input_audio_device), i)));
 		_system_inputs.push_back (audio_port);
 	}
 
@@ -1208,8 +1207,7 @@ PortAudioBackend::register_system_audio_ports()
 		if (!p) return -1;
 		set_latency_range (p, true, lr);
 		std::shared_ptr<PortAudioPort> audio_port = std::dynamic_pointer_cast<PortAudioPort>(p);
-		audio_port->set_hw_port_name (
-		    _pcmio->get_output_channel_name (name_to_id (_output_audio_device), i));
+		audio_port->set_hw_port_name (Glib::locale_to_utf8 (_pcmio->get_output_channel_name (name_to_id (_output_audio_device), i)));
 		_system_outputs.push_back(audio_port);
 	}
 	return 0;
