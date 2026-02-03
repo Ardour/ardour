@@ -1760,11 +1760,23 @@ Editor::region_selection_changed ()
 void
 Editor::maybe_edit_region_in_bottom_pane (RegionView& rv)
 {
-	bool pack_pianoroll = false;
-	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&rv);
 	RegionEditDisposition red (UIConfiguration::instance().get_region_edit_disposition());
 
-	if (mrv && (red != Editing::NeverBottomPane)) {
+	if (red == Editing::NeverBottomPane) {
+		return;
+	}
+
+	switch (red) {
+	case OpenBottomPane:
+		show_att_bottom (true);
+		break;
+	default:
+		break;
+	}
+
+	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&rv);
+
+	if (mrv) {
 
 		std::shared_ptr<ARDOUR::MidiTrack> mt = std::dynamic_pointer_cast<ARDOUR::MidiTrack> (mrv->midi_view()->track());
 		std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion>(mrv->region());
@@ -1781,35 +1793,26 @@ Editor::maybe_edit_region_in_bottom_pane (RegionView& rv)
 
 			_pianoroll->set_track (mt);
 			_pianoroll->set_region (mr);
-			pack_pianoroll = true;
-		}
-	}
 
-	if (pack_pianoroll) {
+			_bottom_hbox.set_child_packing (*_properties_box, false, false);
 
-		switch (red) {
-		case OpenBottomPane:
-			show_att_bottom (true);
-			break;
-		default:
-			break;
-		}
+			if (!_pianoroll->contents().get_parent()) {
+				_bottom_hbox.pack_start (_pianoroll->contents(), true, true);
+			}
 
-		_bottom_hbox.set_child_packing (*_properties_box, false, false);
+			_pianoroll->contents().hide (); // Why is this needed?
+			_pianoroll->contents().show_all ();
 
-		if (!_pianoroll->contents().get_parent()) {
-			_bottom_hbox.pack_start (_pianoroll->contents(), true, true);
-		}
+			if (should_show_att_bottom ()) {
+				showhide_att_bottom (true);
+			}
 
-		_pianoroll->contents().hide (); // Why is this needed?
-		_pianoroll->contents().show_all ();
-
-		if (should_show_att_bottom ()) {
-			showhide_att_bottom (true);
+		} else {
+			showhide_att_bottom (false);
 		}
 
 	} else {
-		showhide_att_bottom (false);
+		showhide_att_bottom (true);
 	}
 }
 
