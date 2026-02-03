@@ -55,6 +55,7 @@ static std::string sanitize_device_name (const char* str)
 	const auto buf = Glib::make_unique_ptr_gfree (g_utf16_to_utf8 (reinterpret_cast<const gunichar2*>(str), -1, NULL, &n_bytes, NULL));
 	std::string rv = std::string (buf.get(),  n_bytes);
 	rv.erase (remove_if (rv.begin(), rv.end(), invalid_char), rv.end());
+	return rv;
 }
 
 PortAudioIO::PortAudioIO ()
