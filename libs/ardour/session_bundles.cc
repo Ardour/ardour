@@ -242,10 +242,7 @@ Session::setup_bundles_rcu ()
 			if (pos != string::npos) {
 				n.erase (pos, 9);
 			}
-			pos = n.find (X_("Midi-Bridge"));
-			if (pos != string::npos) {
-				n.replace (pos, 11, X_("system"));
-			}
+			n = maybe_clean_pipewire_midi_port_name (n);
 		}
 		std::shared_ptr<Bundle> c (new Bundle (n, false));
 		c->add_channel ("", DataType::MIDI);
@@ -270,10 +267,7 @@ Session::setup_bundles_rcu ()
 			if (pos != string::npos) {
 				n.erase (pos, 9);
 			}
-			pos = n.find (X_("Midi-Bridge"));
-			if (pos != string::npos) {
-				n.replace (pos, 11, X_("system"));
-			}
+			n = maybe_clean_pipewire_midi_port_name (n);
 		}
 		std::shared_ptr<Bundle> c (new Bundle (n, true));
 		c->add_channel ("", DataType::MIDI);
