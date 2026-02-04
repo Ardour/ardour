@@ -1733,7 +1733,9 @@ Editor::region_selection_changed ()
 	}
 	update_selection_markers ();
 
-	if (selection->regions.size () == 1)  {
+	if (selection->regions.empty()) {
+		/* do nothing */
+	} else if (selection->regions.size () == 1)  {
 		RegionView* rv = (selection->regions.front ());
 		assert (rv);
 		maybe_edit_region_in_bottom_pane (*rv);
@@ -1766,53 +1768,54 @@ Editor::maybe_edit_region_in_bottom_pane (RegionView& rv)
 		return;
 	}
 
-	switch (red) {
-	case OpenBottomPane:
-		show_att_bottom (true);
-		break;
-	default:
-		break;
-	}
-
 	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&rv);
 
 	if (mrv) {
 
 		std::shared_ptr<ARDOUR::MidiTrack> mt = std::dynamic_pointer_cast<ARDOUR::MidiTrack> (mrv->midi_view()->track());
 		std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion>(mrv->region());
-		if (mt && mr) {
 
-			if (!_pianoroll) {
-				// XXX this should really not happen here
-				_pianoroll = new Pianoroll ("editor pianoroll", true);
-				_pianoroll->get_canvas_viewport()->set_size_request (-1, 120);
-				if (_session) {
-					_pianoroll->set_session (_session);
-				}
-			}
-
-			_pianoroll->set_track (mt);
-			_pianoroll->set_region (mr);
-
-			_bottom_hbox.set_child_packing (*_properties_box, false, false);
-
-			if (!_pianoroll->contents().get_parent()) {
-				_bottom_hbox.pack_start (_pianoroll->contents(), true, true);
-			}
-
-			_pianoroll->contents().hide (); // Why is this needed?
-			_pianoroll->contents().show_all ();
-
-			if (should_show_att_bottom ()) {
-				showhide_att_bottom (true);
-			}
-
-		} else {
+		if (!mt || !mr) {
 			showhide_att_bottom (false);
+			return;
 		}
 
-	} else {
-		showhide_att_bottom (true);
+		if (!_pianoroll) {
+			// XXX this should really not happen here
+			_pianoroll = new Pianoroll ("editor pianoroll", true);
+			_pianoroll->get_canvas_viewport()->set_size_request (-1, 120);
+			if (_session) {
+				_pianoroll->set_session (_session);
+			}
+		}
+
+		_pianoroll->set_track (mt);
+		_pianoroll->set_region (mr);
+
+		_bottom_hbox.set_child_packing (*_properties_box, false, false);
+
+		if (!_pianoroll->contents().get_parent()) {
+			_bottom_hbox.pack_start (_pianoroll->contents(), true, true);
+		}
+
+		_pianoroll->contents().hide (); // Why is this needed?
+		_pianoroll->contents().show_all ();
+
+	}
+
+	switch (red) {
+	case BottomPaneOnly:
+		/* If it's visible, it's visible; otherwise ... user choice */
+		break;
+	case OpenBottomPane:
+		show_att_bottom (true);
+		break;
+	case PreferBottomPane:
+		/* we're good: if it's visible, it's visible */
+		break;
+	case NeverBottomPane:
+		/* user may have made it visible anyway */
+		break;
 	}
 }
 
