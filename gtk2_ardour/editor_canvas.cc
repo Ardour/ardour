@@ -638,6 +638,11 @@ Editor::session_gui_extents (bool use_extra) const
 		}
 	}
 
+	if (_session->actively_recording ()) {
+		session_extent_start = std::min (session_extent_start, timepos_t (_session->last_transport_start ()));
+		session_extent_end   = std::max (session_extent_end, timepos_t (_session->transport_sample ()));
+	}
+
 	/* ToDo: also incorporate automation regions (in case the session has no audio/midi but is just used for automating plugins or the like) */
 
 	/* add additional time to the ui extents (user-defined in config) */
