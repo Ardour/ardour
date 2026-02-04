@@ -796,9 +796,16 @@ bool
 Session::should_ignore_transport_request (TransportRequestSource src, TransportRequestType type)
 {
 	if (config.get_external_sync()) {
+		if (src != TRS_UI) {
+			/* always allow requests from the Master */
+			return false;
+		}
 		if (TransportMasterManager::instance().current()->allow_request (src, type)) {
 			/* accepting a command means dropping external sync first */
 			config.set_external_sync (false);
+			return false;
+		} else {
+			/* not allowed, ignore event */
 			return true;
 		}
 	}
