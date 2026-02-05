@@ -35,8 +35,6 @@ namespace Gtk {
 	class ListStore;
 }
 
-#include "ardour/mode.h"
-
 #include "launchkey_4.h"
 
 namespace ArdourSurface { namespace LAUNCHPAD_NAMESPACE {

@@ -32,7 +32,7 @@
 
 #include "midi++/types.h"
 
-#include "ardour/mode.h"
+#include "ardour/scale.h"
 #include "ardour/types.h"
 
 #include "control_protocol/control_protocol.h"
@@ -368,11 +368,11 @@ class Push2 : public MIDISurface
 	 * bumped up to the next note in the scale if necessary, so with this mode,
 	 * rows are not guaranteed to all have the same vertical interval.
 	 */
-	void set_pad_scale_in_key (int               root,
-	                           int               octave,
-	                           MusicalMode::Type mode,
-	                           NoteGridOrigin    origin,
-	                           int               ideal_vertical_semitones);
+	void set_pad_scale_in_key (int                       root,
+	                           int                       octave,
+	                           ARDOUR::MusicalMode::Name mode,
+	                           NoteGridOrigin            origin,
+	                           int                       ideal_vertical_semitones);
 
 	/** Set a "chromatic" scale on the pads.
 	 *
@@ -393,22 +393,22 @@ class Push2 : public MIDISurface
 	 * mode guarantees that the vertical interval for all rows is always
 	 * exactly this.
 	 */
-	void set_pad_scale_chromatic (int               root,
-	                              int               octave,
-	                              MusicalMode::Type mode,
-	                              NoteGridOrigin    origin,
-	                              int               vertical_semitones);
+	void set_pad_scale_chromatic (int                       root,
+	                              int                       octave,
+	                              ARDOUR::MusicalMode::Name mode,
+	                              NoteGridOrigin            origin,
+	                              int                       vertical_semitones);
 
-	void set_pad_scale (int               root,
-	                    int               octave,
-	                    MusicalMode::Type mode,
-	                    NoteGridOrigin    origin,
-	                    RowInterval       row_interval,
-	                    bool              inkey);
+	void set_pad_scale (int                       root,
+	                    int                       octave,
+	                    ARDOUR::MusicalMode::Name mode,
+	                    NoteGridOrigin            origin,
+	                    RowInterval               row_interval,
+	                    bool                      inkey);
 
 	PBD::Signal<void()> ScaleChange;
 
-	MusicalMode::Type mode() const { return  _mode; }
+	ARDOUR::MusicalMode::Name mode() const { return  _mode; }
 	NoteGridOrigin note_grid_origin() { return _note_grid_origin; }
 	RowInterval row_interval() const { return _row_interval; }
 	int scale_root() const { return _scale_root; }
@@ -625,7 +625,7 @@ class Push2 : public MIDISurface
 
 	void stripable_selection_changed ();
 
-	MusicalMode::Type _mode;
+	ARDOUR::MusicalMode::Name _mode;
 	NoteGridOrigin    _note_grid_origin;
 	RowInterval       _row_interval;
 	int               _scale_root;

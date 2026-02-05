@@ -27,12 +27,12 @@ class ScaleProvider {
 	ScaleProvider (ScaleProvider* parent);
 
 	ScaleProvider* parent() const  { return _parent; }
-	MusicalScale const * scale() const;
-	void set_scale (MusicalScale const &);
+	MusicalKey const * key() const;
+	void set_key (MusicalKey const &);
 
   private:
 	ScaleProvider* _parent;
-	MusicalScale const * _scale;
+	MusicalKey const * _key;
 };
 
 } // namespace 

@@ -22,26 +22,26 @@ using namespace ARDOUR;
 
 ScaleProvider::ScaleProvider (ScaleProvider* parent)
 	: _parent (parent)
-	, _scale (nullptr)
+	, _key (nullptr)
 {
 }
 
 void
-ScaleProvider::set_scale (MusicalScale const & sc)
+ScaleProvider::set_key (MusicalKey const & k)
 {
-	delete _scale;
-	_scale = new MusicalScale (sc);
+	delete _key;
+	_key = new MusicalKey (k);
 }
 
-MusicalScale const *
-ScaleProvider::scale () const
+MusicalKey const *
+ScaleProvider::key () const
 {
-	if (_scale) {
-		return _scale;
+	if (_key) {
+		return _key;
 	}
 
 	if (_parent) {
-		return _parent->scale();
+		return _parent->key();
 	}
 
 	return nullptr;
