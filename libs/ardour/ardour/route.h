@@ -59,6 +59,7 @@
 #include "ardour/graphnode.h"
 #include "ardour/automatable.h"
 #include "ardour/unknown_processor.h"
+#include "ardour/scale_provider.h"
 #include "ardour/soloable.h"
 #include "ardour/solo_control.h"
 #include "ardour/solo_safe_control.h"
@@ -105,7 +106,8 @@ class LIBARDOUR_API Route : public Stripable,
                             public Soloable,
                             public Muteable,
                             public Monitorable,
-                            public RouteGroupMember
+                            public RouteGroupMember,
+                            public ScaleProvider
 {
 public:
 

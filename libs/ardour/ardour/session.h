@@ -92,6 +92,7 @@
 #include "ardour/presentation_info.h"
 #include "ardour/route.h"
 #include "ardour/graph_edges.h"
+#include "ardour/scale_provider.h"
 #include "ardour/transport_api.h"
 #include "ardour/triggerbox.h"
 
@@ -208,7 +209,8 @@ class LIBARDOUR_API Session : public PBD::HistoryOwner,
                               public PBD::ScopedConnectionList,
                               public SessionEventManager,
                               public TransportAPI,
-                              public Temporal::TimeDomainProvider
+                              public Temporal::TimeDomainProvider,
+                              public ScaleProvider
 {
 public:
 	/* a new session might have non-empty mix_template, an existing session should always have an empty one.
