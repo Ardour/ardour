@@ -26,6 +26,7 @@
 #include <ytkmm/eventbox.h>
 #include <ytkmm/label.h>
 
+#include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/visibility.h"
 #include "gtkmm2ext/widget_state.h"
 
@@ -582,7 +583,7 @@ private:
 
 				} else {
 
-					if ((ev->state & Gdk::CONTROL_MASK) == 0) {
+					if ((ev->state & Keyboard::PrimaryModifier) == 0) {
 						clear_selection ();
 					}
 
