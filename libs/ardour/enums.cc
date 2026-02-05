@@ -39,9 +39,9 @@
 #include "ardour/io.h"
 #include "ardour/location.h"
 #include "ardour/midi_model.h"
-#include "ardour/mode.h"
 #include "ardour/mute_master.h"
 #include "ardour/presentation_info.h"
+#include "ardour/scale.h"
 #include "ardour/session.h"
 #include "ardour/source.h"
 #include "ardour/tempo.h"
@@ -154,7 +154,7 @@ setup_enum_writer ()
 	BufferingPreset _BufferingPreset;
 	AutoReturnTarget _AutoReturnTarget;
 	PresentationInfo::Flag _PresentationInfo_Flag;
-	MusicalMode::Type mode;
+	MusicalMode::Name mode;
 	MidiPortFlags _MidiPortFlags;
 	TransportFSM::EventType _TransportFSM_EventType;
 	TransportFSM::MotionState _TransportFSM_MotionState;

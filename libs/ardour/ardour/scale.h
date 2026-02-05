@@ -25,26 +25,65 @@
 
 namespace ARDOUR {
 
-enum MusicalScaleType {
+enum MusicalModeType {
 	AbsolutePitch,
 	SemitoneSteps,
+	WholeToneSteps,
 	RatioSteps,
 	RatioFromRoot
 };
 
-enum MusicalScaleTemperament {
-	EqualTempered,
-	NonTempered
-};
-
-class MusicalScale {
+class MusicalMode {
    public:
-	MusicalScale (std::string const & name, MusicalScaleType type, MusicalScaleTemperament temperament, std::vector<float> const & elements);
-	MusicalScale (MusicalScale const & other);
+
+	enum Name {
+		Dorian,
+		IonianMajor,
+		AeolianMinor,
+		HarmonicMinor,
+		MelodicMinorAscending,
+		MelodicMinorDescending,
+		Phrygian,
+		Lydian,
+		Mixolydian,
+		Locrian,
+		PentatonicMajor,
+		PentatonicMinor,
+		Chromatic,
+		BluesScale,
+		NeapolitanMinor,
+		NeapolitanMajor,
+		Oriental,
+		DoubleHarmonic,
+		Enigmatic,
+		Hirajoshi,
+		HungarianMinor,
+		HungarianMajor,
+		Kumoi,
+		Iwato,
+		Hindu,
+		Spanish8Tone,
+		Pelog,
+		HungarianGypsy,
+		Overtone,
+		LeadingWholeTone,
+		Arabian,
+		Balinese,
+		Gypsy,
+		Mohammedan,
+		Javanese,
+		Persian,
+		Algerian
+	};
+
+	MusicalMode (std::string const & name, MusicalModeType type, std::vector<float> const & elements);
+	MusicalMode (MusicalMode const & other);
+	MusicalMode (MusicalMode::Name);
 
 	std::string name() const { return _name; }
-	MusicalScaleType type() const { return _type; }
+	MusicalModeType type() const { return _type; }
 	int size() const { return _elements.size(); }
+	std::vector<float> const & elements() const { return _elements; }
 
 	std::vector<float> pitches_from_root (float root, int steps) const;
 
@@ -53,19 +92,21 @@ class MusicalScale {
 	PBD::Signal<void()> NameChanged;
 	PBD::Signal<void()> Changed;
 
-  private:
+   protected:
 	std::string _name;
-	MusicalScaleType _type;
-	MusicalScaleTemperament _temperament;
+	MusicalModeType _type;
 	std::vector<float> _elements;
+
+	void fill (Name);
 };
 
-class MusicalKey : public MusicalScale
+class MusicalKey : public MusicalMode
 {
     public:
-	MusicalKey (float root, MusicalScale const &);
+	MusicalKey (float root, MusicalMode const &);
 
 	float root() const { return _root; }
+	float nth (int n) const;
 
    private:
 	float _root;

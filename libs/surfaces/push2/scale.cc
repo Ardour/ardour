@@ -689,7 +689,7 @@ ScaleLayout::show_fixed_state ()
 void
 ScaleLayout::mode_changed ()
 {
-	MusicalMode::Type m = (MusicalMode::Type) _scale_menu->active();
+	MusicalMode::Name m = (MusicalMode::Name) _scale_menu->active();
 	_p2.set_pad_scale (_p2.scale_root (),
 	                   _p2.root_octave (),
 	                   m,

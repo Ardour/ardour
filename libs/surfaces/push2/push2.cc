@@ -145,7 +145,7 @@ Push2::Push2 (ARDOUR::Session& s)
 	, _current_layout (0)
 	, _previous_layout (0)
 	, _gui (0)
-	, _mode (MusicalMode::IonianMajor)
+	, _mode (ARDOUR::MusicalMode::IonianMajor)
 	, _row_interval (Fourth)
 	, _scale_root (0)
 	, _root_octave (3)
@@ -1076,11 +1076,11 @@ Push2::set_pad_note_kind (Pad& pad, const PadNoteKind kind)
 static std::bitset<128>
 mode_notes_bitset (const int               scale_root,
                    const int               octave,
-                   const MusicalMode::Type mode)
+                   const ARDOUR::MusicalMode::Name mode)
 {
 	std::bitset<128> notes_bitset;
 
-	const std::vector<float> mode_steps = MusicalMode (mode).steps;
+	const std::vector<float> mode_steps = ARDOUR::MusicalMode (mode).elements();
 	int                      root       = scale_root - 12;
 
 	// Repeatedly loop through the intervals in an octave
@@ -1120,11 +1120,11 @@ mode_notes_bitset (const int               scale_root,
 static std::vector<int>
 mode_notes_vector (const int               scale_root,
                    const int               octave,
-                   const MusicalMode::Type mode)
+                   const ARDOUR::MusicalMode::Name mode)
 {
 	std::vector<int> notes_vector;
 
-	const std::vector<float> mode_steps = MusicalMode (mode).steps;
+	const std::vector<float> mode_steps = ARDOUR::MusicalMode (mode).elements();
 	int                      root       = scale_root - 12;
 
 	// Repeatedly loop through the intervals in an octave
@@ -1159,7 +1159,7 @@ mode_notes_vector (const int               scale_root,
 void
 Push2::set_pad_scale_in_key (const int               scale_root,
                              const int               octave,
-                             const MusicalMode::Type mode,
+                             const ARDOUR::MusicalMode::Name mode,
                              const NoteGridOrigin    origin,
                              const int               ideal_vertical_semitones)
 {
@@ -1204,7 +1204,7 @@ Push2::restore_pad_scale ()
 void
 Push2::set_pad_scale_chromatic (const int               scale_root,
                                 const int               octave,
-                                const MusicalMode::Type mode,
+                                const ARDOUR::MusicalMode::Name mode,
                                 const NoteGridOrigin    origin,
                                 const int               vertical_semitones)
 {
@@ -1240,7 +1240,7 @@ Push2::set_pad_scale_chromatic (const int               scale_root,
 void
 Push2::set_pad_scale (const int               scale_root,
                       const int               octave,
-                      const MusicalMode::Type mode,
+                      const ARDOUR::MusicalMode::Name mode,
                       const NoteGridOrigin    origin,
                       const RowInterval       row_interval,
                       const bool              inkey)
