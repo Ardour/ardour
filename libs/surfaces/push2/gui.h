@@ -35,8 +35,6 @@ namespace Gtk {
 	class ListStore;
 }
 
-#include "ardour/mode.h"
-
 #include "push2.h"
 
 namespace ArdourSurface {

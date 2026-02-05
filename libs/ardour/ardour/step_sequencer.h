@@ -35,7 +35,7 @@
 #include "temporal/types.h"
 #include "temporal/beats.h"
 
-#include "ardour/mode.h"
+#include "ardour/scale.h"
 #include "ardour/midi_state_tracker.h"
 #include "ardour/types.h"
 
