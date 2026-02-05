@@ -200,6 +200,8 @@ libardour_sources = [
         'rb_effect.cc',
         'rt_task.cc',
         'rt_tasklist.cc',
+        'scale.cc',
+        'scale_provider.cc',
         'scene_change.cc',
         'search_paths.cc',
         'segment_descriptor.cc',
