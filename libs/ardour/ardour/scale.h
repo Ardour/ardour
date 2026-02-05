@@ -86,7 +86,7 @@ class MusicalMode {
 	std::vector<float> const & elements() const { return _elements; }
 
 	std::vector<float> pitches_from_root (float root, int steps) const;
-
+	std::vector<int> as_midi (int scale_root) const;
 	void set_name (std::string const & str);
 
 	PBD::Signal<void()> NameChanged;

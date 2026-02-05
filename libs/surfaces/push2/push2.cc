@@ -1122,38 +1122,7 @@ mode_notes_vector (const int               scale_root,
                    const int               octave,
                    const ARDOUR::MusicalMode::Name mode)
 {
-	std::vector<int> notes_vector;
-
-	const std::vector<float> mode_steps = ARDOUR::MusicalMode (mode).elements();
-	int                      root       = scale_root - 12;
-
-	// Repeatedly loop through the intervals in an octave
-	for (std::vector<float>::const_iterator i = mode_steps.begin ();;) {
-		if (i == mode_steps.end ()) {
-			// Reached the end of the scale, continue with the next octave
-			root += 12;
-			if (root > 127) {
-				break;
-			}
-
-			notes_vector.push_back (root);
-			i = mode_steps.begin ();
-
-		} else {
-			const int note = (int)floor (root + (2.0 * (*i)));
-			if (note > 127) {
-				break;
-			}
-
-			if (note > 0) {
-				notes_vector.push_back (note);
-			}
-
-			++i;
-		}
-	}
-
-	return notes_vector;
+	return ARDOUR::MusicalMode (mode).as_midi (scale_root);
 }
 
 void
