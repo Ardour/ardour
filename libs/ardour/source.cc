@@ -61,6 +61,7 @@ using namespace PBD;
 
 Source::Source (Session& s, DataType type, const string& name, Flag flags)
 	: SessionObject(s, name)
+	, ScaleProvider (&s)
 	, _type(type)
 	, _flags(flags)
 	, _natural_position(0)
@@ -76,6 +77,7 @@ Source::Source (Session& s, DataType type, const string& name, Flag flags)
 
 Source::Source (Session& s, const XMLNode& node)
 	: SessionObject(s, "unnamed source")
+	, ScaleProvider (&s)
 	, _type(DataType::AUDIO)
 	, _flags (Flag (Writable|CanRename))
 	, _natural_position(0)

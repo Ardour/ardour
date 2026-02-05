@@ -32,6 +32,7 @@
 #include "pbd/statefuldestructible.h"
 
 #include "ardour/ardour.h"
+#include "ardour/scale_provider.h"
 #include "ardour/session_object.h"
 #include "ardour/data_type.h"
 #include "ardour/segment_descriptor.h"
@@ -41,7 +42,8 @@ namespace ARDOUR {
 class Session;
 
 class LIBARDOUR_API Source : public SessionObject,
-		public std::enable_shared_from_this<ARDOUR::Source>
+                             public std::enable_shared_from_this<ARDOUR::Source>,
+                             public ScaleProvider
 {
 public:
 	enum Flag {

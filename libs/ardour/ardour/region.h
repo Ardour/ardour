@@ -39,6 +39,7 @@
 #include "ardour/automatable.h"
 #include "ardour/movable.h"
 #include "ardour/readable.h"
+#include "ardour/scale_provider.h"
 #include "ardour/session_object.h"
 #include "ardour/trimmable.h"
 #include "ardour/types_convert.h"
@@ -109,6 +110,7 @@ class LIBARDOUR_API Region
 	, public Trimmable
 	, public Movable
 	, public Temporal::TimeDomainSwapper
+	, public ScaleProvider
 {
 public:
 	typedef std::vector<std::shared_ptr<Source> > SourceList;
