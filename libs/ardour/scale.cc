@@ -48,7 +48,56 @@ MusicalMode::set_name (std::string const & str)
 std::vector<float>
 MusicalMode::pitches_from_root (float root, int steps) const
 {
+	switch (_type) {
+	case AbsolutePitch:
+		return absolute_pitch_pitches_from_root (root, steps);
+	case SemitoneSteps:
+		return semitone_steps_pitches_from_root (root, steps);
+	case WholeToneSteps:
+		return wholetone_steps_pitches_from_root (root, steps);
+	case RatioSteps:
+		return ratio_steps_pitches_from_root (root, steps);
+	case RatioFromRoot:
+		return ratio_from_root_pitches_from_root (root, steps);
+	}
+
+	/*NOTREACHED*/
 	return std::vector<float> ();
+}
+
+std::vector<float>
+MusicalMode::absolute_pitch_pitches_from_root (float root, int steps) const
+{
+	std::vector<float> pitches;
+	return pitches;
+}
+
+std::vector<float>
+MusicalMode::semitone_steps_pitches_from_root (float root, int steps) const
+{
+	std::vector<float> pitches;
+	return pitches;
+}
+
+std::vector<float>
+MusicalMode::wholetone_steps_pitches_from_root (float root, int steps) const
+{
+	std::vector<float> pitches;
+	return pitches;
+}
+
+std::vector<float>
+MusicalMode::ratio_steps_pitches_from_root (float root, int steps) const
+{
+	std::vector<float> pitches;
+	return pitches;
+}
+
+std::vector<float>
+MusicalMode::ratio_from_root_pitches_from_root (float root, int steps) const
+{
+	std::vector<float> pitches;
+	return pitches;
 }
 
 void

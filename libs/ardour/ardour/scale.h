@@ -98,7 +98,14 @@ class MusicalMode {
 	std::vector<float> _elements;
 
 	void fill (Name);
+
+	std::vector<float> absolute_pitch_pitches_from_root (float root, int steps) const;
+	std::vector<float> semitone_steps_pitches_from_root (float root, int steps) const;
+	std::vector<float> wholetone_steps_pitches_from_root (float root, int steps) const;
+	std::vector<float> ratio_steps_pitches_from_root (float root, int steps) const;
+	std::vector<float> ratio_from_root_pitches_from_root (float root, int steps) const;
 };
+
 
 class MusicalKey : public MusicalMode
 {
