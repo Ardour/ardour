@@ -20,14 +20,15 @@
 
 using namespace ARDOUR;
 
-Scale::Scale (std::string const & name, ScaleType type, std::vector<float> const & elements)
+MusicalScale::MusicalScale (std::string const & name, MusicalScaleType type, MusicalScaleTemperament t, std::vector<float> const & elements)
 	: _name (name)
 	, _type (type)
+	, _temperament (t)
 	, _elements (elements)
 {
 }
 
-Scale::Scale (Scale const & other)
+MusicalScale::MusicalScale (MusicalScale const & other)
 	: _name (other._name)
 	, _type (other._type)
 	, _elements (other._elements)
@@ -35,8 +36,23 @@ Scale::Scale (Scale const & other)
 }
 
 void
-Scale::set_name (std::string const & str)
+MusicalScale::set_name (std::string const & str)
 {
 	_name = str;
 	NameChanged(); /* EMIT SIGNAL */
+}
+
+std::vector<float>
+MusicalScale::pitches_from_root (float root, int steps) const
+{
+	return std::vector<float> ();
+}
+
+
+/*---------*/
+
+MusicalKey::MusicalKey (float root, MusicalScale const & sc)
+	: MusicalScale (sc)
+	, _root (root)
+{
 }

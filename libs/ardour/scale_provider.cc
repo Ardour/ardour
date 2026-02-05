@@ -27,8 +27,22 @@ ScaleProvider::ScaleProvider (ScaleProvider* parent)
 }
 
 void
-ScaleProvider::set_scale (Scale const & sc)
+ScaleProvider::set_scale (MusicalScale const & sc)
 {
 	delete _scale;
-	_scale = new Scale (sc);
+	_scale = new MusicalScale (sc);
+}
+
+MusicalScale const *
+ScaleProvider::scale () const
+{
+	if (_scale) {
+		return _scale;
+	}
+
+	if (_parent) {
+		return _parent->scale();
+	}
+
+	return nullptr;
 }

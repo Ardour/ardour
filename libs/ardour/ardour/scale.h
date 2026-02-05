@@ -25,20 +25,28 @@
 
 namespace ARDOUR {
 
-enum ScaleType {
+enum MusicalScaleType {
 	AbsolutePitch,
 	SemitoneSteps,
 	RatioSteps,
 	RatioFromRoot
 };
 
-class Scale {
+enum MusicalScaleTemperament {
+	EqualTempered,
+	NonTempered
+};
+
+class MusicalScale {
    public:
-	Scale (std::string const & name, ScaleType type, std::vector<float> const & elements);
-	Scale (Scale const & other);
+	MusicalScale (std::string const & name, MusicalScaleType type, MusicalScaleTemperament temperament, std::vector<float> const & elements);
+	MusicalScale (MusicalScale const & other);
 
 	std::string name() const { return _name; }
-	ScaleType type() const { return _type; }
+	MusicalScaleType type() const { return _type; }
+	int size() const { return _elements.size(); }
+
+	std::vector<float> pitches_from_root (float root, int steps) const;
 
 	void set_name (std::string const & str);
 
@@ -47,8 +55,21 @@ class Scale {
 
   private:
 	std::string _name;
-	ScaleType _type;
+	MusicalScaleType _type;
+	MusicalScaleTemperament _temperament;
 	std::vector<float> _elements;
+};
+
+class MusicalKey : public MusicalScale
+{
+    public:
+	MusicalKey (float root, MusicalScale const &);
+
+	float root() const { return _root; }
+
+   private:
+	float _root;
+
 };
 
 } // namespace 
