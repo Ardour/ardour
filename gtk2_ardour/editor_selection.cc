@@ -1801,6 +1801,13 @@ Editor::maybe_edit_region_in_bottom_pane (RegionView& rv)
 		_pianoroll->contents().hide (); // Why is this needed?
 		_pianoroll->contents().show_all ();
 
+	} else {
+		_bottom_hbox.set_child_packing (*_properties_box, true, true);
+		if (_pianoroll && _pianoroll->contents().get_parent()) {
+			_pianoroll->contents().unmap ();
+			_pianoroll->contents().get_parent()->remove (_pianoroll->contents());
+		}
+
 	}
 
 	switch (red) {
