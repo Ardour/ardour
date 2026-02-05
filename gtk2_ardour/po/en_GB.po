@@ -4049,72 +4049,72 @@ msgstr ""
 #: editing_context.cc:81 editing_context.cc:106 editor_actions.cc:707
 #: quantize_dialog.cc:41
 msgid "1/4 Note"
-msgstr "Crotchet (1/4)"
+msgstr "Crotchet (¼)"
 
 #: editing_context.cc:82 editing_context.cc:107 editor_actions.cc:708
 #: quantize_dialog.cc:42
 msgid "1/8 Note"
-msgstr "Quaver (1/8)"
+msgstr "Quaver (⅛)"
 
 #: editing_context.cc:83 editing_context.cc:108 editor_actions.cc:709
 #: quantize_dialog.cc:43
 msgid "1/16 Note"
-msgstr "Semiquaver (1/16)"
+msgstr "Semiquaver (⅟₁₆)"
 
 #: editing_context.cc:84 editing_context.cc:109 editor_actions.cc:710
 #: quantize_dialog.cc:44
 msgid "1/32 Note"
-msgstr "Demisemiquaver (1/32)"
+msgstr "Demisemiquaver (⅟₃₂)"
 
 #: editing_context.cc:85 editing_context.cc:110 editor_actions.cc:711
 #: quantize_dialog.cc:45
 msgid "1/64 Note"
-msgstr "Hemidemisemiquaver (1/64)"
+msgstr "Hemidemisemiquaver (⅟₆₄)"
 
 #: editing_context.cc:86 editing_context.cc:111 editor_actions.cc:712
 #: quantize_dialog.cc:46
 msgid "1/128 Note"
-msgstr "Semihemidemisemiquaver (1/128)"
+msgstr "Semihemidemisemiquaver (⅟₁₂₈)"
 
 #: editing_context.cc:87 quantize_dialog.cc:48
 msgid "1/3 (8th triplet)"
-msgstr "quaver triplet (1/3)"
+msgstr "quaver triplet (⅓)"
 
 #: editing_context.cc:88 quantize_dialog.cc:49
 msgid "1/6 (16th triplet)"
-msgstr "semiquaver triplet (1/6)"
+msgstr "semiquaver triplet (⅙)"
 
 #: editing_context.cc:89 quantize_dialog.cc:50
 msgid "1/12 (32nd triplet)"
-msgstr "demisemiquaver triplet (1/12)"
+msgstr "demisemiquaver triplet (⅟₁₂)"
 
 #: editing_context.cc:90
 msgid "1/24 (64th triplet)"
-msgstr "hemidemisemiquaver triplet (1/24)"
+msgstr "hemidemisemiquaver triplet (⅟₂₄)"
 
 #: editing_context.cc:91 quantize_dialog.cc:52
 msgid "1/5 (8th quintuplet)"
-msgstr "quaver quintuplet (1/5)"
+msgstr "quaver quintuplet (⅕)"
 
 #: editing_context.cc:92 quantize_dialog.cc:53
 msgid "1/10 (16th quintuplet)"
-msgstr "semiquaver quintuplet (1/10)"
+msgstr "semiquaver quintuplet (⅟₁₀)"
 
 #: editing_context.cc:93 quantize_dialog.cc:54
 msgid "1/20 (32nd quintuplet)"
-msgstr "demisemiquaver quintuplet (1/20)"
+msgstr "demisemiquaver quintuplet (⅟₂₀)"
 
 #: editing_context.cc:94 quantize_dialog.cc:56
 msgid "1/7 (8th septuplet)"
-msgstr "quaver septuplet (1/7)"
+msgstr "quaver septuplet (⅐)"
 
 #: editing_context.cc:95 quantize_dialog.cc:57
 msgid "1/14 (16th septuplet)"
-msgstr "semiquaver septuplet (1/14)"
+msgstr "semiquaver septuplet (⅟₁₄)"
 
 #: editing_context.cc:96 quantize_dialog.cc:58
 msgid "1/28 (32nd septuplet)"
-msgstr "demisemiquaver septuplet (1/28)"
+msgstr "demisemiquaver septuplet (⅟₂₈)"
 
 #: editing_context.cc:98 editing_context.cc:123
 msgid "MinSec"
@@ -4126,43 +4126,43 @@ msgstr ""
 
 #: editing_context.cc:112
 msgid "1/3 Note"
-msgstr "Minim triplet (1/3)"
+msgstr "Minim triplet (⅓)"
 
 #: editing_context.cc:113
 msgid "1/6 Note"
-msgstr "Semiquaver triplet (1/6)"
+msgstr "Semiquaver triplet (⅙)"
 
 #: editing_context.cc:114
 msgid "1/12 Note"
-msgstr "demisemiquaver triplet (1/12)"
+msgstr "demisemiquaver triplet (⅟₁₂)"
 
 #: editing_context.cc:115
 msgid "1/24 Note"
-msgstr "Hemidemisemiquaver triplet (1/24)"
+msgstr "Hemidemisemiquaver triplet (⅟₂₄)"
 
 #: editing_context.cc:116
 msgid "1/5 Note"
-msgstr "Quaver quintuplet (1/5)"
+msgstr "Quaver quintuplet (⅕)"
 
 #: editing_context.cc:117
 msgid "1/10 Note"
-msgstr "Semiquaver quintuplet (1/10)"
+msgstr "Semiquaver quintuplet (⅟₁₀)"
 
 #: editing_context.cc:118
 msgid "1/20 Note"
-msgstr "demisemiquaver quintuplet (1/20)"
+msgstr "demisemiquaver quintuplet (⅟₂₀)"
 
 #: editing_context.cc:119
 msgid "1/7 Note"
-msgstr "Quaver septuplet (1/7)"
+msgstr "Quaver septuplet (⅐)"
 
 #: editing_context.cc:120
 msgid "1/14 Note"
-msgstr "semiquaver septuplet (1/14)"
+msgstr "semiquaver septuplet (⅟₁₄)"
 
 #: editing_context.cc:121
 msgid "1/28 Note"
-msgstr "demisemiquaver septuplet (1/28)"
+msgstr "demisemiquaver septuplet (⅟₂₈)"
 
 #: editing_context.cc:130 mono_panner_editor.cc:45
 msgid "Left"
@@ -10809,7 +10809,7 @@ msgstr "𝅝"
 
 #: midi_list_editor.cc:58
 msgid "Half"
-msgstr "𝅗𝅥 (1/2)"
+msgstr "𝅗𝅥 (½)"
 
 #: midi_list_editor.cc:59
 msgid "Triplet"
@@ -10817,23 +10817,23 @@ msgstr "𝅘𝅥 × ⅔"
 
 #: midi_list_editor.cc:60
 msgid "Quarter"
-msgstr "𝅘𝅥 (1/4)"
+msgstr "𝅘𝅥 (¼)"
 
 #: midi_list_editor.cc:61
 msgid "Eighth"
-msgstr "𝅘𝅥𝅮 (1/8)"
+msgstr "𝅘𝅥𝅮 (⅛)"
 
 #: midi_list_editor.cc:62
 msgid "Sixteenth"
-msgstr "𝅘𝅥𝅯 (1/16)"
+msgstr "𝅘𝅥𝅯 (⅟₁₆)"
 
 #: midi_list_editor.cc:63
 msgid "Thirty-second"
-msgstr "𝅘𝅥𝅰 (1/32)"
+msgstr "𝅘𝅥𝅰 (⅟₃₂)"
 
 #: midi_list_editor.cc:64
 msgid "Sixty-fourth"
-msgstr "𝅘𝅥𝅱 (1/64)"
+msgstr "𝅘𝅥𝅱 (⅟₆₄)"
 
 #: midi_list_editor.cc:107
 msgid "Num"
@@ -15419,7 +15419,7 @@ msgstr ""
 
 #: rc_option_editor.cc:3593
 msgid "Allow non quarter-note pulse"
-msgstr "Allow non crotchet (1/4) pulse"
+msgstr "Allow non crotchet (¼) pulse"
 
 #: rc_option_editor.cc:3598
 msgid ""
@@ -15431,7 +15431,7 @@ msgstr ""
 "<b>When enabled</b> %1 will allow tempo to be expressed in divisions per "
 "minute\n"
 "<b>When disabled</b> %1 will only allow tempo to be expressed in crotchets "
-"(1/4 notes) per minute"
+"(¼ notes) per minute"
 
 #: rc_option_editor.cc:3606
 msgid "Initial program change"
@@ -15806,7 +15806,7 @@ msgstr ""
 
 #: rc_option_editor.cc:3947
 msgid "quarters"
-msgstr "crotchets  (1/4s)"
+msgstr "crotchets  (¼s)"
 
 #: rc_option_editor.cc:3951
 msgid ""
@@ -15823,7 +15823,7 @@ msgid ""
 "quarter note then adjust this setting to reflect that."
 msgstr ""
 "This option can be used to quantise incoming MIDI clock to whole (or "
-"fractions of a) crotchet (1/4 note).\n"
+"fractions of a) crotchet (¼ note).\n"
 "\n"
 "Setting it to zero prevents any quantisation, which can result in a rather "
 "jittery response to incoming MIDI Clock.\n"
@@ -15832,7 +15832,7 @@ msgstr ""
 "default.\n"
 "\n"
 "If you are using a MIDI clock source that quantises to some fraction of a "
-"crotchet (1/4 note) then adjust this setting to reflect that."
+"crotchet (¼ note) then adjust this setting to reflect that."
 
 #: rc_option_editor.cc:3956
 msgid "MIDI Clock"
@@ -16042,7 +16042,7 @@ msgstr ""
 
 #: rc_option_editor.cc:4170
 msgid ""
-"Closing a plugin window, usually only hides it. This makes it fast to open "
+"Closing a plugin window, usually only hides it. This makes is fast to open "
 "the same plugin UI again at a later time.\n"
 "\n"
 "Most plugin UIs are inactive and do not consume any CPU resources while they "
@@ -19056,11 +19056,11 @@ msgid "Speed Display (Context-click for options)"
 msgstr ""
 
 #: shuttle_control.cc:104
-msgid "LongestShuttle|> 888.9%"
+msgid "LogestShuttle|> 888.9%"
 msgstr ""
 
 #: shuttle_control.cc:106
-msgid "LongestShuttle|> +00 st"
+msgid "LogestShuttle|> +00 st"
 msgstr ""
 
 #: shuttle_control.cc:137 time_fx_dialog.cc:166
@@ -19451,27 +19451,27 @@ msgstr "Set note length to a semibreve"
 
 #: step_entry.cc:151
 msgid "Set note length to a half note"
-msgstr "Set note length to a minim (1/2)"
+msgstr "Set note length to a minim (½)"
 
 #: step_entry.cc:152
 msgid "Set note length to a quarter note"
-msgstr "Set note length to a crotchet (1/4)"
+msgstr "Set note length to a crotchet (¼)"
 
 #: step_entry.cc:153
 msgid "Set note length to a eighth note"
-msgstr "Set note length to a quaver (1/8)"
+msgstr "Set note length to a quaver (⅛)"
 
 #: step_entry.cc:154
 msgid "Set note length to a sixteenth note"
-msgstr "Set note length to a semiquaver (1/16)"
+msgstr "Set note length to a semiquaver (⅟₁₆)"
 
 #: step_entry.cc:155
 msgid "Set note length to a thirty-second note"
-msgstr "Set note length to a demisemiquaver (1/32)"
+msgstr "Set note length to a demisemiquaver (⅟₃₂)"
 
 #: step_entry.cc:156
 msgid "Set note length to a sixty-fourth note"
-msgstr "Set note length to a hemidemisemiquaver (1/64)"
+msgstr "Set note length to a hemidemisemiquaver (⅟₆₄)"
 
 #: step_entry.cc:175
 msgid "Set volume (velocity) to pianississimo"
@@ -19731,31 +19731,31 @@ msgstr "Set Note Length to semibreve"
 
 #: step_entry.cc:580
 msgid "Set Note Length to 1/2"
-msgstr "Set Note Length to minim (1/2)"
+msgstr "Set Note Length to minim (½)"
 
 #: step_entry.cc:582
 msgid "Set Note Length to 1/3"
-msgstr "Set Note Length to minim triplet (1/3)"
+msgstr "Set Note Length to minim triplet (⅓)"
 
 #: step_entry.cc:584
 msgid "Set Note Length to 1/4"
-msgstr "Set Note Length to crotchet (1/4)"
+msgstr "Set Note Length to crotchet (¼)"
 
 #: step_entry.cc:586
 msgid "Set Note Length to 1/8"
-msgstr "Set Note Length to quaver (1/8)"
+msgstr "Set Note Length to quaver (⅛)"
 
 #: step_entry.cc:588
 msgid "Set Note Length to 1/16"
-msgstr "Set Note Length to semiquaver (1/16)"
+msgstr "Set Note Length to semiquaver (⅟₁₆)"
 
 #: step_entry.cc:590
 msgid "Set Note Length to 1/32"
-msgstr "Set Note Length to demisemiquaver (1/32)"
+msgstr "Set Note Length to demisemiquaver (⅟₃₂)"
 
 #: step_entry.cc:592
 msgid "Set Note Length to 1/64"
-msgstr "Set Note Length to hemidemisemiquaver (1/64)"
+msgstr "Set Note Length to hemidemisemiquaver (⅟₆₄)"
 
 #: step_entry.cc:597
 msgid "Set Note Velocity to Pianississimo"
@@ -20063,7 +20063,7 @@ msgstr ""
 #: tempo_dialog.cc:110 tempo_dialog.cc:128 tempo_dialog.cc:129
 #: tempo_dialog.cc:664 tempo_dialog.cc:665
 msgid "one-hundred-twenty-eighth"
-msgstr "semihemidemisemiquaver (1/128)"
+msgstr "semihemidemisemiquaver (⅟₁₂₈)"
 
 #: tempo_dialog.cc:112 tempo_dialog.cc:113 tempo_dialog.cc:648
 #: tempo_dialog.cc:649
@@ -20072,37 +20072,37 @@ msgstr "semibreve"
 
 #: tempo_dialog.cc:114 tempo_dialog.cc:115
 msgid "half"
-msgstr "minim (1/2)"
+msgstr "minim (½)"
 
 #: tempo_dialog.cc:116 tempo_dialog.cc:117 tempo_dialog.cc:652
 #: tempo_dialog.cc:653
 msgid "third"
-msgstr "minim triplet (1/3)"
+msgstr "minim triplet (⅓)"
 
 #: tempo_dialog.cc:118 tempo_dialog.cc:119 tempo_dialog.cc:654
 #: tempo_dialog.cc:655
 msgid "quarter"
-msgstr "crotchet (1/4)"
+msgstr "crotchet (¼)"
 
 #: tempo_dialog.cc:120 tempo_dialog.cc:121 tempo_dialog.cc:656
 #: tempo_dialog.cc:657
 msgid "eighth"
-msgstr "quaver (1/8)"
+msgstr "quaver (⅛)"
 
 #: tempo_dialog.cc:122 tempo_dialog.cc:123 tempo_dialog.cc:658
 #: tempo_dialog.cc:659
 msgid "sixteenth"
-msgstr "semiquaver (1/16)"
+msgstr "semiquaver (⅟₁₆)"
 
 #: tempo_dialog.cc:124 tempo_dialog.cc:125 tempo_dialog.cc:660
 #: tempo_dialog.cc:661
 msgid "thirty-second"
-msgstr "demisemiquaver (1/32)"
+msgstr "demisemiquaver (⅟₃₂)"
 
 #: tempo_dialog.cc:126 tempo_dialog.cc:127 tempo_dialog.cc:662
 #: tempo_dialog.cc:663
 msgid "sixty-fourth"
-msgstr "hemidemisemiquaver (1/64)"
+msgstr "hemidemisemiquaver (⅟₆₄)"
 
 #: tempo_dialog.cc:146 tempo_dialog.cc:147
 msgid "ramped"
@@ -20151,7 +20151,7 @@ msgstr ""
 
 #: tempo_dialog.cc:650 tempo_dialog.cc:651
 msgid "second"
-msgstr "minim (1/2)"
+msgstr "minim (½)"
 
 #: tempo_dialog.cc:698
 msgid "Note value:"
@@ -20639,27 +20639,27 @@ msgstr ""
 
 #: trigger_ui.cc:712
 msgid "1/4"
-msgstr "♩ (1/4)"
+msgstr "♩ (¼)"
 
 #: trigger_ui.cc:714
 msgid "1/2"
-msgstr "𝅗𝅥 (1/2)"
+msgstr "𝅗𝅥 (½)"
 
 #: trigger_ui.cc:718
 msgid "1/8"
-msgstr "♪ (1/8)"
+msgstr "♪ (⅛)"
 
 #: trigger_ui.cc:720
 msgid "1/16"
-msgstr "𝅘𝅥𝅯 (1/16)"
+msgstr "𝅘𝅥𝅯 (⅟₁₆)"
 
 #: trigger_ui.cc:722
 msgid "1/32"
-msgstr "𝅘𝅥𝅰 (1/32)"
+msgstr "𝅘𝅥𝅰 (⅟₃₂)"
 
 #: trigger_ui.cc:724
 msgid "1/64"
-msgstr "𝅘𝅥𝅱 (1/64)"
+msgstr "𝅘𝅥𝅱 (⅟₆₄)"
 
 #: trigger_ui.cc:739
 msgid "Again"
@@ -21432,7 +21432,7 @@ msgstr ""
 
 #~ msgid ""
 #~ "Loudness measurement returned no results. Likely because the analyzed "
-#~ "range is to short."
+#~ "range is too short."
 #~ msgstr ""
 #~ "Loudness measurement returned no results. Likely because the analysed "
 #~ "range is too short."
