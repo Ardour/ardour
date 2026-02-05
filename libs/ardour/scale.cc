@@ -16,6 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cmath>
+
 #include "pbd/enumwriter.h"
 
 #include "ardour/scale.h"
@@ -359,6 +361,46 @@ MusicalMode::fill (Name nom)
 	}
 }
 
+/** Return a sorted vector of all notes in a musical mode.
+ *
+ * The returned vector has every possible MIDI note number (0 through 127
+ * inclusive) that is in the mode in any octave.
+ */
+std::vector<int>
+MusicalMode::as_midi (int scale_root) const
+{
+	std::vector<int> notes_vector;
+	int root = scale_root - 12;
+
+	// Repeatedly loop through the intervals in an octave
+	for (std::vector<float>::const_iterator i = _elements.begin ();;) {
+		if (i == _elements.end ()) {
+			// Reached the end of the scale, continue with the next octave
+			root += 12;
+			if (root > 127) {
+				break;
+			}
+
+			notes_vector.push_back (root);
+			i = _elements.begin ();
+
+		} else {
+			const int note = (int)floor (root + (2.0 * (*i)));
+			if (note > 127) {
+				break;
+			}
+
+			if (note > 0) {
+				notes_vector.push_back (note);
+			}
+
+			++i;
+		}
+	}
+
+	return notes_vector;
+}
+
 /*---------*/
 
 MusicalKey::MusicalKey (float root, MusicalMode const & sc)
@@ -377,3 +419,4 @@ MusicalKey::nth (int n) const
 #warning paul you need to fix this
 	return 99;
 }
+
