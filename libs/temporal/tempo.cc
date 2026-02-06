@@ -1126,7 +1126,6 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 		shift (position, cb.duration());
 	}
 
-
 	/* We need to look these up first, before we change the map */
 	const timepos_t end_position = position + cb.duration();
 	const Tempo end_tempo = tempo_at (end_position);
@@ -1218,10 +1217,14 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 		reset_starting_at (s);
 	}
 
-	pos_bbt = bbt_at (end_position);
 	pos_beats = quarters_at (end_position);
+	pos_beats += Beats (1, 0);
+	timepos_t ep (timepos_t::from_superclock (superclock_at (pos_beats)));
+	pos_bbt = bbt_at (ep);
 
 	if (pos_bbt.ticks != 0 || pos_bbt.beats != 1) {
+
+		/* Not on first beat of a beat */
 
 		if (suggested_name.empty()) {
 			name = _("<paste");
@@ -1229,7 +1232,7 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 			name = string_compose (X_("<%1"), suggested_name);
 		}
 
-		mtp = new MusicTimePoint (*this,  end_position.superclocks(), pos_beats, pos_bbt, end_tempo, end_meter, name);
+		mtp = new MusicTimePoint (*this,  ep.superclocks(), pos_beats, pos_bbt, end_tempo, end_meter, name);
 		core_add_bartime (mtp, replaced);
 		if (!replaced) {
 			core_add_tempo (mtp, ignored);
