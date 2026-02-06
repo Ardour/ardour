@@ -53,7 +53,7 @@ MusicalMode::MusicalMode (std::ifstream& file)
 
 		_type = RatioFromRoot;
 
-		for (int i = 0; i < scl.get_scale_length(); i++){
+		for (size_t i = 0; i < scl.get_scale_length(); i++){
 			_elements.push_back (scl.get_ratio (i));
 		}
 
@@ -463,13 +463,53 @@ std::vector<int>
 MusicalMode::absolute_pitch_as_midi (int root) const
 {
 	std::vector<int> midi_notes;
+	midi_notes.reserve (128);
+
+	/* You need MTS (MIDI Tuning Standard) to get MIDI to use absolute
+	 * pitch values, so this type of scale definition just returns the MIDI
+	 * note numbers 0-127. There is no other accurate answer that can be
+	 * given without MTS.
+	 */
+
+	for (int n = 0; n < 128; ++n) {
+		midi_notes.push_back (n);
+	}
 	return midi_notes;
 }
 
 std::vector<int>
-MusicalMode::semitone_steps_as_midi (int root) const
+MusicalMode::semitone_steps_as_midi (int scale_root) const
 {
 	std::vector<int> midi_notes;
+
+	int root = scale_root - 12;
+
+	// Repeatedly loop through the intervals in an octave
+	for (std::vector<float>::const_iterator i = _elements.begin ();;) {
+		if (i == _elements.end ()) {
+			// Reached the end of the scale, continue with the next octave
+			root += 12;
+			if (root > 127) {
+				break;
+			}
+
+			midi_notes.push_back (root);
+			i = _elements.begin ();
+
+		} else {
+			const int note = (int)floor (root + *i);
+			if (note > 127) {
+				break;
+			}
+
+			if (note > 0) {
+				midi_notes.push_back (note);
+			}
+
+			++i;
+		}
+	}
+
 	return midi_notes;
 }
 
