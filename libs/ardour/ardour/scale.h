@@ -79,6 +79,7 @@ class MusicalMode {
 	MusicalMode (std::string const & name, MusicalModeType type, std::vector<float> const & elements);
 	MusicalMode (MusicalMode const & other);
 	MusicalMode (MusicalMode::Name);
+	MusicalMode (std::ifstream& file); /* Read from a Scala file */
 
 	std::string name() const { return _name; }
 	MusicalModeType type() const { return _type; }
