@@ -1295,7 +1295,7 @@ msgstr ""
 
 #: ardour_ui.cc:335
 msgid "Window|Realtime Analyzer"
-msgstr ""
+msgstr "Realtime Analyser"
 
 #: ardour_ui.cc:345
 msgid "Window|Edit"
@@ -8161,7 +8161,7 @@ msgstr ""
 
 #: editor_routes.cc:41 route_list_base.cc:87
 msgid "Realtime Analyzer active?"
-msgstr ""
+msgstr "Realtime Analyser active?"
 
 #: editor_rulers.cc:252
 msgid "Add New Tempo"
@@ -11384,6 +11384,9 @@ msgid ""
 "Left-click to toggle track analysis\n"
 "Right-click to toggle RTA window visibility"
 msgstr ""
+"Realtime Analyser\n"
+"Left-click to toggle track analysis\n"
+"Right-click to toggle RTA window visibility"
 
 #: mixer_strip.cc:305
 msgid "Trim: "
@@ -16645,7 +16648,7 @@ msgstr ""
 
 #: rc_option_editor.cc:4917
 msgid "Realtime Analyzer"
-msgstr ""
+msgstr "Realtime Analyser"
 
 #: rc_option_editor.cc:4921
 msgid "Limit concurrent RTA spectra"
@@ -17765,7 +17768,7 @@ msgstr ""
 
 #: rta_window.cc:47 rta_window.cc:242 rta_window.cc:247
 msgid "Realtime Perceptual Analyzer"
-msgstr ""
+msgstr "Realtime Perceptual Analyser"
 
 #: rta_window.cc:77
 msgid "Rapid"
@@ -17801,7 +17804,7 @@ msgstr ""
 
 #: rta_window.cc:123
 msgid "Clear current set of analyzed signals (except for the master bus)."
-msgstr ""
+msgstr "Clear current set of analysed signals (except for the master bus)."
 
 #: rta_window.cc:124
 msgid ""
