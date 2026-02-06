@@ -12737,7 +12737,7 @@ msgstr ""
 
 #: plugin_manager_ui.cc:113 plugin_selector.cc:109
 msgid "Favorite|Fav"
-msgstr "Favourite|Fav"
+msgstr "Fav"
 
 #: plugin_manager_ui.cc:113
 msgid "Add this plugin to the favorite list"
