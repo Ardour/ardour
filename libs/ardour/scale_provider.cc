@@ -16,6 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "ardour/scale.h"
 #include "ardour/scale_provider.h"
 
 using namespace ARDOUR;

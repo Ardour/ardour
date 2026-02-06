@@ -418,7 +418,42 @@ MusicalMode::fill (Name nom)
 std::vector<int>
 MusicalMode::as_midi (int scale_root) const
 {
-	std::vector<int> notes_vector;
+	switch (_type) {
+	case AbsolutePitch:
+		return absolute_pitch_as_midi (scale_root);
+	case SemitoneSteps:
+		return semitone_steps_as_midi (scale_root);
+	case WholeToneSteps:
+		return wholetone_steps_as_midi (scale_root);
+	case RatioSteps:
+		return ratio_steps_as_midi (scale_root);
+	case RatioFromRoot:
+		return ratio_from_root_as_midi (scale_root);
+	}
+
+	/*NOTREACHED*/
+	return std::vector<int> ();
+}
+
+std::vector<int>
+MusicalMode::absolute_pitch_as_midi (int root) const
+{
+	std::vector<int> midi_notes;
+	return midi_notes;
+}
+
+std::vector<int>
+MusicalMode::semitone_steps_as_midi (int root) const
+{
+	std::vector<int> midi_notes;
+	return midi_notes;
+}
+
+std::vector<int>
+MusicalMode::wholetone_steps_as_midi (int scale_root) const
+{
+	std::vector<int> midi_notes;
+
 	int root = scale_root - 12;
 
 	// Repeatedly loop through the intervals in an octave
@@ -430,7 +465,7 @@ MusicalMode::as_midi (int scale_root) const
 				break;
 			}
 
-			notes_vector.push_back (root);
+			midi_notes.push_back (root);
 			i = _elements.begin ();
 
 		} else {
@@ -440,15 +475,30 @@ MusicalMode::as_midi (int scale_root) const
 			}
 
 			if (note > 0) {
-				notes_vector.push_back (note);
+				midi_notes.push_back (note);
 			}
 
 			++i;
 		}
 	}
 
-	return notes_vector;
+	return midi_notes;
 }
+
+std::vector<int>
+MusicalMode::ratio_steps_as_midi (int root) const
+{
+	std::vector<int> midi_notes;
+	return midi_notes;
+}
+
+std::vector<int>
+MusicalMode::ratio_from_root_as_midi (int root) const
+{
+	std::vector<int> midi_notes;
+	return midi_notes;
+}
+
 
 /*---------*/
 

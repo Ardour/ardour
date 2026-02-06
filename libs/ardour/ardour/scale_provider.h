@@ -18,16 +18,17 @@
 
 #pragma once
 
-#include "ardour/scale.h"
-
 namespace ARDOUR {
+
+class MusicalKey;
 
 class ScaleProvider {
    public:
 	ScaleProvider (ScaleProvider* parent);
+	virtual ~ScaleProvider () {}
 
 	ScaleProvider* parent() const  { return _parent; }
-	MusicalKey const * key() const;
+	virtual MusicalKey const * key() const;
 	void set_key (MusicalKey const &);
 
   private:
