@@ -27,6 +27,11 @@ ScaleProvider::ScaleProvider (ScaleProvider* parent)
 {
 }
 
+ScaleProvider::~ScaleProvider ()
+{
+	delete _key;
+}
+
 void
 ScaleProvider::set_key (MusicalKey const & k)
 {

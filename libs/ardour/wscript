@@ -199,6 +199,8 @@ libardour_sources = [
         'rb_effect.cc',
         'rt_task.cc',
         'rt_tasklist.cc',
+        'scala_kbm.cc',
+        'scala_scl.cc',
         'scale.cc',
         'scale_provider.cc',
         'scene_change.cc',

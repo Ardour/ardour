@@ -17,10 +17,13 @@
  */
 
 #include <cmath>
+#include <fstream>
 
 #include "pbd/enumwriter.h"
+#include "pbd/failed_constructor.h"
 
 #include "ardour/scale.h"
+#include "ardour/scala_file.h"
 
 using namespace ARDOUR;
 
@@ -36,6 +39,27 @@ MusicalMode::MusicalMode (MusicalMode const & other)
 	, _type (other._type)
 	, _elements (other._elements)
 {
+}
+
+MusicalMode::MusicalMode (MusicalMode::Name name)
+{
+	fill (name);
+}
+
+MusicalMode::MusicalMode (std::ifstream& file)
+{
+	try {
+		scala::scale scl (scala::read_scl (file));
+
+		_type = RatioFromRoot;
+
+		for (int i = 0; i < scl.get_scale_length(); i++){
+			_elements.push_back (scl.get_ratio (i));
+		}
+
+	} catch (...) {
+		throw failed_constructor ();
+	}
 }
 
 void
@@ -518,4 +542,3 @@ MusicalKey::nth (int n) const
 #warning paul you need to fix this
 	return 99;
 }
-

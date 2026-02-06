@@ -18,6 +18,10 @@
 
 #pragma once
 
+namespace Temporal {
+	class timepos_t;
+}
+
 namespace ARDOUR {
 
 class MusicalKey;
@@ -25,10 +29,14 @@ class MusicalKey;
 class ScaleProvider {
    public:
 	ScaleProvider (ScaleProvider* parent);
-	virtual ~ScaleProvider () {}
+	virtual ~ScaleProvider ();
 
 	ScaleProvider* parent() const  { return _parent; }
 	virtual MusicalKey const * key() const;
+	virtual MusicalKey const * key_at (Temporal::timepos_t const &) const {
+		/* by default, ignore time since there's only 1 answer */
+		return key();
+	}
 	void set_key (MusicalKey const &);
 
   private:
