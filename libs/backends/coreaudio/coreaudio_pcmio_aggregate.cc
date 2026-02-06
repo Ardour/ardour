@@ -98,6 +98,7 @@ CoreAudioPCM::create_aggregate_device (
 	UInt32 clockdomain = 0;
 	size = sizeof(UInt32);
 	bool need_clock_drift_compensation = false;
+	bool first_device_provides_clock   = true;
 
 	for (size_t i = 0; i < input_device_ids.size(); ++i) {
 		set_device_sample_rate_id(input_device_ids[i], sample_rate, true);
@@ -295,22 +296,13 @@ CoreAudioPCM::create_aggregate_device (
 	pluginAOPA.mElement = kAudioObjectPropertyElementMaster;
 	outDataSize = sizeof(CFStringRef);
 
-	if (debug_flags & 2) {
-		/* try capture device first */
-		err = AudioObjectSetPropertyData(*created_device, &pluginAOPA, 0, NULL, outDataSize, &captureDeviceUID[0]);
-	} else {
-		err = AudioObjectSetPropertyData(*created_device, &pluginAOPA, 0, NULL, outDataSize, &playbackDeviceUID[0]);
-	}
+	/* try capture device first */
+	err = AudioObjectSetPropertyData(*created_device, &pluginAOPA, 0, NULL, outDataSize, &captureDeviceUID[0]);
 
 	if (err != noErr) {
-		/* fall back */
-		if (debug_flags & 2) {
-			fprintf(stderr, "AggregateDevice: AudioObjectSetPropertyData for capture-master device error\n");
-			err = AudioObjectSetPropertyData(*created_device, &pluginAOPA, 0, NULL, outDataSize, &playbackDeviceUID[0]);
-		} else {
-			fprintf(stderr, "AggregateDevice: AudioObjectSetPropertyData for playback-master device error\n");
-			err = AudioObjectSetPropertyData(*created_device, &pluginAOPA, 0, NULL, outDataSize, &captureDeviceUID[0]);
-		}
+		fprintf(stderr, "AggregateDevice: AudioObjectSetPropertyData for capture-master device error\n");
+		err = AudioObjectSetPropertyData(*created_device, &pluginAOPA, 0, NULL, outDataSize, &playbackDeviceUID[0]);
+		first_device_provides_clock = false;
 	}
 
 	if (err != noErr) {
@@ -356,9 +348,9 @@ CoreAudioPCM::create_aggregate_device (
 		}
 
 		// Set kAudioSubDevicePropertyDriftCompensation property...
-		for (size_t i = 0; i < n_subdevices; ++i) {
+		for (size_t i = first_device_provides_clock ? 1 : 0; i < n_subdevices; ++i) {
 			UInt32 theDriftCompensationValue = 1;
-			// TODO exclude master clock device
+			// TODO exclude master clock device when !first_device_provides_clock
 			err = AudioObjectSetPropertyData(subDevices[i], &theAddressDrift, 0, NULL, sizeof(UInt32), &theDriftCompensationValue);
 			if (err != noErr) {
 				fprintf(stderr, "AggregateDevice: kAudioSubDevicePropertyDriftCompensation error\n");
