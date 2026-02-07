@@ -30,7 +30,8 @@ enum MusicalModeType {
 	SemitoneSteps,
 	WholeToneSteps,
 	RatioSteps,
-	RatioFromRoot
+	RatioFromRoot,
+	MidiNote,
 };
 
 class MusicalMode {
@@ -105,12 +106,14 @@ class MusicalMode {
 	std::vector<float> wholetone_steps_pitches_from_root (float root, int steps) const;
 	std::vector<float> ratio_steps_pitches_from_root (float root, int steps) const;
 	std::vector<float> ratio_from_root_pitches_from_root (float root, int steps) const;
+	std::vector<float> midi_note_pitches_from_root (float root, int steps) const;
 
 	std::vector<int> absolute_pitch_as_midi (int root) const;
 	std::vector<int> semitone_steps_as_midi (int root) const;
 	std::vector<int> wholetone_steps_as_midi (int root) const;
 	std::vector<int> ratio_steps_as_midi (int root) const;
 	std::vector<int> ratio_from_root_as_midi (int root) const;
+	std::vector<int> midi_note_as_midi (int root) const;
 };
 
 
