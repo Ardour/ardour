@@ -1012,7 +1012,16 @@ void ARDOUR_UI::import_strips ()
 {
 	if (_session) {
 		StripImportDialog isd (_session);
-		isd.run();
+		switch (isd.run()) {
+			default:
+				break;
+			case RESPONSE_ACCEPT:
+				DisplaySuspender ds;
+				Mixer_UI::RedisplaySuspender rs;
+				PresentationInfo::ChangeSuspender cs;
+				isd.do_import ();
+				break;
+		}
 	}
 }
 

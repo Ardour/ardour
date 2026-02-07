@@ -23,6 +23,7 @@
 #include <ytkmm/filechooserwidget.h>
 #include <ytkmm/liststore.h>
 #include <ytkmm/notebook.h>
+#include <ytkmm/progressbar.h>
 #include <ytkmm/scrolledwindow.h>
 #include <ytkmm/table.h>
 #include <ytkmm/treestore.h>
@@ -35,6 +36,7 @@
 
 #include "ardour/template_utils.h"
 #include "ardour_dialog.h"
+#include "progress_reporter.h"
 
 namespace ArdourWidgets
 {
@@ -42,11 +44,16 @@ namespace ArdourWidgets
 	class ArdourDropdown;
 }
 
-class StripImportDialog : public ArdourDialog
+class StripImportDialog : public ArdourDialog, public ProgressReporter
 {
 public:
 	StripImportDialog (ARDOUR::Session*);
 	~StripImportDialog ();
+
+	void do_import ();
+
+protected:
+	void on_response (int);
 
 private:
 	enum SelectionType {
@@ -76,6 +83,7 @@ private:
 	void set_default_mapping (bool and_idle_update);
 	void update_sensitivity_ok ();
 	void ok_activated ();
+	void update_progress_gui (float);
 
 	struct SessionTemplateColumns : public Gtk::TreeModel::ColumnRecord {
 		SessionTemplateColumns ()
@@ -104,6 +112,7 @@ private:
 	Gtk::FileChooserWidget _chooser;
 	Gtk::Button*           _open_button;
 	Gtk::Button*           _ok_button;
+	Gtk::Button*           _cancel_button;
 	Gtk::Label             _info_text;
 	Gtk::ScrolledWindow    _recent_scroller;
 	Gtk::TreeView          _recent_treeview;
@@ -121,6 +130,9 @@ private:
 	ArdourWidgets::ArdourButton*   _add_new_mapping;
 	ArdourWidgets::ArdourDropdown* _action;
 	ArdourWidgets::ArdourButton*   _show_all_toggle;
+
+	Gtk::HBox        _action_box;
+	Gtk::ProgressBar _progress_bar;
 
 	bool                       _match_pbd_id;
 	std::string                _path;
