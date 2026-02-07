@@ -83,10 +83,19 @@ MusicalMode::pitches_from_root (float root, int steps) const
 		return ratio_steps_pitches_from_root (root, steps);
 	case RatioFromRoot:
 		return ratio_from_root_pitches_from_root (root, steps);
+	case MidiNote:
+		return midi_note_pitches_from_root (root, steps);
 	}
 
 	/*NOTREACHED*/
 	return std::vector<float> ();
+}
+
+std::vector<float>
+MusicalMode::midi_note_pitches_from_root (float root, int steps) const
+{
+	std::vector<float> pitches;
+	return pitches;
 }
 
 std::vector<float>
@@ -453,6 +462,8 @@ MusicalMode::as_midi (int scale_root) const
 		return ratio_steps_as_midi (scale_root);
 	case RatioFromRoot:
 		return ratio_from_root_as_midi (scale_root);
+	case MidiNote:
+		return midi_note_as_midi (scale_root);
 	}
 
 	/*NOTREACHED*/
@@ -474,6 +485,20 @@ MusicalMode::absolute_pitch_as_midi (int root) const
 	for (int n = 0; n < 128; ++n) {
 		midi_notes.push_back (n);
 	}
+	return midi_notes;
+}
+
+
+std::vector<int>
+MusicalMode::midi_note_as_midi (int root) const
+{
+	std::vector<int> midi_notes;
+	midi_notes.reserve (_elements.size());
+
+	for (auto e : _elements) {
+		midi_notes.push_back (floor (e));
+	}
+
 	return midi_notes;
 }
 
