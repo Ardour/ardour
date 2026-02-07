@@ -1283,7 +1283,7 @@ Session::parse_route_state (const string& path, bool& match_pbd_id)
 }
 
 int
-Session::import_route_state (const string& path, std::map<PBD::ID, PBD::ID> const& idmap, RouteGroupImportMode rgim)
+Session::import_route_state (const string& path, std::map<PBD::ID, PBD::ID> const& idmap, RouteGroupImportMode rgim, Progress* progress)
 {
 	/* idmap:  <local route ID : extern/XML route ID>
 	 * a given route may only be set to the state of one extern ID,
@@ -1296,6 +1296,13 @@ Session::import_route_state (const string& path, std::map<PBD::ID, PBD::ID> cons
 	}
 	if (tree.root()->name() != X_("RouteState") && tree.root()->name() != X_("Session")) { // XXX
 		return -2;
+	}
+
+	size_t completed      = 0;
+	size_t required_tasks = idmap.size () + 2;
+
+	if (progress) {
+		progress->set_progress (completed++ / (float)required_tasks);
 	}
 
 	int version = 0;
@@ -1345,6 +1352,14 @@ Session::import_route_state (const string& path, std::map<PBD::ID, PBD::ID> cons
 	if (xroutes) {
 		/* foreach route .. */
 		for (auto const rxml : xroutes->children()) {
+
+			if (progress) {
+				progress->set_progress (completed++ / (float)required_tasks);
+				if (progress->cancelled ()) {
+					break;
+				}
+			}
+
 			/* track-state includes version per route */
 			if (!rxml->get_property ("version", version) || version == 0) {
 				continue;
@@ -1424,6 +1439,10 @@ Session::import_route_state (const string& path, std::map<PBD::ID, PBD::ID> cons
 		}
 	}
 
+	if (progress) {
+		progress->set_progress (completed++ / (float) required_tasks);
+	}
+
 	if (!new_track_order.empty ()) {
 		std::sort (new_track_order.begin (), new_track_order.end (), [=] (auto& a, auto& b) { return a.second < b.second; });
 
@@ -1442,6 +1461,10 @@ Session::import_route_state (const string& path, std::map<PBD::ID, PBD::ID> cons
 			r->set_presentation_order (n_routes + added++);
 		}
 		ensure_stripable_sort_order ();
+	}
+
+	if (progress) {
+		progress->set_progress (1.0);
 	}
 
 	return 0;

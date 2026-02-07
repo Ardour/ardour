@@ -695,7 +695,7 @@ public:
 	};
 
 	bool export_route_state (std::shared_ptr<RouteList> rl, const std::string& path, bool with_sources);
-	int  import_route_state (const std::string& path, std::map<PBD::ID, PBD::ID> const&, RouteGroupImportMode rgim = CreateRouteGroup);
+	int  import_route_state (const std::string& path, std::map<PBD::ID, PBD::ID> const&, RouteGroupImportMode rgim = CreateRouteGroup, PBD::Progress* p = 0);
 
 	std::map<PBD::ID, RouteImportInfo> parse_route_state (const std::string& path, bool& match_pbd_id);
 
