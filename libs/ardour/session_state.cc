@@ -1393,6 +1393,7 @@ Session::import_route_state (const string& path, std::map<PBD::ID, PBD::ID> cons
 					XMLNode copy (*rxml);
 					copy.remove_nodes_and_delete ("PresentationInfo"); // "Master"
 					copy.add_child_nocopy (pi.get_state());
+					copy.set_property (X_("definitely-add-number"), false);
 
 					RouteList rl = new_route_from_template (1, PresentationInfo::max_order, copy, "", NewPlaylist);
 					assert (rl.size () < 2);
