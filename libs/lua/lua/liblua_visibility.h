@@ -30,8 +30,8 @@
 #endif
 
 
-#ifdef COMPILER_MSVC
-// MSVC: build liblua as DLL
+#if defined(COMPILER_MSVC) && !defined(WAF_BUILD)
+// MSVC: build liblua as DLL outside of waf builds
 #  define LIBLUA_BUILD_AS_DLL
 #else
 // others currently use a static lib (incl. with libardour)
