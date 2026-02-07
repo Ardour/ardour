@@ -30,10 +30,17 @@ def configure(conf):
 
 def build(bld):
     obj = bld.stlib(features = 'cxx cxxstlib', source = zresampler_sources)
-    obj.cxxflags        = [ bld.env['compiler_flags_dict']['pic'], '-O3', '-ffast-math' ]
+    obj.cxxflags        = [bld.env['compiler_flags_dict']['pic']]
+    if bld.env['build_target'] == 'msvc':
+        obj.cxxflags.append (['/O2', '/fp:fast'])
+    else:
+        obj.cxxflags.append (['-O3', '-ffast-math'])
     obj.export_includes = ['.']
     obj.includes        = ['.']
     obj.name            = 'zita-resampler'
     obj.target          = 'zita-resampler'
     obj.vnum            = ZRESAMPLER_LIB_VERSION
     obj.defines         = [ 'PACKAGE="' + I18N_PACKAGE + '"' ]
+    if bld.env['build_target'] == 'msvc':
+        obj.defines    += ['LIBZRESAMPLER_STATIC']
+        obj.export_defines = ['LIBZRESAMPLER_STATIC']
