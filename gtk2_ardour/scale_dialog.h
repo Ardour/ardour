@@ -21,8 +21,11 @@
 #include "ytkmm/label.h"
 #include "ytkmm/entry.h"
 #include "ytkmm/spinbutton.h"
+#include "ytkmm/filechooserbutton.h"
 
 #include "ardour/scale.h"
+
+#include "widgets/ardour_dropdown.h"
 
 #include "ardour_dialog.h"
 
@@ -32,7 +35,7 @@ class ScaleDialog : public ArdourDialog
 	ScaleDialog ();
 	~ScaleDialog ();
 
-	void set (ARDOUR::MusicalKey&);
+	void set (ARDOUR::MusicalKey const &);
 	ARDOUR::MusicalKey get() const;
 
   private:
@@ -43,12 +46,22 @@ class ScaleDialog : public ArdourDialog
 		int index;
 	};
 
-	Gtk::HBox step_packer;
+	Gtk::VBox step_packer;
 	Gtk::HBox name_packer;
 	Gtk::Label name_label;
+	Gtk::HBox type_box;
+	Gtk::Label type_label;
 	Gtk::Entry name_entry;
 	Gtk::Adjustment step_adjustment;
+	Gtk::Label steps_label;
 	Gtk::SpinButton step_spinner;
+	Gtk::HBox steps_box;
+	ArdourWidgets::ArdourDropdown type_dropdown;
+	Gtk::HBox scala_box;
+	Gtk::Label scala_label;
+	Gtk::FileChooserButton scala_file_button;
+	Gtk::Button clear_button;
 
 	void pack ();
+	void set_type (ARDOUR::MusicalModeType);
 };
