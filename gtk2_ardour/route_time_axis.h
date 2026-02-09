@@ -280,6 +280,7 @@ protected:
 
 	bool _ignore_set_layer_display;
 	void layer_display_menu_change (Gtk::MenuItem* item);
+	void edit_scale ();
 
 protected:
 	void update_pan_track_visibility ();

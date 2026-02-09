@@ -87,6 +87,7 @@
 #include "public_editor.h"
 #include "region_view.h"
 #include "selection.h"
+#include "scale_dialog.h"
 #include "streamview.h"
 #include "ui_config.h"
 #include "utils.h"
@@ -618,6 +619,25 @@ RouteTimeAxisView::build_automation_action_menu (bool for_selection)
 }
 
 void
+RouteTimeAxisView::edit_scale ()
+{
+	if (!_route || !_route->key()) {
+		return;
+	}
+
+	ScaleDialog sd;
+	sd.set (*_route->key());
+
+	sd.present ();
+
+	int response = sd.run ();
+
+	switch (response) {
+		break;
+	}
+}
+
+void
 RouteTimeAxisView::build_display_menu ()
 {
 	using namespace Menu_Helpers;
@@ -637,6 +657,8 @@ RouteTimeAxisView::build_display_menu ()
 	bool active = _route->active ();
 
 	MenuList& items = display_menu->items();
+
+	items.push_back (MenuElem (_("Scale..."), sigc::mem_fun (*this, &RouteTimeAxisView::edit_scale)));
 
 	/* now fill it with our stuff */
 	if (active) {
