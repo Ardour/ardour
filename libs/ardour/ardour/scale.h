@@ -82,6 +82,8 @@ class MusicalMode {
 	MusicalMode (MusicalMode::Name);
 	MusicalMode (std::ifstream& file); /* Read from a Scala file */
 
+	MusicalMode operator= (MusicalMode const & other);
+
 	std::string name() const { return _name; }
 	MusicalModeType type() const { return _type; }
 	int size() const { return _elements.size(); }
@@ -121,6 +123,9 @@ class MusicalKey : public MusicalMode
 {
     public:
 	MusicalKey (float root, MusicalMode const &);
+	MusicalKey (MusicalKey const & other);
+
+	MusicalKey operator= (MusicalKey const & other);
 
 	float root() const { return _root; }
 	float nth (int n) const;
@@ -130,5 +135,4 @@ class MusicalKey : public MusicalMode
 
 };
 
-} // namespace 
-
+} // namespace

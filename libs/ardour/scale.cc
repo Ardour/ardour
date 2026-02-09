@@ -62,6 +62,15 @@ MusicalMode::MusicalMode (std::ifstream& file)
 	}
 }
 
+MusicalMode
+MusicalMode::operator= (MusicalMode const & other)
+{
+	_name = other._name;
+	_elements = other._elements;
+
+	return *this;
+}
+
 void
 MusicalMode::set_name (std::string const & str)
 {
@@ -595,6 +604,21 @@ MusicalKey::MusicalKey (float root, MusicalMode const & sc)
 	: MusicalMode (sc)
 	, _root (root)
 {
+}
+
+MusicalKey::MusicalKey (MusicalKey const & other)
+	: MusicalMode (other)
+	, _root (other._root)
+{
+}
+
+MusicalKey
+MusicalKey::operator= (MusicalKey const & other)
+{
+	MusicalMode::operator= (other);
+	_root = other._root;
+
+	return *this;
 }
 
 float
