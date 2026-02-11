@@ -81,6 +81,7 @@ public:
 
 
 	void set_atv (AutomationTimeAxisView&);
+	AutomationTimeAxisView* automation_time_axis_view() const { return atv; }
 
 	virtual Temporal::timepos_t get_origin () const;
 
