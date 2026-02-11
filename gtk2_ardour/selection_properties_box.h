@@ -52,6 +52,9 @@ public:
 
 	void set_session (ARDOUR::Session*);
 
+	void add_region_rhs (Gtk::Widget&);
+	void remove_region_rhs ();
+
 private:
 	void init ();
 	void selection_changed ();
@@ -65,9 +68,9 @@ private:
 	RoutePropertiesBox*    _route_prop_box;
 	SlotPropertiesBox*     _slot_prop_box;
 	Gtk::HBox              _region_editor_box;
+	Gtk::Widget*           _region_editor_box_rhs;
 	RegionEditor*          _region_editor;
 	RegionFxPropertiesBox* _region_fx_box;
-
 	DispositionMask _disposition;
 
 	PBD::ScopedConnection _region_connection;

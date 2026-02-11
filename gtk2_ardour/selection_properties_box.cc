@@ -48,7 +48,8 @@ using std::min;
 using std::max;
 
 SelectionPropertiesBox::SelectionPropertiesBox (DispositionMask mask)
-	: _region_editor (nullptr)
+	: _region_editor_box_rhs (nullptr)
+	, _region_editor (nullptr)
 	, _region_fx_box (nullptr)
 	, _disposition (mask)
 {
@@ -119,6 +120,24 @@ SelectionPropertiesBox::set_session (Session* s)
 }
 
 void
+SelectionPropertiesBox::add_region_rhs (Gtk::Widget& w)
+{
+	/* it will be packed on an as-needed basis */
+	_region_editor_box_rhs = &w;
+}
+
+void
+SelectionPropertiesBox::remove_region_rhs ()
+{
+	if (_region_editor_box_rhs) {
+		if (_region_editor_box_rhs->get_parent()) {
+			_region_editor_box.remove (*_region_editor_box_rhs);
+		}
+		_region_editor_box_rhs = nullptr;
+	}
+}
+
+void
 SelectionPropertiesBox::track_mouse_mode ()
 {
 	/* maybe do something here? */
@@ -150,9 +169,16 @@ SelectionPropertiesBox::delete_region_editor ()
 	}
 	assert (_region_fx_box);
 	_region_editor_box.remove (*_region_editor);
-	_region_editor_box.remove (*_region_fx_box);
+	if (_region_fx_box && _region_fx_box->get_parent()) {
+		_region_editor_box.remove (*_region_fx_box);
+	}
+	if (_region_editor_box_rhs && _region_editor_box_rhs->get_parent()) {
+		_region_editor_box.remove (*_region_editor_box_rhs);
+	}
 	delete _region_editor;
+	_region_editor = nullptr;
 	delete _region_fx_box;
+	_region_fx_box = nullptr;
 	_region_editor = nullptr;
 	_region_fx_box = nullptr;
 	_region_editor_box.hide ();
@@ -185,13 +211,34 @@ SelectionPropertiesBox::selection_changed ()
 	if (!selection.tracks.empty () && 0 != (_disposition & ShowRoutes)) {
 		TimeAxisView *tav = selection.tracks.back (); //the LAST selected stripable is the clicked one. see selection.cc line ~92
 		RouteTimeAxisView *rtav = dynamic_cast<RouteTimeAxisView *>(tav);
+
+		/* If the selected time axis isn't a route, check the parent */
+		if (!rtav) {
+			tav = tav->get_parent ();
+			rtav = dynamic_cast<RouteTimeAxisView *>(tav);
+		}
+
 		if (rtav) {
 			_route_prop_box->set_route (rtav->route());
 			show_route_properties = true;
 		}
 	}
 
-	RegionView* rv = 0;
+	if (!selection.points.empty()) {
+		AutomationTimeAxisView* atv = selection.points.back()->line().automation_time_axis_view();
+		if (atv) {
+			/* Points are selected in an automation time axis, show route properties for corresponding route */
+			TimeAxisView* tav = atv->get_parent ();
+			RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView *>(tav);
+
+			if (rtav) {
+				_route_prop_box->set_route (rtav->route());
+				show_route_properties = true;
+			}
+		}
+	}
+
+	RegionView* rv = nullptr;
 	if (selection.regions.size () == 1) {
 		rv = selection.regions.front ();
 	} else if (!selection.points.empty ()) {
@@ -218,7 +265,16 @@ SelectionPropertiesBox::selection_changed ()
 			_region_editor_box.pack_start (*_region_editor, false, false);
 
 			_region_fx_box = new RegionFxPropertiesBox (rv->region ());
-			_region_editor_box.pack_start (*_region_fx_box);
+			/* If there's a RHS element and the RegionFX box is
+			   empty, don't show the region fx box
+			*/
+			if (!_region_editor_box_rhs || !_region_fx_box->empty()) {
+				_region_editor_box.pack_start (*_region_fx_box);
+			}
+			if (_region_editor_box_rhs) {
+				_region_editor_box.pack_start (*_region_editor_box_rhs, true, true);
+			}
+
 			rv->RegionViewGoingAway.connect_same_thread (_region_connection, std::bind (&SelectionPropertiesBox::delete_region_editor, this));
 
 #ifndef MIXBUS
@@ -232,7 +288,7 @@ SelectionPropertiesBox::selection_changed ()
 		 * retain existing RegionEditor, when selecting another additional region, or
 		 * when switching tools (grab -> draw) to edit region-gain, or note entry.
 		 */
-		if (!selection.tracks.empty ()|| !selection.markers.empty () || !selection.playlists.empty () || !selection.triggers.empty ()) {
+		if (!selection.tracks.empty () || !selection.points.empty() || !selection.markers.empty () || !selection.playlists.empty () || !selection.triggers.empty ()) {
 			delete_region_editor ();
 		}
 	}
