@@ -308,13 +308,13 @@
       <menuitem action='cycle-snap-mode'/>
       <menu name='GridChoice' action='GridChoice'>
         <menu name='GlobalQuantize' action='GlobalQuantize'>
-        <menuitem action='set-global-quantization-1-bar'/>
-	<menuitem action='set-global-quantization-quarter-note'/>
-	<menuitem action='set-global-quantization-eighth-note'/>
-	<menuitem action='set-global-quantization-sixteenth-note'/>
-	<menuitem action='set-global-quantization-thirtysecond-note'/>
-	<menuitem action='set-global-quantization-sixtyfourth-note'/>
-	<menuitem action='set-global-quantization-onetwentyeighth-note'/>
+          <menuitem action='set-global-quantization-1-bar'/>
+          <menuitem action='set-global-quantization-quarter-note'/>
+          <menuitem action='set-global-quantization-eighth-note'/>
+          <menuitem action='set-global-quantization-sixteenth-note'/>
+          <menuitem action='set-global-quantization-thirtysecond-note'/>
+          <menuitem action='set-global-quantization-sixtyfourth-note'/>
+          <menuitem action='set-global-quantization-onetwentyeighth-note'/>
         </menu>
         <separator/>
         <menuitem action='prev-grid-choice'/>
