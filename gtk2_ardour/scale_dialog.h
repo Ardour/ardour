@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <map>
+
 #include "ytkmm/label.h"
 #include "ytkmm/entry.h"
 #include "ytkmm/spinbutton.h"
@@ -39,6 +41,10 @@ class ScaleDialog : public ArdourDialog
 	ARDOUR::MusicalKey get() const;
 
   private:
+	static std::map<ARDOUR::MusicalModeType,std::string> type_string_map;
+	static std::map<std::string,ARDOUR::MusicalModeType> string_type_map;
+	static void fill_maps ();
+
 	ARDOUR::MusicalKey _key;
 
 	struct StepEntry : public Gtk::Entry {

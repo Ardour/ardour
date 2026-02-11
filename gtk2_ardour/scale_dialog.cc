@@ -22,6 +22,34 @@
 
 #include "pbd/i18n.h"
 
+std::map<ARDOUR::MusicalModeType,std::string> ScaleDialog::type_string_map;
+std::map<std::string,ARDOUR::MusicalModeType> ScaleDialog::string_type_map;
+
+
+void
+ScaleDialog::fill_maps ()
+{
+	struct stpair {
+		stpair (char const * const s, ARDOUR::MusicalModeType t) : str (s), type (t) {}
+		char const * const str;
+		ARDOUR::MusicalModeType type;
+	};
+
+	std::vector<stpair> pairs = {
+		{ _("Absolute Pitch (Hz)"), ARDOUR::AbsolutePitch },
+		{ _("Semitone Steps") ,ARDOUR::SemitoneSteps },
+		{ _("Whole Tone Steps"), ARDOUR::WholeToneSteps },
+		{ _("Ratio steps"), ARDOUR::RatioSteps },
+		{ _("Ratios from root"), ARDOUR::RatioFromRoot },
+		{ _("MIDI Note Numbers"), ARDOUR::MidiNote },
+		};
+
+	for (auto const & p : pairs) {
+		type_string_map[p.type] = p.str;
+		string_type_map[p.str] = p.type;
+	}
+}
+
 ScaleDialog::ScaleDialog ()
 	: ArdourDialog (_("Scale Editor"))
 	, _key (440.0, ARDOUR::MusicalMode (ARDOUR::MusicalMode::IonianMajor))
@@ -33,6 +61,10 @@ ScaleDialog::ScaleDialog ()
 	, scala_label (_("Load a Scala file"))
 	, clear_button (_("Remove scale"))
 {
+	if (type_string_map.empty()) {
+		fill_maps ();
+	}
+
 	using namespace Gtk::Menu_Helpers;
 
 	type_dropdown.add_menu_elem (MenuElem (_("Absolute Pitch (Hz)"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), ARDOUR::AbsolutePitch)));
