@@ -2275,6 +2275,8 @@ private:
 	void global_quantization_chosen (Editing::GridType);
 	bool bbt_to_grid (Temporal::BBT_Offset const & bbt, Editing::GridType& gt) const;
 
+	void hide_bottom_pianoroll ();
+
 	friend class RegionMoveDrag;
 	friend class TrimDrag;
 	friend class MappingTwistDrag;

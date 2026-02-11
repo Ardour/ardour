@@ -1733,29 +1733,20 @@ Editor::region_selection_changed ()
 	}
 	update_selection_markers ();
 
-	if (selection->regions.empty()) {
-		/* do nothing */
-	} else if (selection->regions.size () == 1)  {
-		RegionView* rv = (selection->regions.front ());
+	if (!selection->regions.empty()) {
+		RegionView* rv = (selection->regions.back ());
 		assert (rv);
 		maybe_edit_region_in_bottom_pane (*rv);
-	} else {
-		_bottom_hbox.set_child_packing (*_properties_box, true, true);
-		if (_pianoroll && _pianoroll->contents().get_parent()) {
-			_pianoroll->contents().unmap ();
-			_pianoroll->contents().get_parent()->remove (_pianoroll->contents());
-		}
+	}
+}
 
-		RegionEditDisposition red (UIConfiguration::instance().get_region_edit_disposition());
+void
+Editor::hide_bottom_pianoroll ()
+{
+	_properties_box->remove_region_rhs ();
 
-		switch (red) {
-		case OpenBottomPane:
-			show_att_bottom (false);
-			break;
-		default:
-			showhide_att_bottom (false);
-			break;
-		}
+	if (_pianoroll) {
+		_pianoroll->contents().unmap ();
 	}
 }
 
@@ -1776,7 +1767,7 @@ Editor::maybe_edit_region_in_bottom_pane (RegionView& rv)
 		std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion>(mrv->region());
 
 		if (!mt || !mr) {
-			showhide_att_bottom (false);
+			hide_bottom_pianoroll ();
 			return;
 		}
 
@@ -1792,36 +1783,26 @@ Editor::maybe_edit_region_in_bottom_pane (RegionView& rv)
 		_pianoroll->set_track (mt);
 		_pianoroll->set_region (mr);
 
-		_bottom_hbox.set_child_packing (*_properties_box, false, false);
-
-		if (!_pianoroll->contents().get_parent()) {
-			_bottom_hbox.pack_start (_pianoroll->contents(), true, true);
+		if (_pianoroll) {
+			if (!_pianoroll->contents().get_parent()) {
+				_properties_box->add_region_rhs (_pianoroll->contents());
+			}
+			_pianoroll->contents().hide (); // Why is this needed?
+			_pianoroll->contents().show_all ();
 		}
-
-		_pianoroll->contents().hide (); // Why is this needed?
-		_pianoroll->contents().show_all ();
 
 	} else {
-		_bottom_hbox.set_child_packing (*_properties_box, true, true);
-		if (_pianoroll && _pianoroll->contents().get_parent()) {
-			_pianoroll->contents().unmap ();
-			_pianoroll->contents().get_parent()->remove (_pianoroll->contents());
-		}
+
+		hide_bottom_pianoroll ();
 
 	}
 
 	switch (red) {
-	case BottomPaneOnly:
-		/* If it's visible, it's visible; otherwise ... user choice */
-		break;
 	case OpenBottomPane:
 		show_att_bottom (true);
 		break;
-	case PreferBottomPane:
+	default:
 		/* we're good: if it's visible, it's visible */
-		break;
-	case NeverBottomPane:
-		/* user may have made it visible anyway */
 		break;
 	}
 }
