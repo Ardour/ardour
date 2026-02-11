@@ -2042,7 +2042,9 @@ Editor::toggle_location_at_playhead_cursor ()
 void
 Editor::add_location_from_playhead_cursor ()
 {
-	add_location_mark (timepos_t (_session->audible_sample()));
+	if (_session) {
+		add_location_mark (timepos_t (_session->audible_sample()));
+	}
 }
 
 bool
