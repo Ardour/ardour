@@ -39,6 +39,8 @@ public:
 	RegionFxPropertiesBox (std::shared_ptr<ARDOUR::Region>);
 	~RegionFxPropertiesBox ();
 
+	bool empty() const { return _proc_uis.empty(); }
+
 private:
 	void drop_plugin_uis ();
 	void redisplay_plugins ();
