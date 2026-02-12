@@ -4590,7 +4590,22 @@ MarkerDrag::motion (GdkEvent* event, bool)
 			}
 
 		} else {
+
+			if (move_both || (*x).move_both) {
+				if (copy_location->start().is_zero()) {
+					if (f_delta.is_negative()) {
+						continue;
+					}
+				}
+			}
+
 			timepos_t new_start = copy_location->start () + f_delta;
+
+			if (!new_start.is_positive()) {
+				f_delta = f_delta + new_start;
+				new_start = timepos_t::zero (new_start.time_domain());
+			}
+
 			timepos_t new_end   = copy_location->end () + f_delta;
 
 			if (is_start) { // start-of-range marker
