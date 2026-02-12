@@ -110,11 +110,11 @@ PlaylistSelector::PlaylistSelector ()
 	get_vbox ()->show_all ();
 
 	_btn_new_plist.set_name ("generic button");
-	_btn_new_plist.set_text ("New Playlist(s)");
+	_btn_new_plist.set_text (_("New Playlist(s)"));
 	_btn_new_plist.signal_clicked.connect (sigc::mem_fun (*this, &PlaylistSelector::new_plist_button_clicked));
 
 	_btn_copy_plist.set_name ("generic button");
-	_btn_copy_plist.set_text ("Copy Playlist(s)");
+	_btn_copy_plist.set_text (_("Copy Playlist(s)"));
 	_btn_copy_plist.signal_clicked.connect (sigc::mem_fun (*this, &PlaylistSelector::copy_plist_button_clicked));
 
 	tree.get_selection ()->signal_changed ().connect (sigc::mem_fun (*this, &PlaylistSelector::selection_changed));
