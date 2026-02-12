@@ -23,12 +23,16 @@
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/utils.h"
 
+#include "ardour/midi_region.h"
+#include "ardour/midi_track.h"
 #include "ardour/session.h"
 
 #include "audio_region_editor.h"
 #include "audio_region_view.h"
 #include "control_point.h"
 #include "editor.h"
+#include "midi_region_view.h"
+#include "pianoroll.h"
 #include "region_fx_line.h"
 #include "region_fx_properties_box.h"
 #include "region_view.h"
@@ -48,10 +52,10 @@ using std::min;
 using std::max;
 
 SelectionPropertiesBox::SelectionPropertiesBox (DispositionMask mask)
-	: _region_editor_box_rhs (nullptr)
-	, _region_editor (nullptr)
+	: _region_editor (nullptr)
 	, _region_fx_box (nullptr)
 	, _disposition (mask)
+	, _pianoroll (nullptr)
 {
 	init ();
 
@@ -81,6 +85,7 @@ SelectionPropertiesBox::~SelectionPropertiesBox ()
 	delete _region_editor;
 	delete _region_fx_box;
 	delete _slot_prop_box;
+	delete _pianoroll;
 }
 
 void
@@ -116,25 +121,11 @@ SelectionPropertiesBox::set_session (Session* s)
 	_route_prop_box->set_session(s);
 	_slot_prop_box->set_session(s);
 
-	selection_changed();
-}
-
-void
-SelectionPropertiesBox::add_region_rhs (Gtk::Widget& w)
-{
-	/* it will be packed on an as-needed basis */
-	_region_editor_box_rhs = &w;
-}
-
-void
-SelectionPropertiesBox::remove_region_rhs ()
-{
-	if (_region_editor_box_rhs) {
-		if (_region_editor_box_rhs->get_parent()) {
-			_region_editor_box.remove (*_region_editor_box_rhs);
-		}
-		_region_editor_box_rhs = nullptr;
+	if (_pianoroll) {
+		_pianoroll->set_session (_session);
 	}
+
+	selection_changed();
 }
 
 void
@@ -167,17 +158,12 @@ SelectionPropertiesBox::delete_region_editor ()
 	if (!_region_editor) {
 		return;
 	}
-	assert (_region_fx_box);
 	_region_editor_box.remove (*_region_editor);
-	if (_region_fx_box && _region_fx_box->get_parent()) {
-		_region_editor_box.remove (*_region_fx_box);
-	}
-	if (_region_editor_box_rhs && _region_editor_box_rhs->get_parent()) {
-		_region_editor_box.remove (*_region_editor_box_rhs);
-	}
 	delete _region_editor;
-	_region_editor = nullptr;
 	delete _region_fx_box;
+	delete _pianoroll;
+	_region_editor = nullptr;
+	_pianoroll = nullptr;
 	_region_fx_box = nullptr;
 	_region_editor = nullptr;
 	_region_fx_box = nullptr;
@@ -264,15 +250,37 @@ SelectionPropertiesBox::selection_changed ()
 			_region_editor->show_all ();
 			_region_editor_box.pack_start (*_region_editor, false, false);
 
-			_region_fx_box = new RegionFxPropertiesBox (rv->region ());
-			/* If there's a RHS element and the RegionFX box is
-			   empty, don't show the region fx box
-			*/
-			if (!_region_editor_box_rhs || !_region_fx_box->empty()) {
+			MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rv);
+
+			if (!mrv) {
+				/* Audio regions get RegionFX box, but MIDI
+				   regions do not (as of Feb 2026, anyway)
+				*/
+				_region_fx_box = new RegionFxPropertiesBox (rv->region ());
 				_region_editor_box.pack_start (*_region_fx_box);
-			}
-			if (_region_editor_box_rhs) {
-				_region_editor_box.pack_start (*_region_editor_box_rhs, true, true);
+
+			} else {
+
+				std::shared_ptr<ARDOUR::MidiTrack> mt = std::dynamic_pointer_cast<ARDOUR::MidiTrack> (mrv->midi_view()->track());
+				std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion>(mrv->region());
+
+				if (mt && mr) {
+					if (!_pianoroll) {
+						_pianoroll = new Pianoroll (X_("region editor pianoroll"), true);
+						_pianoroll->get_canvas_viewport()->set_size_request (-1, 120);
+						if (_session) {
+							_pianoroll->set_session (_session);
+						}
+					}
+
+					_pianoroll->set_track (mt);
+					_pianoroll->set_region (mr);
+
+					_region_editor_box.pack_start (_pianoroll->contents(), true, true);
+
+					_pianoroll->contents().hide (); // Why is this needed?
+					_pianoroll->contents().show_all ();
+				}
 			}
 
 			rv->RegionViewGoingAway.connect_same_thread (_region_connection, std::bind (&SelectionPropertiesBox::delete_region_editor, this));

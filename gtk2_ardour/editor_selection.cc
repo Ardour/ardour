@@ -1741,63 +1741,9 @@ Editor::region_selection_changed ()
 }
 
 void
-Editor::hide_bottom_pianoroll ()
+Editor::maybe_edit_region_in_bottom_pane (RegionView&)
 {
-	_properties_box->remove_region_rhs ();
-
-	if (_pianoroll) {
-		_pianoroll->contents().unmap ();
-	}
-}
-
-void
-Editor::maybe_edit_region_in_bottom_pane (RegionView& rv)
-{
-	RegionEditDisposition red (UIConfiguration::instance().get_region_edit_disposition());
-
-	if (red == Editing::NeverBottomPane) {
-		return;
-	}
-
-	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&rv);
-
-	if (mrv) {
-
-		std::shared_ptr<ARDOUR::MidiTrack> mt = std::dynamic_pointer_cast<ARDOUR::MidiTrack> (mrv->midi_view()->track());
-		std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion>(mrv->region());
-
-		if (!mt || !mr) {
-			hide_bottom_pianoroll ();
-			return;
-		}
-
-		if (!_pianoroll) {
-			// XXX this should really not happen here
-			_pianoroll = new Pianoroll ("editor pianoroll", true);
-			_pianoroll->get_canvas_viewport()->set_size_request (-1, 120);
-			if (_session) {
-				_pianoroll->set_session (_session);
-			}
-		}
-
-		_pianoroll->set_track (mt);
-		_pianoroll->set_region (mr);
-
-		if (_pianoroll) {
-			if (!_pianoroll->contents().get_parent()) {
-				_properties_box->add_region_rhs (_pianoroll->contents());
-			}
-			_pianoroll->contents().hide (); // Why is this needed?
-			_pianoroll->contents().show_all ();
-		}
-
-	} else {
-
-		hide_bottom_pianoroll ();
-
-	}
-
-	switch (red) {
+	switch (UIConfiguration::instance().get_region_edit_disposition()) {
 	case OpenBottomPane:
 		show_att_bottom (true);
 		break;

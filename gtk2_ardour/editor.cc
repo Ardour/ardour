@@ -222,7 +222,6 @@ Editor::Editor ()
 	, editor_mixer_strip_width (Wide)
 	, constructed (false)
 	, _properties_box (nullptr)
-	, _pianoroll (nullptr)
 	, no_save_visual (false)
 	, marker_click_behavior (MarkerClickSelectOnly)
 	, _join_object_range_state (JOIN_OBJECT_RANGE_NONE)
@@ -749,7 +748,6 @@ Editor::~Editor()
 	delete _snapshots;
 	delete _sections;
 	delete _locations;
-	delete _pianoroll;
 	delete _properties_box;
 	delete selection;
 	delete cut_buffer;
@@ -1226,11 +1224,6 @@ Editor::set_session (Session *t)
 	_locations->set_session (_session);
 	_properties_box->set_session (_session);
 
-	if (_pianoroll) {
-		_pianoroll->set_session (_session);
-	}
-
-	/* _pianoroll is packed on demand in Editor::region_selection_changed */
 	_bottom_hbox.show_all();
 
 	if (rhythm_ferret) {

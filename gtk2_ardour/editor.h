@@ -136,7 +136,6 @@ class MidiExportDialog;
 class MixerStrip;
 class MouseCursors;
 class NoteBase;
-class Pianoroll;
 class PluginSelector;
 class ProgressReporter;
 class QuantizeDialog;
@@ -527,7 +526,6 @@ private:
 
 	Gtk::HBox                    _bottom_hbox;
 	SelectionPropertiesBox*      _properties_box;
-	Pianoroll*                   _pianoroll;
 
 	typedef std::pair<TimeAxisView*,XMLNode*> TAVState;
 
@@ -2274,8 +2272,6 @@ private:
 	std::map<Editing::GridType,Glib::RefPtr<Gtk::RadioAction> > quantization_actions;
 	void global_quantization_chosen (Editing::GridType);
 	bool bbt_to_grid (Temporal::BBT_Offset const & bbt, Editing::GridType& gt) const;
-
-	void hide_bottom_pianoroll ();
 
 	friend class RegionMoveDrag;
 	friend class TrimDrag;
