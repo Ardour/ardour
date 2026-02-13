@@ -711,6 +711,7 @@ MonitorSection::populate_buttons ()
 	channel_table->resize (nchans, 5);
 
 	const uint32_t row_offset = 0;
+	int channel_errors = 0;
 
 	for (uint32_t i = 0; i < nchans; ++i) {
 
@@ -741,29 +742,47 @@ MonitorSection::populate_buttons ()
 		channel_table->attach (cbs->solo, 3, 4, i+row_offset, i+row_offset+1, EXPAND|FILL);
 		channel_table->attach (cbs->invert, 4, 5, i+row_offset, i+row_offset+1, EXPAND|FILL);
 
-		snprintf (buf, sizeof (buf), "monitor-cut-%u", i);
-		act = ActionManager::get_action (X_("Monitor"), buf);
-		if (act) {
-			cbs->cut.set_related_action (act);
-		}
+		try {
+			snprintf (buf, sizeof (buf), "monitor-cut-%u", i);
+			act = ActionManager::get_action (X_("Monitor"), buf, false);
+			/* could have failed if channel count is too high, so try to
+			   register it, and then try again. If it worked, it will work
+			   for all per-channel actions; if not, it will throw an
+			   exception
+			*/
+			if (!act) {
+				register_channel_actions (i);
+				act = ActionManager::get_action (X_("Monitor"), buf);
+			}
 
-		snprintf (buf, sizeof (buf), "monitor-dim-%u", i);
-		act = ActionManager::get_action (X_("Monitor"), buf);
-		if (act) {
-			cbs->dim.set_related_action (act);
-		}
+			if (act) {
+				cbs->cut.set_related_action (act);
+			}
 
-		snprintf (buf, sizeof (buf), "monitor-solo-%u", i);
-		act = ActionManager::get_action (X_("Monitor"), buf);
-		if (act) {
-			cbs->solo.set_related_action (act);
-		}
+			snprintf (buf, sizeof (buf), "monitor-dim-%u", i);
+			act = ActionManager::get_action (X_("Monitor"), buf);
+			if (act) {
+				cbs->dim.set_related_action (act);
+			}
 
-		snprintf (buf, sizeof (buf), "monitor-invert-%u", i);
-		act = ActionManager::get_action (X_("Monitor"), buf);
-		if (act) {
-			cbs->invert.set_related_action (act);
+			snprintf (buf, sizeof (buf), "monitor-solo-%u", i);
+			act = ActionManager::get_action (X_("Monitor"), buf);
+			if (act) {
+				cbs->solo.set_related_action (act);
+			}
+
+			snprintf (buf, sizeof (buf), "monitor-invert-%u", i);
+			act = ActionManager::get_action (X_("Monitor"), buf);
+			if (act) {
+				cbs->invert.set_related_action (act);
+			}
+		} catch (...) {
+			channel_errors++;
 		}
+	}
+
+	if (channel_errors) {
+		error << _("Some per channel monitor buttons will not work due to missing actions") << std::endl;
 	}
 
 	channel_table->show_all ();
