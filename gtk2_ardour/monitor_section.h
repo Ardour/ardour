@@ -109,6 +109,7 @@ private:
 	Glib::RefPtr<Gtk::ActionGroup> monitor_actions;
 	Glib::RefPtr<Gtk::ActionGroup> solo_actions;
 	void register_actions ();
+	void register_channel_actions (uint32_t chn);
 
 	void cut_channel (uint32_t);
 	void dim_channel (uint32_t);
