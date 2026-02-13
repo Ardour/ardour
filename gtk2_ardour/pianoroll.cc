@@ -989,6 +989,8 @@ Pianoroll::button_press_handler_2 (ArdourCanvas::Item*, GdkEvent*, ItemType)
 bool
 Pianoroll::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
+	NoteBase* e;
+
 	EC_LOCAL_TEMPO_SCOPE;
 
 	if (!Keyboard::is_context_menu_event (&event->button)) {
@@ -1001,6 +1003,29 @@ Pianoroll::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, It
 				/* grab dragged, so do nothing else */
 				return true;
 			}
+		}
+
+		if (event->button.button == 2) {
+			std::cerr << "button2!\n";
+			switch (current_mouse_mode()) {
+			case Editing::MouseContent:
+			case Editing::MouseDraw:
+				switch (item_type) {
+				case NoteItem:
+					e = reinterpret_cast<NoteBase*> (item->get_data ("notebase"));
+					assert (e);
+					if (midi_view()) {
+						midi_view()->delete_note (e->note());
+					}
+					return true;
+				default:
+					break;
+				}
+				break;
+			default:
+				break;
+			}
+			return true;
 		}
 
 	} else {
