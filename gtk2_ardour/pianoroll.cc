@@ -1006,7 +1006,6 @@ Pianoroll::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, It
 		}
 
 		if (event->button.button == 2) {
-			std::cerr << "button2!\n";
 			switch (current_mouse_mode()) {
 			case Editing::MouseContent:
 			case Editing::MouseDraw:
