@@ -587,7 +587,7 @@ TriggerUI::follow_context_menu (GdkEventButton* ev)
 
 	_ignore_menu_action = false;
 
-	_follow_context_menu->popup (ev->button, ev->time);
+	_follow_context_menu->popup (1, ev->time);
 }
 
 void
