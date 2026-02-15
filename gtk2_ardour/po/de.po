@@ -18799,7 +18799,7 @@ msgid ""
 "The name includes special characters (<>:\"/\\|?*) which is discouraged in "
 "track and bus names, due to filename restrictions on some systems.\n"
 msgstr ""
-"Der Name enthält Sonderzeichen (<>:\\"/\\|?*), wovon bei Spur/Busnamen "
+"Der Name enthält Sonderzeichen (<>:\"/\\|?*), wovon bei Spur/Busnamen "
 "wegen Beschränkungen mancher Systeme bei Dateinamen abgeraten wird.\n"
 
 #: route_ui.cc:1770
