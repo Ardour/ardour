@@ -2213,6 +2213,7 @@ MidiView::remove_canvas_patch_change (PatchChange* pc)
 	/* remove the canvas item */
 	for (PatchChanges::iterator x = _patch_changes.begin(); x != _patch_changes.end(); ++x) {
 		if (x->first == pc->patch()) {
+			delete x->second;
 			_patch_changes.erase (x);
 			break;
 		}
@@ -2282,7 +2283,6 @@ MidiView::change_patch_change (PatchChange& pc, const MIDI::Name::PatchPrimaryKe
 
 	_model->apply_diff_command_as_commit (_editing_context.history(), c);
 
-	remove_canvas_patch_change (&pc);
 	display_patch_changes ();
 }
 
@@ -2317,6 +2317,7 @@ MidiView::change_patch_change (MidiModel::PatchChangePtr old_change, const Evora
 
 	for (PatchChanges::iterator x = _patch_changes.begin(); x != _patch_changes.end(); ++x) {
 		if (x->second->patch() == old_change) {
+			delete x->second;
 			_patch_changes.erase (x);
 			break;
 		}
