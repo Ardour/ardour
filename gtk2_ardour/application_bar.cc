@@ -686,7 +686,7 @@ ApplicationBar::feedback_blink (bool onoff)
 		} else {
 			_feedback_alert_button.set_active_color (UIConfigurationBase::instance().color ("feedback alert: alt active", NULL));
 		}
-	} else if (_ambiguous_latency && !UIConfiguration::instance().get_show_toolbar_latency ()) {
+	} else if (_ambiguous_latency) {
 		_feedback_alert_button.set_text (_("No Align"));
 		_feedback_alert_button.set_active (true);
 		if (onoff) {
