@@ -115,6 +115,7 @@ StartupFSM::~StartupFSM ()
 void
 StartupFSM::set_complete ()
 {
+	DEBUG_TRACE (DEBUG::GuiStartup, string_compose (X_("FSM complete. State was: %1\n"), enum_2_string (_state)));
 	app_quit_connection.disconnect ();
 	hide_quit_connection.disconnect ();
 
