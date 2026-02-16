@@ -3949,6 +3949,19 @@ Session::cleanup_peakfiles ()
 	return 0;
 }
 
+void
+Session::close_all_sources ()
+{
+	/* this is mainly useful on Windows, sources are re-opened when needed */
+	Glib::Threads::Mutex::Lock lm (source_lock);
+	for (auto const& s : sources) {
+		std::shared_ptr<FileSource> fs = std::dynamic_pointer_cast<FileSource> (s.second);
+		if (fs) {
+			fs->close ();
+		}
+	}
+}
+
 int
 Session::cleanup_sources (CleanupReport& rep)
 {
