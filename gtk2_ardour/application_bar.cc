@@ -917,6 +917,7 @@ ApplicationBar::session_latency_updated (bool for_playback)
 
 	if (!_session) {
 		_route_latency_value.set_text ("--");
+		_ambiguous_latency = false;
 	} else {
 		samplecnt_t wrl = _session->worst_route_latency ();
 		float rate      = _session->nominal_sample_rate ();
@@ -925,6 +926,10 @@ ApplicationBar::session_latency_updated (bool for_playback)
 		} else {
 			_route_latency_value.set_text (samples_as_time_string (wrl, rate));
 		}
+		/* TODO do this only once in ARDOUR_UI::session_latency_updated
+		 * and use value in all application bars.
+		 */
+		_ambiguous_latency = _session->engine().check_for_ambiguous_latency (true);
 	}
 }
 
