@@ -701,10 +701,6 @@ ARDOUR_UI::load_session_from_startup_fsm ()
 
 	int ret = load_session (session_path, session_name, session_template);
 
-	if (!ret) {
-		startup_fsm->set_complete ();
-	}
-
 	return ret;
 }
 
