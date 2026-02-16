@@ -1128,6 +1128,9 @@ ARDOUR_UI::ask_about_scratch_deletion ()
 	int r = msg.run ();
 
 	if (r == Gtk::RESPONSE_OK) {
+#ifdef PLATFORM_WINDOWS
+		_session->close_all_sources ();
+#endif
 		PBD::remove_directory (path);
 	} else {
 		_session->end_unnamed_status ();
