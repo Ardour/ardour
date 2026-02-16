@@ -161,6 +161,9 @@ public:
 		GIOChannel* gio_channel = g_io_channel_unix_new (fd);
 		guint id = g_io_add_watch (gio_channel, (GIOCondition) (G_IO_IN /*| G_IO_OUT*/ | G_IO_ERR | G_IO_HUP), event, handler);
 		_event_handlers[fd] = EventHandler (handler, gio_channel, id);
+#ifndef VST3_SCANNER_APP
+		DEBUG_TRACE (PBD::DEBUG::VST3Callbacks, string_compose ("IRunLoop::registerEventHandler: fd = %1 id = %2\n", fd, id));
+#endif
 		return kResultTrue;
 	}
 
@@ -174,6 +177,9 @@ public:
 		Glib::Threads::Mutex::Lock lm (_lock);
 		for (auto it = _event_handlers.begin (); it != _event_handlers.end ();) {
 			if (it->second._handler == handler) {
+#ifndef VST3_SCANNER_APP
+				DEBUG_TRACE (PBD::DEBUG::VST3Callbacks, string_compose ("IRunLoop::unregisterEventHandler: fd = %1 id = %2\n", it->first, it->second._source_id));
+#endif
 				g_source_remove (it->second._source_id);
 				g_io_channel_unref (it->second._gio_channel);
 				it = _event_handlers.erase (it);
@@ -182,6 +188,11 @@ public:
 				++it;
 			}
 		}
+#ifndef VST3_SCANNER_APP
+		if (rv != kResultTrue) {
+			DEBUG_TRACE (PBD::DEBUG::VST3Callbacks, "IRunLoop::unregisterEventHandler: handler not found");
+		}
+#endif
 		return rv;
 	}
 
@@ -193,6 +204,9 @@ public:
 		Glib::Threads::Mutex::Lock lm (_lock);
 		guint id = g_timeout_add_full (G_PRIORITY_HIGH_IDLE, milliseconds, timeout, handler, NULL);
 		_timer_handlers[id] = handler;
+#ifndef VST3_SCANNER_APP
+		DEBUG_TRACE (PBD::DEBUG::VST3Callbacks, string_compose ("IRunLoop::registerTimer: id = %1 int = %2 ms\n", id, milliseconds));
+#endif
 		return kResultTrue;
 
 	}
@@ -207,6 +221,9 @@ public:
 		Glib::Threads::Mutex::Lock lm (_lock);
 		for (std::unordered_map<guint, Linux::ITimerHandler*>::const_iterator it = _timer_handlers.begin (); it != _timer_handlers.end ();) {
 			if (it->second == handler) {
+#ifndef VST3_SCANNER_APP
+				DEBUG_TRACE (PBD::DEBUG::VST3Callbacks, string_compose ("IRunLoop::unregisterTimer: id = %1\n", it->first));
+#endif
 				g_source_remove (it->first);
 				it = _timer_handlers.erase (it);
 				rv = kResultTrue;
@@ -214,6 +231,11 @@ public:
 				++it;
 			}
 		}
+#ifndef VST3_SCANNER_APP
+		if (rv != kResultTrue) {
+			DEBUG_TRACE (PBD::DEBUG::VST3Callbacks, "IRunLoop::unregisterTimer: handler not found");
+		}
+#endif
 		return rv;
 	}
 
