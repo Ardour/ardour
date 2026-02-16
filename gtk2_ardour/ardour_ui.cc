@@ -1475,19 +1475,19 @@ ARDOUR_UI::session_latency_updated (bool for_playback)
 	}
 
 	if (!_session) {
-		pdc_info_label.set_text ("PDC: --");
-		latency_info_label.set_text ("I/O Latency: --");
+		pdc_info_label.set_text (string_compose (_("PDC: %1"), "--"));
+		latency_info_label.set_text (string_compose (_("I/O Latency: %1"), "--"));
 	} else {
 		samplecnt_t wrl = _session->worst_route_latency ();
 		samplecnt_t iol = _session->io_latency ();
 		float rate      = _session->nominal_sample_rate ();
 
-		pdc_info_label.set_text (string_compose ("PDC: %1", samples_as_time_string (wrl, rate)));
+		pdc_info_label.set_text (string_compose (_("PDC: %1"), samples_as_time_string (wrl, rate)));
 
 		if (_session->engine().check_for_ambiguous_latency (true)) {
-			latency_info_label.set_markup ("I/O Latency: <span background=\"red\" foreground=\"white\">ambiguous</span>");
+			latency_info_label.set_markup (string_compose (_("I/O Latency: %1%2%3"), "<span background=\"red\" foreground=\"white\">", _("ambiguous"), "</span>"));
 		} else {
-			latency_info_label.set_text (string_compose ("I/O Latency: %1", samples_as_time_string (iol, rate)));
+			latency_info_label.set_text (string_compose (_("I/O Latency: %1"), samples_as_time_string (iol, rate)));
 		}
 	}
 }
