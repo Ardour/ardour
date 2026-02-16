@@ -235,7 +235,7 @@ Automatable::describe_parameter (Evoral::Parameter param)
 	} else if (param.type() == MidiVelocityAutomation) {
 		return _("Velocity");
 	} else if (param.type() == MidiCCAutomation) {
-		return string_compose("Controller %1 [%2]", param.id(), int(param.channel()) + 1);
+		return string_compose ("[%1]%2:%3", int (param.channel ()) + 1, param.id (), _("Controller"));
 	} else if (param.type() == MidiPgmChangeAutomation) {
 		return string_compose("Program [%1]", int(param.channel()) + 1);
 	} else if (param.type() == MidiPitchBenderAutomation) {
