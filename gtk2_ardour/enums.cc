@@ -221,6 +221,7 @@ setup_gtk_ardour_enums ()
 	REGISTER_CLASS_ENUM (StartupFSM, NewSessionDialog);
 	REGISTER_CLASS_ENUM (StartupFSM, AudioMIDISetup);
 	REGISTER_CLASS_ENUM (StartupFSM, PluginDialog);
+	REGISTER_CLASS_ENUM (StartupFSM, ApplicationPseudoDialog);
 	REGISTER (startup_dialog);
 
 	REGISTER_ENUM (RESPONSE_NONE);
