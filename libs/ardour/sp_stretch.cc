@@ -135,10 +135,13 @@ SPStretch::run (std::shared_ptr<Region> r, Progress* progress)
 	double shift   = region->shift () * tsr.pitch_fraction;
 
 	samplecnt_t read_start = region->ancestral_start_sample () +
-	                         samplecnt_t (region->start () / (double)region->stretch ());
+	                         samplecnt_t (region->start_sample () / (double)region->stretch ());
 
 	samplecnt_t read_duration  = samplecnt_t (region->length_samples () / (double)region->stretch ());
 	samplecnt_t write_duration = read_duration * stretch;
+
+	assert (read_duration <= region->master_sources ().front()->length ().samples() - read_start);
+	read_duration = std::min (read_duration, region->master_sources ().front()->length ().samples() - read_start);
 
 	uint32_t channels = region->n_channels ();
 
