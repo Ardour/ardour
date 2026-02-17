@@ -32,6 +32,7 @@
 #include <sys/types.h>
 #include <cstdio>
 #include <cstdlib>
+#include <regex>
 #include <sstream>
 
 #include <glib.h>
@@ -2085,13 +2086,24 @@ PluginManager::vst3_discover_from_path (string const& path, bool cache_only)
 
 	find_paths_matching_filter (plugin_objects, paths, vst3_filter, 0, false, true, true);
 
-	size_t n = 1;
+#ifndef PLATFORM_WINDOWS
+	std::regex win_vst_regex ("Contents/\\w+-win/");
+#endif
+
+	size_t n = 0;
 	size_t all_modules = plugin_objects.size ();
-	for (vector<string>::iterator i = plugin_objects.begin(); i != plugin_objects.end (); ++i, ++n) {
-		DEBUG_TRACE (DEBUG::PluginManager, string_compose ("VST3: discover '%1'\n", *i));
+	for (auto const& path : plugin_objects) {
+		++n;
+		DEBUG_TRACE (DEBUG::PluginManager, string_compose ("VST3: discover '%1'\n", path));
 		reset_scan_cancel_state (true);
-		ARDOUR::PluginScanMessage (string_compose (_("VST3 (%1 / %2)"), n, all_modules), *i, !cache_only && !cancelled());
-		vst3_discover (*i, cache_only || cancelled ());
+		ARDOUR::PluginScanMessage (string_compose (_("VST3 (%1 / %2)"), n, all_modules), path, !cache_only && !cancelled());
+
+#ifndef PLATFORM_WINDOWS
+		if (std::regex_search (path, win_vst_regex)) {
+			continue;
+		}
+#endif
+		vst3_discover (path, cache_only || cancelled ());
 	}
 
 	return cancelled() ? -1 : 0;
