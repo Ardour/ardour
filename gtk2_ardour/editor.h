@@ -1900,11 +1900,19 @@ private:
 	        guint                                 info,
 	        guint                                 time);
 
+	void drop_region (
+	        const Glib::RefPtr<Gdk::DragContext>& context,
+	        gint                                  x,
+	        gint                                  y,
+	        const PBD::ID&                        rid,
+	        guint                                 info,
+	        guint                                 time);
+
 	void drop_regions (
 	        const Glib::RefPtr<Gdk::DragContext>& context,
 	        gint                                  x,
 	        gint                                  y,
-	        const Gtk::SelectionData&             data,
+	        std::vector<PBD::ID> const&           rids,
 	        guint                                 info,
 	        guint                                 time);
 

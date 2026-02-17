@@ -23,6 +23,7 @@
  */
 
 #include <algorithm>
+#include <sstream>
 #include <string>
 
 #include "pbd/file_utils.h"
@@ -80,6 +81,7 @@ RegionListBase::RegionListBase ()
 	_model = TreeStore::create (_columns);
 	_model->set_sort_column (0, SORT_ASCENDING);
 
+	_display.add_object_drag (-1, "x-ardour/region.pbdids", Gtk::TARGET_SAME_APP);
 	_display.add_object_drag (-1, "x-ardour/region.pbdid", Gtk::TARGET_SAME_APP);
 	_display.set_drag_column (_columns.name.index ());
 	_display.signal_drag_begin ().connect (sigc::mem_fun (*this, &RegionListBase::drag_begin));
@@ -263,15 +265,32 @@ RegionListBase::drag_end (Glib::RefPtr<Gdk::DragContext> const&)
 void
 RegionListBase::drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, Gtk::SelectionData& data, guint, guint)
 {
-	if (data.get_target () != "x-ardour/region.pbdid") {
+	bool single_file;
+	if (data.get_target () == "x-ardour/region.pbdid") {
+		single_file = true;
+	} else if (data.get_target () == "x-ardour/region.pbdids") {
+		single_file = false;
+	} else {
 		return;
 	}
+	std::stringstream ids;
+
 	TreeView::Selection::ListHandle_Path rows = _display.get_selection ()->get_selected_rows ();
 	for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin (); i != rows.end (); ++i) {
 		std::shared_ptr<Region> region = (*_model->get_iter (*i))[_columns.region];
-		data.set (data.get_target (), region->id ().to_s ());
-		break;
+		if (region->data_type () != PublicEditor::instance ().pbdid_dragged_dt) {
+			continue;
+		}
+		if (!ids.str().empty ()) {
+			if (single_file) {
+				break;
+			}
+			ids << ",";
+		}
+		ids << region->id ().to_s ();
 	}
+	assert (!ids.str().empty ());
+	data.set (data.get_target (), ids.str());
 }
 
 void

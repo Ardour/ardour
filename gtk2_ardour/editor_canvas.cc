@@ -27,6 +27,8 @@
 #include "gtk2ardour-config.h"
 #endif
 
+#include <boost/algorithm/string.hpp>
+
 #include "gtkmm2ext/utils.h"
 
 #include "ardour/profile.h"
@@ -282,7 +284,7 @@ Editor::initialize_canvas ()
 
 	vector<TargetEntry> target_table;
 
-	target_table.push_back (TargetEntry ("x-ardour/region.pbdid", TARGET_SAME_APP));
+	target_table.push_back (TargetEntry ("x-ardour/region.pbdids", TARGET_SAME_APP));
 	target_table.push_back (TargetEntry ("text/uri-list"));
 	target_table.push_back (TargetEntry ("text/plain"));
 	target_table.push_back (TargetEntry ("application/x-rootwin-drop"));
@@ -400,7 +402,20 @@ Editor::track_canvas_drag_data_received (const RefPtr<Gdk::DragContext>& context
 		return;
 	}
 	if (data.get_target() == "x-ardour/region.pbdid") {
-		drop_regions (context, x, y, data, info, time);
+		PBD::ID rid (data.get_data_as_string ());
+		drop_region (context, x, y, rid, info, time);
+	} else if (data.get_target() == "x-ardour/region.pbdids") {
+		std::vector<std::string> ids;
+		std::vector<PBD::ID> rids;
+		boost::split (ids, data.get_data_as_string (), boost::is_any_of(","));
+		for (auto const& id: ids) {
+			rids.push_back (id);
+		}
+		if (rids.size () == 1) {
+			drop_region (context, x, y, rids.front (), info, time);
+		} else {
+			drop_regions (context, x, y, rids, info, time);
+		}
 	} else {
 		drop_paths (context, x, y, data, info, time);
 	}
