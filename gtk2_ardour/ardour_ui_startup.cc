@@ -595,7 +595,7 @@ ARDOUR_UI::starting ()
 
 	if (nsm_init ()) {
 		return -1;
-	} else  {
+	} else {
 
 		if (nsm) {
 			return 0;
@@ -622,7 +622,11 @@ ARDOUR_UI::starting ()
 		 * 3) no audio/MIDI setup required
 		 */
 
-		startup_fsm->start ();
+		if (!startup_fsm->complete()) {
+			startup_fsm->start ();
+		} else {
+			DEBUG_TRACE (DEBUG::GuiStartup, "Starting: SFSM already completed (by load_from_application_api)\n");
+		}
 
 		if (startup_fsm->complete()) {
 			delete startup_fsm;
