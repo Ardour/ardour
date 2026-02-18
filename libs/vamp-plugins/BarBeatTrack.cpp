@@ -482,3 +482,12 @@ BarBeatTracker::barBeatTrack()
     return returnFeatures;
 }
 
+#if defined(COMPILER_MSVC) && defined(WAF_BUILD)
+_VAMP_SDK_PLUGSPACE_BEGIN(BarBeatTrack.cpp)
+
+namespace Vamp {
+    const RealTime RealTime::zeroTime{};
+}
+
+_VAMP_SDK_PLUGSPACE_END(BarBeatTrack.cpp)
+#endif
