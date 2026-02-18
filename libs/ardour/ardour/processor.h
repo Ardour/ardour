@@ -127,6 +127,7 @@ class LIBARDOUR_API Processor : public SessionObject, public Automatable, public
 
 	virtual void realtime_handle_transport_stopped () {}
 	virtual void realtime_locate (bool) {}
+	virtual void non_realtime_locate (samplepos_t) {}
 
 	virtual void set_loop (Location *loc) { _loop_location = loc; }
 
