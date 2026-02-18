@@ -152,7 +152,7 @@ MidiNoteTracker::push_notes (MidiBuffer &dst, samplepos_t time, bool reset, int 
 				*/
 				dst.push_back (ev);
 				cnt--;
-				DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1: MB-push note %2/%3 vel %5 at %4\n", this, (int) note, (int) channel, time, vel));
+				DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1: MB-push note %2/%3 vel %5 at %4\n", this, (int) note, (int) channel, time, (int) vel));
 			}
 			if (reset) {
 				_active_notes [note + coff] = 0;
