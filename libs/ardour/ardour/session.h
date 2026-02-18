@@ -784,6 +784,7 @@ public:
 	 * useful for speeding up imports of various kinds that involve lots of tracks */
 	bool new_audio_routes_tracks_bulk (
 		RouteList& routes,
+		std::list<std::shared_ptr<AudioTrack> >& tracks,
 		int input_channels,
 		int output_channels,
 		std::shared_ptr<RouteGroup> route_group,

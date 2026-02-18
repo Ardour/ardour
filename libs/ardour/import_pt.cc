@@ -313,6 +313,7 @@ Session::import_pt_rest (PTFFormat& ptf)
 	SourceList all_ch_srcs;
 
 	RouteList routes;
+	list<std::shared_ptr<AudioTrack> > tracks;
 	std::shared_ptr<AudioTrack> existing_track;
 	Session::PtfLookup utr;
 	vector<midipair> uniquetr;
@@ -372,6 +373,7 @@ Session::import_pt_rest (PTFFormat& ptf)
 			/* Create missing track */
 			DEBUG_TRACE (DEBUG::PTImport, string_compose ("Create tr(%1) %2ch '%3'\n", tr_multi[a->name].second, tr_multi[a->name].first, a->name));
 			ok = new_audio_routes_tracks_bulk (routes,
+							   tracks,
 							   tr_multi[a->name].first,
 							   std::max (2, tr_multi[a->name].first),
 							   0,
@@ -382,7 +384,7 @@ Session::import_pt_rest (PTFFormat& ptf)
 							  );
 
 			if (ok) {
-				existing_track = dynamic_pointer_cast<AudioTrack> (routes.back());
+				existing_track = tracks.back();
 
 				track_map[a->name] = existing_track;
 				std::shared_ptr<Playlist> playlist = existing_track->playlist();
