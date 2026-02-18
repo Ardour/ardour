@@ -313,7 +313,7 @@ Session::import_pt_rest (PTFFormat& ptf)
 	SourceList all_ch_srcs;
 
 	RouteList routes;
-	list<std::shared_ptr<AudioTrack> > tracks;
+	AudioTrackList tracks;
 	std::shared_ptr<AudioTrack> existing_track;
 	Session::PtfLookup utr;
 	vector<midipair> uniquetr;

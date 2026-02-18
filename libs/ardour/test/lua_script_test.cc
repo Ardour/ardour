@@ -63,7 +63,7 @@ void
 LuaScriptTest::dsp_script_test ()
 {
 	PluginManager& pm = PluginManager::instance ();
-	std::list<std::shared_ptr<AudioTrack> > tracks;
+	AudioTrackList tracks;
 
 	tracks = _session->new_audio_track (2, 2, NULL, 1, "", PresentationInfo::max_order);
 	CPPUNIT_ASSERT (tracks.size() == 1);
