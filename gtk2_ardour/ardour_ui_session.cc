@@ -707,6 +707,8 @@ ARDOUR_UI::audio_midi_setup_for_new_session_done (int response, std::string path
 int
 ARDOUR_UI::build_session_stage_two (std::string const& path, std::string const& snap_name, std::string const& session_template, BusProfile const& bus_profile, bool unnamed, Temporal::TimeDomain domain, samplecnt_t samplerate)
 {
+	PBD::Unwinder uw (_loading_session, true);
+
 	Session* new_session;
 
 	bool meta_session = !session_template.empty() && session_template.substr (0, 11) == "urn:ardour:";
