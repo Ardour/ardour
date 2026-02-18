@@ -1955,6 +1955,10 @@ ControlList::cut_copy_clear (timepos_t const& start_time, timepos_t const& end_t
 	iterator     s, e;
 	timepos_t    start = start_time;
 	timepos_t    end   = end_time;
+
+	start.set_time_domain (time_domain());
+	end.set_time_domain (time_domain());
+
 	ControlEvent cp (start, 0.0);
 
 	{
