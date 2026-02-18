@@ -100,30 +100,6 @@ SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_
 	Searchpath rc (ARDOUR::ardour_data_search_path());
 	rc.add_subdirectory_to_paths ("resources");
 
-	/* Possible update message */
-	if (ARDOUR_UI::instance()->announce_string() != "") {
-		_info_box.set_border_width (12);
-		_info_box.set_spacing (6);
-
-		_info_box.pack_start (info_scroller_label, false, false);
-
-		info_scroller_count = 0;
-		info_scroller_connection = Glib::signal_timeout().connect (mem_fun(*this, &SessionDialog::info_scroller_update), 50);
-
-		ArdourButton *updates_button = manage (new ArdourButton (_("Check the website for more...")));
-
-		updates_button->signal_clicked.connect (mem_fun(*this, &SessionDialog::updates_button_clicked));
-		set_tooltip (*updates_button, _("Click to open the program website in your web browser"));
-
-		_info_box.pack_start (*updates_button, false, false);
-
-		_info_box.show_all ();
-	}
-#ifndef LIVETRAX
-	/* no update message for trax, show license here */
-	_open_table.attach (_info_box, 1,3, 0,1, FILL, FILL, 0, 6);
-#endif
-
 	new_button.set_text (_("NEW"));
 	new_button.set_name ("tab button");
 	new_button.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceFlat));
@@ -162,6 +138,35 @@ SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_
 			grp->add_widget (*image);
 		}
 	}
+
+#if !defined (LIVETRAX) && !defined (VBM)
+	/* Possible update message */
+	if (ARDOUR_UI::instance()->announce_string() != "") {
+		Gtk::HBox* info_hbox = manage (new HBox);
+		Gtk::VBox* info_vbox = manage (new VBox);
+
+		info_hbox->set_border_width (12);
+		info_hbox->set_spacing (6);
+		info_vbox->set_spacing (6);
+
+		info_scroller_count = 0;
+		info_scroller_connection = Glib::signal_timeout().connect (mem_fun(*this, &SessionDialog::info_scroller_update), 50);
+
+		ArdourButton *updates_button = manage (new ArdourButton (_("Check the website for more...")));
+
+		updates_button->signal_clicked.connect (mem_fun(*this, &SessionDialog::updates_button_clicked));
+		set_tooltip (*updates_button, _("Click to open the program website in your web browser"));
+
+		info_vbox->pack_start (info_scroller_label, false, false);
+		info_vbox->pack_start (*updates_button, false, false);
+		info_hbox->pack_start (*info_vbox, true, false);
+
+		info_hbox->show_all ();
+
+		/* no update message for trax, show license here */
+		_open_table.attach (*info_hbox, 0, 3, row, row + 1, FILL, FILL, 0, 6); ++row; ++top;
+	}
+#endif
 
 	_open_table.attach (recent_button,     0,1, row, row + 1, FILL, FILL); ++row;
 	_open_table.attach (existing_button,   0,1, row, row + 1, FILL, FILL); ++row;

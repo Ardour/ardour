@@ -107,8 +107,6 @@ private:
 
 	bool open_button_pressed (GdkEventButton*);
 
-	Gtk::HBox _info_box;
-
 	Gtk::Table _open_table;
 
 	/* initial choice page */
