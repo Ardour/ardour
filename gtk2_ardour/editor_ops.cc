@@ -9460,6 +9460,10 @@ Editor::temporal_zoom_session ()
 		samplecnt_t end = _session->current_end_sample();
 
 		if (_session->actively_recording ()) {
+			if (start == 0 && end == 0) {
+				start = _session->last_transport_start();
+			}
+
 			samplepos_t cur = _playhead_cursor->current_sample ();
 			if (cur > end) {
 				/* recording beyond the end marker; zoom out
