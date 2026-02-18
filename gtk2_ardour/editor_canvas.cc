@@ -407,7 +407,8 @@ Editor::track_canvas_drag_data_received (const RefPtr<Gdk::DragContext>& context
 	} else if (data.get_target() == "x-ardour/region.pbdids") {
 		std::vector<std::string> ids;
 		std::vector<PBD::ID> rids;
-		boost::split (ids, data.get_data_as_string (), boost::is_any_of(","));
+		std::string const& data_str (data.get_data_as_string ());
+		boost::split (ids, data_str, boost::is_any_of(","));
 		for (auto const& id: ids) {
 			rids.push_back (id);
 		}
