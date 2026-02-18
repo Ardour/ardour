@@ -3007,7 +3007,7 @@ Session::ensure_route_presentation_info_gap (PresentationInfo::order_t first_new
  *  @param name_template string to use for the start of the name, or "" to use "Audio".
  */
 bool
-Session::new_audio_routes_tracks_bulk (RouteList& routes, list< std::shared_ptr<AudioTrack> >& tracks,
+Session::new_audio_routes_tracks_bulk (RouteList& routes,
                                        int input_channels, int output_channels, std::shared_ptr<RouteGroup> route_group,
                                        uint32_t how_many, string name_template, PresentationInfo::order_t order,
                                        TrackMode mode, bool input_auto_connect,
@@ -3070,7 +3070,6 @@ Session::new_audio_routes_tracks_bulk (RouteList& routes, list< std::shared_ptr<
 			track->presentation_info ().set_trigger_track (trigger_visibility);
 
 			routes.push_back (track);
-			tracks.push_back (track);
 		}
 
 		catch (failed_constructor &err) {
@@ -3106,7 +3105,6 @@ Session::new_audio_track (int input_channels, int output_channels, std::shared_p
 	list<std::shared_ptr<AudioTrack> > tracks;
 
 	new_audio_routes_tracks_bulk (routes,
-				      tracks,
 				      input_channels,
 				      output_channels,
 				      route_group,
