@@ -131,14 +131,6 @@ SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_
 	int top = 0;
 	int row = 0;
 
-	if (find_file (rc, PROGRAM_NAME "-small-splash.png", image_path)) {
-		Gtk::Image* image;
-		if ((image = manage (new Gtk::Image (image_path))) != 0) {
-			_open_table.attach (*image, 0,1,  row , row + 1, FILL, FILL); ++row;
-			grp->add_widget (*image);
-		}
-	}
-
 #if !defined (LIVETRAX) && !defined (VBM)
 	/* Possible update message */
 	if (ARDOUR_UI::instance()->announce_string() != "") {
@@ -167,6 +159,14 @@ SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_
 		_open_table.attach (*info_hbox, 0, 3, row, row + 1, FILL, FILL, 0, 6); ++row; ++top;
 	}
 #endif
+
+	if (find_file (rc, PROGRAM_NAME "-small-splash.png", image_path)) {
+		Gtk::Image* image;
+		if ((image = manage (new Gtk::Image (image_path))) != 0) {
+			_open_table.attach (*image, 0,1,  row , row + 1, FILL, FILL); ++row;
+			grp->add_widget (*image);
+		}
+	}
 
 	_open_table.attach (recent_button,     0,1, row, row + 1, FILL, FILL); ++row;
 	_open_table.attach (existing_button,   0,1, row, row + 1, FILL, FILL); ++row;
