@@ -32,6 +32,10 @@
 #include <signal.h>
 #include <locale.h>
 
+#ifdef COMPILER_MSVC
+#include <io.h>    // Needed for '_setmode' and '_fileno'
+#endif
+
 #include <sigc++/bind.h>
 #include <ytkmm/settings.h>
 
@@ -202,7 +206,7 @@ sigpipe_handler (int /*signal*/)
 }
 #endif
 
-#if (!defined COMPILER_MSVC && defined PLATFORM_WINDOWS)
+#if (defined WAF_BUILD && defined PLATFORM_WINDOWS)
 
 static void command_line_parse_error (int *argc, char** argv[]) {}
 
@@ -223,7 +227,7 @@ static void command_line_parse_error (int *argc, char** argv[]) {
 static void command_line_parse_error (int *argc, char** argv[]) {}
 #endif
 
-#if (defined(COMPILER_MSVC) && defined(NDEBUG) && !defined(RDC_BUILD))
+#if (defined(COMPILER_MSVC) && defined(NDEBUG) && !defined(RDC_BUILD) && !defined(WAF_BUILD))
 /*
  *  Release build with MSVC uses ardour_main()
  */
@@ -248,6 +252,12 @@ int nomain (int argc, char *argv[])
 int main (int argc, char *argv[])
 #endif
 {
+#if defined(COMPILER_MSVC) && defined(WAF_BUILD)
+    _fmode = _O_BINARY;  // Force binary mode for stdio on MSVC to prevent newline translation (\n to \r\n) during runtime.
+    _setmode(_fileno(stdout), _O_BINARY);
+    _setmode(_fileno(stderr), _O_BINARY);
+#endif
+	
 	console_madness_begin();
 
 	ARDOUR::check_for_old_configuration_files();

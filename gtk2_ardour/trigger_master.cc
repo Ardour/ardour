@@ -725,7 +725,7 @@ CueMaster::get_boxen (TriggerBoxList &boxlist)
 	std::shared_ptr<RouteList const> rl = _session->get_routes();
 	for (auto const& route : *rl) {
 		std::shared_ptr<TriggerBox> box = route->triggerbox();
-#warning @Ben disambiguate processor *active* vs *visibility*
+#pragma message("WARNING: @Ben disambiguate processor *active* vs *visibility*")
 		if (box /*&& box.active*/) {
 			boxlist.push_back(box);
 		}

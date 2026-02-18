@@ -23,7 +23,9 @@
 #include <cstdint>
 #include <sstream>
 
+#ifndef COMPILER_MSVC
 #include <sys/time.h>
+#endif
 #include <time.h>
 
 #include "pbd/localtime_r.h"

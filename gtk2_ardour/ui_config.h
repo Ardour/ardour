@@ -42,6 +42,7 @@
 #include "gtkmm2ext/ui_config.h"
 
 #include "editing.h"
+#include "editing_convert.h"
 #include "utils.h"
 
 class UIConfiguration : public Gtkmm2ext::UIConfigurationBase

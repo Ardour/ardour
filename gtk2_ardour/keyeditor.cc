@@ -28,6 +28,10 @@
 #include <fstream>
 #include <sstream>
 
+#ifdef COMPILER_MSVC
+#include <io.h>
+#endif
+
 #include <boost/algorithm/string.hpp>
 
 #include <glib.h>
