@@ -1499,7 +1499,8 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& context,
 				}
 			}
 		} else if (pbdid_dragged_dt == DataType::AUDIO) {
-			RouteList tracks;
+			RouteList routes;
+			std::list<shared_ptr<AudioTrack>>  tracks;
 			bool use_master_chan = (Config->get_output_auto_connect() & AutoConnectMaster) && session()->master_out();
 
 			for (auto const& rid : rids) {
@@ -1508,16 +1509,16 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& context,
 				if (use_master_chan) {
 					output_chan = _session->master_out()->n_inputs().n_audio();
 				}
-				bool ok = _session->new_audio_routes_tracks_bulk (tracks, region->sources().size(), output_chan, 0, 1, region->name(), PresentationInfo::max_order);
+				bool ok = _session->new_audio_routes_tracks_bulk (routes, tracks, region->sources().size(), output_chan, 0, 1, region->name(), PresentationInfo::max_order);
 				if (ok) {
-					std::shared_ptr<Playlist> playlist = dynamic_pointer_cast<Track> (tracks.back())->playlist ();
+					std::shared_ptr<Playlist> playlist = tracks.back()->playlist ();
 					std::shared_ptr<Region> region_copy = RegionFactory::create (region, true);
 					import_map[playlist] = region_copy;
 				}
 
 			}
-			if (!tracks.empty ()) {
-				_session->add_routes (tracks, true, true, PresentationInfo::max_order);
+			if (!routes.empty ()) {
+				_session->add_routes (routes, true, true, PresentationInfo::max_order);
 			}
 		}
 
