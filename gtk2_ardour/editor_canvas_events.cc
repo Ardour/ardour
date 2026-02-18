@@ -35,6 +35,7 @@
 #include "ardour/audio_track.h"
 #include "ardour/midi_track.h"
 #include "ardour/midi_region.h"
+#include "ardour/operations.h"
 #include "ardour/profile.h"
 #include "ardour/region_factory.h"
 
@@ -1351,7 +1352,7 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context,
 
 	if (can_drop) {
 
-		if (target == "x-ardour/region.pbdid") {
+		if (target == "x-ardour/region.pbdid" || target == "x-ardour/region.pbdids") {
 			if (tv.first == 0 && pbdid_dragged_dt != DataType::NIL) {
 				/* drop to drop-zone */
 				context->drag_status (Gdk::ACTION_COPY, time);
@@ -1478,12 +1479,61 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& context,
 
 	if (tv.first == 0) {
 		/* drop to dropzone */
-		// TODO optimize, batch create tracks, then place regions
-		// (Note: channel-count may vary per region)
-		// TODO: combined undo request..
-		for (auto const& rid : rids) {
-			drop_region (context, x, y, rid, info, time);
+		std::map<shared_ptr<Playlist>, shared_ptr<Region>> import_map;
+
+		/* step 1: create tracks */
+		if (pbdid_dragged_dt == DataType::MIDI) {
+			for (auto const& rid : rids) {
+				std::shared_ptr<Region> region = RegionFactory::region_by_id (rid);
+				ChanCount one_midi_port (DataType::MIDI, 1);
+				list<std::shared_ptr<MidiTrack> > midi_tracks;
+				midi_tracks = session()->new_midi_track (one_midi_port, one_midi_port,
+				                                         Config->get_strict_io () || Profile->get_mixbus (),
+				                                         std::shared_ptr<ARDOUR::PluginInfo>(),
+				                                         (ARDOUR::Plugin::PresetRecord*) 0,
+				                                         nullptr, 1, region->name(), PresentationInfo::max_order, Normal, true);
+				if (midi_tracks.size () == 1) {
+					std::shared_ptr<Playlist> playlist = midi_tracks.front()->playlist ();
+					std::shared_ptr<Region> region_copy = RegionFactory::create (region, true);
+					import_map[playlist] = region_copy;
+				}
+			}
+		} else if (pbdid_dragged_dt == DataType::AUDIO) {
+			RouteList tracks;
+			bool use_master_chan = (Config->get_output_auto_connect() & AutoConnectMaster) && session()->master_out();
+
+			for (auto const& rid : rids) {
+				std::shared_ptr<Region> region = RegionFactory::region_by_id (rid);
+				uint32_t output_chan = region->sources().size();
+				if (use_master_chan) {
+					output_chan = _session->master_out()->n_inputs().n_audio();
+				}
+				bool ok = _session->new_audio_routes_tracks_bulk (tracks, region->sources().size(), output_chan, 0, 1, region->name(), PresentationInfo::max_order);
+				if (ok) {
+					std::shared_ptr<Playlist> playlist = dynamic_pointer_cast<Track> (tracks.back())->playlist ();
+					std::shared_ptr<Region> region_copy = RegionFactory::create (region, true);
+					import_map[playlist] = region_copy;
+				}
+
+			}
+			if (!tracks.empty ()) {
+				_session->add_routes (tracks, true, true, PresentationInfo::max_order);
+			}
 		}
+
+		/* step 2: add regions to created tracks */
+		timepos_t insert_pos (pos);
+		snap_to_with_modifier (insert_pos, &event);
+		begin_reversible_command (Operations::insert_region);
+
+		for (auto& [playlist, r] : import_map) {
+			playlist->clear_changes ();
+			playlist->clear_owned_changes ();
+			playlist->add_region (r, insert_pos, 1.0, false);
+			playlist->rdiff_and_add_command (_session);
+		}
+		commit_reversible_command ();
+
 		return;
 	}
 
@@ -1530,15 +1580,25 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& context,
 	}
 
 	if (sequence_regions) {
-		// TODO directly interact with playlist, combined Undo request
 		timepos_t insert_pos (pos);
+		snap_to_with_modifier (insert_pos, &event);
+
+		std::shared_ptr<Playlist> playlist = rtav->playlist ();
+		begin_reversible_command (Operations::insert_region);
+		playlist->clear_changes ();
+		playlist->clear_owned_changes ();
+
 		for (auto const& rid : rids) {
 			std::shared_ptr<Region> region = RegionFactory::region_by_id (rid);
 			std::shared_ptr<Region> region_copy = RegionFactory::create (region, true);
-			_drags->set (new RegionInsertDrag (*this, region_copy, rtav, insert_pos, drag_time_domain (region_copy.get())), &event);
-			_drags->end_grab (&event);
+			playlist->add_region (region_copy, insert_pos, 1.0, false);
+			if (should_ripple ()) {
+				playlist->ripple (insert_pos, region_copy->length (), region_copy);
+			}
 			insert_pos += region_copy->length ();
 		}
+		playlist->rdiff_and_add_command (_session);
+		commit_reversible_command ();
 	} else {
 		/* make multi-channel region */
 		std::string region_name = region_name_from_path (first_region->name(), true, false); // XXX use track name?
@@ -1552,7 +1612,7 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& context,
 		plist.add (ARDOUR::Properties::length, first_region->length ());
 		plist.add (ARDOUR::Properties::name, region_name);
 		plist.add (ARDOUR::Properties::layer, 0);
-		plist.add (ARDOUR::Properties::whole_file, false); // XXX, no new source are used but we could show the multi-channel region as source?
+		plist.add (ARDOUR::Properties::whole_file, false);
 		plist.add (ARDOUR::Properties::external, true);
 		plist.add (ARDOUR::Properties::opaque, true);
 
