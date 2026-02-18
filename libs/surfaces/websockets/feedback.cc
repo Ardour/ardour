@@ -20,6 +20,9 @@
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 
+#ifdef COMPILER_MSVC
+#define ABSTRACT_UI_EXPORTS
+#endif
 #include "pbd/abstract_ui.inc.cc" // instantiate template
 
 #include "feedback.h"

@@ -23,7 +23,9 @@
 
 #include <stdint.h>
 
-#include <sys/time.h>
+#ifndef COMPILER_MSVC
+#include <sys/time.h>\
+#endif
 
 #include <glibmm/convert.h>
 

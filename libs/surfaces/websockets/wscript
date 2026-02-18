@@ -32,6 +32,8 @@ def build(bld):
     obj.name         = 'libardour_websockets'
     obj.target       = 'ardour_websockets'
     obj.uselib       = 'GLIBMM XML WEBSOCKETS OPENSSL'
+    if bld.env['build_target'] == 'msvc':
+        obj.uselib  += 'SIGCPP'
     obj.use          = 'libardour libardour_cp libgtkmm2ext libpbd'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
 
