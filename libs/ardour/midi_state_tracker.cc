@@ -43,15 +43,17 @@ MidiNoteTracker::reset ()
 {
 	DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1: reset\n", this));
 	memset (_active_notes, 0, sizeof (_active_notes));
+	memset (_active_velocities, 0, sizeof (_active_velocities));
 	_on = 0;
 }
 
 void
-MidiNoteTracker::add (uint8_t note, uint8_t chn)
+MidiNoteTracker::add (uint8_t note, uint8_t chn, uint8_t velocity)
 {
 	const int coff = chn << 7;
 	if (_active_notes[note + coff] == 0) {
 		++_on;
+		_active_velocities[note+coff] = velocity;
 	}
 	++_active_notes[note + coff];
 
@@ -61,9 +63,10 @@ MidiNoteTracker::add (uint8_t note, uint8_t chn)
 	}
 #endif
 
-	DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1 ON %2/%3 voices %5 total on %4\n",
+	DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1 ON %2/%3 voices %5 total on %4 vel %6\n",
 							       this, (int) note, (int) chn, _on,
-							       (int) _active_notes[note + coff]));
+	                                                       (int) _active_notes[note + coff],
+	                                                       (int) _active_velocities[note+coff]));
 }
 
 void
@@ -76,6 +79,7 @@ MidiNoteTracker::remove (uint8_t note, uint8_t chn)
 	case 1:
 		--_on;
 		_active_notes [note + coff] = 0;
+		_active_velocities[note+coff] = 0;
 		break;
 	default:
 		--_active_notes [note + coff];
@@ -105,10 +109,10 @@ MidiNoteTracker::track (const uint8_t* evbuf)
 		reset();
 		break;
 	case MIDI_CMD_NOTE_ON:
-		add(evbuf[1], chan);
+		add (evbuf[1], chan, evbuf[2]);
 		break;
 	case MIDI_CMD_NOTE_OFF:
-		remove(evbuf[1], chan);
+		remove (evbuf[1], chan);
 		break;
 	}
 }
@@ -116,19 +120,19 @@ MidiNoteTracker::track (const uint8_t* evbuf)
 void
 MidiNoteTracker::resolve_notes (MidiBuffer &dst, samplepos_t time, bool reset)
 {
-	push_notes (dst, time, reset, MIDI_CMD_NOTE_OFF, 64);
+	push_notes (dst, time, reset, MIDI_CMD_NOTE_OFF);
 }
 
 void
 MidiNoteTracker::flush_notes (MidiBuffer &dst, samplepos_t time, bool reset)
 {
-	push_notes (dst, time, reset, MIDI_CMD_NOTE_ON, 64);
+	push_notes (dst, time, reset, MIDI_CMD_NOTE_ON);
 }
 
 void
-MidiNoteTracker::push_notes (MidiBuffer &dst, samplepos_t time, bool reset, int cmd, int velocity)
+MidiNoteTracker::push_notes (MidiBuffer &dst, samplepos_t time, bool reset, int cmd)
 {
-	DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1 MB-resolve notes @ %2 on = %3\n", this, time, _on));
+	DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1 MB-push notes @ %2 on = %3\n", this, time, _on));
 
 	if (!_on) {
 		return;
@@ -139,17 +143,20 @@ MidiNoteTracker::push_notes (MidiBuffer &dst, samplepos_t time, bool reset, int 
 		for (int note = 0; note < 128; ++note) {
 			uint8_t cnt = _active_notes[note + coff];
 			while (cnt) {
-				uint8_t buffer[3] = { ((uint8_t) (cmd | channel)), uint8_t (note), (uint8_t) velocity };
+				uint8_t vel = _active_velocities[note + coff];
+				assert (vel);
+				uint8_t buffer[3] = { ((uint8_t) (cmd | channel)), uint8_t (note), vel };
 				Evoral::Event<MidiBuffer::TimeType> ev (Evoral::MIDI_EVENT, time, 3, buffer, false);
 				/* note that we do not care about failure from
 				   push_back() ... should we warn someone ?
 				*/
 				dst.push_back (ev);
 				cnt--;
-				DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1: MB-push note %2/%3 at %4\n", this, (int) note, (int) channel, time));
+				DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1: MB-push note %2/%3 vel %5 at %4\n", this, (int) note, (int) channel, time, vel));
 			}
 			if (reset) {
 				_active_notes [note + coff] = 0;
+				_active_velocities [note + coff] = 0;
 			}
 		}
 	}
@@ -232,7 +239,9 @@ MidiNoteTracker::dump (ostream& o) const
 		for (int x = 0; x < 128; ++x) {
 			if (_active_notes[coff + x]) {
 				o << "Channel " << c+1 << " Note " << x << " is on ("
-				  << (int) _active_notes[coff+x] <<  " times)\n";
+				  << (int) _active_notes[coff+x] <<  " times) velocity = "
+				  << (int) _active_velocities[coff+x]
+				  << std::endl;
 			}
 		}
 	}
@@ -315,7 +324,7 @@ MidiStateTracker::track (const uint8_t* evbuf)
 		break;
 
 	case MIDI_CMD_NOTE_ON:
-		add (evbuf[1], chan);
+		add (evbuf[1], chan, evbuf[2]);
 		break;
 	case MIDI_CMD_NOTE_OFF:
 		remove (evbuf[1], chan);

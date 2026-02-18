@@ -1383,7 +1383,7 @@ MidiModel::write_section_to (std::shared_ptr<MidiSource>     source,
 				mst.remove (mev.note(), mev.channel());
 
 			} else if (mev.is_note_on()) {
-				mst.add (mev.note(), mev.channel());
+				mst.add (mev.note(), mev.channel(), mev.velocity());
 				source->append_event_beats(source_lock, mev);
 			} else {
 				source->append_event_beats(source_lock, mev);

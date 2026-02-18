@@ -51,8 +51,6 @@ public:
 	virtual void reset ();
 
 	void track (const MidiBuffer::const_iterator& from, const MidiBuffer::const_iterator& to);
-	void add (uint8_t note, uint8_t chn);
-	void remove (uint8_t note, uint8_t chn);
 	void resolve_notes (MidiBuffer& buffer, samplepos_t time, bool reset = true);
 	void resolve_notes (Evoral::EventSink<samplepos_t>& buffer, samplepos_t time);
 	void resolve_notes (MidiSource& src, const Source::WriterLock& lock, Temporal::Beats time);
@@ -75,11 +73,15 @@ public:
 		track (ev.buffer());
 	}
 
-private:
+	void add (uint8_t note, uint8_t chn, uint8_t velocity);
+	void remove (uint8_t note, uint8_t chn);
+
+  private:
 	uint8_t  _active_notes[128*16];
+	uint8_t  _active_velocities[128*16];
 	uint16_t _on;
 
-	void push_notes (MidiBuffer &dst, samplepos_t time, bool reset, int cmd, int velocity);
+	void push_notes (MidiBuffer &dst, samplepos_t time, bool reset, int cmd);
 
 	template<typename Time>
 	void push_notes (Evoral::EventSink<Time> &dst, Time time, bool reset, int cmd, int velocity) {
