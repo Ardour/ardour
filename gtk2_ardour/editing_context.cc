@@ -864,7 +864,7 @@ EditingContext::grid_type_chosen (GridType gt)
 
 	grid_type_selector.set_active (grid_type_short_labels[grid_ind]);
 
-	if (UIConfiguration::instance().get_show_grids_ruler()) {
+	if (UIConfiguration::instance().get_show_grids_ruler() && !ARDOUR_UI::instance()->loading_session()) {
 		show_rulers_for_grid ();
 	}
 
