@@ -443,6 +443,8 @@ MidiTrack::non_realtime_locate (samplepos_t spos)
 		return;
 	}
 
+	_disk_reader->non_realtime_locate (spos);
+
 	Glib::Threads::Mutex::Lock lm (_control_lock, Glib::Threads::TRY_LOCK);
 	if (!lm.locked()) {
 		return;
