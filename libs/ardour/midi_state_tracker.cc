@@ -161,6 +161,7 @@ MidiNoteTracker::push_notes (MidiBuffer &dst, samplepos_t time, bool reset, int 
 		}
 	}
 	if (reset) {
+		/* Notes & velocities were zeroed above */
 		_on = 0;
 	}
 }
