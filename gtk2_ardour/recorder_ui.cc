@@ -1307,7 +1307,7 @@ RecorderUI::new_track_for_port (DataType dt, string const& port_name)
 	if (dt == DataType::AUDIO) {
 		std::shared_ptr<Route> r;
 		try {
-			list<std::shared_ptr<AudioTrack> > tl = _session->new_audio_track (1, outputs, NULL, 1, track_name, PresentationInfo::max_order, Normal, false);
+			AudioTrackList tl = _session->new_audio_track (1, outputs, NULL, 1, track_name, PresentationInfo::max_order, Normal, false);
 			r = tl.front ();
 		} catch (...) {
 			return;

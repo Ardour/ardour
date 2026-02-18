@@ -122,7 +122,7 @@ prepare_audio_track (aafiAudioTrack* aafTrack, Session* s)
 		outputs = max (outputs, s->master_out ()->n_inputs ().n_audio ());
 	}
 
-	list<std::shared_ptr<AudioTrack>> at (s->new_audio_track (aafTrack->format, outputs, NULL, 1, aafTrack->name, PresentationInfo::max_order));
+	AudioTrackList at (s->new_audio_track (aafTrack->format, outputs, NULL, 1, aafTrack->name, PresentationInfo::max_order));
 
 	if (at.empty ()) {
 		PBD::fatal << "AAF: Could not create new audio track." << endmsg;

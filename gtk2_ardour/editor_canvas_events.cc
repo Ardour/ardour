@@ -1422,7 +1422,7 @@ Editor::drop_region (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
 				if ((Config->get_output_auto_connect() & AutoConnectMaster) && session()->master_out()) {
 					output_chan =  session()->master_out()->n_inputs().n_audio();
 				}
-				list<std::shared_ptr<AudioTrack> > audio_tracks;
+				AudioTrackList audio_tracks;
 				audio_tracks = session()->new_audio_track (region->sources().size(), output_chan, 0, 1, region->name(), PresentationInfo::max_order);
 				rtav = dynamic_cast<RouteTimeAxisView*> (time_axis_view_from_stripable (audio_tracks.front()));
 			} else if (std::dynamic_pointer_cast<MidiRegion> (region)) {
@@ -1500,7 +1500,7 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& context,
 			}
 		} else if (pbdid_dragged_dt == DataType::AUDIO) {
 			RouteList routes;
-			std::list<shared_ptr<AudioTrack>>  tracks;
+			AudioTrackList tracks;
 			bool use_master_chan = (Config->get_output_auto_connect() & AutoConnectMaster) && session()->master_out();
 
 			for (auto const& rid : rids) {

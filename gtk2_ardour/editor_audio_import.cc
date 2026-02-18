@@ -1061,7 +1061,7 @@ Editor::finish_bringing_in_material (std::shared_ptr<Region> region,
 	{
 		if (!existing_track) {
 			if (ar) {
-				list<std::shared_ptr<AudioTrack> > at (
+				AudioTrackList at (
 					_session->new_audio_track (in_chans, out_chans,
 					                           0, 1, string(),
 					                           PresentationInfo::max_order,
@@ -1072,7 +1072,7 @@ Editor::finish_bringing_in_material (std::shared_ptr<Region> region,
 				if (at.empty()) {
 					return -1;
 				}
-				for (list<std::shared_ptr<AudioTrack> >::iterator i = at.begin(); i != at.end(); ++i) {
+				for (AudioTrackList::iterator i = at.begin(); i != at.end(); ++i) {
 					if (Config->get_strict_io ()) {
 						(*i)->set_strict_io (true);
 					}

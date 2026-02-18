@@ -1075,7 +1075,7 @@ Mixer_UI::fan_out (std::weak_ptr<Route> wr, bool to_busses, bool group)
 					r = rl.front ();
 					assert (r);
 				} else {
-					list<std::shared_ptr<AudioTrack> > tl = _session->new_audio_track (busnames[bn], outputs, NULL, 1, bn, PresentationInfo::max_order, Normal, false);
+					AudioTrackList tl = _session->new_audio_track (busnames[bn], outputs, NULL, 1, bn, PresentationInfo::max_order, Normal, false);
 					r = tl.front ();
 					assert (r);
 

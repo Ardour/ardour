@@ -1578,8 +1578,8 @@ ARDOUR_UI::session_add_audio_route (
 	ARDOUR::PresentationInfo::order_t order,
 	bool trigger_visibility)
 {
-	list<std::shared_ptr<AudioTrack> > tracks;
-	RouteList routes;
+	RouteList      routes;
+	AudioTrackList tracks;
 
 	assert (_session);
 
@@ -1609,7 +1609,7 @@ ARDOUR_UI::session_add_audio_route (
 	}
 
 	if (strict_io) {
-		for (list<std::shared_ptr<AudioTrack> >::iterator i = tracks.begin(); i != tracks.end(); ++i) {
+		for (AudioTrackList::iterator i = tracks.begin(); i != tracks.end(); ++i) {
 			(*i)->set_strict_io (true);
 		}
 		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {

@@ -1752,8 +1752,8 @@ RegionMoveDrag::create_destination_time_axis (std::shared_ptr<Region> region, Ti
 	TimeAxisView* tav = 0;
 	try {
 		if (std::dynamic_pointer_cast<AudioRegion> (region)) {
-			list<std::shared_ptr<AudioTrack>> audio_tracks;
-			uint32_t                          output_chan = region->sources ().size ();
+			AudioTrackList  audio_tracks;
+			uint32_t        output_chan = region->sources ().size ();
 			if ((Config->get_output_auto_connect () & AutoConnectMaster) && editing_context.session ()->master_out ()) {
 				output_chan = editing_context.session ()->master_out ()->n_inputs ().n_audio ();
 			}
