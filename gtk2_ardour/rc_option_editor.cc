@@ -3609,7 +3609,7 @@ These settings will only take effect after %1 is restarted.\n\
 
 	add_option (_("MIDI"),
 	     new BoolOption (
-		     "scroll_velocity_editing",
+		     "scroll-velocity-editing",
 		     _("Scroll wheel use when editing MIDI adjusts selected note velocity"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_scroll_velocity_editing),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_scroll_velocity_editing)
@@ -3618,7 +3618,7 @@ These settings will only take effect after %1 is restarted.\n\
 	add_option (_("MIDI"), new OptionEditorHeading (_("MIDI Chase")));
 	add_option (_("MIDI"),
 	     new BoolOption (
-		     "midi_chase",
+		     "midi-chase",
 		     _("When locating, track sustained MIDI notes and play them when rolling"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_chase),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_chase)
