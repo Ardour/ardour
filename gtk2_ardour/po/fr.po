@@ -22227,7 +22227,7 @@ msgstr "Arrêter tous les Cues maintenant"
 
 #: trigger_page.cc:1003
 msgid "Stop all cues soon"
-msgstr "Arreter tous les Cues bientôt"
+msgstr "Arrêter tous les Cues bientôt"
 
 #: trigger_strip.cc:145
 msgid "Switch controls from cue launching to cue recording"
