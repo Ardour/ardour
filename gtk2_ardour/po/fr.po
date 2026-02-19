@@ -16607,10 +16607,9 @@ msgstr ""
 "L'utilisation de la molette de défilement lors de l'édition MIDI permet "
 "d'ajuster la vélocité de la note sélectionnée"
 
-# Chase est le terme technique qu'on trouve partout
 #: rc_option_editor.cc:3618
 msgid "MIDI Chase"
-msgstr "Suivi MIDI (\"chase\")"
+msgstr "Suivi MIDI"
 
 #: rc_option_editor.cc:3622
 msgid "When locating, track sustained MIDI notes and play them when rolling"
@@ -16620,7 +16619,7 @@ msgstr ""
 
 #: rc_option_editor.cc:3627
 msgid "Output Port Panic"
-msgstr "Envois de panique MIDI"
+msgstr "Envoi de panique MIDI"
 
 #: rc_option_editor.cc:3631
 msgid ""
