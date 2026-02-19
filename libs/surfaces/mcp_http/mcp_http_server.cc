@@ -21,6 +21,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <iomanip>
+#include <memory>
 #include <sstream>
 #include <vector>
 
@@ -30,10 +31,12 @@
 #include "pbd/error.h"
 #include "pbd/id.h"
 #include "pbd/controllable.h"
+#include "pbd/xml++.h"
 
 #include "ardour/audio_track.h"
 #include "ardour/dB.h"
 #include "ardour/internal_send.h"
+#include "ardour/location.h"
 #include "ardour/midi_track.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
@@ -245,6 +248,364 @@ tracks_list_json (ARDOUR::Session& session, bool include_hidden)
 		   << ",\"presentationOrder\":" << route->presentation_info ().order ()
 		   << ",\"hidden\":" << (hidden ? "true" : "false")
 		   << "}";
+	}
+
+	ss << "]}";
+	return ss.str ();
+}
+
+static std::string
+marker_type_json (uint32_t flags)
+{
+	std::ostringstream ss;
+	ss << "[";
+
+	bool first = true;
+	struct Kind {
+		uint32_t bit;
+		const char* name;
+	};
+	const Kind kinds[] = {
+		{(uint32_t) ARDOUR::Location::IsMark, "mark"},
+		{(uint32_t) ARDOUR::Location::IsCueMarker, "cue"},
+		{(uint32_t) ARDOUR::Location::IsCDMarker, "cd"},
+		{(uint32_t) ARDOUR::Location::IsXrun, "xrun"},
+		{(uint32_t) ARDOUR::Location::IsSection, "section"},
+		{(uint32_t) ARDOUR::Location::IsScene, "scene"},
+		{(uint32_t) ARDOUR::Location::IsRangeMarker, "range"},
+		{(uint32_t) ARDOUR::Location::IsSessionRange, "session_range"},
+		{(uint32_t) ARDOUR::Location::IsAutoLoop, "auto_loop"},
+		{(uint32_t) ARDOUR::Location::IsAutoPunch, "auto_punch"},
+		{(uint32_t) ARDOUR::Location::IsClockOrigin, "clock_origin"},
+		{(uint32_t) ARDOUR::Location::IsSkip, "skip"},
+	};
+
+	for (size_t i = 0; i < (sizeof (kinds) / sizeof (kinds[0])); ++i) {
+		if (!(flags & kinds[i].bit)) {
+			continue;
+		}
+		if (!first) {
+			ss << ",";
+		}
+		first = false;
+		ss << "\"" << kinds[i].name << "\"";
+	}
+
+	ss << "]";
+	return ss.str ();
+}
+
+static bool
+parse_location_flags (const XMLNode& node, uint32_t& flags_out)
+{
+	flags_out = 0;
+	if (node.get_property ("flags", flags_out)) {
+		return true;
+	}
+
+	const XMLProperty* prop = node.property ("flags");
+	if (!prop) {
+		return false;
+	}
+
+	const std::string v = prop->value ();
+	if (v.empty ()) {
+		return false;
+	}
+
+	char* endptr = 0;
+	unsigned long parsed = std::strtoul (v.c_str (), &endptr, 0);
+	if (endptr && *endptr == '\0') {
+		flags_out = (uint32_t) parsed;
+		return true;
+	}
+
+	struct FlagName {
+		const char* name;
+		uint32_t bit;
+	};
+	const FlagName named_flags[] = {
+		{"IsMark", (uint32_t) ARDOUR::Location::IsMark},
+		{"IsAutoPunch", (uint32_t) ARDOUR::Location::IsAutoPunch},
+		{"IsAutoLoop", (uint32_t) ARDOUR::Location::IsAutoLoop},
+		{"IsHidden", (uint32_t) ARDOUR::Location::IsHidden},
+		{"IsCDMarker", (uint32_t) ARDOUR::Location::IsCDMarker},
+		{"IsRangeMarker", (uint32_t) ARDOUR::Location::IsRangeMarker},
+		{"IsSessionRange", (uint32_t) ARDOUR::Location::IsSessionRange},
+		{"IsSkip", (uint32_t) ARDOUR::Location::IsSkip},
+		{"IsSkipping", (uint32_t) ARDOUR::Location::IsSkipping},
+		{"IsClockOrigin", (uint32_t) ARDOUR::Location::IsClockOrigin},
+		{"IsXrun", (uint32_t) ARDOUR::Location::IsXrun},
+		{"IsCueMarker", (uint32_t) ARDOUR::Location::IsCueMarker},
+		{"IsSection", (uint32_t) ARDOUR::Location::IsSection},
+		{"IsScene", (uint32_t) ARDOUR::Location::IsScene},
+	};
+
+	bool matched = false;
+	size_t start = 0;
+	while (start < v.size ()) {
+		size_t comma = v.find (',', start);
+		if (comma == std::string::npos) {
+			comma = v.size ();
+		}
+
+		size_t token_begin = v.find_first_not_of (" \t", start);
+		size_t token_end = comma;
+		while (token_end > start && (v[token_end - 1] == ' ' || v[token_end - 1] == '\t')) {
+			--token_end;
+		}
+
+		if (token_begin != std::string::npos && token_begin < token_end) {
+			const std::string token = v.substr (token_begin, token_end - token_begin);
+			for (size_t i = 0; i < (sizeof (named_flags) / sizeof (named_flags[0])); ++i) {
+				if (token == named_flags[i].name) {
+					flags_out |= named_flags[i].bit;
+					matched = true;
+					break;
+				}
+			}
+		}
+
+		start = comma + 1;
+	}
+
+	return matched;
+}
+
+static bool
+parse_location_samples (const XMLNode& node, samplepos_t& start_sample, samplepos_t& end_sample)
+{
+	if (node.get_property ("start", start_sample) && node.get_property ("end", end_sample)) {
+		return true;
+	}
+
+	Temporal::timepos_t start;
+	Temporal::timepos_t end;
+	if (!node.get_property ("start", start) || !node.get_property ("end", end)) {
+		return false;
+	}
+
+	start_sample = start.samples ();
+	end_sample = end.samples ();
+	return true;
+}
+
+static std::string
+bbt_json_at_sample (samplepos_t sample)
+{
+	Temporal::BBT_Time bbt = Temporal::TempoMap::use ()->bbt_at (Temporal::timepos_t (sample));
+
+	std::ostringstream text;
+	text << bbt.bars << "|" << bbt.beats << "|" << bbt.ticks;
+
+	std::ostringstream ss;
+	ss << "{\"bars\":" << bbt.bars
+	   << ",\"beats\":" << bbt.beats
+	   << ",\"ticks\":" << bbt.ticks
+	   << ",\"text\":\"" << text.str () << "\"}";
+	return ss.str ();
+}
+
+static std::string
+markers_list_json (ARDOUR::Session& session)
+{
+	/* Ensure this thread has a current tempo-map pointer for any beat->audio conversions. */
+	Temporal::TempoMap::fetch ();
+
+	ARDOUR::Locations* locations = session.locations ();
+	if (!locations) {
+		return "{\"markers\":[]}";
+	}
+
+	std::unique_ptr<XMLNode> locations_state (&locations->get_state ());
+	if (!locations_state.get ()) {
+		return "{\"markers\":[]}";
+	}
+
+	struct MarkerSnapshot {
+		std::string name;
+		samplepos_t sample;
+		uint32_t flags;
+		int32_t cue_id;
+		bool have_cue;
+		bool hidden;
+		std::string location_id;
+		bool have_location_id;
+		std::string location_name;
+		samplepos_t location_start_sample;
+		samplepos_t location_end_sample;
+		bool synthetic;
+		bool boundary_start;
+	};
+
+	std::vector<MarkerSnapshot> markers;
+	const XMLNodeList children = locations_state->children ();
+
+	for (XMLNodeConstIterator it = children.begin (); it != children.end (); ++it) {
+		if (!(*it) || (*it)->name () != "Location") {
+			continue;
+		}
+
+		uint32_t flags = 0;
+		if (!parse_location_flags (*(*it), flags)) {
+			continue;
+		}
+
+		std::string name;
+		samplepos_t start_sample = 0;
+		samplepos_t end_sample = 0;
+		if (!(*it)->get_property ("name", name) || !parse_location_samples (*(*it), start_sample, end_sample)) {
+			continue;
+		}
+		std::string location_id;
+		const bool have_location_id = (*it)->get_property ("id", location_id);
+
+		int32_t cue_id = 0;
+		const bool have_cue = (*it)->get_property ("cue", cue_id);
+
+		if (flags & (uint32_t) ARDOUR::Location::IsSessionRange) {
+			/* Match OSC behavior: expose session bounds as synthetic "start"/"end" markers. */
+			MarkerSnapshot start_marker;
+			start_marker.name = "start";
+			start_marker.sample = start_sample;
+			start_marker.flags = flags;
+			start_marker.cue_id = 0;
+			start_marker.have_cue = false;
+			start_marker.hidden = false;
+			start_marker.location_id = location_id;
+			start_marker.have_location_id = have_location_id;
+			start_marker.location_name = name;
+			start_marker.location_start_sample = start_sample;
+			start_marker.location_end_sample = end_sample;
+			start_marker.synthetic = true;
+			start_marker.boundary_start = true;
+			markers.push_back (start_marker);
+
+			MarkerSnapshot end_marker;
+			end_marker.name = "end";
+			end_marker.sample = end_sample;
+			end_marker.flags = flags;
+			end_marker.cue_id = 0;
+			end_marker.have_cue = false;
+			end_marker.hidden = false;
+			end_marker.location_id = location_id;
+			end_marker.have_location_id = have_location_id;
+			end_marker.location_name = name;
+			end_marker.location_start_sample = start_sample;
+			end_marker.location_end_sample = end_sample;
+			end_marker.synthetic = true;
+			end_marker.boundary_start = false;
+			markers.push_back (end_marker);
+			continue;
+		}
+
+		if (!(flags & (uint32_t) ARDOUR::Location::IsMark)) {
+			continue;
+		}
+
+		MarkerSnapshot marker;
+		marker.name = name;
+		marker.sample = start_sample;
+		marker.flags = flags;
+		marker.cue_id = cue_id;
+		marker.have_cue = have_cue && (flags & (uint32_t) ARDOUR::Location::IsCueMarker);
+		marker.hidden = (flags & (uint32_t) ARDOUR::Location::IsHidden) != 0;
+		marker.location_id = location_id;
+		marker.have_location_id = have_location_id;
+		marker.location_name = name;
+		marker.location_start_sample = start_sample;
+		marker.location_end_sample = end_sample;
+		marker.synthetic = false;
+		marker.boundary_start = true;
+		markers.push_back (marker);
+	}
+
+	std::sort (
+		markers.begin (),
+		markers.end (),
+		[] (const MarkerSnapshot& a, const MarkerSnapshot& b) {
+			if (a.sample == b.sample) {
+				return a.name < b.name;
+			}
+			return a.sample < b.sample;
+		});
+
+	std::ostringstream ss;
+	ss << "{\"markers\":[";
+
+	bool first = true;
+	for (size_t i = 0; i < markers.size (); ++i) {
+		const MarkerSnapshot& marker = markers[i];
+		if (!first) {
+			ss << ",";
+		}
+		first = false;
+
+		const bool is_mark = (marker.flags & (uint32_t) ARDOUR::Location::IsMark) != 0;
+		const bool is_cue = (marker.flags & (uint32_t) ARDOUR::Location::IsCueMarker) != 0;
+		const bool is_cd = (marker.flags & (uint32_t) ARDOUR::Location::IsCDMarker) != 0;
+		const bool is_xrun = (marker.flags & (uint32_t) ARDOUR::Location::IsXrun) != 0;
+		const bool is_section = (marker.flags & (uint32_t) ARDOUR::Location::IsSection) != 0;
+		const bool is_scene = (marker.flags & (uint32_t) ARDOUR::Location::IsScene) != 0;
+		const bool is_range_marker = (marker.flags & (uint32_t) ARDOUR::Location::IsRangeMarker) != 0;
+		const bool is_session_range = (marker.flags & (uint32_t) ARDOUR::Location::IsSessionRange) != 0;
+		const bool is_auto_loop = (marker.flags & (uint32_t) ARDOUR::Location::IsAutoLoop) != 0;
+		const bool is_auto_punch = (marker.flags & (uint32_t) ARDOUR::Location::IsAutoPunch) != 0;
+		const bool is_clock_origin = (marker.flags & (uint32_t) ARDOUR::Location::IsClockOrigin) != 0;
+		const bool is_skip = (marker.flags & (uint32_t) ARDOUR::Location::IsSkip) != 0;
+		const bool is_range = is_session_range || is_range_marker || is_auto_loop || is_auto_punch || is_cd;
+		const int64_t distance_from_start = (int64_t) marker.sample - (int64_t) marker.location_start_sample;
+		const std::string marker_bbt = bbt_json_at_sample (marker.sample);
+		const std::string location_start_bbt = bbt_json_at_sample (marker.location_start_sample);
+		const std::string location_end_bbt = bbt_json_at_sample (marker.location_end_sample);
+
+		ss << "{\"name\":\"" << json_escape (marker.name) << "\""
+		   << ",\"label\":\"" << json_escape (marker.name) << "\""
+		   << ",\"source\":\"" << (marker.synthetic ? "session_range_boundary" : "location") << "\""
+		   << ",\"boundary\":\"" << (marker.synthetic ? (marker.boundary_start ? "start" : "end") : "point") << "\""
+		   << ",\"sortIndex\":" << i
+		   << ",\"isSynthetic\":" << (marker.synthetic ? "true" : "false");
+
+		if (marker.have_location_id) {
+			ss << ",\"locationId\":\"" << json_escape (marker.location_id) << "\"";
+		} else {
+			ss << ",\"locationId\":null";
+		}
+
+		ss << ",\"locationName\":\"" << json_escape (marker.location_name) << "\""
+		   << ",\"locationStartSample\":" << marker.location_start_sample
+		   << ",\"locationEndSample\":" << marker.location_end_sample
+		   << ",\"locationStartBbt\":" << location_start_bbt
+		   << ",\"locationEndBbt\":" << location_end_bbt
+		   << ",\"distanceFromLocationStartSamples\":" << distance_from_start
+		   << ",\"startSample\":" << marker.sample
+		   << ",\"endSample\":" << marker.sample
+		   << ",\"bbt\":" << marker_bbt
+		   << ",\"lengthSamples\":0"
+		   << ",\"isHidden\":" << (marker.hidden ? "true" : "false")
+		   << ",\"isRange\":" << (is_range ? "true" : "false")
+		   << ",\"flagBits\":" << marker.flags
+		   << ",\"isMark\":" << (is_mark ? "true" : "false")
+		   << ",\"isCue\":" << (is_cue ? "true" : "false")
+		   << ",\"isCD\":" << (is_cd ? "true" : "false")
+		   << ",\"isXrun\":" << (is_xrun ? "true" : "false")
+		   << ",\"isSection\":" << (is_section ? "true" : "false")
+		   << ",\"isScene\":" << (is_scene ? "true" : "false")
+		   << ",\"isRangeMarker\":" << (is_range_marker ? "true" : "false")
+		   << ",\"isSessionRange\":" << (is_session_range ? "true" : "false")
+		   << ",\"isAutoLoop\":" << (is_auto_loop ? "true" : "false")
+		   << ",\"isAutoPunch\":" << (is_auto_punch ? "true" : "false")
+		   << ",\"isClockOrigin\":" << (is_clock_origin ? "true" : "false")
+		   << ",\"isSkip\":" << (is_skip ? "true" : "false")
+		   << ",\"types\":" << marker_type_json (marker.flags);
+
+		if (is_cue && marker.have_cue) {
+			ss << ",\"cueId\":" << marker.cue_id;
+		} else {
+			ss << ",\"cueId\":null";
+		}
+
+		ss << "}";
 	}
 
 	ss << "]}";
@@ -653,6 +1014,7 @@ MCPHttpServer::run ()
 {
 	/* Session transport requests allocate SessionEvent objects from a per-thread pool. */
 	ARDOUR::SessionEvent::create_per_thread_pool ("MCPHttp events", 256);
+	Temporal::TempoMap::fetch ();
 
 	while (_running) {
 		lws_service (_context, 100);
@@ -947,11 +1309,13 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 			"\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
 			"{\"name\":\"transport/play\",\"title\":\"Transport Play\",\"description\":\"Start transport playback.\","
 			"\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
-			"{\"name\":\"transport/stop\",\"title\":\"Transport Stop\",\"description\":\"Stop transport playback.\","
-			"\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
-			"{\"name\":\"tracks/list\",\"title\":\"Tracks List\",\"description\":\"List session tracks and buses.\","
-			"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"includeHidden\":{\"type\":\"boolean\"}},\"additionalProperties\":false}},"
-				"{\"name\":\"track/get_info\",\"title\":\"Get Track Info\",\"description\":\"Get one track info (fader, pan, rec, mute, solo, sends, plugins).\","
+				"{\"name\":\"transport/stop\",\"title\":\"Transport Stop\",\"description\":\"Stop transport playback.\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
+				"{\"name\":\"markers/list\",\"title\":\"Markers List\",\"description\":\"List all session markers regardless of marker subtype.\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
+				"{\"name\":\"tracks/list\",\"title\":\"Tracks List\",\"description\":\"List session tracks and buses.\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"includeHidden\":{\"type\":\"boolean\"}},\"additionalProperties\":false}},"
+					"{\"name\":\"track/get_info\",\"title\":\"Get Track Info\",\"description\":\"Get one track info (fader, pan, rec, mute, solo, sends, plugins).\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"}},\"required\":[\"id\"],\"additionalProperties\":false}},"
 					"{\"name\":\"plugin/get_description\",\"title\":\"Plugin Description\",\"description\":\"Get plugin descriptor and parameter metadata for a route plugin.\","
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"pluginIndex\":{\"type\":\"integer\",\"minimum\":0}},\"required\":[\"id\",\"pluginIndex\"],\"additionalProperties\":false}},"
@@ -1013,17 +1377,24 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 				std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Transport play requested\"}],\"structuredContent\":") + structured + "}");
 		}
 
-		if (tool_name == "transport/stop") {
-			_session.request_stop ();
-			std::string structured = transport_state_json (_session);
-			return jsonrpc_result (
-				id,
-				std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Transport stop requested\"}],\"structuredContent\":") + structured + "}");
-		}
+			if (tool_name == "transport/stop") {
+				_session.request_stop ();
+				std::string structured = transport_state_json (_session);
+				return jsonrpc_result (
+					id,
+					std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Transport stop requested\"}],\"structuredContent\":") + structured + "}");
+			}
 
-			if (tool_name == "tracks/list") {
-				const bool include_hidden = root.get<bool> ("params.arguments.includeHidden", false);
-				std::string structured = tracks_list_json (_session, include_hidden);
+			if (tool_name == "markers/list") {
+				std::string structured = markers_list_json (_session);
+				return jsonrpc_result (
+					id,
+					std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Markers listed\"}],\"structuredContent\":") + structured + "}");
+			}
+
+				if (tool_name == "tracks/list") {
+					const bool include_hidden = root.get<bool> ("params.arguments.includeHidden", false);
+					std::string structured = tracks_list_json (_session, include_hidden);
 				return jsonrpc_result (
 					id,
 					std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Tracks listed\"}],\"structuredContent\":") + structured + "}");
