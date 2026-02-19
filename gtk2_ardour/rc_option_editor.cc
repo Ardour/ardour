@@ -3615,6 +3615,15 @@ These settings will only take effect after %1 is restarted.\n\
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_scroll_velocity_editing)
 		     ));
 
+	add_option (_("MIDI"), new OptionEditorHeading (_("MIDI Chase")));
+	add_option (_("MIDI"),
+	     new BoolOption (
+		     "midi_chase",
+		     _("When locating, track sustained MIDI notes and play them when rolling"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_chase),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_chase)
+		     ));
+
 	add_option (_("MIDI"), new OptionEditorHeading (_("Audition")));
 
 	add_option (_("MIDI"),
