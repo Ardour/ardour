@@ -856,6 +856,7 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 	static PBD::Signal<void()> CueRecordingChanged;
 
 	void set_record_enabled (bool yn);
+	bool rec_enabled() const;
 	RecordState record_enabled() const { return _record_state; }
 	PBD::Signal<void()> RecEnableChanged;
 	PBD::Signal<void(Trigger const *)> ReCountIn;

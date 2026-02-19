@@ -4006,6 +4006,12 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 	}
 }
 
+bool
+TriggerBox::rec_enabled() const
+{
+	return _record_state >= Enabled;
+}
+
 void
 TriggerBox::set_record_enabled (bool yn)
 {
