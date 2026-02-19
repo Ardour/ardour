@@ -2286,7 +2286,7 @@ Session::maybe_enable_record (bool rt_context)
 		return;
 	}
 
-	if (armed_triggerbox()) {
+	if (rec_enabled_triggerbox()) {
 		return;
 	}
 
@@ -8301,3 +8301,21 @@ Session::armed_triggerbox () const
 
 	return armed_tb;
 }
+
+std::shared_ptr<TriggerBox>
+Session::rec_enabled_triggerbox () const
+{
+	std::shared_ptr<TriggerBox> re_tb;
+	std::shared_ptr<RouteList const> rl = routes.reader();
+
+	for (auto const & r : *rl) {
+		std::shared_ptr<TriggerBox> tb = r->triggerbox();
+		if (tb && tb->rec_enabled()) {
+			re_tb = tb;
+			break;
+		}
+	}
+
+	return re_tb;
+}
+
