@@ -83,6 +83,7 @@ ArdourButton::ArdourButton (Element e, bool toggle)
 	, _diameter (0)
 	, _corner_radius (3.5)
 	, _corner_mask (0xf)
+	, _border_mask (0x0)
 	, _angle(0)
 	, _xalign(.5)
 	, _yalign(.5)
@@ -133,6 +134,7 @@ ArdourButton::ArdourButton (const std::string& str, Element e, bool toggle)
 	, _diameter (0)
 	, _corner_radius (3.5)
 	, _corner_mask (0xf)
+	, _border_mask (0x0)
 	, _angle(0)
 	, _xalign(.5)
 	, _yalign(.5)
@@ -370,9 +372,36 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 
 	// draw edge (filling a rect underneath, rather than stroking a border on top, allows the corners to be lighter-weight.
 	if ((_elements & (Body|Edge)) == (Body|Edge)) {
+
+		if (_border_mask != NONE) {
+			cairo_save(cr);
+
+			cairo_rectangle (cr, 1, 1, get_width() - 2, get_height() - 2);
+
+			if (!(_border_mask & HIDE_TOP)) {
+				cairo_rectangle (cr, 0, 0, get_width(), 1);
+			}
+			if (!(_border_mask & HIDE_BOTTOM)) {
+				cairo_rectangle (cr, 0, get_height() - 1, get_width(), 1);
+			}
+			if (!(_border_mask & HIDE_LEFT)) {
+				cairo_rectangle (cr, 0, 0, 1, get_height());
+			}
+			if (!(_border_mask & HIDE_RIGHT)) {
+				cairo_rectangle (cr, get_width() - 1, 0, 1, get_height());
+			}
+
+			cairo_clip(cr);
+			cairo_new_path(cr);
+		}
+
 		rounded_function (cr, 0, 0, get_width(), get_height(), corner_radius + 1.5*scale);
 		Gtkmm2ext::set_source_rgba (cr, outline_color);
 		cairo_fill(cr);
+
+		if (_border_mask != NONE) {
+			cairo_restore(cr);
+		}
 	}
 
 	// background fill
@@ -1032,6 +1061,13 @@ void
 ArdourButton::set_corner_mask (int cm)
 {
 	_corner_mask = cm;
+	CairoWidget::set_dirty ();
+}
+
+void
+ArdourButton::set_border_mask (int bm)
+{
+	_border_mask = bm;
 	CairoWidget::set_dirty ();
 }
 
