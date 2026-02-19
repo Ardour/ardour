@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <ctime>
 #include <cstdlib>
 #include <cstring>
 #include <iomanip>
@@ -193,6 +194,24 @@ session_info_json (ARDOUR::Session& session)
 	   << ",\"transport\":" << transport_state_json (session)
 	   << "}";
 	return ss.str ();
+}
+
+static std::string
+quick_snapshot_name_localtime ()
+{
+	const std::time_t now = std::time (0);
+	std::tm tm_now;
+#ifdef _WIN32
+	localtime_s (&tm_now, &now);
+#else
+	localtime_r (&now, &tm_now);
+#endif
+
+	char buf[64];
+	if (std::strftime (buf, sizeof (buf), "%Y-%m-%dT%H.%M.%S", &tm_now) == 0) {
+		return "snapshot";
+	}
+	return std::string (buf);
 }
 
 static std::string
@@ -1667,6 +1686,20 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 			"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\"}},\"additionalProperties\":false}},"
 			"{\"name\":\"session/get_info\",\"title\":\"Session Info\",\"description\":\"Return basic session and transport info.\","
 			"\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
+			"{\"name\":\"session/save\",\"title\":\"Save Session\",\"description\":\"Save current session state, optionally to a snapshot name.\","
+			"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"snapshotName\":{\"type\":\"string\"},\"switchToSnapshot\":{\"type\":\"boolean\"}},\"additionalProperties\":false}},"
+			"{\"name\":\"session/undo\",\"title\":\"Undo\",\"description\":\"Undo one or more operations from session history.\","
+			"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"count\":{\"type\":\"integer\",\"minimum\":1}},\"additionalProperties\":false}},"
+			"{\"name\":\"session/redo\",\"title\":\"Redo\",\"description\":\"Redo one or more operations from session history.\","
+			"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"count\":{\"type\":\"integer\",\"minimum\":1}},\"additionalProperties\":false}},"
+			"{\"name\":\"session/rename\",\"title\":\"Rename Session\",\"description\":\"Rename current session.\","
+			"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"newName\":{\"type\":\"string\"}},\"required\":[\"newName\"],\"additionalProperties\":false}},"
+			"{\"name\":\"session/quick_snapshot\",\"title\":\"Quick Snapshot\",\"description\":\"Trigger quick snapshot action; optionally switch to the new snapshot.\","
+			"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"switchToSnapshot\":{\"type\":\"boolean\"}},\"additionalProperties\":false}},"
+			"{\"name\":\"session/store_mixer_scene\",\"title\":\"Store Mixer Scene\",\"description\":\"Store mixer scene by index.\","
+			"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"index\":{\"type\":\"integer\",\"minimum\":0}},\"required\":[\"index\"],\"additionalProperties\":false}},"
+			"{\"name\":\"session/recall_mixer_scene\",\"title\":\"Recall Mixer Scene\",\"description\":\"Recall mixer scene by index.\","
+			"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"index\":{\"type\":\"integer\",\"minimum\":0}},\"required\":[\"index\"],\"additionalProperties\":false}},"
 				"{\"name\":\"transport/get_state\",\"title\":\"Transport State\",\"description\":\"Return transport state.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
 				"{\"name\":\"transport/locate\",\"title\":\"Transport Locate\",\"description\":\"Move playhead to a target position by sample, or by bar+beat (fractional beat allowed).\","
@@ -1685,6 +1718,8 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"startSample\":{\"type\":\"integer\",\"minimum\":0},\"endSample\":{\"type\":\"integer\",\"minimum\":0},\"startBar\":{\"type\":\"integer\",\"minimum\":1},\"startBeat\":{\"type\":\"number\",\"minimum\":1},\"endBar\":{\"type\":\"integer\",\"minimum\":1},\"endBeat\":{\"type\":\"number\",\"minimum\":1}},\"additionalProperties\":false}},"
 				"{\"name\":\"transport/set_record_enable\",\"title\":\"Set Global Record Enable\",\"description\":\"Set session record-enable (global rec arm) state.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"enabled\":{\"type\":\"boolean\"}},\"required\":[\"enabled\"],\"additionalProperties\":false}},"
+				"{\"name\":\"transport/set_speed\",\"title\":\"Set Transport Speed\",\"description\":\"Set transport speed (as in OSC set_transport_speed).\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"speed\":{\"type\":\"number\"}},\"required\":[\"speed\"],\"additionalProperties\":false}},"
 				"{\"name\":\"transport/play\",\"title\":\"Transport Play\",\"description\":\"Start transport playback.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
 				"{\"name\":\"transport/stop\",\"title\":\"Transport Stop\",\"description\":\"Stop transport playback.\","
@@ -1764,6 +1799,182 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 			return jsonrpc_result (
 				id,
 				std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Session info\"}],\"structuredContent\":") + structured + "}");
+		}
+
+		if (tool_name == "session/save") {
+			const std::string snapshot_name = root.get<std::string> ("params.arguments.snapshotName", "");
+			const bool switch_to_snapshot = root.get<bool> ("params.arguments.switchToSnapshot", false);
+
+			const int rc = _session.save_state (snapshot_name, false, switch_to_snapshot);
+			if (rc != 0) {
+				return jsonrpc_error (id, -32000, "Failed to save session state");
+			}
+
+			std::ostringstream structured;
+			structured << "{\"saved\":true";
+			if (snapshot_name.empty ()) {
+				structured << ",\"requestedSnapshotName\":null";
+			} else {
+				structured << ",\"requestedSnapshotName\":\"" << json_escape (snapshot_name) << "\"";
+			}
+			structured << ",\"switchToSnapshot\":" << (switch_to_snapshot ? "true" : "false")
+				<< ",\"currentSnapshotName\":\"" << json_escape (_session.snap_name ()) << "\""
+				<< ",\"session\":" << session_info_json (_session)
+				<< "}";
+
+			return jsonrpc_result (
+				id,
+				std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Session saved\"}],\"structuredContent\":") + structured.str () + "}");
+		}
+
+		if (tool_name == "session/undo") {
+			const int64_t count_in = root.get<int64_t> ("params.arguments.count", 1);
+			if (count_in < 1 || count_in > 1024) {
+				return jsonrpc_error (id, -32602, "Invalid count (expected 1..1024)");
+			}
+			const uint32_t count = (uint32_t) count_in;
+
+			const uint32_t undo_before = _session.undo_depth ();
+			const uint32_t redo_before = _session.redo_depth ();
+			_session.undo (count);
+			const uint32_t undo_after = _session.undo_depth ();
+			const uint32_t redo_after = _session.redo_depth ();
+
+			std::ostringstream structured;
+			structured << "{\"countRequested\":" << count
+				<< ",\"undoDepthBefore\":" << undo_before
+				<< ",\"redoDepthBefore\":" << redo_before
+				<< ",\"undoDepthAfter\":" << undo_after
+				<< ",\"redoDepthAfter\":" << redo_after
+				<< ",\"nextUndo\":\"" << json_escape (_session.next_undo ()) << "\""
+				<< ",\"nextRedo\":\"" << json_escape (_session.next_redo ()) << "\""
+				<< "}";
+
+			return jsonrpc_result (
+				id,
+				std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Undo applied\"}],\"structuredContent\":") + structured.str () + "}");
+		}
+
+		if (tool_name == "session/redo") {
+			const int64_t count_in = root.get<int64_t> ("params.arguments.count", 1);
+			if (count_in < 1 || count_in > 1024) {
+				return jsonrpc_error (id, -32602, "Invalid count (expected 1..1024)");
+			}
+			const uint32_t count = (uint32_t) count_in;
+
+			const uint32_t undo_before = _session.undo_depth ();
+			const uint32_t redo_before = _session.redo_depth ();
+			_session.redo (count);
+			const uint32_t undo_after = _session.undo_depth ();
+			const uint32_t redo_after = _session.redo_depth ();
+
+			std::ostringstream structured;
+			structured << "{\"countRequested\":" << count
+				<< ",\"undoDepthBefore\":" << undo_before
+				<< ",\"redoDepthBefore\":" << redo_before
+				<< ",\"undoDepthAfter\":" << undo_after
+				<< ",\"redoDepthAfter\":" << redo_after
+				<< ",\"nextUndo\":\"" << json_escape (_session.next_undo ()) << "\""
+				<< ",\"nextRedo\":\"" << json_escape (_session.next_redo ()) << "\""
+				<< "}";
+
+			return jsonrpc_result (
+				id,
+				std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Redo applied\"}],\"structuredContent\":") + structured.str () + "}");
+		}
+
+		if (tool_name == "session/rename") {
+			const std::string new_name = root.get<std::string> ("params.arguments.newName", "");
+			if (new_name.empty ()) {
+				return jsonrpc_error (id, -32602, "Missing newName");
+			}
+
+			const std::string illegal = ARDOUR::Session::session_name_is_legal (new_name);
+			if (!illegal.empty ()) {
+				return jsonrpc_error (id, -32602, std::string ("Session name contains illegal character: ") + illegal);
+			}
+
+			const std::string old_name = _session.name ();
+			const int rc = _session.rename (new_name);
+			if (rc == -1) {
+				return jsonrpc_error (id, -32000, "Session name already exists");
+			}
+			if (rc != 0) {
+				return jsonrpc_error (id, -32000, "Renaming session failed");
+			}
+
+			std::ostringstream structured;
+			structured << "{\"oldName\":\"" << json_escape (old_name) << "\""
+				<< ",\"newName\":\"" << json_escape (_session.name ()) << "\""
+				<< ",\"session\":" << session_info_json (_session)
+				<< "}";
+
+			return jsonrpc_result (
+				id,
+				std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Session renamed\"}],\"structuredContent\":") + structured.str () + "}");
+		}
+
+		if (tool_name == "session/quick_snapshot") {
+			const bool switch_to_snapshot = root.get<bool> ("params.arguments.switchToSnapshot", false);
+			const std::string before_snapshot = _session.snap_name ();
+			const std::string snapshot_name = quick_snapshot_name_localtime ();
+
+			/* Match ARDOUR_UI::quick_snapshot_session behavior without invoking GUI actions. */
+			if (switch_to_snapshot && _session.dirty ()) {
+				if (_session.save_state ("") != 0) {
+					return jsonrpc_error (id, -32000, "Failed to save current session before quick snapshot");
+				}
+			}
+			if (_session.save_state (snapshot_name, false, switch_to_snapshot) != 0) {
+				return jsonrpc_error (id, -32000, "Quick snapshot save failed");
+			}
+
+			std::ostringstream structured;
+			structured << "{\"switchToSnapshot\":" << (switch_to_snapshot ? "true" : "false")
+				<< ",\"snapshotName\":\"" << json_escape (snapshot_name) << "\""
+				<< ",\"snapshotNameBefore\":\"" << json_escape (before_snapshot) << "\""
+				<< ",\"snapshotNameAfter\":\"" << json_escape (_session.snap_name ()) << "\""
+				<< ",\"session\":" << session_info_json (_session)
+				<< "}";
+
+			return jsonrpc_result (
+				id,
+				std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Quick snapshot requested\"}],\"structuredContent\":") + structured.str () + "}");
+		}
+
+		if (tool_name == "session/store_mixer_scene") {
+			const int64_t index_in = root.get<int64_t> ("params.arguments.index", -1);
+			if (index_in < 0 || index_in > 1024) {
+				return jsonrpc_error (id, -32602, "Invalid index (expected 0..1024)");
+			}
+			const size_t index = (size_t) index_in;
+			_session.store_nth_mixer_scene (index);
+
+			std::ostringstream structured;
+			structured << "{\"index\":" << index
+				<< ",\"stored\":true}";
+			return jsonrpc_result (
+				id,
+				std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Mixer scene stored\"}],\"structuredContent\":") + structured.str () + "}");
+		}
+
+		if (tool_name == "session/recall_mixer_scene") {
+			const int64_t index_in = root.get<int64_t> ("params.arguments.index", -1);
+			if (index_in < 0 || index_in > 1024) {
+				return jsonrpc_error (id, -32602, "Invalid index (expected 0..1024)");
+			}
+			const size_t index = (size_t) index_in;
+			const bool ok = _session.apply_nth_mixer_scene (index);
+			if (!ok) {
+				return jsonrpc_error (id, -32000, "Mixer scene recall failed");
+			}
+
+			std::ostringstream structured;
+			structured << "{\"index\":" << index
+				<< ",\"recalled\":true}";
+			return jsonrpc_result (
+				id,
+				std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Mixer scene recalled\"}],\"structuredContent\":") + structured.str () + "}");
 		}
 
 			if (tool_name == "transport/get_state") {
@@ -1976,6 +2187,27 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 				return jsonrpc_result (
 					id,
 					std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Global record-enable updated\"}],\"structuredContent\":") + structured.str () + "}");
+			}
+
+			if (tool_name == "transport/set_speed") {
+				const boost::optional<double> speed_opt = root.get_optional<double> ("params.arguments.speed");
+				if (!speed_opt || !std::isfinite (*speed_opt)) {
+					return jsonrpc_error (id, -32602, "Missing or invalid speed");
+				}
+
+				const double speed = *speed_opt;
+				/* Match OSC/BasicUI set_transport_speed behavior. */
+				_session.request_roll (ARDOUR::TRS_UI);
+				_session.request_transport_speed (speed, ARDOUR::TRS_UI);
+
+				std::ostringstream structured;
+				structured << "{\"requestedSpeed\":" << speed
+					<< ",\"actualSpeed\":" << _session.actual_speed ()
+					<< ",\"transport\":" << transport_state_json (_session)
+					<< "}";
+				return jsonrpc_result (
+					id,
+					std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Transport speed updated\"}],\"structuredContent\":") + structured.str () + "}");
 			}
 
 			if (tool_name == "transport/play") {
