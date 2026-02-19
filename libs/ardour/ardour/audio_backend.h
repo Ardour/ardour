@@ -44,11 +44,11 @@ namespace ARDOUR
 struct LIBARDOUR_API AudioBackendInfo {
 	const char* name;
 
-	/** Using arg1 and arg2, initialize this audiobackend.
+	/** Using client_name and session_id, initialize this audiobackend.
 	 *
 	 * Returns zero on success, non-zero otherwise.
 	 */
-	int (*instantiate) (const std::string& arg1, const std::string& arg2);
+	int (*instantiate) (const std::string& client_name, const std::string& session_id);
 
 	/** Release all resources associated with this audiobackend */
 	int (*deinstantiate) (void);
@@ -131,12 +131,8 @@ public:
 
 	static std::string get_error_string (ErrorCode);
 
-	enum StandardDeviceName {
-		DeviceNone,
-		DeviceDefault
-	};
-
-	static std::string get_standard_device_name (StandardDeviceName);
+	static std::string get_none_device_name ();
+	static std::string get_default_device_name ();
 
 	/** Return the AudioBackendInfo object from which this backend
 	 * was constructed.
@@ -153,15 +149,10 @@ public:
 	 */
 	virtual std::string name () const = 0;
 
-	/** Return true if the callback from the underlying mechanism/API
-	 * (CoreAudio, JACK, ASIO etc.) occurs in a thread subject to realtime
-	 * constraints. Return false otherwise.
-	 */
-	virtual bool is_realtime () const = 0;
-
-	/** Return true if the backed is JACK */
+	/** Return true if the backend is JACK */
 	virtual bool is_jack () const { return false; }
 
+	/** Return the priority to be set with pbd_set_engine_rt_priority. */
 	virtual int client_real_time_priority () { return 0; }
 
 	/* Discovering devices and parameters */
@@ -232,7 +223,7 @@ public:
 	 * of allowing one to be "None".
 	 *
 	 * ie. Input Device must match Output Device, except if either of them
-	 * is get_standard_device_name (DeviceNone).
+	 * is get_none_device_name ().
 	 */
 	virtual bool match_input_output_devices_or_none () const
 	{
@@ -291,7 +282,7 @@ public:
 	/** Set the period size to be used.
 	 * must be called before starting the backend.
 	 */
-	virtual int set_peridod_size (uint32_t)
+	virtual int set_period_size (uint32_t)
 	{
 		return -1;
 	}

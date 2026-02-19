@@ -109,12 +109,6 @@ DummyAudioBackend::name () const
 	return X_("Dummy"); // internal name
 }
 
-bool
-DummyAudioBackend::is_realtime () const
-{
-	return false;
-}
-
 std::vector<AudioBackend::DeviceStatus>
 DummyAudioBackend::enumerate_devices () const
 {
@@ -1021,7 +1015,7 @@ DummyAudioBackend::main_process_thread ()
 static std::shared_ptr<DummyAudioBackend> _instance;
 
 static std::shared_ptr<AudioBackend> backend_factory (AudioEngine& e);
-static int instantiate (const std::string& arg1, const std::string& /* arg2 */);
+static int instantiate (const std::string& client_name, const std::string& /* session_id */);
 static int deinstantiate ();
 static bool already_configured ();
 static bool available ();
@@ -1045,9 +1039,9 @@ backend_factory (AudioEngine& e)
 }
 
 static int
-instantiate (const std::string& arg1, const std::string& /* arg2 */)
+instantiate (const std::string& client_name, const std::string& /* session_id */)
 {
-	s_instance_name = arg1;
+	s_instance_name = client_name;
 	return 0;
 }
 
