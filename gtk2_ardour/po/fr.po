@@ -1152,10 +1152,10 @@ msgstr "Atténuer"
 msgid "Mute All"
 msgstr "Muet"
 
-# voir code source : doit correspondre au plus long parmis les traductions de "Feedback" et "No align". Cependant, "No align" n'a plus l'air d'apparaître aujoud'hui même en cas de latence ambigue.
+# voir code source : doit correspondre au plus long parmis les traductions de "Feedback" et "No align".
 #: application_bar.cc:394
 msgid "Feedgeek"
-msgstr "Larsen"
+msgstr "Ambiguë"
 
 #: application_bar.cc:430
 msgid ""
@@ -1252,9 +1252,10 @@ msgstr ""
 msgid "Reset All Peak Meters"
 msgstr "Réinitialiser tous les indicateurs de crête"
 
+# no align = latence ambigue, comme la largeur des boutons  Solo/Ecoute/Larsen est affectée par ce terme, on prend le plus court
 #: application_bar.cc:690
 msgid "No Align"
-msgstr "Pas d'alignement"
+msgstr "Ambiguë"
 
 #: application_bar.cc:749 editor_actions.cc:549
 msgid "Unset #%1"
@@ -2079,12 +2080,11 @@ msgstr "AAF : impossible de préparer le cache pour le fichier : %1"
 
 #: ardour_ui_aaf.cc:527
 msgid "AAF: Could not start [dummy] engine for AAF import ."
-msgstr ""
-"AAF : impossible de démarrer le moteur [fictif] pour l'importation AAF."
+msgstr "AAF : impossible de démarrer le moteur [fictif] pour l'import AAF."
 
 #: ardour_ui_aaf.cc:540
 msgid "AAF: Could not create new session for AAF import ."
-msgstr "AAF : impossible de créer une nouvelle session pour l'importation AAF."
+msgstr "AAF : impossible de créer une nouvelle session pour l'import AAF."
 
 #: ardour_ui_aaf.cc:603
 msgid "AAF: Clip has no essence."
@@ -4583,7 +4583,7 @@ msgstr "Quintolet de croches"
 
 #: editing_context.cc:117
 msgid "1/10 Note"
-msgstr "Quintolet de doubles croches"
+msgstr "Quintolet de double-croches"
 
 #: editing_context.cc:118
 msgid "1/20 Note"
@@ -7153,7 +7153,7 @@ msgstr "Importer"
 
 #: editor_audio_import.cc:359 editor_pt_import.cc:91 editor_videotimeline.cc:95
 msgid "Cancel Import"
-msgstr "Annuler l'importation"
+msgstr "Annuler l'import"
 
 #: editor_audio_import.cc:643
 msgid "Editor: cannot open file \"%1\", (%2)"
@@ -7169,7 +7169,7 @@ msgstr ""
 
 #: editor_audio_import.cc:657
 msgid "Cancel entire import"
-msgstr "Annuler toute l'importation"
+msgstr "Annuler tout l'import"
 
 #: editor_audio_import.cc:658
 msgid "Don't embed it"
@@ -7634,7 +7634,7 @@ msgstr "Ne pas poursuivre"
 
 #: editor_markers.cc:1244 utils_videotl.cc:71
 msgid "Continue"
-msgstr "Conti"
+msgstr "Continuer"
 
 #: editor_markers.cc:1249
 msgid "Set Constant"
@@ -10226,7 +10226,7 @@ msgstr "Niveau : "
 
 #: foldback_strip.cc:759 mixer_strip.cc:991 surround_strip.cc:327
 msgid "Click to add/edit comments"
-msgstr "Cliquer pour ajout/modif de commentaires"
+msgstr "Cliquer pour éditer les commentaires"
 
 #: foldback_strip.cc:792 mixer_strip.cc:1095 route_time_axis.cc:642
 #: surround_strip.cc:359 track_record_axis.cc:501 trigger_strip.cc:304
@@ -10322,7 +10322,7 @@ msgstr "-inf"
 
 #: gain_meter.cc:172 gain_meter.cc:1000
 msgid "Fader automation mode"
-msgstr "Atténuateur d'automation du gain"
+msgstr "Mode d'automation de l'atténuateur"
 
 #: gain_meter.cc:173
 msgid "dBFS - Digital Peak Hold. Click to reset."
@@ -10775,7 +10775,7 @@ msgstr "Rechercher..."
 
 #: keyeditor.cc:110
 msgid "Click to reset search string"
-msgstr "Clic  pour réinitialiser le champ de recherche"
+msgstr "Cliquer pour réinitialiser le champ de recherche"
 
 #: keyeditor.cc:114
 msgid "To remove a shortcut, select an action then press this: "
@@ -10985,9 +10985,9 @@ msgid ""
 "<b>When disabled</b>, the gain is applied directly to the output of the "
 "master-bus. This results in an efficient and reliable volume adjustment."
 msgstr ""
-"<b>Si coché</b> un étage d'amplification est utilisé pour appliquer le gain. "
-"Cela permet un positionnement personnalisé de l'étage de gain dans le flux "
-"de signaux du bus master, éventuellement suivi d'un limiteur pour se "
+"<b>Si coché</b> un module d'amplification est utilisé pour appliquer le "
+"gain. Cela permet un positionnement personnalisé de l'étage de gain dans le "
+"flux de signaux du bus master, éventuellement suivi d'un limiteur pour se "
 "conformer aux exigences en matière d'intensité sonore et de crête. En "
 "fonction des réglages du limiteur ou des traitements après l'étage de gain, "
 "des mesures successives de l'intensité sonore peuvent produire des résultats "
@@ -15498,7 +15498,7 @@ msgstr ""
 
 #: rc_option_editor.cc:2463
 msgid "Cache Folder for downloaded Freesound clips:"
-msgstr "Dossier cache pour les clips téléchargés depuis Freesound :"
+msgstr "Dossier de cache pour les clips téléchargés depuis Freesound :"
 
 #: rc_option_editor.cc:2473
 msgid "Save loudness analysis as image file after export"
@@ -15610,8 +15610,8 @@ msgid ""
 "\n"
 "<b>When disabled</b> clock displays are updated only every 100ms."
 msgstr ""
-"<b>Si coché</b>, les affichages d'horloges sont mis à jour à chaque images "
-"de code temporel.\n"
+"<b>Si coché</b>, les affichages d'horloges sont mis à jour à chaque image de "
+"code temporel.\n"
 "\n"
 "<b>Si décoché</b>, les affichages d'horloges sont mis à jour seulement "
 "toutes les 100 ms."
@@ -16199,14 +16199,14 @@ msgstr "Centre de l'écran"
 msgid "Mouse position"
 msgstr "Position de la souris"
 
+# voir GTK_WIN_POS_CENTER_ALWAYS
 #: rc_option_editor.cc:3206
 msgid "Center of screen, really"
-msgstr "Centre de l'écran"
+msgstr "Centre de l'écran (toujours)"
 
-# voir GTK_WIN_POS_CENTER_ALWAYS
 #: rc_option_editor.cc:3207
 msgid "Center of parent window"
-msgstr "Centre de la fenêtre (toujours)"
+msgstr "Centre de la fenêtre parente"
 
 #: rc_option_editor.cc:3212 rc_option_editor.cc:3223
 msgid "Appearance/Translation"
@@ -16965,7 +16965,7 @@ msgid ""
 "<b>When enabled</b> %1 will stop recording if an over- or underrun is "
 "detected by the audio engine"
 msgstr ""
-"<b>Si coché</b>, %1 arrêterea l'enregistrement si le moteur audio détecte un "
+"<b>Si coché</b>, %1 arrêtera l'enregistrement si le moteur audio détecte un "
 "décrochage (xrun)"
 
 #: rc_option_editor.cc:3877
@@ -20260,8 +20260,7 @@ msgstr "à la liste des sources"
 #: sfdb_ui.cc:135
 msgid "programming error: unknown import mode string %1"
 msgstr ""
-"erreur de programmation : chaîne de caractères %1 de mode d'importation "
-"inconnue"
+"erreur de programmation : chaîne de caractères de mode d'import inconnue %1"
 
 #: sfdb_ui.cc:163 trigger_clip_picker.cc:69
 msgid "Auto-play"
@@ -20309,7 +20308,7 @@ msgstr "carte des tempos avec %1 sections"
 
 #: sfdb_ui.cc:405 transcode_video_dialog.cc:110
 msgid "<b>File Information</b>"
-msgstr "<b>Informations sur fichier</b>"
+msgstr "<b>Informations sur le fichier</b>"
 
 #: sfdb_ui.cc:426
 msgid "Could not use confusing filename [%1] (%2)"
@@ -20580,7 +20579,7 @@ msgstr "par ordre de sélection"
 
 #: sfdb_ui.cc:2080
 msgid "programming error: unknown import sort string %1"
-msgstr "erreur de programmation : chaîne de tri d'importation inconnue %1"
+msgstr "erreur de programmation : chaîne de tri d'import inconnue %1"
 
 #: shuttle_control.cc:77
 msgid "Speed Display (Context-click for options)"
@@ -21516,7 +21515,7 @@ msgstr "Afficher toutes les pistes locales"
 
 #: strip_import_dialog.cc:786
 msgid "Importing Track State"
-msgstr "Importation de l'état des pistes en coucrs"
+msgstr "Import de l'état des pistes en cours"
 
 #: strip_silence_dialog.cc:49
 msgid "Strip Silence"
