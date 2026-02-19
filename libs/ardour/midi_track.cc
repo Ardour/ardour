@@ -217,6 +217,11 @@ MidiTrack::set_state (const XMLNode& node, int version)
 		capture_channel_mode = playback_channel_mode;
 	}
 
+	if (node.get_property ("chase-notes", _chase_notes)) {
+		/* default is to chase */
+		_chase_notes = true;
+	}
+
 	XMLProperty const * prop;
 
 	unsigned int playback_channel_mask = 0xffff;
@@ -285,6 +290,7 @@ MidiTrack::state(bool save_template) const
 	root.set_property ("step-editing", _step_editing);
 	root.set_property ("input-active", _input_active);
 	root.set_property ("restore-pgm", _restore_pgm_on_load);
+	root.set_property ("chase-notes", _chase_notes);
 
 	for (Controls::const_iterator c = _controls.begin(); c != _controls.end(); ++c) {
 		if (std::dynamic_pointer_cast<MidiTrack::MidiControl>(c->second)) {
