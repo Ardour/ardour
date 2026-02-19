@@ -11,7 +11,7 @@
 # Edouard <edwsaintesprit@hotmail.com>, 2016.
 # Rivaud Julien <frnchfrgg@free.fr>, 2016, 2019.
 # Olivier Humbert <trebmuh@tuxfamily.org>, 2016, 2018, 2019, 2020, 2021, 2022, 2023, 2024.
-# Julien Taverna <jujudusud@gmail.com>, 2022,2023.
+# Julien Taverna <jujudusud@gmail.com>, 2022,2023,2024,2025,2026.
 # Nicolas Faure <sub26nico@laposte.net>, 2022.
 # Jean-Emmanuel Doucet <jean-emmanuel@ammd.net>, 2026.
 msgid ""
