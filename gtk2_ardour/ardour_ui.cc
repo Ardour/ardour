@@ -1783,34 +1783,42 @@ ARDOUR_UI::trx_record_enable_all_tracks ()
 void
 ARDOUR_UI::transport_record (bool roll)
 {
-	if (_session) {
-		switch (_session->record_status()) {
-		case Disabled:
-			if (_session->ntracks() == 0) {
-				ArdourMessageDialog msg (_main_window, _("Please create one or more tracks before trying to record.\nYou can do this with the \"Add Track or Bus\" option in the Session menu."));
-				msg.run ();
-				return;
-			}
-			_session->maybe_enable_record ();
-			if (roll) {
-				ActionManager::get_action (X_("Region"), X_("add-region-cue-marker"))->set_sensitive(true);
-				transport_roll ();
-			}
-			break;
-		case Recording:
-			if (roll) {
-				_session->request_stop();
-			} else {
-				_session->disable_record (false, true);
-			}
-			break;
+	if (!_session) {
+		return;
+	}
 
-		case Enabled:
-			if (roll) {
-				transport_roll();
-			} else {
-				_session->disable_record (false, true);
-			}
+	if (_session->rec_enabled_triggerbox()) {
+		ArdourMessageDialog msg (_main_window, _("You have one more tracks enabled for cue recording.\n\nYou cannot simultaneously record cues and to the timeline."));
+		msg.run ();
+		return;
+	}
+
+	switch (_session->record_status()) {
+	case Disabled:
+		if (_session->ntracks() == 0) {
+			ArdourMessageDialog msg (_main_window, _("Please create one or more tracks before trying to record.\nYou can do this with the \"Add Track or Bus\" option in the Session menu."));
+			msg.run ();
+			return;
+		}
+		_session->maybe_enable_record ();
+		if (roll) {
+			ActionManager::get_action (X_("Region"), X_("add-region-cue-marker"))->set_sensitive(true);
+			transport_roll ();
+		}
+		break;
+	case Recording:
+		if (roll) {
+			_session->request_stop();
+		} else {
+			_session->disable_record (false, true);
+		}
+		break;
+
+	case Enabled:
+		if (roll) {
+			transport_roll();
+		} else {
+			_session->disable_record (false, true);
 		}
 	}
 }
