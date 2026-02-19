@@ -499,7 +499,7 @@ midi:
 
 	/* MIDI data handling */
 
-	const bool no_playlist_modification_pending = 0 == (_pending_overwrite.load () & PlaylistModified);
+	const bool playlist_modification_pending = 0 != (_pending_overwrite.load () & PlaylistModified);
 
 	if (bufs.count ().n_midi ()) {
 		MidiBuffer& dst (bufs.get_midi (0));
@@ -509,7 +509,7 @@ midi:
 			run_must_resolve = false;
 		}
 
-		if (!no_disk_output && !declick_in_progress () && (ms & MonitoringDisk) && !still_locating && no_playlist_modification_pending && speed) {
+		if (!no_disk_output && !declick_in_progress () && (ms & MonitoringDisk) && !still_locating && !playlist_modification_pending && speed) {
 			get_midi_playback (dst, start_sample, end_sample, ms, scratch_bufs, speed, disk_samples_to_consume);
 		}
 	}
@@ -529,7 +529,7 @@ midi:
 	}
 
 	/* decide if we need the butler */
-	if (!still_locating && no_playlist_modification_pending) {
+	if (!still_locating && !playlist_modification_pending) {
 		bool butler_required = false;
 
 		if (_playlists[DataType::AUDIO]) {
