@@ -50,7 +50,13 @@ value_as_string(const ARDOUR::ParameterDescriptor& desc,
 	// Value is not a scale point, print it normally
 	if (desc.unit == ARDOUR::ParameterDescriptor::MIDI_NOTE) {
 		snprintf(buf, sizeof(buf), "%s", ParameterDescriptor::midi_note_name (rint(v)).c_str());
-	} else if (desc.type == GainAutomation || desc.type == BusSendLevel || desc.type == TrimAutomation || desc.type == EnvelopeAutomation || desc.type == MainOutVolume || desc.type == SurroundSendLevel || desc.type == InsertReturnLevel) {
+	} else if (desc.type == GainAutomation
+	           || desc.type == BusSendLevel
+	           || desc.type == TrimAutomation
+	           || desc.type == EnvelopeAutomation
+	           || desc.type == MainOutVolume
+	           || desc.type == SurroundSendLevel
+	           || desc.type == InsertReturnLevel) {
 #ifdef PLATFORM_WINDOWS
 		if (v < GAIN_COEFF_SMALL) {
 			snprintf(buf, sizeof(buf), "-inf dB");
@@ -62,6 +68,8 @@ value_as_string(const ARDOUR::ParameterDescriptor& desc,
 #endif
 	} else if (desc.type == PanWidthAutomation) {
 		snprintf (buf, sizeof (buf), "%d%%", (int) floor (100.0 * v));
+	} else if (desc.type == MidiPitchBenderAutomation) {
+		snprintf (buf, sizeof (buf), "%d", (int) v - 8192);
 	} else if (!desc.print_fmt.empty()) {
 		snprintf(buf, sizeof(buf), desc.print_fmt.c_str(), v);
 	} else if (desc.integer_step) {
@@ -151,7 +159,10 @@ string_as_value (const ARDOUR::ParameterDescriptor& desc,
 	} else if (desc.type == PanWidthAutomation) {
 		int tmp;
 		legal = (sscanf (str.c_str(), "%d", &tmp) == 1);
-		return tmp;
+	} else if (desc.type == MidiPitchBenderAutomation) {
+		int tmp;
+		legal = (sscanf (str.c_str(), "%d", &tmp) == 1);
+		return tmp + 8192;
 	} else if (desc.integer_step) {
 		float tmp;
 		legal = (sscanf (str.c_str(), "%g", &tmp) == 1);

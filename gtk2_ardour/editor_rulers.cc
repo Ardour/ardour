@@ -505,8 +505,6 @@ Editor::update_ruler_visibility ()
 	_ruler_box_videotl.hide();
 #endif
 
-	std::cerr << "Update ruler vis\n";
-
 	if (ruler_minsec_action->get_active()) {
 		old_unit_pos = minsec_ruler->position().y;
 		if (tbpos != old_unit_pos) {

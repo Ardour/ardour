@@ -77,6 +77,8 @@ CONFIG_VARIABLE (bool, first_midi_bank_is_zero, "display-first-midi-bank-as-zero
 CONFIG_VARIABLE (int32_t, inter_scene_gap_samples, "inter-scene-gap-samples", 1)
 CONFIG_VARIABLE (bool, midi_input_follows_selection, "midi-input-follows-selection", 1)
 CONFIG_VARIABLE (std::string, default_trigger_input_port, "default-trigger-input-port", "")
+CONFIG_VARIABLE (bool, midi_chase, "midi-chase", true)
+CONFIG_VARIABLE (bool, midi_panic_when_looping, "midi-panic-when-looping", true)
 
 /* Timecode and related */
 

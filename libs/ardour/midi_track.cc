@@ -91,6 +91,7 @@ MidiTrack::MidiTrack (Session& sess, string name, TrackMode mode)
 	, _input_active (true)
 	, _restore_pgm_on_load (true)
 	, _last_seen_external_midi_note (-1)
+	, _chase_notes (true)
 {
 	_session.SessionLoaded.connect_same_thread (*this, std::bind (&MidiTrack::restore_controls, this));
 
@@ -128,6 +129,18 @@ MidiTrack::init ()
 #endif
 
 	return 0;
+}
+
+void
+MidiTrack::set_chase_notes (bool yn)
+{
+	if (_chase_notes != yn) {
+		_chase_notes = yn;
+		if (!yn && _disk_reader) {
+			_disk_reader->clear_midi_chase ();
+		}
+		_session.set_dirty();
+	}
 }
 
 void
@@ -207,6 +220,11 @@ MidiTrack::set_state (const XMLNode& node, int version)
 		capture_channel_mode = playback_channel_mode;
 	}
 
+	if (!node.get_property ("chase-notes", _chase_notes)) {
+		/* default is to chase */
+		_chase_notes = true;
+	}
+
 	XMLProperty const * prop;
 
 	unsigned int playback_channel_mask = 0xffff;
@@ -275,6 +293,7 @@ MidiTrack::state(bool save_template) const
 	root.set_property ("step-editing", _step_editing);
 	root.set_property ("input-active", _input_active);
 	root.set_property ("restore-pgm", _restore_pgm_on_load);
+	root.set_property ("chase-notes", _chase_notes);
 
 	for (Controls::const_iterator c = _controls.begin(); c != _controls.end(); ++c) {
 		if (std::dynamic_pointer_cast<MidiTrack::MidiControl>(c->second)) {
@@ -443,7 +462,9 @@ MidiTrack::non_realtime_locate (samplepos_t spos)
 		return;
 	}
 
-	_disk_reader->non_realtime_locate (spos);
+	if (_chase_notes && Config->get_midi_chase()) {
+		_disk_reader->midi_chase (spos);
+	}
 
 	Glib::Threads::Mutex::Lock lm (_control_lock, Glib::Threads::TRY_LOCK);
 	if (!lm.locked()) {

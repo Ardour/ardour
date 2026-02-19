@@ -207,15 +207,20 @@ DiskReader::realtime_locate (bool for_loop_end)
 }
 
 void
-DiskReader::non_realtime_locate (samplepos_t spos)
+DiskReader::clear_midi_chase ()
 {
-	if (!_playlists[DataType::MIDI]) {
+	_locate_tracker.reset ();
+}
+
+void
+DiskReader::midi_chase (samplepos_t spos)
+{
+	RTMidiBuffer* rtmb = rt_midibuffer();
+	if (!rtmb) {
 		return;
 	}
 
 	_locate_tracker.reset ();
-
-	RTMidiBuffer* rtmb = rt_midibuffer();
 
 	if (rtmb) {
 		for (size_t n = 0; n < rtmb->size(); ++n) {
@@ -1529,7 +1534,7 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 	if (ms & MonitoringDisk) {
 		/* disk data needed */
 
-		if (_locate_tracker.on()) {
+		if (Config->get_midi_chase() && _locate_tracker.on()) {
 			_locate_tracker.flush_notes (dst, 0, true);
 		}
 
