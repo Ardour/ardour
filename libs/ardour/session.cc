@@ -2286,6 +2286,10 @@ Session::maybe_enable_record (bool rt_context)
 		return;
 	}
 
+	if (armed_triggerbox()) {
+		return;
+	}
+
 	_record_status.store (Enabled);
 
 	// TODO make configurable, perhaps capture-buffer-seconds dependnet?
