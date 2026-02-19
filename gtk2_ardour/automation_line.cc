@@ -512,6 +512,9 @@ AutomationLine::string_to_fraction (string const & s) const
 				v = dB_to_coefficient (v);
 			}
 			break;
+		case MidiPitchBenderAutomation:
+			v += 8192;
+			break;
 		default:
 			break;
 	}

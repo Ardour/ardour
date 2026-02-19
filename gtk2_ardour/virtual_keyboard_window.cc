@@ -526,7 +526,7 @@ VirtualKeyboardWindow::pitch_bend_update_tooltip (int value)
 	        "Use mouse-drag for sprung mode,\n"
 	        "mouse-wheel for persistent bends.\n"
 	        "F1-F4 and arrow-up/down keys jump\n"
-	        "to select values."), value));
+	        "to select values."), value - 8192));
 }
 
 void
