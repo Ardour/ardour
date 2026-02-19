@@ -2745,6 +2745,8 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 					const std::string route_kind = root.get<std::string> ("params.arguments.type", "audio");
 					const int64_t count_in = root.get<int64_t> ("params.arguments.count", 1);
 					const std::string name_template = root.get<std::string> ("params.arguments.name", "");
+					const bool has_input_channels = root.get_child_optional ("params.arguments.inputChannels").is_initialized ();
+					const bool has_output_channels = root.get_child_optional ("params.arguments.outputChannels").is_initialized ();
 					const int64_t input_channels_in = root.get<int64_t> ("params.arguments.inputChannels", 2);
 					const int64_t output_channels_in = root.get<int64_t> ("params.arguments.outputChannels", 2);
 					const bool strict_io = root.get<bool> ("params.arguments.strictIo", false);
@@ -2784,6 +2786,8 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 					}
 
 					ARDOUR::RouteList created_routes;
+					int resolved_input_channels = 0;
+					int resolved_output_channels = 0;
 
 					if (route_kind == "audio") {
 						if (input_channels_in < 1 || input_channels_in > 1024 || output_channels_in < 1 || output_channels_in > 1024) {
@@ -2791,7 +2795,15 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						}
 
 						const int input_channels = (int) input_channels_in;
-						const int output_channels = (int) output_channels_in;
+						int output_channels = (int) output_channels_in;
+						resolved_input_channels = input_channels;
+						resolved_output_channels = output_channels;
+
+						if (add_tracks && input_channels == 1 && output_channels == 1 && !strict_io) {
+							/* Match UI mono-track behavior (mono in, stereo out) so pan is available. */
+							output_channels = 2;
+							resolved_output_channels = output_channels;
+						}
 
 						if (add_tracks) {
 							std::list<std::shared_ptr<ARDOUR::AudioTrack> > tracks = _session.new_audio_track (
@@ -2861,7 +2873,16 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 
 					std::ostringstream structured;
 					structured << "{\"kind\":\"" << (add_tracks ? "track" : "bus") << "\""
-						<< ",\"type\":\"" << json_escape (route_kind) << "\""
+						<< ",\"type\":\"" << json_escape (route_kind) << "\"";
+					if (route_kind == "audio") {
+						structured << ",\"io\":{"
+							<< "\"requestedInputChannels\":" << (has_input_channels ? std::to_string ((int) input_channels_in) : "null")
+							<< ",\"requestedOutputChannels\":" << (has_output_channels ? std::to_string ((int) output_channels_in) : "null")
+							<< ",\"resolvedInputChannels\":" << resolved_input_channels
+							<< ",\"resolvedOutputChannels\":" << resolved_output_channels
+							<< "}";
+					}
+					structured
 						<< ",\"insert\":{\"mode\":\"" << json_escape (insert_mode) << "\"";
 					if (insert_mode == "end") {
 						structured << ",\"order\":\"end\""
