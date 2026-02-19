@@ -35,8 +35,11 @@
 #include "ardour/dB.h"
 #include "ardour/internal_send.h"
 #include "ardour/midi_track.h"
+#include "ardour/plugin.h"
+#include "ardour/plugin_insert.h"
 #include "ardour/processor.h"
 #include "ardour/route.h"
+#include "ardour/selection.h"
 #include "ardour/session.h"
 #include "ardour/session_event.h"
 #include "ardour/tempo.h"
@@ -193,11 +196,11 @@ route_type_string (const std::shared_ptr<ARDOUR::Route>& route)
 static std::string
 tracks_list_json (ARDOUR::Session& session, bool include_hidden)
 {
-	std::shared_ptr<ARDOUR::RouteList> tracks = session.get_tracks ();
+	std::shared_ptr<ARDOUR::RouteList const> routes = session.get_routes ();
 	std::vector<std::shared_ptr<ARDOUR::Route> > sorted;
 
-	if (tracks) {
-		sorted.assign (tracks->begin (), tracks->end ());
+	if (routes) {
+		sorted.assign (routes->begin (), routes->end ());
 	}
 
 	std::sort (
@@ -363,6 +366,134 @@ plugin_list_json (const std::shared_ptr<ARDOUR::Route>& route)
 	}
 
 	ss << "]";
+	return ss.str ();
+}
+
+static std::string
+variant_type_string (ARDOUR::Variant::Type type)
+{
+	switch (type) {
+		case ARDOUR::Variant::BEATS: return "BEATS";
+		case ARDOUR::Variant::BOOL: return "BOOL";
+		case ARDOUR::Variant::DOUBLE: return "DOUBLE";
+		case ARDOUR::Variant::FLOAT: return "FLOAT";
+		case ARDOUR::Variant::INT: return "INT";
+		case ARDOUR::Variant::LONG: return "LONG";
+		case ARDOUR::Variant::NOTHING: return "NOTHING";
+		case ARDOUR::Variant::PATH: return "PATH";
+		case ARDOUR::Variant::STRING: return "STRING";
+		case ARDOUR::Variant::URI: return "URI";
+		default: return "UNKNOWN";
+	}
+}
+
+static std::string
+plugin_descriptor_json (const std::shared_ptr<ARDOUR::Route>& route, int plugin_index, std::string* error_message)
+{
+	std::shared_ptr<ARDOUR::Processor> proc = route->nth_plugin (plugin_index);
+	if (!proc) {
+		if (error_message) {
+			*error_message = "Plugin not found";
+		}
+		return std::string ();
+	}
+
+	std::shared_ptr<ARDOUR::PluginInsert> pi = std::dynamic_pointer_cast<ARDOUR::PluginInsert> (proc);
+	if (!pi) {
+		if (error_message) {
+			*error_message = "Processor is not a plugin";
+		}
+		return std::string ();
+	}
+
+	std::shared_ptr<ARDOUR::Plugin> pip = pi->plugin ();
+	if (!pip) {
+		if (error_message) {
+			*error_message = "Plugin instance unavailable";
+		}
+		return std::string ();
+	}
+
+	std::ostringstream ss;
+	ss << "{\"plugin\":{\"index\":" << plugin_index
+	   << ",\"name\":\"" << json_escape (proc->name ()) << "\""
+	   << ",\"displayName\":\"" << json_escape (proc->display_name ()) << "\""
+	   << ",\"enabled\":" << (proc->enabled () ? "true" : "false")
+	   << ",\"active\":" << (proc->active () ? "true" : "false")
+	   << ",\"maker\":\"" << json_escape (pip->maker ()) << "\""
+	   << ",\"label\":\"" << json_escape (pip->label ()) << "\""
+	   << ",\"uniqueId\":\"" << json_escape (pip->unique_id ()) << "\""
+	   << "},\"parameters\":[";
+
+	bool ok = false;
+	bool first = true;
+	for (uint32_t ppi = 0; ppi < pip->parameter_count (); ++ppi) {
+		const uint32_t controlid = pip->nth_parameter (ppi, ok);
+		if (!ok) {
+			continue;
+		}
+
+		ARDOUR::ParameterDescriptor pd;
+		if (pip->get_parameter_descriptor (controlid, pd) != 0) {
+			continue;
+		}
+
+		if (!first) {
+			ss << ",";
+		}
+		first = false;
+
+		int flags = 0;
+		flags |= pd.enumeration ? 1 : 0;
+		flags |= pd.integer_step ? 2 : 0;
+		flags |= pd.logarithmic ? 4 : 0;
+		flags |= pd.sr_dependent ? 32 : 0;
+		flags |= pd.toggled ? 64 : 0;
+		flags |= pip->parameter_is_input (controlid) ? 0x80 : 0;
+		std::string param_desc = pip->describe_parameter (Evoral::Parameter (ARDOUR::PluginAutomation, 0, controlid));
+		flags |= (param_desc == "hidden") ? 0x100 : 0;
+
+		ss << "{\"index\":" << ppi
+		   << ",\"number\":" << (ppi + 1)
+		   << ",\"controlId\":" << controlid
+		   << ",\"label\":\"" << json_escape (pd.label) << "\""
+		   << ",\"flags\":" << flags
+		   << ",\"datatype\":\"" << variant_type_string (pd.datatype) << "\""
+		   << ",\"lower\":" << pd.lower
+		   << ",\"upper\":" << pd.upper
+		   << ",\"printFmt\":\"" << json_escape (pd.print_fmt) << "\""
+		   << ",\"isInput\":" << (pip->parameter_is_input (controlid) ? "true" : "false")
+		   << ",\"isOutput\":" << (pip->parameter_is_output (controlid) ? "true" : "false")
+		   << ",\"isControl\":" << (pip->parameter_is_control (controlid) ? "true" : "false")
+		   << ",\"isHidden\":" << ((flags & 0x100) ? "true" : "false");
+
+		ss << ",\"scalePoints\":[";
+		bool first_scale = true;
+		if (pd.scale_points) {
+			for (ARDOUR::ScalePoints::const_iterator i = pd.scale_points->begin (); i != pd.scale_points->end (); ++i) {
+				if (!first_scale) {
+					ss << ",";
+				}
+				first_scale = false;
+				ss << "{\"value\":" << i->second
+				   << ",\"label\":\"" << json_escape (i->first) << "\"}";
+			}
+		}
+		ss << "]";
+
+		std::shared_ptr<ARDOUR::AutomationControl> c = pi->automation_control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, controlid));
+		if (c) {
+			ss << ",\"currentValue\":" << c->get_value ()
+			   << ",\"currentInterface\":" << c->internal_to_interface (c->get_value ());
+		} else {
+			ss << ",\"currentValue\":0"
+			   << ",\"currentInterface\":0";
+		}
+
+		ss << "}";
+	}
+
+	ss << "]}";
 	return ss.str ();
 }
 
@@ -818,15 +949,31 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 			"\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
 			"{\"name\":\"transport/stop\",\"title\":\"Transport Stop\",\"description\":\"Stop transport playback.\","
 			"\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
-			"{\"name\":\"tracks/list\",\"title\":\"Tracks List\",\"description\":\"List session tracks.\","
+			"{\"name\":\"tracks/list\",\"title\":\"Tracks List\",\"description\":\"List session tracks and buses.\","
 			"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"includeHidden\":{\"type\":\"boolean\"}},\"additionalProperties\":false}},"
-			"{\"name\":\"track/get_info\",\"title\":\"Get Track Info\",\"description\":\"Get one track info (fader, pan, rec, mute, solo, sends, plugins).\","
-			"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"}},\"required\":[\"id\"],\"additionalProperties\":false}},"
-			"{\"name\":\"track/get_fader\",\"title\":\"Get Track Fader\",\"description\":\"Get current track fader as normalized position and dB.\","
-			"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"}},\"required\":[\"id\"],\"additionalProperties\":false}},"
-			"{\"name\":\"track/set_fader\",\"title\":\"Set Track Fader\",\"description\":\"Set track fader by normalized position (0.0 to 1.0) or dB.\","
-			"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"position\":{\"type\":\"number\",\"minimum\":0,\"maximum\":1},\"db\":{\"type\":\"number\"}},\"required\":[\"id\"],\"oneOf\":[{\"required\":[\"position\"]},{\"required\":[\"db\"]}],\"additionalProperties\":false}}"
-			"]}");
+				"{\"name\":\"track/get_info\",\"title\":\"Get Track Info\",\"description\":\"Get one track info (fader, pan, rec, mute, solo, sends, plugins).\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"}},\"required\":[\"id\"],\"additionalProperties\":false}},"
+					"{\"name\":\"plugin/get_description\",\"title\":\"Plugin Description\",\"description\":\"Get plugin descriptor and parameter metadata for a route plugin.\","
+					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"pluginIndex\":{\"type\":\"integer\",\"minimum\":0}},\"required\":[\"id\",\"pluginIndex\"],\"additionalProperties\":false}},"
+					"{\"name\":\"plugin/set_parameter\",\"title\":\"Set Plugin Parameter\",\"description\":\"Set a plugin parameter by parameter index or control ID.\","
+					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"pluginIndex\":{\"type\":\"integer\",\"minimum\":0},\"parameterIndex\":{\"type\":\"integer\",\"minimum\":0},\"controlId\":{\"type\":\"integer\",\"minimum\":0},\"value\":{\"type\":\"number\"},\"interface\":{\"type\":\"number\"}},\"required\":[\"id\",\"pluginIndex\"],\"additionalProperties\":false}},"
+				"{\"name\":\"track/get_fader\",\"title\":\"Get Track Fader\",\"description\":\"Get current track fader as normalized position and dB.\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"}},\"required\":[\"id\"],\"additionalProperties\":false}},"
+				"{\"name\":\"track/select\",\"title\":\"Select Track\",\"description\":\"Select a route in Ardour.\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"}},\"required\":[\"id\"],\"additionalProperties\":false}},"
+				"{\"name\":\"track/set_mute\",\"title\":\"Set Track Mute\",\"description\":\"Set route mute state.\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"value\":{\"type\":\"boolean\"}},\"required\":[\"id\",\"value\"],\"additionalProperties\":false}},"
+					"{\"name\":\"track/set_solo\",\"title\":\"Set Track Solo\",\"description\":\"Set route solo state.\","
+					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"value\":{\"type\":\"boolean\"}},\"required\":[\"id\",\"value\"],\"additionalProperties\":false}},"
+					"{\"name\":\"track/set_rec_enable\",\"title\":\"Set Record Enable\",\"description\":\"Set track record-enable state.\","
+					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"value\":{\"type\":\"boolean\"}},\"required\":[\"id\",\"value\"],\"additionalProperties\":false}},"
+					"{\"name\":\"track/set_rec_safe\",\"title\":\"Set Record Safe\",\"description\":\"Set track record-safe state.\","
+					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"value\":{\"type\":\"boolean\"}},\"required\":[\"id\",\"value\"],\"additionalProperties\":false}},"
+					"{\"name\":\"track/set_pan\",\"title\":\"Set Pan\",\"description\":\"Set route pan position (0.0 to 1.0).\","
+					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"position\":{\"type\":\"number\",\"minimum\":0,\"maximum\":1}},\"required\":[\"id\",\"position\"],\"additionalProperties\":false}},"
+				"{\"name\":\"track/set_fader\",\"title\":\"Set Track Fader\",\"description\":\"Set track fader by normalized position (0.0 to 1.0) or dB.\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"position\":{\"type\":\"number\",\"minimum\":0,\"maximum\":1},\"db\":{\"type\":\"number\"}},\"required\":[\"id\"],\"oneOf\":[{\"required\":[\"position\"]},{\"required\":[\"db\"]}],\"additionalProperties\":false}}"
+				"]}");
 	}
 
 	if (method == "tools/call") {
@@ -882,7 +1029,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 					std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Tracks listed\"}],\"structuredContent\":") + structured + "}");
 			}
 
-			if (tool_name == "track/get_info") {
+				if (tool_name == "track/get_info") {
 				const std::string route_id = root.get<std::string> ("params.arguments.id", "");
 
 				if (route_id.empty ()) {
@@ -898,9 +1045,172 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 				return jsonrpc_result (
 					id,
 					std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Track info\"}],\"structuredContent\":") + structured + "}");
-			}
+				}
 
-			if (tool_name == "track/get_fader") {
+				if (tool_name == "plugin/get_description") {
+					const std::string route_id = root.get<std::string> ("params.arguments.id", "");
+					const int plugin_index = root.get<int> ("params.arguments.pluginIndex", -1);
+
+					if (route_id.empty ()) {
+						return jsonrpc_error (id, -32602, "Missing route id");
+					}
+					if (plugin_index < 0) {
+						return jsonrpc_error (id, -32602, "Invalid pluginIndex (expected >= 0)");
+					}
+
+					const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
+					if (!route) {
+						return jsonrpc_error (id, -32602, "Route not found");
+					}
+
+					std::string error_message;
+					std::string structured = plugin_descriptor_json (route, plugin_index, &error_message);
+					if (structured.empty ()) {
+						return jsonrpc_error (id, -32602, error_message.empty () ? "Could not describe plugin" : error_message);
+					}
+
+					return jsonrpc_result (
+						id,
+						std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Plugin descriptor\"}],\"structuredContent\":") + structured + "}");
+				}
+
+				if (tool_name == "plugin/set_parameter") {
+					const std::string route_id = root.get<std::string> ("params.arguments.id", "");
+					const int plugin_index = root.get<int> ("params.arguments.pluginIndex", -1);
+					const boost::optional<int> parameter_index = root.get_optional<int> ("params.arguments.parameterIndex");
+					const boost::optional<int> control_id = root.get_optional<int> ("params.arguments.controlId");
+					const boost::optional<double> value = root.get_optional<double> ("params.arguments.value");
+					const boost::optional<double> interface_value = root.get_optional<double> ("params.arguments.interface");
+
+					if (route_id.empty ()) {
+						return jsonrpc_error (id, -32602, "Missing route id");
+					}
+					if (plugin_index < 0) {
+						return jsonrpc_error (id, -32602, "Invalid pluginIndex (expected >= 0)");
+					}
+					if (!parameter_index && !control_id) {
+						return jsonrpc_error (id, -32602, "Provide one of: parameterIndex or controlId");
+					}
+					if (parameter_index && control_id) {
+						return jsonrpc_error (id, -32602, "Provide only one of: parameterIndex or controlId");
+					}
+					if (!value && !interface_value) {
+						return jsonrpc_error (id, -32602, "Provide one of: value or interface");
+					}
+					if (value && interface_value) {
+						return jsonrpc_error (id, -32602, "Provide only one of: value or interface");
+					}
+					if (parameter_index && *parameter_index < 0) {
+						return jsonrpc_error (id, -32602, "Invalid parameterIndex (expected >= 0)");
+					}
+					if (control_id && *control_id < 0) {
+						return jsonrpc_error (id, -32602, "Invalid controlId (expected >= 0)");
+					}
+
+					const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
+					if (!route) {
+						return jsonrpc_error (id, -32602, "Route not found");
+					}
+
+					std::shared_ptr<ARDOUR::Processor> proc = route->nth_plugin (plugin_index);
+					if (!proc) {
+						return jsonrpc_error (id, -32602, "Plugin not found");
+					}
+
+					std::shared_ptr<ARDOUR::PluginInsert> pi = std::dynamic_pointer_cast<ARDOUR::PluginInsert> (proc);
+					if (!pi) {
+						return jsonrpc_error (id, -32602, "Processor is not a plugin");
+					}
+
+					std::shared_ptr<ARDOUR::Plugin> pip = pi->plugin ();
+					if (!pip) {
+						return jsonrpc_error (id, -32602, "Plugin instance unavailable");
+					}
+
+					bool ok = false;
+					uint32_t resolved_control_id = 0;
+					int resolved_parameter_index = -1;
+
+					if (parameter_index) {
+						resolved_control_id = pip->nth_parameter ((uint32_t) *parameter_index, ok);
+						if (!ok) {
+							return jsonrpc_error (id, -32602, "parameterIndex out of range");
+						}
+						resolved_parameter_index = *parameter_index;
+					} else {
+						resolved_control_id = (uint32_t) *control_id;
+						for (uint32_t ppi = 0; ppi < pip->parameter_count (); ++ppi) {
+							const uint32_t cid = pip->nth_parameter (ppi, ok);
+							if (!ok) {
+								continue;
+							}
+							if (cid == resolved_control_id) {
+								resolved_parameter_index = (int) ppi;
+								break;
+							}
+						}
+						if (resolved_parameter_index < 0) {
+							return jsonrpc_error (id, -32602, "controlId not found");
+						}
+					}
+
+					ARDOUR::ParameterDescriptor pd;
+					if (pip->get_parameter_descriptor (resolved_control_id, pd) != 0) {
+						return jsonrpc_error (id, -32602, "Could not read parameter descriptor");
+					}
+					if (!(pip->parameter_is_input (resolved_control_id) || pip->parameter_is_control (resolved_control_id))) {
+						return jsonrpc_error (id, -32602, "Parameter is not writable");
+					}
+
+					std::shared_ptr<ARDOUR::AutomationControl> c =
+						pi->automation_control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, resolved_control_id));
+					if (!c) {
+						return jsonrpc_error (id, -32602, "Parameter automation control not available");
+					}
+
+					double new_value = c->get_value ();
+					if (interface_value) {
+						if (!std::isfinite (*interface_value)) {
+							return jsonrpc_error (id, -32602, "Invalid interface value");
+						}
+						/* Match OSC plugin-parameter flow: convert interface value through the automation control. */
+						new_value = c->interface_to_internal (*interface_value);
+					} else {
+						if (!std::isfinite (*value)) {
+							return jsonrpc_error (id, -32602, "Invalid parameter value");
+						}
+						new_value = *value;
+					}
+					if (!std::isfinite (new_value)) {
+						return jsonrpc_error (id, -32602, "Parameter mapping produced invalid value");
+					}
+
+					/* Clamp to control bounds to match defensive handling used elsewhere in MCP tools. */
+					new_value = std::max (c->lower (), std::min (c->upper (), new_value));
+					c->set_value (new_value, PBD::Controllable::NoGroup);
+
+					const double current_value = c->get_value ();
+					const double current_interface = c->internal_to_interface (current_value);
+
+					std::ostringstream structured;
+					structured << "{\"id\":\"" << json_escape (route->id ().to_s ()) << "\""
+						<< ",\"routeName\":\"" << json_escape (route->name ()) << "\""
+						<< ",\"pluginIndex\":" << plugin_index
+						<< ",\"pluginName\":\"" << json_escape (proc->name ()) << "\""
+						<< ",\"parameterIndex\":" << resolved_parameter_index
+						<< ",\"controlId\":" << resolved_control_id
+						<< ",\"label\":\"" << json_escape (pd.label) << "\""
+						<< ",\"value\":" << current_value
+						<< ",\"interface\":" << current_interface
+						<< "}";
+
+					return jsonrpc_result (
+						id,
+						std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Plugin parameter updated\"}],\"structuredContent\":")
+							+ structured.str () + "}");
+				}
+
+				if (tool_name == "track/get_fader") {
 				const std::string route_id = root.get<std::string> ("params.arguments.id", "");
 
 				if (route_id.empty ()) {
@@ -918,12 +1228,179 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 				}
 
 				std::string structured = track_fader_json (route);
-				return jsonrpc_result (
-					id,
-					std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Track fader state\"}],\"structuredContent\":") + structured + "}");
-			}
+					return jsonrpc_result (
+						id,
+						std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Track fader state\"}],\"structuredContent\":") + structured + "}");
+				}
 
-			if (tool_name == "track/set_fader") {
+				if (tool_name == "track/select") {
+					const std::string route_id = root.get<std::string> ("params.arguments.id", "");
+
+					if (route_id.empty ()) {
+						return jsonrpc_error (id, -32602, "Missing route id");
+					}
+
+					const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
+					if (!route) {
+						return jsonrpc_error (id, -32602, "Route not found");
+					}
+
+					/* Match OSC /strip/select behavior: set global stripable selection. */
+					_session.selection ().select_stripable_and_maybe_group (route, ARDOUR::SelectionSet);
+
+					std::string structured = track_info_json (route);
+					return jsonrpc_result (
+						id,
+						std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Route selected\"}],\"structuredContent\":") + structured + "}");
+				}
+
+				if (tool_name == "track/set_mute") {
+					const std::string route_id = root.get<std::string> ("params.arguments.id", "");
+					const boost::optional<bool> value = root.get_optional<bool> ("params.arguments.value");
+
+					if (route_id.empty ()) {
+						return jsonrpc_error (id, -32602, "Missing route id");
+					}
+					if (!value) {
+						return jsonrpc_error (id, -32602, "Missing boolean value");
+					}
+
+					const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
+					if (!route) {
+						return jsonrpc_error (id, -32602, "Route not found");
+					}
+					if (!route->mute_control ()) {
+						return jsonrpc_error (id, -32602, "Route has no mute control");
+					}
+
+					/* Match OSC mute logic. */
+					route->mute_control ()->set_value (*value ? 1.0 : 0.0, PBD::Controllable::NoGroup);
+
+					std::string structured = track_info_json (route);
+					return jsonrpc_result (
+						id,
+						std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Route mute updated\"}],\"structuredContent\":") + structured + "}");
+				}
+
+				if (tool_name == "track/set_solo") {
+					const std::string route_id = root.get<std::string> ("params.arguments.id", "");
+					const boost::optional<bool> value = root.get_optional<bool> ("params.arguments.value");
+
+					if (route_id.empty ()) {
+						return jsonrpc_error (id, -32602, "Missing route id");
+					}
+					if (!value) {
+						return jsonrpc_error (id, -32602, "Missing boolean value");
+					}
+
+					const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
+					if (!route) {
+						return jsonrpc_error (id, -32602, "Route not found");
+					}
+					if (!route->solo_control ()) {
+						return jsonrpc_error (id, -32602, "Route has no solo control");
+					}
+					if (route->is_master () || route->is_monitor ()) {
+						return jsonrpc_error (id, -32602, "Solo is not supported for this route");
+					}
+
+					/* Match OSC solo logic: use Session::set_control for solo-state propagation. */
+					_session.set_control (route->solo_control (), *value ? 1.0 : 0.0, PBD::Controllable::NoGroup);
+
+					std::string structured = track_info_json (route);
+					return jsonrpc_result (
+						id,
+						std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Route solo updated\"}],\"structuredContent\":") + structured + "}");
+				}
+
+				if (tool_name == "track/set_rec_enable") {
+					const std::string route_id = root.get<std::string> ("params.arguments.id", "");
+					const boost::optional<bool> value = root.get_optional<bool> ("params.arguments.value");
+
+					if (route_id.empty ()) {
+						return jsonrpc_error (id, -32602, "Missing track id");
+					}
+					if (!value) {
+						return jsonrpc_error (id, -32602, "Missing boolean value");
+					}
+
+					const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
+					const std::shared_ptr<ARDOUR::Track> track = std::dynamic_pointer_cast<ARDOUR::Track> (route);
+					if (!track) {
+						return jsonrpc_error (id, -32602, "Track not found");
+					}
+					if (!track->rec_enable_control ()) {
+						return jsonrpc_error (id, -32602, "Track has no record-enable control");
+					}
+
+					/* Match OSC recenable logic. */
+					track->rec_enable_control ()->set_value (*value ? 1.0 : 0.0, PBD::Controllable::NoGroup);
+
+					std::string structured = track_info_json (route);
+					return jsonrpc_result (
+						id,
+						std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Track rec-enable updated\"}],\"structuredContent\":") + structured + "}");
+				}
+
+				if (tool_name == "track/set_rec_safe") {
+					const std::string route_id = root.get<std::string> ("params.arguments.id", "");
+					const boost::optional<bool> value = root.get_optional<bool> ("params.arguments.value");
+
+					if (route_id.empty ()) {
+						return jsonrpc_error (id, -32602, "Missing track id");
+					}
+					if (!value) {
+						return jsonrpc_error (id, -32602, "Missing boolean value");
+					}
+
+					const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
+					const std::shared_ptr<ARDOUR::Track> track = std::dynamic_pointer_cast<ARDOUR::Track> (route);
+					if (!track) {
+						return jsonrpc_error (id, -32602, "Track not found");
+					}
+					if (!track->rec_safe_control ()) {
+						return jsonrpc_error (id, -32602, "Track has no record-safe control");
+					}
+
+					/* Match OSC record_safe logic. */
+					track->rec_safe_control ()->set_value (*value ? 1.0 : 0.0, PBD::Controllable::NoGroup);
+
+					std::string structured = track_info_json (route);
+					return jsonrpc_result (
+						id,
+						std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Track rec-safe updated\"}],\"structuredContent\":") + structured + "}");
+				}
+
+				if (tool_name == "track/set_pan") {
+					const std::string route_id = root.get<std::string> ("params.arguments.id", "");
+					const boost::optional<double> position = root.get_optional<double> ("params.arguments.position");
+
+					if (route_id.empty ()) {
+						return jsonrpc_error (id, -32602, "Missing route id");
+					}
+					if (!position || !valid_fader_position (*position)) {
+						return jsonrpc_error (id, -32602, "Invalid pan position (expected 0.0 to 1.0)");
+					}
+
+					const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
+					if (!route) {
+						return jsonrpc_error (id, -32602, "Route not found");
+					}
+					std::shared_ptr<ARDOUR::AutomationControl> pan = route->pan_azimuth_control ();
+					if (!pan) {
+						return jsonrpc_error (id, -32602, "Route has no pan control");
+					}
+
+					/* Match OSC pan_stereo_position logic. */
+					pan->set_value (route->pan_azimuth_control ()->interface_to_internal (*position), PBD::Controllable::NoGroup);
+
+					std::string structured = track_info_json (route);
+					return jsonrpc_result (
+						id,
+						std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Route pan updated\"}],\"structuredContent\":") + structured + "}");
+				}
+
+				if (tool_name == "track/set_fader") {
 				const std::string route_id = root.get<std::string> ("params.arguments.id", "");
 				const boost::optional<double> position = root.get_optional<double> ("params.arguments.position");
 				const boost::optional<double> db = root.get_optional<double> ("params.arguments.db");
