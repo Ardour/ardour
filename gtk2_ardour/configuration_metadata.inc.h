@@ -192,10 +192,12 @@ UIConfiguration::build_metadata ()
 	VAR_META (X_("meter-type-master"), _("meter"), _("type"), _("master"),  NULL);
 	VAR_META (X_("meter-type-track"), _("meter"), _("type"), _("track"),  NULL);
 	VAR_META (X_("midi-audition-synth-uri"), _("midi"), _("audition"), _("synthesizer"), _("plugin"), _("name"), _("id"), _("uri"), _("location"),  NULL);
+	VAR_META (X_("midi-chase"), _("midi"), _("chase"), _("notes"), _("locate"), _("play"),  NULL);
 	VAR_META (X_("midi-clock-resolution"), _("midi"), _("clock"), _("resolution"), _("quantize"), _("limit"), _("precision"),  NULL);
 	VAR_META (X_("midi-clock-sets-tempo"), _("midi"), _("clock"), _("mclk"), _("set"), _("tempo"),  NULL);
 	VAR_META (X_("midi-feedback"), _("midi"), _("generic"), _("control"), _("surface"), _("feedback"),  NULL);
 	VAR_META (X_("midi-input-follows-selection"), _("midi"), _("inputs"), _("port"), _("device"), _("follow"), _("selection"), _("tracks"),  NULL);
+	VAR_META (X_("midi-panic-when-looping"), _("midi"), _("panic"), _("looping"), _("ports"), _("notes"), _("off"),  NULL);
 	VAR_META (X_("minimum-disk-read-bytes"), _("disk"), _("disc"), _("i/o"), _("io"), _("chunk"), _("read"), _("size"), _("bytes"), _("buffering"),  NULL);
 	VAR_META (X_("minimum-disk-write-bytes"), _("disk"), _("disc"), _("i/o"), _("io"), _("chunk"), _("write"), _("size"), _("bytes"), _("buffering"),  NULL);
 	VAR_META (X_("mmc-receive-device-id"), _("midi"), _("machine"), _("control"), _("mmc"), _("receive"), _("receiving"), _("device"), _("id"),  NULL);
