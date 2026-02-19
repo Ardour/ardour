@@ -975,6 +975,43 @@ send_list_json (const std::shared_ptr<ARDOUR::Route>& route)
 }
 
 static std::string
+send_level_json (const std::shared_ptr<ARDOUR::Route>& route, uint32_t send_index)
+{
+	std::shared_ptr<ARDOUR::Processor> p = route ? route->nth_send (send_index) : std::shared_ptr<ARDOUR::Processor> ();
+	std::shared_ptr<ARDOUR::AutomationControl> gain = route ? route->send_level_controllable (send_index) : std::shared_ptr<ARDOUR::AutomationControl> ();
+	const double position = gain ? gain->internal_to_interface (gain->get_value ()) : 0.0;
+	double db = -193.0;
+
+	if (gain && gain->get_value () > 0.0) {
+		db = fast_coefficient_to_dB (gain->get_value ());
+		if (!std::isfinite (db)) {
+			db = -193.0;
+		}
+	}
+
+	std::ostringstream ss;
+	ss << "{\"id\":\"" << json_escape (route->id ().to_s ()) << "\""
+	   << ",\"routeName\":\"" << json_escape (route->name ()) << "\""
+	   << ",\"sendIndex\":" << send_index
+	   << ",\"name\":\"" << json_escape (route->send_name (send_index)) << "\""
+	   << ",\"active\":" << ((p && p->active ()) ? "true" : "false")
+	   << ",\"position\":" << position
+	   << ",\"db\":" << db;
+
+	std::shared_ptr<ARDOUR::InternalSend> isend = std::dynamic_pointer_cast<ARDOUR::InternalSend> (p);
+	if (isend) {
+		std::shared_ptr<ARDOUR::Route> target = isend->target_route ();
+		if (target) {
+			ss << ",\"targetRouteId\":\"" << json_escape (target->id ().to_s ()) << "\""
+			   << ",\"targetRouteName\":\"" << json_escape (target->name ()) << "\"";
+		}
+	}
+
+	ss << "}";
+	return ss.str ();
+}
+
+static std::string
 plugin_list_json (const std::shared_ptr<ARDOUR::Route>& route)
 {
 	std::ostringstream ss;
@@ -1630,6 +1667,8 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"value\":{\"type\":\"boolean\"}},\"required\":[\"id\",\"value\"],\"additionalProperties\":false}},"
 					"{\"name\":\"track/set_pan\",\"title\":\"Set Pan\",\"description\":\"Set route pan position (0.0 to 1.0).\","
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"position\":{\"type\":\"number\",\"minimum\":0,\"maximum\":1}},\"required\":[\"id\",\"position\"],\"additionalProperties\":false}},"
+					"{\"name\":\"track/set_send_level\",\"title\":\"Set Send Level\",\"description\":\"Set route send level by send index using normalized position (0.0 to 1.0) or dB.\","
+					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"sendIndex\":{\"type\":\"integer\",\"minimum\":0},\"position\":{\"type\":\"number\",\"minimum\":0,\"maximum\":1},\"db\":{\"type\":\"number\"}},\"required\":[\"id\",\"sendIndex\"],\"oneOf\":[{\"required\":[\"position\"]},{\"required\":[\"db\"]}],\"additionalProperties\":false}},"
 				"{\"name\":\"track/set_fader\",\"title\":\"Set Track Fader\",\"description\":\"Set track fader by normalized position (0.0 to 1.0) or dB.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"position\":{\"type\":\"number\",\"minimum\":0,\"maximum\":1},\"db\":{\"type\":\"number\"}},\"required\":[\"id\"],\"oneOf\":[{\"required\":[\"position\"]},{\"required\":[\"db\"]}],\"additionalProperties\":false}}"
 				"]}");
@@ -2597,6 +2636,71 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 					return jsonrpc_result (
 						id,
 						std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Route pan updated\"}],\"structuredContent\":") + structured + "}");
+				}
+
+				if (tool_name == "track/set_send_level") {
+					const std::string route_id = root.get<std::string> ("params.arguments.id", "");
+					const int send_index = root.get<int> ("params.arguments.sendIndex", -1);
+					const boost::optional<double> position = root.get_optional<double> ("params.arguments.position");
+					const boost::optional<double> db = root.get_optional<double> ("params.arguments.db");
+
+					if (route_id.empty ()) {
+						return jsonrpc_error (id, -32602, "Missing route id");
+					}
+					if (send_index < 0) {
+						return jsonrpc_error (id, -32602, "Invalid sendIndex (expected >= 0)");
+					}
+					if (!position && !db) {
+						return jsonrpc_error (id, -32602, "Provide one of: position (0.0 to 1.0) or db");
+					}
+					if (position && db) {
+						return jsonrpc_error (id, -32602, "Provide only one of: position or db");
+					}
+
+					const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
+					if (!route) {
+						return jsonrpc_error (id, -32602, "Route not found");
+					}
+
+					const uint32_t sid = (uint32_t) send_index;
+					std::shared_ptr<ARDOUR::Processor> send_proc = route->nth_send (sid);
+					if (!send_proc) {
+						return jsonrpc_error (id, -32602, "Send not found");
+					}
+
+					std::shared_ptr<ARDOUR::AutomationControl> send_gain = route->send_level_controllable (sid);
+					if (!send_gain) {
+						return jsonrpc_error (id, -32602, "Send has no level control");
+					}
+
+					double internal_gain = send_gain->get_value ();
+					if (position) {
+						if (!valid_fader_position (*position)) {
+							return jsonrpc_error (id, -32602, "Invalid send position (expected 0.0 to 1.0)");
+						}
+
+						/* Match OSC /strip/send/fader behavior. */
+						internal_gain = send_gain->interface_to_internal (*position);
+					} else {
+						if (!valid_fader_db (*db)) {
+							return jsonrpc_error (id, -32602, "Invalid dB value");
+						}
+
+						/* Match OSC /strip/send/gain behavior. */
+						internal_gain = (*db <= -192.0) ? 0.0 : dB_to_coefficient (*db);
+					}
+
+					if (!std::isfinite (internal_gain)) {
+						return jsonrpc_error (id, -32602, "Invalid mapped send gain");
+					}
+
+					internal_gain = std::max (send_gain->lower (), std::min (send_gain->upper (), internal_gain));
+					send_gain->set_value (internal_gain, PBD::Controllable::NoGroup);
+
+					std::string structured = send_level_json (route, sid);
+					return jsonrpc_result (
+						id,
+						std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Send level updated\"}],\"structuredContent\":") + structured + "}");
 				}
 
 				if (tool_name == "track/set_fader") {
