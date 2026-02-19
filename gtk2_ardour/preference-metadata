@@ -388,8 +388,11 @@
 [auto-return-after-rewind-ffwd]
 [auto-return-target-list]
 [automation-follows-regions]
+  automation follows regions
 [automation-interval-msecs]
+  automation
 [automation-thinning-factor]
+  automation
 [buffering-preset]
 [capture-buffer-seconds]
 [click-emphasis-sound]

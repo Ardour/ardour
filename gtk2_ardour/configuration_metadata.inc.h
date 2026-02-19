@@ -159,6 +159,9 @@ UIConfiguration::build_metadata ()
 	VAR_META (X_("use-video-file-fps"), _("video"), _("use"), _("frames"), _("per"), _("second"), _("fps"),  NULL);
 	VAR_META (X_("afl-position"), _("monitoring"), _("monitor"), _("afl"), _("pfl"), _("pre"), _("post"), _("position"),  NULL);
 	VAR_META (X_("auto-analyse-audio"), _("automatic"), _("automated"), _("audio"), _("analysis"), _("transients"),  NULL);
+	VAR_META (X_("automation-follows-regions"), _("automation"), _("follows"), _("regions"),  NULL);
+	VAR_META (X_("automation-interval-msecs"), _("automation"),  NULL);
+	VAR_META (X_("automation-thinning-factor"), _("automation"),  NULL);
 	VAR_META (X_("click-emphasis-sound"), _("metronome"), _("click"), _("beat"), _("downbeat"), _("emphasis"), _("sample"), _("sound"),  NULL);
 	VAR_META (X_("click-gain"), _("metronome"), _("click"), _("beat"), _("volume"), _("gain"), _("level"),  NULL);
 	VAR_META (X_("click-sound"), _("metronome"), _("click"), _("beat"), _("sound"), _("sample"),  NULL);
