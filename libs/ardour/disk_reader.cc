@@ -514,11 +514,7 @@ midi:
 		}
 	}
 
-	/* decide if we need the butler */
-
-	if (!still_locating && no_playlist_modification_pending) {
-		bool butler_required = false;
-
+	if (!still_locating) {
 		if (speed < 0.0) {
 			playback_sample -= disk_samples_to_consume;
 		} else {
@@ -530,6 +526,11 @@ midi:
 			Temporal::Range loop_range (loc->start (), loc->end ());
 			playback_sample = loop_range.squish (timepos_t (playback_sample)).samples ();
 		}
+	}
+
+	/* decide if we need the butler */
+	if (!still_locating && no_playlist_modification_pending) {
+		bool butler_required = false;
 
 		if (_playlists[DataType::AUDIO]) {
 			if (!c->empty ()) {
