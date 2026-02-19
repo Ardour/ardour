@@ -68,6 +68,8 @@ value_as_string(const ARDOUR::ParameterDescriptor& desc,
 #endif
 	} else if (desc.type == PanWidthAutomation) {
 		snprintf (buf, sizeof (buf), "%d%%", (int) floor (100.0 * v));
+	} else if (desc.type == MidiPitchBenderAutomation) {
+		snprintf (buf, sizeof (buf), "%d", (int) v - 8192);
 	} else if (!desc.print_fmt.empty()) {
 		snprintf(buf, sizeof(buf), desc.print_fmt.c_str(), v);
 	} else if (desc.integer_step) {
@@ -157,7 +159,10 @@ string_as_value (const ARDOUR::ParameterDescriptor& desc,
 	} else if (desc.type == PanWidthAutomation) {
 		int tmp;
 		legal = (sscanf (str.c_str(), "%d", &tmp) == 1);
-		return tmp;
+	} else if (desc.type == MidiPitchBenderAutomation) {
+		int tmp;
+		legal = (sscanf (str.c_str(), "%d", &tmp) == 1);
+		return tmp + 8192;
 	} else if (desc.integer_step) {
 		float tmp;
 		legal = (sscanf (str.c_str(), "%g", &tmp) == 1);
