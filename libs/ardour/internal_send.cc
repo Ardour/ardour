@@ -227,12 +227,20 @@ InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 	const gain_t tgain = target_gain ();
 	const bool converged = fabsf (_current_gain - tgain) < GAIN_COEFF_DELTA;
 
-	if ((tgain == GAIN_COEFF_ZERO) && converged) {
-		_meter->reset ();
-		return;
-	}
+	const samplecnt_t latency  = _thru_delay->delay ();
+	const samplecnt_t delay    = _send_delay->delay ();
+	bool can_return_early      = latency == 0 && delay == 0;
 
-	samplecnt_t latency = _thru_delay->delay ();
+	// maybe TODO: once converged, count-down max(latency, delay) before
+	// returning early. or flush delaylines (once) when transitioning
+	// to converved and run delays for a cycle.
+
+	if ((tgain == GAIN_COEFF_ZERO) && converged) {
+		if (can_return_early) {
+			_meter->reset ();
+			return;
+		}
+	}
 
 	/* we have to copy the input, because we may alter the buffers with the amp
 	 * in-place, which a send must never do.
@@ -336,9 +344,11 @@ InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		_current_gain = Amp::apply_gain (mixbufs, _session.nominal_sample_rate (), nframes, _current_gain, tgain);
 	} else if (tgain == GAIN_COEFF_ZERO) {
 		/* we were quiet last time, and we're still supposed to be quiet. */
-		_meter->reset ();
 		Amp::apply_simple_gain (mixbufs, nframes, GAIN_COEFF_ZERO);
-		return;
+		if (can_return_early) {
+			_meter->reset ();
+			return;
+		}
 	} else if (tgain != GAIN_COEFF_UNITY) {
 		/* target gain has not changed, but is not zero or unity */
 		Amp::apply_simple_gain (mixbufs, nframes, tgain);
