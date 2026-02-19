@@ -22223,7 +22223,7 @@ msgstr "Arrêter les Cues %1"
 
 #: trigger_page.cc:1002
 msgid "Stop all cues now"
-msgstr "Arreter tous les Cues maintenant"
+msgstr "Arrêter tous les Cues maintenant"
 
 #: trigger_page.cc:1003
 msgid "Stop all cues soon"
