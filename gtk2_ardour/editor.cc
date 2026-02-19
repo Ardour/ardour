@@ -570,15 +570,19 @@ Editor::Editor ()
 	editor_summary_pane.set_check_divider_position (true);
 	editor_summary_pane.add (edit_packer);
 
-	Button* summary_arrow_left = manage (new Button);
-	summary_arrow_left->add (*manage (new Arrow (ARROW_LEFT, SHADOW_NONE)));
-	summary_arrow_left->signal_pressed().connect (sigc::hide_return (sigc::bind (sigc::mem_fun (*this, &Editor::scroll_press), LEFT)));
-	summary_arrow_left->signal_released().connect (sigc::mem_fun (*this, &Editor::scroll_release));
+	ArdourButton* summary_arrow_left = manage (new ArdourButton);
+	summary_arrow_left->set_corner_mask(ArdourButton::LEFT);
+	summary_arrow_left->set_icon(ArdourIcon::ArrowLeft);
+	summary_arrow_left->set_act_on_release(false);
+	summary_arrow_left->signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &Editor::scroll_press), LEFT), false);
+	summary_arrow_left->signal_button_release_event().connect (sigc::mem_fun (*this, &Editor::scroll_release), false);
 
-	Button* summary_arrow_right = manage (new Button);
-	summary_arrow_right->add (*manage (new Arrow (ARROW_RIGHT, SHADOW_NONE)));
-	summary_arrow_right->signal_pressed().connect (sigc::hide_return (sigc::bind (sigc::mem_fun (*this, &Editor::scroll_press), RIGHT)));
-	summary_arrow_right->signal_released().connect (sigc::mem_fun (*this, &Editor::scroll_release));
+	ArdourButton* summary_arrow_right = manage (new ArdourButton);
+	summary_arrow_right->set_corner_mask(ArdourButton::RIGHT);
+	summary_arrow_right->set_icon(ArdourIcon::ArrowRight);
+	summary_arrow_right->set_act_on_release(false);
+	summary_arrow_right->signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &Editor::scroll_press), RIGHT), false);
+	summary_arrow_right->signal_button_release_event().connect (sigc::mem_fun (*this, &Editor::scroll_release), false);
 
 	VBox* summary_arrows_left = manage (new VBox);
 	summary_arrows_left->pack_start (*summary_arrow_left);
@@ -586,17 +590,22 @@ Editor::Editor ()
 	VBox* summary_arrows_right = manage (new VBox);
 	summary_arrows_right->pack_start (*summary_arrow_right);
 
-	Gtk::Frame* summary_frame = manage (new Gtk::Frame);
-	summary_frame->set_shadow_type (Gtk::SHADOW_ETCHED_IN);
+	Gtk::EventBox* summary_left_spacer = manage (new Gtk::EventBox); // extra space before the left arrow
+	summary_left_spacer->set_size_request(4, -1);
+	summary_left_spacer->show();
+	Gtk::EventBox* summary_bottom_spacer = manage (new Gtk::EventBox); // extra space after the summary
+	summary_bottom_spacer->set_size_request(-1, 3);
+	summary_bottom_spacer->show();
 
-	summary_frame->add (*_summary);
-	summary_frame->show ();
-
+	_summary_hbox.pack_start (*summary_left_spacer, false, false);
 	_summary_hbox.pack_start (*summary_arrows_left, false, false);
-	_summary_hbox.pack_start (*summary_frame, true, true);
+	_summary_hbox.pack_start (*_summary, true, true);
 	_summary_hbox.pack_start (*summary_arrows_right, false, false);
 
-	editor_summary_pane.add (_summary_hbox);
+	_summary_vbox.pack_start (_summary_hbox, true, true);
+	_summary_vbox.pack_start (*summary_bottom_spacer, false, false);
+
+	editor_summary_pane.add (_summary_vbox);
 
 	HBox* tabbox = manage (new HBox (true));
 	tabbox->set_spacing (3);
@@ -5174,7 +5183,7 @@ Editor::check_step_edit ()
 }
 
 bool
-Editor::scroll_press (Direction dir)
+Editor::scroll_press (GdkEventButton* ev, Direction dir)
 {
 	++_scroll_callbacks;
 
@@ -5205,7 +5214,7 @@ Editor::scroll_press (Direction dir)
 	if (!_scroll_connection.connected ()) {
 
 		_scroll_connection = Glib::signal_timeout().connect (
-			sigc::bind (sigc::mem_fun (*this, &Editor::scroll_press), dir), 100
+			sigc::bind (sigc::mem_fun (*this, &Editor::scroll_press), ev, dir), 100
 			);
 
 		_scroll_callbacks = 0;
@@ -5214,10 +5223,11 @@ Editor::scroll_press (Direction dir)
 	return true;
 }
 
-void
-Editor::scroll_release ()
+bool
+Editor::scroll_release (GdkEventButton* ev)
 {
 	_scroll_connection.disconnect ();
+	return true;
 }
 
 void

@@ -142,7 +142,7 @@ EditorSummary::render_background_image ()
 
 	/* background (really just the dividing lines between tracks */
 
-	cairo_set_source_rgb (cr, 0, 0, 0);
+	Gtkmm2ext::set_source_rgba (cr, _background_color);
 	cairo_rectangle (cr, 0, 0, get_width(), get_height());
 	cairo_fill (cr);
 
@@ -195,7 +195,7 @@ EditorSummary::render_background_image ()
 		/* paint a non-bg colored strip to represent the track itself */
 
 		if (_track_height > 4) {
-			cairo_set_source_rgb (cr, 0.2, 0.2, 0.2);
+			Gtkmm2ext::set_source_rgba (cr, _track_color);
 			cairo_set_line_width (cr, _track_height - 1);
 			cairo_move_to (cr, 0, y + _track_height / 2);
 			cairo_line_to (cr, get_width(), y + _track_height / 2);
@@ -217,18 +217,30 @@ EditorSummary::render_background_image ()
 		y += _track_height;
 	}
 
+	/* top and bottom border */
+
+	cairo_set_line_width (cr, 1);
+	Gtkmm2ext::set_source_rgba (cr, _background_color);
+
+	cairo_move_to (cr, 0, 0.5);
+	cairo_line_to (cr, get_width(), 0.5);
+	cairo_stroke (cr);
+	cairo_move_to (cr, 0, get_height() - 0.5);
+	cairo_line_to (cr, get_width(), get_height() - 0.5);
+	cairo_stroke (cr);
+
 	/* start and end markers */
 
 	cairo_set_line_width (cr, 1);
-	cairo_set_source_rgb (cr, 1, 1, 0);
+	Gtkmm2ext::set_source_rgba (cr, _marker_color);
 
 	const double p = (_session->current_start_sample() - _start) * _x_scale;
-	cairo_move_to (cr, p, 0);
-	cairo_line_to (cr, p, get_height());
+	cairo_move_to (cr, p, 1);
+	cairo_line_to (cr, p, get_height() - 1);
 
 	double const q = (_session->current_end_sample() - _start) * _x_scale;
-	cairo_move_to (cr, q, 0);
-	cairo_line_to (cr, q, get_height());
+	cairo_move_to (cr, q, 1);
+	cairo_line_to (cr, q, get_height() - 1);
 	cairo_stroke (cr);
 
 	cairo_destroy (cr);
@@ -283,13 +295,13 @@ EditorSummary::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle
 
 	int32_t width = _view_rectangle_x.second - _view_rectangle_x.first;
 	cairo_rectangle (cr, _view_rectangle_x.first, 0, width, get_height ());
-	cairo_set_source_rgba (cr, 1, 1, 1, 0.15);
+	Gtkmm2ext::set_source_rgba (cr, _viewrect_color);
 	cairo_fill (cr);
 
 	/* horiz zoom */
-	cairo_rectangle (cr, _view_rectangle_x.first, 0, width, get_height ());
+	cairo_rectangle (cr, _view_rectangle_x.first + 0.5, 1.5, width - 1, get_height () - 3);
 	cairo_set_line_width (cr, 1);
-	cairo_set_source_rgba (cr, 1, 1, 1, 0.9);
+	cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(_viewrect_color), UINT_RGBA_G_FLT(_viewrect_color), UINT_RGBA_B_FLT(_viewrect_color), 0.5);
 	cairo_stroke (cr);
 
 	/* Playhead */
@@ -300,8 +312,8 @@ EditorSummary::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle
 	cairo_set_source_rgb (cr, r,g,b); // playhead color
 
 	const double ph= playhead_sample_to_position (_editor.playhead_cursor ()->current_sample());
-	cairo_move_to (cr, ph, 0);
-	cairo_line_to (cr, ph, get_height());
+	cairo_move_to (cr, ph, 1);
+	cairo_line_to (cr, ph, get_height() - 1);
 	cairo_stroke (cr);
 	cairo_pop_group_to_source (cr);
 	cairo_paint (cr);
@@ -313,6 +325,10 @@ void
 EditorSummary::set_colors ()
 {
 	_phead_color = UIConfiguration::instance().color ("play head");
+	_background_color = UIConfiguration::instance().color ("summary: base");
+	_track_color = UIConfiguration::instance().color_mod ("summary: track base", "summary track alpha");
+	_marker_color = UIConfiguration::instance().color ("location session");
+	_viewrect_color = UIConfiguration::instance().color_mod ("summary: view rect", "summary view rect alpha");
 }
 
 

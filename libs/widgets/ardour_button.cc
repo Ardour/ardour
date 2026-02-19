@@ -408,11 +408,11 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 		if (use_concave && active_state() == Gtkmm2ext::ExplicitActive && (!((_elements & Indicator)==Indicator) || use_custom_led_color)) {
 			// concave
 			cairo_set_source (cr, concave_pattern);
-			Gtkmm2ext::rounded_rectangle (cr, 1, 1, get_width() - 2, get_height() - 2, corner_radius);
+			rounded_function (cr, 1, 1, get_width() - 2, get_height() - 2, corner_radius);
 			cairo_fill (cr);
 		} else {
 			cairo_set_source (cr, convex_pattern);
-			Gtkmm2ext::rounded_rectangle (cr, 1, 1, get_width() - 2*scale, get_height() - 2*scale, corner_radius);
+			rounded_function (cr, 1, 1, get_width() - 2*scale, get_height() - 2*scale, corner_radius);
 			cairo_fill (cr);
 		}
 	}
