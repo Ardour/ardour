@@ -685,7 +685,7 @@ msgstr "%1 ne fonctionnera pas sans un fichier de définition de menu valide"
 
 #: add_route_dialog.cc:71
 msgid "Add Track/Bus/VCA"
-msgstr "Ajouter piste/bus/VCA"
+msgstr "Ajouter piste / bus / VCA"
 
 #: add_route_dialog.cc:74
 msgid "Input Config:"
@@ -1216,7 +1216,7 @@ msgid ""
 "Click to stop the audition"
 msgstr ""
 "Allumé lorsqu'une écoute est en cours.\n"
-"Cliquez pour arrêter l'écoute"
+"Cliquer pour arrêter l'écoute"
 
 #: application_bar.cc:435
 msgid ""
@@ -1267,7 +1267,7 @@ msgid ""
 "Right-click to assign"
 msgstr ""
 "Pas d'action liée\n"
-"Clic droit pour affecter"
+"Clic droit pour assigner"
 
 #: application_bar.cc:754
 msgid ""
@@ -1332,7 +1332,7 @@ msgstr "Positionnement des haut-parleurs"
 
 #: ardour_ui.cc:311
 msgid "Add Tracks/Busses"
-msgstr "Ajouter pistes/bus"
+msgstr "Ajouter pistes / bus"
 
 #: ardour_ui.cc:312
 msgid "About"
@@ -2169,7 +2169,7 @@ msgstr "UI : impossible de configurer l'enregistreur"
 
 #: ardour_ui_dependents.cc:279
 msgid "UI: cannot setup trigger"
-msgstr "UI : impossible de configurer les cues"
+msgstr "UI : impossible de configurer les déclencheurs"
 
 #: ardour_ui_dependents.cc:284
 msgid "UI: cannot setup meterbridge"
@@ -2329,7 +2329,7 @@ msgstr "Ajouter une piste, un bus, un VCA ou un bus de retour..."
 
 #: ardour_ui_ed.cc:209
 msgid "Duplicate Tracks/Busses..."
-msgstr "Dupliquer les pistes/bus..."
+msgstr "Dupliquer les pistes / bus..."
 
 #: ardour_ui_ed.cc:215
 msgid "Cancel Solo"
@@ -2615,7 +2615,7 @@ msgstr "Activer l'enregistrement"
 #: ardour_ui_ed.cc:436
 #, fuzzy
 msgid "Toggle Auto Loop"
-msgstr "Basculer boucle auto"
+msgstr "Basculer boucle automatique"
 
 #: ardour_ui_ed.cc:439
 #, fuzzy
@@ -3115,7 +3115,7 @@ msgid ""
 "Please consider paying for a copy of %1 - you can pay whatever you want.\n"
 "Download the unrestricted build after paying..."
 msgstr ""
-"Merci d'envisagez d'acheter une copie de %1 - vous pouvez payer le montant "
+"Merci d'envisager d'acheter une copie de %1 - vous pouvez payer le montant "
 "que vous souhaitez.\n"
 "Téléchargez la version sans restriction après avoir effectué le paiement..."
 
@@ -3927,7 +3927,7 @@ msgid ""
 "Click to halve the tempo for the clip. This will result in it playing faster "
 "when stretched on the timeline"
 msgstr ""
-"Cliquez pour réduire de moitié le tempo du clip. Cela aura pour effet de le "
+"Cliquer pour réduire de moitié le tempo du clip. Cela aura pour effet de le "
 "lire plus rapidement lorsqu'il sera étiré sur la ligne de temps"
 
 #: audio_trigger_properties_box.cc:161
@@ -3935,7 +3935,7 @@ msgid ""
 "Click to double the tempo for the clip. This will result in it playing "
 "slower when stretched on the timeline"
 msgstr ""
-"Cliquez pour doubler le tempo du clip. Cela aura pour effet de le lire plus "
+"Cliquer pour doubler le tempo du clip. Cela aura pour effet de le lire plus "
 "lentement lorsqu'il sera étiré sur la ligne de temps"
 
 #: audio_trigger_properties_box.cc:250
@@ -4241,9 +4241,8 @@ msgid ""
 "Click to launch all clips in this row\n"
 "Right-click to select properties for all clips in this row"
 msgstr ""
-"Cliquez pour lancer tous les clips de cette rangée\n"
-"Cliquez-droit pour sélectionner les propriétés de tous les clips de cette "
-"rangée"
+"Cliquer pour lancer tous les clips de cette rangée\n"
+"Clic droit pour sélectionner les propriétés de tous les clips de cette rangée"
 
 #: cuebox_ui.cc:257
 msgid "Jump..."
@@ -4395,7 +4394,7 @@ msgstr "Pas de session chargée"
 
 #: duplicate_routes_dialog.cc:36
 msgid "Duplicate Tracks/Busses"
-msgstr "Dupliquer pistes/bus"
+msgstr "Dupliquer pistes / bus"
 
 #: duplicate_routes_dialog.cc:37
 msgid "For each Track:"
@@ -4415,7 +4414,7 @@ msgstr "Partager la liste de lecture"
 
 #: duplicate_routes_dialog.cc:43
 msgid "Duplicate each track/bus this number of times:"
-msgstr "Dupliquer chaque piste/bus ce nombre de fois :"
+msgstr "Dupliquer chaque piste / bus ce nombre de fois :"
 
 #: duplicate_routes_dialog.cc:64
 msgid "Insert duplicates at: "
@@ -4423,7 +4422,7 @@ msgstr "Insérer une duplication à : "
 
 #: duplicate_routes_dialog.cc:209
 msgid "1 or more tracks/busses could not be duplicated"
-msgstr "1 ou davantage de pistes/bus n'ont pas pu être dupliquées"
+msgstr "1 ou davantage de pistes / bus n'ont pas pu être dupliquées"
 
 #: edit_note_dialog.cc:48
 msgid "Note"
@@ -6114,7 +6113,7 @@ msgstr "Aller à la limite de région suivante"
 
 #: editor_actions.cc:210
 msgid "Playhead to Next Region Boundary (No Track Selection)"
-msgstr "Aller à la limite de région suivante (Pas de sélection de piste)"
+msgstr "Aller à la limite de région suivante (pas de sélection de piste)"
 
 #: editor_actions.cc:211
 msgid "Playhead to Previous Region Boundary"
@@ -6770,7 +6769,8 @@ msgstr "Afficher les onglets de groupes"
 #: editor_actions.cc:679
 msgid "Toggle MIDI Input Active for Editor-Selected Tracks/Busses"
 msgstr ""
-"Basculer l'entrée MIDI active pour les pistes/bus sélectionnés dans l'éditeur"
+"Basculer l'entrée MIDI active pour les pistes / bus sélectionnés dans "
+"l'éditeur"
 
 #: editor_actions.cc:684 quantize_dialog.cc:75 quantize_dialog.cc:132
 msgid "Quantize"
@@ -7960,7 +7960,7 @@ msgstr "séparer"
 
 #: editor_ops.cc:3238
 msgid "separate region under"
-msgstr "scinder la région sous-jacente"
+msgstr "scinder une région sous-jacente"
 
 #: editor_ops.cc:3307
 msgid "Crop Regions to Edit Range"
@@ -8034,7 +8034,7 @@ msgid ""
 "This is typically caused by plugins that generate stereo output from mono "
 "input or vice versa."
 msgstr ""
-"Cette piste/bus ne peut pas être gelé(e) car le signal n'a pas le même "
+"Cette piste / bus ne peut pas être gelé(e) car le signal n'a pas le même "
 "nombre de canaux en atteignant les sorties.\n"
 "Ceci est typiquement causé par des greffons qui génèrent une sortie stéréo à "
 "partir d'une entrée mono ou vice-versa."
@@ -8439,7 +8439,7 @@ msgstr[1] "VCA"
 
 #: editor_ops.cc:7935
 msgid "Remove various strips"
-msgstr "Supprimer pistes/bus/VCA"
+msgstr "Supprimer pistes / bus / VCA"
 
 #: editor_ops.cc:7936
 msgid "Do you really want to remove %1 %2, %3 %4 and %5 %6?"
@@ -8707,7 +8707,7 @@ msgstr "Supprimer les régions inutilisées"
 
 #: editor_routes.cc:31 route_list_base.cc:84 trigger_route_list.cc:31
 msgid "Track/Bus visible ?"
-msgstr "Piste/bus visible ?"
+msgstr "Piste / bus visible ?"
 
 #: editor_routes.cc:32 route_list_base.cc:85 trigger_route_list.cc:32
 msgid "Cues|C"
@@ -8719,7 +8719,7 @@ msgstr "Visible dans la fenêtre Cues ?"
 
 #: editor_routes.cc:33 route_list_base.cc:86 trigger_route_list.cc:33
 msgid "Track/Bus active ?"
-msgstr "Piste/bus actif ?"
+msgstr "Piste / bus actif ?"
 
 #: editor_routes.cc:41 route_list_base.cc:87
 msgid "RTA|RA"
@@ -9465,7 +9465,7 @@ msgstr "Contenu de région avec fondus et gain (canaux : %1)"
 
 #: export_channel_selector.cc:572
 msgid "Apply track/bus processing"
-msgstr "Appliquer les traitements (greffons) de piste/bus"
+msgstr "Appliquer les traitements (greffons) de piste / bus"
 
 #: export_channel_selector.cc:581
 msgid "Selection Actions"
@@ -9994,7 +9994,7 @@ msgstr "Option Broadcast Wave"
 
 #: export_format_dialog.cc:1230
 msgid "Variable bit rate quality"
-msgstr "Qualitt du taux d'échantillonnage variable (VBR)"
+msgstr "Qualité du taux d'échantillonnage variable (VBR)"
 
 #: export_format_dialog.cc:1241
 msgid "FFMPEG/MP3 options"
@@ -10179,7 +10179,7 @@ msgstr "Niveau"
 
 #: foldback_strip.cc:291
 msgid "Copy track/bus gain to send"
-msgstr "Appliquer le niveau de la piste/bus au départ"
+msgstr "Appliquer le niveau de la piste / bus au départ"
 
 #: foldback_strip.cc:293
 msgid "Set send gain to -inf"
@@ -10757,7 +10757,7 @@ msgid ""
 "\n"
 "You can replace the existing binding or cancel this action."
 msgstr ""
-"La combinaison de touches est déjà affectée à \"%1\".\n"
+"La combinaison de touches est déjà assignée à \"%1\".\n"
 "\n"
 "Vous pouvez remplacer le raccourci existant, ou annuler cette action."
 
@@ -10921,7 +10921,7 @@ msgstr "ajouter un repère d'intervalle"
 
 #: loudness_dialog.cc:63
 msgid "Loudness Analyzer and Normalizer"
-msgstr "Analyseur de sonie et normalisateur "
+msgstr "Analyseur de sonie et normalisateur"
 
 #: loudness_dialog.cc:69
 msgid "Conformity Analysis (with gain applied)"
@@ -11027,7 +11027,7 @@ msgid ""
 "is to short."
 msgstr ""
 "La mesure de l'intensité sonore n'a donné aucun résultat. Probablement parce "
-"que l'intervalle analysée est trop courte."
+"que l'intervalle analysé est trop courte."
 
 #: loudness_dialog.cc:514
 msgid "Export Loudness Report"
@@ -11542,7 +11542,7 @@ msgstr "Blanche"
 # ticks_per_beat * 2 / 3 = triolet de noire
 #: midi_list_editor.cc:59
 msgid "Triplet"
-msgstr "Triolet de noire"
+msgstr "Triolet de noires"
 
 #: midi_list_editor.cc:60
 msgid "Quarter"
@@ -11752,7 +11752,7 @@ msgid ""
 "Are you sure you want to\n"
 "show all MIDI automation lanes?"
 msgstr ""
-"Êtes vous sûrs de vouloir montrer\n"
+"Êtes vous sûrs de vouloir afficher\n"
 "toutes les lignes d'automation MIDI ?"
 
 #: midi_time_axis.cc:1230 route_time_axis.cc:556 vca_time_axis.cc:482
@@ -11902,15 +11902,15 @@ msgstr "effacer le sysex"
 
 #: midi_view.cc:5283
 msgid "split notes"
-msgstr "scinder les notes"
+msgstr "fractionner les notes"
 
 #: midi_view.cc:5309
 msgid "split notes more"
-msgstr "scinder plus les notes"
+msgstr "fractionner plus les notes"
 
 #: midi_view.cc:5339
 msgid "split notes less"
-msgstr "scinder moins les notes"
+msgstr "fractionner moins les notes"
 
 #: midi_view.cc:5402
 msgid "join notes"
@@ -12007,7 +12007,7 @@ msgstr ""
 
 #: missing_file_dialog.cc:113
 msgid "Click to choose an additional folder"
-msgstr "Cliquez pour choisir un dossier supplémentaire"
+msgstr "Cliquer pour choisir un dossier supplémentaire"
 
 #: missing_filesource_dialog.cc:33
 msgid "Missing Source Files"
@@ -12191,7 +12191,7 @@ msgstr "Solo iso / verr"
 
 #: mixer_strip.cc:414 rc_option_editor.cc:2870
 msgid "VCA Assigns"
-msgstr "VCA assigné(s)"
+msgstr "Assignations VCA"
 
 #: mixer_strip.cc:415
 msgid "Trigger Master"
@@ -12421,7 +12421,7 @@ msgstr "Visibilité des pistes & bus"
 
 #: mixer_ui.cc:731
 msgid "Error adding GUI elements for new tracks/busses %1"
-msgstr "Erreur lors de l'ajout d'éléments pour les nouvelles pistes/bus %1"
+msgstr "Erreur lors de l'ajout d'éléments pour les nouvelles pistes / bus %1"
 
 #: mixer_ui.cc:1029
 msgid ""
@@ -12437,7 +12437,7 @@ msgstr "L'instrument n'a qu'un canal de sortie. Rien à ventiler."
 
 #: mixer_ui.cc:2080 plugin_selector.cc:225 route_list_base.cc:407
 msgid "Show All"
-msgstr "Tout montrer"
+msgstr "Tout afficher"
 
 #: mixer_ui.cc:2081 route_list_base.cc:408
 msgid "Hide All"
@@ -12486,7 +12486,7 @@ msgstr "Console"
 
 #: mixer_ui.cc:3459
 msgid "No Track/Bus is selected."
-msgstr "Pas de sélection de piste/bus."
+msgstr "Pas de sélection de piste / bus."
 
 #: mixer_ui.cc:3461
 msgid "Add at the top"
@@ -12514,27 +12514,27 @@ msgstr "Supprimer le pré-réglage"
 
 #: mixer_ui.cc:3762
 msgid "Toggle Solo on Mixer-Selected Tracks/Busses"
-msgstr "Basculer solo sur les pistes/bus sélectionnés"
+msgstr "Basculer solo sur les pistes / bus sélectionnés"
 
 #: mixer_ui.cc:3763
 msgid "Toggle Mute on Mixer-Selected Tracks/Busses"
-msgstr "Basculer muet sur les pistes/bus sélectionnés"
+msgstr "Basculer muet sur les pistes / bus sélectionnés"
 
 #: mixer_ui.cc:3764
 msgid "Toggle Rec-enable on Mixer-Selected Tracks/Busses"
-msgstr "(Dés)armer l'enregistrement sur le pistes/bus sélectionnés"
+msgstr "(Dés)armer l'enregistrement sur les pistes / bus sélectionnés"
 
 #: mixer_ui.cc:3765
 msgid "Increase Gain on Mixer-Selected Tracks/Busses"
-msgstr "Augmenter le gain des pistes/bus sélectionnés"
+msgstr "Augmenter le gain des pistes / bus sélectionnés"
 
 #: mixer_ui.cc:3766
 msgid "Decrease Gain on Mixer-Selected Tracks/Busses"
-msgstr "Baisser le gain des pistes/bus sélectionnés"
+msgstr "Baisser le gain des pistes / bus sélectionnés"
 
 #: mixer_ui.cc:3767
 msgid "Set Gain to 0dB on Mixer-Selected Tracks/Busses"
-msgstr "Gain à 0dB pour les pistes/bus sélectionnés"
+msgstr "Gain à 0dB pour les pistes / bus sélectionnés"
 
 #: mixer_ui.cc:3770
 msgid "Copy Selected Processors"
@@ -12587,8 +12587,8 @@ msgstr "Défiler vers la droite de la console"
 #: mixer_ui.cc:3786
 msgid "Toggle MIDI Input Active for Mixer-Selected Tracks/Busses"
 msgstr ""
-"Basculer l'activation de l'entrée MIDI su pistes/bus sélectionnés dans la "
-"console"
+"Basculer l'activation de l'entrée MIDI pour les pistes / bus sélectionnés "
+"dans la console"
 
 #: mixer_ui.cc:3793 mixer_ui.cc:3798
 msgid "Mixer: Show Sidebar List"
@@ -12605,7 +12605,7 @@ msgstr "Console : afficher les VCA"
 # mixbus uniquement
 #: mixer_ui.cc:3814
 msgid "Mixer: Show Mixbusses"
-msgstr "Console : afficher les bus de mix"
+msgstr "Console : afficher les bus de mixage"
 
 #: mixer_ui.cc:3817
 msgid "Mixer: Show Monitor Section"
@@ -12614,11 +12614,11 @@ msgstr "Console : afficher la section d'écoute de contrôle"
 # mixbus uniquement
 #: mixer_ui.cc:3820
 msgid "Atmos Surround Master"
-msgstr "Master Atmos Surround"
+msgstr "Master Atmos surround"
 
 #: mixer_ui.cc:3822
 msgid "Surround Master"
-msgstr "Master Surround"
+msgstr "Master surround"
 
 #: mixer_ui.cc:3825
 msgid "Mixer: Show Foldback Strip"
@@ -12804,7 +12804,7 @@ msgid ""
 "Click to de-isolate everything"
 msgstr ""
 "Allumé lorsqu'au moins un solo est isolé\n"
-"Cliquez pour tout dés-isoler"
+"Cliquer pour tout dés-isoler"
 
 #: monitor_section.cc:140
 msgid ""
@@ -12812,7 +12812,7 @@ msgid ""
 "Click to stop the audition"
 msgstr ""
 "Allumé lorsqu'une écoute est en cours.\n"
-"Cliquez pour arrêter l'écoute"
+"Cliquer pour arrêter l'écoute"
 
 #: monitor_section.cc:157
 msgid "Solo controls affect solo-in-place"
@@ -12877,7 +12877,7 @@ msgstr "10 dB"
 
 #: monitor_section.cc:219
 msgid "Solo Boost"
-msgstr "Boost solo"
+msgstr "Gain solo"
 
 #: monitor_section.cc:226 monitor_section.cc:229
 msgid ""
@@ -13284,7 +13284,7 @@ msgstr "  -a, --no-announcements      Ne pas chercher d'annonces sur le site\n"
 #: opts.cc:72
 msgid "  -A, --actions               Print all possible menu action names\n"
 msgstr ""
-"  -A, --actions               Montre tous les noms d'action possibles du "
+"  -A, --actions               Affiche tous les noms d'action possibles du "
 "menu\n"
 
 #: opts.cc:73
@@ -13749,11 +13749,11 @@ msgstr "Ouvrir la fenêtre de préférences"
 
 #: plugin_manager_ui.cc:268
 msgid "Match plugin name"
-msgstr "Correspond au nom de greffon "
+msgstr "Correspond au nom de greffon"
 
 #: plugin_manager_ui.cc:269
 msgid "Match plugin type"
-msgstr "Correspond au type de greffon "
+msgstr "Correspond au type de greffon"
 
 #: plugin_manager_ui.cc:270
 msgid "Match any tag"
@@ -14497,7 +14497,7 @@ msgstr "Retour/entrée"
 
 #: port_insert_ui.cc:113 route_ui.cc:2215 send_ui.cc:71
 msgid "Click to invert polarity of all send channels"
-msgstr "Cliquez pour inverser la polarité de tous les canaux départ"
+msgstr "Cliquer pour inverser la polarité de tous les canaux départ"
 
 #: port_insert_ui.cc:114
 msgid "Edit Latency, manually override measured or I/O reported latency"
@@ -14700,7 +14700,7 @@ msgid ""
 "Right-click to add/remove/edit\n"
 "plugins,inserts,sends and more"
 msgstr ""
-"Clic droit pour ajouter/supprimer/modifier\n"
+"Clic droit pour ajouter / supprimer / modifier\n"
 "greffons, insertions, départs et autres"
 
 #: processor_box.cc:2164
@@ -15148,7 +15148,7 @@ msgstr "Ignorer l'aimant avec :"
 
 #: rc_option_editor.cc:716
 msgid "Snap relatively using:"
-msgstr "Aimanter relativement avec) :"
+msgstr "Aimanter relativement avec :"
 
 #: rc_option_editor.cc:724
 msgid "While Trimming:"
@@ -15602,7 +15602,7 @@ msgstr ""
 
 #: rc_option_editor.cc:2605
 msgid "Update clocks at TC Frame rate"
-msgstr "Rafraîchir les horloges à la fréquence d'image du code temporel (TC)"
+msgstr "Rafraîchir les horloges à la cadence d'image du code temporel (TC)"
 
 #: rc_option_editor.cc:2610
 msgid ""
@@ -15784,7 +15784,7 @@ msgstr "Formes d'onde dans l'éditeur"
 
 #: rc_option_editor.cc:2812
 msgid "Show waveforms in regions"
-msgstr "Afficher la formes d'onde dans les régions"
+msgstr "Afficher les formes d'onde dans les régions"
 
 #: rc_option_editor.cc:2821
 msgid "Show waveforms while recording"
@@ -17210,7 +17210,7 @@ msgid ""
 "<b>When enabled</b> a popup window showing plugin scan progress is displayed "
 "for indexing (cache load) and discovery (detect new plugins)"
 msgstr ""
-"<b>Si coché</b>, une fenêtre contextuelle montre la progression de la "
+"<b>Si coché</b>, une fenêtre contextuelle affiche la progression de la "
 "recherche de nouveaux greffons et de leur indexation."
 
 #: rc_option_editor.cc:4093
@@ -17911,7 +17911,7 @@ msgstr "très rapide [32dB/sec]"
 # extraspace needed to get a space before the colon
 #: rc_option_editor.cc:4791
 msgid "Meter line-up level; 0dBu"
-msgstr "Niveau ligne) (0 dBu) "
+msgstr "Niveau ligne (0 dBu) "
 
 #: rc_option_editor.cc:4796 rc_option_editor.cc:4812
 msgid "-24dBFS (SMPTE US: 4dBu = -20dBFS)"
@@ -18462,7 +18462,7 @@ msgstr "Ajouter une piste pour ce port d'entrée"
 
 #: recorder_ui.cc:1581
 msgid "This port feeds %1 tracks. Click to show them"
-msgstr "Ce port alimente %1 piste(s). Cliquez pour les afficher"
+msgstr "Ce port alimente %1 piste(s). Cliquer pour les afficher"
 
 #: recorder_ui.cc:1585
 msgid "This port is not feeding any tracks"
@@ -18740,7 +18740,7 @@ msgstr "Éditeur de commentaires"
 
 #: route_group_dialog.cc:46
 msgid "Track/bus Group"
-msgstr "Groupe de piste/bus"
+msgstr "Groupe de piste / bus"
 
 #: route_group_dialog.cc:51
 msgid "Relative"
@@ -18756,7 +18756,7 @@ msgstr "Enregistrement"
 
 #: route_group_dialog.cc:55
 msgid "Surround Send enable"
-msgstr "Départ Surround"
+msgstr "Départ surround"
 
 #: route_group_dialog.cc:57
 msgid "Active state"
@@ -18825,11 +18825,11 @@ msgstr "Solo sûr (verrouillé)"
 
 #: route_list_base.cc:415
 msgid "Only Show Tracks with Regions Under Playhead"
-msgstr "Ne montrer que les pistes avec des régions sous la tête de lecture"
+msgstr "N'afficher que les pistes avec des régions sous la tête de lecture"
 
 #: route_params_ui.cc:87
 msgid "Tracks/Busses"
-msgstr "Pistes/bus"
+msgstr "Pistes / bus"
 
 #: route_params_ui.cc:106
 msgid "Inputs"
@@ -18841,12 +18841,12 @@ msgstr "Sorties"
 
 #: route_params_ui.cc:108
 msgid "Plugins, Inserts & Sends"
-msgstr "Traitements"
+msgstr "Greffons, inserts et départs"
 
 #: route_params_ui.cc:197
 msgid "Display list item for renamed track/bus was not found!"
 msgstr ""
-"L'élément de la liste d'affichage pour la piste/bus renommée n'a pas été "
+"L'élément de la liste d'affichage pour la piste / le bus renommé n'a pas été "
 "trouvé !"
 
 #: route_params_ui.cc:433
@@ -19068,7 +19068,7 @@ msgstr "Assigner les pistes et les bus sélectionnés (post-atténuateur)"
 
 #: route_ui.cc:1113
 msgid "Copy track/bus gains to sends"
-msgstr "Appliquer le gain de piste/bus aux départs"
+msgstr "Appliquer le gain de piste / bus aux départs"
 
 #: route_ui.cc:1114
 msgid "Set sends gain to -inf"
@@ -19100,7 +19100,7 @@ msgstr "Sorties principales"
 
 #: route_ui.cc:1543
 msgid "Surround Send"
-msgstr "Départ Surround"
+msgstr "Départ surround"
 
 #: route_ui.cc:1766
 msgid ""
@@ -20763,7 +20763,7 @@ msgstr "Options de lancement"
 
 #: slot_properties_box.cc:378
 msgid "Double-click to rename this clip"
-msgstr "Double-cliquez pour renommer ce clip"
+msgstr "Double-clic pour renommer le clip"
 
 #: slot_properties_box.cc:379
 msgid "Adjust audio gain (or MIDI velocity) for this slot"
@@ -21421,7 +21421,7 @@ msgstr "Session complète"
 
 #: strip_export_dialog.cc:47
 msgid "Selected Tracks/Busses"
-msgstr "Pistes/bus sélectionnés"
+msgstr "Pistes / bus sélectionnés"
 
 #: strip_export_dialog.cc:51
 msgid "Local strip template (saved in session folder)"
@@ -21467,7 +21467,7 @@ msgstr[1] "%1 pistes"
 
 #: strip_import_dialog.cc:417
 msgid "Local Track/Bus"
-msgstr "Piste/bus local"
+msgstr "Piste / bus local"
 
 #: strip_import_dialog.cc:422
 msgid "External State"
@@ -21780,7 +21780,7 @@ msgstr "modification de la carte des tempos"
 
 #: time_axis_view.cc:157
 msgid "Track/Bus name (double click to edit)"
-msgstr "Nom piste/bus (double-clic pour éditer)"
+msgstr "Nom de piste / bus (double-clic pour éditer)"
 
 #: time_axis_view.cc:162
 msgid "This track is inactive. (right-click to activate)"
@@ -22100,7 +22100,7 @@ msgstr "Afficher l'interface graphique du synthétiseur auditionneur"
 #: trigger_clip_picker.cc:146
 msgid "Click to select a clip folder and edit your available clip folders"
 msgstr ""
-"Cliquez pour sélectionner un dossier de clips et modifier vos dossiers de "
+"Cliquer pour sélectionner un dossier de clips et modifier vos dossiers de "
 "clips disponibles"
 
 #: trigger_clip_picker.cc:186
