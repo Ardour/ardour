@@ -18,7 +18,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 8\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-19 01:01+0100\n"
+"POT-Creation-Date: 2026-02-19 03:13+0100\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -699,7 +699,7 @@ msgstr "Configuration :"
 msgid "Add:"
 msgstr "Ajouter :"
 
-#: add_route_dialog.cc:77 bundle_manager.cc:205 editor_ops.cc:9529
+#: add_route_dialog.cc:77 bundle_manager.cc:205 editor_ops.cc:9533
 #: loudness_dialog.cc:525 region_editor.cc:76 route_group_dialog.cc:75
 #: strip_export_dialog.cc:65
 msgid "Name:"
@@ -1360,7 +1360,7 @@ msgstr "Gestionnaire de scripts"
 
 #: ardour_ui.cc:318
 msgid "Idle'o'Meter"
-msgstr ""
+msgstr "Idle'o'Meter"
 
 #: ardour_ui.cc:319 io_plugin_window.cc:56
 msgid "I/O Plugins"
@@ -3196,7 +3196,7 @@ msgstr "Échec d'extraction de la session archivée : %1"
 msgid "Extracting AAF failed"
 msgstr "Échec de l'extraction AAF"
 
-#: ardour_ui_session.cc:262 ardour_ui_session.cc:295 ardour_ui_session.cc:909
+#: ardour_ui_session.cc:262 ardour_ui_session.cc:295 ardour_ui_session.cc:911
 #: session_dialog.cc:907 startup_fsm.cc:873
 msgid ""
 "To ensure compatibility with various systems\n"
@@ -3230,7 +3230,7 @@ msgstr ""
 "%3%4%5"
 
 #: ardour_ui_session.cc:458 ardour_ui_session.cc:499 ardour_ui_session.cc:521
-#: ardour_ui_session.cc:728 ardour_ui_session.cc:745 ardour_ui_session.cc:761
+#: ardour_ui_session.cc:730 ardour_ui_session.cc:747 ardour_ui_session.cc:763
 msgid "Loading Error"
 msgstr "Erreur de chargement"
 
@@ -3297,11 +3297,11 @@ msgstr ""
 msgid "Read-only Session"
 msgstr "Session en lecture-seule"
 
-#: ardour_ui_session.cc:726
+#: ardour_ui_session.cc:728
 msgid "Could not create session in \"%1\": %2%3%4"
 msgstr "Création de session impossible dans \"%1\": %2%3%4"
 
-#: ardour_ui_session.cc:741
+#: ardour_ui_session.cc:743
 msgid ""
 "Could not create session in \"%1\".\n"
 "\n"
@@ -3319,23 +3319,23 @@ msgstr ""
 "Quoi : %4\n"
 "%5%6"
 
-#: ardour_ui_session.cc:759
+#: ardour_ui_session.cc:761
 msgid "Could not create session in \"%1\": %2%3"
 msgstr "Impossible de créer la session dans « %1 » : %2%3"
 
-#: ardour_ui_session.cc:813
+#: ardour_ui_session.cc:815
 msgid "Abort saving snapshot"
 msgstr "Annuler"
 
-#: ardour_ui_session.cc:814
+#: ardour_ui_session.cc:816
 msgid "Don't save now, just snapshot"
 msgstr "Ignorer, prendre un cliché"
 
-#: ardour_ui_session.cc:815 ardour_ui_session.cc:975
+#: ardour_ui_session.cc:817 ardour_ui_session.cc:977
 msgid "Save it first"
 msgstr "Sauvegarder d'abord"
 
-#: ardour_ui_session.cc:823 ardour_ui_session.cc:983
+#: ardour_ui_session.cc:825 ardour_ui_session.cc:985
 msgid ""
 "%1 was unable to save your session.\n"
 "\n"
@@ -3349,40 +3349,40 @@ msgstr ""
 "\n"
 "\"Ignorer\"."
 
-#: ardour_ui_session.cc:841
+#: ardour_ui_session.cc:843
 msgid "Snapshot and switch"
 msgstr "Basculer sur un nouveau cliché"
 
-#: ardour_ui_session.cc:842 ardour_ui_session.cc:894
+#: ardour_ui_session.cc:844 ardour_ui_session.cc:896
 msgid "New session name"
 msgstr "Nom de la nouvelle session"
 
-#: ardour_ui_session.cc:844
+#: ardour_ui_session.cc:846
 msgid "Take Snapshot"
 msgstr "Prendre un cliché"
 
-#: ardour_ui_session.cc:845
+#: ardour_ui_session.cc:847
 msgid "Name of new snapshot"
 msgstr "Nom du nouveau cliché"
 
-#: ardour_ui_session.cc:890
+#: ardour_ui_session.cc:892
 msgid "Name Session"
 msgstr "Nommer la session"
 
-#: ardour_ui_session.cc:891
+#: ardour_ui_session.cc:893
 msgid "Session name"
 msgstr "Nom de la session"
 
-#: ardour_ui_session.cc:893
+#: ardour_ui_session.cc:895
 msgid "Rename Session"
 msgstr "Renommer la session"
 
-#: ardour_ui_session.cc:917
+#: ardour_ui_session.cc:919
 msgid ""
 "That name is already in use by another directory/folder. Please try again."
 msgstr "Un fichier ou un répertoire utilise déjà ce nom. Essayez autre chose."
 
-#: ardour_ui_session.cc:925
+#: ardour_ui_session.cc:927
 msgid ""
 "Renaming this session failed.\n"
 "Things could be seriously messed up at this point"
@@ -3390,33 +3390,33 @@ msgstr ""
 "Le renommage de la session a échoué.\n"
 "Il est possible que les données soient à présent corrompues"
 
-#: ardour_ui_session.cc:945
+#: ardour_ui_session.cc:947
 #, c-format
 msgid "Copied %<PRId64> of %<PRId64>"
 msgstr "%<PRId64> sur %<PRId64> copié(s)"
 
-#: ardour_ui_session.cc:973
+#: ardour_ui_session.cc:975
 msgid "Abort save-as"
 msgstr "Annuler"
 
-#: ardour_ui_session.cc:974
+#: ardour_ui_session.cc:976
 msgid "Don't save now, just save-as"
 msgstr "Ignorer, sauvegarder une copie"
 
-#: ardour_ui_session.cc:1030 save_as_dialog.cc:35
+#: ardour_ui_session.cc:1032 save_as_dialog.cc:35
 msgid "Save As"
 msgstr "Sauvegarder sous"
 
-#: ardour_ui_session.cc:1057
+#: ardour_ui_session.cc:1059
 msgid "Save As failed: %1"
 msgstr "Échec de la sauvegarde : %1"
 
-#: ardour_ui_session.cc:1101
+#: ardour_ui_session.cc:1103
 msgid "Session Archiving failed. See Log window for further info."
 msgstr ""
 "Échec de l'archivage de la session. Voir le journal pour plus d'information."
 
-#: ardour_ui_session.cc:1104
+#: ardour_ui_session.cc:1106
 msgid ""
 "Session Archiving failed.\n"
 "Cannot create archive file in destination folder."
@@ -3424,7 +3424,7 @@ msgstr ""
 "Échec de l'archivage de la session.\n"
 "Impossible de créer le fichier d'archive dans le dossier de destination."
 
-#: ardour_ui_session.cc:1107
+#: ardour_ui_session.cc:1109
 msgid ""
 "Session Archiving failed.\n"
 "Cannot write archive. Disk full or file size exceeded."
@@ -3433,11 +3433,11 @@ msgstr ""
 "Impossible d'écrire le fichier d'archive : disque plein ou taille maximale "
 "excédée."
 
-#: ardour_ui_session.cc:1110
+#: ardour_ui_session.cc:1112
 msgid "Session Archiving failed."
 msgstr "Échec de l'archivage de session."
 
-#: ardour_ui_session.cc:1140
+#: ardour_ui_session.cc:1142
 msgid ""
 "The currently loaded session name cannot be used as new snapshot.\n"
 "Just save the session for this operation."
@@ -3446,7 +3446,7 @@ msgstr ""
 "nouveau cliché.\n"
 "Enregistrez simplement la session pour cette opération."
 
-#: ardour_ui_session.cc:1148
+#: ardour_ui_session.cc:1150
 msgid ""
 "To ensure compatibility with various systems\n"
 "snapshot names may not contain a '%1' character"
@@ -3455,19 +3455,19 @@ msgstr ""
 "systèmes, les noms de cliché ne peuvent pas\n"
 "utiliser le caractère \"%1\""
 
-#: ardour_ui_session.cc:1160
+#: ardour_ui_session.cc:1162
 msgid "Confirm Snapshot Overwrite"
 msgstr "Confirmer l'écrasement du cliché"
 
-#: ardour_ui_session.cc:1161
+#: ardour_ui_session.cc:1163
 msgid "A snapshot already exists with that name. Do you want to overwrite it?"
 msgstr "Un cliché avec ce nom existe déjà. Voulez-vous l'écraser ?"
 
-#: ardour_ui_session.cc:1198
+#: ardour_ui_session.cc:1200
 msgid "Unsaved Session"
 msgstr "Session non sauvegardée"
 
-#: ardour_ui_session.cc:1220
+#: ardour_ui_session.cc:1222
 msgid ""
 "The session \"%1\"\n"
 "has not been saved.\n"
@@ -3485,7 +3485,7 @@ msgstr ""
 "\n"
 "Que voulez-vous faire ?"
 
-#: ardour_ui_session.cc:1223
+#: ardour_ui_session.cc:1225
 msgid ""
 "The snapshot \"%1\"\n"
 "has not been saved.\n"
@@ -3502,7 +3502,7 @@ msgstr ""
 "\n"
 "Que voulez-vous faire ?"
 
-#: ardour_ui_session.cc:1237
+#: ardour_ui_session.cc:1239
 msgid "Prompter"
 msgstr "Question"
 
@@ -6425,7 +6425,7 @@ msgstr "Utiliser les sauts d'intervalle"
 
 #: editor_actions.cc:363
 msgid "Find & Display Track/Bus..."
-msgstr "Rechercher et afficher une piste/le bus..."
+msgstr "Rechercher et afficher une piste / un bus..."
 
 #: editor_actions.cc:368
 msgid "Insert Time Section at Playhead"
@@ -8599,7 +8599,7 @@ msgstr "La valeur de l'écart que vous avez saisie n'est pas un nombre"
 msgid "remove gaps"
 msgstr "supprimer les écarts"
 
-#: editor_ops.cc:9526
+#: editor_ops.cc:9530
 msgid "Find Track/Bus"
 msgstr "Rechercher une piste / un bus"
 
@@ -8753,7 +8753,7 @@ msgstr "Effacer tous les tempos précédents (avec marquers BBT)"
 msgid "Clear All Later Tempos (w/BBT markers)"
 msgstr "Effacer tous les tempos suivants (avec marqueurs BBT)"
 
-#: editor_rulers.cc:264 tempo_dialog.cc:622
+#: editor_rulers.cc:264 tempo_dialog.cc:625
 msgid "New Time Signature"
 msgstr "Nouvelle signature rythmique"
 
@@ -11406,11 +11406,11 @@ msgstr "Afficher le delta vers le curseur d'édition"
 msgid "Display delta to origin marker"
 msgstr "Afficher le delta vers le repère de début"
 
-#: main_clock.cc:121 tempo_dialog.cc:74
+#: main_clock.cc:121 tempo_dialog.cc:75
 msgid "Edit Tempo"
 msgstr "Modifier le tempo"
 
-#: main_clock.cc:122 tempo_dialog.cc:631
+#: main_clock.cc:122 tempo_dialog.cc:634
 msgid "Edit Time Signature"
 msgstr "Éditer la signature rythmique"
 
@@ -11980,8 +11980,8 @@ msgstr "Ignorer tous les fichiers manquants"
 msgid "Skip this file"
 msgstr "Ignorer ce fichier"
 
-#: missing_file_dialog.cc:62 tempo_dialog.cc:166 tempo_dialog.cc:167
-#: tempo_dialog.cc:684 tempo_dialog.cc:685
+#: missing_file_dialog.cc:62 tempo_dialog.cc:169 tempo_dialog.cc:170
+#: tempo_dialog.cc:687 tempo_dialog.cc:688
 msgid "audio"
 msgstr "audio"
 
@@ -12844,7 +12844,7 @@ msgid ""
 "(a soloed & muted track or bus will be audible)"
 msgstr ""
 "<b>Si coché</b>, le mode solo surcharge le mode muet\n"
-"(une piste/bus muet et solo sera audible)."
+"(une piste / un bus muet et solo sera audible)."
 
 #: monitor_section.cc:191
 msgid "Processors"
@@ -21637,140 +21637,140 @@ msgstr "Impossible d'effacer un fichier de modèle \"%1\": %2"
 msgid "New Tempo"
 msgstr "Nouveau tempo"
 
-#: tempo_dialog.cc:60 tempo_dialog.cc:81
+#: tempo_dialog.cc:60 tempo_dialog.cc:82
 msgid "End Beats per Minute:"
 msgstr "BPM à la fin :"
 
-#: tempo_dialog.cc:61 tempo_dialog.cc:82
+#: tempo_dialog.cc:61 tempo_dialog.cc:83
 msgid "bar:"
 msgstr "mesure :"
 
-#: tempo_dialog.cc:62 tempo_dialog.cc:83
+#: tempo_dialog.cc:62 tempo_dialog.cc:84
 msgid "beat:"
 msgstr "temps :"
 
-#: tempo_dialog.cc:63 tempo_dialog.cc:84
+#: tempo_dialog.cc:63 tempo_dialog.cc:85
 msgid "Pulse:"
 msgstr "Pulsation :"
 
-#: tempo_dialog.cc:64 tempo_dialog.cc:85
+#: tempo_dialog.cc:64 tempo_dialog.cc:86
 msgid "Tap Source:"
 msgstr "Source pour le Tap :"
 
-#: tempo_dialog.cc:65 tempo_dialog.cc:86
+#: tempo_dialog.cc:65 tempo_dialog.cc:87
 msgid "Tap tempo"
 msgstr "Battre le tempo"
 
-#: tempo_dialog.cc:110 tempo_dialog.cc:128 tempo_dialog.cc:129
-#: tempo_dialog.cc:664 tempo_dialog.cc:665
+#: tempo_dialog.cc:113 tempo_dialog.cc:131 tempo_dialog.cc:132
+#: tempo_dialog.cc:667 tempo_dialog.cc:668
 msgid "one-hundred-twenty-eighth"
 msgstr "quintuple-croche"
 
-#: tempo_dialog.cc:112 tempo_dialog.cc:113 tempo_dialog.cc:648
-#: tempo_dialog.cc:649
+#: tempo_dialog.cc:115 tempo_dialog.cc:116 tempo_dialog.cc:651
+#: tempo_dialog.cc:652
 msgid "whole"
 msgstr "ronde"
 
-#: tempo_dialog.cc:114 tempo_dialog.cc:115
+#: tempo_dialog.cc:117 tempo_dialog.cc:118
 msgid "half"
 msgstr "blanche"
 
-#: tempo_dialog.cc:116 tempo_dialog.cc:117 tempo_dialog.cc:652
-#: tempo_dialog.cc:653
+#: tempo_dialog.cc:119 tempo_dialog.cc:120 tempo_dialog.cc:655
+#: tempo_dialog.cc:656
 msgid "third"
 msgstr "triolet de noires"
 
-#: tempo_dialog.cc:118 tempo_dialog.cc:119 tempo_dialog.cc:654
-#: tempo_dialog.cc:655
+#: tempo_dialog.cc:121 tempo_dialog.cc:122 tempo_dialog.cc:657
+#: tempo_dialog.cc:658
 msgid "quarter"
 msgstr "noire"
 
-#: tempo_dialog.cc:120 tempo_dialog.cc:121 tempo_dialog.cc:656
-#: tempo_dialog.cc:657
+#: tempo_dialog.cc:123 tempo_dialog.cc:124 tempo_dialog.cc:659
+#: tempo_dialog.cc:660
 msgid "eighth"
 msgstr "croche"
 
-#: tempo_dialog.cc:122 tempo_dialog.cc:123 tempo_dialog.cc:658
-#: tempo_dialog.cc:659
+#: tempo_dialog.cc:125 tempo_dialog.cc:126 tempo_dialog.cc:661
+#: tempo_dialog.cc:662
 msgid "sixteenth"
 msgstr "double-croche"
 
-#: tempo_dialog.cc:124 tempo_dialog.cc:125 tempo_dialog.cc:660
-#: tempo_dialog.cc:661
+#: tempo_dialog.cc:127 tempo_dialog.cc:128 tempo_dialog.cc:663
+#: tempo_dialog.cc:664
 msgid "thirty-second"
 msgstr "triple-croche"
 
-#: tempo_dialog.cc:126 tempo_dialog.cc:127 tempo_dialog.cc:662
-#: tempo_dialog.cc:663
+#: tempo_dialog.cc:129 tempo_dialog.cc:130 tempo_dialog.cc:665
+#: tempo_dialog.cc:666
 msgid "sixty-fourth"
 msgstr "quadruple-croche"
 
-#: tempo_dialog.cc:146 tempo_dialog.cc:147
+#: tempo_dialog.cc:149 tempo_dialog.cc:150
 msgid "ramped"
 msgstr "rampe"
 
-#: tempo_dialog.cc:148 tempo_dialog.cc:149
+#: tempo_dialog.cc:151 tempo_dialog.cc:152
 msgid "constant"
 msgstr "constant"
 
-#: tempo_dialog.cc:164 tempo_dialog.cc:165 tempo_dialog.cc:682
-#: tempo_dialog.cc:683
+#: tempo_dialog.cc:167 tempo_dialog.cc:168 tempo_dialog.cc:685
+#: tempo_dialog.cc:686
 msgid "music"
 msgstr "musique"
 
-#: tempo_dialog.cc:194
+#: tempo_dialog.cc:197
 msgid "Start Beats per Minute:"
 msgstr "BPM au début :"
 
-#: tempo_dialog.cc:203
+#: tempo_dialog.cc:206
 msgid "Tempo Type:"
 msgstr "Type de tempo :"
 
-#: tempo_dialog.cc:233
+#: tempo_dialog.cc:236
 msgid "Tempo begins at"
 msgstr "Le tempo démarre à"
 
-#: tempo_dialog.cc:238
+#: tempo_dialog.cc:241
 msgid "Lock Style:"
 msgstr "Style du verrouillage :"
 
-#: tempo_dialog.cc:363
+#: tempo_dialog.cc:366
 msgid "Manual Tap"
 msgstr "Tap manuel"
 
-#: tempo_dialog.cc:498
+#: tempo_dialog.cc:501
 msgid "incomprehensible pulse note type (%1)"
 msgstr "type de pulsation incompréhensible (%1)"
 
-#: tempo_dialog.cc:511
+#: tempo_dialog.cc:514
 msgid "incomprehensible tempo type (%1)"
 msgstr "type de tempo incompréhensible (%1)"
 
-#: tempo_dialog.cc:524 tempo_dialog.cc:853
+#: tempo_dialog.cc:527 tempo_dialog.cc:856
 msgid "incomprehensible lock style (%1)"
 msgstr "type de verrouillage incompréhensible (%1)"
 
-#: tempo_dialog.cc:650 tempo_dialog.cc:651
+#: tempo_dialog.cc:653 tempo_dialog.cc:654
 msgid "second"
 msgstr "blanche"
 
-#: tempo_dialog.cc:698
+#: tempo_dialog.cc:701
 msgid "Note value:"
 msgstr "Valeur de note :"
 
-#: tempo_dialog.cc:699
+#: tempo_dialog.cc:702
 msgid "Lock style:"
 msgstr "Style de verrouillage :"
 
-#: tempo_dialog.cc:700
+#: tempo_dialog.cc:703
 msgid "Beats per bar:"
 msgstr "Temps par mesure :"
 
-#: tempo_dialog.cc:716
+#: tempo_dialog.cc:719
 msgid "Time Signature begins at bar:"
 msgstr "La signature rythmique commence à la mesure :"
 
-#: tempo_dialog.cc:840
+#: tempo_dialog.cc:843
 msgid "incomprehensible time signature denominator (%1)"
 msgstr "dénominateur de signature rythmique incompréhensible (%1)"
 
