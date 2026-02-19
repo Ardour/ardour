@@ -246,6 +246,7 @@ KeyEditor::Tab::Tab (KeyEditor& ke, string const & str, Bindings* b)
 	view.set_model (sorted_filter);
 	view.append_column (_("Action"), columns.name);
 	view.append_column (_("Shortcut"), columns.binding);
+	view.append_column (_("Path"), columns.path);
 	view.set_headers_visible (true);
 	view.set_headers_clickable (true);
 	view.get_selection()->set_mode (SELECTION_SINGLE);
@@ -261,6 +262,8 @@ KeyEditor::Tab::Tab (KeyEditor& ke, string const & str, Bindings* b)
 
 	view.get_column(0)->set_sort_column (columns.name);
 	view.get_column(1)->set_sort_column (columns.binding);
+	view.get_column(2)->set_visible (false);
+	view.set_tooltip_column(2);
 	data_model->set_sort_column (owner.sort_column,  owner.sort_type);
 	data_model->signal_sort_column_changed().connect (sigc::mem_fun (*this, &Tab::sort_column_changed));
 
