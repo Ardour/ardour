@@ -47,6 +47,7 @@ SlavableAutomationControl::SlavableAutomationControl(ARDOUR::Session& s,
                                                      Controllable::Flag                        flags)
 	: AutomationControl (s, parameter, desc, l, name, flags)
 	, _masters_node (0)
+	, _is_vca (false)
 {
 }
 

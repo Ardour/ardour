@@ -70,6 +70,8 @@ public:
 	*/
 	int32_t   get_boolean_masters () const;
 
+	bool is_vca_master () const { return _is_vca; }
+
 	PBD::Signal<void()> MasterStatusChange;
 
 	void use_saved_master_ratios ();
@@ -152,6 +154,7 @@ protected:
 	virtual void   post_add_master (std::shared_ptr<AutomationControl>) {}
 
 	XMLNode* _masters_node; /* used to store master ratios in ::set_state() for later use */
+	bool     _is_vca;
 };
 
 } // namespace ARDOUR
