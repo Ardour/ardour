@@ -313,6 +313,7 @@ Session::Session (AudioEngine &eng,
 	, _route_deletion_in_progress (false)
 	, _route_reorder_in_progress (false)
 	, _track_number_decimals(1)
+	, _solo_change_in_progress (false)
 	, default_fade_steepness (0)
 	, default_fade_msecs (0)
 	, _total_free_4k_blocks (0)
@@ -4071,6 +4072,17 @@ Session::route_solo_isolated_changed (std::weak_ptr<Route> wpr)
 void
 Session::route_solo_changed (bool self_solo_changed, Controllable::GroupControlDisposition group_override,  std::weak_ptr<Route> wpr)
 {
+	if (_solo_change_in_progress) {
+		/* when VCA master changes multiple solos, first collect all Changed signals,
+		 * so that SoloControl::transitioned_into_solo is set before processing
+		 * up/downstream propagation.
+		 * Slaved Solos behave like they are in a group, but `group_already_accounted_for`
+		 * is not set for VCAs, leading to https://tracker.ardour.org/view.php?id=10192
+		 */
+		_solo_change_queue.push_back (SoloChange (self_solo_changed, group_override, wpr));
+		return;
+	}
+
 	DEBUG_TRACE (DEBUG::Solo, string_compose ("route solo change, self = %1, update\n", self_solo_changed));
 
 	std::shared_ptr<Route> route (wpr.lock());

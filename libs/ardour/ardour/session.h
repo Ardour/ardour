@@ -2014,6 +2014,24 @@ private:
 	void listen_position_changed ();
 	void solo_control_mode_changed ();
 
+	bool _solo_change_in_progress;
+
+	struct SoloChange {
+		SoloChange (bool s, PBD::Controllable::GroupControlDisposition g, std::weak_ptr<Route> r)
+			: self_solo_changed (s)
+			, gcd (g)
+			, route (r)
+		{}
+		bool                                       self_solo_changed;
+		PBD::Controllable::GroupControlDisposition gcd;
+		std::weak_ptr<Route>                       route;
+	};
+#ifdef _MSC_VER
+	std::vector<SoloChange> _solo_change_queue;
+#else
+	std::vector<SoloChange, PBD::StackAllocator<SoloChange, 8>> _solo_change_queue;
+#endif
+
 	/* REGION MANAGEMENT */
 
 	mutable Glib::Threads::Mutex region_lock;

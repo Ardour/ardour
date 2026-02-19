@@ -28,6 +28,7 @@
 #include "ardour/monitor_control.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
+#include "ardour/slavable_automation_control.h"
 #include "ardour/solo_mute_release.h"
 #include "ardour/track.h"
 #include "ardour/vca_manager.h"
@@ -108,9 +109,23 @@ Session::rt_set_controls (std::shared_ptr<WeakAutomationControlList> cl, double 
 	for (auto const& c : *cl) {
 		std::shared_ptr<AutomationControl> ac = c.lock ();
 		if (ac) {
+			if (SoloAutomation == ac->desc().type) {
+				update_solo_state = true;
+				if (std::dynamic_pointer_cast<SlavableAutomationControl>(ac)->is_vca_master ()) {
+					_solo_change_in_progress = true;
+				}
+			}
+
 			ac->set_value (val, gcd);
-			update_solo_state |= SoloAutomation == ac->desc().type;
 		}
+	}
+
+	if (_solo_change_in_progress) {
+		_solo_change_in_progress = false;
+		for (auto const& r : _solo_change_queue) {
+			route_solo_changed (r.self_solo_changed, r.gcd, r.route);
+		}
+		_solo_change_queue.clear ();
 	}
 
 	/* some controls need global work to take place after they are set. Do
