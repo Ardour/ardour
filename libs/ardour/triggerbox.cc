@@ -3660,10 +3660,10 @@ PBD::ScopedConnectionList TriggerBox::static_connections;
 PBD::ScopedConnection TriggerBox::midi_input_connection;
 std::shared_ptr<MidiPort> TriggerBox::current_input;
 PBD::Signal<void(PBD::PropertyChange,int)> TriggerBox::TriggerBoxPropertyChange;
+Glib::Threads::Mutex TriggerBox::_bindings_mutex;
 
 typedef std::map <std::shared_ptr<Region>, std::shared_ptr<Trigger::UIState>> RegionStateMap;
 RegionStateMap enqueued_state_map;
-
 
 void
 TriggerBox::init ()
@@ -4778,6 +4778,12 @@ TriggerBox::set_first_midi_note (int n)
 bool
 TriggerBox::lookup_custom_midi_binding (std::vector<uint8_t> const & msg, int& x, int& y)
 {
+	Glib::Threads::Mutex::Lock lm (_bindings_mutex, Glib::Threads::TRY_LOCK);
+
+	if (!lm.locked()) {
+		return false;
+	}
+
 	CustomMidiMap::iterator i = _custom_midi_map.find (msg);
 
 	if (i == _custom_midi_map.end()) {
@@ -4795,12 +4801,15 @@ TriggerBox::midi_input_handler (MIDI::Parser&, MIDI::byte* buf, size_t sz, sampl
 {
 	if (_learning) {
 
+		/* Note on only */
+
 		if ((buf[0] & 0xf0) == MIDI::on) {
 			/* throw away velocity */
 			std::vector<uint8_t> msg { buf[0], buf[1] };
+			/* this could fail if the map is being manipulated */
 			add_custom_midi_binding (msg, learning_for.first, learning_for.second);
 			_learning = false;
-			TriggerMIDILearned (); /* EMIT SIGNAL */
+			TriggerMIDILearned(); /* EMIT SIGNAL */
 		}
 
 		return;
@@ -4834,18 +4843,13 @@ void
 TriggerBox::stop_midi_learn ()
 {
 	_learning = false;
+	TriggerMIDILearned (); /* EMIT SIGNAL */
 }
 
 void
 TriggerBox::midi_unlearn (int index)
 {
 	remove_custom_midi_binding (order(), index);
-}
-
-void
-TriggerBox::clear_custom_midi_bindings ()
-{
-	_custom_midi_map.clear ();
 }
 
 int
@@ -4867,6 +4871,7 @@ TriggerBox::get_custom_midi_binding_state ()
 {
 	XMLTree tree;
 	XMLNode* root = new XMLNode (X_("TriggerBindings"));
+	Glib::Threads::Mutex::Lock lm (_bindings_mutex);
 
 	for (auto const & b : _custom_midi_map) {
 
@@ -4941,6 +4946,14 @@ TriggerBox::load_custom_midi_bindings (XMLNode const & root)
 void
 TriggerBox::add_custom_midi_binding (std::vector<uint8_t> const & msg, int x, int y)
 {
+	/* Called from realtime/MIDI thread, so cannot block */
+
+	Glib::Threads::Mutex::Lock lm (_bindings_mutex, Glib::Threads::TRY_LOCK);
+
+	if (!lm.locked()) {
+		return;
+	}
+
 	std::pair<CustomMidiMap::iterator,bool> res = _custom_midi_map.insert (std::make_pair (msg, std::make_pair (x, y)));
 
 	if (!res.second) {
@@ -4951,6 +4964,8 @@ TriggerBox::add_custom_midi_binding (std::vector<uint8_t> const & msg, int x, in
 void
 TriggerBox::remove_custom_midi_binding (int x, int y)
 {
+	Glib::Threads::Mutex::Lock lm (_bindings_mutex);
+
 	/* this searches the whole map in case there are multiple entries
 	 *(keyed by note/channel) for the same pad (x,y)
 	 */
@@ -4958,9 +4973,15 @@ TriggerBox::remove_custom_midi_binding (int x, int y)
 	for (CustomMidiMap::iterator i = _custom_midi_map.begin(); i != _custom_midi_map.end(); ++i) {
 		if (i->second.first == x && i->second.second == y) {
 			_custom_midi_map.erase (i);
-			break;
 		}
 	}
+}
+
+void
+TriggerBox::clear_custom_midi_bindings ()
+{
+	Glib::Threads::Mutex::Lock lm (_bindings_mutex);
+	_custom_midi_map.clear ();
 }
 
 void

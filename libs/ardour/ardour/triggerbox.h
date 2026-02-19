@@ -965,6 +965,8 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 	void begin_midi_learn (int index);
 	void midi_unlearn (int index);
 	void stop_midi_learn ();
+	bool learning () const { return _learning; }
+	static PBD::Signal<void()> TriggerMIDILearned;
 
 	static Temporal::BBT_Offset assumed_trigger_duration () { return _assumed_trigger_duration; }
 	static void set_assumed_trigger_duration (Temporal::BBT_Offset const &);
@@ -1094,6 +1096,7 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 
 	typedef  std::map<std::vector<uint8_t>,std::pair<int,int> > CustomMidiMap;
 	static CustomMidiMap _custom_midi_map;
+	static Glib::Threads::Mutex         _bindings_mutex;
 
 	static void midi_input_handler (MIDI::Parser&, MIDI::byte*, size_t, samplecnt_t);
 	static std::shared_ptr<MIDI::Parser> input_parser;
@@ -1104,7 +1107,6 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 
 	static bool _learning;
 	static std::pair<int,int> learning_for;
-	static PBD::Signal<void()> TriggerMIDILearned;
 
 	static void init_pool();
 
