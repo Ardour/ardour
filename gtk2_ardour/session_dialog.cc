@@ -104,6 +104,7 @@ SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_
 	new_button.set_name ("tab button");
 	new_button.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceFlat));
 	new_button.set_corner_mask(ArdourButton::BOTTOM);
+	new_button.set_border_mask(ArdourButton::HIDE_TOP);
 	new_button.set_can_focus (true);
 	new_button.set_related_action (new_session_action);
 
@@ -111,6 +112,7 @@ SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_
 	recent_button.set_name ("tab button");
 	recent_button.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceFlat));
 	recent_button.set_corner_mask(ArdourButton::TOP);
+	recent_button.set_border_mask(ArdourButton::HIDE_BOTTOM);
 	recent_button.set_can_focus (true);
 	recent_button.set_related_action (recent_session_action);
 
