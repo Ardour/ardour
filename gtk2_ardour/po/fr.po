@@ -22015,7 +22015,7 @@ msgstr ""
 
 #: transport_masters_dialog.cc:84
 msgid "Sync Position + Delta"
-msgstr "Position de synchronisatin + delta"
+msgstr "Position de synchronisation + delta"
 
 #: transport_masters_dialog.cc:85
 msgid "Last Message + Age"
