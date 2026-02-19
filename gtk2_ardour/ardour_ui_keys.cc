@@ -212,40 +212,44 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 
 		KeyboardKey k (ev->state, ev->keyval);
 
-		/* Check hierarchy from current focus widget upwards */
+		if (!loading_session()) {
+			/* Check hierarchy from current focus widget upwards */
 
-		while (focus) {
+			while (focus) {
 
-			Gtkmm2ext::BindingSet* focus_bindings = get_bindings_from_widget_hierarchy (&focus);
+				Gtkmm2ext::BindingSet* focus_bindings = get_bindings_from_widget_hierarchy (&focus);
 
-			if (focus && focus_bindings) {
-				for (auto & bindings : *focus_bindings) {
-					DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tusing widget (%3) bindings %1 @ %2 for this event\n", bindings->name(), bindings, gtk_widget_get_name (focus)));
-					if (bindings->activate (k, Bindings::Press)) {
+				if (focus && focus_bindings) {
+					for (auto & bindings : *focus_bindings) {
+						DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tusing widget (%3) bindings %1 @ %2 for this event\n", bindings->name(), bindings, gtk_widget_get_name (focus)));
+						if (bindings->activate (k, Bindings::Press)) {
+							DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
+							return true;
+						}
+					}
+				}
+
+				if (focus) {
+					focus = gtk_widget_get_parent (focus);
+				}
+			}
+
+			/* Use any "top level" bindings passed to us (could be from a
+			 * top level tab or a top level window)
+			 */
+
+			if (top_level_bindings) {
+				for (auto & tlb : *top_level_bindings) {
+					DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tusing top level bindings %1 @ %2 for this event\n", tlb->name(), tlb));
+
+					if (tlb->activate (k, Bindings::Press)) {
 						DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
 						return true;
 					}
 				}
 			}
-
-			if (focus) {
-				focus = gtk_widget_get_parent (focus);
-			}
-		}
-
-		/* Use any "top level" bindings passed to us (could be from a
-		 * top level tab or a top level window)
-		 */
-
-		if (top_level_bindings) {
-			for (auto & tlb : *top_level_bindings) {
-				DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tusing top level bindings %1 @ %2 for this event\n", tlb->name(), tlb));
-
-				if (tlb->activate (k, Bindings::Press)) {
-					DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
-					return true;
-				}
-			}
+		} else {
+			DEBUG_TRACE (DEBUG::Accelerators, "bindings skipped because session is still loading\n");
 		}
 
 		/* Use any global bindings */
@@ -272,6 +276,11 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 
 		if (window.get_realized () && (!window.get_focus() || window.get_focus()->get_realized ()) && gtk_window_propagate_key_event (win, ev)) {
 			DEBUG_TRACE (DEBUG::Accelerators, "\thandled by propagate\n");
+			return true;
+		}
+
+		if (loading_session()) {
+			DEBUG_TRACE (DEBUG::Accelerators, "bindings skipped because session is still loading\n");
 			return true;
 		}
 
