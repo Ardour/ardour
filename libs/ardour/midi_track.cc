@@ -220,7 +220,7 @@ MidiTrack::set_state (const XMLNode& node, int version)
 		capture_channel_mode = playback_channel_mode;
 	}
 
-	if (node.get_property ("chase-notes", _chase_notes)) {
+	if (!node.get_property ("chase-notes", _chase_notes)) {
 		/* default is to chase */
 		_chase_notes = true;
 	}
