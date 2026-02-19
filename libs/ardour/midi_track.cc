@@ -91,7 +91,7 @@ MidiTrack::MidiTrack (Session& sess, string name, TrackMode mode)
 	, _input_active (true)
 	, _restore_pgm_on_load (true)
 	, _last_seen_external_midi_note (-1)
-	, _chase (true)
+	, _chase_notes (true)
 {
 	_session.SessionLoaded.connect_same_thread (*this, std::bind (&MidiTrack::restore_controls, this));
 
@@ -132,9 +132,12 @@ MidiTrack::init ()
 }
 
 void
-MidiTrack::set_chase (bool yn)
+MidiTrack::set_chase_notes (bool yn)
 {
-	_chase = yn;
+	_chase_notes = yn;
+	if (!yn && _disk_reader) {
+		_disk_reader->clear_midi_chase ();
+	}
 }
 
 void
@@ -450,7 +453,7 @@ MidiTrack::non_realtime_locate (samplepos_t spos)
 		return;
 	}
 
-	if (_chase && Config->get_midi_chase()) {
+	if (_chase_notes && Config->get_midi_chase()) {
 		_disk_reader->midi_chase (spos);
 	}
 

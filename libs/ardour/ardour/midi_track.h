@@ -93,8 +93,8 @@ public:
 	NoteMode note_mode() const { return _note_mode; }
 	void set_note_mode (NoteMode m);
 
-	bool chase() const { return _chase; }
-	void set_chase (bool yn);
+	bool chase_notes() const { return _chase_notes; }
+	void set_chase_notes (bool yn);
 
 	std::string describe_parameter (Evoral::Parameter param);
 
@@ -173,7 +173,7 @@ private:
 	MidiChannelFilter           _playback_filter;
 	MidiChannelFilter           _capture_filter;
 	int                         _last_seen_external_midi_note;
-	bool                        _chase;
+	bool                        _chase_notes;
 
 	std::shared_ptr<VelocityControl>  _velocity_control;
 

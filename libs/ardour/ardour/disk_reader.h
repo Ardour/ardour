@@ -64,6 +64,7 @@ public:
 	LIBARDOUR_API void realtime_handle_transport_stopped ();
 	LIBARDOUR_API void realtime_locate (bool);
 	LIBARDOUR_API void midi_chase (samplepos_t spos);
+	LIBARDOUR_API void clear_midi_chase ();
 	LIBARDOUR_API bool overwrite_existing_buffers ();
 	LIBARDOUR_API void set_pending_overwrite (OverwriteReason);
 	LIBARDOUR_API void set_loop (Location*);

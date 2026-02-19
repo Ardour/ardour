@@ -207,6 +207,12 @@ DiskReader::realtime_locate (bool for_loop_end)
 }
 
 void
+DiskReader::clear_midi_chase ()
+{
+	_locate_tracker.reset ();
+}
+
+void
 DiskReader::midi_chase (samplepos_t spos)
 {
 	RTMidiBuffer* rtmb = rt_midibuffer();
