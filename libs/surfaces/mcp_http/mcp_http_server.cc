@@ -42,6 +42,7 @@
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/processor.h"
+#include "ardour/rc_configuration.h"
 #include "ardour/route.h"
 #include "ardour/selection.h"
 #include "ardour/session.h"
@@ -153,6 +154,21 @@ transport_state_json (ARDOUR::Session& session)
 	   << ",\"sample\":" << session.transport_sample ()
 	   << ",\"state\":\"" << transport_state_string (session) << "\"}";
 	return ss.str ();
+}
+
+static const char*
+record_state_string (ARDOUR::RecordState state)
+{
+	switch (state) {
+	case ARDOUR::Disabled:
+		return "disabled";
+	case ARDOUR::Enabled:
+		return "enabled";
+	case ARDOUR::Recording:
+		return "recording";
+	default:
+		return "unknown";
+	}
 }
 
 static double
@@ -1623,6 +1639,20 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
 				"{\"name\":\"transport/locate\",\"title\":\"Transport Locate\",\"description\":\"Move playhead to a target position by sample, or by bar+beat (fractional beat allowed).\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"sample\":{\"type\":\"integer\",\"minimum\":0},\"bar\":{\"type\":\"integer\",\"minimum\":1},\"beat\":{\"type\":\"number\",\"minimum\":1}},\"additionalProperties\":false}},"
+				"{\"name\":\"transport/goto_start\",\"title\":\"Transport Go To Start\",\"description\":\"Move playhead to session start. Optional andRoll starts playback after locate.\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"andRoll\":{\"type\":\"boolean\"}},\"additionalProperties\":false}},"
+				"{\"name\":\"transport/goto_end\",\"title\":\"Transport Go To End\",\"description\":\"Move playhead to session end.\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
+				"{\"name\":\"transport/prev_marker\",\"title\":\"Transport Previous Marker\",\"description\":\"Move playhead to the previous visible marker/range boundary.\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
+				"{\"name\":\"transport/next_marker\",\"title\":\"Transport Next Marker\",\"description\":\"Move playhead to the next visible marker/range boundary.\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
+				"{\"name\":\"transport/loop_toggle\",\"title\":\"Transport Loop Toggle\",\"description\":\"Toggle loop playback, or set explicit loop state. Shows loop range if available.\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"enabled\":{\"type\":\"boolean\"}},\"additionalProperties\":false}},"
+				"{\"name\":\"transport/loop_location\",\"title\":\"Transport Loop Location\",\"description\":\"Set auto-loop range using start/end sample or start/end bar+beat.\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"startSample\":{\"type\":\"integer\",\"minimum\":0},\"endSample\":{\"type\":\"integer\",\"minimum\":0},\"startBar\":{\"type\":\"integer\",\"minimum\":1},\"startBeat\":{\"type\":\"number\",\"minimum\":1},\"endBar\":{\"type\":\"integer\",\"minimum\":1},\"endBeat\":{\"type\":\"number\",\"minimum\":1}},\"additionalProperties\":false}},"
+				"{\"name\":\"transport/set_record_enable\",\"title\":\"Set Global Record Enable\",\"description\":\"Set session record-enable (global rec arm) state.\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"enabled\":{\"type\":\"boolean\"}},\"required\":[\"enabled\"],\"additionalProperties\":false}},"
 				"{\"name\":\"transport/play\",\"title\":\"Transport Play\",\"description\":\"Start transport playback.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
 				"{\"name\":\"transport/stop\",\"title\":\"Transport Stop\",\"description\":\"Stop transport playback.\","
@@ -1737,6 +1767,175 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 				return jsonrpc_result (
 					id,
 					std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Transport locate requested\"}],\"structuredContent\":") + structured.str () + "}");
+			}
+
+			if (tool_name == "transport/goto_start") {
+				const bool and_roll = root.get<bool> ("params.arguments.andRoll", false);
+				_session.goto_start (and_roll);
+				std::string structured = transport_state_json (_session);
+				return jsonrpc_result (
+					id,
+					std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Transport moved to start\"}],\"structuredContent\":") + structured + "}");
+			}
+
+			if (tool_name == "transport/goto_end") {
+				_session.goto_end ();
+				std::string structured = transport_state_json (_session);
+				return jsonrpc_result (
+					id,
+					std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Transport moved to end\"}],\"structuredContent\":") + structured + "}");
+			}
+
+			if (tool_name == "transport/prev_marker") {
+				ARDOUR::Locations* locations = _session.locations ();
+				if (!locations) {
+					return jsonrpc_error (id, -32602, "Session locations unavailable");
+				}
+
+				const samplepos_t now_sample = _session.transport_sample ();
+				Temporal::timepos_t pos = locations->first_mark_before_flagged (
+					Temporal::timepos_t (now_sample),
+					true,
+					ARDOUR::Location::Flags (0),
+					ARDOUR::Location::Flags (0),
+					ARDOUR::Location::Flags (0));
+
+				/* Match Editor behavior while rolling: skip the current/very-near mark. */
+				if (pos != Temporal::timepos_t::max (Temporal::AudioTime) && _session.transport_rolling ()) {
+					if ((now_sample - pos.samples ()) < (_session.sample_rate () / 2)) {
+						Temporal::timepos_t prior = locations->first_mark_before (pos, true);
+						if (prior != Temporal::timepos_t::max (Temporal::AudioTime)) {
+							pos = prior;
+						}
+					}
+				}
+
+				std::ostringstream structured;
+				if (pos == Temporal::timepos_t::max (Temporal::AudioTime)) {
+					structured << "{\"moved\":false,\"transport\":" << transport_state_json (_session) << "}";
+					return jsonrpc_result (
+						id,
+						std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"No previous marker\"}],\"structuredContent\":") + structured.str () + "}");
+				}
+
+				_session.request_locate (pos.samples ());
+
+				structured << "{\"moved\":true"
+					<< ",\"targetSample\":" << pos.samples ()
+					<< ",\"targetBbt\":" << bbt_json_at_sample (pos.samples ())
+					<< ",\"transport\":" << transport_state_json (_session)
+					<< "}";
+				return jsonrpc_result (
+					id,
+					std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Moved to previous marker\"}],\"structuredContent\":") + structured.str () + "}");
+			}
+
+			if (tool_name == "transport/next_marker") {
+				ARDOUR::Locations* locations = _session.locations ();
+				if (!locations) {
+					return jsonrpc_error (id, -32602, "Session locations unavailable");
+				}
+
+				Temporal::timepos_t pos = locations->first_mark_after_flagged (
+					Temporal::timepos_t (_session.transport_sample () + 1),
+					true,
+					ARDOUR::Location::Flags (0),
+					ARDOUR::Location::Flags (0),
+					ARDOUR::Location::Flags (0));
+
+				std::ostringstream structured;
+				if (pos == Temporal::timepos_t::max (Temporal::AudioTime)) {
+					structured << "{\"moved\":false,\"transport\":" << transport_state_json (_session) << "}";
+					return jsonrpc_result (
+						id,
+						std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"No next marker\"}],\"structuredContent\":") + structured.str () + "}");
+				}
+
+				_session.request_locate (pos.samples ());
+
+				structured << "{\"moved\":true"
+					<< ",\"targetSample\":" << pos.samples ()
+					<< ",\"targetBbt\":" << bbt_json_at_sample (pos.samples ())
+					<< ",\"transport\":" << transport_state_json (_session)
+					<< "}";
+				return jsonrpc_result (
+					id,
+					std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Moved to next marker\"}],\"structuredContent\":") + structured.str () + "}");
+			}
+
+			if (tool_name == "transport/loop_toggle") {
+				ARDOUR::Locations* locations = _session.locations ();
+				if (!locations) {
+					return jsonrpc_error (id, -32602, "Session locations unavailable");
+				}
+
+				ARDOUR::Location* loop_loc = locations->auto_loop_location ();
+				if (!loop_loc) {
+					return jsonrpc_error (id, -32602, "Auto-loop range not set");
+				}
+
+				const boost::optional<bool> enabled_opt = root.get_optional<bool> ("params.arguments.enabled");
+				const bool requested_enabled = enabled_opt ? *enabled_opt : !_session.get_play_loop ();
+				const bool loop_is_mode = ARDOUR::Config->get_loop_is_mode ();
+				const bool was_rolling = _session.transport_rolling ();
+
+				if (_session.get_play_loop () != requested_enabled) {
+					if (requested_enabled) {
+						/* Match BasicUI/OSC semantics: loop-is-mode does not force roll. */
+						if (loop_is_mode) {
+							_session.request_play_loop (true, false);
+						} else {
+							_session.request_play_loop (true, true);
+							/* Ensure transport-state UI updates if SetLoop and roll requests race. */
+							if (!was_rolling) {
+								_session.request_roll ();
+							}
+						}
+					} else {
+						_session.request_play_loop (false);
+					}
+				}
+
+				/* Match BasicUI: loop toggle should unhide the loop range. */
+				loop_loc->set_hidden (false, 0);
+
+				std::ostringstream structured;
+				structured << "{\"requestedEnabled\":" << (requested_enabled ? "true" : "false")
+					<< ",\"loopIsMode\":" << (loop_is_mode ? "true" : "false")
+					<< ",\"rollingBefore\":" << (was_rolling ? "true" : "false")
+					<< ",\"playLoop\":" << (_session.get_play_loop () ? "true" : "false")
+					<< ",\"transport\":" << transport_state_json (_session)
+					<< ",\"loop\":" << special_range_json (*loop_loc, "auto_loop")
+					<< "}";
+
+				return jsonrpc_result (
+					id,
+					std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Loop playback updated\"}],\"structuredContent\":") + structured.str () + "}");
+			}
+
+			if (tool_name == "transport/set_record_enable") {
+				const bool requested_enabled = root.get<bool> ("params.arguments.enabled");
+				const ARDOUR::RecordState status_before = _session.record_status ();
+
+				if (requested_enabled) {
+					_session.maybe_enable_record ();
+				} else {
+					_session.disable_record (false, true);
+				}
+
+				const ARDOUR::RecordState status_after = _session.record_status ();
+
+				std::ostringstream structured;
+				structured << "{\"requestedEnabled\":" << (requested_enabled ? "true" : "false")
+					<< ",\"recordEnabled\":" << (_session.get_record_enabled () ? "true" : "false")
+					<< ",\"recordStatusBefore\":\"" << record_state_string (status_before) << "\""
+					<< ",\"recordStatusAfter\":\"" << record_state_string (status_after) << "\""
+					<< ",\"transport\":" << transport_state_json (_session)
+					<< "}";
+
+				return jsonrpc_result (
+					id,
+					std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Global record-enable updated\"}],\"structuredContent\":") + structured.str () + "}");
 			}
 
 			if (tool_name == "transport/play") {
@@ -1857,7 +2056,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Range marker added\"}],\"structuredContent\":") + structured + "}");
 				}
 
-				if (tool_name == "markers/set_auto_loop") {
+				if (tool_name == "markers/set_auto_loop" || tool_name == "transport/loop_location") {
 					samplepos_t start_sample = 0;
 					samplepos_t end_sample = 0;
 					std::string range_error;
@@ -1879,9 +2078,10 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 					    loop_loc->end_sample () == end_sample &&
 					    !loop_loc->is_hidden ()) {
 						std::string structured = special_range_json (*loop_loc, "auto_loop");
+						const std::string unchanged_text = (tool_name == "transport/loop_location") ? "Loop location unchanged" : "Auto-loop range unchanged";
 						return jsonrpc_result (
 							id,
-							std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Auto-loop range unchanged\"}],\"structuredContent\":") + structured + "}");
+							std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"") + json_escape (unchanged_text) + "\"}],\"structuredContent\":" + structured + "}");
 					}
 
 					_session.begin_reversible_command ("set auto loop range");
@@ -1907,9 +2107,10 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 					_session.commit_reversible_command ();
 
 					std::string structured = special_range_json (*loop_loc, "auto_loop");
+					const std::string updated_text = (tool_name == "transport/loop_location") ? "Loop location updated" : "Auto-loop range updated";
 					return jsonrpc_result (
 						id,
-						std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Auto-loop range updated\"}],\"structuredContent\":") + structured + "}");
+						std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"") + json_escape (updated_text) + "\"}],\"structuredContent\":" + structured + "}");
 				}
 
 				if (tool_name == "markers/hide_auto_loop") {
