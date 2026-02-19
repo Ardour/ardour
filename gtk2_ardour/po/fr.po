@@ -7689,7 +7689,7 @@ msgstr "%1 de la section d'arrangement"
 
 #: editor_markers.cc:1877
 msgid "%1 Range"
-msgstr "%1 de l'iintervalle"
+msgstr "%1 de l'intervalle"
 
 #: editor_markers.cc:1879
 msgid "%1 Marker"
