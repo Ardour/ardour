@@ -207,28 +207,25 @@ DiskReader::realtime_locate (bool for_loop_end)
 }
 
 void
-DiskReader::non_realtime_locate (samplepos_t spos)
+DiskReader::midi_chase (samplepos_t spos)
 {
-	if (!_playlists[DataType::MIDI]) {
+	RTMidiBuffer* rtmb = rt_midibuffer();
+	if (!rtmb) {
 		return;
 	}
 
-	if (Config->get_midi_chase()) {
-		_locate_tracker.reset ();
+	_locate_tracker.reset ();
 
-		RTMidiBuffer* rtmb = rt_midibuffer();
-
-		if (rtmb) {
-			for (size_t n = 0; n < rtmb->size(); ++n) {
-				uint32_t sz;
-				RTMidiBuffer::Item const & item ((*rtmb)[n]);
-				if (item.timestamp > spos) {
-					break;
-				}
-				uint8_t const * buf = rtmb->bytes (item, sz);
-				if (sz == 3) {
-					_locate_tracker.track (buf);
-				}
+	if (rtmb) {
+		for (size_t n = 0; n < rtmb->size(); ++n) {
+			uint32_t sz;
+			RTMidiBuffer::Item const & item ((*rtmb)[n]);
+			if (item.timestamp > spos) {
+				break;
+			}
+			uint8_t const * buf = rtmb->bytes (item, sz);
+			if (sz == 3) {
+				_locate_tracker.track (buf);
 			}
 		}
 	}

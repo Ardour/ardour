@@ -63,7 +63,7 @@ public:
 	LIBARDOUR_API void run (BufferSet& /*bufs*/, samplepos_t /*start_sample*/, samplepos_t /*end_sample*/, double speed, pframes_t /*nframes*/, bool /*result_required*/);
 	LIBARDOUR_API void realtime_handle_transport_stopped ();
 	LIBARDOUR_API void realtime_locate (bool);
-	LIBARDOUR_API void non_realtime_locate (samplepos_t spos);
+	LIBARDOUR_API void midi_chase (samplepos_t spos);
 	LIBARDOUR_API bool overwrite_existing_buffers ();
 	LIBARDOUR_API void set_pending_overwrite (OverwriteReason);
 	LIBARDOUR_API void set_loop (Location*);
