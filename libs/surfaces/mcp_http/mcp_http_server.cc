@@ -31,6 +31,7 @@
 #include "pbd/error.h"
 #include "pbd/id.h"
 #include "pbd/controllable.h"
+#include "pbd/memento_command.h"
 #include "pbd/xml++.h"
 
 #include "ardour/audio_track.h"
@@ -424,7 +425,8 @@ markers_list_json (ARDOUR::Session& session)
 
 	struct MarkerSnapshot {
 		std::string name;
-		samplepos_t sample;
+		samplepos_t entry_start_sample;
+		samplepos_t entry_end_sample;
 		uint32_t flags;
 		int32_t cue_id;
 		bool have_cue;
@@ -467,7 +469,8 @@ markers_list_json (ARDOUR::Session& session)
 			/* Match OSC behavior: expose session bounds as synthetic "start"/"end" markers. */
 			MarkerSnapshot start_marker;
 			start_marker.name = "start";
-			start_marker.sample = start_sample;
+			start_marker.entry_start_sample = start_sample;
+			start_marker.entry_end_sample = start_sample;
 			start_marker.flags = flags;
 			start_marker.cue_id = 0;
 			start_marker.have_cue = false;
@@ -483,7 +486,8 @@ markers_list_json (ARDOUR::Session& session)
 
 			MarkerSnapshot end_marker;
 			end_marker.name = "end";
-			end_marker.sample = end_sample;
+			end_marker.entry_start_sample = end_sample;
+			end_marker.entry_end_sample = end_sample;
 			end_marker.flags = flags;
 			end_marker.cue_id = 0;
 			end_marker.have_cue = false;
@@ -499,13 +503,17 @@ markers_list_json (ARDOUR::Session& session)
 			continue;
 		}
 
-		if (!(flags & (uint32_t) ARDOUR::Location::IsMark)) {
+		if (!(flags & ((uint32_t) ARDOUR::Location::IsMark |
+		               (uint32_t) ARDOUR::Location::IsRangeMarker |
+		               (uint32_t) ARDOUR::Location::IsAutoLoop |
+		               (uint32_t) ARDOUR::Location::IsAutoPunch))) {
 			continue;
 		}
 
 		MarkerSnapshot marker;
 		marker.name = name;
-		marker.sample = start_sample;
+		marker.entry_start_sample = start_sample;
+		marker.entry_end_sample = end_sample;
 		marker.flags = flags;
 		marker.cue_id = cue_id;
 		marker.have_cue = have_cue && (flags & (uint32_t) ARDOUR::Location::IsCueMarker);
@@ -524,10 +532,10 @@ markers_list_json (ARDOUR::Session& session)
 		markers.begin (),
 		markers.end (),
 		[] (const MarkerSnapshot& a, const MarkerSnapshot& b) {
-			if (a.sample == b.sample) {
+			if (a.entry_start_sample == b.entry_start_sample) {
 				return a.name < b.name;
 			}
-			return a.sample < b.sample;
+			return a.entry_start_sample < b.entry_start_sample;
 		});
 
 	std::ostringstream ss;
@@ -554,15 +562,17 @@ markers_list_json (ARDOUR::Session& session)
 		const bool is_clock_origin = (marker.flags & (uint32_t) ARDOUR::Location::IsClockOrigin) != 0;
 		const bool is_skip = (marker.flags & (uint32_t) ARDOUR::Location::IsSkip) != 0;
 		const bool is_range = is_session_range || is_range_marker || is_auto_loop || is_auto_punch || is_cd;
-		const int64_t distance_from_start = (int64_t) marker.sample - (int64_t) marker.location_start_sample;
-		const std::string marker_bbt = bbt_json_at_sample (marker.sample);
+		const samplepos_t entry_end_sample = std::max (marker.entry_start_sample, marker.entry_end_sample);
+		const int64_t distance_from_start = (int64_t) marker.entry_start_sample - (int64_t) marker.location_start_sample;
+		const std::string marker_bbt = bbt_json_at_sample (marker.entry_start_sample);
+		const std::string marker_end_bbt = bbt_json_at_sample (entry_end_sample);
 		const std::string location_start_bbt = bbt_json_at_sample (marker.location_start_sample);
 		const std::string location_end_bbt = bbt_json_at_sample (marker.location_end_sample);
 
 		ss << "{\"name\":\"" << json_escape (marker.name) << "\""
 		   << ",\"label\":\"" << json_escape (marker.name) << "\""
 		   << ",\"source\":\"" << (marker.synthetic ? "session_range_boundary" : "location") << "\""
-		   << ",\"boundary\":\"" << (marker.synthetic ? (marker.boundary_start ? "start" : "end") : "point") << "\""
+		   << ",\"boundary\":\"" << (marker.synthetic ? (marker.boundary_start ? "start" : "end") : (is_range ? "range" : "point")) << "\""
 		   << ",\"sortIndex\":" << i
 		   << ",\"isSynthetic\":" << (marker.synthetic ? "true" : "false");
 
@@ -578,10 +588,11 @@ markers_list_json (ARDOUR::Session& session)
 		   << ",\"locationStartBbt\":" << location_start_bbt
 		   << ",\"locationEndBbt\":" << location_end_bbt
 		   << ",\"distanceFromLocationStartSamples\":" << distance_from_start
-		   << ",\"startSample\":" << marker.sample
-		   << ",\"endSample\":" << marker.sample
+		   << ",\"startSample\":" << marker.entry_start_sample
+		   << ",\"endSample\":" << entry_end_sample
 		   << ",\"bbt\":" << marker_bbt
-		   << ",\"lengthSamples\":0"
+		   << ",\"endBbt\":" << marker_end_bbt
+		   << ",\"lengthSamples\":" << (entry_end_sample - marker.entry_start_sample)
 		   << ",\"isHidden\":" << (marker.hidden ? "true" : "false")
 		   << ",\"isRange\":" << (is_range ? "true" : "false")
 		   << ",\"flagBits\":" << marker.flags
@@ -610,6 +621,272 @@ markers_list_json (ARDOUR::Session& session)
 
 	ss << "]}";
 	return ss.str ();
+}
+
+static std::string
+marker_added_json (const ARDOUR::Location& location, bool used_default_name, const std::string& requested_name)
+{
+	const samplepos_t sample = location.start_sample ();
+	const uint32_t flags = (uint32_t) location.flags ();
+	const std::string bbt = bbt_json_at_sample (sample);
+
+	std::ostringstream ss;
+	ss << "{\"locationId\":\"" << json_escape (location.id ().to_s ()) << "\""
+	   << ",\"name\":\"" << json_escape (location.name ()) << "\""
+	   << ",\"startSample\":" << sample
+	   << ",\"endSample\":" << sample
+	   << ",\"bbt\":" << bbt
+	   << ",\"types\":" << marker_type_json (flags)
+	   << ",\"usedDefaultName\":" << (used_default_name ? "true" : "false");
+
+	if (requested_name.empty ()) {
+		ss << ",\"requestedName\":null";
+	} else {
+		ss << ",\"requestedName\":\"" << json_escape (requested_name) << "\"";
+	}
+
+	ss << "}";
+	return ss.str ();
+}
+
+static std::string
+range_added_json (const ARDOUR::Location& location, bool used_default_name, const std::string& requested_name)
+{
+	const samplepos_t start_sample = location.start_sample ();
+	const samplepos_t end_sample = std::max (start_sample, location.end_sample ());
+	const uint32_t flags = (uint32_t) location.flags ();
+	const std::string start_bbt = bbt_json_at_sample (start_sample);
+	const std::string end_bbt = bbt_json_at_sample (end_sample);
+
+	std::ostringstream ss;
+	ss << "{\"locationId\":\"" << json_escape (location.id ().to_s ()) << "\""
+	   << ",\"name\":\"" << json_escape (location.name ()) << "\""
+	   << ",\"startSample\":" << start_sample
+	   << ",\"endSample\":" << end_sample
+	   << ",\"startBbt\":" << start_bbt
+	   << ",\"endBbt\":" << end_bbt
+	   << ",\"lengthSamples\":" << (end_sample - start_sample)
+	   << ",\"types\":" << marker_type_json (flags)
+	   << ",\"usedDefaultName\":" << (used_default_name ? "true" : "false");
+
+	if (requested_name.empty ()) {
+		ss << ",\"requestedName\":null";
+	} else {
+		ss << ",\"requestedName\":\"" << json_escape (requested_name) << "\"";
+	}
+
+	ss << "}";
+	return ss.str ();
+}
+
+static std::string
+special_range_json (const ARDOUR::Location& location, const std::string& mode)
+{
+	const samplepos_t start_sample = location.start_sample ();
+	const samplepos_t end_sample = std::max (start_sample, location.end_sample ());
+	const uint32_t flags = (uint32_t) location.flags ();
+	const std::string start_bbt = bbt_json_at_sample (start_sample);
+	const std::string end_bbt = bbt_json_at_sample (end_sample);
+	const bool is_hidden = (flags & (uint32_t) ARDOUR::Location::IsHidden) != 0;
+
+	std::ostringstream ss;
+	ss << "{\"mode\":\"" << json_escape (mode) << "\""
+	   << ",\"locationId\":\"" << json_escape (location.id ().to_s ()) << "\""
+	   << ",\"name\":\"" << json_escape (location.name ()) << "\""
+	   << ",\"startSample\":" << start_sample
+	   << ",\"endSample\":" << end_sample
+	   << ",\"startBbt\":" << start_bbt
+	   << ",\"endBbt\":" << end_bbt
+	   << ",\"lengthSamples\":" << (end_sample - start_sample)
+	   << ",\"isHidden\":" << (is_hidden ? "true" : "false")
+	   << ",\"types\":" << marker_type_json (flags)
+	   << "}";
+	return ss.str ();
+}
+
+static bool
+parse_bbt_target_sample (int bar, double beat, samplepos_t& target_sample, std::string& error)
+{
+	error.clear ();
+
+	if (bar < 1 || !std::isfinite (beat) || beat < 1.0) {
+		error = "Invalid bar/beat (expected: bar>=1, beat>=1.0)";
+		return false;
+	}
+
+	int32_t whole_beats = (int32_t) std::floor (beat);
+	double fractional = beat - (double) whole_beats;
+
+	if (whole_beats < 1 || fractional < 0.0) {
+		error = "Invalid beat value";
+		return false;
+	}
+
+	int32_t ticks = (int32_t) std::llround (fractional * (double) Temporal::ticks_per_beat);
+	if (ticks >= Temporal::ticks_per_beat) {
+		ticks = 0;
+		++whole_beats;
+	}
+
+	Temporal::BBT_Argument bbt ((int32_t) bar, whole_beats, ticks);
+	target_sample = Temporal::TempoMap::use ()->sample_at (bbt);
+	return true;
+}
+
+static std::string
+marker_deleted_json (
+	const std::string& location_id,
+	const std::string& name,
+	samplepos_t start_sample,
+	samplepos_t end_sample,
+	uint32_t flags)
+{
+	const samplepos_t safe_end_sample = std::max (start_sample, end_sample);
+	const std::string start_bbt = bbt_json_at_sample (start_sample);
+	const std::string end_bbt = bbt_json_at_sample (safe_end_sample);
+
+	std::ostringstream ss;
+	ss << "{\"locationId\":\"" << json_escape (location_id) << "\""
+	   << ",\"name\":\"" << json_escape (name) << "\""
+	   << ",\"startSample\":" << start_sample
+	   << ",\"endSample\":" << safe_end_sample
+	   << ",\"bbt\":" << start_bbt
+	   << ",\"endBbt\":" << end_bbt
+	   << ",\"lengthSamples\":" << (safe_end_sample - start_sample)
+	   << ",\"types\":" << marker_type_json (flags)
+	   << "}";
+	return ss.str ();
+}
+
+static std::string
+marker_renamed_json (
+	const std::string& location_id,
+	const std::string& old_name,
+	const std::string& new_name,
+	samplepos_t start_sample,
+	samplepos_t end_sample,
+	uint32_t flags)
+{
+	const samplepos_t safe_end_sample = std::max (start_sample, end_sample);
+	const std::string start_bbt = bbt_json_at_sample (start_sample);
+	const std::string end_bbt = bbt_json_at_sample (safe_end_sample);
+
+	std::ostringstream ss;
+	ss << "{\"locationId\":\"" << json_escape (location_id) << "\""
+	   << ",\"oldName\":\"" << json_escape (old_name) << "\""
+	   << ",\"name\":\"" << json_escape (new_name) << "\""
+	   << ",\"startSample\":" << start_sample
+	   << ",\"endSample\":" << safe_end_sample
+	   << ",\"bbt\":" << start_bbt
+	   << ",\"endBbt\":" << end_bbt
+	   << ",\"lengthSamples\":" << (safe_end_sample - start_sample)
+	   << ",\"types\":" << marker_type_json (flags)
+	   << "}";
+	return ss.str ();
+}
+
+static bool
+parse_optional_bbt_target_sample (
+	const pt::ptree& root,
+	const std::string& args_path,
+	samplepos_t& target_sample,
+	bool& have_target,
+	std::string& error)
+{
+	have_target = false;
+	error.clear ();
+
+	const boost::optional<int> bar_opt = root.get_optional<int> (args_path + ".bar");
+	const boost::optional<double> beat_opt = root.get_optional<double> (args_path + ".beat");
+
+	if ((bar_opt && !beat_opt) || (!bar_opt && beat_opt)) {
+		error = "Provide both bar and beat, or neither";
+		return false;
+	}
+
+	if (!bar_opt && !beat_opt) {
+		return true;
+	}
+
+	const int bar = *bar_opt;
+	const double beat = *beat_opt;
+	if (!parse_bbt_target_sample (bar, beat, target_sample, error)) {
+		return false;
+	}
+
+	have_target = true;
+	return true;
+}
+
+static bool
+parse_range_endpoints (
+	const pt::ptree& root,
+	const std::string& args_path,
+	samplepos_t& start_sample,
+	samplepos_t& end_sample,
+	std::string& error)
+{
+	error.clear ();
+	start_sample = 0;
+	end_sample = 0;
+
+	const boost::optional<int64_t> start_sample_opt = root.get_optional<int64_t> (args_path + ".startSample");
+	const boost::optional<int64_t> end_sample_opt = root.get_optional<int64_t> (args_path + ".endSample");
+	const boost::optional<int> start_bar_opt = root.get_optional<int> (args_path + ".startBar");
+	const boost::optional<double> start_beat_opt = root.get_optional<double> (args_path + ".startBeat");
+	const boost::optional<int> end_bar_opt = root.get_optional<int> (args_path + ".endBar");
+	const boost::optional<double> end_beat_opt = root.get_optional<double> (args_path + ".endBeat");
+
+	if ((start_bar_opt && !start_beat_opt) || (!start_bar_opt && start_beat_opt)) {
+		error = "Provide both startBar and startBeat, or neither";
+		return false;
+	}
+	if ((end_bar_opt && !end_beat_opt) || (!end_bar_opt && end_beat_opt)) {
+		error = "Provide both endBar and endBeat, or neither";
+		return false;
+	}
+	if ((start_sample_opt && !end_sample_opt) || (!start_sample_opt && end_sample_opt)) {
+		error = "Provide both startSample and endSample, or neither";
+		return false;
+	}
+
+	const bool have_samples = start_sample_opt && end_sample_opt;
+	const bool have_bbt = start_bar_opt && start_beat_opt && end_bar_opt && end_beat_opt;
+
+	if (have_samples && (start_bar_opt || start_beat_opt || end_bar_opt || end_beat_opt)) {
+		error = "Provide either sample pair or bar+beat pair, not both";
+		return false;
+	}
+	if (!have_samples && !have_bbt) {
+		error = "Missing range endpoints (provide sample pair or bar+beat pair)";
+		return false;
+	}
+
+	if (have_samples) {
+		if (*start_sample_opt < 0 || *end_sample_opt < 0) {
+			error = "Invalid sample (expected >= 0)";
+			return false;
+		}
+		start_sample = (samplepos_t) *start_sample_opt;
+		end_sample = (samplepos_t) *end_sample_opt;
+	} else {
+		std::string bbt_error;
+		if (!parse_bbt_target_sample (*start_bar_opt, *start_beat_opt, start_sample, bbt_error)) {
+			error = std::string ("Invalid start ") + bbt_error;
+			return false;
+		}
+		if (!parse_bbt_target_sample (*end_bar_opt, *end_beat_opt, end_sample, bbt_error)) {
+			error = std::string ("Invalid end ") + bbt_error;
+			return false;
+		}
+	}
+
+	if (end_sample < start_sample) {
+		error = "Invalid range: end before start";
+		return false;
+	}
+
+	return true;
 }
 
 static bool
@@ -1305,14 +1582,32 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 			"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\"}},\"additionalProperties\":false}},"
 			"{\"name\":\"session/get_info\",\"title\":\"Session Info\",\"description\":\"Return basic session and transport info.\","
 			"\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
-			"{\"name\":\"transport/get_state\",\"title\":\"Transport State\",\"description\":\"Return transport state.\","
-			"\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
-			"{\"name\":\"transport/play\",\"title\":\"Transport Play\",\"description\":\"Start transport playback.\","
-			"\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
+				"{\"name\":\"transport/get_state\",\"title\":\"Transport State\",\"description\":\"Return transport state.\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
+				"{\"name\":\"transport/locate\",\"title\":\"Transport Locate\",\"description\":\"Move playhead to a target position by sample, or by bar+beat (fractional beat allowed).\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"sample\":{\"type\":\"integer\",\"minimum\":0},\"bar\":{\"type\":\"integer\",\"minimum\":1},\"beat\":{\"type\":\"number\",\"minimum\":1}},\"additionalProperties\":false}},"
+				"{\"name\":\"transport/play\",\"title\":\"Transport Play\",\"description\":\"Start transport playback.\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
 				"{\"name\":\"transport/stop\",\"title\":\"Transport Stop\",\"description\":\"Stop transport playback.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
 				"{\"name\":\"markers/list\",\"title\":\"Markers List\",\"description\":\"List all session markers regardless of marker subtype.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
+				"{\"name\":\"markers/add\",\"title\":\"Add Marker\",\"description\":\"Add a marker at the current audible position or at a specific BBT location. Optional type: mark, section (arrangement), or scene. If name is omitted or empty, Ardour assigns a default marker name.\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\"},\"type\":{\"type\":\"string\",\"enum\":[\"mark\",\"section\",\"scene\",\"arrangement\"]},\"bar\":{\"type\":\"integer\",\"minimum\":1},\"beat\":{\"type\":\"number\",\"minimum\":1}},\"additionalProperties\":false}},"
+				"{\"name\":\"markers/add_range\",\"title\":\"Add Range Marker\",\"description\":\"Add a range marker using start/end sample or start/end bar+beat.\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\"},\"startSample\":{\"type\":\"integer\",\"minimum\":0},\"endSample\":{\"type\":\"integer\",\"minimum\":0},\"startBar\":{\"type\":\"integer\",\"minimum\":1},\"startBeat\":{\"type\":\"number\",\"minimum\":1},\"endBar\":{\"type\":\"integer\",\"minimum\":1},\"endBeat\":{\"type\":\"number\",\"minimum\":1}},\"additionalProperties\":false}},"
+				"{\"name\":\"markers/set_auto_loop\",\"title\":\"Set Auto Loop Range\",\"description\":\"Set auto-loop range using start/end sample or start/end bar+beat.\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"startSample\":{\"type\":\"integer\",\"minimum\":0},\"endSample\":{\"type\":\"integer\",\"minimum\":0},\"startBar\":{\"type\":\"integer\",\"minimum\":1},\"startBeat\":{\"type\":\"number\",\"minimum\":1},\"endBar\":{\"type\":\"integer\",\"minimum\":1},\"endBeat\":{\"type\":\"number\",\"minimum\":1}},\"additionalProperties\":false}},"
+				"{\"name\":\"markers/hide_auto_loop\",\"title\":\"Hide Auto Loop Range\",\"description\":\"Hide or show the current auto-loop range without changing its endpoints.\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"hidden\":{\"type\":\"boolean\"}},\"additionalProperties\":false}},"
+				"{\"name\":\"markers/set_auto_punch\",\"title\":\"Set Auto Punch Range\",\"description\":\"Set auto-punch range using start/end sample or start/end bar+beat.\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"startSample\":{\"type\":\"integer\",\"minimum\":0},\"endSample\":{\"type\":\"integer\",\"minimum\":0},\"startBar\":{\"type\":\"integer\",\"minimum\":1},\"startBeat\":{\"type\":\"number\",\"minimum\":1},\"endBar\":{\"type\":\"integer\",\"minimum\":1},\"endBeat\":{\"type\":\"number\",\"minimum\":1}},\"additionalProperties\":false}},"
+				"{\"name\":\"markers/hide_auto_punch\",\"title\":\"Hide Auto Punch Range\",\"description\":\"Hide or show the current auto-punch range without changing its endpoints.\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"hidden\":{\"type\":\"boolean\"}},\"additionalProperties\":false}},"
+				"{\"name\":\"markers/delete\",\"title\":\"Delete Marker\",\"description\":\"Delete one marker by location ID (preferred), or by name with optional sample for disambiguation.\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"locationId\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"sample\":{\"type\":\"integer\",\"minimum\":0}},\"additionalProperties\":false}},"
+				"{\"name\":\"markers/rename\",\"title\":\"Rename Marker\",\"description\":\"Rename one marker by location ID (preferred), or by name with optional sample for disambiguation.\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"locationId\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"sample\":{\"type\":\"integer\",\"minimum\":0},\"newName\":{\"type\":\"string\"}},\"required\":[\"newName\"],\"additionalProperties\":false}},"
 				"{\"name\":\"tracks/list\",\"title\":\"Tracks List\",\"description\":\"List session tracks and buses.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"includeHidden\":{\"type\":\"boolean\"}},\"additionalProperties\":false}},"
 					"{\"name\":\"track/get_info\",\"title\":\"Get Track Info\",\"description\":\"Get one track info (fader, pan, rec, mute, solo, sends, plugins).\","
@@ -1362,16 +1657,52 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 				std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Session info\"}],\"structuredContent\":") + structured + "}");
 		}
 
-		if (tool_name == "transport/get_state") {
-			std::string structured = transport_state_json (_session);
-			return jsonrpc_result (
-				id,
-				std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Transport state\"}],\"structuredContent\":") + structured + "}");
-		}
+			if (tool_name == "transport/get_state") {
+				std::string structured = transport_state_json (_session);
+				return jsonrpc_result (
+					id,
+					std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Transport state\"}],\"structuredContent\":") + structured + "}");
+			}
 
-		if (tool_name == "transport/play") {
-			_session.request_roll ();
-			std::string structured = transport_state_json (_session);
+			if (tool_name == "transport/locate") {
+				const boost::optional<int64_t> sample_opt = root.get_optional<int64_t> ("params.arguments.sample");
+				samplepos_t target_sample = 0;
+				bool have_bbt_target = false;
+				std::string bbt_error;
+				if (!parse_optional_bbt_target_sample (root, "params.arguments", target_sample, have_bbt_target, bbt_error)) {
+					return jsonrpc_error (id, -32602, bbt_error);
+				}
+
+				if (sample_opt && have_bbt_target) {
+					return jsonrpc_error (id, -32602, "Provide either sample or bar+beat, not both");
+				}
+				if (!sample_opt && !have_bbt_target) {
+					return jsonrpc_error (id, -32602, "Missing target position (provide sample or bar+beat)");
+				}
+
+				if (sample_opt) {
+					if (*sample_opt < 0) {
+						return jsonrpc_error (id, -32602, "Invalid sample (expected >= 0)");
+					}
+					target_sample = (samplepos_t) *sample_opt;
+				}
+
+				_session.request_locate (target_sample, false, ARDOUR::RollIfAppropriate);
+
+				std::ostringstream structured;
+				structured << "{\"requestedSample\":" << target_sample
+					<< ",\"requestedBbt\":" << bbt_json_at_sample (target_sample)
+					<< ",\"transport\":" << transport_state_json (_session)
+					<< "}";
+
+				return jsonrpc_result (
+					id,
+					std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Transport locate requested\"}],\"structuredContent\":") + structured.str () + "}");
+			}
+
+			if (tool_name == "transport/play") {
+				_session.request_roll ();
+				std::string structured = transport_state_json (_session);
 			return jsonrpc_result (
 				id,
 				std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Transport play requested\"}],\"structuredContent\":") + structured + "}");
@@ -1392,9 +1723,506 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 					std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Markers listed\"}],\"structuredContent\":") + structured + "}");
 			}
 
-				if (tool_name == "tracks/list") {
-					const bool include_hidden = root.get<bool> ("params.arguments.includeHidden", false);
-					std::string structured = tracks_list_json (_session, include_hidden);
+				if (tool_name == "markers/add") {
+					const boost::optional<std::string> marker_name_opt = root.get_optional<std::string> ("params.arguments.name");
+					const boost::optional<std::string> marker_type_opt = root.get_optional<std::string> ("params.arguments.type");
+					const std::string requested_name = marker_name_opt ? *marker_name_opt : std::string ();
+					const std::string marker_type = marker_type_opt ? *marker_type_opt : std::string ("mark");
+
+					ARDOUR::Location::Flags marker_flags = ARDOUR::Location::IsMark;
+					std::string default_name_base = "mark";
+
+					if (marker_type == "mark") {
+						marker_flags = ARDOUR::Location::IsMark;
+						default_name_base = "mark";
+					} else if (marker_type == "section" || marker_type == "arrangement") {
+						marker_flags = (ARDOUR::Location::Flags) ((uint32_t) ARDOUR::Location::IsMark | (uint32_t) ARDOUR::Location::IsSection);
+						default_name_base = "section";
+					} else if (marker_type == "scene") {
+						marker_flags = (ARDOUR::Location::Flags) ((uint32_t) ARDOUR::Location::IsMark | (uint32_t) ARDOUR::Location::IsScene);
+						default_name_base = "scene";
+					} else {
+						return jsonrpc_error (id, -32602, "Invalid marker type (expected: mark, section, scene, arrangement)");
+					}
+
+					samplepos_t target_sample = _session.audible_sample ();
+					bool have_bbt_target = false;
+					std::string bbt_error;
+					if (!parse_optional_bbt_target_sample (root, "params.arguments", target_sample, have_bbt_target, bbt_error)) {
+						return jsonrpc_error (id, -32602, bbt_error);
+					}
+
+					ARDOUR::Locations* locations = _session.locations ();
+					if (!locations) {
+						return jsonrpc_error (id, -32602, "Session locations unavailable");
+					}
+
+					std::string marker_name = requested_name;
+					if (marker_name.empty ()) {
+						locations->next_available_name (marker_name, default_name_base);
+					}
+					const bool used_default_name = requested_name.empty ();
+
+					const Temporal::timepos_t where (target_sample);
+					ARDOUR::Location* location = new ARDOUR::Location (_session, where, where, marker_name, marker_flags);
+
+					/* Match BasicUI::add_marker/OSC behavior: add an undoable marker operation. */
+					_session.begin_reversible_command ("add marker");
+					XMLNode& before = locations->get_state ();
+					locations->add (location, true);
+					XMLNode& after = locations->get_state ();
+					_session.add_command (new MementoCommand<ARDOUR::Locations> (*locations, &before, &after));
+					_session.commit_reversible_command ();
+
+					std::string structured = marker_added_json (*location, used_default_name, requested_name);
+					return jsonrpc_result (
+						id,
+						std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Marker added\"}],\"structuredContent\":") + structured + "}");
+				}
+
+				if (tool_name == "markers/add_range") {
+					const boost::optional<std::string> marker_name_opt = root.get_optional<std::string> ("params.arguments.name");
+					const std::string requested_name = marker_name_opt ? *marker_name_opt : std::string ();
+					samplepos_t start_sample = 0;
+					samplepos_t end_sample = 0;
+					std::string range_error;
+					if (!parse_range_endpoints (root, "params.arguments", start_sample, end_sample, range_error)) {
+						return jsonrpc_error (id, -32602, range_error);
+					}
+
+					ARDOUR::Locations* locations = _session.locations ();
+					if (!locations) {
+						return jsonrpc_error (id, -32602, "Session locations unavailable");
+					}
+
+					std::string marker_name = requested_name;
+					if (marker_name.empty ()) {
+						locations->next_available_name (marker_name, "range");
+					}
+					const bool used_default_name = requested_name.empty ();
+
+					const Temporal::timepos_t start_where (start_sample);
+					const Temporal::timepos_t end_where (end_sample);
+					ARDOUR::Location* location = new ARDOUR::Location (_session, start_where, end_where, marker_name, ARDOUR::Location::IsRangeMarker);
+
+					_session.begin_reversible_command ("add range marker");
+					XMLNode& before = locations->get_state ();
+					locations->add (location, true);
+					XMLNode& after = locations->get_state ();
+					_session.add_command (new MementoCommand<ARDOUR::Locations> (*locations, &before, &after));
+					_session.commit_reversible_command ();
+
+					std::string structured = range_added_json (*location, used_default_name, requested_name);
+					return jsonrpc_result (
+						id,
+						std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Range marker added\"}],\"structuredContent\":") + structured + "}");
+				}
+
+				if (tool_name == "markers/set_auto_loop") {
+					samplepos_t start_sample = 0;
+					samplepos_t end_sample = 0;
+					std::string range_error;
+					if (!parse_range_endpoints (root, "params.arguments", start_sample, end_sample, range_error)) {
+						return jsonrpc_error (id, -32602, range_error);
+					}
+					if (end_sample <= start_sample) {
+						return jsonrpc_error (id, -32602, "Auto-loop range must have positive length");
+					}
+
+					ARDOUR::Locations* locations = _session.locations ();
+					if (!locations) {
+						return jsonrpc_error (id, -32602, "Session locations unavailable");
+					}
+
+					ARDOUR::Location* loop_loc = locations->auto_loop_location ();
+					if (loop_loc &&
+					    loop_loc->start_sample () == start_sample &&
+					    loop_loc->end_sample () == end_sample &&
+					    !loop_loc->is_hidden ()) {
+						std::string structured = special_range_json (*loop_loc, "auto_loop");
+						return jsonrpc_result (
+							id,
+							std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Auto-loop range unchanged\"}],\"structuredContent\":") + structured + "}");
+					}
+
+					_session.begin_reversible_command ("set auto loop range");
+
+					if (!loop_loc) {
+						const Temporal::timepos_t start_where (start_sample);
+						const Temporal::timepos_t end_where (end_sample);
+						ARDOUR::Location* loc = new ARDOUR::Location (_session, start_where, end_where, "Loop", ARDOUR::Location::IsAutoLoop);
+						XMLNode& before = locations->get_state ();
+						locations->add (loc, true);
+						_session.set_auto_loop_location (loc);
+						XMLNode& after = locations->get_state ();
+						_session.add_command (new MementoCommand<ARDOUR::Locations> (*locations, &before, &after));
+						loop_loc = loc;
+					} else {
+						XMLNode& before = loop_loc->get_state ();
+						loop_loc->set_hidden (false, 0);
+						loop_loc->set (Temporal::timepos_t (start_sample), Temporal::timepos_t (end_sample));
+						XMLNode& after = loop_loc->get_state ();
+						_session.add_command (new MementoCommand<ARDOUR::Location> (*loop_loc, &before, &after));
+					}
+
+					_session.commit_reversible_command ();
+
+					std::string structured = special_range_json (*loop_loc, "auto_loop");
+					return jsonrpc_result (
+						id,
+						std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Auto-loop range updated\"}],\"structuredContent\":") + structured + "}");
+				}
+
+				if (tool_name == "markers/hide_auto_loop") {
+					const bool hidden = root.get<bool> ("params.arguments.hidden", true);
+
+					ARDOUR::Locations* locations = _session.locations ();
+					if (!locations) {
+						return jsonrpc_error (id, -32602, "Session locations unavailable");
+					}
+
+					ARDOUR::Location* loop_loc = locations->auto_loop_location ();
+					if (!loop_loc) {
+						return jsonrpc_error (id, -32602, "Auto-loop range not set");
+					}
+
+					if (loop_loc->is_hidden () == hidden) {
+						std::string structured = special_range_json (*loop_loc, "auto_loop");
+						return jsonrpc_result (
+							id,
+							std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Auto-loop range visibility unchanged\"}],\"structuredContent\":") + structured + "}");
+					}
+
+					_session.begin_reversible_command (hidden ? "hide auto loop range" : "show auto loop range");
+					XMLNode& before = loop_loc->get_state ();
+					loop_loc->set_hidden (hidden, 0);
+					XMLNode& after = loop_loc->get_state ();
+					_session.add_command (new MementoCommand<ARDOUR::Location> (*loop_loc, &before, &after));
+					_session.commit_reversible_command ();
+
+					std::string structured = special_range_json (*loop_loc, "auto_loop");
+					return jsonrpc_result (
+						id,
+						std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Auto-loop range visibility updated\"}],\"structuredContent\":") + structured + "}");
+				}
+
+				if (tool_name == "markers/set_auto_punch") {
+					samplepos_t start_sample = 0;
+					samplepos_t end_sample = 0;
+					std::string range_error;
+					if (!parse_range_endpoints (root, "params.arguments", start_sample, end_sample, range_error)) {
+						return jsonrpc_error (id, -32602, range_error);
+					}
+					if (end_sample <= start_sample) {
+						return jsonrpc_error (id, -32602, "Auto-punch range must have positive length");
+					}
+
+					ARDOUR::Locations* locations = _session.locations ();
+					if (!locations) {
+						return jsonrpc_error (id, -32602, "Session locations unavailable");
+					}
+
+					ARDOUR::Location* punch_loc = locations->auto_punch_location ();
+					if (punch_loc &&
+					    punch_loc->start_sample () == start_sample &&
+					    punch_loc->end_sample () == end_sample &&
+					    !punch_loc->is_hidden ()) {
+						std::string structured = special_range_json (*punch_loc, "auto_punch");
+						return jsonrpc_result (
+							id,
+							std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Auto-punch range unchanged\"}],\"structuredContent\":") + structured + "}");
+					}
+
+					_session.begin_reversible_command ("set auto punch range");
+
+					if (!punch_loc) {
+						const Temporal::timepos_t start_where (start_sample);
+						const Temporal::timepos_t end_where (end_sample);
+						ARDOUR::Location* loc = new ARDOUR::Location (_session, start_where, end_where, "Punch", ARDOUR::Location::IsAutoPunch);
+						XMLNode& before = locations->get_state ();
+						locations->add (loc, true);
+						_session.set_auto_punch_location (loc);
+						XMLNode& after = locations->get_state ();
+						_session.add_command (new MementoCommand<ARDOUR::Locations> (*locations, &before, &after));
+						punch_loc = loc;
+					} else {
+						XMLNode& before = punch_loc->get_state ();
+						punch_loc->set_hidden (false, 0);
+						punch_loc->set (Temporal::timepos_t (start_sample), Temporal::timepos_t (end_sample));
+						XMLNode& after = punch_loc->get_state ();
+						_session.add_command (new MementoCommand<ARDOUR::Location> (*punch_loc, &before, &after));
+					}
+
+					_session.commit_reversible_command ();
+
+					std::string structured = special_range_json (*punch_loc, "auto_punch");
+					return jsonrpc_result (
+						id,
+						std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Auto-punch range updated\"}],\"structuredContent\":") + structured + "}");
+				}
+
+				if (tool_name == "markers/hide_auto_punch") {
+					const bool hidden = root.get<bool> ("params.arguments.hidden", true);
+
+					ARDOUR::Locations* locations = _session.locations ();
+					if (!locations) {
+						return jsonrpc_error (id, -32602, "Session locations unavailable");
+					}
+
+					ARDOUR::Location* punch_loc = locations->auto_punch_location ();
+					if (!punch_loc) {
+						return jsonrpc_error (id, -32602, "Auto-punch range not set");
+					}
+
+					if (punch_loc->is_hidden () == hidden) {
+						std::string structured = special_range_json (*punch_loc, "auto_punch");
+						return jsonrpc_result (
+							id,
+							std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Auto-punch range visibility unchanged\"}],\"structuredContent\":") + structured + "}");
+					}
+
+					_session.begin_reversible_command (hidden ? "hide auto punch range" : "show auto punch range");
+					XMLNode& before = punch_loc->get_state ();
+					punch_loc->set_hidden (hidden, 0);
+					XMLNode& after = punch_loc->get_state ();
+					_session.add_command (new MementoCommand<ARDOUR::Location> (*punch_loc, &before, &after));
+					_session.commit_reversible_command ();
+
+					std::string structured = special_range_json (*punch_loc, "auto_punch");
+					return jsonrpc_result (
+						id,
+						std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Auto-punch range visibility updated\"}],\"structuredContent\":") + structured + "}");
+				}
+
+				if (tool_name == "markers/delete") {
+					const boost::optional<std::string> location_id_opt = root.get_optional<std::string> ("params.arguments.locationId");
+					const boost::optional<std::string> name_opt = root.get_optional<std::string> ("params.arguments.name");
+					const boost::optional<int64_t> sample_opt = root.get_optional<int64_t> ("params.arguments.sample");
+					const std::string location_id = location_id_opt ? *location_id_opt : std::string ();
+					const std::string name = name_opt ? *name_opt : std::string ();
+
+					if (location_id.empty () && name.empty ()) {
+						return jsonrpc_error (id, -32602, "Provide one of: locationId or name");
+					}
+					if (sample_opt && *sample_opt < 0) {
+						return jsonrpc_error (id, -32602, "Invalid sample (expected >= 0)");
+					}
+
+					ARDOUR::Locations* locations = _session.locations ();
+					if (!locations) {
+						return jsonrpc_error (id, -32602, "Session locations unavailable");
+					}
+
+					ARDOUR::Location* target = 0;
+
+					if (!location_id.empty ()) {
+						target = locations->get_location_by_id (PBD::ID (location_id));
+						if (!target) {
+							return jsonrpc_error (id, -32602, "Marker locationId not found");
+						}
+					} else {
+						std::unique_ptr<XMLNode> locations_state (&locations->get_state ());
+						if (!locations_state.get ()) {
+							return jsonrpc_error (id, -32602, "Could not read session locations");
+						}
+
+						struct Candidate {
+							std::string id;
+							samplepos_t sample;
+						};
+
+						std::vector<Candidate> candidates;
+						const XMLNodeList children = locations_state->children ();
+
+						for (XMLNodeConstIterator it = children.begin (); it != children.end (); ++it) {
+							if (!(*it) || (*it)->name () != "Location") {
+								continue;
+							}
+
+							uint32_t flags = 0;
+							if (!parse_location_flags (*(*it), flags)) {
+								continue;
+							}
+							if (!(flags & ((uint32_t) ARDOUR::Location::IsMark | (uint32_t) ARDOUR::Location::IsRangeMarker))) {
+								continue;
+							}
+
+							std::string candidate_name;
+							std::string candidate_id;
+							samplepos_t start_sample = 0;
+							samplepos_t end_sample = 0;
+							if (!(*it)->get_property ("name", candidate_name) ||
+							    !(*it)->get_property ("id", candidate_id) ||
+							    !parse_location_samples (*(*it), start_sample, end_sample)) {
+								continue;
+							}
+							if (candidate_name != name) {
+								continue;
+							}
+							if (sample_opt && start_sample != (samplepos_t) *sample_opt) {
+								continue;
+							}
+
+							Candidate c;
+							c.id = candidate_id;
+							c.sample = start_sample;
+							candidates.push_back (c);
+						}
+
+						if (candidates.empty ()) {
+							return jsonrpc_error (id, -32602, "Marker not found by name/sample");
+						}
+						if (candidates.size () > 1) {
+							return jsonrpc_error (id, -32602, "Ambiguous marker name; provide locationId or sample");
+						}
+
+						target = locations->get_location_by_id (PBD::ID (candidates[0].id));
+						if (!target) {
+							return jsonrpc_error (id, -32602, "Marker disappeared before deletion");
+						}
+					}
+
+						if (!(target->is_mark () || target->is_range_marker ())) {
+							return jsonrpc_error (id, -32602, "Location is not a marker/range");
+						}
+
+						const std::string removed_id = target->id ().to_s ();
+						const std::string removed_name = target->name ();
+						const samplepos_t removed_start_sample = target->start_sample ();
+						const samplepos_t removed_end_sample = target->end_sample ();
+						const uint32_t removed_flags = (uint32_t) target->flags ();
+
+					_session.begin_reversible_command ("delete marker");
+					XMLNode& before = locations->get_state ();
+					locations->remove (target);
+					XMLNode& after = locations->get_state ();
+					_session.add_command (new MementoCommand<ARDOUR::Locations> (*locations, &before, &after));
+					_session.commit_reversible_command ();
+
+						std::string structured = marker_deleted_json (removed_id, removed_name, removed_start_sample, removed_end_sample, removed_flags);
+						return jsonrpc_result (
+							id,
+							std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Marker/range deleted\"}],\"structuredContent\":") + structured + "}");
+				}
+
+				if (tool_name == "markers/rename") {
+					const boost::optional<std::string> location_id_opt = root.get_optional<std::string> ("params.arguments.locationId");
+					const boost::optional<std::string> name_opt = root.get_optional<std::string> ("params.arguments.name");
+					const boost::optional<int64_t> sample_opt = root.get_optional<int64_t> ("params.arguments.sample");
+					const std::string new_name = root.get<std::string> ("params.arguments.newName", "");
+					const std::string location_id = location_id_opt ? *location_id_opt : std::string ();
+					const std::string name = name_opt ? *name_opt : std::string ();
+
+					if (new_name.empty ()) {
+						return jsonrpc_error (id, -32602, "Missing newName");
+					}
+					if (location_id.empty () && name.empty ()) {
+						return jsonrpc_error (id, -32602, "Provide one of: locationId or name");
+					}
+					if (sample_opt && *sample_opt < 0) {
+						return jsonrpc_error (id, -32602, "Invalid sample (expected >= 0)");
+					}
+
+					ARDOUR::Locations* locations = _session.locations ();
+					if (!locations) {
+						return jsonrpc_error (id, -32602, "Session locations unavailable");
+					}
+
+					ARDOUR::Location* target = 0;
+
+					if (!location_id.empty ()) {
+						target = locations->get_location_by_id (PBD::ID (location_id));
+						if (!target) {
+							return jsonrpc_error (id, -32602, "Marker locationId not found");
+						}
+					} else {
+						std::unique_ptr<XMLNode> locations_state (&locations->get_state ());
+						if (!locations_state.get ()) {
+							return jsonrpc_error (id, -32602, "Could not read session locations");
+						}
+
+						struct Candidate {
+							std::string id;
+							samplepos_t sample;
+						};
+
+						std::vector<Candidate> candidates;
+						const XMLNodeList children = locations_state->children ();
+
+						for (XMLNodeConstIterator it = children.begin (); it != children.end (); ++it) {
+							if (!(*it) || (*it)->name () != "Location") {
+								continue;
+							}
+
+							uint32_t flags = 0;
+							if (!parse_location_flags (*(*it), flags)) {
+								continue;
+							}
+							if (!(flags & ((uint32_t) ARDOUR::Location::IsMark | (uint32_t) ARDOUR::Location::IsRangeMarker))) {
+								continue;
+							}
+
+							std::string candidate_name;
+							std::string candidate_id;
+							samplepos_t start_sample = 0;
+							samplepos_t end_sample = 0;
+							if (!(*it)->get_property ("name", candidate_name) ||
+							    !(*it)->get_property ("id", candidate_id) ||
+							    !parse_location_samples (*(*it), start_sample, end_sample)) {
+								continue;
+							}
+							if (candidate_name != name) {
+								continue;
+							}
+							if (sample_opt && start_sample != (samplepos_t) *sample_opt) {
+								continue;
+							}
+
+							Candidate c;
+							c.id = candidate_id;
+							c.sample = start_sample;
+							candidates.push_back (c);
+						}
+
+						if (candidates.empty ()) {
+							return jsonrpc_error (id, -32602, "Marker not found by name/sample");
+						}
+						if (candidates.size () > 1) {
+							return jsonrpc_error (id, -32602, "Ambiguous marker name; provide locationId or sample");
+						}
+
+						target = locations->get_location_by_id (PBD::ID (candidates[0].id));
+						if (!target) {
+							return jsonrpc_error (id, -32602, "Marker disappeared before rename");
+						}
+					}
+
+					if (!(target->is_mark () || target->is_range_marker ())) {
+						return jsonrpc_error (id, -32602, "Location is not a marker/range");
+					}
+
+					const std::string renamed_id = target->id ().to_s ();
+					const std::string old_name = target->name ();
+					const samplepos_t marker_start_sample = target->start_sample ();
+					const samplepos_t marker_end_sample = target->end_sample ();
+					const uint32_t marker_flags = (uint32_t) target->flags ();
+
+					_session.begin_reversible_command ("rename marker");
+					XMLNode& before = locations->get_state ();
+					target->set_name (new_name);
+					XMLNode& after = locations->get_state ();
+					_session.add_command (new MementoCommand<ARDOUR::Locations> (*locations, &before, &after));
+					_session.commit_reversible_command ();
+
+					std::string structured = marker_renamed_json (renamed_id, old_name, target->name (), marker_start_sample, marker_end_sample, marker_flags);
+					return jsonrpc_result (
+						id,
+						std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Marker/range renamed\"}],\"structuredContent\":") + structured + "}");
+				}
+
+					if (tool_name == "tracks/list") {
+						const bool include_hidden = root.get<bool> ("params.arguments.includeHidden", false);
+						std::string structured = tracks_list_json (_session, include_hidden);
 				return jsonrpc_result (
 					id,
 					std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Tracks listed\"}],\"structuredContent\":") + structured + "}");
