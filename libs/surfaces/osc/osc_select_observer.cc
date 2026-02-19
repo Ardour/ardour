@@ -74,9 +74,9 @@ OSCSelectObserver::OSCSelectObserver (OSC& o, ARDOUR::Session& s, ArdourSurface:
 	plug_size = plug_page_size;
 	plug_page = sur->plug_page;
 	if (sur->plugins.size () > 0) {
-		plug_id = sur->plugins[sur->plugin_id - 1];
+		selected_piid = sur->plugin_id;
 	} else {
-		plug_id = -1;
+		selected_piid = 0;
 	}
 	_group_sharing[15] = 1;
 	refresh_strip (sur->select, sur->nsends, gainmode, true);
@@ -447,7 +447,7 @@ OSCSelectObserver::send_end ()
 void
 OSCSelectObserver::set_plugin_id (int id, uint32_t page)
 {
-	plug_id = id;
+	selected_piid = id;
 	plug_page = page;
 	renew_plugin ();
 }
@@ -475,7 +475,7 @@ OSCSelectObserver::renew_plugin () {
 void
 OSCSelectObserver::plugin_init()
 {
-	if (plug_id < 0) {
+	if (!selected_piid) {
 		plugin_end ();
 		return;
 	}
@@ -486,12 +486,14 @@ OSCSelectObserver::plugin_init()
 	}
 
 	// we have a plugin number now get the processor
-	std::shared_ptr<Processor> proc = r->nth_plugin (plug_id);
+	std::shared_ptr<Processor> proc = r->nth_plugin (sur->plugins[selected_piid - 1]);
 	std::shared_ptr<PluginInsert> pi;
 	if (!(pi = std::dynamic_pointer_cast<PluginInsert>(proc))) {
 		plugin_end ();
 		return;
 	}
+	_osc.float_message (X_("/select/plugin"), selected_piid, addr);
+
 	std::shared_ptr<ARDOUR::Plugin> pip = pi->plugin();
 	// we have a plugin we can ask if it is activated
 	proc->ActiveChanged.connect (plugin_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::plug_enable, this, X_("/select/plugin/activate"), proc), &_osc);
@@ -564,6 +566,7 @@ void
 OSCSelectObserver::plugin_end ()
 {
 	plugin_connections.drop_connections ();
+	_osc.float_message (X_("/select/plugin"), 0, addr);
 	_osc.float_message (X_("/select/plugin/activate"), 0, addr);
 	_osc.text_message (X_("/select/plugin/name"), " ", addr);
 	for (uint32_t i = 1; i <= plug_size; i++) {
