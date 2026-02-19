@@ -799,7 +799,7 @@ RouteTimeAxisView::build_display_menu ()
 		std::shared_ptr<MidiTrack> mt (std::dynamic_pointer_cast<MidiTrack> (_route));
 		if (mt) {
 			items.push_back (CheckMenuElem (_("Chase MIDI notes")));
-			CheckMenuItem* c = dynamic_cast<CheckMenuItem*> (&items.back());
+			Gtk::CheckMenuItem* c = dynamic_cast<Gtk::CheckMenuItem*> (&items.back());
 			c->set_active (mt->chase_notes());
 			c->signal_activate().connect ([mt]() { mt->set_chase_notes (!mt->chase_notes()); });
 			items.push_back (SeparatorElem());
