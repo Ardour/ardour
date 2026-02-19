@@ -3588,18 +3588,6 @@ These settings will only take effect after %1 is restarted.\n\
 
 	add_option (_("MIDI"), new OptionEditorHeading (_("Session")));
 
-	bo = new BoolOption (
-		"allow-non-quarter-pulse",
-		_("Allow non quarter-note pulse"),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_allow_non_quarter_pulse),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_allow_non_quarter_pulse)
-		);
-	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-					    string_compose (_("<b>When enabled</b> %1 will allow tempo to be expressed in divisions per minute\n"
-							      "<b>When disabled</b> %1 will only allow tempo to be expressed in quarter notes per minute"),
-							    PROGRAM_NAME));
-	add_option (_("MIDI"), bo);
-
 	add_option (_("MIDI"),
 	     new SpinOption<int32_t> (
 		     "initial-program-change",
@@ -4728,6 +4716,18 @@ These settings will only take effect after %1 is restarted.\n\
 	add_option (_("Metronome"), new ClickOptions (_rc_config));
 
 	add_option (_("Metronome"), new OptionEditorHeading (_("Options")));
+
+	bo = new BoolOption (
+		"allow-non-quarter-pulse",
+		_("Allow non quarter-note pulse"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_allow_non_quarter_pulse),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_allow_non_quarter_pulse)
+		);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+					    string_compose (_("<b>When enabled</b> %1 will allow tempo to be expressed in divisions per minute\n"
+							      "<b>When disabled</b> %1 will only allow tempo to be expressed in quarter notes per minute"),
+							    PROGRAM_NAME));
+	add_option (_("Metronome"), bo);
 
 	bo = new BoolOption (
 			"click-record-only",
