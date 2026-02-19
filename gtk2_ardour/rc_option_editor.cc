@@ -3624,6 +3624,15 @@ These settings will only take effect after %1 is restarted.\n\
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_chase)
 		     ));
 
+	add_option (_("MIDI"), new OptionEditorHeading (_("Output Port Panic")));
+	add_option (_("MIDI"),
+	     new BoolOption (
+		     "midi-panic-when-looping",
+		     _("MIDI output ports should send panic message at end of a timeline (transport) loop"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_panic_when_looping),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_panic_when_looping)
+		     ));
+
 	add_option (_("MIDI"), new OptionEditorHeading (_("Audition")));
 
 	add_option (_("MIDI"),
