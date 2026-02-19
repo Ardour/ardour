@@ -50,6 +50,7 @@
 
 #include "ardour/amp.h"
 #include "ardour/meter.h"
+#include "ardour/midi_track.h"
 #include "ardour/pan_controllable.h"
 #include "ardour/pannable.h"
 #include "ardour/panner.h"
@@ -792,6 +793,17 @@ RouteTimeAxisView::build_display_menu ()
 		build_playlist_menu ();
 		items.push_back (MenuElem (_("Playlist"), *playlist_action_menu));
 		items.back().set_sensitive (_editor.get_selection().tracks.size() <= 1);
+	}
+
+	{
+		std::shared_ptr<MidiTrack> mt (std::dynamic_pointer_cast<MidiTrack> (_route));
+		if (mt) {
+			items.push_back (CheckMenuElem (_("Chase MIDI notes")));
+			CheckMenuItem* c = dynamic_cast<CheckMenuItem*> (&items.back());
+			c->set_active (mt->chase_notes());
+			c->signal_activate().connect ([mt]() { mt->set_chase_notes (!mt->chase_notes()); });
+			items.push_back (SeparatorElem());
+		}
 	}
 
 	if (!is_midi_track () && _route->the_instrument ()) {
