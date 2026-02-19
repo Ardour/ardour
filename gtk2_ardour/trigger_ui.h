@@ -34,6 +34,10 @@ namespace Gtk
 	class Menu;
 }
 
+namespace ArdourWidgets {
+	class PopUp;
+}
+
 class TriggerJumpDialog;
 class ArdourColorDialog;
 
@@ -89,7 +93,9 @@ public:
 	void edit_trigger ();
 
 	void trigger_midi_learn ();
+	void trigger_stop_midi_learn ();
 	void trigger_midi_unlearn ();
+	void trigger_learning_finished (ArdourWidgets::PopUp*);
 
 private:
 	void trigger_changed (PBD::PropertyChange const& );  //calls on_trigger_changed to subclasses
@@ -130,6 +136,8 @@ protected:
 	ARDOUR::TriggerReference tref;
 	sigc::connection          color_connection;
 	PBD::ScopedConnectionList trigger_connections;
+
+	PBD::ScopedConnection learning_connection;
 };
 
 

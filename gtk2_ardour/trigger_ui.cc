@@ -42,18 +42,18 @@
 #include "gtkmm2ext/colors.h"
 #include <gtkmm2ext/utils.h>
 
-#include "slot_properties_box.h"
+#include "widgets/popup.h"
 
+#include "ardour_color_dialog.h"
 #include "ardour_ui.h"
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "public_editor.h"
 #include "region_view.h"
-#include "ardour_color_dialog.h"
+#include "slot_properties_box.h"
 #include "trigger_jump_dialog.h"
-#include "ui_config.h"
-
 #include "trigger_ui.h"
+#include "ui_config.h"
 
 #include "pbd/i18n.h"
 
@@ -419,13 +419,32 @@ TriggerUI::context_menu ()
 }
 
 void
+TriggerUI::trigger_learning_finished (ArdourWidgets::PopUp* prompter)
+{
+	learning_connection.disconnect ();
+	if (prompter) {
+		prompter->touch ();
+	}
+}
+
+void
 TriggerUI::trigger_midi_learn ()
 {
 	if (!trigger()) {
 		return;
 	}
 
+	ArdourWidgets::PopUp* prompter = new ArdourWidgets::PopUp (Gtk::WIN_POS_MOUSE, 30000, true);
+	prompter->set_text (_("operate controller now"));
+	prompter->touch (); // shows popup
+	tref.box()->TriggerMIDILearned.connect (learning_connection, invalidator (*this), std::bind (&TriggerUI::trigger_learning_finished, this, prompter), gui_context());
 	tref.box()->begin_midi_learn (trigger()->index());
+}
+
+void
+TriggerUI::trigger_stop_midi_learn ()
+{
+	tref.box()->stop_midi_learn ();
 }
 
 void
