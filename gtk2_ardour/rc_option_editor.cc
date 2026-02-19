@@ -5187,6 +5187,8 @@ These settings will only take effect after %1 is restarted.\n\
 	                                   "It is intended to be connected to a NxN pad device (such as the Ableton Push 2 or Novation Launchpad)\n"
 	                                   "or a regular MIDI device capable of sending sequential note numbers (like a typical keyboard)"));
 	add_option (_("Triggering"), dtip);
+	add_option (_("Triggering"),
+	            new RcActionButton (_("Clear all custom trigger MIDI bindings"), sigc::ptr_fun (TriggerBox::clear_custom_midi_bindings)));
 
 	add_option (_("Triggering"), new OptionEditorHeading (_("Clip Library")));
 
