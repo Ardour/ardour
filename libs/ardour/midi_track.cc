@@ -134,9 +134,12 @@ MidiTrack::init ()
 void
 MidiTrack::set_chase_notes (bool yn)
 {
-	_chase_notes = yn;
-	if (!yn && _disk_reader) {
-		_disk_reader->clear_midi_chase ();
+	if (_chase_notes != yn) {
+		_chase_notes = yn;
+		if (!yn && _disk_reader) {
+			_disk_reader->clear_midi_chase ();
+		}
+		_session.set_dirty();
 	}
 }
 
