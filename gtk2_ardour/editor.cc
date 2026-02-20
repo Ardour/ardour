@@ -2551,23 +2551,24 @@ Editor::snap_to_cd_frames (timepos_t const & presnap, Temporal::RoundMode direct
 	}
 
 	const samplepos_t one_second = _session->sample_rate();
+	const samplepos_t cd_frame = one_second/75;
 
 	samplepos_t presnap_sample = presnap.samples();
 
 	if ((direction == Temporal::RoundUpMaybe || direction == Temporal::RoundDownMaybe) &&
-		presnap_sample % (one_second/75) == 0) {
+		presnap_sample % (cd_frame) == 0) {
 		/* start is already on a whole CD sample, do nothing */
 	} else if ((direction == Temporal::RoundUpAlways || direction == Temporal::RoundDownAlways) &&
-		(presnap_sample % (one_second/75) == 0)) {
+		(presnap_sample % (cd_frame) == 0)) {
 		if (direction > 0) {
-			presnap_sample = presnap_sample + (one_second/75);
+			presnap_sample = presnap_sample + (cd_frame);
 		} else if (direction < 0) {
-			presnap_sample = presnap_sample - (one_second/75);
+			presnap_sample = presnap_sample - (cd_frame);
 		}
-	} else if (((direction == 0) && (presnap_sample % (one_second/75) > (one_second/75) / 2)) || (direction > 0)) {
-		presnap_sample = (samplepos_t) ceil ((double) presnap_sample / (one_second / 75)) * (one_second / 75);
+	} else if (((direction == 0) && (presnap_sample % (cd_frame) > (cd_frame) / 2)) || (direction > 0)) {
+		presnap_sample = (samplepos_t) ceil ((double) presnap_sample / (cd_frame)) * (cd_frame);
 	} else {
-		presnap_sample = (samplepos_t) floor ((double) presnap_sample / (one_second / 75)) * (one_second / 75);
+		presnap_sample = (samplepos_t) floor ((double) presnap_sample / (cd_frame)) * (cd_frame);
 	}
 
 	return timepos_t (presnap_sample);
