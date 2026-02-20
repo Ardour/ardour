@@ -12844,7 +12844,7 @@ msgid ""
 "If enabled, solo will override mute\n"
 "(a soloed & muted track or bus will be audible)"
 msgstr ""
-"<b>Si coché</b>, le mode solo surcharge le mode muet\n"
+"<b>Si coché</b>, le mode solo supplante le mode muet\n"
 "(une piste / un bus muet et solo sera audible)."
 
 #: monitor_section.cc:191
@@ -13424,7 +13424,7 @@ msgstr "Pgm-%1"
 
 #: patch_change_widget.cc:243
 msgid "Override Patch Changes"
-msgstr "Surcharger les changements de patchs"
+msgstr "Supplanter les changements de patchs"
 
 #: patch_change_widget.cc:253 patch_change_widget.cc:413
 msgid "Bank:"
@@ -14503,7 +14503,7 @@ msgstr "Cliquer pour inverser la polarité de tous les canaux départ"
 #: port_insert_ui.cc:114
 msgid "Edit Latency, manually override measured or I/O reported latency"
 msgstr ""
-"Éditer la latence, surcharge manuellement la latence mesurée ou signalée par "
+"Éditer la latence, supplante manuellement la latence mesurée ou signalée par "
 "les E/S"
 
 #: port_insert_ui.cc:115
@@ -17620,7 +17620,7 @@ msgstr "Afficher les sourdines implicites lors d'une mise en solo"
 
 #: rc_option_editor.cc:4515
 msgid "Soloing overrides muting"
-msgstr "La mise en solo surcharge la mise en sourdine"
+msgstr "La mise en solo supplante la mise en sourdine"
 
 # extraspace needed to get a space before the colon
 #: rc_option_editor.cc:4523
@@ -22834,7 +22834,7 @@ msgstr "Extraire le LTC de l'audio et aligner la vidéo"
 
 #: transcode_video_dialog.cc:70
 msgid "Manual Override"
-msgstr "Surcharge manuelle"
+msgstr "Supplanter manuellement"
 
 #: transcode_video_dialog.cc:73 export_video_dialog.cc:82
 msgid "Debug Mode: Print ffmpeg command and output to stdout."
