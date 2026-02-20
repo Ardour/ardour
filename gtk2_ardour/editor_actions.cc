@@ -941,11 +941,9 @@ Editor::toggle_skip_playback ()
 void
 Editor::toggle_ruler_visibility ()
 {
-	if (no_ruler_shown_update) {
+	if (no_ruler_shown_update || _session) {
 		return;
 	}
-
-	assert (_session);
 
 	update_ruler_visibility ();
 	store_ruler_visibility ();
