@@ -2463,6 +2463,13 @@ Editor::snap_to_timecode (timepos_t const & presnap, Temporal::RoundMode directi
 	if ((direction == Temporal::RoundUpMaybe || direction == Temporal::RoundDownMaybe) &&
 		(start_sample % subdivision == 0)) {
 		/* start is already on a whole second, do nothing */
+	} else if ((direction == Temporal::RoundUpAlways || direction == Temporal::RoundDownAlways) &&
+		(start_sample % subdivision == 0)) {
+		if (direction > 0) {
+			start_sample = start_sample + subdivision;
+		} else if (direction < 0) {
+			start_sample = start_sample - subdivision;
+		}
 	} else if (((direction == 0) && (start_sample % subdivision > subdivision / 2)) || direction > 0) {
 		start_sample = (samplepos_t) ceil ((double) start_sample / subdivision) * subdivision;
 	} else {
@@ -2510,6 +2517,13 @@ Editor::snap_to_minsec (timepos_t const & presnap, Temporal::RoundMode direction
 	if ((direction == Temporal::RoundUpMaybe || direction == Temporal::RoundDownMaybe) &&
 		presnap_sample % subdivision == 0) {
 		/* start is already on a whole subdivision, do nothing */
+	} else if ((direction == Temporal::RoundUpAlways || direction == Temporal::RoundDownAlways) &&
+		(presnap_sample % subdivision == 0)) {
+		if (direction > 0) {
+			presnap_sample = presnap_sample + subdivision;
+		} else if (direction < 0) {
+			presnap_sample = presnap_sample - subdivision;
+		}
 	} else if (((direction == 0) && (presnap_sample % subdivision > subdivision / 2)) || (direction > 0)) {
 		presnap_sample = (samplepos_t) ceil ((double) presnap_sample / subdivision) * subdivision;
 	} else {
@@ -2533,6 +2547,13 @@ Editor::snap_to_cd_frames (timepos_t const & presnap, Temporal::RoundMode direct
 	if ((direction == Temporal::RoundUpMaybe || direction == Temporal::RoundDownMaybe) &&
 		presnap_sample % (one_second/75) == 0) {
 		/* start is already on a whole CD sample, do nothing */
+	} else if ((direction == Temporal::RoundUpAlways || direction == Temporal::RoundDownAlways) &&
+		(presnap_sample % (one_second/75) == 0)) {
+		if (direction > 0) {
+			presnap_sample = presnap_sample + (one_second/75);
+		} else if (direction < 0) {
+			presnap_sample = presnap_sample - (one_second/75);
+		}
 	} else if (((direction == 0) && (presnap_sample % (one_second/75) > (one_second/75) / 2)) || (direction > 0)) {
 		presnap_sample = (samplepos_t) ceil ((double) presnap_sample / (one_second / 75)) * (one_second / 75);
 	} else {
