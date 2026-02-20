@@ -2503,6 +2503,14 @@ Editor::snap_to_minsec (timepos_t const & presnap, Temporal::RoundMode direction
 
 	switch (scale) {
 		case minsec_show_msecs:
+			subdivision = one_second / 1000;
+			break;
+		case minsec_show_csecs:
+			subdivision = one_second / 100;
+			break;
+		case minsec_show_dsecs:
+			subdivision = one_second / 10;
+			break;
 		case minsec_show_seconds:
 			subdivision = one_second;
 			break;
@@ -2536,7 +2544,9 @@ Editor::snap_to_minsec (timepos_t const & presnap, Temporal::RoundMode direction
 timepos_t
 Editor::snap_to_cd_frames (timepos_t const & presnap, Temporal::RoundMode direction, SnapPref gpref) const
 {
-	if ((gpref != SnapToGrid_Unscaled) && (minsec_ruler_scale != minsec_show_msecs)) {
+	if ((gpref != SnapToGrid_Unscaled) && !(minsec_ruler_scale == minsec_show_msecs ||
+	                                        minsec_ruler_scale == minsec_show_csecs ||
+	                                        minsec_ruler_scale == minsec_show_dsecs)) {
 		return snap_to_minsec (presnap, direction, gpref);
 	}
 

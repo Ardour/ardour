@@ -811,6 +811,8 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 
 	enum MinsecRulerScale {
 		minsec_show_msecs,
+		minsec_show_csecs,
+		minsec_show_dsecs,
 		minsec_show_seconds,
 		minsec_show_minutes,
 		minsec_show_hours,
