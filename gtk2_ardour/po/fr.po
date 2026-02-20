@@ -17269,7 +17269,7 @@ msgstr ""
 msgid "Setup Sidechain ports when loading plugin with aux inputs"
 msgstr ""
 "Configurer des ports sidechain lors du chargement d'un greffon avec des "
-"entrées auxilières"
+"entrées auxiliaires"
 
 #: rc_option_editor.cc:4136
 msgid ""
