@@ -2431,72 +2431,53 @@ Editor::snap_to_timecode (timepos_t const & presnap, Temporal::RoundMode directi
 	samplepos_t start_sample = presnap.samples();
 	const samplepos_t one_timecode_second = (samplepos_t)(rint(_session->timecode_frames_per_second()) * _session->samples_per_timecode_frame());
 	samplepos_t one_timecode_minute = (samplepos_t)(rint(_session->timecode_frames_per_second()) * _session->samples_per_timecode_frame() * 60);
+	samplepos_t subdivision;
 
 	TimecodeRulerScale scale = (gpref != SnapToGrid_Unscaled) ? timecode_ruler_scale : timecode_show_samples;
 
 	switch (scale) {
-	case timecode_show_bits:
-	case timecode_show_samples:
-		if ((direction == Temporal::RoundUpMaybe || direction == Temporal::RoundDownMaybe) &&
-		    fmod((double)start_sample, (double)_session->samples_per_timecode_frame()) == 0) {
-			/* start is already on a whole timecode frame, do nothing */
-		} else if (((direction == 0) && (fmod((double)start_sample, (double)_session->samples_per_timecode_frame()) > (_session->samples_per_timecode_frame() / 2))) || (direction > 0)) {
-			start_sample = (samplepos_t) (ceil ((double) start_sample / _session->samples_per_timecode_frame()) * _session->samples_per_timecode_frame());
-		} else {
-			start_sample = (samplepos_t) (floor ((double) start_sample / _session->samples_per_timecode_frame()) *  _session->samples_per_timecode_frame());
-		}
-		start = timepos_t (start_sample);
-		break;
-
-	case timecode_show_seconds:
-		if (_session->config.get_timecode_offset_negative()) {
-			start_sample += _session->config.get_timecode_offset ();
-		} else {
-			start_sample -= _session->config.get_timecode_offset ();
-		}
-		if ((direction == Temporal::RoundUpMaybe || direction == Temporal::RoundDownMaybe) &&
-		    (start_sample % one_timecode_second == 0)) {
-			/* start is already on a whole second, do nothing */
-		} else if (((direction == 0) && (start_sample % one_timecode_second > one_timecode_second / 2)) || direction > 0) {
-			start_sample = (samplepos_t) ceil ((double) start_sample / one_timecode_second) * one_timecode_second;
-		} else {
-			start_sample = (samplepos_t) floor ((double) start_sample / one_timecode_second) * one_timecode_second;
-		}
-
-		if (_session->config.get_timecode_offset_negative()) {
-			start_sample -= _session->config.get_timecode_offset ();
-		} else {
-			start_sample += _session->config.get_timecode_offset ();
-		}
-		start = timepos_t (start_sample);
-		break;
-
-	case timecode_show_minutes:
-	case timecode_show_hours:
-	case timecode_show_many_hours:
-		if (_session->config.get_timecode_offset_negative()) {
-			start_sample += _session->config.get_timecode_offset ();
-		} else {
-			start_sample -= _session->config.get_timecode_offset ();
-		}
-		if ((direction == Temporal::RoundUpMaybe || direction == Temporal::RoundDownMaybe) &&
-		    (start_sample % one_timecode_minute == 0)) {
-			/* start is already on a whole minute, do nothing */
-		} else if (((direction == 0) && (start_sample % one_timecode_minute > one_timecode_minute / 2)) || direction > 0) {
-			start_sample = (samplepos_t) ceil ((double) start_sample / one_timecode_minute) * one_timecode_minute;
-		} else {
-			start_sample = (samplepos_t) floor ((double) start_sample / one_timecode_minute) * one_timecode_minute;
-		}
-		if (_session->config.get_timecode_offset_negative()) {
-			start_sample -= _session->config.get_timecode_offset ();
-		} else {
-			start_sample += _session->config.get_timecode_offset ();
-		}
-		start = timepos_t (start_sample);
-		break;
-	default:
-		fatal << "Editor::smpte_snap_to_internal() called with non-timecode snap type!" << endmsg;
+		case timecode_show_bits:
+		case timecode_show_samples:
+			subdivision = _session->samples_per_timecode_frame();
+			break;
+		case timecode_show_seconds:
+			subdivision = one_timecode_second;
+			break;
+		case timecode_show_minutes:
+		case timecode_show_hours:
+		case timecode_show_many_hours:
+			subdivision = one_timecode_minute;
+			break;
+		default:
+			fatal << "Editor::smpte_snap_to_internal() called with non-timecode snap type!" << endmsg;
 	}
+
+	if (subdivision != _session->samples_per_timecode_frame()) {
+		if (_session->config.get_timecode_offset_negative()) {
+			start_sample += _session->config.get_timecode_offset ();
+		} else {
+			start_sample -= _session->config.get_timecode_offset ();
+		}
+	}
+
+	if ((direction == Temporal::RoundUpMaybe || direction == Temporal::RoundDownMaybe) &&
+		(start_sample % subdivision == 0)) {
+		/* start is already on a whole second, do nothing */
+	} else if (((direction == 0) && (start_sample % subdivision > subdivision / 2)) || direction > 0) {
+		start_sample = (samplepos_t) ceil ((double) start_sample / subdivision) * subdivision;
+	} else {
+		start_sample = (samplepos_t) floor ((double) start_sample / subdivision) * subdivision;
+	}
+
+	if (subdivision != _session->samples_per_timecode_frame()) {
+		if (_session->config.get_timecode_offset_negative()) {
+			start_sample += _session->config.get_timecode_offset ();
+		} else {
+			start_sample -= _session->config.get_timecode_offset ();
+		}
+	}
+
+	start = timepos_t (start_sample);
 
 	return start;
 }
@@ -2509,43 +2490,30 @@ Editor::snap_to_minsec (timepos_t const & presnap, Temporal::RoundMode direction
 	const samplepos_t one_second = _session->sample_rate();
 	const samplepos_t one_minute = one_second * 60;
 	const samplepos_t one_hour = one_minute * 60;
+	samplepos_t subdivision;
 
 	MinsecRulerScale scale = (gpref != SnapToGrid_Unscaled) ? minsec_ruler_scale : minsec_show_seconds;
 
 	switch (scale) {
 		case minsec_show_msecs:
-		case minsec_show_seconds: {
-			if ((direction == Temporal::RoundUpMaybe || direction == Temporal::RoundDownMaybe) &&
-				presnap_sample % one_second == 0) {
-				/* start is already on a whole second, do nothing */
-			} else if (((direction == 0) && (presnap_sample % one_second > one_second / 2)) || (direction > 0)) {
-				presnap_sample = (samplepos_t) ceil ((double) presnap_sample / one_second) * one_second;
-			} else {
-				presnap_sample = (samplepos_t) floor ((double) presnap_sample / one_second) * one_second;
-			}
-		} break;
+		case minsec_show_seconds:
+			subdivision = one_second;
+			break;
+		case minsec_show_minutes:
+			subdivision = one_minute;
+			break;
+		default:
+			subdivision = one_hour;
+			break;
+	}
 
-		case minsec_show_minutes: {
-			if ((direction == Temporal::RoundUpMaybe || direction == Temporal::RoundDownMaybe) &&
-				presnap_sample % one_minute == 0) {
-				/* start is already on a whole minute, do nothing */
-			} else if (((direction == 0) && (presnap_sample % one_minute > one_minute / 2)) || (direction > 0)) {
-				presnap_sample = (samplepos_t) ceil ((double) presnap_sample / one_minute) * one_minute;
-			} else {
-				presnap_sample = (samplepos_t) floor ((double) presnap_sample / one_minute) * one_minute;
-			}
-		} break;
-
-		default: {
-			if ((direction == Temporal::RoundUpMaybe || direction == Temporal::RoundDownMaybe) &&
-				presnap_sample % one_hour == 0) {
-				/* start is already on a whole hour, do nothing */
-			} else if (((direction == 0) && (presnap_sample % one_hour > one_hour / 2)) || (direction > 0)) {
-				presnap_sample = (samplepos_t) ceil ((double) presnap_sample / one_hour) * one_hour;
-			} else {
-				presnap_sample = (samplepos_t) floor ((double) presnap_sample / one_hour) * one_hour;
-			}
-		} break;
+	if ((direction == Temporal::RoundUpMaybe || direction == Temporal::RoundDownMaybe) &&
+		presnap_sample % subdivision == 0) {
+		/* start is already on a whole subdivision, do nothing */
+	} else if (((direction == 0) && (presnap_sample % subdivision > subdivision / 2)) || (direction > 0)) {
+		presnap_sample = (samplepos_t) ceil ((double) presnap_sample / subdivision) * subdivision;
+	} else {
+		presnap_sample = (samplepos_t) floor ((double) presnap_sample / subdivision) * subdivision;
 	}
 
 	return timepos_t (presnap_sample);
