@@ -1427,8 +1427,11 @@ Session::import_route_state (const string& path, std::map<PBD::ID, PBD::ID> cons
 							rg = route_group_by_name (route_groupname[src]);
 							break;
 						case CreateRouteGroup:
-							rg = new_route_group (route_groupname[src]);
-							add_route_group (rg);
+							rg = route_group_by_name (route_groupname[src]);
+							if (!rg) {
+								rg = new_route_group (route_groupname[src]);
+								add_route_group (rg);
+							}
 							break;
 					}
 					if (rg) {
