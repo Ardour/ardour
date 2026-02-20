@@ -194,6 +194,7 @@ public:
 	LilvNode* lv2_ControlPort;
 	LilvNode* lv2_InputPort;
 	LilvNode* lv2_OutputPort;
+	LilvNode* lv2_CVPort;
 	LilvNode* lv2_connectionOptional;
 	LilvNode* lv2_designation;
 	LilvNode* lv2_enumeration;
@@ -3590,6 +3591,7 @@ LV2World::LV2World()
 	lv2_ControlPort        = lilv_new_uri(world, LILV_URI_CONTROL_PORT);
 	lv2_InputPort          = lilv_new_uri(world, LILV_URI_INPUT_PORT);
 	lv2_OutputPort         = lilv_new_uri(world, LILV_URI_OUTPUT_PORT);
+	lv2_CVPort             = lilv_new_uri(world, LILV_URI_CV_PORT);
 	lv2_connectionOptional = lilv_new_uri(world, LV2_CORE__connectionOptional);
 	lv2_inPlaceBroken      = lilv_new_uri(world, LV2_CORE__inPlaceBroken);
 	lv2_isSideChain        = lilv_new_uri(world, LV2_CORE_PREFIX "isSideChain");
@@ -3711,6 +3713,7 @@ LV2World::~LV2World()
 	lilv_node_free(lv2_isSideChain);
 	lilv_node_free(lv2_inPlaceBroken);
 	lilv_node_free(lv2_connectionOptional);
+	lilv_node_free(lv2_CVPort);
 	lilv_node_free(lv2_OutputPort);
 	lilv_node_free(lv2_InputPort);
 	lilv_node_free(lv2_ControlPort);
