@@ -3877,7 +3877,57 @@ MidiView::multi_duplicate_notes ()
 void
 MidiView::_duplicate_notes (int times)
 {
+	if (_selection.empty()) {
+		return;
+	}
 
+	Temporal::Beats last_note_time;
+	Temporal::Beats first_note_time (std::numeric_limits<Temporal::Beats>::max());
+
+	for (auto const & n : _selection) {
+		if (n->note()->end_time()  > last_note_time) {
+			last_note_time = n->note()->end_time();
+		}
+		if (n->note()->time() < first_note_time) {
+			first_note_time = n->note()->time();
+		}
+	}
+	timepos_t snapped_pos (last_note_time);
+	_editing_context.snap_to (snapped_pos, RoundUpMaybe, SnapToGrid_Unscaled);
+
+	Temporal::Beats delta = snapped_pos.beats() - first_note_time;
+
+	list<Evoral::event_id_t> to_be_selected;
+
+	start_note_diff_command (_("duplicate notes"));
+
+	for (auto const & n : _selection) {
+		std::shared_ptr<NoteType> new_note (new NoteType (*(n->note())));
+		new_note->set_time (new_note->time() + delta);
+		note_diff_add_note (new_note, false, false);
+		to_be_selected.push_back (new_note->id());
+	}
+
+	bool need_commit = true;
+
+	if (_midi_region) {
+		Temporal::Beats lno (_midi_region->source_beats_to_absolute_time (last_note_time + delta).beats());
+		if (lno > _midi_region->end().beats()) {
+			apply_note_diff (true, true);
+			_midi_region->playlist()->clear_owned_changes ();
+			_midi_region->trim_end (timepos_t (lno));
+			_editing_context.add_command (new StatefulDiffCommand (_midi_region));
+			_editing_context.commit_reversible_command ();
+			need_commit = false;
+		}
+	}
+
+	if (need_commit) {
+		apply_note_diff (false, true);
+	}
+
+	clear_selection_internal ();
+	select_notes (to_be_selected, true);
 }
 
 void

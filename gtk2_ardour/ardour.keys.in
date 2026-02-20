@@ -483,6 +483,8 @@ This mode provides many different operations on both regions and control points,
 @notes|Notes/split-notes-more|                                     s|Split Notes More Finely
 @notes|Notes/split-notes-less|                         <@TERTIARY@>s|Split Notes Less Finely
 
+@notes|Notes/duplicate-notes|			       <@TERTIARY@>d|duplicate selected notes
+
 @notes|Notes/transpose-up-octave|                          <@SECONDARY@>Up|Transpose up (1 octave)
 @notes|Notes/transpose-down-octave|                      <@SECONDARY@>Down|Transpose down (1 octave)
 @notes|Notes/transpose-up-semitone|                                     Up|Transpose up (1 semitone)
