@@ -620,6 +620,9 @@ EditingContext::register_midi_actions (Bindings* midi_bindings, std::string cons
 	ActionManager::register_action (_midi_actions, X_("decrease-velocity-smush-together"), _("Decrease Velocity (maintain ratios, allow mush)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::decrease_note_velocity_smush_together));
 	ActionManager::register_action (_midi_actions, X_("decrease-velocity-fine-smush-together"), _("Decrease Velocity (fine, allow mush, non-relative)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::decrease_note_velocity_fine_smush_together));
 
+	ActionManager::register_action (_midi_actions, X_("duplicate-notes"), _("Duplicate Notes"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::duplicate_notes));
+	ActionManager::register_action (_midi_actions, X_("multi-duplicate-notes"), _("Multi-Duplicate Notes"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::multi_duplicate_notes));
+
 	ActionManager::register_action (_midi_actions, X_("transpose-up-octave"), _("Transpose Up (octave)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::transpose_up_octave));
 	ActionManager::register_action (_midi_actions, X_("transpose-up-octave-smush"), _("Transpose Up (octave, allow mush)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::transpose_up_octave_smush));
 	ActionManager::register_action (_midi_actions, X_("transpose-up-semitone"), _("Transpose Up (semitone)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::transpose_up_tone));

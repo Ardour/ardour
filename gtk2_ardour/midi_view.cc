@@ -3867,6 +3867,18 @@ MidiView::change_velocities (bool up, bool fine, bool allow_smush, bool all_toge
 	}
 }
 
+void
+MidiView::multi_duplicate_notes ()
+{
+	int times = 1;
+	_duplicate_notes (times);
+}
+
+void
+MidiView::_duplicate_notes (int times)
+{
+
+}
 
 void
 MidiView::transpose (bool up, bool fine, bool allow_smush)
