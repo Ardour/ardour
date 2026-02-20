@@ -130,43 +130,6 @@ MidiNoteTracker::flush_notes (MidiBuffer &dst, samplepos_t time, bool reset)
 }
 
 void
-MidiNoteTracker::push_notes (MidiBuffer &dst, samplepos_t time, bool reset, int cmd)
-{
-	DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1 MB-push notes @ %2 on = %3\n", this, time, _on));
-
-	if (!_on) {
-		return;
-	}
-
-	for (int channel = 0; channel < 16; ++channel) {
-		const int coff = channel << 7;
-		for (int note = 0; note < 128; ++note) {
-			uint8_t cnt = _active_notes[note + coff];
-			while (cnt) {
-				uint8_t vel = _active_velocities[note + coff];
-				assert (vel);
-				uint8_t buffer[3] = { ((uint8_t) (cmd | channel)), uint8_t (note), vel };
-				Evoral::Event<MidiBuffer::TimeType> ev (Evoral::MIDI_EVENT, time, 3, buffer, false);
-				/* note that we do not care about failure from
-				   push_back() ... should we warn someone ?
-				*/
-				dst.push_back (ev);
-				cnt--;
-				DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1: MB-push note %2/%3 vel %5 at %4\n", this, (int) note, (int) channel, time, (int) vel));
-			}
-			if (reset) {
-				_active_notes [note + coff] = 0;
-				_active_velocities [note + coff] = 0;
-			}
-		}
-	}
-	if (reset) {
-		/* Notes & velocities were zeroed above */
-		_on = 0;
-	}
-}
-
-void
 MidiNoteTracker::resolve_notes (Evoral::EventSink<samplepos_t> &dst, samplepos_t time)
 {
 	uint8_t buf[3];

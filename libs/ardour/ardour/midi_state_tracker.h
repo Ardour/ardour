@@ -59,7 +59,7 @@ public:
 
 	template<typename Time>
 	void flush_notes (Evoral::EventSink<Time> &sink, Time time, bool reset = true) {
-		push_notes<Time> (sink, time, reset, MIDI_CMD_NOTE_ON, 64);
+		push_notes<Time> (sink, time, reset, MIDI_CMD_NOTE_ON);
 	}
 
 	bool empty() const { return _on == 0; }
@@ -81,10 +81,8 @@ public:
 	uint8_t  _active_velocities[128*16];
 	uint16_t _on;
 
-	void push_notes (MidiBuffer &dst, samplepos_t time, bool reset, int cmd);
-
 	template<typename Time>
-	void push_notes (Evoral::EventSink<Time> &dst, Time time, bool reset, int cmd, int velocity) {
+	void push_notes (Evoral::EventSink<Time> &dst, Time time, bool reset, int cmd) {
 		DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1 ES::push_notes @ %2 on = %3\n", this, time, _on));
 
 		if (!_on) {
@@ -95,17 +93,19 @@ public:
 			const int coff = channel << 7;
 			for (int note = 0; note < 128; ++note) {
 				uint8_t cnt = _active_notes[note + coff];
+				uint8_t vel = _active_velocities[note + coff];
 				while (cnt) {
-					uint8_t buffer[3] = { ((uint8_t) (cmd | channel)), uint8_t (note), (uint8_t) velocity };
+					uint8_t buffer[3] = { ((uint8_t) (cmd | channel)), uint8_t (note), vel};
 					/* note that we do not care about failure from
 					   write() ... should we warn someone ?
 					*/
 					dst.write (time, Evoral::MIDI_EVENT, 3, buffer);
 					cnt--;
-					DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1: MB-push note %2/%3 at %4\n", this, (int) note, (int) channel, time));
+					DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1: MB-push note %2/%3 vel %5 at %4\n", this, (int) note, (int) channel, time, (int) vel));
 				}
 				if (reset) {
 					_active_notes [note + coff] = 0;
+					_active_velocities [note + coff] = 0;
 				}
 			}
 		}
