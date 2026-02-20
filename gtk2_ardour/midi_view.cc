@@ -3892,10 +3892,12 @@ MidiView::_duplicate_notes (int times)
 			first_note_time = n->note()->time();
 		}
 	}
-	timepos_t snapped_pos (last_note_time);
-	_editing_context.snap_to (snapped_pos, RoundUpMaybe, SnapToGrid_Unscaled);
 
-	Temporal::Beats delta = snapped_pos.beats() - first_note_time;
+	timepos_t snapped_pos (source_beats_to_timeline (last_note_time).beats());
+
+	_editing_context.snap_to (snapped_pos, RoundUpMaybe, SnapToGrid_Unscaled, true);
+
+	Temporal::Beats delta = snapped_pos.beats() - source_beats_to_timeline (first_note_time).beats();
 
 	list<Evoral::event_id_t> to_be_selected;
 
