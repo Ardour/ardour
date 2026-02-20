@@ -21977,8 +21977,8 @@ msgid ""
 "Send note off and reset controller messages on all MIDI channels"
 msgstr ""
 "Panique MIDI\n"
-"Envoyer les messages \"all-notes-off\" et réinitialiser les contrôles sur "
-"tous les canaux MIDI"
+"Envoyer les extinctions de notes et réinitialiser les contrôles sur tous les "
+"canaux MIDI"
 
 #: transport_control_ui.cc:198
 msgid ""
