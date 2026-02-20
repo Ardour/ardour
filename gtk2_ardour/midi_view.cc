@@ -3895,7 +3895,14 @@ MidiView::_duplicate_notes (int times)
 
 	timepos_t snapped_pos (source_beats_to_timeline (last_note_time).beats());
 
-	_editing_context.snap_to (snapped_pos, RoundUpMaybe, SnapToGrid_Unscaled, true);
+	/* We have to test snap mode explicitly, because we also provide a 4th
+	   arg to ::snap_to() which will force snapping no matter what (so that
+	   bar-sized grid snaps will always work, no matter how big the
+	   distance.
+	*/
+	if (_editing_context.snap_mode() != Editing::SnapOff) {
+		_editing_context.snap_to (snapped_pos, RoundUpMaybe, SnapToGrid_Unscaled, true);
+	}
 
 	Temporal::Beats delta = snapped_pos.beats() - source_beats_to_timeline (first_note_time).beats();
 
