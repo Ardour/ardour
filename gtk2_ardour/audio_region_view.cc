@@ -1518,15 +1518,16 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev, b
 
 	samplecnt_t const sample_within_region = (samplecnt_t) floor (mx * samples_per_pixel);
 
-	double y = my;
+	/* compute model y-position */
+	double y;
 
-	if (_fx_line->control_points_adjacent (sample_within_region, before_p, after_p)) {
-		/* y is in item frame */
-		double const bx = _fx_line->nth (before_p)->get_x();
-		double const ax = _fx_line->nth (after_p)->get_x();
-		double const click_ratio = (ax - mx) / (ax - bx);
-
-		y = ((_fx_line->nth (before_p)->get_y() * click_ratio) + (_fx_line->nth (after_p)->get_y() * (1 - click_ratio)));
+	if (UIConfiguration::instance().get_new_automation_points_on_lane()) {
+		/* new point on the line */
+		y = _fx_line->the_list()->eval (timepos_t (sample_within_region));
+	}  else {
+		/* new point where the mouse is */
+		y = 1.0 - (my / _fx_line->height());
+		_fx_line->view_to_model_coord_y (y);
 	}
 
 	/* don't create points that can't be seen */
@@ -1540,14 +1541,6 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev, b
 	if (fx > _region->length_samples()) {
 		return;
 	}
-
-	/* compute vertical fractional position */
-
-	y = 1.0 - (y / (_fx_line->height()));
-
-	/* map using gain line */
-
-	_fx_line->view_to_model_coord_y (y);
 
 	/* XXX STATEFUL: can't convert to stateful diff until we
 	   can represent automation data with it.
