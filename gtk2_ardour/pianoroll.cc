@@ -733,6 +733,11 @@ Pianoroll::snap_to_internal (timepos_t& start, Temporal::RoundMode direction, Sn
 void
 Pianoroll::set_samples_per_pixel (samplecnt_t spp)
 {
+
+	if (spp < 1) {
+		return;
+	}
+
 	EC_LOCAL_TEMPO_SCOPE;
 
 	assert (spp > 0);
