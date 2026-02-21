@@ -405,10 +405,12 @@ Session::post_engine_init ()
 	/* Can't do this until the trigger input MIDI port is set up */
 	TriggerBox::static_init (*this);
 
-	/* Now, finally, we can [ask the butler to] fill the playback buffers */
-
-	BootMessage (_("Filling playback buffers"));
-	request_locate (transport_sample(), true);
+	/* When loading, Session::session_loaded () will do this */
+	if (!loading ()) {
+		/* Now, finally, we can [ask the butler to] fill the playback buffers */
+		BootMessage (_("Filling playback buffers"));
+		request_locate (transport_sample(), true);
+	}
 
 	reset_xrun_count ();
 	return 0;
