@@ -34,13 +34,23 @@ enum MusicalModeType {
 	MidiNote,
 };
 
+enum MusicalModeCulture {
+	WesternEurope12TET,
+	Byzantine,
+	Maqams,
+	Hindustani,
+	Carnatic,
+	SEAsia,
+	China
+};
+
 class MusicalMode {
    public:
 
 	enum Name {
-		Dorian,
 		IonianMajor,
 		AeolianMinor,
+		Dorian,
 		HarmonicMinor,
 		MelodicMinorAscending,
 		MelodicMinorDescending,
