@@ -88,7 +88,9 @@ private: // methods
 private: // data
 	HMIDIIN m_handle;
 	MIDIHDR m_sysex_header;
+	HANDLE  m_main_thread;
 
+	bool m_priority_boosted;
 	bool m_started;
 
 	std::string m_name;
