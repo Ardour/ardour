@@ -20,7 +20,6 @@
 #define _ardour_surface_mcp_http_server_h_
 
 #include <stdint.h>
-#include <deque>
 #include <string>
 #include <thread>
 #include <unordered_map>
@@ -44,13 +43,10 @@ public:
 
 private:
 	struct ClientContext {
-		bool sse;
 		bool mcp_post;
-		bool mcp_post_messages;
 		bool have_response;
 		std::string request_body;
 		std::string response_body;
-		std::deque<std::string> sse_queue;
 	};
 
 	typedef std::unordered_map<struct lws*, ClientContext> ClientMap;
@@ -76,11 +72,8 @@ private:
 	int handle_http_writeable (struct lws*, ClientContext&);
 
 	int send_json_headers (struct lws*);
-	int send_sse_headers (struct lws*);
 	int send_http_status (struct lws*, unsigned int);
 	int write_json_response (struct lws*, ClientContext&);
-	int write_sse_message (struct lws*, ClientContext&);
-	void queue_sse_jsonrpc_message (const std::string&);
 
 	std::string dispatch_jsonrpc (const std::string&) const;
 

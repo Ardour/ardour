@@ -1577,9 +1577,7 @@ MCPHttpServer::client (struct lws* wsi)
 	ClientMap::iterator it = _clients.find (wsi);
 	if (it == _clients.end ()) {
 		ClientContext ctx;
-		ctx.sse = false;
 		ctx.mcp_post = false;
-		ctx.mcp_post_messages = false;
 		ctx.have_response = false;
 		it = _clients.emplace (wsi, ctx).first;
 	}
@@ -1599,13 +1597,10 @@ MCPHttpServer::erase_client (struct lws* wsi)
 int
 MCPHttpServer::handle_http (struct lws* wsi, ClientContext& ctx)
 {
-	ctx.sse = false;
 	ctx.mcp_post = false;
-	ctx.mcp_post_messages = false;
 	ctx.have_response = false;
 	ctx.request_body.clear ();
 	ctx.response_body.clear ();
-	ctx.sse_queue.clear ();
 
 	char uri[1024];
 	std::string path;
@@ -1613,27 +1608,8 @@ MCPHttpServer::handle_http (struct lws* wsi, ClientContext& ctx)
 	if (lws_hdr_copy (wsi, uri, sizeof (uri), WSI_TOKEN_GET_URI) > 0) {
 		path = uri;
 
-		/* Support both legacy SSE path and streamable HTTP endpoint path. */
-		if (path == "/mcp" || path == "/mcp/sse") {
-			if (send_sse_headers (wsi)) {
-				return 1;
-			}
-
-			ctx.sse = true;
-			std::string endpoint = "/mcp/messages";
-			char host[256];
-			if (lws_hdr_copy (wsi, host, sizeof (host), WSI_TOKEN_HOST) > 0) {
-				endpoint = std::string ("http://") + host + "/mcp/messages";
-			}
-			/* Legacy SSE transport discovery: send endpoint before ready for Gemini CLI compatibility. */
-			ctx.sse_queue.push_back ("event: endpoint\ndata: " + endpoint + "\n\n");
-			ctx.sse_queue.push_back ("event: ready\ndata: {\"jsonrpc\":\"2.0\",\"method\":\"notifications/ready\",\"params\":{\"server\":\"ardour-mcp-http\"}}\n\n");
-			ctx.sse_queue.push_back ("event: message\ndata: {\"jsonrpc\":\"2.0\",\"method\":\"notifications/ready\",\"params\":{\"server\":\"ardour-mcp-http\"}}\n\n");
-			lws_callback_on_writable (wsi);
-			return 0;
-		}
-
-		if (path == "/mcp/messages") {
+		/* HTTP-only MCP endpoint: POST /mcp */
+		if (path == "/mcp") {
 			return send_http_status (wsi, 405);
 		}
 
@@ -1643,14 +1619,9 @@ MCPHttpServer::handle_http (struct lws* wsi, ClientContext& ctx)
 	if (lws_hdr_copy (wsi, uri, sizeof (uri), WSI_TOKEN_POST_URI) > 0) {
 		path = uri;
 
-		if (path == "/mcp" || path == "/mcp/messages") {
+		if (path == "/mcp") {
 			ctx.mcp_post = true;
-			ctx.mcp_post_messages = (path == "/mcp/messages");
 			return 0;
-		}
-
-		if (path == "/mcp/sse") {
-			return send_http_status (wsi, 405);
 		}
 
 		return send_http_status (wsi, 404);
@@ -1679,18 +1650,6 @@ MCPHttpServer::handle_http_body_completion (struct lws* wsi, ClientContext& ctx)
 
 	ctx.response_body = dispatch_jsonrpc (ctx.request_body);
 
-	if (ctx.mcp_post_messages) {
-		if (!ctx.response_body.empty ()) {
-			queue_sse_jsonrpc_message (ctx.response_body);
-		}
-
-		ctx.mcp_post = false;
-		ctx.mcp_post_messages = false;
-		ctx.request_body.clear ();
-		ctx.response_body.clear ();
-		return send_http_status (wsi, 202);
-	}
-
 	if (ctx.response_body.empty ()) {
 		return send_http_status (wsi, 202);
 	}
@@ -1708,10 +1667,6 @@ MCPHttpServer::handle_http_body_completion (struct lws* wsi, ClientContext& ctx)
 int
 MCPHttpServer::handle_http_writeable (struct lws* wsi, ClientContext& ctx)
 {
-	if (ctx.sse) {
-		return write_sse_message (wsi, ctx);
-	}
-
 	if (ctx.have_response) {
 		return write_json_response (wsi, ctx);
 	}
@@ -1759,39 +1714,6 @@ MCPHttpServer::send_json_headers (struct lws* wsi)
 }
 
 int
-MCPHttpServer::send_sse_headers (struct lws* wsi)
-{
-	unsigned char out_buf[1024];
-	unsigned char* start = out_buf;
-	unsigned char* p = start;
-	unsigned char* end = &out_buf[sizeof (out_buf) - 1];
-
-#if LWS_LIBRARY_VERSION_MAJOR >= 3
-	if (   lws_add_http_common_headers (wsi, 200, "text/event-stream", LWS_ILLEGAL_HTTP_CONTENT_LEN, &p, end)
-	    || lws_add_http_header_by_token (wsi, WSI_TOKEN_HTTP_CACHE_CONTROL, reinterpret_cast<const unsigned char*> ("no-cache"), 8, &p, end)
-	    || lws_add_http_header_by_token (wsi, WSI_TOKEN_CONNECTION, reinterpret_cast<const unsigned char*> ("keep-alive"), 10, &p, end)
-	    || lws_finalize_write_http_header (wsi, start, &p, end)) {
-		return 1;
-	}
-#else
-	if (   lws_add_http_header_status (wsi, 200, &p, end)
-	    || lws_add_http_header_by_token (wsi, WSI_TOKEN_HTTP_CONTENT_TYPE, reinterpret_cast<const unsigned char*> ("text/event-stream"), 17, &p, end)
-	    || lws_add_http_header_by_token (wsi, WSI_TOKEN_CONNECTION, reinterpret_cast<const unsigned char*> ("keep-alive"), 10, &p, end)
-	    || lws_add_http_header_by_token (wsi, WSI_TOKEN_HTTP_CACHE_CONTROL, reinterpret_cast<const unsigned char*> ("no-cache"), 8, &p, end)
-	    || lws_finalize_http_header (wsi, &p, end)) {
-		return 1;
-	}
-
-	int len = p - start;
-	if (lws_write (wsi, start, len, LWS_WRITE_HTTP_HEADERS) != len) {
-		return 1;
-	}
-#endif
-
-	return 0;
-}
-
-int
 MCPHttpServer::write_json_response (struct lws* wsi, ClientContext& ctx)
 {
 	std::vector<unsigned char> body (ctx.response_body.begin (), ctx.response_body.end ());
@@ -1801,7 +1723,6 @@ MCPHttpServer::write_json_response (struct lws* wsi, ClientContext& ctx)
 
 	ctx.have_response = false;
 	ctx.mcp_post = false;
-	ctx.mcp_post_messages = false;
 	ctx.request_body.clear ();
 	ctx.response_body.clear ();
 
@@ -1810,43 +1731,6 @@ MCPHttpServer::write_json_response (struct lws* wsi, ClientContext& ctx)
 	}
 
 	return -1;
-}
-
-int
-MCPHttpServer::write_sse_message (struct lws* wsi, ClientContext& ctx)
-{
-	if (ctx.sse_queue.empty ()) {
-		return 0;
-	}
-
-	std::string message = ctx.sse_queue.front ();
-	ctx.sse_queue.pop_front ();
-
-	std::vector<unsigned char> data (message.begin (), message.end ());
-	if (!data.empty () && lws_write (wsi, data.data (), data.size (), LWS_WRITE_HTTP) != (int) data.size ()) {
-		return 1;
-	}
-
-	if (!ctx.sse_queue.empty ()) {
-		lws_callback_on_writable (wsi);
-	}
-
-	return 0;
-}
-
-void
-MCPHttpServer::queue_sse_jsonrpc_message (const std::string& payload)
-{
-	const std::string message = "event: message\ndata: " + payload + "\n\n";
-
-	for (ClientMap::iterator it = _clients.begin (); it != _clients.end (); ++it) {
-		if (!it->second.sse) {
-			continue;
-		}
-
-		it->second.sse_queue.push_back (message);
-		lws_callback_on_writable (it->first);
-	}
 }
 
 std::string
