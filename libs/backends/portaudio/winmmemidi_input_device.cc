@@ -63,8 +63,10 @@ WinMMEMidiInputDevice::WinMMEMidiInputDevice (int index)
 		throw std::runtime_error (error_msg);
 	}
 
+#ifdef USE_MMCSS_THREAD_PRIORITIES
 	m_main_thread = GetCurrentThread ();
 	m_priority_boosted = false;
+#endif
 
 	set_device_name (index);
 }
@@ -187,11 +189,15 @@ WinMMEMidiInputDevice::winmm_input_callback(HMIDIIN handle,
 {
 	WinMMEMidiInputDevice* midi_input = (WinMMEMidiInputDevice*)instance;
 
-	if (!m_priority_boosted && GetCurrentThread () != m_main_thread) {
+#ifdef USE_MMCSS_THREAD_PRIORITIES
+	HANDLE task_handle;
+	if (!midi_input->m_priority_boosted
+	    && GetCurrentThread () != midi_input->m_main_thread) {
 		PBD::MMCSS::set_thread_characteristics ("Pro Audio", &task_handle);
 		PBD::MMCSS::set_thread_priority (task_handle, PBD::MMCSS::AVRT_PRIORITY_HIGH);
-		m_priority_boosted = true;
+		midi_input->m_priority_boosted = true;
 	}
+#endif
 
 	switch (msg) {
 	case MIM_OPEN:

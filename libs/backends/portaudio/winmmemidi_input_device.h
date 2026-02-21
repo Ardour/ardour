@@ -88,12 +88,14 @@ private: // methods
 private: // data
 	HMIDIIN m_handle;
 	MIDIHDR m_sysex_header;
-	HANDLE  m_main_thread;
-
-	bool m_priority_boosted;
 	bool m_started;
 
 	std::string m_name;
+
+#ifdef USE_MMCSS_THREAD_PRIORITIES
+	HANDLE  m_main_thread;
+	bool m_priority_boosted;
+#endif
 
 	// can't use unique_ptr yet
 	const std::unique_ptr<PBD::RingBuffer<uint8_t> > m_midi_buffer;
