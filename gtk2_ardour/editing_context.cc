@@ -283,6 +283,9 @@ EditingContext::EditingContext (std::string const & name)
 
 EditingContext::~EditingContext()
 {
+	if (pending_visual_change.idle_handler_id >= 0) {
+		g_source_remove (pending_visual_change.idle_handler_id);
+	}
 	if (_midi_actions) {
 		ActionManager::drop_action_group (_midi_actions);
 	}
