@@ -46,6 +46,7 @@ private:
 	struct ClientContext {
 		bool sse;
 		bool mcp_post;
+		bool mcp_post_messages;
 		bool have_response;
 		std::string request_body;
 		std::string response_body;
@@ -79,6 +80,7 @@ private:
 	int send_http_status (struct lws*, unsigned int);
 	int write_json_response (struct lws*, ClientContext&);
 	int write_sse_message (struct lws*, ClientContext&);
+	void queue_sse_jsonrpc_message (const std::string&);
 
 	std::string dispatch_jsonrpc (const std::string&) const;
 

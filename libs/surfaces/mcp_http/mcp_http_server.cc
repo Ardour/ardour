@@ -17,6 +17,7 @@
  */
 
 #include <algorithm>
+#include <cctype>
 #include <cmath>
 #include <ctime>
 #include <cstdlib>
@@ -30,6 +31,7 @@
 #include <boost/property_tree/ptree.hpp>
 
 #include "pbd/error.h"
+#include "pbd/basename.h"
 #include "pbd/id.h"
 #include "pbd/controllable.h"
 #include "pbd/memento_command.h"
@@ -40,15 +42,20 @@
 #include "ardour/internal_send.h"
 #include "ardour/location.h"
 #include "ardour/midi_track.h"
+#include "ardour/midi_source.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
+#include "ardour/playlist.h"
 #include "ardour/presentation_info.h"
 #include "ardour/processor.h"
 #include "ardour/rc_configuration.h"
+#include "ardour/region.h"
+#include "ardour/region_factory.h"
 #include "ardour/route.h"
 #include "ardour/selection.h"
 #include "ardour/session.h"
 #include "ardour/session_event.h"
+#include "ardour/source.h"
 #include "ardour/tempo.h"
 #include "ardour/track.h"
 
@@ -76,6 +83,44 @@ json_escape (const std::string& s)
 	return o.str ();
 }
 
+static std::string
+canonical_tool_name (std::string tool_name)
+{
+	/* Some MCP clients only support function-safe identifiers, so accept
+	 * underscore and dotted aliases in addition to slash-delimited names.
+	 */
+	std::replace (tool_name.begin (), tool_name.end (), '.', '/');
+
+	if (tool_name.find ('/') != std::string::npos) {
+		return tool_name;
+	}
+
+	static const char* known_groups[] = {
+		"session",
+		"transport",
+		"markers",
+		"tracks",
+		"buses",
+		"track",
+		"plugin",
+		"midi_region"
+	};
+
+	for (size_t i = 0; i < (sizeof (known_groups) / sizeof (known_groups[0])); ++i) {
+		const std::string group (known_groups[i]);
+		const std::string prefix = group + "_";
+		if (tool_name.size () <= prefix.size ()) {
+			continue;
+		}
+		if (tool_name.compare (0, prefix.size (), prefix) == 0) {
+			tool_name[group.size ()] = '/';
+			return tool_name;
+		}
+	}
+
+	return tool_name;
+}
+
 static bool
 is_number_literal (const std::string& s)
 {
@@ -86,6 +131,42 @@ is_number_literal (const std::string& s)
 	char* endptr = 0;
 	std::strtod (s.c_str (), &endptr);
 	return endptr && *endptr == '\0';
+}
+
+static std::string
+tool_result_with_structured_text_fallback (const std::string& result_json)
+{
+	/* Compatibility policy: whenever structuredContent is present, mirror it
+	 * as serialized JSON in content[0].text for clients that ignore structure.
+	 *
+	 * This helper assumes the tool result shape used in this server:
+	 * {"content":[...],"structuredContent":<json>}
+	 */
+	static const std::string key = "\"structuredContent\":";
+	const std::string::size_type key_pos = result_json.find (key);
+	if (key_pos == std::string::npos) {
+		return result_json;
+	}
+
+	std::string::size_type obj_end = result_json.find_last_not_of (" \t\r\n");
+	if (obj_end == std::string::npos || result_json[obj_end] != '}') {
+		return result_json;
+	}
+
+	std::string::size_type value_start = key_pos + key.size ();
+	while (value_start < result_json.size () && std::isspace ((unsigned char) result_json[value_start])) {
+		++value_start;
+	}
+	if (value_start >= obj_end) {
+		return result_json;
+	}
+
+	const std::string structured_json = result_json.substr (value_start, obj_end - value_start);
+	return std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"")
+		+ json_escape (structured_json)
+		+ "\"}],\"structuredContent\":"
+		+ structured_json
+		+ "}";
 }
 
 static std::string
@@ -121,7 +202,8 @@ has_jsonrpc_id (const pt::ptree& root)
 static std::string
 jsonrpc_result (const std::string& id, const std::string& result_json)
 {
-	return std::string ("{\"jsonrpc\":\"2.0\",\"id\":") + id + ",\"result\":" + result_json + "}";
+	const std::string normalized_result_json = tool_result_with_structured_text_fallback (result_json);
+	return std::string ("{\"jsonrpc\":\"2.0\",\"id\":") + id + ",\"result\":" + normalized_result_json + "}";
 }
 
 static std::string
@@ -288,6 +370,61 @@ tracks_list_json (ARDOUR::Session& session, bool include_hidden)
 	}
 
 	ss << "]}";
+	return ss.str ();
+}
+
+static std::string
+tracks_list_text (ARDOUR::Session& session, bool include_hidden)
+{
+	std::shared_ptr<ARDOUR::RouteList const> routes = session.get_routes ();
+	std::vector<std::shared_ptr<ARDOUR::Route> > sorted;
+
+	if (routes) {
+		sorted.assign (routes->begin (), routes->end ());
+	}
+
+	std::sort (
+		sorted.begin (),
+		sorted.end (),
+		[] (const std::shared_ptr<ARDOUR::Route>& a, const std::shared_ptr<ARDOUR::Route>& b) {
+			if (!a) {
+				return false;
+			}
+			if (!b) {
+				return true;
+			}
+			return a->presentation_info ().order () < b->presentation_info ().order ();
+		});
+
+	std::ostringstream ss;
+	int count = 0;
+	for (std::vector<std::shared_ptr<ARDOUR::Route> >::const_iterator it = sorted.begin (); it != sorted.end (); ++it) {
+		const std::shared_ptr<ARDOUR::Route>& route = *it;
+		if (!route) {
+			continue;
+		}
+		if (route->is_hidden () && !include_hidden) {
+			continue;
+		}
+		++count;
+	}
+
+	ss << "Tracks (" << count << "):";
+	for (std::vector<std::shared_ptr<ARDOUR::Route> >::const_iterator it = sorted.begin (); it != sorted.end (); ++it) {
+		const std::shared_ptr<ARDOUR::Route>& route = *it;
+		if (!route) {
+			continue;
+		}
+		if (route->is_hidden () && !include_hidden) {
+			continue;
+		}
+
+		ss << "\n- " << route->name ()
+		   << " (" << route_type_string (route)
+		   << ", id " << route->id ().to_s ()
+		   << ")";
+	}
+
 	return ss.str ();
 }
 
@@ -956,6 +1093,38 @@ parse_range_endpoints (
 	return true;
 }
 
+static std::string
+midi_region_json (const std::shared_ptr<ARDOUR::Region>& region, const std::shared_ptr<ARDOUR::Track>& track)
+{
+	const samplepos_t start_sample = region->position_sample ();
+	const samplepos_t end_sample = start_sample + region->length_samples ();
+
+	std::ostringstream ss;
+	ss << "{\"regionId\":\"" << json_escape (region->id ().to_s ()) << "\""
+	   << ",\"name\":\"" << json_escape (region->name ()) << "\""
+	   << ",\"type\":\"midi\""
+	   << ",\"trackId\":\"" << json_escape (track->id ().to_s ()) << "\""
+	   << ",\"trackName\":\"" << json_escape (track->name ()) << "\"";
+
+	const std::shared_ptr<ARDOUR::Playlist> playlist = region->playlist ();
+	if (playlist) {
+		ss << ",\"playlistId\":\"" << json_escape (playlist->id ().to_s ()) << "\"";
+	} else {
+		ss << ",\"playlistId\":null";
+	}
+
+	ss << ",\"startSample\":" << start_sample
+	   << ",\"endSample\":" << end_sample
+	   << ",\"lengthSamples\":" << region->length_samples ()
+	   << ",\"startBbt\":" << bbt_json_at_sample (start_sample)
+	   << ",\"endBbt\":" << bbt_json_at_sample (end_sample)
+	   << ",\"locked\":" << (region->locked () ? "true" : "false")
+	   << ",\"positionLocked\":" << (region->position_locked () ? "true" : "false")
+	   << "}";
+
+	return ss.str ();
+}
+
 static bool
 valid_fader_position (double p)
 {
@@ -1410,6 +1579,7 @@ MCPHttpServer::client (struct lws* wsi)
 		ClientContext ctx;
 		ctx.sse = false;
 		ctx.mcp_post = false;
+		ctx.mcp_post_messages = false;
 		ctx.have_response = false;
 		it = _clients.emplace (wsi, ctx).first;
 	}
@@ -1431,6 +1601,7 @@ MCPHttpServer::handle_http (struct lws* wsi, ClientContext& ctx)
 {
 	ctx.sse = false;
 	ctx.mcp_post = false;
+	ctx.mcp_post_messages = false;
 	ctx.have_response = false;
 	ctx.request_body.clear ();
 	ctx.response_body.clear ();
@@ -1449,7 +1620,15 @@ MCPHttpServer::handle_http (struct lws* wsi, ClientContext& ctx)
 			}
 
 			ctx.sse = true;
+			std::string endpoint = "/mcp/messages";
+			char host[256];
+			if (lws_hdr_copy (wsi, host, sizeof (host), WSI_TOKEN_HOST) > 0) {
+				endpoint = std::string ("http://") + host + "/mcp/messages";
+			}
+			/* Legacy SSE transport discovery: send endpoint before ready for Gemini CLI compatibility. */
+			ctx.sse_queue.push_back ("event: endpoint\ndata: " + endpoint + "\n\n");
 			ctx.sse_queue.push_back ("event: ready\ndata: {\"jsonrpc\":\"2.0\",\"method\":\"notifications/ready\",\"params\":{\"server\":\"ardour-mcp-http\"}}\n\n");
+			ctx.sse_queue.push_back ("event: message\ndata: {\"jsonrpc\":\"2.0\",\"method\":\"notifications/ready\",\"params\":{\"server\":\"ardour-mcp-http\"}}\n\n");
 			lws_callback_on_writable (wsi);
 			return 0;
 		}
@@ -1466,6 +1645,7 @@ MCPHttpServer::handle_http (struct lws* wsi, ClientContext& ctx)
 
 		if (path == "/mcp" || path == "/mcp/messages") {
 			ctx.mcp_post = true;
+			ctx.mcp_post_messages = (path == "/mcp/messages");
 			return 0;
 		}
 
@@ -1498,6 +1678,18 @@ MCPHttpServer::handle_http_body_completion (struct lws* wsi, ClientContext& ctx)
 	}
 
 	ctx.response_body = dispatch_jsonrpc (ctx.request_body);
+
+	if (ctx.mcp_post_messages) {
+		if (!ctx.response_body.empty ()) {
+			queue_sse_jsonrpc_message (ctx.response_body);
+		}
+
+		ctx.mcp_post = false;
+		ctx.mcp_post_messages = false;
+		ctx.request_body.clear ();
+		ctx.response_body.clear ();
+		return send_http_status (wsi, 202);
+	}
 
 	if (ctx.response_body.empty ()) {
 		return send_http_status (wsi, 202);
@@ -1609,6 +1801,7 @@ MCPHttpServer::write_json_response (struct lws* wsi, ClientContext& ctx)
 
 	ctx.have_response = false;
 	ctx.mcp_post = false;
+	ctx.mcp_post_messages = false;
 	ctx.request_body.clear ();
 	ctx.response_body.clear ();
 
@@ -1639,6 +1832,21 @@ MCPHttpServer::write_sse_message (struct lws* wsi, ClientContext& ctx)
 	}
 
 	return 0;
+}
+
+void
+MCPHttpServer::queue_sse_jsonrpc_message (const std::string& payload)
+{
+	const std::string message = "event: message\ndata: " + payload + "\n\n";
+
+	for (ClientMap::iterator it = _clients.begin (); it != _clients.end (); ++it) {
+		if (!it->second.sse) {
+			continue;
+		}
+
+		it->second.sse_queue.push_back (message);
+		lws_callback_on_writable (it->first);
+	}
 }
 
 std::string
@@ -1684,103 +1892,105 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 			"{\"tools\":["
 			"{\"name\":\"hello_world\",\"title\":\"Hello World\",\"description\":\"Return a greeting from Ardour.\","
 			"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\"}},\"additionalProperties\":false}},"
-			"{\"name\":\"session/get_info\",\"title\":\"Session Info\",\"description\":\"Return basic session and transport info.\","
+			"{\"name\":\"session_get_info\",\"title\":\"Session Info\",\"description\":\"Return basic session and transport info.\","
 			"\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
-			"{\"name\":\"session/save\",\"title\":\"Save Session\",\"description\":\"Save current session state, optionally to a snapshot name.\","
+			"{\"name\":\"session_save\",\"title\":\"Save Session\",\"description\":\"Save current session state, optionally to a snapshot name.\","
 			"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"snapshotName\":{\"type\":\"string\"},\"switchToSnapshot\":{\"type\":\"boolean\"}},\"additionalProperties\":false}},"
-			"{\"name\":\"session/undo\",\"title\":\"Undo\",\"description\":\"Undo one or more operations from session history.\","
+			"{\"name\":\"session_undo\",\"title\":\"Undo\",\"description\":\"Undo one or more operations from session history.\","
 			"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"count\":{\"type\":\"integer\",\"minimum\":1}},\"additionalProperties\":false}},"
-			"{\"name\":\"session/redo\",\"title\":\"Redo\",\"description\":\"Redo one or more operations from session history.\","
+			"{\"name\":\"session_redo\",\"title\":\"Redo\",\"description\":\"Redo one or more operations from session history.\","
 			"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"count\":{\"type\":\"integer\",\"minimum\":1}},\"additionalProperties\":false}},"
-			"{\"name\":\"session/rename\",\"title\":\"Rename Session\",\"description\":\"Rename current session.\","
+			"{\"name\":\"session_rename\",\"title\":\"Rename Session\",\"description\":\"Rename current session.\","
 			"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"newName\":{\"type\":\"string\"}},\"required\":[\"newName\"],\"additionalProperties\":false}},"
-			"{\"name\":\"session/quick_snapshot\",\"title\":\"Quick Snapshot\",\"description\":\"Trigger quick snapshot action; optionally switch to the new snapshot.\","
+			"{\"name\":\"session_quick_snapshot\",\"title\":\"Quick Snapshot\",\"description\":\"Trigger quick snapshot action; optionally switch to the new snapshot.\","
 			"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"switchToSnapshot\":{\"type\":\"boolean\"}},\"additionalProperties\":false}},"
-			"{\"name\":\"session/store_mixer_scene\",\"title\":\"Store Mixer Scene\",\"description\":\"Store mixer scene by index.\","
+			"{\"name\":\"session_store_mixer_scene\",\"title\":\"Store Mixer Scene\",\"description\":\"Store mixer scene by index.\","
 			"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"index\":{\"type\":\"integer\",\"minimum\":0}},\"required\":[\"index\"],\"additionalProperties\":false}},"
-			"{\"name\":\"session/recall_mixer_scene\",\"title\":\"Recall Mixer Scene\",\"description\":\"Recall mixer scene by index.\","
+			"{\"name\":\"session_recall_mixer_scene\",\"title\":\"Recall Mixer Scene\",\"description\":\"Recall mixer scene by index.\","
 			"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"index\":{\"type\":\"integer\",\"minimum\":0}},\"required\":[\"index\"],\"additionalProperties\":false}},"
-				"{\"name\":\"transport/get_state\",\"title\":\"Transport State\",\"description\":\"Return transport state.\","
+				"{\"name\":\"transport_get_state\",\"title\":\"Transport State\",\"description\":\"Return transport state.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
-				"{\"name\":\"transport/locate\",\"title\":\"Transport Locate\",\"description\":\"Move playhead to a target position by sample, or by bar+beat (fractional beat allowed).\","
+				"{\"name\":\"transport_locate\",\"title\":\"Transport Locate\",\"description\":\"Move playhead to a target position by sample, or by bar+beat (fractional beat allowed).\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"sample\":{\"type\":\"integer\",\"minimum\":0},\"bar\":{\"type\":\"integer\",\"minimum\":1},\"beat\":{\"type\":\"number\",\"minimum\":1}},\"additionalProperties\":false}},"
-				"{\"name\":\"transport/goto_start\",\"title\":\"Transport Go To Start\",\"description\":\"Move playhead to session start. Optional andRoll starts playback after locate.\","
+				"{\"name\":\"transport_goto_start\",\"title\":\"Transport Go To Start\",\"description\":\"Move playhead to session start. Optional andRoll starts playback after locate.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"andRoll\":{\"type\":\"boolean\"}},\"additionalProperties\":false}},"
-				"{\"name\":\"transport/goto_end\",\"title\":\"Transport Go To End\",\"description\":\"Move playhead to session end.\","
+				"{\"name\":\"transport_goto_end\",\"title\":\"Transport Go To End\",\"description\":\"Move playhead to session end.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
-				"{\"name\":\"transport/prev_marker\",\"title\":\"Transport Previous Marker\",\"description\":\"Move playhead to the previous visible marker/range boundary.\","
+				"{\"name\":\"transport_prev_marker\",\"title\":\"Transport Previous Marker\",\"description\":\"Move playhead to the previous visible marker/range boundary.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
-				"{\"name\":\"transport/next_marker\",\"title\":\"Transport Next Marker\",\"description\":\"Move playhead to the next visible marker/range boundary.\","
+				"{\"name\":\"transport_next_marker\",\"title\":\"Transport Next Marker\",\"description\":\"Move playhead to the next visible marker/range boundary.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
-				"{\"name\":\"transport/loop_toggle\",\"title\":\"Transport Loop Toggle\",\"description\":\"Toggle loop playback, or set explicit loop state. Shows loop range if available.\","
+				"{\"name\":\"transport_loop_toggle\",\"title\":\"Transport Loop Toggle\",\"description\":\"Toggle loop playback, or set explicit loop state. Shows loop range if available.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"enabled\":{\"type\":\"boolean\"}},\"additionalProperties\":false}},"
-				"{\"name\":\"transport/loop_location\",\"title\":\"Transport Loop Location\",\"description\":\"Set auto-loop range using start/end sample or start/end bar+beat.\","
+				"{\"name\":\"transport_loop_location\",\"title\":\"Transport Loop Location\",\"description\":\"Set auto-loop range using start/end sample or start/end bar+beat.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"startSample\":{\"type\":\"integer\",\"minimum\":0},\"endSample\":{\"type\":\"integer\",\"minimum\":0},\"startBar\":{\"type\":\"integer\",\"minimum\":1},\"startBeat\":{\"type\":\"number\",\"minimum\":1},\"endBar\":{\"type\":\"integer\",\"minimum\":1},\"endBeat\":{\"type\":\"number\",\"minimum\":1}},\"additionalProperties\":false}},"
-				"{\"name\":\"transport/set_record_enable\",\"title\":\"Set Global Record Enable\",\"description\":\"Set session record-enable (global rec arm) state.\","
+				"{\"name\":\"transport_set_record_enable\",\"title\":\"Set Global Record Enable\",\"description\":\"Set session record-enable (global rec arm) state.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"enabled\":{\"type\":\"boolean\"}},\"required\":[\"enabled\"],\"additionalProperties\":false}},"
-				"{\"name\":\"transport/set_speed\",\"title\":\"Set Transport Speed\",\"description\":\"Set transport speed (as in OSC set_transport_speed).\","
+				"{\"name\":\"transport_set_speed\",\"title\":\"Set Transport Speed\",\"description\":\"Set transport speed (as in OSC set_transport_speed).\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"speed\":{\"type\":\"number\"}},\"required\":[\"speed\"],\"additionalProperties\":false}},"
-				"{\"name\":\"transport/play\",\"title\":\"Transport Play\",\"description\":\"Start transport playback.\","
+				"{\"name\":\"transport_play\",\"title\":\"Transport Play\",\"description\":\"Start transport playback.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
-				"{\"name\":\"transport/stop\",\"title\":\"Transport Stop\",\"description\":\"Stop transport playback.\","
+				"{\"name\":\"transport_stop\",\"title\":\"Transport Stop\",\"description\":\"Stop transport playback.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
-				"{\"name\":\"markers/list\",\"title\":\"Markers List\",\"description\":\"List all session markers regardless of marker subtype.\","
+				"{\"name\":\"markers_list\",\"title\":\"Markers List\",\"description\":\"List all session markers regardless of marker subtype.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
-				"{\"name\":\"markers/add\",\"title\":\"Add Marker\",\"description\":\"Add a marker at the current audible position or at a specific BBT location. Optional type: mark, section (arrangement), or scene. If name is omitted or empty, Ardour assigns a default marker name.\","
+				"{\"name\":\"markers_add\",\"title\":\"Add Marker\",\"description\":\"Add a marker at the current audible position or at a specific BBT location. Optional type: mark, section (arrangement), or scene. If name is omitted or empty, Ardour assigns a default marker name.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\"},\"type\":{\"type\":\"string\",\"enum\":[\"mark\",\"section\",\"scene\",\"arrangement\"]},\"bar\":{\"type\":\"integer\",\"minimum\":1},\"beat\":{\"type\":\"number\",\"minimum\":1}},\"additionalProperties\":false}},"
-				"{\"name\":\"markers/add_range\",\"title\":\"Add Range Marker\",\"description\":\"Add a range marker using start/end sample or start/end bar+beat.\","
+				"{\"name\":\"markers_add_range\",\"title\":\"Add Range Marker\",\"description\":\"Add a range marker using start/end sample or start/end bar+beat.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\"},\"startSample\":{\"type\":\"integer\",\"minimum\":0},\"endSample\":{\"type\":\"integer\",\"minimum\":0},\"startBar\":{\"type\":\"integer\",\"minimum\":1},\"startBeat\":{\"type\":\"number\",\"minimum\":1},\"endBar\":{\"type\":\"integer\",\"minimum\":1},\"endBeat\":{\"type\":\"number\",\"minimum\":1}},\"additionalProperties\":false}},"
-				"{\"name\":\"markers/set_auto_loop\",\"title\":\"Set Auto Loop Range\",\"description\":\"Set auto-loop range using start/end sample or start/end bar+beat.\","
+				"{\"name\":\"markers_set_auto_loop\",\"title\":\"Set Auto Loop Range\",\"description\":\"Set auto-loop range using start/end sample or start/end bar+beat.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"startSample\":{\"type\":\"integer\",\"minimum\":0},\"endSample\":{\"type\":\"integer\",\"minimum\":0},\"startBar\":{\"type\":\"integer\",\"minimum\":1},\"startBeat\":{\"type\":\"number\",\"minimum\":1},\"endBar\":{\"type\":\"integer\",\"minimum\":1},\"endBeat\":{\"type\":\"number\",\"minimum\":1}},\"additionalProperties\":false}},"
-				"{\"name\":\"markers/hide_auto_loop\",\"title\":\"Hide Auto Loop Range\",\"description\":\"Hide or show the current auto-loop range without changing its endpoints.\","
+				"{\"name\":\"markers_hide_auto_loop\",\"title\":\"Hide Auto Loop Range\",\"description\":\"Hide or show the current auto-loop range without changing its endpoints.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"hidden\":{\"type\":\"boolean\"}},\"additionalProperties\":false}},"
-				"{\"name\":\"markers/set_auto_punch\",\"title\":\"Set Auto Punch Range\",\"description\":\"Set auto-punch range using start/end sample or start/end bar+beat.\","
+				"{\"name\":\"markers_set_auto_punch\",\"title\":\"Set Auto Punch Range\",\"description\":\"Set auto-punch range using start/end sample or start/end bar+beat.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"startSample\":{\"type\":\"integer\",\"minimum\":0},\"endSample\":{\"type\":\"integer\",\"minimum\":0},\"startBar\":{\"type\":\"integer\",\"minimum\":1},\"startBeat\":{\"type\":\"number\",\"minimum\":1},\"endBar\":{\"type\":\"integer\",\"minimum\":1},\"endBeat\":{\"type\":\"number\",\"minimum\":1}},\"additionalProperties\":false}},"
-				"{\"name\":\"markers/hide_auto_punch\",\"title\":\"Hide Auto Punch Range\",\"description\":\"Hide or show the current auto-punch range without changing its endpoints.\","
+				"{\"name\":\"markers_hide_auto_punch\",\"title\":\"Hide Auto Punch Range\",\"description\":\"Hide or show the current auto-punch range without changing its endpoints.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"hidden\":{\"type\":\"boolean\"}},\"additionalProperties\":false}},"
-				"{\"name\":\"markers/delete\",\"title\":\"Delete Marker\",\"description\":\"Delete one marker by location ID (preferred), or by name with optional sample for disambiguation.\","
+				"{\"name\":\"markers_delete\",\"title\":\"Delete Marker\",\"description\":\"Delete one marker by location ID (preferred), or by name with optional sample for disambiguation.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"locationId\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"sample\":{\"type\":\"integer\",\"minimum\":0}},\"additionalProperties\":false}},"
-				"{\"name\":\"markers/rename\",\"title\":\"Rename Marker\",\"description\":\"Rename one marker by location ID (preferred), or by name with optional sample for disambiguation.\","
+				"{\"name\":\"markers_rename\",\"title\":\"Rename Marker\",\"description\":\"Rename one marker by location ID (preferred), or by name with optional sample for disambiguation.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"locationId\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"sample\":{\"type\":\"integer\",\"minimum\":0},\"newName\":{\"type\":\"string\"}},\"required\":[\"newName\"],\"additionalProperties\":false}},"
-				"{\"name\":\"tracks/list\",\"title\":\"Tracks List\",\"description\":\"List session tracks and buses.\","
+				"{\"name\":\"tracks_list\",\"title\":\"Tracks List\",\"description\":\"List session tracks and buses.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"includeHidden\":{\"type\":\"boolean\"}},\"additionalProperties\":false}},"
-				"{\"name\":\"tracks/add\",\"title\":\"Add Track\",\"description\":\"Add one or more tracks (audio or MIDI). Optional insertion: end, before, or after a reference route (or selected route).\","
+				"{\"name\":\"tracks_add\",\"title\":\"Add Track\",\"description\":\"Add one or more tracks (audio or MIDI). Optional insertion: end, before, or after a reference route (or selected route).\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"type\":{\"type\":\"string\",\"enum\":[\"audio\",\"midi\"]},\"count\":{\"type\":\"integer\",\"minimum\":1},\"name\":{\"type\":\"string\"},\"inputChannels\":{\"type\":\"integer\",\"minimum\":1},\"outputChannels\":{\"type\":\"integer\",\"minimum\":1},\"strictIo\":{\"type\":\"boolean\"},\"insert\":{\"type\":\"string\",\"enum\":[\"end\",\"before\",\"after\"]},\"relativeToId\":{\"type\":\"string\"}},\"additionalProperties\":false}},"
-				"{\"name\":\"buses/add\",\"title\":\"Add Bus\",\"description\":\"Add one or more buses (audio or MIDI). Optional insertion: end, before, or after a reference route (or selected route).\","
+				"{\"name\":\"buses_add\",\"title\":\"Add Bus\",\"description\":\"Add one or more buses (audio or MIDI). Optional insertion: end, before, or after a reference route (or selected route).\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"type\":{\"type\":\"string\",\"enum\":[\"audio\",\"midi\"]},\"count\":{\"type\":\"integer\",\"minimum\":1},\"name\":{\"type\":\"string\"},\"inputChannels\":{\"type\":\"integer\",\"minimum\":1},\"outputChannels\":{\"type\":\"integer\",\"minimum\":1},\"strictIo\":{\"type\":\"boolean\"},\"insert\":{\"type\":\"string\",\"enum\":[\"end\",\"before\",\"after\"]},\"relativeToId\":{\"type\":\"string\"}},\"additionalProperties\":false}},"
-					"{\"name\":\"track/get_info\",\"title\":\"Get Route Info\",\"description\":\"Get one route info (fader, pan, rec, mute, solo, sends, plugins).\","
+					"{\"name\":\"track_get_info\",\"title\":\"Get Route Info\",\"description\":\"Get one route info (fader, pan, rec, mute, solo, sends, plugins).\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"}},\"required\":[\"id\"],\"additionalProperties\":false}},"
-					"{\"name\":\"plugin/get_description\",\"title\":\"Plugin Description\",\"description\":\"Get plugin descriptor and parameter metadata for a route plugin.\","
+					"{\"name\":\"plugin_get_description\",\"title\":\"Plugin Description\",\"description\":\"Get plugin descriptor and parameter metadata for a route plugin.\","
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"pluginIndex\":{\"type\":\"integer\",\"minimum\":0}},\"required\":[\"id\",\"pluginIndex\"],\"additionalProperties\":false}},"
-					"{\"name\":\"plugin/set_parameter\",\"title\":\"Set Plugin Parameter\",\"description\":\"Set a plugin parameter by parameter index or control ID.\","
+					"{\"name\":\"plugin_set_parameter\",\"title\":\"Set Plugin Parameter\",\"description\":\"Set a plugin parameter by parameter index or control ID.\","
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"pluginIndex\":{\"type\":\"integer\",\"minimum\":0},\"parameterIndex\":{\"type\":\"integer\",\"minimum\":0},\"controlId\":{\"type\":\"integer\",\"minimum\":0},\"value\":{\"type\":\"number\"},\"interface\":{\"type\":\"number\"}},\"required\":[\"id\",\"pluginIndex\"],\"additionalProperties\":false}},"
-					"{\"name\":\"plugin/set_enabled\",\"title\":\"Set Plugin Enabled\",\"description\":\"Enable or disable one route plugin by index.\","
+					"{\"name\":\"plugin_set_enabled\",\"title\":\"Set Plugin Enabled\",\"description\":\"Enable or disable one route plugin by index.\","
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"pluginIndex\":{\"type\":\"integer\",\"minimum\":0},\"enabled\":{\"type\":\"boolean\"}},\"required\":[\"id\",\"pluginIndex\",\"enabled\"],\"additionalProperties\":false}},"
-				"{\"name\":\"track/get_fader\",\"title\":\"Get Track Fader\",\"description\":\"Get current track fader as normalized position and dB.\","
+				"{\"name\":\"track_get_fader\",\"title\":\"Get Track Fader\",\"description\":\"Get current track fader as normalized position and dB.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"}},\"required\":[\"id\"],\"additionalProperties\":false}},"
-				"{\"name\":\"track/select\",\"title\":\"Select Track\",\"description\":\"Select a route in Ardour.\","
+				"{\"name\":\"track_select\",\"title\":\"Select Track\",\"description\":\"Select a route in Ardour.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"}},\"required\":[\"id\"],\"additionalProperties\":false}},"
-				"{\"name\":\"track/rename\",\"title\":\"Rename Track\",\"description\":\"Rename one route by ID.\","
+				"{\"name\":\"track_rename\",\"title\":\"Rename Track\",\"description\":\"Rename one route by ID.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"newName\":{\"type\":\"string\"}},\"required\":[\"id\",\"newName\"],\"additionalProperties\":false}},"
-				"{\"name\":\"track/set_mute\",\"title\":\"Set Track Mute\",\"description\":\"Set route mute state.\","
+				"{\"name\":\"track_set_mute\",\"title\":\"Set Track Mute\",\"description\":\"Set route mute state.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"value\":{\"type\":\"boolean\"}},\"required\":[\"id\",\"value\"],\"additionalProperties\":false}},"
-					"{\"name\":\"track/set_solo\",\"title\":\"Set Track Solo\",\"description\":\"Set route solo state.\","
+					"{\"name\":\"track_set_solo\",\"title\":\"Set Track Solo\",\"description\":\"Set route solo state.\","
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"value\":{\"type\":\"boolean\"}},\"required\":[\"id\",\"value\"],\"additionalProperties\":false}},"
-					"{\"name\":\"track/set_rec_enable\",\"title\":\"Set Record Enable\",\"description\":\"Set track record-enable state.\","
+					"{\"name\":\"track_set_rec_enable\",\"title\":\"Set Record Enable\",\"description\":\"Set track record-enable state.\","
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"value\":{\"type\":\"boolean\"}},\"required\":[\"id\",\"value\"],\"additionalProperties\":false}},"
-					"{\"name\":\"track/set_rec_safe\",\"title\":\"Set Record Safe\",\"description\":\"Set track record-safe state.\","
+					"{\"name\":\"track_set_rec_safe\",\"title\":\"Set Record Safe\",\"description\":\"Set track record-safe state.\","
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"value\":{\"type\":\"boolean\"}},\"required\":[\"id\",\"value\"],\"additionalProperties\":false}},"
-					"{\"name\":\"track/set_pan\",\"title\":\"Set Pan\",\"description\":\"Set route pan position (0.0 to 1.0).\","
+					"{\"name\":\"track_set_pan\",\"title\":\"Set Pan\",\"description\":\"Set route pan position (0.0 to 1.0).\","
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"position\":{\"type\":\"number\",\"minimum\":0,\"maximum\":1}},\"required\":[\"id\",\"position\"],\"additionalProperties\":false}},"
-					"{\"name\":\"track/set_send_level\",\"title\":\"Set Send Level\",\"description\":\"Set route send level by send index using normalized position (0.0 to 1.0) or dB.\","
+					"{\"name\":\"track_set_send_level\",\"title\":\"Set Send Level\",\"description\":\"Set route send level by send index using normalized position (0.0 to 1.0) or dB.\","
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"sendIndex\":{\"type\":\"integer\",\"minimum\":0},\"position\":{\"type\":\"number\",\"minimum\":0,\"maximum\":1},\"db\":{\"type\":\"number\"}},\"required\":[\"id\",\"sendIndex\"],\"oneOf\":[{\"required\":[\"position\"]},{\"required\":[\"db\"]}],\"additionalProperties\":false}},"
-				"{\"name\":\"track/set_fader\",\"title\":\"Set Track Fader\",\"description\":\"Set track fader by normalized position (0.0 to 1.0) or dB.\","
-				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"position\":{\"type\":\"number\",\"minimum\":0,\"maximum\":1},\"db\":{\"type\":\"number\"}},\"required\":[\"id\"],\"oneOf\":[{\"required\":[\"position\"]},{\"required\":[\"db\"]}],\"additionalProperties\":false}}"
+				"{\"name\":\"track_set_fader\",\"title\":\"Set Track Fader\",\"description\":\"Set track fader by normalized position (0.0 to 1.0) or dB.\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"position\":{\"type\":\"number\",\"minimum\":0,\"maximum\":1},\"db\":{\"type\":\"number\"}},\"required\":[\"id\"],\"oneOf\":[{\"required\":[\"position\"]},{\"required\":[\"db\"]}],\"additionalProperties\":false}},"
+				"{\"name\":\"midi_region_add\",\"title\":\"Add MIDI Region\",\"description\":\"Create an empty MIDI region on a MIDI track using sample or bar+beat range endpoints.\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"trackId\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"startSample\":{\"type\":\"integer\",\"minimum\":0},\"endSample\":{\"type\":\"integer\",\"minimum\":0},\"startBar\":{\"type\":\"integer\",\"minimum\":1},\"startBeat\":{\"type\":\"number\",\"minimum\":1},\"endBar\":{\"type\":\"integer\",\"minimum\":1},\"endBeat\":{\"type\":\"number\",\"minimum\":1}},\"required\":[\"trackId\"],\"additionalProperties\":false}}"
 				"]}");
 	}
 
 	if (method == "tools/call") {
-		std::string tool_name = root.get<std::string> ("params.name", "");
+		std::string tool_name = canonical_tool_name (root.get<std::string> ("params.name", ""));
 		if (tool_name == "hello_world") {
 			std::string caller = root.get<std::string> ("params.arguments.name", "");
 			std::string text = "Hello from Ardour";
@@ -2735,9 +2945,10 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 					if (tool_name == "tracks/list") {
 						const bool include_hidden = root.get<bool> ("params.arguments.includeHidden", false);
 						std::string structured = tracks_list_json (_session, include_hidden);
-				return jsonrpc_result (
-					id,
-					std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Tracks listed\"}],\"structuredContent\":") + structured + "}");
+						std::string text = tracks_list_text (_session, include_hidden);
+						return jsonrpc_result (
+							id,
+							std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"") + json_escape (text) + "\"}],\"structuredContent\":" + structured + "}");
 			}
 
 				if (tool_name == "tracks/add" || tool_name == "buses/add") {
@@ -2903,6 +3114,110 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 					return jsonrpc_result (
 						id,
 						std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"") + (add_tracks ? "Track(s) added" : "Bus(es) added") + "\"}],\"structuredContent\":" + structured.str () + "}");
+				}
+
+				if (tool_name == "midi_region/add") {
+					const std::string track_id = root.get<std::string> ("params.arguments.trackId", "");
+					const std::string requested_name = root.get<std::string> ("params.arguments.name", "");
+
+					if (track_id.empty ()) {
+						return jsonrpc_error (id, -32602, "Missing trackId");
+					}
+
+					const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (track_id));
+					const std::shared_ptr<ARDOUR::Track> track = std::dynamic_pointer_cast<ARDOUR::Track> (route);
+					const std::shared_ptr<ARDOUR::MidiTrack> midi_track = std::dynamic_pointer_cast<ARDOUR::MidiTrack> (track);
+					if (!midi_track) {
+						return jsonrpc_error (id, -32602, "trackId is not a MIDI track");
+					}
+
+					samplepos_t start_sample = 0;
+					samplepos_t end_sample = 0;
+					std::string range_error;
+					if (!parse_range_endpoints (root, "params.arguments", start_sample, end_sample, range_error)) {
+						return jsonrpc_error (id, -32602, range_error);
+					}
+					if (end_sample <= start_sample) {
+						return jsonrpc_error (id, -32602, "Invalid range: end must be greater than start");
+					}
+
+					const std::shared_ptr<ARDOUR::Playlist> playlist = midi_track->playlist ();
+					if (!playlist) {
+						return jsonrpc_error (id, -32602, "Track has no playlist");
+					}
+
+					const Temporal::timepos_t start_pos (start_sample);
+					const Temporal::timepos_t end_pos (end_sample);
+					const Temporal::timecnt_t region_length = start_pos.distance (end_pos);
+					if (region_length.samples () <= 0) {
+						return jsonrpc_error (id, -32602, "Invalid region length");
+					}
+
+					std::shared_ptr<ARDOUR::MidiSource> midi_src;
+					try {
+						midi_src = _session.create_midi_source_by_stealing_name (track);
+					} catch (...) {
+						midi_src.reset ();
+					}
+					if (!midi_src) {
+						return jsonrpc_error (id, -32000, "Failed to create MIDI source");
+					}
+
+					ARDOUR::SourceList srcs;
+					srcs.push_back (std::dynamic_pointer_cast<ARDOUR::Source> (midi_src));
+					if (srcs.empty () || !srcs.front ()) {
+						return jsonrpc_error (id, -32000, "Failed to resolve MIDI source");
+					}
+
+					const Temporal::timecnt_t source_start (Temporal::BeatTime); /* zero beats */
+
+					PBD::PropertyList whole_file_props;
+					whole_file_props.add (ARDOUR::Properties::start, source_start);
+					whole_file_props.add (ARDOUR::Properties::length, region_length);
+					whole_file_props.add (ARDOUR::Properties::automatic, true);
+					whole_file_props.add (ARDOUR::Properties::whole_file, true);
+					whole_file_props.add (ARDOUR::Properties::name, PBD::basename_nosuffix (midi_src->name ()));
+					whole_file_props.add (ARDOUR::Properties::opaque, _session.config.get_draw_opaque_midi_regions ());
+
+					std::shared_ptr<ARDOUR::Region> whole_file_region = ARDOUR::RegionFactory::create (srcs, whole_file_props);
+					if (!whole_file_region) {
+						return jsonrpc_error (id, -32000, "Failed to create whole-file MIDI region");
+					}
+
+					PBD::PropertyList playlist_region_props;
+					if (requested_name.empty ()) {
+						playlist_region_props.add (ARDOUR::Properties::name, whole_file_region->name ());
+					} else {
+						playlist_region_props.add (ARDOUR::Properties::name, requested_name);
+					}
+
+					std::shared_ptr<ARDOUR::Region> region = ARDOUR::RegionFactory::create (whole_file_region, playlist_region_props);
+					if (!region) {
+						return jsonrpc_error (id, -32000, "Failed to create MIDI playlist region");
+					}
+
+					_session.begin_reversible_command ("add midi region");
+					playlist->clear_changes ();
+					playlist->clear_owned_changes ();
+					region->set_position (start_pos);
+					playlist->add_region (region, start_pos, 1.0, false);
+					playlist->rdiff_and_add_command (&_session);
+					_session.commit_reversible_command ();
+
+					std::ostringstream structured;
+					structured << "{\"created\":" << midi_region_json (region, track)
+						<< ",\"usedDefaultName\":" << (requested_name.empty () ? "true" : "false");
+					if (requested_name.empty ()) {
+						structured << ",\"requestedName\":null";
+					} else {
+						structured << ",\"requestedName\":\"" << json_escape (requested_name) << "\"";
+					}
+					structured << "}";
+
+					return jsonrpc_result (
+						id,
+						std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"MIDI region added\"}],\"structuredContent\":")
+							+ structured.str () + "}");
 				}
 
 				if (tool_name == "track/get_info") {
