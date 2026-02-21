@@ -67,6 +67,22 @@ ScaleDialog::ScaleDialog ()
 
 	using namespace Gtk::Menu_Helpers;
 
+	culture_dropdown.add_menu_elem (MenuElem (_("Western Europe (12TET)"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::fill_dropdowns), ARDOUR::WesternEurope12TET)));
+	culture_dropdown.add_menu_elem (MenuElem (_("Byzantine"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::fill_dropdowns), ARDOUR::Byzantine)));
+	culture_dropdown.add_menu_elem (MenuElem (_("Maqams"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::fill_dropdowns), ARDOUR::Maqams)));
+	culture_dropdown.add_menu_elem (MenuElem (_("Hindustani"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::fill_dropdowns), ARDOUR::Hindustani)));
+	culture_dropdown.add_menu_elem (MenuElem (_("Carnatic"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::fill_dropdowns), ARDOUR::Carnatic)));
+	culture_dropdown.add_menu_elem (MenuElem (_("SE Asian Archipelago"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::fill_dropdowns), ARDOUR::SEAsia)));
+	culture_dropdown.add_menu_elem (MenuElem (_("China"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::fill_dropdowns), ARDOUR::China)));
+	culture_dropdown.set_active (0);
+	fill_dropdowns (ARDOUR::WesternEurope12TET);
+
+	root_mode_box.pack_start (root_dropdown, true, false);
+	root_mode_box.pack_start (mode_dropdown, true, false);
+
+	named_scale_box.pack_start (culture_dropdown, false, false);
+	named_scale_box.pack_start (root_mode_box, false, false);
+
 	type_dropdown.add_menu_elem (MenuElem (_("Absolute Pitch (Hz)"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), ARDOUR::AbsolutePitch)));
 	type_dropdown.add_menu_elem (MenuElem (_("Semitone Steps"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), ARDOUR::SemitoneSteps)));
 	type_dropdown.add_menu_elem (MenuElem (_("Whole Tone Steps"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), ARDOUR::WholeToneSteps)));
@@ -106,6 +122,7 @@ ScaleDialog::ScaleDialog ()
 
 	Gtk::VBox* vbox (get_vbox());
 	vbox->pack_start (name_packer, false, false);
+	vbox->pack_start (named_scale_box, false, false);
 	vbox->pack_start (scala_box, false, false);
 	vbox->pack_start (type_box, false, false);
 	vbox->pack_start (steps_box, false, false);
@@ -121,7 +138,7 @@ ScaleDialog::ScaleDialog ()
 	vbox->show_all ();
 
 	step_packer.set_spacing (12);
-	pack ();
+	pack_steps ();
 }
 
 ScaleDialog::~ScaleDialog ()
@@ -133,7 +150,7 @@ ScaleDialog ::set (ARDOUR::MusicalKey const & key)
 {
 	_key = key;
 
-	pack ();
+	pack_steps ();
 }
 
 ARDOUR::MusicalKey
@@ -143,7 +160,79 @@ ScaleDialog::get() const
 }
 
 void
-ScaleDialog::pack ()
+ScaleDialog::fill_dropdowns (ARDOUR::MusicalModeCulture culture)
+{
+	using namespace Gtk::Menu_Helpers;
+	using namespace ARDOUR;
+
+	root_dropdown.clear_items ();
+	mode_dropdown.clear_items ();
+
+	culture_dropdown.set_active ((int) culture);
+
+	switch (culture) {
+	case WesternEurope12TET:
+		root_dropdown.add_menu_elem (MenuElem (_("A")));
+		root_dropdown.add_menu_elem (MenuElem (_("A#")));
+		root_dropdown.add_menu_elem (MenuElem (_("B")));
+		root_dropdown.add_menu_elem (MenuElem (_("C")));
+		root_dropdown.add_menu_elem (MenuElem (_("C#")));
+		root_dropdown.add_menu_elem (MenuElem (_("D")));
+		root_dropdown.add_menu_elem (MenuElem (_("D#")));
+		root_dropdown.add_menu_elem (MenuElem (_("E")));
+		root_dropdown.add_menu_elem (MenuElem (_("F")));
+		root_dropdown.add_menu_elem (MenuElem (_("F#")));
+		root_dropdown.add_menu_elem (MenuElem (_("G")));
+		root_dropdown.add_menu_elem (MenuElem (_("G#")));
+
+		/* Must match enum order */
+
+		mode_dropdown.add_menu_elem (MenuElem (_("Major (Ionian)")));
+		mode_dropdown.add_menu_elem (MenuElem (_("Minor (Aeolian)")));
+		mode_dropdown.add_menu_elem (MenuElem (_("Dorian")));
+		mode_dropdown.add_menu_elem (MenuElem (_("Harmonic Minor")));
+		mode_dropdown.add_menu_elem (MenuElem (_("Melodic Minor Ascending")));
+		mode_dropdown.add_menu_elem (MenuElem (_("Melodic Minor Descending")));
+		mode_dropdown.add_menu_elem (MenuElem (_("Phrygian")));
+		mode_dropdown.add_menu_elem (MenuElem (_("Lydian")));
+		mode_dropdown.add_menu_elem (MenuElem (_("Mixolydian")));
+		mode_dropdown.add_menu_elem (MenuElem (_("Locrian")));
+		mode_dropdown.add_menu_elem (MenuElem (_("Pentatonic Major")));
+		mode_dropdown.add_menu_elem (MenuElem (_("Pentatonic Minor")));
+		mode_dropdown.add_menu_elem (MenuElem (_("Chromatic")));
+		mode_dropdown.add_menu_elem (MenuElem (_("Blues")));
+		mode_dropdown.add_menu_elem (MenuElem (_("Neapolitan Minor")));
+		mode_dropdown.add_menu_elem (MenuElem (_("Neapolitan Major")));
+		mode_dropdown.add_menu_elem (MenuElem (_("Oriental")));
+		mode_dropdown.add_menu_elem (MenuElem (_("Double Harmonic")));
+		mode_dropdown.add_menu_elem (MenuElem (_("Enigmatic")));
+		mode_dropdown.add_menu_elem (MenuElem (_("Hungarian Minor")));
+		mode_dropdown.add_menu_elem (MenuElem (_("Hungarian Major")));
+		mode_dropdown.add_menu_elem (MenuElem (_("Spanish 8 Tone")));
+		mode_dropdown.add_menu_elem (MenuElem (_("Hungarian Gypsy")));
+		mode_dropdown.add_menu_elem (MenuElem (_("Overtone")));
+		mode_dropdown.add_menu_elem (MenuElem (_("Leading Whole Tone")));
+
+		root_dropdown.set_active (0);
+		mode_dropdown.set_active (0);
+		break;
+	case Byzantine:
+		break;
+	case Maqams:
+		break;
+	case Hindustani:
+		break;
+	case Carnatic:
+		break;
+	case SEAsia:
+		break;
+	case China:
+		break;
+	}
+}
+
+void
+ScaleDialog::pack_steps ()
 {
 	Gtkmm2ext::container_clear (step_packer);
 

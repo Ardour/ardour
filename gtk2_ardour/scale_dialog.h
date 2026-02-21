@@ -68,6 +68,13 @@ class ScaleDialog : public ArdourDialog
 	Gtk::FileChooserButton scala_file_button;
 	Gtk::Button clear_button;
 
-	void pack ();
+	ArdourWidgets::ArdourDropdown culture_dropdown;
+	ArdourWidgets::ArdourDropdown root_dropdown;
+	ArdourWidgets::ArdourDropdown mode_dropdown;
+	Gtk::HBox root_mode_box;
+	Gtk::VBox named_scale_box;
+
+	void pack_steps ();
+	void fill_dropdowns (ARDOUR::MusicalModeCulture);
 	void set_type (ARDOUR::MusicalModeType);
 };
