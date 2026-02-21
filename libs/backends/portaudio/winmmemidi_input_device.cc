@@ -184,32 +184,6 @@ WinMMEMidiInputDevice::winmm_input_callback(HMIDIIN handle,
 {
 	WinMMEMidiInputDevice* midi_input = (WinMMEMidiInputDevice*)instance;
 
-#ifdef USE_MMCSS_THREAD_PRIORITIES
-
-	static HANDLE input_thread = GetCurrentThread ();
-	static bool priority_boosted = false;
-
-#if 0 // GetThreadId() is Vista or later only.
-	if (input_thread != GetCurrentThread ()) {
-		DWORD otid = GetThreadId (input_thread);
-		DWORD ntid = GetThreadId (GetCurrentThread ());
-		// There was a reference on the internet somewhere that it is possible
-		// for the callback to come from different threads(thread pool) this
-		// could be problematic but I haven't seen this behaviour yet
-		DEBUG_THREADS (string_compose (
-		    "WinMME input Thread ID Changed: was %1, now %2\n", otid, ntid));
-	}
-#endif
-
-	HANDLE task_handle;
-
-	if (!priority_boosted) {
-		PBD::MMCSS::set_thread_characteristics ("Pro Audio", &task_handle);
-		PBD::MMCSS::set_thread_priority (task_handle, PBD::MMCSS::AVRT_PRIORITY_HIGH);
-		priority_boosted = true;
-	}
-#endif
-
 	switch (msg) {
 	case MIM_OPEN:
 	case MIM_CLOSE:
