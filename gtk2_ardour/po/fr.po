@@ -13918,7 +13918,7 @@ msgstr "Latence %1 spl%2 %3"
 # debug build only
 #: plugin_pin_dialog.cc:1063 plugin_pin_dialog.cc:1067
 msgid "no-inplace"
-msgstr ""
+msgstr "no-inplace"
 
 #: plugin_pin_dialog.cc:1065
 msgid "Latency %1 spl"
