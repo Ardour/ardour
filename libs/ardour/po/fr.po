@@ -316,16 +316,16 @@ msgstr ""
 #: audiosource.cc:561 audiosource.cc:673
 msgid "map failed - could not create file mapping for peakfile %1."
 msgstr ""
-"échec de carte - impossible de créer un mappage de fichier pour fichier de "
-"crête %1."
+"échec de carte - impossible de créer un mappage de fichier pour le fichier "
+"de crête %1."
 
 #: audiosource.cc:567 audiosource.cc:679
 msgid "map failed - could not map peakfile %1."
-msgstr "échec de carte - n'a pas pu mapper fichier de crête %1."
+msgstr "échec de carte - n'a pas pu mapper le fichier de crête %1."
 
 #: audiosource.cc:578 audiosource.cc:690
 msgid "unmap failed - could not unmap peakfile %1."
-msgstr "échec de carte - n'a pas pu démapper fichier de crête %1."
+msgstr "échec de carte - n'a pas pu démapper le fichier de crête %1."
 
 #: audiosource.cc:584 audiosource.cc:696
 msgid "map failed - could not mmap peakfile %1."
