@@ -92,11 +92,6 @@ private: // data
 
 	std::string m_name;
 
-#ifdef USE_MMCSS_THREAD_PRIORITIES
-	DWORD m_main_thread;
-	bool  m_priority_boosted;
-#endif
-
 	// can't use unique_ptr yet
 	const std::unique_ptr<PBD::RingBuffer<uint8_t> > m_midi_buffer;
 	std::unique_ptr<uint8_t[]> m_sysex_buffer;
