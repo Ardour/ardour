@@ -375,7 +375,7 @@ msgstr "Échec du chargement de synthé pour l'audition MIDI"
 
 #: auditioner.cc:168
 msgid "Cannot setup auditioner processing flow."
-msgstr ""
+msgstr "Impossible de configurer le flux de traitement de l'audition."
 
 #: auditioner.cc:223
 msgid "no outputs available for auditioner - manual connection required"
