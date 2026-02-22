@@ -12911,7 +12911,7 @@ msgstr "Atténuation SeP"
 #: monitor_section.cc:245 monitor_section.cc:248
 msgid "Gain reduction to use when dimming monitor outputs"
 msgstr ""
-"Réduction de gain à utiliser pour le mode 'atténuation des sorties d'écoute "
+"Réduction de gain à utiliser pour le mode atténuation des sorties d'écoute "
 "de contrôle"
 
 #: monitor_section.cc:252 monitor_section.cc:298
