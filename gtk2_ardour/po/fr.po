@@ -2294,7 +2294,7 @@ msgstr "Surfaces de contrôle"
 
 #: ardour_ui_ed.cc:190 rc_option_editor.cc:4773
 msgid "Metering"
-msgstr "Indicateurs de mesure"
+msgstr "Mesure"
 
 #: ardour_ui_ed.cc:191
 msgid "Fall Off Rate"
