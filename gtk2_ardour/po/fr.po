@@ -11331,7 +11331,7 @@ msgstr " et GCC version "
 
 #: main.cc:370
 msgid "Copyright (C) 1999-2026 Paul Davis"
-msgstr ""
+msgstr "Copyright (C) 1999-2026 Paul Davis"
 
 #: main.cc:371
 msgid ""
