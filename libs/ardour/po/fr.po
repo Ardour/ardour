@@ -1738,7 +1738,7 @@ msgstr "Panoramiques fournies par les données XML pour %1 ignorées."
 
 #: panner_manager.cc:98
 msgid "looking for panners in %1\n"
-msgstr "lecherche de Panoramiques dans %1\n"
+msgstr "recherche de Panoramiques dans %1\n"
 
 #: panner_manager.cc:124
 msgid "Panner discovered: \"%1\" in %2\n"
