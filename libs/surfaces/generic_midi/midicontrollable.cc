@@ -321,7 +321,9 @@ MIDIControllable::midi_sense_note (Parser &, EventTwoBytes *msg, bool /*is_on*/)
 		}
 	}
 
-	last_value = (MIDI::byte) (_controllable->get_value() * 127.0); // to prevent feedback fights
+	if (!_surface->get_feedback ()) {
+		last_value = (MIDI::byte) (_controllable->get_value() * 127.0); // to prevent feedback fights
+	}
 }
 
 void
