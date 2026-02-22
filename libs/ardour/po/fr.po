@@ -1939,7 +1939,7 @@ msgstr "Ne peut pas supprimer le pré-réglage d'usine du greffon"
 
 #: plugin.cc:161
 msgid "A factory presets with given name already exists."
-msgstr ""
+msgstr "Un préréglage d'usine portant ce nom existe déjà."
 
 #: plugin.cc:170
 msgid "Failed to save plugin preset."
