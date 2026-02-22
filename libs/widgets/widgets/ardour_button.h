@@ -108,8 +108,17 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
 		RIGHT        = 0xA
 	};
 
+	enum BorderMask {
+		HIDE_NONE         = 0x0,
+		HIDE_LEFT         = 0x1,
+		HIDE_RIGHT        = 0x2,
+		HIDE_TOP          = 0x4,
+		HIDE_BOTTOM       = 0x8
+	};
+
 	void set_corner_radius (float);
 	void set_corner_mask (int);
+	void set_border_mask (int);
 
 	void set_text (const std::string&, bool markup = false);
 	const std::string& get_text () const { return _text; }
@@ -206,6 +215,7 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
 	float _diameter;
 	float _corner_radius;
 	int   _corner_mask;
+	int   _border_mask;
 
 	double _angle;
 	float _xalign, _yalign;
