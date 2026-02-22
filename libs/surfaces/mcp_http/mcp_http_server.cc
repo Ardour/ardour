@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <climits>
 #include <cmath>
 #include <ctime>
 #include <cstdlib>
@@ -1667,9 +1668,13 @@ midi_note_json (
 	const Temporal::Beats start_source_beats = note->time ();
 	const Temporal::Beats length_beats = note->length ();
 	const Temporal::Beats end_source_beats = start_source_beats + length_beats;
+	const Temporal::Beats start_region_beats = region->source_beats_to_region_time (start_source_beats).beats ();
+	const Temporal::Beats end_region_beats = region->source_beats_to_region_time (end_source_beats).beats ();
 	const double start_source_beats_double = start_source_beats.get_beats () + (start_source_beats.get_ticks () / (double) Temporal::ticks_per_beat);
+	const double start_region_beats_double = start_region_beats.get_beats () + (start_region_beats.get_ticks () / (double) Temporal::ticks_per_beat);
 	const double length_beats_double = length_beats.get_beats () + (length_beats.get_ticks () / (double) Temporal::ticks_per_beat);
 	const double end_source_beats_double = end_source_beats.get_beats () + (end_source_beats.get_ticks () / (double) Temporal::ticks_per_beat);
+	const double end_region_beats_double = end_region_beats.get_beats () + (end_region_beats.get_ticks () / (double) Temporal::ticks_per_beat);
 
 	const samplepos_t start_sample = region->source_beats_to_absolute_time (start_source_beats).samples ();
 	const samplepos_t end_sample = region->source_beats_to_absolute_time (end_source_beats).samples ();
@@ -1681,8 +1686,11 @@ midi_note_json (
 	   << ",\"note\":" << (int) note->note ()
 	   << ",\"velocity\":" << (int) note->velocity ()
 	   << ",\"channel\":" << ((int) note->channel () + 1)
+	   << ",\"channelRaw\":" << (int) note->channel ()
+	   << ",\"startRegionBeats\":" << start_region_beats_double
 	   << ",\"startSourceBeats\":" << start_source_beats_double
 	   << ",\"lengthBeats\":" << length_beats_double
+	   << ",\"endRegionBeats\":" << end_region_beats_double
 	   << ",\"endSourceBeats\":" << end_source_beats_double
 	   << ",\"startSample\":" << start_sample
 	   << ",\"endSample\":" << end_sample
@@ -2500,6 +2508,10 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"trackId\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"startSample\":{\"type\":\"integer\",\"minimum\":0},\"endSample\":{\"type\":\"integer\",\"minimum\":0},\"startBar\":{\"type\":\"integer\",\"minimum\":1},\"startBeat\":{\"type\":\"number\",\"minimum\":1},\"endBar\":{\"type\":\"integer\",\"minimum\":1},\"endBeat\":{\"type\":\"number\",\"minimum\":1}},\"required\":[\"trackId\"],\"additionalProperties\":false}},"
 					"{\"name\":\"midi_note_add\",\"title\":\"Add MIDI Note\",\"description\":\"Add one MIDI note to an existing MIDI region at region beats, sample, or bar+beat position.\","
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"regionId\":{\"type\":\"string\"},\"note\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":127},\"velocity\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":127},\"channel\":{\"type\":\"integer\",\"minimum\":1,\"maximum\":16},\"lengthBeats\":{\"type\":\"number\",\"exclusiveMinimum\":0},\"regionBeat\":{\"type\":\"number\",\"minimum\":0},\"sample\":{\"type\":\"integer\",\"minimum\":0},\"bar\":{\"type\":\"integer\",\"minimum\":1},\"beat\":{\"type\":\"number\",\"minimum\":1}},\"required\":[\"regionId\",\"note\",\"lengthBeats\"],\"oneOf\":[{\"required\":[\"regionBeat\"]},{\"required\":[\"sample\"]},{\"required\":[\"bar\",\"beat\"]}],\"additionalProperties\":false}},"
+					"{\"name\":\"midi_note_list\",\"title\":\"List MIDI Notes\",\"description\":\"List all MIDI notes in a MIDI region.\","
+					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"regionId\":{\"type\":\"string\"}},\"required\":[\"regionId\"],\"additionalProperties\":false}},"
+					"{\"name\":\"midi_note_edit\",\"title\":\"Edit MIDI Notes\",\"description\":\"Edit or delete MIDI notes by noteId in a MIDI region.\","
+					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"regionId\":{\"type\":\"string\"},\"edits\":{\"type\":\"array\",\"minItems\":1,\"items\":{\"type\":\"object\",\"properties\":{\"noteId\":{\"type\":\"integer\"},\"delete\":{\"type\":\"boolean\"},\"note\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":127},\"deltaSemitones\":{\"type\":\"integer\"},\"velocity\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":127},\"deltaVelocity\":{\"type\":\"integer\"},\"channel\":{\"type\":\"integer\",\"minimum\":1,\"maximum\":16},\"startBeats\":{\"type\":\"number\",\"minimum\":0},\"deltaBeats\":{\"type\":\"number\"},\"lengthBeats\":{\"type\":\"number\",\"exclusiveMinimum\":0}},\"required\":[\"noteId\"],\"additionalProperties\":false}}},\"required\":[\"regionId\",\"edits\"],\"additionalProperties\":false}},"
 					"{\"name\":\"midi_note_import_json\",\"title\":\"Import MIDI JSON\",\"description\":\"Import a MIDI JSON pattern (with repeats) into an existing MIDI region, or create a new MIDI region and populate it.\","
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"midi\":{\"type\":\"object\"},\"regionId\":{\"type\":\"string\"},\"trackId\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"startSample\":{\"type\":\"integer\",\"minimum\":0},\"endSample\":{\"type\":\"integer\",\"minimum\":0},\"startBar\":{\"type\":\"integer\",\"minimum\":1},\"startBeat\":{\"type\":\"number\",\"minimum\":1},\"endBar\":{\"type\":\"integer\",\"minimum\":1},\"endBeat\":{\"type\":\"number\",\"minimum\":1}},\"required\":[\"midi\"],\"oneOf\":[{\"required\":[\"regionId\"]},{\"required\":[\"trackId\"]}],\"additionalProperties\":false}},"
 					"{\"name\":\"midi_note_get_json\",\"title\":\"Export MIDI JSON\",\"description\":\"Export all notes from a MIDI region as import-compatible MIDI JSON (standard mode with note_on/note_off events).\",\"inputSchema\":{\"type\":\"object\",\"properties\":{\"regionId\":{\"type\":\"string\"},\"ticksPerQuarter\":{\"type\":\"integer\",\"minimum\":1},\"timeSignature\":{\"type\":\"string\"}},\"required\":[\"regionId\"],\"additionalProperties\":false}}"
@@ -3879,6 +3891,411 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						return jsonrpc_result (
 							id,
 							std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"MIDI note added\"}],\"structuredContent\":")
+								+ structured.str () + "}");
+					}
+
+					if (tool_name == "midi_note/list") {
+						const std::string region_id = root.get<std::string> ("params.arguments.regionId", "");
+						if (region_id.empty ()) {
+							return jsonrpc_error (id, -32602, "Missing regionId");
+						}
+
+						const std::shared_ptr<ARDOUR::Region> region = ARDOUR::RegionFactory::region_by_id (PBD::ID (region_id));
+						if (!region) {
+							return jsonrpc_error (id, -32602, "regionId not found");
+						}
+						const std::shared_ptr<ARDOUR::MidiRegion> midi_region = std::dynamic_pointer_cast<ARDOUR::MidiRegion> (region);
+						if (!midi_region) {
+							return jsonrpc_error (id, -32602, "regionId is not a MIDI region");
+						}
+
+						const std::shared_ptr<ARDOUR::MidiModel> model = midi_region->model ();
+						if (!model) {
+							return jsonrpc_error (id, -32000, "MIDI region model not available");
+						}
+
+						std::vector<std::string> notes_json;
+						const ARDOUR::MidiModel::Notes& notes = model->notes ();
+						for (ARDOUR::MidiModel::Notes::const_iterator it = notes.begin (); it != notes.end (); ++it) {
+							const std::shared_ptr<Evoral::Note<Temporal::Beats> >& note = *it;
+							if (!note) {
+								continue;
+							}
+							notes_json.push_back (midi_note_json (region, note, "list"));
+						}
+
+						std::ostringstream structured;
+						structured << "{\"region\":" << midi_region_brief_json (region)
+							<< ",\"count\":" << notes_json.size ()
+							<< ",\"notes\":[";
+						for (size_t i = 0; i < notes_json.size (); ++i) {
+							if (i > 0) {
+								structured << ",";
+							}
+							structured << notes_json[i];
+						}
+						structured << "]}";
+
+						return jsonrpc_result (
+							id,
+							std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"MIDI notes listed\"}],\"structuredContent\":")
+								+ structured.str () + "}");
+					}
+
+					if (tool_name == "midi_note/edit") {
+						const std::string region_id = root.get<std::string> ("params.arguments.regionId", "");
+						if (region_id.empty ()) {
+							return jsonrpc_error (id, -32602, "Missing regionId");
+						}
+
+						const std::shared_ptr<ARDOUR::Region> region = ARDOUR::RegionFactory::region_by_id (PBD::ID (region_id));
+						if (!region) {
+							return jsonrpc_error (id, -32602, "regionId not found");
+						}
+						const std::shared_ptr<ARDOUR::MidiRegion> midi_region = std::dynamic_pointer_cast<ARDOUR::MidiRegion> (region);
+						if (!midi_region) {
+							return jsonrpc_error (id, -32602, "regionId is not a MIDI region");
+						}
+
+						const std::shared_ptr<ARDOUR::MidiModel> model = midi_region->model ();
+						if (!model) {
+							return jsonrpc_error (id, -32000, "MIDI region model not available");
+						}
+
+						boost::optional<pt::ptree&> edits_opt = root.get_child_optional ("params.arguments.edits");
+						if (!edits_opt) {
+							return jsonrpc_error (id, -32602, "Missing edits array");
+						}
+						if (edits_opt->empty ()) {
+							return jsonrpc_error (id, -32602, "edits must contain at least one item");
+						}
+
+						struct PlannedNoteEdit {
+							Evoral::event_id_t note_id;
+							std::shared_ptr<Evoral::Note<Temporal::Beats> > note;
+							bool remove;
+							bool change_note;
+							bool change_velocity;
+							bool change_channel;
+							bool change_start;
+							bool change_length;
+							uint8_t note_value;
+							uint8_t velocity_value;
+							uint8_t channel_value;
+							Temporal::Beats start_value;
+							Temporal::Beats length_value;
+						};
+
+						std::vector<PlannedNoteEdit> planned;
+						std::vector<Evoral::event_id_t> not_found_ids;
+						std::vector<std::string> warnings;
+
+						size_t requested_count = 0;
+						size_t unchanged_count = 0;
+						size_t invalid_count = 0;
+
+						for (pt::ptree::const_iterator it = edits_opt->begin (); it != edits_opt->end (); ++it) {
+							++requested_count;
+							const pt::ptree& edit = it->second;
+							const size_t edit_index = requested_count;
+
+							const boost::optional<int64_t> note_id_opt = edit.get_optional<int64_t> ("noteId");
+							if (!note_id_opt) {
+								return jsonrpc_error (id, -32602, "Each edit item must include noteId");
+							}
+							if (*note_id_opt < INT32_MIN || *note_id_opt > INT32_MAX) {
+								std::ostringstream w;
+								w << "Edit " << edit_index << " skipped: noteId out of range";
+								warnings.push_back (w.str ());
+								++invalid_count;
+								continue;
+							}
+
+							const Evoral::event_id_t note_id = (Evoral::event_id_t) *note_id_opt;
+							const std::shared_ptr<Evoral::Note<Temporal::Beats> > note = model->find_note (note_id);
+							if (!note) {
+								not_found_ids.push_back (note_id);
+								continue;
+							}
+
+							const bool remove_note = edit.get<bool> ("delete", false);
+
+							const boost::optional<int64_t> note_value_opt = edit.get_optional<int64_t> ("note");
+							const boost::optional<int64_t> delta_semitones_opt = edit.get_optional<int64_t> ("deltaSemitones");
+							if (note_value_opt && delta_semitones_opt) {
+								return jsonrpc_error (id, -32602, "Each edit item may include only one of: note or deltaSemitones");
+							}
+
+							const boost::optional<int64_t> velocity_value_opt = edit.get_optional<int64_t> ("velocity");
+							const boost::optional<int64_t> delta_velocity_opt = edit.get_optional<int64_t> ("deltaVelocity");
+							if (velocity_value_opt && delta_velocity_opt) {
+								return jsonrpc_error (id, -32602, "Each edit item may include only one of: velocity or deltaVelocity");
+							}
+
+							const boost::optional<double> start_beats_opt = edit.get_optional<double> ("startBeats");
+							const boost::optional<double> delta_beats_opt = edit.get_optional<double> ("deltaBeats");
+							if (start_beats_opt && delta_beats_opt) {
+								return jsonrpc_error (id, -32602, "Each edit item may include only one of: startBeats or deltaBeats");
+							}
+
+							const boost::optional<int64_t> channel_opt = edit.get_optional<int64_t> ("channel");
+							const boost::optional<double> length_beats_opt = edit.get_optional<double> ("lengthBeats");
+
+							if (start_beats_opt && (!std::isfinite (*start_beats_opt) || *start_beats_opt < 0.0)) {
+								return jsonrpc_error (id, -32602, "Invalid startBeats (expected finite >= 0)");
+							}
+							if (delta_beats_opt && !std::isfinite (*delta_beats_opt)) {
+								return jsonrpc_error (id, -32602, "Invalid deltaBeats (expected finite number)");
+							}
+							if (length_beats_opt && (!std::isfinite (*length_beats_opt) || *length_beats_opt <= 0.0)) {
+								return jsonrpc_error (id, -32602, "Invalid lengthBeats (expected > 0)");
+							}
+
+							PlannedNoteEdit planned_edit;
+							planned_edit.note_id = note_id;
+							planned_edit.note = note;
+							planned_edit.remove = remove_note;
+							planned_edit.change_note = false;
+							planned_edit.change_velocity = false;
+							planned_edit.change_channel = false;
+							planned_edit.change_start = false;
+							planned_edit.change_length = false;
+							planned_edit.note_value = note->note ();
+							planned_edit.velocity_value = note->velocity ();
+							planned_edit.channel_value = note->channel ();
+							planned_edit.start_value = note->time ();
+							planned_edit.length_value = note->length ();
+
+							if (remove_note) {
+								planned.push_back (planned_edit);
+								continue;
+							}
+
+							bool invalid_edit = false;
+							std::string invalid_reason;
+
+							int note_number = (int) note->note ();
+							if (note_value_opt) {
+								note_number = (int) *note_value_opt;
+							} else if (delta_semitones_opt) {
+								note_number += (int) *delta_semitones_opt;
+							}
+							if (note_number < 0 || note_number > 127) {
+								invalid_edit = true;
+								invalid_reason = "note out of range after edit";
+							}
+
+							int velocity = (int) note->velocity ();
+							if (!invalid_edit) {
+								if (velocity_value_opt) {
+									velocity = (int) *velocity_value_opt;
+								} else if (delta_velocity_opt) {
+									velocity += (int) *delta_velocity_opt;
+								}
+								if (velocity < 0 || velocity > 127) {
+									invalid_edit = true;
+									invalid_reason = "velocity out of range after edit";
+								}
+							}
+
+							int channel = (int) note->channel ();
+							if (!invalid_edit && channel_opt) {
+								channel = (int) *channel_opt - 1;
+								if (channel < 0 || channel > 15) {
+									invalid_edit = true;
+									invalid_reason = "channel out of range (expected 1..16)";
+								}
+							}
+
+							Temporal::Beats start_source = note->time ();
+							if (!invalid_edit && (start_beats_opt || delta_beats_opt)) {
+								const Temporal::Beats current_region_beats = midi_region->source_beats_to_region_time (note->time ()).beats ();
+								double target_region_beats = beats_to_double (current_region_beats);
+								if (start_beats_opt) {
+									target_region_beats = *start_beats_opt;
+								} else {
+									target_region_beats += *delta_beats_opt;
+								}
+
+								if (!std::isfinite (target_region_beats) || target_region_beats < 0.0) {
+									invalid_edit = true;
+									invalid_reason = "start position out of range after edit";
+								} else {
+									start_source = midi_region->region_beats_to_source_beats (Temporal::Beats::from_double (target_region_beats));
+									if (start_source < Temporal::Beats ()) {
+										invalid_edit = true;
+										invalid_reason = "start position maps before source start";
+									}
+								}
+							}
+
+							Temporal::Beats length_source = note->length ();
+							if (!invalid_edit && length_beats_opt) {
+								length_source = Temporal::Beats::from_double (*length_beats_opt);
+								if (length_source < Temporal::Beats::one_tick ()) {
+									invalid_edit = true;
+									invalid_reason = "lengthBeats too small (minimum is one tick)";
+								}
+							}
+
+							if (invalid_edit) {
+								std::ostringstream w;
+								w << "Edit " << edit_index << " for noteId " << note_id << " skipped: " << invalid_reason;
+								warnings.push_back (w.str ());
+								++invalid_count;
+								continue;
+							}
+
+							planned_edit.note_value = (uint8_t) note_number;
+							planned_edit.velocity_value = (uint8_t) velocity;
+							planned_edit.channel_value = (uint8_t) channel;
+							planned_edit.start_value = start_source;
+							planned_edit.length_value = length_source;
+
+							planned_edit.change_note = (planned_edit.note_value != note->note ());
+							planned_edit.change_velocity = (planned_edit.velocity_value != note->velocity ());
+							planned_edit.change_channel = (planned_edit.channel_value != note->channel ());
+							planned_edit.change_start = (planned_edit.start_value != note->time ());
+							planned_edit.change_length = (planned_edit.length_value != note->length ());
+
+							if (!planned_edit.change_note
+								&& !planned_edit.change_velocity
+								&& !planned_edit.change_channel
+								&& !planned_edit.change_start
+								&& !planned_edit.change_length) {
+								++unchanged_count;
+								continue;
+							}
+
+							planned.push_back (planned_edit);
+						}
+
+						const size_t queued_count = planned.size ();
+						if (queued_count > 0) {
+							ARDOUR::MidiModel::NoteDiffCommand* cmd = model->new_note_diff_command ("edit midi notes");
+							for (size_t i = 0; i < planned.size (); ++i) {
+								const PlannedNoteEdit& e = planned[i];
+								if (e.remove) {
+									cmd->remove (e.note);
+									continue;
+								}
+								if (e.change_note) {
+									cmd->change (e.note, ARDOUR::MidiModel::NoteDiffCommand::NoteNumber, e.note_value);
+								}
+								if (e.change_velocity) {
+									cmd->change (e.note, ARDOUR::MidiModel::NoteDiffCommand::Velocity, e.velocity_value);
+								}
+								if (e.change_channel) {
+									cmd->change (e.note, ARDOUR::MidiModel::NoteDiffCommand::Channel, e.channel_value);
+								}
+								if (e.change_start) {
+									cmd->change (e.note, ARDOUR::MidiModel::NoteDiffCommand::StartTime, e.start_value);
+								}
+								if (e.change_length) {
+									cmd->change (e.note, ARDOUR::MidiModel::NoteDiffCommand::Length, e.length_value);
+								}
+							}
+							model->apply_diff_command_as_commit (_session, cmd);
+						}
+
+						size_t changed_count = 0;
+						size_t deleted_count = 0;
+						size_t rejected_count = 0;
+						std::vector<std::string> changed_notes_json;
+						std::vector<Evoral::event_id_t> deleted_ids;
+
+						for (size_t i = 0; i < planned.size (); ++i) {
+							const PlannedNoteEdit& e = planned[i];
+							const std::shared_ptr<Evoral::Note<Temporal::Beats> > after = model->find_note (e.note_id);
+
+							if (e.remove) {
+								if (after) {
+									++rejected_count;
+									std::ostringstream w;
+									w << "Delete for noteId " << e.note_id << " was rejected";
+									warnings.push_back (w.str ());
+								} else {
+									++deleted_count;
+									deleted_ids.push_back (e.note_id);
+								}
+								continue;
+							}
+
+							if (!after) {
+								++rejected_count;
+								std::ostringstream w;
+								w << "Edit for noteId " << e.note_id << " was rejected (note no longer present)";
+								warnings.push_back (w.str ());
+								continue;
+							}
+
+							bool mismatch = false;
+							if (e.change_note && after->note () != e.note_value) {
+								mismatch = true;
+							}
+							if (e.change_velocity && after->velocity () != e.velocity_value) {
+								mismatch = true;
+							}
+							if (e.change_channel && after->channel () != e.channel_value) {
+								mismatch = true;
+							}
+							if (e.change_start && after->time () != e.start_value) {
+								mismatch = true;
+							}
+							if (e.change_length && after->length () != e.length_value) {
+								mismatch = true;
+							}
+
+							if (mismatch) {
+								++rejected_count;
+								std::ostringstream w;
+								w << "Edit for noteId " << e.note_id << " did not fully apply";
+								warnings.push_back (w.str ());
+								continue;
+							}
+
+							++changed_count;
+							changed_notes_json.push_back (midi_note_json (region, after, "edit"));
+						}
+
+						std::ostringstream structured;
+						structured << "{\"region\":" << midi_region_brief_json (region)
+							<< ",\"summary\":{"
+							<< "\"requested\":" << requested_count
+							<< ",\"queued\":" << queued_count
+							<< ",\"changed\":" << changed_count
+							<< ",\"deleted\":" << deleted_count
+							<< ",\"unchanged\":" << unchanged_count
+							<< ",\"notFound\":" << not_found_ids.size ()
+							<< ",\"invalid\":" << invalid_count
+							<< ",\"rejected\":" << rejected_count
+							<< "}"
+							<< ",\"changed\":[";
+						for (size_t i = 0; i < changed_notes_json.size (); ++i) {
+							if (i > 0) {
+								structured << ",";
+							}
+							structured << changed_notes_json[i];
+						}
+						structured << "],\"deletedNoteIds\":[";
+						for (size_t i = 0; i < deleted_ids.size (); ++i) {
+							if (i > 0) {
+								structured << ",";
+							}
+							structured << deleted_ids[i];
+						}
+						structured << "],\"notFoundNoteIds\":[";
+						for (size_t i = 0; i < not_found_ids.size (); ++i) {
+							if (i > 0) {
+								structured << ",";
+							}
+							structured << not_found_ids[i];
+						}
+						structured << "],\"warnings\":" << json_string_array (warnings) << "}";
+
+						return jsonrpc_result (
+							id,
+							std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"MIDI notes edited\"}],\"structuredContent\":")
 								+ structured.str () + "}");
 					}
 
