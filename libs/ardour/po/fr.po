@@ -444,31 +444,31 @@ msgstr "Élévation"
 
 #: automatable.cc:216 surround_send.cc:393
 msgid "Left/Right"
-msgstr ""
+msgstr "Gauche/Droite"
 
 #: automatable.cc:218 surround_send.cc:395
 msgid "Front/Back"
-msgstr ""
+msgstr "Avant/Arrière"
 
 #: automatable.cc:222 surround_send.cc:399
 msgid "Object Size"
-msgstr ""
+msgstr "Taille d'objet"
 
 #: automatable.cc:224 surround_send.cc:401
 msgid "Snap to Speaker"
-msgstr ""
+msgstr "Aligner au haut-parleur"
 
 #: automatable.cc:226 surround_send.cc:403
 msgid "Binaural Render mode"
-msgstr ""
+msgstr "Mode de rendu binaural"
 
 #: automatable.cc:234
 msgid "Polarity Invert"
-msgstr ""
+msgstr "Inversion de polarité"
 
 #: automatable.cc:236 velocity_control.cc:36
 msgid "Velocity"
-msgstr ""
+msgstr "Vélocité"
 
 #: automation_control.cc:338
 msgid "record %1 automation"
@@ -508,6 +508,8 @@ msgstr "Session : impossible de créer le fil maître"
 #: butler.cc:196
 msgid "Cannot set I/O Priority for disk read/write thread"
 msgstr ""
+"Impossible de définir la priorité d'E/S pour le fil de lecture/écriture du "
+"disque"
 
 #: butler.cc:307 butler.cc:309
 msgid "Butler read ahead failure on dstream %1"
@@ -519,24 +521,28 @@ msgstr "Échec de l'écriture du maître sur le dstream %1"
 
 #: clip_library.cc:83
 msgid "Set Clip Library directory to '%1'"
-msgstr ""
+msgstr "Définir le répertoire de la bibliothèque de clips sur '%1' "
 
 #: clip_library.cc:92
 msgid "Cannot create Clip Library directory '%1'"
-msgstr ""
+msgstr "Impossible de créer le répertoire de la bibliothèque de clips '%1'"
 
 #: clip_library.cc:98
 msgid "Clip Library"
-msgstr ""
+msgstr "Bibliothèque de clips"
 
 #: clip_library.cc:103
 msgid "Could not save Clip Library meta-data in '%1'"
 msgstr ""
+"Impossible d'enregistrer les métadonnées de la bibliothèque de clips dans "
+"'%1'"
 
 #: clip_library.cc:107
 msgid ""
 "Clip Library directory '%1' already exists and is not a directory/folder"
 msgstr ""
+"Le répertoire de la bibliothèque de clips '%1' existe déjà et n'est pas un "
+"répertoire / dossier"
 
 #: control_protocol_manager.cc:232
 msgid "Control protocol support for %1 failed to activate"
@@ -601,7 +607,7 @@ msgstr "écoute"
 
 #: disk_reader.cc:82
 msgid "Player"
-msgstr ""
+msgstr "Lecteur"
 
 #: disk_reader.cc:741
 msgid ""
@@ -628,16 +634,20 @@ msgid ""
 "DiskReader %1: when refilling, cannot read %2 from playlist at sample %3 "
 "(rv: %4)"
 msgstr ""
+"DiskReader %1 : lors du remplissage, impossible de lire %2 depuis la liste "
+"de lecture à l'échantillon %3 (rv: %4)"
 
 #: disk_reader.cc:1340
 msgid ""
 "DiskReader %1: when refilling, cannot write %2 into buffer (wrote %3, space "
 "%4)"
 msgstr ""
+"DiskReader %1 : lors du remplissage, impossible d'écrire %2 dans la mémoire "
+"tampon (a écrit %3, espace %4)"
 
 #: disk_writer.cc:95
 msgid "Recorder"
-msgstr ""
+msgstr "Enregistreur"
 
 #: disk_writer.cc:1016 disk_writer.cc:1035
 msgid "AudioDiskstream %1: cannot write to disk"
@@ -672,6 +682,8 @@ msgstr "Échec d'export : %1"
 msgid ""
 "Existing export folder for this session (%1) does not exist - using default"
 msgstr ""
+"Le dossier d'export existant pour cette session (%1) n'existe pas - "
+"utilisation du dossier par défaut"
 
 #: export_filename.cc:293
 msgid "No Time"
@@ -728,7 +740,7 @@ msgstr "Débit de la session"
 #: export_format_specification.cc:97 export_format_specification.cc:135
 #: midi_ring_buffer.cc:101 midi_ring_buffer.cc:168
 msgid "programming error: %1\n"
-msgstr ""
+msgstr "erreur de programmation : %1\n"
 
 #: export_format_specification.cc:680
 msgid "normalize loudness"
@@ -736,7 +748,7 @@ msgstr "normaliser la sonie"
 
 #: export_format_specification.cc:682
 msgid "limit peak"
-msgstr ""
+msgstr "Limiter les crêtes"
 
 #: export_format_specification.cc:685
 msgid "normalize peak"
@@ -800,11 +812,11 @@ msgstr "Format d'échantillonnage Vorbis"
 
 #: export_formats.cc:183
 msgid "OPUS codec"
-msgstr ""
+msgstr "Codec OPUS"
 
 #: export_formats.cc:185
 msgid "MPEG-2 Audio Layer III"
-msgstr ""
+msgstr "MPEG-2 Audio Layer III"
 
 #: export_formats.cc:187
 msgid "No sample format"
@@ -867,7 +879,7 @@ msgstr "Impossible de lire le format d'exportation de %1"
 
 #: export_profile_manager.cc:813
 msgid "Cannot export format read from %1: %2"
-msgstr ""
+msgstr "Impossible d'exporter le format lu à partir de %1 : %2"
 
 #: export_profile_manager.cc:820
 msgid "Ignored format '%1': encoder is not available"
@@ -883,7 +895,7 @@ msgstr "Aucun canal sélectionné !"
 
 #: export_profile_manager.cc:913
 msgid "Invalid export channel config!"
-msgstr ""
+msgstr "Configuration du canal d'export non valide !"
 
 #: export_profile_manager.cc:918
 msgid "Some channels are empty"
@@ -891,7 +903,7 @@ msgstr "Certains canaux sont vides !"
 
 #: export_profile_manager.cc:925
 msgid "Invalid export format selected!"
-msgstr ""
+msgstr "Format d'export invalide sélectionné !"
 
 #: export_profile_manager.cc:988
 msgid "Destination folder does not exist."
@@ -1083,15 +1095,15 @@ msgstr "Erreur inconnue"
 
 #: globals.cc:319
 msgid "Released CPU DMA latency request"
-msgstr ""
+msgstr "Demande de latence DMA CPU révoquée"
 
 #: globals.cc:346 globals.cc:352
 msgid "Could not set CPU DMA latency to %1 usec (%2)"
-msgstr ""
+msgstr "Impossible de définir la latence DMA du processeur à %1 usec (%2)"
 
 #: globals.cc:350
 msgid "Set CPU DMA latency to %1 usec"
-msgstr ""
+msgstr "Définir la latence DMA du processeur à %1 usec"
 
 #: globals.cc:382
 msgid "Could not set system open files limit to \"unlimited\""
@@ -1129,7 +1141,7 @@ msgstr "Master"
 
 #: globals.cc:771 session.cc:1519 surround_send.cc:38 surround_send.cc:51
 msgid "Surround"
-msgstr ""
+msgstr "Surround"
 
 #: globals.cc:781
 msgid "Control"
@@ -1207,7 +1219,7 @@ msgstr "Copie de %1"
 
 #: import.cc:461
 msgid "No usable MIDI data found for file %1 of %2"
-msgstr ""
+msgstr "Aucune donnée MIDI utilisable trouvée pour le fichier %1 de %2"
 
 #: import.cc:465 import.cc:693
 msgid "MIDI file could not be written (best guess: %1)"
@@ -1215,23 +1227,25 @@ msgstr "Impossible d'écrire le fichier MIDI (probablement : %1)"
 
 #: import.cc:689
 msgid "Track %1 contained no usable MIDI data"
-msgstr ""
+msgstr "Aucune donnée MIDI utilisable trouvée pour le fichier %1 de %2"
 
 #: import.cc:783
 msgid "MIDI file has unsupported SMF format type %1"
-msgstr ""
+msgstr "Aucune donnée MIDI utilisable trouvée pour le fichier %1 de %2"
 
 #: import.cc:835
 msgid "deinterlace_midi_region: failed to create sources"
-msgstr ""
+msgstr "deinterlace_midi_region : échec de la création des sources"
 
 #: import.cc:839
 msgid "deinterlace_midi_region: error opening MIDI file for splitting"
 msgstr ""
+"deinterlace_midi_region : erreur lors de l'ouverture du fichier MIDI pour la "
+"scission"
 
 #: import.cc:864
 msgid "(split-chans)"
-msgstr ""
+msgstr "(canaux séparés)"
 
 #: import.cc:928
 msgid "Import: cannot open input sound file \"%1\""
@@ -1351,11 +1365,11 @@ msgstr "IO : mauvaise chaîne de sortie dans le noeud XML \"%1\""
 
 #: io.cc:1153 plugin.cc:338
 msgid "IO|Out"
-msgstr ""
+msgstr "Sortie"
 
 #: io.cc:1153 plugin.cc:336
 msgid "IO|In"
-msgstr ""
+msgstr "Entrée"
 
 #: io.cc:1526 session_bundles.cc:156 session_bundles.cc:198
 msgid "mono"
@@ -1373,15 +1387,15 @@ msgstr "D"
 
 #: io_plug.cc:87 io_plug.cc:419 io_plug.cc:424 io_plug.cc:429 io_plug.cc:434
 msgid "IO"
-msgstr ""
+msgstr "E/S"
 
 #: io_plug.cc:87
 msgid "IO|Pre"
-msgstr ""
+msgstr "Avant"
 
 #: io_plug.cc:87
 msgid "IO|Post"
-msgstr ""
+msgstr "Après"
 
 #: io_processor.cc:279
 msgid "send "
@@ -1398,6 +1412,7 @@ msgstr "retour "
 #: io_tasklist.cc:82
 msgid "IOTaskList: cannot acquire realtime permissions."
 msgstr ""
+"Liste des tâches E/S : impossible d'obtenir les autorisations en temps réel."
 
 #: ladspa_plugin.cc:104
 msgid "LADSPA: Unable to open module: "
@@ -1482,15 +1497,15 @@ msgstr ""
 
 #: location.cc:1157
 msgid "cue"
-msgstr ""
+msgstr "cue"
 
 #: location.cc:1159
 msgid "mark"
-msgstr ""
+msgstr "marqueur"
 
 #: location.cc:1161 location.cc:1185
 msgid "range"
-msgstr ""
+msgstr "intervalle"
 
 #: location.cc:1273
 msgid "incorrect XML mode passed to Locations::set_state"
@@ -1535,7 +1550,7 @@ msgstr "Impossible d'instancier le processeur Lua\n"
 
 #: lua_api.cc:139
 msgid "Cannot set up new send: %1"
-msgstr ""
+msgstr "Impossible de configurer un nouveau départ : %1"
 
 #: luaproc.cc:984
 msgid "Failed to load Lua script from session state."
@@ -1584,7 +1599,8 @@ msgstr "Le changement n'a pas de note ou d'ID de note"
 #: midi_model.cc:605
 msgid "No NoteID found for note property change - ignored"
 msgstr ""
-"Aucun NoteID trouvé pour le changement de propriété de la note - ignoré"
+"Aucun identifiant de note trouvé pour la modification de la propriété de la "
+"note - ignoré"
 
 #: midi_model.cc:856
 msgid "No SysExID found for sys-ex property change - ignored"
@@ -1593,7 +1609,7 @@ msgstr ""
 
 #: midi_model.cc:1841 midi_model.cc:1864 midi_model.cc:1875
 msgid "conform to tempo map"
-msgstr ""
+msgstr "conformer à la carte de tempo"
 
 #: midi_patch_manager.cc:126
 msgid "Loading %1 MIDI patch from %2"
@@ -1625,7 +1641,7 @@ msgstr "Scène "
 
 #: midi_scene_changer.cc:359
 msgid "scene [%1]"
-msgstr ""
+msgstr "scène [%1]"
 
 #: midi_source.cc:124
 msgid "Missing parameter property on InterpolationStyle"
