@@ -286,62 +286,63 @@ msgstr "Impossible de renommer le fichier de crêtes pour %1 de %2 à %3 (%4)"
 
 #: audiosource.cc:301
 msgid "AudioSource: cannot stat peakfile \"%1\""
-msgstr "Source audio : impossible de statuer sur le fichier de pic \"%1\""
+msgstr "Source audio : impossible de statuer sur le fichier de crête \"%1\""
 
 #: audiosource.cc:456
 msgid "Cannot open peakfile @ %1 for size check (%2)"
 msgstr ""
-"Impossible d'ouvrir le fichier de pic @ %1 pour vérifier la taille (%2)"
+"Impossible d'ouvrir le fichier de crête @ %1 pour vérifier la taille (%2)"
 
 #: audiosource.cc:473
 msgid "peak file %1 is truncated from %2 to %3"
-msgstr "le fichier de pic %1 est tronqué de %2 à %3"
+msgstr "le fichier de crête %1 est tronqué de %2 à %3"
 
 #: audiosource.cc:478
 msgid "Cannot open peakfile @ %1 for size check (%2) after rebuild"
 msgstr ""
-"Impossible d'ouvrir le fichier de pic @ %1 pour vérifier la taille (%2) "
+"Impossible d'ouvrir le fichier de crête @ %1 pour vérifier la taille (%2) "
 "après reconstruction"
 
 #: audiosource.cc:490
 msgid "Cannot open peakfile @ %1 for reading (%2)"
-msgstr "Impossible d'ouvrir le fichier de pic @ %1 pour lire (%2)"
+msgstr "Impossible d'ouvrir le fichier de crête @ %1 pour lire (%2)"
 
 #: audiosource.cc:526
 msgid "cannot read sample data for unscaled peak computation"
 msgstr ""
-"impossible de lire les données échantillonnée pour le calcul de pic non-"
+"impossible de lire les données d'échantillon pour le calcul de crête non-"
 "mises à l’échelle."
 
 #: audiosource.cc:561 audiosource.cc:673
 msgid "map failed - could not create file mapping for peakfile %1."
 msgstr ""
-"échec de carte - impossible de créer un mappage de fichier pour fichier-pic "
-"%1."
+"échec de carte - impossible de créer un mappage de fichier pour fichier de "
+"crête %1."
 
 #: audiosource.cc:567 audiosource.cc:679
 msgid "map failed - could not map peakfile %1."
-msgstr "échec de carte - n'a pas pu mapper fichier-pic %1."
+msgstr "échec de carte - n'a pas pu mapper fichier de crête %1."
 
 #: audiosource.cc:578 audiosource.cc:690
 msgid "unmap failed - could not unmap peakfile %1."
-msgstr "échec de carte - n'a pas pu démapper fichier-pic %1."
+msgstr "échec de carte - n'a pas pu démapper fichier de crête %1."
 
 #: audiosource.cc:584 audiosource.cc:696
 msgid "map failed - could not mmap peakfile %1."
-msgstr "échec de carte - n'a pas pu mmapper fichier-pic %1."
+msgstr "échec de carte - n'a pas pu mmapper fichier crête %1."
 
 #: audiosource.cc:805
 msgid ""
 "AudioSource[%1]: peak read - cannot read %2 samples at offset %3 of %4 (%5)"
 msgstr ""
-"AudioSource[%1] : lecture de pic - impossible de lire les échantillons %2 à "
-"l'offset %3 de %4 (%5)"
+"AudioSource[%1] : lecture de crête - impossible de lire les échantillons %2 "
+"à l'offset %3 de %4 (%5)"
 
 #: audiosource.cc:872
 msgid "%1: could not write read raw data for peak computation (%2)"
 msgstr ""
-"%1 : impossible d'écrire/écrire des données brutes pour le calcul de pic (%2)"
+"%1 : impossible d'écrire/écrire des données brutes pour le calcul de crête "
+"(%2)"
 
 #: audiosource.cc:939
 msgid "AudioSource: cannot open _peakpath (c) \"%1\" (%2)"
@@ -349,15 +350,16 @@ msgstr "AudioSource : impossible d'ouvrir _peakpath (c) \"%1\" (%2)"
 
 #: audiosource.cc:1020 audiosource.cc:1144
 msgid "%1: could not seek in peak file data (%2)"
-msgstr "%1 : impossible de rechercher dans les données du fichier de pic (%2)"
+msgstr ""
+"%1 : impossible de rechercher dans les données du fichier de crête (%2)"
 
 #: audiosource.cc:1025 audiosource.cc:1153
 msgid "%1: could not write peak file data (%2)"
-msgstr "%1 : impossible d'écrire dans les données du fichier de pic (%2)"
+msgstr "%1 : impossible d'écrire dans les données du fichier de crête (%2)"
 
 #: audiosource.cc:1186
 msgid "could not truncate peakfile %1 to %2 (error: %3)"
-msgstr "impossible de tronquer le fichier de pic %1 de %2 (erreur : %3)"
+msgstr "impossible de tronquer le fichier de crête %1 de %2 (erreur : %3)"
 
 #: auditioner.cc:121
 msgid "Falling back to Reasonable Synth for Midi Audition"
@@ -3622,18 +3624,20 @@ msgstr ""
 #: session_state.cc:3899
 msgid "Cannot cleanup peak-files for read-only session."
 msgstr ""
-"Impossible de nettoyer les fichiers de pic pour une session en lecture seule."
+"Impossible de nettoyer les fichiers de crête pour une session en lecture "
+"seule."
 
 #: session_state.cc:3903
 msgid "Cannot cleanup peak-files while recording"
-msgstr "Impossible de nettoyer les fichiers de pic pendant un enregistrement."
+msgstr ""
+"Impossible de nettoyer les fichiers de crête pendant un enregistrement."
 
 #: session_state.cc:3926
 msgid ""
 "Timeout waiting for peak-file creation to terminate before cleanup, please "
 "try again later."
 msgstr ""
-"Timeout en attente de la fin de la création du fichier de pic avant le "
+"Timeout en attente de la fin de la création du fichier de crête avant le "
 "nettoyage, veuillez réessayer plus tard."
 
 #: session_state.cc:4204
@@ -3646,7 +3650,7 @@ msgstr "impossible de renommer la source du fichier inutilisé de %1 à %2 (%3)"
 
 #: session_state.cc:4253
 msgid "cannot remove peakfile %1 for %2 (%3)"
-msgstr "impossible de supprimer le fichier de pic %1 pour %2 (%3)"
+msgstr "impossible de supprimer le fichier de crête %1 pour %2 (%3)"
 
 #: session_state.cc:4432
 msgid "could not backup old history file, current history not saved"
