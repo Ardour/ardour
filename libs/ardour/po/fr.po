@@ -1943,7 +1943,7 @@ msgstr ""
 
 #: plugin.cc:170
 msgid "Failed to save plugin preset."
-msgstr ""
+msgstr "Échec de l'enregistrement du préréglage du greffon."
 
 #: plugin.cc:326 session.cc:2732
 msgid "Audio"
