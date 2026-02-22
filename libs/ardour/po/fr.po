@@ -298,7 +298,7 @@ msgstr "Impossible d'ouvrir le fichier de pic @ %1 pour lire (%2)"
 msgid "cannot read sample data for unscaled peak computation"
 msgstr ""
 "impossible de lire les données échantillonnée pour le calcul de pic non-"
-"échelonné"
+"non mises à l'echelle."
 
 #: audiosource.cc:561 audiosource.cc:673
 msgid "map failed - could not create file mapping for peakfile %1."
