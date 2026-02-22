@@ -740,7 +740,7 @@ msgstr ""
 
 #: export_format_specification.cc:685
 msgid "normalize peak"
-msgstr "normaliser les pics"
+msgstr "normaliser les crêtes"
 
 #: export_format_specification.cc:690
 msgid "trim"
