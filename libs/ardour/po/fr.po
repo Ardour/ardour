@@ -424,7 +424,7 @@ msgstr "Rogner"
 
 #: automatable.cc:206
 msgid "Master Volume"
-msgstr ""
+msgstr "Volume master"
 
 #: automatable.cc:208
 msgid "Mute"
