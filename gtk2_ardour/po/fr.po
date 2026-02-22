@@ -18388,7 +18388,9 @@ msgstr ""
 
 #: recorder_ui.cc:252
 msgid "Create a new playlist for all rec-armed tracks"
-msgstr "Créer une nouvelle liste de lecture pour toutes les pistes armées"
+msgstr ""
+"Créer une nouvelle liste de lecture pour toutes les pistes armées pour "
+"l'enregistrement"
 
 #: recorder_ui.cc:253
 msgid ""
@@ -20104,7 +20106,7 @@ msgstr "Contrôles"
 
 #: session_option_editor.cc:317
 msgid "Rec-enable Button"
-msgstr "Enregistrement"
+msgstr "Armement (enregistrement)"
 
 #: session_option_editor.cc:324
 msgid "Mute Button"
