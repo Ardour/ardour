@@ -479,9 +479,11 @@ int main() { return 0; }''',
     conf.env['compiler_flags_dict'] = flags_dict
 
     if compiler_name == 'msvc':
-        compiler_flags.extend(['/nologo', '/FS', '/bigobj', '/JMC', '/FC',
-                               '/diagnostics:column', '/Zc:__cplusplus'])
-        linker_flags.extend(['/guard:cf'])
+        compiler_flags.extend(['/nologo', '/FS', '/bigobj','/FC', '/MP',
+                               '/diagnostics:column', '/Zc:__cplusplus', '/utf-8'])
+        linker_flags.extend(['/guard:cf', 'DEBUG'])
+        c_flags.extend(['/FI', os.path.join(conf.srcnode.abspath(), 'msvc_waf_headers', '2.h')])
+        cxx_flags.extend(['/FI', os.path.join(conf.srcnode.abspath(), 'msvc_waf_headers', '1.h')])
 
     autowaf.set_basic_compiler_flags (conf,flags_dict)
 
@@ -573,7 +575,7 @@ int main() { return 0; }''',
             # C++17 removes 'unary_function' and 'binary_function' this breaks older boost versions
             # prior to boost 1.81.0
             cxx_flags.append('-D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION')
-        else:
+        elif compiler_name != 'msvc':
             cxx_flags.append('-DBOOST_NO_AUTO_PTR')
 
     if (is_clang and platform == "darwin"):
@@ -957,9 +959,10 @@ def configure(conf):
         conf.load('clang_compilation_database')
 
     if Options.options.dist_target == 'msvc':
-        conf.env['MSVC_VERSIONS'] = ['msvc 10.0', 'msvc 9.0', 'msvc 8.0', 'msvc 7.1', 'msvc 7.0', 'msvc 6.0', ]
         conf.env['MSVC_TARGETS'] = ['x64']
         conf.load('msvc')
+        conf.find_program('dumpbin', var='DUMPBIN')
+        conf.load('gendef', tooldir='.')
 
     if Options.options.debug and not Options.options.keepflags:
         # Nuke user CFLAGS/CXXFLAGS if debug is set (they likely contain -O3, NDEBUG, etc)
@@ -1276,7 +1279,10 @@ int main () { return 0; }
         conf.env.append_value('LIB', 'Dbghelp')
         conf.env.append_value('LIB', 'User32')
         conf.env.append_value('LIB', 'Kernel32')
-        # MORE STUFF PROBABLY NEEDED HERE
+        conf.env.append_value('LIB', 'ole32')
+        conf.env.append_value('CXXFLAGS', '-DWIN32_LEAN_AND_MEAN')
+        conf.env.append_value('CXXFLAGS', '-DNOMINMAX')
+        # MORE STUFF POSSIBLY NEEDED HERE
         conf.define ('WINDOWS', 1)
 
     have_int128_support = conf.check_cc(fragment = '''

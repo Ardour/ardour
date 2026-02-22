@@ -54,7 +54,11 @@ def configure(conf):
     autowaf.check_pkg(conf, 'gobject-2.0', uselib_store='GOBJECT', mandatory=True)
 
 def build(bld):
-    obj = bld.shlib(features = 'c cshlib', source = libztk_sources)
+    features = 'c cshlib'
+    if bld.env['build_target'] == 'msvc':
+        features += ' gendef'
+    
+    obj = bld.shlib(features=features, source=libztk_sources)
     obj.cflags          = [ bld.env['compiler_flags_dict']['pic'] ]
     obj.export_includes = ['.']
     obj.includes        = ['.', '..', 'ztk']

@@ -46,7 +46,10 @@ def build(bld):
         return
 
     if bld.is_defined ('INTERNAL_SHARED_LIBS'):
-        obj              = bld.shlib(features = 'c cshlib', source=libaaf_sources)
+        if bld.env.COMPILER_CC == 'msvc':
+            obj          = bld.shlib(features = 'c cshlib gendef', source=libaaf_sources)
+        else:
+            obj          = bld.shlib(features = 'c cshlib', source=libaaf_sources)
         obj.defines = [ 'LIBAAF_DLL_EXPORTS=1' ]
     else:
         obj              = bld.stlib(features = 'c cshlib', source=libaaf_sources)

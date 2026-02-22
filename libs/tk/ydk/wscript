@@ -167,7 +167,11 @@ def configure(conf):
     conf.check(header_name='unistd.h', define_name='HAVE_UNISTD_H',mandatory=False)
 
 def build(bld):
-    obj = bld.shlib(features = 'c cshlib')
+    features = 'c cshlib'
+    if bld.env['build_target'] == 'msvc':
+        features += ' gendef'
+
+    obj = bld.shlib(features=features)
     obj.cflags          = [ bld.env['compiler_flags_dict']['pic'], '-w' ]
     obj.export_includes = ['.', 'ydk']
     obj.includes        = ['.', 'ydk']
