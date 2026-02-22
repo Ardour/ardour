@@ -190,7 +190,7 @@ msgstr "Par défaut"
 
 #: audio_library.cc:67
 msgid "Could not get config folder: %1"
-msgstr ""
+msgstr "Impossible d'obtenir le dossier de configuration : %1"
 
 #: audio_library.cc:95
 msgid "Could not open %1.  Audio Library not saved"
