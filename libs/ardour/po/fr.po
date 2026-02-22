@@ -2033,7 +2033,7 @@ msgstr ""
 
 #: plugin_manager.cc:539
 msgid "Discovering VST3 Plugins"
-msgstr ""
+msgstr "Découverte des greffons VST3"
 
 #: plugin_manager.cc:567
 msgid "Scanning AU Plugins"
