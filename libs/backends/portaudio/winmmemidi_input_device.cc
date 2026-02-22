@@ -46,6 +46,11 @@ WinMMEMidiInputDevice::WinMMEMidiInputDevice (int index)
 {
 	DEBUG_MIDI (string_compose ("Creating midi input device index: %1\n", index));
 
+#ifdef USE_MMCSS_THREAD_PRIORITIES
+	m_main_thread = GetCurrentThreadId ();
+	m_priority_boosted = false;
+#endif
+
 	std::string error_msg;
 
 	if (!open (index, error_msg)) {
@@ -62,11 +67,6 @@ WinMMEMidiInputDevice::WinMMEMidiInputDevice (int index)
 		}
 		throw std::runtime_error (error_msg);
 	}
-
-#ifdef USE_MMCSS_THREAD_PRIORITIES
-	m_main_thread = GetCurrentThread ();
-	m_priority_boosted = false;
-#endif
 
 	set_device_name (index);
 }
@@ -192,7 +192,8 @@ WinMMEMidiInputDevice::winmm_input_callback(HMIDIIN handle,
 #ifdef USE_MMCSS_THREAD_PRIORITIES
 	HANDLE task_handle;
 	if (!midi_input->m_priority_boosted
-	    && GetCurrentThread () != midi_input->m_main_thread) {
+	    && GetCurrentThreadId () != midi_input->m_main_thread) {
+		DEBUG_MIDI("WinMME: boosting thread priority\n");
 		PBD::MMCSS::set_thread_characteristics ("Pro Audio", &task_handle);
 		PBD::MMCSS::set_thread_priority (task_handle, PBD::MMCSS::AVRT_PRIORITY_HIGH);
 		midi_input->m_priority_boosted = true;

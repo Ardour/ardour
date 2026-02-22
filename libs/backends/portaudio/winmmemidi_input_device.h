@@ -93,8 +93,8 @@ private: // data
 	std::string m_name;
 
 #ifdef USE_MMCSS_THREAD_PRIORITIES
-	HANDLE  m_main_thread;
-	bool m_priority_boosted;
+	DWORD m_main_thread;
+	bool  m_priority_boosted;
 #endif
 
 	// can't use unique_ptr yet
