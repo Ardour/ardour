@@ -222,7 +222,7 @@ msgstr "erreur de programmation : %1"
 
 #: audioanalyser.cc:52
 msgid "cannot load VAMP plugin \"%1\""
-msgstr "Impossible de charger le Plugin VAMP \"%1\""
+msgstr "Impossible de charger le greffon VAMP \"%1\""
 
 #: audioanalyser.cc:72 lua_api.cc:1044
 msgid "VAMP Plugin \"%1\" could not be loaded"
