@@ -14419,7 +14419,7 @@ msgstr "Trier par charge moyenne"
 
 #: plugin_dspload_window.cc:39
 msgid "Sort by Worst-Case Load"
-msgstr "Trier par pire charge"
+msgstr "Trier par pire cas de charge "
 
 #: plugin_dspload_window.cc:196 port_group.cc:362
 msgid "I/O Pre"
