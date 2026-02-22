@@ -40,6 +40,7 @@
 #include "pbd/stateful_diff_command.h"
 #include "pbd/xml++.h"
 
+#include "ardour/audioregion.h"
 #include "ardour/audio_track.h"
 #include "ardour/dB.h"
 #include "ardour/internal_send.h"
@@ -2230,6 +2231,113 @@ playlist_regions_json (const std::shared_ptr<ARDOUR::Playlist>& playlist, bool i
 	return ss.str ();
 }
 
+static bool
+resolve_audio_region_argument_or_selected_at_playhead (
+	ARDOUR::Session& session,
+	const pt::ptree& root,
+	const std::string& args_path,
+	std::shared_ptr<ARDOUR::Region>& region,
+	std::shared_ptr<ARDOUR::AudioRegion>& audio_region,
+	std::string& resolved_via,
+	std::string& error)
+{
+	if (!resolve_region_argument_or_selected_at_playhead (session, root, args_path, region, resolved_via, error)) {
+		return false;
+	}
+
+	audio_region = std::dynamic_pointer_cast<ARDOUR::AudioRegion> (region);
+	if (!audio_region) {
+		error = "Region is not an audio region";
+		return false;
+	}
+
+	return true;
+}
+
+static double
+safe_region_gain_db (double linear_gain)
+{
+	const double magnitude = std::fabs (linear_gain);
+	if (magnitude <= 0.0 || !std::isfinite (magnitude)) {
+		return -193.0;
+	}
+
+	double db = accurate_coefficient_to_dB (magnitude);
+	if (!std::isfinite (db)) {
+		db = -193.0;
+	}
+	return db;
+}
+
+static std::string
+region_info_json (
+	const std::shared_ptr<ARDOUR::Region>& region,
+	const std::string& resolved_via,
+	bool include_analysis,
+	const boost::optional<double>& maximum_amplitude,
+	const boost::optional<double>& rms)
+{
+	const samplepos_t start_sample = region->position_sample ();
+	const samplepos_t end_sample = start_sample + region->length_samples ();
+	const std::shared_ptr<ARDOUR::Playlist> playlist = region->playlist ();
+	const std::shared_ptr<ARDOUR::AudioRegion> audio_region = std::dynamic_pointer_cast<ARDOUR::AudioRegion> (region);
+
+	std::ostringstream ss;
+	ss << "{\"regionId\":\"" << json_escape (region->id ().to_s ()) << "\""
+	   << ",\"name\":\"" << json_escape (region->name ()) << "\""
+	   << ",\"type\":\"" << json_escape (region->data_type ().to_string ()) << "\""
+	   << ",\"resolvedVia\":\"" << json_escape (resolved_via) << "\"";
+
+	if (playlist) {
+		ss << ",\"playlistId\":\"" << json_escape (playlist->id ().to_s ()) << "\"";
+	} else {
+		ss << ",\"playlistId\":null";
+	}
+
+	ss << ",\"startSample\":" << start_sample
+	   << ",\"endSample\":" << end_sample
+	   << ",\"lengthSamples\":" << region->length_samples ()
+	   << ",\"startBbt\":" << bbt_json_at_sample (start_sample)
+	   << ",\"endBbt\":" << bbt_json_at_sample (end_sample)
+	   << ",\"hidden\":" << (region->hidden () ? "true" : "false")
+	   << ",\"muted\":" << (region->muted () ? "true" : "false")
+	   << ",\"locked\":" << (region->locked () ? "true" : "false")
+	   << ",\"positionLocked\":" << (region->position_locked () ? "true" : "false")
+	   << ",\"isAudio\":" << (audio_region ? "true" : "false")
+	   << ",\"includeAnalysis\":" << (include_analysis ? "true" : "false");
+
+	if (audio_region) {
+		const double scale_amplitude = audio_region->scale_amplitude ();
+		const double magnitude = std::fabs (scale_amplitude);
+		ss << ",\"audio\":{\"scaleAmplitude\":" << scale_amplitude
+		   << ",\"gainLinearAbs\":" << magnitude
+		   << ",\"gainDb\":" << safe_region_gain_db (scale_amplitude)
+		   << ",\"polarityInverted\":" << (scale_amplitude < 0.0 ? "true" : "false");
+
+		if (include_analysis) {
+			ss << ",\"maximumAmplitude\":";
+			if (maximum_amplitude && std::isfinite (*maximum_amplitude) && *maximum_amplitude >= 0.0) {
+				ss << *maximum_amplitude;
+			} else {
+				ss << "null";
+			}
+			ss << ",\"rms\":";
+			if (rms && std::isfinite (*rms) && *rms >= 0.0) {
+				ss << *rms;
+			} else {
+				ss << "null";
+			}
+		}
+
+		ss << "}";
+	} else {
+		ss << ",\"audio\":null";
+	}
+
+	ss << "}";
+	return ss.str ();
+}
+
 } // namespace
 
 MCPHttpServer::MCPHttpServer (ARDOUR::Session& session, uint16_t port)
@@ -2588,6 +2696,14 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"}},\"required\":[\"id\"],\"additionalProperties\":false},\"outputSchema\":{\"type\":\"object\",\"required\":[\"id\",\"name\",\"type\"],\"properties\":{\"id\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"type\":{\"type\":\"string\"},\"sends\":{\"type\":\"array\"},\"plugins\":{\"type\":\"array\"}},\"additionalProperties\":true}},"
 						"{\"name\":\"track_get_regions\",\"title\":\"Get Track Regions\",\"description\":\"List regions in one track playlist. includeHidden=true includes hidden regions.\","
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"includeHidden\":{\"type\":\"boolean\"}},\"required\":[\"id\"],\"additionalProperties\":false},\"outputSchema\":{\"type\":\"object\",\"required\":[\"id\",\"regions\"],\"properties\":{\"id\":{\"type\":\"string\"},\"regions\":{\"type\":\"array\"}},\"additionalProperties\":true}},"
+						"{\"name\":\"region_get_info\",\"title\":\"Get Region Info\",\"description\":\"Get one region info. If regionId is omitted, resolves to selected track's top region at playhead. includeAnalysis=true adds audio peak/RMS analysis.\","
+					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"regionId\":{\"type\":\"string\"},\"includeAnalysis\":{\"type\":\"boolean\"}},\"additionalProperties\":false},\"outputSchema\":{\"type\":\"object\",\"required\":[\"regionId\",\"type\",\"startSample\",\"endSample\",\"isAudio\"],\"properties\":{\"regionId\":{\"type\":\"string\"},\"resolvedVia\":{\"type\":\"string\"},\"type\":{\"type\":\"string\"},\"isAudio\":{\"type\":\"boolean\"},\"audio\":{\"type\":[\"object\",\"null\"]}},\"additionalProperties\":true}},"
+						"{\"name\":\"region_set_gain\",\"title\":\"Set Region Gain\",\"description\":\"Set one audio region gain using linear gain or dB. Optional invertPolarity toggles polarity.\","
+					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"regionId\":{\"type\":\"string\"},\"linear\":{\"type\":\"number\",\"minimum\":0},\"db\":{\"type\":\"number\"},\"invertPolarity\":{\"type\":\"boolean\"}},\"oneOf\":[{\"required\":[\"linear\"]},{\"required\":[\"db\"]}],\"additionalProperties\":false},\"outputSchema\":{\"type\":\"object\",\"required\":[\"regionId\",\"updated\",\"gain\"],\"properties\":{\"regionId\":{\"type\":\"string\"},\"updated\":{\"type\":\"boolean\"},\"gain\":{\"type\":\"object\"}},\"additionalProperties\":true}},"
+						"{\"name\":\"region_normalize\",\"title\":\"Normalize Region\",\"description\":\"Normalize one audio region to targetDb (default 0.0 dBFS).\","
+					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"regionId\":{\"type\":\"string\"},\"targetDb\":{\"type\":\"number\"}},\"additionalProperties\":false},\"outputSchema\":{\"type\":\"object\",\"required\":[\"regionId\",\"targetDb\",\"peakAmplitude\",\"updated\",\"gain\"],\"properties\":{\"regionId\":{\"type\":\"string\"},\"targetDb\":{\"type\":\"number\"},\"peakAmplitude\":{\"type\":\"number\"},\"updated\":{\"type\":\"boolean\"},\"gain\":{\"type\":\"object\"}},\"additionalProperties\":true}},"
+						"{\"name\":\"region_split\",\"title\":\"Split Region\",\"description\":\"Split one region (audio or MIDI) at sample, bar+beat, or current playhead if no split point is provided. If regionId is omitted, uses selected track's top region at playhead.\","
+					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"regionId\":{\"type\":\"string\"},\"sample\":{\"type\":\"integer\",\"minimum\":0},\"bar\":{\"type\":\"integer\",\"minimum\":1},\"beat\":{\"type\":\"number\",\"minimum\":1}},\"additionalProperties\":false},\"outputSchema\":{\"type\":\"object\",\"required\":[\"regionId\",\"split\",\"splitSample\",\"createdRegions\"],\"properties\":{\"regionId\":{\"type\":\"string\"},\"split\":{\"type\":\"boolean\"},\"splitSample\":{\"type\":\"integer\"},\"createdRegions\":{\"type\":\"array\"}},\"additionalProperties\":true}},"
 						"{\"name\":\"region_resize\",\"title\":\"Resize Region\",\"description\":\"Resize one region (audio or MIDI) by setting start and/or end timeline boundary using sample or bar+beat. If regionId is omitted, uses selected track's top region at playhead.\","
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"regionId\":{\"type\":\"string\"},\"startSample\":{\"type\":\"integer\",\"minimum\":0},\"startBar\":{\"type\":\"integer\",\"minimum\":1},\"startBeat\":{\"type\":\"number\",\"minimum\":1},\"endSample\":{\"type\":\"integer\",\"minimum\":0},\"endBar\":{\"type\":\"integer\",\"minimum\":1},\"endBeat\":{\"type\":\"number\",\"minimum\":1}},\"anyOf\":[{\"required\":[\"startSample\"]},{\"required\":[\"startBar\",\"startBeat\"]},{\"required\":[\"endSample\"]},{\"required\":[\"endBar\",\"endBeat\"]}],\"additionalProperties\":false},\"outputSchema\":{\"type\":\"object\",\"required\":[\"regionId\",\"startSample\",\"endSample\"],\"properties\":{\"regionId\":{\"type\":\"string\"},\"resolvedVia\":{\"type\":\"string\"},\"startSample\":{\"type\":\"integer\"},\"endSample\":{\"type\":\"integer\"}},\"additionalProperties\":true}},"
 						"{\"name\":\"region_copy\",\"title\":\"Copy Region\",\"description\":\"Copy one region (audio or MIDI) to an absolute position or by delta. deltaBeats can be fractional. Optional trackId copies to another track. If regionId is omitted, uses selected track's top region at playhead.\","
@@ -4848,6 +4964,365 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						id,
 						std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Track regions listed\"}],\"structuredContent\":")
 							+ structured.str () + "}");
+					}
+
+					if (tool_name == "region/get_info") {
+						const bool include_analysis = root.get<bool> ("params.arguments.includeAnalysis", false);
+
+						std::shared_ptr<ARDOUR::Region> region;
+						std::string region_resolved_via;
+						std::string region_error;
+						if (!resolve_region_argument_or_selected_at_playhead (_session, root, "params.arguments", region, region_resolved_via, region_error)) {
+							return jsonrpc_error (id, -32602, region_error);
+						}
+
+						boost::optional<double> analyzed_maximum_amplitude;
+						boost::optional<double> analyzed_rms;
+						if (include_analysis) {
+							const std::shared_ptr<ARDOUR::AudioRegion> audio_region = std::dynamic_pointer_cast<ARDOUR::AudioRegion> (region);
+							if (audio_region) {
+								const double max_amp = audio_region->maximum_amplitude ();
+								if (std::isfinite (max_amp) && max_amp >= 0.0) {
+									analyzed_maximum_amplitude = max_amp;
+								}
+
+								const double rms = audio_region->rms ();
+								if (std::isfinite (rms) && rms >= 0.0) {
+									analyzed_rms = rms;
+								}
+							}
+						}
+
+						const std::string structured = region_info_json (
+							region,
+							region_resolved_via,
+							include_analysis,
+							analyzed_maximum_amplitude,
+							analyzed_rms);
+
+						return jsonrpc_result (
+							id,
+							std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Region info\"}],\"structuredContent\":")
+								+ structured + "}");
+					}
+
+					if (tool_name == "region/set_gain") {
+						const boost::optional<double> linear = root.get_optional<double> ("params.arguments.linear");
+						const boost::optional<double> db = root.get_optional<double> ("params.arguments.db");
+						const bool invert_polarity = root.get<bool> ("params.arguments.invertPolarity", false);
+
+						if (!linear && !db) {
+							return jsonrpc_error (id, -32602, "Provide one of: linear or db");
+						}
+						if (linear && db) {
+							return jsonrpc_error (id, -32602, "Provide only one of: linear or db");
+						}
+
+						if (linear) {
+							if (!std::isfinite (*linear) || *linear < 0.0) {
+								return jsonrpc_error (id, -32602, "Invalid linear gain (expected finite >= 0)");
+							}
+						}
+						if (db) {
+							if (!std::isfinite (*db)) {
+								return jsonrpc_error (id, -32602, "Invalid dB value");
+							}
+						}
+
+						std::shared_ptr<ARDOUR::Region> region;
+						std::shared_ptr<ARDOUR::AudioRegion> audio_region;
+						std::string region_resolved_via;
+						std::string region_error;
+						if (!resolve_audio_region_argument_or_selected_at_playhead (
+								_session,
+								root,
+								"params.arguments",
+								region,
+								audio_region,
+								region_resolved_via,
+								region_error)) {
+							return jsonrpc_error (id, -32602, region_error);
+						}
+
+						const double previous_gain = audio_region->scale_amplitude ();
+						const double previous_db = safe_region_gain_db (previous_gain);
+						double new_magnitude = std::fabs (previous_gain);
+
+						if (linear) {
+							new_magnitude = *linear;
+						} else {
+							new_magnitude = (*db <= -192.0) ? 0.0 : dB_to_coefficient (*db);
+						}
+
+						if (!std::isfinite (new_magnitude) || new_magnitude < 0.0) {
+							return jsonrpc_error (id, -32602, "Invalid mapped region gain");
+						}
+
+						double sign = (previous_gain < 0.0) ? -1.0 : 1.0;
+						if (invert_polarity) {
+							sign *= -1.0;
+						}
+						const double new_gain = (new_magnitude == 0.0) ? 0.0 : (new_magnitude * sign);
+						const bool updated = (new_gain != previous_gain);
+
+						if (updated) {
+							_session.begin_reversible_command ("set region gain");
+							region->clear_changes ();
+							audio_region->set_scale_amplitude ((ARDOUR::gain_t) new_gain);
+							_session.add_command (new PBD::StatefulDiffCommand (region));
+							_session.commit_reversible_command ();
+						}
+
+						std::ostringstream structured;
+						structured << "{\"regionId\":\"" << json_escape (region->id ().to_s ()) << "\""
+							<< ",\"name\":\"" << json_escape (region->name ()) << "\""
+							<< ",\"resolvedVia\":\"" << json_escape (region_resolved_via) << "\""
+							<< ",\"updated\":" << (updated ? "true" : "false")
+							<< ",\"requested\":{"
+							<< "\"linear\":";
+						if (linear) {
+							structured << *linear;
+						} else {
+							structured << "null";
+						}
+						structured << ",\"db\":";
+						if (db) {
+							structured << *db;
+						} else {
+							structured << "null";
+						}
+						structured << ",\"invertPolarity\":" << (invert_polarity ? "true" : "false")
+							<< "},\"gain\":{"
+							<< "\"previousLinear\":" << previous_gain
+							<< ",\"previousDb\":" << previous_db
+							<< ",\"linear\":" << audio_region->scale_amplitude ()
+							<< ",\"db\":" << safe_region_gain_db (audio_region->scale_amplitude ())
+							<< ",\"polarityInverted\":" << (audio_region->scale_amplitude () < 0.0 ? "true" : "false")
+							<< "}}";
+
+						return jsonrpc_result (
+							id,
+							std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"")
+								+ (updated ? "Region gain updated" : "Region gain unchanged")
+								+ "\"}],\"structuredContent\":" + structured.str () + "}");
+					}
+
+					if (tool_name == "region/normalize") {
+						const double target_db = root.get<double> ("params.arguments.targetDb", 0.0);
+						if (!std::isfinite (target_db)) {
+							return jsonrpc_error (id, -32602, "Invalid targetDb");
+						}
+
+						std::shared_ptr<ARDOUR::Region> region;
+						std::shared_ptr<ARDOUR::AudioRegion> audio_region;
+						std::string region_resolved_via;
+						std::string region_error;
+						if (!resolve_audio_region_argument_or_selected_at_playhead (
+								_session,
+								root,
+								"params.arguments",
+								region,
+								audio_region,
+								region_resolved_via,
+								region_error)) {
+							return jsonrpc_error (id, -32602, region_error);
+						}
+
+						const double peak_amplitude = audio_region->maximum_amplitude ();
+						if (!std::isfinite (peak_amplitude) || peak_amplitude < 0.0) {
+							return jsonrpc_error (id, -32000, "Failed to analyze region peak amplitude");
+						}
+
+						const double previous_gain = audio_region->scale_amplitude ();
+						const double previous_db = safe_region_gain_db (previous_gain);
+
+						_session.begin_reversible_command ("normalize region");
+						region->clear_changes ();
+						audio_region->normalize ((float) peak_amplitude, (float) target_db);
+						const double normalized_gain = audio_region->scale_amplitude ();
+						const bool updated = (normalized_gain != previous_gain);
+						_session.add_command (new PBD::StatefulDiffCommand (region));
+						_session.commit_reversible_command ();
+
+						std::ostringstream structured;
+						structured << "{\"regionId\":\"" << json_escape (region->id ().to_s ()) << "\""
+							<< ",\"name\":\"" << json_escape (region->name ()) << "\""
+							<< ",\"resolvedVia\":\"" << json_escape (region_resolved_via) << "\""
+							<< ",\"targetDb\":" << target_db
+							<< ",\"peakAmplitude\":" << peak_amplitude
+							<< ",\"updated\":" << (updated ? "true" : "false")
+							<< ",\"gain\":{"
+							<< "\"previousLinear\":" << previous_gain
+							<< ",\"previousDb\":" << previous_db
+							<< ",\"linear\":" << audio_region->scale_amplitude ()
+							<< ",\"db\":" << safe_region_gain_db (audio_region->scale_amplitude ())
+							<< ",\"polarityInverted\":" << (audio_region->scale_amplitude () < 0.0 ? "true" : "false")
+							<< "}}";
+
+						return jsonrpc_result (
+							id,
+							std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"")
+								+ (updated ? "Region normalized" : "Region unchanged")
+								+ "\"}],\"structuredContent\":" + structured.str () + "}");
+					}
+
+					if (tool_name == "region/split") {
+						Temporal::TempoMap::fetch ();
+
+						const boost::optional<int64_t> sample_opt = root.get_optional<int64_t> ("params.arguments.sample");
+						if (sample_opt && *sample_opt < 0) {
+							return jsonrpc_error (id, -32602, "Invalid sample (expected >= 0)");
+						}
+
+						samplepos_t bbt_sample = 0;
+						bool have_bbt_target = false;
+						std::string bbt_error;
+						if (!parse_optional_bbt_target_sample (root, "params.arguments", bbt_sample, have_bbt_target, bbt_error)) {
+							return jsonrpc_error (id, -32602, bbt_error);
+						}
+
+						if (sample_opt && have_bbt_target) {
+							return jsonrpc_error (id, -32602, "Provide either sample or bar+beat, not both");
+						}
+
+						std::shared_ptr<ARDOUR::Region> region;
+						std::string region_resolved_via;
+						std::string region_error;
+						if (!resolve_region_argument_or_selected_at_playhead (_session, root, "params.arguments", region, region_resolved_via, region_error)) {
+							return jsonrpc_error (id, -32602, region_error);
+						}
+
+						const std::shared_ptr<ARDOUR::Playlist> playlist = region->playlist ();
+						if (!playlist) {
+							return jsonrpc_error (id, -32000, "Region has no playlist");
+						}
+						if (region->locked ()) {
+							return jsonrpc_error (id, -32602, "Region is locked");
+						}
+
+						samplepos_t split_sample = _session.transport_sample ();
+						std::string split_origin = "playhead";
+						if (sample_opt) {
+							split_sample = (samplepos_t) *sample_opt;
+							split_origin = "sample";
+						} else if (have_bbt_target) {
+							split_sample = bbt_sample;
+							split_origin = "bbt";
+						}
+
+						const samplepos_t region_start_sample = region->position_sample ();
+						const samplepos_t region_end_sample = region_start_sample + region->length_samples ();
+						if (split_sample <= region_start_sample || split_sample >= region_end_sample) {
+							std::ostringstream structured;
+							structured << "{\"regionId\":\"" << json_escape (region->id ().to_s ()) << "\""
+								<< ",\"name\":\"" << json_escape (region->name ()) << "\""
+								<< ",\"type\":\"" << json_escape (region->data_type ().to_string ()) << "\""
+								<< ",\"playlistId\":\"" << json_escape (playlist->id ().to_s ()) << "\""
+								<< ",\"resolvedVia\":\"" << json_escape (region_resolved_via) << "\""
+								<< ",\"split\":false"
+								<< ",\"reason\":\"split point outside region body\""
+								<< ",\"splitOrigin\":\"" << json_escape (split_origin) << "\""
+								<< ",\"splitSample\":" << split_sample
+								<< ",\"splitBbt\":" << bbt_json_at_sample (split_sample)
+								<< ",\"regionStartSample\":" << region_start_sample
+								<< ",\"regionEndSample\":" << region_end_sample
+								<< ",\"regionStartBbt\":" << bbt_json_at_sample (region_start_sample)
+								<< ",\"regionEndBbt\":" << bbt_json_at_sample (region_end_sample)
+								<< ",\"createdRegions\":[]}";
+
+							return jsonrpc_result (
+								id,
+								std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Region unchanged\"}],\"structuredContent\":")
+									+ structured.str () + "}");
+						}
+
+						std::vector<std::string> playlist_region_ids_before;
+						{
+							const ARDOUR::RegionList& existing = playlist->region_list_property ().rlist ();
+							for (ARDOUR::RegionList::const_iterator i = existing.begin (); i != existing.end (); ++i) {
+								if (*i) {
+									playlist_region_ids_before.push_back ((*i)->id ().to_s ());
+								}
+							}
+						}
+
+						_session.begin_reversible_command ("split region");
+						playlist->clear_changes ();
+						playlist->split_region (region, Temporal::timepos_t (split_sample));
+						_session.add_command (new PBD::StatefulDiffCommand (playlist));
+						_session.commit_reversible_command ();
+
+						std::vector<std::shared_ptr<ARDOUR::Region> > created_regions;
+						bool source_region_remaining = false;
+						{
+							const ARDOUR::RegionList& after = playlist->region_list_property ().rlist ();
+							for (ARDOUR::RegionList::const_iterator i = after.begin (); i != after.end (); ++i) {
+								if (!*i) {
+									continue;
+								}
+
+								const std::string candidate_id = (*i)->id ().to_s ();
+								if (candidate_id == region->id ().to_s ()) {
+									source_region_remaining = true;
+								}
+
+								if (std::find (playlist_region_ids_before.begin (), playlist_region_ids_before.end (), candidate_id) == playlist_region_ids_before.end ()) {
+									created_regions.push_back (*i);
+								}
+							}
+						}
+
+						std::sort (
+							created_regions.begin (),
+							created_regions.end (),
+							[] (const std::shared_ptr<ARDOUR::Region>& a, const std::shared_ptr<ARDOUR::Region>& b) {
+								if (a->position_sample () != b->position_sample ()) {
+									return a->position_sample () < b->position_sample ();
+								}
+								return a->id () < b->id ();
+							});
+
+						const bool split_performed = (created_regions.size () >= 2) && !source_region_remaining;
+						std::ostringstream structured;
+						structured << "{\"regionId\":\"" << json_escape (region->id ().to_s ()) << "\""
+							<< ",\"name\":\"" << json_escape (region->name ()) << "\""
+							<< ",\"type\":\"" << json_escape (region->data_type ().to_string ()) << "\""
+							<< ",\"playlistId\":\"" << json_escape (playlist->id ().to_s ()) << "\""
+							<< ",\"resolvedVia\":\"" << json_escape (region_resolved_via) << "\""
+							<< ",\"split\":" << (split_performed ? "true" : "false")
+							<< ",\"splitOrigin\":\"" << json_escape (split_origin) << "\""
+							<< ",\"splitSample\":" << split_sample
+							<< ",\"splitBbt\":" << bbt_json_at_sample (split_sample)
+							<< ",\"regionStartSample\":" << region_start_sample
+							<< ",\"regionEndSample\":" << region_end_sample
+							<< ",\"regionStartBbt\":" << bbt_json_at_sample (region_start_sample)
+							<< ",\"regionEndBbt\":" << bbt_json_at_sample (region_end_sample)
+							<< ",\"sourceRegionRemoved\":" << (source_region_remaining ? "false" : "true")
+							<< ",\"createdRegions\":[";
+
+						for (size_t i = 0; i < created_regions.size (); ++i) {
+							if (i > 0) {
+								structured << ",";
+							}
+							const samplepos_t created_start_sample = created_regions[i]->position_sample ();
+							const samplepos_t created_end_sample = created_start_sample + created_regions[i]->length_samples ();
+							structured << "{\"regionId\":\"" << json_escape (created_regions[i]->id ().to_s ()) << "\""
+								<< ",\"name\":\"" << json_escape (created_regions[i]->name ()) << "\""
+								<< ",\"type\":\"" << json_escape (created_regions[i]->data_type ().to_string ()) << "\""
+								<< ",\"startSample\":" << created_start_sample
+								<< ",\"endSample\":" << created_end_sample
+								<< ",\"lengthSamples\":" << created_regions[i]->length_samples ()
+								<< ",\"startBbt\":" << bbt_json_at_sample (created_start_sample)
+								<< ",\"endBbt\":" << bbt_json_at_sample (created_end_sample)
+								<< "}";
+						}
+						structured << "]}";
+
+						return jsonrpc_result (
+							id,
+							std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"")
+								+ (split_performed ? "Region split" : "Region unchanged")
+								+ "\"}],\"structuredContent\":" + structured.str () + "}");
 					}
 
 					if (tool_name == "region/resize") {
