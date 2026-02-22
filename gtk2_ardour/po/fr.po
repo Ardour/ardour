@@ -12821,7 +12821,7 @@ msgstr "Les contrôles de solo affectent le solo-en-place"
 
 #: monitor_section.cc:163
 msgid "Solo controls toggle after-fader-listen"
-msgstr "Les contrôles de solo basculent l'écoute post-atténuateur"
+msgstr "Les contrôles de solo basculent l'écoute après atténuateur"
 
 #: monitor_section.cc:169
 msgid "Solo controls toggle pre-fader-listen"
@@ -13243,7 +13243,8 @@ msgstr "Normaliser chaque région selon son propre niveau de crête"
 
 #: normalize_dialog.cc:101
 msgid "Normalize each region using the peak value of all regions"
-msgstr "Normaliser chaque région selon le niveau de crête de toutes les régions"
+msgstr ""
+"Normaliser chaque région selon le niveau de crête de toutes les régions"
 
 #: normalize_dialog.cc:118
 msgid "Normalize"
