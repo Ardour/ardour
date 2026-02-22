@@ -17635,7 +17635,7 @@ msgstr "Position d'écoute "
 
 #: rc_option_editor.cc:4535
 msgid "after-fader (AFL)"
-msgstr "post-atténuateur (AFL)"
+msgstr "après atténuateur (AFL)"
 
 #: rc_option_editor.cc:4536
 msgid "pre-fader (PFL)"
@@ -19007,7 +19007,7 @@ msgstr "Paramètres %1 - %2"
 
 #: route_time_axis.cc:2424 vca_master_strip.cc:235 vca_time_axis.cc:274
 msgid "After-fade listen (AFL)"
-msgstr "Écoute post-atténuateur (AFL)"
+msgstr "Écoute après atténuateur (AFL)"
 
 #: route_time_axis.cc:2428 vca_master_strip.cc:239 vca_time_axis.cc:278
 msgid "Pre-fade listen (PFL)"
