@@ -472,7 +472,7 @@ msgstr ""
 
 #: automation_control.cc:338
 msgid "record %1 automation"
-msgstr "enregistrement l'auromation %1"
+msgstr "enregistrement de l'automation %1"
 
 #: automation_list.cc:434
 msgid "automation list: cannot load coordinates from XML, all points ignored"
