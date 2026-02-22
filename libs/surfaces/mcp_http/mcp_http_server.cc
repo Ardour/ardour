@@ -1081,6 +1081,63 @@ parse_optional_timeline_boundary_sample (
 }
 
 static bool
+resolve_region_argument_or_selected_at_playhead (
+	ARDOUR::Session& session,
+	const pt::ptree& root,
+	const std::string& args_path,
+	std::shared_ptr<ARDOUR::Region>& region,
+	std::string& resolved_via,
+	std::string& error)
+{
+	error.clear ();
+	resolved_via.clear ();
+	region.reset ();
+
+	const std::string region_id = root.get<std::string> (args_path + ".regionId", "");
+	if (!region_id.empty ()) {
+		region = ARDOUR::RegionFactory::region_by_id (PBD::ID (region_id));
+		if (!region) {
+			error = "regionId not found";
+			return false;
+		}
+		resolved_via = "regionId";
+		return true;
+	}
+
+	const std::shared_ptr<ARDOUR::Stripable> selected_stripable = session.selection ().first_selected_stripable ();
+	if (!selected_stripable) {
+		error = "Missing regionId and no selected track";
+		return false;
+	}
+
+	const std::shared_ptr<ARDOUR::Route> selected_route = std::dynamic_pointer_cast<ARDOUR::Route> (selected_stripable);
+	const std::shared_ptr<ARDOUR::Track> selected_track = std::dynamic_pointer_cast<ARDOUR::Track> (selected_route);
+	if (!selected_track) {
+		error = "Missing regionId and selected stripable is not a track";
+		return false;
+	}
+
+	const std::shared_ptr<ARDOUR::Playlist> selected_playlist = selected_track->playlist ();
+	if (!selected_playlist) {
+		error = "Missing regionId and selected track has no playlist";
+		return false;
+	}
+
+	const samplepos_t playhead_sample = session.transport_sample ();
+	region = selected_playlist->top_unmuted_region_at (Temporal::timepos_t (playhead_sample));
+	if (!region) {
+		region = selected_playlist->top_region_at (Temporal::timepos_t (playhead_sample));
+	}
+	if (!region) {
+		error = "Missing regionId and no region at playhead on selected track";
+		return false;
+	}
+
+	resolved_via = "selectedTrackAtPlayhead";
+	return true;
+}
+
+static bool
 parse_range_endpoints (
 	const pt::ptree& root,
 	const std::string& args_path,
@@ -2479,10 +2536,10 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 			"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"index\":{\"type\":\"integer\",\"minimum\":0}},\"required\":[\"index\"],\"additionalProperties\":false}},"
 			"{\"name\":\"session_recall_mixer_scene\",\"title\":\"Recall Mixer Scene\",\"description\":\"Recall mixer scene by index.\","
 			"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"index\":{\"type\":\"integer\",\"minimum\":0}},\"required\":[\"index\"],\"additionalProperties\":false}},"
-				"{\"name\":\"transport_get_state\",\"title\":\"Transport State\",\"description\":\"Return transport state.\","
-				"\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
-				"{\"name\":\"transport_locate\",\"title\":\"Transport Locate\",\"description\":\"Move playhead to a target position by sample, or by bar+beat (fractional beat allowed).\","
-				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"sample\":{\"type\":\"integer\",\"minimum\":0},\"bar\":{\"type\":\"integer\",\"minimum\":1},\"beat\":{\"type\":\"number\",\"minimum\":1}},\"additionalProperties\":false}},"
+				"{\"name\":\"transport_get_state\",\"title\":\"Transport State\",\"description\":\"Return transport state (rolling, speed, sample, state).\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false},\"outputSchema\":{\"type\":\"object\",\"required\":[\"rolling\",\"speed\",\"sample\",\"state\"],\"properties\":{\"rolling\":{\"type\":\"boolean\"},\"speed\":{\"type\":\"number\"},\"sample\":{\"type\":\"integer\"},\"state\":{\"type\":\"string\"}},\"additionalProperties\":true}},"
+				"{\"name\":\"transport_locate\",\"title\":\"Transport Locate\",\"description\":\"Move playhead to an absolute target position. Provide either sample, or bar+beat (fractional beat allowed).\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"sample\":{\"type\":\"integer\",\"minimum\":0},\"bar\":{\"type\":\"integer\",\"minimum\":1},\"beat\":{\"type\":\"number\",\"minimum\":1}},\"oneOf\":[{\"required\":[\"sample\"]},{\"required\":[\"bar\",\"beat\"]}],\"additionalProperties\":false},\"outputSchema\":{\"type\":\"object\",\"required\":[\"requestedSample\",\"requestedBbt\",\"transport\"],\"properties\":{\"requestedSample\":{\"type\":\"integer\"},\"requestedBbt\":{\"type\":\"object\"},\"transport\":{\"type\":\"object\"}},\"additionalProperties\":true}},"
 				"{\"name\":\"transport_goto_start\",\"title\":\"Transport Go To Start\",\"description\":\"Move playhead to session start. Optional andRoll starts playback after locate.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"andRoll\":{\"type\":\"boolean\"}},\"additionalProperties\":false}},"
 				"{\"name\":\"transport_goto_end\",\"title\":\"Transport Go To End\",\"description\":\"Move playhead to session end.\","
@@ -2493,8 +2550,8 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
 				"{\"name\":\"transport_loop_toggle\",\"title\":\"Transport Loop Toggle\",\"description\":\"Toggle loop playback, or set explicit loop state. Shows loop range if available.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"enabled\":{\"type\":\"boolean\"}},\"additionalProperties\":false}},"
-				"{\"name\":\"transport_loop_location\",\"title\":\"Transport Loop Location\",\"description\":\"Set auto-loop range using start/end sample or start/end bar+beat.\","
-				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"startSample\":{\"type\":\"integer\",\"minimum\":0},\"endSample\":{\"type\":\"integer\",\"minimum\":0},\"startBar\":{\"type\":\"integer\",\"minimum\":1},\"startBeat\":{\"type\":\"number\",\"minimum\":1},\"endBar\":{\"type\":\"integer\",\"minimum\":1},\"endBeat\":{\"type\":\"number\",\"minimum\":1}},\"additionalProperties\":false}},"
+				"{\"name\":\"transport_loop_location\",\"title\":\"Transport Loop Location\",\"description\":\"Set loop range. Provide either startSample+endSample, or startBar+startBeat+endBar+endBeat.\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"startSample\":{\"type\":\"integer\",\"minimum\":0},\"endSample\":{\"type\":\"integer\",\"minimum\":0},\"startBar\":{\"type\":\"integer\",\"minimum\":1},\"startBeat\":{\"type\":\"number\",\"minimum\":1},\"endBar\":{\"type\":\"integer\",\"minimum\":1},\"endBeat\":{\"type\":\"number\",\"minimum\":1}},\"oneOf\":[{\"required\":[\"startSample\",\"endSample\"]},{\"required\":[\"startBar\",\"startBeat\",\"endBar\",\"endBeat\"]}],\"additionalProperties\":false},\"outputSchema\":{\"type\":\"object\",\"properties\":{\"kind\":{\"type\":\"string\"},\"locationId\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"startSample\":{\"type\":\"integer\"},\"endSample\":{\"type\":\"integer\"},\"startBbt\":{\"type\":\"object\"},\"endBbt\":{\"type\":\"object\"},\"lengthSamples\":{\"type\":\"integer\"},\"hidden\":{\"type\":\"boolean\"}},\"additionalProperties\":true}},"
 				"{\"name\":\"transport_set_record_enable\",\"title\":\"Set Global Record Enable\",\"description\":\"Set session record-enable (global rec arm) state.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"enabled\":{\"type\":\"boolean\"}},\"required\":[\"enabled\"],\"additionalProperties\":false}},"
 				"{\"name\":\"transport_set_speed\",\"title\":\"Set Transport Speed\",\"description\":\"Set transport speed (as in OSC set_transport_speed).\","
@@ -2505,42 +2562,42 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
 				"{\"name\":\"markers_list\",\"title\":\"Markers List\",\"description\":\"List all session markers regardless of marker subtype.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
-				"{\"name\":\"markers_add\",\"title\":\"Add Marker\",\"description\":\"Add a marker at the current audible position or at a specific BBT location. Optional type: mark, section (arrangement), or scene. If name is omitted or empty, Ardour assigns a default marker name.\","
+				"{\"name\":\"markers_add\",\"title\":\"Add Marker\",\"description\":\"Add one marker at current playhead/audible position or a specific bar+beat. If name is omitted or empty, Ardour assigns a default name. Optional type: mark, section (arrangement), scene.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\"},\"type\":{\"type\":\"string\",\"enum\":[\"mark\",\"section\",\"scene\",\"arrangement\"]},\"bar\":{\"type\":\"integer\",\"minimum\":1},\"beat\":{\"type\":\"number\",\"minimum\":1}},\"additionalProperties\":false}},"
-				"{\"name\":\"markers_add_range\",\"title\":\"Add Range Marker\",\"description\":\"Add a range marker using start/end sample or start/end bar+beat.\","
-				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\"},\"startSample\":{\"type\":\"integer\",\"minimum\":0},\"endSample\":{\"type\":\"integer\",\"minimum\":0},\"startBar\":{\"type\":\"integer\",\"minimum\":1},\"startBeat\":{\"type\":\"number\",\"minimum\":1},\"endBar\":{\"type\":\"integer\",\"minimum\":1},\"endBeat\":{\"type\":\"number\",\"minimum\":1}},\"additionalProperties\":false}},"
-				"{\"name\":\"markers_set_auto_loop\",\"title\":\"Set Auto Loop Range\",\"description\":\"Set auto-loop range using start/end sample or start/end bar+beat.\","
-				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"startSample\":{\"type\":\"integer\",\"minimum\":0},\"endSample\":{\"type\":\"integer\",\"minimum\":0},\"startBar\":{\"type\":\"integer\",\"minimum\":1},\"startBeat\":{\"type\":\"number\",\"minimum\":1},\"endBar\":{\"type\":\"integer\",\"minimum\":1},\"endBeat\":{\"type\":\"number\",\"minimum\":1}},\"additionalProperties\":false}},"
+				"{\"name\":\"markers_add_range\",\"title\":\"Add Range Marker\",\"description\":\"Add one range marker. Provide either startSample+endSample, or startBar+startBeat+endBar+endBeat.\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\"},\"startSample\":{\"type\":\"integer\",\"minimum\":0},\"endSample\":{\"type\":\"integer\",\"minimum\":0},\"startBar\":{\"type\":\"integer\",\"minimum\":1},\"startBeat\":{\"type\":\"number\",\"minimum\":1},\"endBar\":{\"type\":\"integer\",\"minimum\":1},\"endBeat\":{\"type\":\"number\",\"minimum\":1}},\"oneOf\":[{\"required\":[\"startSample\",\"endSample\"]},{\"required\":[\"startBar\",\"startBeat\",\"endBar\",\"endBeat\"]}],\"additionalProperties\":false}},"
+				"{\"name\":\"markers_set_auto_loop\",\"title\":\"Set Auto Loop Range\",\"description\":\"Set auto-loop range. Provide either startSample+endSample, or startBar+startBeat+endBar+endBeat.\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"startSample\":{\"type\":\"integer\",\"minimum\":0},\"endSample\":{\"type\":\"integer\",\"minimum\":0},\"startBar\":{\"type\":\"integer\",\"minimum\":1},\"startBeat\":{\"type\":\"number\",\"minimum\":1},\"endBar\":{\"type\":\"integer\",\"minimum\":1},\"endBeat\":{\"type\":\"number\",\"minimum\":1}},\"oneOf\":[{\"required\":[\"startSample\",\"endSample\"]},{\"required\":[\"startBar\",\"startBeat\",\"endBar\",\"endBeat\"]}],\"additionalProperties\":false}},"
 				"{\"name\":\"markers_hide_auto_loop\",\"title\":\"Hide Auto Loop Range\",\"description\":\"Hide or show the current auto-loop range without changing its endpoints.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"hidden\":{\"type\":\"boolean\"}},\"additionalProperties\":false}},"
-				"{\"name\":\"markers_set_auto_punch\",\"title\":\"Set Auto Punch Range\",\"description\":\"Set auto-punch range using start/end sample or start/end bar+beat.\","
-				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"startSample\":{\"type\":\"integer\",\"minimum\":0},\"endSample\":{\"type\":\"integer\",\"minimum\":0},\"startBar\":{\"type\":\"integer\",\"minimum\":1},\"startBeat\":{\"type\":\"number\",\"minimum\":1},\"endBar\":{\"type\":\"integer\",\"minimum\":1},\"endBeat\":{\"type\":\"number\",\"minimum\":1}},\"additionalProperties\":false}},"
+				"{\"name\":\"markers_set_auto_punch\",\"title\":\"Set Auto Punch Range\",\"description\":\"Set auto-punch range. Provide either startSample+endSample, or startBar+startBeat+endBar+endBeat.\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"startSample\":{\"type\":\"integer\",\"minimum\":0},\"endSample\":{\"type\":\"integer\",\"minimum\":0},\"startBar\":{\"type\":\"integer\",\"minimum\":1},\"startBeat\":{\"type\":\"number\",\"minimum\":1},\"endBar\":{\"type\":\"integer\",\"minimum\":1},\"endBeat\":{\"type\":\"number\",\"minimum\":1}},\"oneOf\":[{\"required\":[\"startSample\",\"endSample\"]},{\"required\":[\"startBar\",\"startBeat\",\"endBar\",\"endBeat\"]}],\"additionalProperties\":false}},"
 				"{\"name\":\"markers_hide_auto_punch\",\"title\":\"Hide Auto Punch Range\",\"description\":\"Hide or show the current auto-punch range without changing its endpoints.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"hidden\":{\"type\":\"boolean\"}},\"additionalProperties\":false}},"
-				"{\"name\":\"markers_delete\",\"title\":\"Delete Marker\",\"description\":\"Delete one marker by location ID (preferred), or by name with optional sample for disambiguation.\","
-				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"locationId\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"sample\":{\"type\":\"integer\",\"minimum\":0}},\"additionalProperties\":false}},"
-				"{\"name\":\"markers_rename\",\"title\":\"Rename Marker\",\"description\":\"Rename one marker by location ID (preferred), or by name with optional sample for disambiguation.\","
-				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"locationId\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"sample\":{\"type\":\"integer\",\"minimum\":0},\"newName\":{\"type\":\"string\"}},\"required\":[\"newName\"],\"additionalProperties\":false}},"
-				"{\"name\":\"tracks_list\",\"title\":\"Tracks List\",\"description\":\"List session tracks and buses.\","
-				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"includeHidden\":{\"type\":\"boolean\"}},\"additionalProperties\":false}},"
-				"{\"name\":\"tracks_add\",\"title\":\"Add Track\",\"description\":\"Add one or more tracks (audio or MIDI). Optional insertion: end, before, or after a reference route (or selected route).\","
+				"{\"name\":\"markers_delete\",\"title\":\"Delete Marker\",\"description\":\"Delete one marker/range by locationId (preferred), or by name with optional sample to disambiguate duplicate names.\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"locationId\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"sample\":{\"type\":\"integer\",\"minimum\":0}},\"anyOf\":[{\"required\":[\"locationId\"]},{\"required\":[\"name\"]}],\"additionalProperties\":false}},"
+				"{\"name\":\"markers_rename\",\"title\":\"Rename Marker\",\"description\":\"Rename one marker/range by locationId (preferred), or by name with optional sample to disambiguate duplicate names.\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"locationId\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"sample\":{\"type\":\"integer\",\"minimum\":0},\"newName\":{\"type\":\"string\"}},\"required\":[\"newName\"],\"anyOf\":[{\"required\":[\"locationId\"]},{\"required\":[\"name\"]}],\"additionalProperties\":false}},"
+				"{\"name\":\"tracks_list\",\"title\":\"Tracks List\",\"description\":\"List session tracks and buses. includeHidden=true includes hidden routes.\","
+				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"includeHidden\":{\"type\":\"boolean\"}},\"additionalProperties\":false},\"outputSchema\":{\"type\":\"object\",\"required\":[\"tracks\"],\"properties\":{\"tracks\":{\"type\":\"array\"}},\"additionalProperties\":true}},"
+				"{\"name\":\"tracks_add\",\"title\":\"Add Track\",\"description\":\"Add one or more tracks (audio or MIDI). insert can be end/before/after; when before/after and relativeToId is omitted, selected route is used if available.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"type\":{\"type\":\"string\",\"enum\":[\"audio\",\"midi\"]},\"count\":{\"type\":\"integer\",\"minimum\":1},\"name\":{\"type\":\"string\"},\"inputChannels\":{\"type\":\"integer\",\"minimum\":1},\"outputChannels\":{\"type\":\"integer\",\"minimum\":1},\"strictIo\":{\"type\":\"boolean\"},\"insert\":{\"type\":\"string\",\"enum\":[\"end\",\"before\",\"after\"]},\"relativeToId\":{\"type\":\"string\"}},\"additionalProperties\":false}},"
-				"{\"name\":\"buses_add\",\"title\":\"Add Bus\",\"description\":\"Add one or more buses (audio or MIDI). Optional insertion: end, before, or after a reference route (or selected route).\","
+				"{\"name\":\"buses_add\",\"title\":\"Add Bus\",\"description\":\"Add one or more buses (audio or MIDI). insert can be end/before/after; when before/after and relativeToId is omitted, selected route is used if available.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"type\":{\"type\":\"string\",\"enum\":[\"audio\",\"midi\"]},\"count\":{\"type\":\"integer\",\"minimum\":1},\"name\":{\"type\":\"string\"},\"inputChannels\":{\"type\":\"integer\",\"minimum\":1},\"outputChannels\":{\"type\":\"integer\",\"minimum\":1},\"strictIo\":{\"type\":\"boolean\"},\"insert\":{\"type\":\"string\",\"enum\":[\"end\",\"before\",\"after\"]},\"relativeToId\":{\"type\":\"string\"}},\"additionalProperties\":false}},"
 						"{\"name\":\"track_get_info\",\"title\":\"Get Route Info\",\"description\":\"Get one route info (fader, pan, rec, mute, solo, sends, plugins).\","
-					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"}},\"required\":[\"id\"],\"additionalProperties\":false}},"
-						"{\"name\":\"track_get_regions\",\"title\":\"Get Track Regions\",\"description\":\"List regions in one track playlist.\","
-					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"includeHidden\":{\"type\":\"boolean\"}},\"required\":[\"id\"],\"additionalProperties\":false}},"
-						"{\"name\":\"region_resize\",\"title\":\"Resize Region\",\"description\":\"Resize one region (audio or MIDI) by setting start and/or end timeline boundary using sample or bar+beat.\","
-					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"regionId\":{\"type\":\"string\"},\"startSample\":{\"type\":\"integer\",\"minimum\":0},\"startBar\":{\"type\":\"integer\",\"minimum\":1},\"startBeat\":{\"type\":\"number\",\"minimum\":1},\"endSample\":{\"type\":\"integer\",\"minimum\":0},\"endBar\":{\"type\":\"integer\",\"minimum\":1},\"endBeat\":{\"type\":\"number\",\"minimum\":1}},\"required\":[\"regionId\"],\"anyOf\":[{\"required\":[\"startSample\"]},{\"required\":[\"startBar\",\"startBeat\"]},{\"required\":[\"endSample\"]},{\"required\":[\"endBar\",\"endBeat\"]}],\"additionalProperties\":false}},"
-						"{\"name\":\"region_copy\",\"title\":\"Copy Region\",\"description\":\"Copy one region (audio or MIDI) to a new timeline position by absolute sample/bar+beat or by delta, optionally to another track.\","
-					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"regionId\":{\"type\":\"string\"},\"trackId\":{\"type\":\"string\"},\"sample\":{\"type\":\"integer\",\"minimum\":0},\"bar\":{\"type\":\"integer\",\"minimum\":1},\"beat\":{\"type\":\"number\",\"minimum\":1},\"deltaSamples\":{\"type\":\"integer\"},\"deltaBeats\":{\"type\":\"number\"}},\"required\":[\"regionId\"],\"oneOf\":[{\"required\":[\"sample\"]},{\"required\":[\"bar\",\"beat\"]},{\"required\":[\"deltaSamples\"]},{\"required\":[\"deltaBeats\"]}],\"additionalProperties\":false}},"
-						"{\"name\":\"region_move\",\"title\":\"Move Region\",\"description\":\"Move one region (audio or MIDI) to a new timeline position by absolute sample/bar+beat or by delta, optionally to another track.\","
-					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"regionId\":{\"type\":\"string\"},\"trackId\":{\"type\":\"string\"},\"sample\":{\"type\":\"integer\",\"minimum\":0},\"bar\":{\"type\":\"integer\",\"minimum\":1},\"beat\":{\"type\":\"number\",\"minimum\":1},\"deltaSamples\":{\"type\":\"integer\"},\"deltaBeats\":{\"type\":\"number\"}},\"required\":[\"regionId\"],\"oneOf\":[{\"required\":[\"sample\"]},{\"required\":[\"bar\",\"beat\"]},{\"required\":[\"deltaSamples\"]},{\"required\":[\"deltaBeats\"]}],\"additionalProperties\":false}},"
+					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"}},\"required\":[\"id\"],\"additionalProperties\":false},\"outputSchema\":{\"type\":\"object\",\"required\":[\"id\",\"name\",\"type\"],\"properties\":{\"id\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"type\":{\"type\":\"string\"},\"sends\":{\"type\":\"array\"},\"plugins\":{\"type\":\"array\"}},\"additionalProperties\":true}},"
+						"{\"name\":\"track_get_regions\",\"title\":\"Get Track Regions\",\"description\":\"List regions in one track playlist. includeHidden=true includes hidden regions.\","
+					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"includeHidden\":{\"type\":\"boolean\"}},\"required\":[\"id\"],\"additionalProperties\":false},\"outputSchema\":{\"type\":\"object\",\"required\":[\"id\",\"regions\"],\"properties\":{\"id\":{\"type\":\"string\"},\"regions\":{\"type\":\"array\"}},\"additionalProperties\":true}},"
+						"{\"name\":\"region_resize\",\"title\":\"Resize Region\",\"description\":\"Resize one region (audio or MIDI) by setting start and/or end timeline boundary using sample or bar+beat. If regionId is omitted, uses selected track's top region at playhead.\","
+					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"regionId\":{\"type\":\"string\"},\"startSample\":{\"type\":\"integer\",\"minimum\":0},\"startBar\":{\"type\":\"integer\",\"minimum\":1},\"startBeat\":{\"type\":\"number\",\"minimum\":1},\"endSample\":{\"type\":\"integer\",\"minimum\":0},\"endBar\":{\"type\":\"integer\",\"minimum\":1},\"endBeat\":{\"type\":\"number\",\"minimum\":1}},\"anyOf\":[{\"required\":[\"startSample\"]},{\"required\":[\"startBar\",\"startBeat\"]},{\"required\":[\"endSample\"]},{\"required\":[\"endBar\",\"endBeat\"]}],\"additionalProperties\":false},\"outputSchema\":{\"type\":\"object\",\"required\":[\"regionId\",\"startSample\",\"endSample\"],\"properties\":{\"regionId\":{\"type\":\"string\"},\"resolvedVia\":{\"type\":\"string\"},\"startSample\":{\"type\":\"integer\"},\"endSample\":{\"type\":\"integer\"}},\"additionalProperties\":true}},"
+						"{\"name\":\"region_copy\",\"title\":\"Copy Region\",\"description\":\"Copy one region (audio or MIDI) to an absolute position or by delta. deltaBeats can be fractional. Optional trackId copies to another track. If regionId is omitted, uses selected track's top region at playhead.\","
+					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"regionId\":{\"type\":\"string\"},\"trackId\":{\"type\":\"string\"},\"sample\":{\"type\":\"integer\",\"minimum\":0},\"bar\":{\"type\":\"integer\",\"minimum\":1},\"beat\":{\"type\":\"number\",\"minimum\":1},\"deltaSamples\":{\"type\":\"integer\"},\"deltaBeats\":{\"type\":\"number\"}},\"oneOf\":[{\"required\":[\"sample\"]},{\"required\":[\"bar\",\"beat\"]},{\"required\":[\"deltaSamples\"]},{\"required\":[\"deltaBeats\"]}],\"additionalProperties\":false},\"outputSchema\":{\"type\":\"object\",\"required\":[\"regionId\",\"sourceRegionId\",\"startSample\",\"endSample\"],\"properties\":{\"regionId\":{\"type\":\"string\"},\"sourceRegionId\":{\"type\":\"string\"},\"resolvedVia\":{\"type\":\"string\"},\"startSample\":{\"type\":\"integer\"},\"endSample\":{\"type\":\"integer\"},\"crossTrack\":{\"type\":\"boolean\"}},\"additionalProperties\":true}},"
+						"{\"name\":\"region_move\",\"title\":\"Move Region\",\"description\":\"Move one region (audio or MIDI) to an absolute position or by delta. deltaBeats can be fractional. Optional trackId moves to another track. If regionId is omitted, uses selected track's top region at playhead.\","
+					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"regionId\":{\"type\":\"string\"},\"trackId\":{\"type\":\"string\"},\"sample\":{\"type\":\"integer\",\"minimum\":0},\"bar\":{\"type\":\"integer\",\"minimum\":1},\"beat\":{\"type\":\"number\",\"minimum\":1},\"deltaSamples\":{\"type\":\"integer\"},\"deltaBeats\":{\"type\":\"number\"}},\"oneOf\":[{\"required\":[\"sample\"]},{\"required\":[\"bar\",\"beat\"]},{\"required\":[\"deltaSamples\"]},{\"required\":[\"deltaBeats\"]}],\"additionalProperties\":false},\"outputSchema\":{\"type\":\"object\",\"required\":[\"regionId\",\"sourceRegionId\",\"startSample\",\"endSample\"],\"properties\":{\"regionId\":{\"type\":\"string\"},\"sourceRegionId\":{\"type\":\"string\"},\"resolvedVia\":{\"type\":\"string\"},\"startSample\":{\"type\":\"integer\"},\"endSample\":{\"type\":\"integer\"},\"crossTrack\":{\"type\":\"boolean\"}},\"additionalProperties\":true}},"
 						"{\"name\":\"plugin_get_description\",\"title\":\"Plugin Description\",\"description\":\"Get plugin descriptor and parameter metadata for a route plugin.\","
 						"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"pluginIndex\":{\"type\":\"integer\",\"minimum\":0}},\"required\":[\"id\",\"pluginIndex\"],\"additionalProperties\":false}},"
-					"{\"name\":\"plugin_set_parameter\",\"title\":\"Set Plugin Parameter\",\"description\":\"Set a plugin parameter by parameter index or control ID.\","
-					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"pluginIndex\":{\"type\":\"integer\",\"minimum\":0},\"parameterIndex\":{\"type\":\"integer\",\"minimum\":0},\"controlId\":{\"type\":\"integer\",\"minimum\":0},\"value\":{\"type\":\"number\"},\"interface\":{\"type\":\"number\"}},\"required\":[\"id\",\"pluginIndex\"],\"additionalProperties\":false}},"
+					"{\"name\":\"plugin_set_parameter\",\"title\":\"Set Plugin Parameter\",\"description\":\"Set one plugin parameter by parameterIndex or controlId, using either internal value or interface value.\","
+					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"pluginIndex\":{\"type\":\"integer\",\"minimum\":0},\"parameterIndex\":{\"type\":\"integer\",\"minimum\":0},\"controlId\":{\"type\":\"integer\",\"minimum\":0},\"value\":{\"type\":\"number\"},\"interface\":{\"type\":\"number\"}},\"required\":[\"id\",\"pluginIndex\"],\"allOf\":[{\"oneOf\":[{\"required\":[\"parameterIndex\"]},{\"required\":[\"controlId\"]}]},{\"oneOf\":[{\"required\":[\"value\"]},{\"required\":[\"interface\"]}]}],\"additionalProperties\":false},\"outputSchema\":{\"type\":\"object\",\"required\":[\"id\",\"pluginIndex\",\"parameterIndex\",\"controlId\",\"value\",\"interface\"],\"properties\":{\"id\":{\"type\":\"string\"},\"pluginIndex\":{\"type\":\"integer\"},\"parameterIndex\":{\"type\":\"integer\"},\"controlId\":{\"type\":\"integer\"},\"value\":{\"type\":\"number\"},\"interface\":{\"type\":\"number\"}},\"additionalProperties\":true}},"
 					"{\"name\":\"plugin_set_enabled\",\"title\":\"Set Plugin Enabled\",\"description\":\"Enable or disable one route plugin by index.\","
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"pluginIndex\":{\"type\":\"integer\",\"minimum\":0},\"enabled\":{\"type\":\"boolean\"}},\"required\":[\"id\",\"pluginIndex\",\"enabled\"],\"additionalProperties\":false}},"
 				"{\"name\":\"track_get_fader\",\"title\":\"Get Track Fader\",\"description\":\"Get current track fader as normalized position and dB.\","
@@ -2563,16 +2620,16 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"sendIndex\":{\"type\":\"integer\",\"minimum\":0},\"position\":{\"type\":\"number\",\"minimum\":0,\"maximum\":1},\"db\":{\"type\":\"number\"}},\"required\":[\"id\",\"sendIndex\"],\"oneOf\":[{\"required\":[\"position\"]},{\"required\":[\"db\"]}],\"additionalProperties\":false}},"
 				"{\"name\":\"track_set_fader\",\"title\":\"Set Track Fader\",\"description\":\"Set track fader by normalized position (0.0 to 1.0) or dB.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"position\":{\"type\":\"number\",\"minimum\":0,\"maximum\":1},\"db\":{\"type\":\"number\"}},\"required\":[\"id\"],\"oneOf\":[{\"required\":[\"position\"]},{\"required\":[\"db\"]}],\"additionalProperties\":false}},"
-						"{\"name\":\"midi_region_add\",\"title\":\"Add MIDI Region\",\"description\":\"Create an empty MIDI region on a MIDI track using sample or bar+beat range endpoints.\","
-						"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"trackId\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"startSample\":{\"type\":\"integer\",\"minimum\":0},\"endSample\":{\"type\":\"integer\",\"minimum\":0},\"startBar\":{\"type\":\"integer\",\"minimum\":1},\"startBeat\":{\"type\":\"number\",\"minimum\":1},\"endBar\":{\"type\":\"integer\",\"minimum\":1},\"endBeat\":{\"type\":\"number\",\"minimum\":1}},\"required\":[\"trackId\"],\"additionalProperties\":false}},"
+						"{\"name\":\"midi_region_add\",\"title\":\"Add MIDI Region\",\"description\":\"Create an empty MIDI region on a MIDI track. Provide either startSample+endSample, or startBar+startBeat+endBar+endBeat.\","
+						"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"trackId\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"startSample\":{\"type\":\"integer\",\"minimum\":0},\"endSample\":{\"type\":\"integer\",\"minimum\":0},\"startBar\":{\"type\":\"integer\",\"minimum\":1},\"startBeat\":{\"type\":\"number\",\"minimum\":1},\"endBar\":{\"type\":\"integer\",\"minimum\":1},\"endBeat\":{\"type\":\"number\",\"minimum\":1}},\"required\":[\"trackId\"],\"oneOf\":[{\"required\":[\"startSample\",\"endSample\"]},{\"required\":[\"startBar\",\"startBeat\",\"endBar\",\"endBeat\"]}],\"additionalProperties\":false},\"outputSchema\":{\"type\":\"object\",\"required\":[\"created\"],\"properties\":{\"created\":{\"type\":\"object\"},\"usedDefaultName\":{\"type\":\"boolean\"}},\"additionalProperties\":true}},"
 					"{\"name\":\"midi_note_add\",\"title\":\"Add MIDI Note\",\"description\":\"Add one MIDI note to an existing MIDI region at region beats, sample, or bar+beat position.\","
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"regionId\":{\"type\":\"string\"},\"note\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":127},\"velocity\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":127},\"channel\":{\"type\":\"integer\",\"minimum\":1,\"maximum\":16},\"lengthBeats\":{\"type\":\"number\",\"exclusiveMinimum\":0},\"regionBeat\":{\"type\":\"number\",\"minimum\":0},\"sample\":{\"type\":\"integer\",\"minimum\":0},\"bar\":{\"type\":\"integer\",\"minimum\":1},\"beat\":{\"type\":\"number\",\"minimum\":1}},\"required\":[\"regionId\",\"note\",\"lengthBeats\"],\"oneOf\":[{\"required\":[\"regionBeat\"]},{\"required\":[\"sample\"]},{\"required\":[\"bar\",\"beat\"]}],\"additionalProperties\":false}},"
 					"{\"name\":\"midi_note_list\",\"title\":\"List MIDI Notes\",\"description\":\"List all MIDI notes in a MIDI region.\","
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"regionId\":{\"type\":\"string\"}},\"required\":[\"regionId\"],\"additionalProperties\":false}},"
 					"{\"name\":\"midi_note_edit\",\"title\":\"Edit MIDI Notes\",\"description\":\"Edit or delete MIDI notes by noteId in a MIDI region.\","
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"regionId\":{\"type\":\"string\"},\"edits\":{\"type\":\"array\",\"minItems\":1,\"items\":{\"type\":\"object\",\"properties\":{\"noteId\":{\"type\":\"integer\"},\"delete\":{\"type\":\"boolean\"},\"note\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":127},\"deltaSemitones\":{\"type\":\"integer\"},\"velocity\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":127},\"deltaVelocity\":{\"type\":\"integer\"},\"channel\":{\"type\":\"integer\",\"minimum\":1,\"maximum\":16},\"startBeats\":{\"type\":\"number\",\"minimum\":0},\"deltaBeats\":{\"type\":\"number\"},\"lengthBeats\":{\"type\":\"number\",\"exclusiveMinimum\":0}},\"required\":[\"noteId\"],\"additionalProperties\":false}}},\"required\":[\"regionId\",\"edits\"],\"additionalProperties\":false}},"
-					"{\"name\":\"midi_note_import_json\",\"title\":\"Import MIDI JSON\",\"description\":\"Import a MIDI JSON pattern (with repeats) into an existing MIDI region, or create a new MIDI region and populate it.\","
-					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"midi\":{\"type\":\"object\"},\"regionId\":{\"type\":\"string\"},\"trackId\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"startSample\":{\"type\":\"integer\",\"minimum\":0},\"endSample\":{\"type\":\"integer\",\"minimum\":0},\"startBar\":{\"type\":\"integer\",\"minimum\":1},\"startBeat\":{\"type\":\"number\",\"minimum\":1},\"endBar\":{\"type\":\"integer\",\"minimum\":1},\"endBeat\":{\"type\":\"number\",\"minimum\":1}},\"required\":[\"midi\"],\"oneOf\":[{\"required\":[\"regionId\"]},{\"required\":[\"trackId\"]}],\"additionalProperties\":false}},"
+					"{\"name\":\"midi_note_import_json\",\"title\":\"Import MIDI JSON\",\"description\":\"Import MIDI JSON into an existing MIDI region (regionId), or create/populate a new MIDI region on a track (trackId plus range endpoints).\","
+					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"midi\":{\"type\":\"object\"},\"regionId\":{\"type\":\"string\"},\"trackId\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"startSample\":{\"type\":\"integer\",\"minimum\":0},\"endSample\":{\"type\":\"integer\",\"minimum\":0},\"startBar\":{\"type\":\"integer\",\"minimum\":1},\"startBeat\":{\"type\":\"number\",\"minimum\":1},\"endBar\":{\"type\":\"integer\",\"minimum\":1},\"endBeat\":{\"type\":\"number\",\"minimum\":1}},\"required\":[\"midi\"],\"oneOf\":[{\"required\":[\"regionId\"]},{\"required\":[\"trackId\",\"startSample\",\"endSample\"]},{\"required\":[\"trackId\",\"startBar\",\"startBeat\",\"endBar\",\"endBeat\"]}],\"additionalProperties\":false},\"outputSchema\":{\"type\":\"object\",\"required\":[\"createdRegion\",\"region\",\"summary\"],\"properties\":{\"createdRegion\":{\"type\":\"boolean\"},\"region\":{\"type\":\"object\"},\"summary\":{\"type\":\"object\"},\"warnings\":{\"type\":\"array\"}},\"additionalProperties\":true}},"
 					"{\"name\":\"midi_note_get_json\",\"title\":\"Export MIDI JSON\",\"description\":\"Export all notes from a MIDI region as import-compatible MIDI JSON (standard mode with note_on/note_off events).\",\"inputSchema\":{\"type\":\"object\",\"properties\":{\"regionId\":{\"type\":\"string\"},\"ticksPerQuarter\":{\"type\":\"integer\",\"minimum\":1},\"timeSignature\":{\"type\":\"string\"}},\"required\":[\"regionId\"],\"additionalProperties\":false}}"
 					"]}");
 			}
@@ -4796,11 +4853,6 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 					if (tool_name == "region/resize") {
 						Temporal::TempoMap::fetch ();
 
-						const std::string region_id = root.get<std::string> ("params.arguments.regionId", "");
-						if (region_id.empty ()) {
-							return jsonrpc_error (id, -32602, "Missing regionId");
-						}
-
 						samplepos_t requested_start_boundary = 0;
 						samplepos_t requested_end_boundary = 0;
 						bool have_start_boundary = false;
@@ -4823,9 +4875,11 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 							return jsonrpc_error (id, -32602, "Provide at least one boundary (startSample/startBar+startBeat and/or endSample/endBar+endBeat)");
 						}
 
-						const std::shared_ptr<ARDOUR::Region> region = ARDOUR::RegionFactory::region_by_id (PBD::ID (region_id));
-						if (!region) {
-							return jsonrpc_error (id, -32602, "regionId not found");
+						std::shared_ptr<ARDOUR::Region> region;
+						std::string region_resolved_via;
+						std::string region_error;
+						if (!resolve_region_argument_or_selected_at_playhead (_session, root, "params.arguments", region, region_resolved_via, region_error)) {
+							return jsonrpc_error (id, -32602, region_error);
 						}
 						const std::shared_ptr<ARDOUR::Playlist> playlist = region->playlist ();
 						if (!playlist) {
@@ -4878,6 +4932,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 							<< ",\"name\":\"" << json_escape (region->name ()) << "\""
 							<< ",\"type\":\"" << json_escape (region->data_type ().to_string ()) << "\""
 							<< ",\"playlistId\":\"" << json_escape (playlist->id ().to_s ()) << "\""
+							<< ",\"resolvedVia\":\"" << json_escape (region_resolved_via) << "\""
 							<< ",\"resized\":" << (resized ? "true" : "false")
 							<< ",\"previousStartSample\":" << previous_start_sample
 							<< ",\"previousEndSample\":" << previous_end_sample
@@ -4951,11 +5006,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 					if (tool_name == "region/copy") {
 						Temporal::TempoMap::fetch ();
 
-						const std::string region_id = root.get<std::string> ("params.arguments.regionId", "");
 						const std::string target_track_id = root.get<std::string> ("params.arguments.trackId", "");
-						if (region_id.empty ()) {
-							return jsonrpc_error (id, -32602, "Missing regionId");
-						}
 
 						const boost::optional<int64_t> sample_opt = root.get_optional<int64_t> ("params.arguments.sample");
 						const boost::optional<int64_t> delta_samples_opt = root.get_optional<int64_t> ("params.arguments.deltaSamples");
@@ -4992,9 +5043,11 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 							return jsonrpc_error (id, -32602, "Provide exactly one target: sample, bar+beat, deltaSamples, or deltaBeats");
 						}
 
-						const std::shared_ptr<ARDOUR::Region> region = ARDOUR::RegionFactory::region_by_id (PBD::ID (region_id));
-						if (!region) {
-							return jsonrpc_error (id, -32602, "regionId not found");
+						std::shared_ptr<ARDOUR::Region> region;
+						std::string region_resolved_via;
+						std::string region_error;
+						if (!resolve_region_argument_or_selected_at_playhead (_session, root, "params.arguments", region, region_resolved_via, region_error)) {
+							return jsonrpc_error (id, -32602, region_error);
 						}
 
 						const std::shared_ptr<ARDOUR::Playlist> source_playlist = region->playlist ();
@@ -5097,6 +5150,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 							<< ",\"type\":\"" << json_escape (copied_region->data_type ().to_string ()) << "\""
 							<< ",\"playlistId\":\"" << json_escape (target_playlist->id ().to_s ()) << "\""
 							<< ",\"sourcePlaylistId\":\"" << json_escape (source_playlist->id ().to_s ()) << "\""
+							<< ",\"resolvedVia\":\"" << json_escape (region_resolved_via) << "\""
 							<< ",\"trackId\":";
 						if (target_track) {
 							structured << "\"" << json_escape (target_track->id ().to_s ()) << "\"";
@@ -5151,11 +5205,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 					if (tool_name == "region/move") {
 						Temporal::TempoMap::fetch ();
 
-						const std::string region_id = root.get<std::string> ("params.arguments.regionId", "");
 						const std::string target_track_id = root.get<std::string> ("params.arguments.trackId", "");
-						if (region_id.empty ()) {
-							return jsonrpc_error (id, -32602, "Missing regionId");
-						}
 
 						const boost::optional<int64_t> sample_opt = root.get_optional<int64_t> ("params.arguments.sample");
 						const boost::optional<int64_t> delta_samples_opt = root.get_optional<int64_t> ("params.arguments.deltaSamples");
@@ -5192,9 +5242,11 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 							return jsonrpc_error (id, -32602, "Provide exactly one target: sample, bar+beat, deltaSamples, or deltaBeats");
 						}
 
-						const std::shared_ptr<ARDOUR::Region> region = ARDOUR::RegionFactory::region_by_id (PBD::ID (region_id));
-						if (!region) {
-							return jsonrpc_error (id, -32602, "regionId not found");
+						std::shared_ptr<ARDOUR::Region> region;
+						std::string region_resolved_via;
+						std::string region_error;
+						if (!resolve_region_argument_or_selected_at_playhead (_session, root, "params.arguments", region, region_resolved_via, region_error)) {
+							return jsonrpc_error (id, -32602, region_error);
 						}
 
 						const std::shared_ptr<ARDOUR::Playlist> source_playlist = region->playlist ();
@@ -5322,6 +5374,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 							<< ",\"type\":\"" << json_escape (moved_region->data_type ().to_string ()) << "\""
 							<< ",\"playlistId\":\"" << json_escape (moved_playlist->id ().to_s ()) << "\""
 							<< ",\"sourcePlaylistId\":\"" << json_escape (source_playlist->id ().to_s ()) << "\""
+							<< ",\"resolvedVia\":\"" << json_escape (region_resolved_via) << "\""
 							<< ",\"trackId\":";
 						if (target_track) {
 							structured << "\"" << json_escape (target_track->id ().to_s ()) << "\"";
