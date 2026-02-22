@@ -269,7 +269,7 @@ msgstr "Région audio"
 
 #: audiosource.cc:267
 msgid "cannot rename peakfile for %1 from %2 to %3 (%4)"
-msgstr "Impossible de renommer le fichier de pic-audio pour %1 de %2 à %3 (%4)"
+msgstr "Impossible de renommer le fichier de crêtes pour %1 de %2 à %3 (%4)"
 
 #: audiosource.cc:301
 msgid "AudioSource: cannot stat peakfile \"%1\""
