@@ -6672,7 +6672,7 @@ msgstr "Passer au mode d'édition suivant"
 
 #: editor_actions.cc:574
 msgid "Show Marker Lines"
-msgstr "Afficher les lignes verticales sous les) repères"
+msgstr "Afficher les lignes verticales sous les repères"
 
 #: editor_actions.cc:592
 msgid "All Markers"
