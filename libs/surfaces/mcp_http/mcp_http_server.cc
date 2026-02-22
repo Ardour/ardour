@@ -37,6 +37,7 @@
 #include "pbd/id.h"
 #include "pbd/controllable.h"
 #include "pbd/memento_command.h"
+#include "pbd/stateful_diff_command.h"
 #include "pbd/xml++.h"
 
 #include "ardour/audio_track.h"
@@ -106,6 +107,7 @@ canonical_tool_name (std::string tool_name)
 		"tracks",
 		"buses",
 		"track",
+		"region",
 		"plugin",
 		"midi_region",
 		"midi_note"
@@ -1020,6 +1022,57 @@ parse_optional_bbt_target_sample (
 	const int bar = *bar_opt;
 	const double beat = *beat_opt;
 	if (!parse_bbt_target_sample (bar, beat, target_sample, error)) {
+		return false;
+	}
+
+	have_target = true;
+	return true;
+}
+
+static bool
+parse_optional_timeline_boundary_sample (
+	const pt::ptree& root,
+	const std::string& args_path,
+	const std::string& sample_key,
+	const std::string& bar_key,
+	const std::string& beat_key,
+	samplepos_t& target_sample,
+	bool& have_target,
+	std::string& error)
+{
+	have_target = false;
+	error.clear ();
+
+	const boost::optional<int64_t> sample_opt = root.get_optional<int64_t> (args_path + "." + sample_key);
+	const boost::optional<int> bar_opt = root.get_optional<int> (args_path + "." + bar_key);
+	const boost::optional<double> beat_opt = root.get_optional<double> (args_path + "." + beat_key);
+
+	if ((bar_opt && !beat_opt) || (!bar_opt && beat_opt)) {
+		error = std::string ("Provide both ") + bar_key + " and " + beat_key + ", or neither";
+		return false;
+	}
+
+	if (sample_opt && (bar_opt || beat_opt)) {
+		error = std::string ("Provide either ") + sample_key + " or " + bar_key + "+" + beat_key + ", not both";
+		return false;
+	}
+
+	if (!sample_opt && !bar_opt && !beat_opt) {
+		return true;
+	}
+
+	if (sample_opt) {
+		if (*sample_opt < 0) {
+			error = std::string ("Invalid ") + sample_key + " (expected >= 0)";
+			return false;
+		}
+		target_sample = (samplepos_t) *sample_opt;
+		have_target = true;
+		return true;
+	}
+
+	if (!parse_bbt_target_sample (*bar_opt, *beat_opt, target_sample, error)) {
+		error = std::string ("Invalid ") + bar_key + "/" + beat_key + ": " + error;
 		return false;
 	}
 
@@ -2478,6 +2531,12 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"}},\"required\":[\"id\"],\"additionalProperties\":false}},"
 						"{\"name\":\"track_get_regions\",\"title\":\"Get Track Regions\",\"description\":\"List regions in one track playlist.\","
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"includeHidden\":{\"type\":\"boolean\"}},\"required\":[\"id\"],\"additionalProperties\":false}},"
+						"{\"name\":\"region_resize\",\"title\":\"Resize Region\",\"description\":\"Resize one region (audio or MIDI) by setting start and/or end timeline boundary using sample or bar+beat.\","
+					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"regionId\":{\"type\":\"string\"},\"startSample\":{\"type\":\"integer\",\"minimum\":0},\"startBar\":{\"type\":\"integer\",\"minimum\":1},\"startBeat\":{\"type\":\"number\",\"minimum\":1},\"endSample\":{\"type\":\"integer\",\"minimum\":0},\"endBar\":{\"type\":\"integer\",\"minimum\":1},\"endBeat\":{\"type\":\"number\",\"minimum\":1}},\"required\":[\"regionId\"],\"anyOf\":[{\"required\":[\"startSample\"]},{\"required\":[\"startBar\",\"startBeat\"]},{\"required\":[\"endSample\"]},{\"required\":[\"endBar\",\"endBeat\"]}],\"additionalProperties\":false}},"
+						"{\"name\":\"region_copy\",\"title\":\"Copy Region\",\"description\":\"Copy one region (audio or MIDI) to a new timeline position by absolute sample/bar+beat or by delta, optionally to another track.\","
+					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"regionId\":{\"type\":\"string\"},\"trackId\":{\"type\":\"string\"},\"sample\":{\"type\":\"integer\",\"minimum\":0},\"bar\":{\"type\":\"integer\",\"minimum\":1},\"beat\":{\"type\":\"number\",\"minimum\":1},\"deltaSamples\":{\"type\":\"integer\"},\"deltaBeats\":{\"type\":\"number\"}},\"required\":[\"regionId\"],\"oneOf\":[{\"required\":[\"sample\"]},{\"required\":[\"bar\",\"beat\"]},{\"required\":[\"deltaSamples\"]},{\"required\":[\"deltaBeats\"]}],\"additionalProperties\":false}},"
+						"{\"name\":\"region_move\",\"title\":\"Move Region\",\"description\":\"Move one region (audio or MIDI) to a new timeline position by absolute sample/bar+beat or by delta, optionally to another track.\","
+					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"regionId\":{\"type\":\"string\"},\"trackId\":{\"type\":\"string\"},\"sample\":{\"type\":\"integer\",\"minimum\":0},\"bar\":{\"type\":\"integer\",\"minimum\":1},\"beat\":{\"type\":\"number\",\"minimum\":1},\"deltaSamples\":{\"type\":\"integer\"},\"deltaBeats\":{\"type\":\"number\"}},\"required\":[\"regionId\"],\"oneOf\":[{\"required\":[\"sample\"]},{\"required\":[\"bar\",\"beat\"]},{\"required\":[\"deltaSamples\"]},{\"required\":[\"deltaBeats\"]}],\"additionalProperties\":false}},"
 						"{\"name\":\"plugin_get_description\",\"title\":\"Plugin Description\",\"description\":\"Get plugin descriptor and parameter metadata for a route plugin.\","
 						"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"pluginIndex\":{\"type\":\"integer\",\"minimum\":0}},\"required\":[\"id\",\"pluginIndex\"],\"additionalProperties\":false}},"
 					"{\"name\":\"plugin_set_parameter\",\"title\":\"Set Plugin Parameter\",\"description\":\"Set a plugin parameter by parameter index or control ID.\","
@@ -4732,6 +4791,587 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						id,
 						std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Track regions listed\"}],\"structuredContent\":")
 							+ structured.str () + "}");
+					}
+
+					if (tool_name == "region/resize") {
+						Temporal::TempoMap::fetch ();
+
+						const std::string region_id = root.get<std::string> ("params.arguments.regionId", "");
+						if (region_id.empty ()) {
+							return jsonrpc_error (id, -32602, "Missing regionId");
+						}
+
+						samplepos_t requested_start_boundary = 0;
+						samplepos_t requested_end_boundary = 0;
+						bool have_start_boundary = false;
+						bool have_end_boundary = false;
+						std::string boundary_error;
+
+						if (!parse_optional_timeline_boundary_sample (
+								root, "params.arguments",
+								"startSample", "startBar", "startBeat",
+								requested_start_boundary, have_start_boundary, boundary_error)) {
+							return jsonrpc_error (id, -32602, boundary_error);
+						}
+						if (!parse_optional_timeline_boundary_sample (
+								root, "params.arguments",
+								"endSample", "endBar", "endBeat",
+								requested_end_boundary, have_end_boundary, boundary_error)) {
+							return jsonrpc_error (id, -32602, boundary_error);
+						}
+						if (!have_start_boundary && !have_end_boundary) {
+							return jsonrpc_error (id, -32602, "Provide at least one boundary (startSample/startBar+startBeat and/or endSample/endBar+endBeat)");
+						}
+
+						const std::shared_ptr<ARDOUR::Region> region = ARDOUR::RegionFactory::region_by_id (PBD::ID (region_id));
+						if (!region) {
+							return jsonrpc_error (id, -32602, "regionId not found");
+						}
+						const std::shared_ptr<ARDOUR::Playlist> playlist = region->playlist ();
+						if (!playlist) {
+							return jsonrpc_error (id, -32000, "Region has no playlist");
+						}
+						if (region->locked ()) {
+							return jsonrpc_error (id, -32602, "Region is locked");
+						}
+
+						const samplepos_t previous_start_sample = region->position_sample ();
+						const samplepos_t previous_end_sample = previous_start_sample + region->length_samples ();
+						const samplepos_t requested_start_sample = have_start_boundary ? requested_start_boundary : previous_start_sample;
+						const samplepos_t requested_end_sample = have_end_boundary ? requested_end_boundary : previous_end_sample;
+
+						if (requested_end_sample <= requested_start_sample) {
+							return jsonrpc_error (id, -32602, "Invalid region bounds: end must be greater than start");
+						}
+
+						const ARDOUR::Trimmable::CanTrim can_trim = region->can_trim ();
+						const int trim_flags = (int) can_trim;
+						if (requested_start_sample < previous_start_sample && !(trim_flags & ARDOUR::Trimmable::FrontTrimEarlier)) {
+							return jsonrpc_error (id, -32602, "Region front cannot be trimmed earlier");
+						}
+						if (requested_start_sample > previous_start_sample && !(trim_flags & ARDOUR::Trimmable::FrontTrimLater)) {
+							return jsonrpc_error (id, -32602, "Region front cannot be trimmed later");
+						}
+						if (requested_end_sample < previous_end_sample && !(trim_flags & ARDOUR::Trimmable::EndTrimEarlier)) {
+							return jsonrpc_error (id, -32602, "Region end cannot be trimmed earlier");
+						}
+						if (requested_end_sample > previous_end_sample && !(trim_flags & ARDOUR::Trimmable::EndTrimLater)) {
+							return jsonrpc_error (id, -32602, "Region end cannot be trimmed later");
+						}
+
+						if (requested_start_sample != previous_start_sample || requested_end_sample != previous_end_sample) {
+							_session.begin_reversible_command ("resize region");
+							region->clear_changes ();
+							region->trim_to (
+								Temporal::timepos_t (requested_start_sample),
+								Temporal::timepos_t (requested_start_sample).distance (Temporal::timepos_t (requested_end_sample)));
+							_session.add_command (new PBD::StatefulDiffCommand (region));
+							_session.commit_reversible_command ();
+						}
+
+						const samplepos_t resized_start_sample = region->position_sample ();
+						const samplepos_t resized_end_sample = resized_start_sample + region->length_samples ();
+						const bool resized = (resized_start_sample != previous_start_sample) || (resized_end_sample != previous_end_sample);
+
+						std::ostringstream structured;
+						structured << "{\"regionId\":\"" << json_escape (region->id ().to_s ()) << "\""
+							<< ",\"name\":\"" << json_escape (region->name ()) << "\""
+							<< ",\"type\":\"" << json_escape (region->data_type ().to_string ()) << "\""
+							<< ",\"playlistId\":\"" << json_escape (playlist->id ().to_s ()) << "\""
+							<< ",\"resized\":" << (resized ? "true" : "false")
+							<< ",\"previousStartSample\":" << previous_start_sample
+							<< ",\"previousEndSample\":" << previous_end_sample
+							<< ",\"requestedStartSample\":" << requested_start_sample
+							<< ",\"requestedEndSample\":" << requested_end_sample
+							<< ",\"startSample\":" << resized_start_sample
+							<< ",\"endSample\":" << resized_end_sample
+							<< ",\"lengthSamples\":" << region->length_samples ()
+							<< ",\"previousStartBbt\":" << bbt_json_at_sample (previous_start_sample)
+							<< ",\"previousEndBbt\":" << bbt_json_at_sample (previous_end_sample)
+							<< ",\"requestedStartBbt\":" << bbt_json_at_sample (requested_start_sample)
+							<< ",\"requestedEndBbt\":" << bbt_json_at_sample (requested_end_sample)
+							<< ",\"startBbt\":" << bbt_json_at_sample (resized_start_sample)
+							<< ",\"endBbt\":" << bbt_json_at_sample (resized_end_sample)
+							<< ",\"requested\":{";
+
+						const boost::optional<int64_t> req_start_sample_opt = root.get_optional<int64_t> ("params.arguments.startSample");
+						const boost::optional<int> req_start_bar_opt = root.get_optional<int> ("params.arguments.startBar");
+						const boost::optional<double> req_start_beat_opt = root.get_optional<double> ("params.arguments.startBeat");
+						const boost::optional<int64_t> req_end_sample_opt = root.get_optional<int64_t> ("params.arguments.endSample");
+						const boost::optional<int> req_end_bar_opt = root.get_optional<int> ("params.arguments.endBar");
+						const boost::optional<double> req_end_beat_opt = root.get_optional<double> ("params.arguments.endBeat");
+
+						structured << "\"start\":{"
+							<< "\"sample\":";
+						if (req_start_sample_opt) {
+							structured << *req_start_sample_opt;
+						} else {
+							structured << "null";
+						}
+						structured << ",\"bar\":";
+						if (req_start_bar_opt) {
+							structured << *req_start_bar_opt;
+						} else {
+							structured << "null";
+						}
+						structured << ",\"beat\":";
+						if (req_start_beat_opt) {
+							structured << *req_start_beat_opt;
+						} else {
+							structured << "null";
+						}
+						structured << "},\"end\":{"
+							<< "\"sample\":";
+						if (req_end_sample_opt) {
+							structured << *req_end_sample_opt;
+						} else {
+							structured << "null";
+						}
+						structured << ",\"bar\":";
+						if (req_end_bar_opt) {
+							structured << *req_end_bar_opt;
+						} else {
+							structured << "null";
+						}
+						structured << ",\"beat\":";
+						if (req_end_beat_opt) {
+							structured << *req_end_beat_opt;
+						} else {
+							structured << "null";
+						}
+						structured << "}}}";
+
+						return jsonrpc_result (
+							id,
+							std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"")
+								+ (resized ? "Region resized" : "Region unchanged")
+								+ "\"}],\"structuredContent\":" + structured.str () + "}");
+					}
+
+					if (tool_name == "region/copy") {
+						Temporal::TempoMap::fetch ();
+
+						const std::string region_id = root.get<std::string> ("params.arguments.regionId", "");
+						const std::string target_track_id = root.get<std::string> ("params.arguments.trackId", "");
+						if (region_id.empty ()) {
+							return jsonrpc_error (id, -32602, "Missing regionId");
+						}
+
+						const boost::optional<int64_t> sample_opt = root.get_optional<int64_t> ("params.arguments.sample");
+						const boost::optional<int64_t> delta_samples_opt = root.get_optional<int64_t> ("params.arguments.deltaSamples");
+						const boost::optional<double> delta_beats_opt = root.get_optional<double> ("params.arguments.deltaBeats");
+
+						samplepos_t bbt_sample = 0;
+						bool have_bbt_target = false;
+						std::string bbt_error;
+						if (!parse_optional_bbt_target_sample (root, "params.arguments", bbt_sample, have_bbt_target, bbt_error)) {
+							return jsonrpc_error (id, -32602, bbt_error);
+						}
+
+						if (sample_opt && *sample_opt < 0) {
+							return jsonrpc_error (id, -32602, "Invalid sample (expected >= 0)");
+						}
+						if (delta_beats_opt && !std::isfinite (*delta_beats_opt)) {
+							return jsonrpc_error (id, -32602, "Invalid deltaBeats (expected finite number)");
+						}
+
+						int target_mode_count = 0;
+						if (sample_opt) {
+							++target_mode_count;
+						}
+						if (have_bbt_target) {
+							++target_mode_count;
+						}
+						if (delta_samples_opt) {
+							++target_mode_count;
+						}
+						if (delta_beats_opt) {
+							++target_mode_count;
+						}
+						if (target_mode_count != 1) {
+							return jsonrpc_error (id, -32602, "Provide exactly one target: sample, bar+beat, deltaSamples, or deltaBeats");
+						}
+
+						const std::shared_ptr<ARDOUR::Region> region = ARDOUR::RegionFactory::region_by_id (PBD::ID (region_id));
+						if (!region) {
+							return jsonrpc_error (id, -32602, "regionId not found");
+						}
+
+						const std::shared_ptr<ARDOUR::Playlist> source_playlist = region->playlist ();
+						if (!source_playlist) {
+							return jsonrpc_error (id, -32000, "Region has no playlist");
+						}
+
+						std::shared_ptr<ARDOUR::Track> target_track;
+						std::shared_ptr<ARDOUR::Playlist> target_playlist = source_playlist;
+						if (!target_track_id.empty ()) {
+							const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (target_track_id));
+							target_track = std::dynamic_pointer_cast<ARDOUR::Track> (route);
+							if (!target_track) {
+								return jsonrpc_error (id, -32602, "trackId is not a track");
+							}
+
+							target_playlist = target_track->playlist ();
+							if (!target_playlist) {
+								return jsonrpc_error (id, -32000, "Destination track has no playlist");
+							}
+						}
+
+						if (target_playlist->data_type () != region->data_type ()) {
+							return jsonrpc_error (id, -32602, "Region type does not match destination track type");
+						}
+
+						const samplepos_t source_start_sample = region->position_sample ();
+						samplepos_t requested_start_sample = source_start_sample;
+						std::string copy_origin = "none";
+
+						if (sample_opt) {
+							requested_start_sample = (samplepos_t) *sample_opt;
+							copy_origin = "sample";
+						} else if (have_bbt_target) {
+							requested_start_sample = bbt_sample;
+							copy_origin = "bbt";
+						} else if (delta_samples_opt) {
+							const int64_t current = (int64_t) source_start_sample;
+							const int64_t delta = *delta_samples_opt;
+							if ((delta > 0 && current > (LLONG_MAX - delta)) || (delta < 0 && current < (LLONG_MIN - delta))) {
+								return jsonrpc_error (id, -32602, "deltaSamples overflow");
+							}
+							const int64_t target = current + delta;
+							if (target < 0) {
+								return jsonrpc_error (id, -32602, "Resulting position is before session start");
+							}
+							requested_start_sample = (samplepos_t) target;
+							copy_origin = "deltaSamples";
+						} else {
+							const Temporal::Beats current_quarters = Temporal::TempoMap::use ()->quarters_at (Temporal::timepos_t (source_start_sample));
+							const Temporal::Beats target_quarters = current_quarters + Temporal::Beats::from_double (*delta_beats_opt);
+							if (target_quarters < Temporal::Beats ()) {
+								return jsonrpc_error (id, -32602, "Resulting position is before session start");
+							}
+							requested_start_sample = Temporal::TempoMap::use ()->sample_at (target_quarters);
+							copy_origin = "deltaBeats";
+						}
+
+						const bool cross_track = target_playlist != source_playlist;
+						const std::shared_ptr<ARDOUR::Region> region_copy = ARDOUR::RegionFactory::create (region, true);
+						if (!region_copy) {
+							return jsonrpc_error (id, -32000, "Failed to create region copy");
+						}
+
+						std::vector<std::string> target_region_ids_before;
+						{
+							const ARDOUR::RegionList& existing = target_playlist->region_list_property ().rlist ();
+							for (ARDOUR::RegionList::const_iterator i = existing.begin (); i != existing.end (); ++i) {
+								target_region_ids_before.push_back ((*i)->id ().to_s ());
+							}
+						}
+
+						_session.begin_reversible_command ("copy region");
+						target_playlist->clear_changes ();
+						target_playlist->clear_owned_changes ();
+						target_playlist->add_region (region_copy, Temporal::timepos_t (requested_start_sample), 1.0, false);
+						target_playlist->rdiff_and_add_command (&_session);
+						_session.commit_reversible_command ();
+
+						std::shared_ptr<ARDOUR::Region> inserted_region;
+						{
+							const ARDOUR::RegionList& after = target_playlist->region_list_property ().rlist ();
+							for (ARDOUR::RegionList::const_iterator i = after.begin (); i != after.end (); ++i) {
+								const std::string candidate_id = (*i)->id ().to_s ();
+								if (std::find (target_region_ids_before.begin (), target_region_ids_before.end (), candidate_id) == target_region_ids_before.end ()) {
+									inserted_region = *i;
+									break;
+								}
+							}
+						}
+
+						const std::shared_ptr<ARDOUR::Region> copied_region = inserted_region ? inserted_region : region_copy;
+						const samplepos_t copied_start_sample = copied_region->position_sample ();
+						const samplepos_t copied_end_sample = copied_start_sample + copied_region->length_samples ();
+
+						std::ostringstream structured;
+						structured << "{\"regionId\":\"" << json_escape (copied_region->id ().to_s ()) << "\""
+							<< ",\"sourceRegionId\":\"" << json_escape (region->id ().to_s ()) << "\""
+							<< ",\"name\":\"" << json_escape (copied_region->name ()) << "\""
+							<< ",\"type\":\"" << json_escape (copied_region->data_type ().to_string ()) << "\""
+							<< ",\"playlistId\":\"" << json_escape (target_playlist->id ().to_s ()) << "\""
+							<< ",\"sourcePlaylistId\":\"" << json_escape (source_playlist->id ().to_s ()) << "\""
+							<< ",\"trackId\":";
+						if (target_track) {
+							structured << "\"" << json_escape (target_track->id ().to_s ()) << "\"";
+						} else {
+							structured << "null";
+						}
+						structured << ",\"lengthSamples\":" << copied_region->length_samples ()
+							<< ",\"crossTrack\":" << (cross_track ? "true" : "false")
+							<< ",\"copyOrigin\":\"" << json_escape (copy_origin) << "\""
+							<< ",\"copied\":true"
+							<< ",\"sourceStartSample\":" << source_start_sample
+							<< ",\"requestedStartSample\":" << requested_start_sample
+							<< ",\"startSample\":" << copied_start_sample
+							<< ",\"endSample\":" << copied_end_sample
+							<< ",\"sourceStartBbt\":" << bbt_json_at_sample (source_start_sample)
+							<< ",\"requestedStartBbt\":" << bbt_json_at_sample (requested_start_sample)
+							<< ",\"startBbt\":" << bbt_json_at_sample (copied_start_sample)
+							<< ",\"endBbt\":" << bbt_json_at_sample (copied_end_sample)
+							<< ",\"requested\":{";
+						if (sample_opt) {
+							structured << "\"sample\":" << *sample_opt
+								<< ",\"bar\":null,\"beat\":null,\"deltaSamples\":null,\"deltaBeats\":null";
+						} else if (have_bbt_target) {
+							const int req_bar = root.get<int> ("params.arguments.bar", 0);
+							const double req_beat = root.get<double> ("params.arguments.beat", 0.0);
+							structured << "\"sample\":null"
+								<< ",\"bar\":" << req_bar
+								<< ",\"beat\":" << req_beat
+								<< ",\"deltaSamples\":null,\"deltaBeats\":null";
+						} else if (delta_samples_opt) {
+							structured << "\"sample\":null,\"bar\":null,\"beat\":null"
+								<< ",\"deltaSamples\":" << *delta_samples_opt
+								<< ",\"deltaBeats\":null";
+						} else {
+							structured << "\"sample\":null,\"bar\":null,\"beat\":null,\"deltaSamples\":null"
+								<< ",\"deltaBeats\":" << *delta_beats_opt;
+						}
+						structured << ",\"trackId\":";
+						if (!target_track_id.empty ()) {
+							structured << "\"" << json_escape (target_track_id) << "\"";
+						} else {
+							structured << "null";
+						}
+						structured << "}}";
+
+						return jsonrpc_result (
+							id,
+							std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Region copied\"}],\"structuredContent\":")
+								+ structured.str () + "}");
+					}
+
+					if (tool_name == "region/move") {
+						Temporal::TempoMap::fetch ();
+
+						const std::string region_id = root.get<std::string> ("params.arguments.regionId", "");
+						const std::string target_track_id = root.get<std::string> ("params.arguments.trackId", "");
+						if (region_id.empty ()) {
+							return jsonrpc_error (id, -32602, "Missing regionId");
+						}
+
+						const boost::optional<int64_t> sample_opt = root.get_optional<int64_t> ("params.arguments.sample");
+						const boost::optional<int64_t> delta_samples_opt = root.get_optional<int64_t> ("params.arguments.deltaSamples");
+						const boost::optional<double> delta_beats_opt = root.get_optional<double> ("params.arguments.deltaBeats");
+
+						samplepos_t bbt_sample = 0;
+						bool have_bbt_target = false;
+						std::string bbt_error;
+						if (!parse_optional_bbt_target_sample (root, "params.arguments", bbt_sample, have_bbt_target, bbt_error)) {
+							return jsonrpc_error (id, -32602, bbt_error);
+						}
+
+						if (sample_opt && *sample_opt < 0) {
+							return jsonrpc_error (id, -32602, "Invalid sample (expected >= 0)");
+						}
+						if (delta_beats_opt && !std::isfinite (*delta_beats_opt)) {
+							return jsonrpc_error (id, -32602, "Invalid deltaBeats (expected finite number)");
+						}
+
+						int target_mode_count = 0;
+						if (sample_opt) {
+							++target_mode_count;
+						}
+						if (have_bbt_target) {
+							++target_mode_count;
+						}
+						if (delta_samples_opt) {
+							++target_mode_count;
+						}
+						if (delta_beats_opt) {
+							++target_mode_count;
+						}
+						if (target_mode_count != 1) {
+							return jsonrpc_error (id, -32602, "Provide exactly one target: sample, bar+beat, deltaSamples, or deltaBeats");
+						}
+
+						const std::shared_ptr<ARDOUR::Region> region = ARDOUR::RegionFactory::region_by_id (PBD::ID (region_id));
+						if (!region) {
+							return jsonrpc_error (id, -32602, "regionId not found");
+						}
+
+						const std::shared_ptr<ARDOUR::Playlist> source_playlist = region->playlist ();
+						if (!source_playlist) {
+							return jsonrpc_error (id, -32000, "Region has no playlist");
+						}
+						if (!region->can_move ()) {
+							return jsonrpc_error (id, -32602, "Region is locked or position-locked");
+						}
+
+						std::shared_ptr<ARDOUR::Track> target_track;
+						std::shared_ptr<ARDOUR::Playlist> target_playlist = source_playlist;
+						if (!target_track_id.empty ()) {
+							const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (target_track_id));
+							target_track = std::dynamic_pointer_cast<ARDOUR::Track> (route);
+							if (!target_track) {
+								return jsonrpc_error (id, -32602, "trackId is not a track");
+							}
+
+							target_playlist = target_track->playlist ();
+							if (!target_playlist) {
+								return jsonrpc_error (id, -32000, "Destination track has no playlist");
+							}
+						}
+
+						if (target_playlist->data_type () != region->data_type ()) {
+							return jsonrpc_error (id, -32602, "Region type does not match destination track type");
+						}
+
+						const samplepos_t previous_start_sample = region->position_sample ();
+						samplepos_t requested_start_sample = previous_start_sample;
+						std::string move_origin = "none";
+
+						if (sample_opt) {
+							requested_start_sample = (samplepos_t) *sample_opt;
+							move_origin = "sample";
+						} else if (have_bbt_target) {
+							requested_start_sample = bbt_sample;
+							move_origin = "bbt";
+						} else if (delta_samples_opt) {
+							const int64_t current = (int64_t) previous_start_sample;
+							const int64_t delta = *delta_samples_opt;
+							if ((delta > 0 && current > (LLONG_MAX - delta)) || (delta < 0 && current < (LLONG_MIN - delta))) {
+								return jsonrpc_error (id, -32602, "deltaSamples overflow");
+							}
+							const int64_t target = current + delta;
+							if (target < 0) {
+								return jsonrpc_error (id, -32602, "Resulting position is before session start");
+							}
+							requested_start_sample = (samplepos_t) target;
+							move_origin = "deltaSamples";
+						} else {
+							const Temporal::Beats current_quarters = Temporal::TempoMap::use ()->quarters_at (Temporal::timepos_t (previous_start_sample));
+							const Temporal::Beats target_quarters = current_quarters + Temporal::Beats::from_double (*delta_beats_opt);
+							if (target_quarters < Temporal::Beats ()) {
+								return jsonrpc_error (id, -32602, "Resulting position is before session start");
+							}
+							requested_start_sample = Temporal::TempoMap::use ()->sample_at (target_quarters);
+							move_origin = "deltaBeats";
+						}
+
+						const bool cross_playlist_move = target_playlist != source_playlist;
+						std::shared_ptr<ARDOUR::Region> moved_region = region;
+						std::shared_ptr<ARDOUR::Playlist> moved_playlist = source_playlist;
+
+						if (cross_playlist_move) {
+							const std::shared_ptr<ARDOUR::Region> region_copy = ARDOUR::RegionFactory::create (region, true);
+							if (!region_copy) {
+								return jsonrpc_error (id, -32000, "Failed to create region copy for cross-track move");
+							}
+
+							std::vector<std::string> target_region_ids_before;
+							{
+								const ARDOUR::RegionList& existing = target_playlist->region_list_property ().rlist ();
+								for (ARDOUR::RegionList::const_iterator i = existing.begin (); i != existing.end (); ++i) {
+									target_region_ids_before.push_back ((*i)->id ().to_s ());
+								}
+							}
+
+							_session.begin_reversible_command ("move region");
+							source_playlist->clear_changes ();
+							source_playlist->clear_owned_changes ();
+							target_playlist->clear_changes ();
+							target_playlist->clear_owned_changes ();
+							target_playlist->add_region (region_copy, Temporal::timepos_t (requested_start_sample), 1.0, false);
+							source_playlist->remove_region (region);
+							target_playlist->rdiff_and_add_command (&_session);
+							source_playlist->rdiff_and_add_command (&_session);
+							_session.commit_reversible_command ();
+
+							std::shared_ptr<ARDOUR::Region> inserted_region;
+							{
+								const ARDOUR::RegionList& after = target_playlist->region_list_property ().rlist ();
+								for (ARDOUR::RegionList::const_iterator i = after.begin (); i != after.end (); ++i) {
+									const std::string candidate_id = (*i)->id ().to_s ();
+									if (std::find (target_region_ids_before.begin (), target_region_ids_before.end (), candidate_id) == target_region_ids_before.end ()) {
+										inserted_region = *i;
+										break;
+									}
+								}
+							}
+
+							moved_region = inserted_region ? inserted_region : region_copy;
+							/* RegionFactory::create() auto-generates a new name.
+							 * For cross-track move we preserve the original name.
+							 */
+							moved_region->set_name (region->name ());
+							moved_playlist = target_playlist;
+						} else if (requested_start_sample != previous_start_sample) {
+							_session.begin_reversible_command ("move region");
+							region->clear_changes ();
+							region->set_position (Temporal::timepos_t (requested_start_sample));
+							_session.add_command (new PBD::StatefulDiffCommand (region));
+							_session.commit_reversible_command ();
+						}
+
+						const samplepos_t moved_start_sample = moved_region->position_sample ();
+						const samplepos_t moved_end_sample = moved_start_sample + moved_region->length_samples ();
+						const bool moved = cross_playlist_move || moved_start_sample != previous_start_sample;
+
+						std::ostringstream structured;
+						structured << "{\"regionId\":\"" << json_escape (moved_region->id ().to_s ()) << "\""
+							<< ",\"sourceRegionId\":\"" << json_escape (region->id ().to_s ()) << "\""
+							<< ",\"name\":\"" << json_escape (moved_region->name ()) << "\""
+							<< ",\"type\":\"" << json_escape (moved_region->data_type ().to_string ()) << "\""
+							<< ",\"playlistId\":\"" << json_escape (moved_playlist->id ().to_s ()) << "\""
+							<< ",\"sourcePlaylistId\":\"" << json_escape (source_playlist->id ().to_s ()) << "\""
+							<< ",\"trackId\":";
+						if (target_track) {
+							structured << "\"" << json_escape (target_track->id ().to_s ()) << "\"";
+						} else {
+							structured << "null";
+						}
+						structured << ",\"lengthSamples\":" << moved_region->length_samples ()
+							<< ",\"crossTrack\":" << (cross_playlist_move ? "true" : "false")
+							<< ",\"moveOrigin\":\"" << json_escape (move_origin) << "\""
+							<< ",\"moved\":" << (moved ? "true" : "false")
+							<< ",\"previousStartSample\":" << previous_start_sample
+							<< ",\"requestedStartSample\":" << requested_start_sample
+							<< ",\"startSample\":" << moved_start_sample
+							<< ",\"endSample\":" << moved_end_sample
+							<< ",\"previousStartBbt\":" << bbt_json_at_sample (previous_start_sample)
+							<< ",\"requestedStartBbt\":" << bbt_json_at_sample (requested_start_sample)
+							<< ",\"startBbt\":" << bbt_json_at_sample (moved_start_sample)
+							<< ",\"endBbt\":" << bbt_json_at_sample (moved_end_sample)
+							<< ",\"requested\":{";
+						if (sample_opt) {
+							structured << "\"sample\":" << *sample_opt
+								<< ",\"bar\":null,\"beat\":null,\"deltaSamples\":null,\"deltaBeats\":null";
+						} else if (have_bbt_target) {
+							const int req_bar = root.get<int> ("params.arguments.bar", 0);
+							const double req_beat = root.get<double> ("params.arguments.beat", 0.0);
+							structured << "\"sample\":null"
+								<< ",\"bar\":" << req_bar
+								<< ",\"beat\":" << req_beat
+								<< ",\"deltaSamples\":null,\"deltaBeats\":null";
+						} else if (delta_samples_opt) {
+							structured << "\"sample\":null,\"bar\":null,\"beat\":null"
+								<< ",\"deltaSamples\":" << *delta_samples_opt
+								<< ",\"deltaBeats\":null";
+						} else {
+							structured << "\"sample\":null,\"bar\":null,\"beat\":null,\"deltaSamples\":null"
+								<< ",\"deltaBeats\":" << *delta_beats_opt;
+						}
+						structured << ",\"trackId\":";
+						if (!target_track_id.empty ()) {
+							structured << "\"" << json_escape (target_track_id) << "\"";
+						} else {
+							structured << "null";
+						}
+						structured << "}}";
+
+						return jsonrpc_result (
+							id,
+							std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"")
+								+ (moved ? "Region moved" : "Region unchanged")
+								+ "\"}],\"structuredContent\":" + structured.str () + "}");
 					}
 
 					if (tool_name == "plugin/get_description") {
