@@ -2029,7 +2029,7 @@ msgstr "Découverte des greffons VST Mac"
 
 #: plugin_manager.cc:537
 msgid "Scanning VST3 Plugins"
-msgstr ""
+msgstr "Scan des greffons VST3"
 
 #: plugin_manager.cc:539
 msgid "Discovering VST3 Plugins"
