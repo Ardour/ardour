@@ -23,6 +23,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <iomanip>
+#include <map>
 #include <memory>
 #include <sstream>
 #include <vector>
@@ -41,6 +42,8 @@
 #include "ardour/dB.h"
 #include "ardour/internal_send.h"
 #include "ardour/location.h"
+#include "ardour/midi_model.h"
+#include "ardour/midi_region.h"
 #include "ardour/midi_track.h"
 #include "ardour/midi_source.h"
 #include "ardour/plugin.h"
@@ -103,7 +106,8 @@ canonical_tool_name (std::string tool_name)
 		"buses",
 		"track",
 		"plugin",
-		"midi_region"
+		"midi_region",
+		"midi_note"
 	};
 
 	for (size_t i = 0; i < (sizeof (known_groups) / sizeof (known_groups[0])); ++i) {
@@ -1125,6 +1129,571 @@ midi_region_json (const std::shared_ptr<ARDOUR::Region>& region, const std::shar
 	return ss.str ();
 }
 
+struct MidiJsonEventDef {
+	int bar;
+	double beat;
+	int tick;
+	int note;
+	int velocity;
+	int channel;
+	std::string type;
+};
+
+struct MidiJsonNoteDef {
+	double start_quarters;
+	double length_quarters;
+	int note;
+	int velocity;
+	int channel;
+};
+
+static bool
+parse_time_signature (const std::string& sig, int& numerator, int& denominator)
+{
+	const std::string::size_type slash = sig.find ('/');
+	if (slash == std::string::npos || slash == 0 || (slash + 1) >= sig.size ()) {
+		return false;
+	}
+
+	const std::string num = sig.substr (0, slash);
+	const std::string den = sig.substr (slash + 1);
+	char* endptr = 0;
+	long n = std::strtol (num.c_str (), &endptr, 10);
+	if (!endptr || *endptr != '\0') {
+		return false;
+	}
+	endptr = 0;
+	long d = std::strtol (den.c_str (), &endptr, 10);
+	if (!endptr || *endptr != '\0') {
+		return false;
+	}
+
+	if (n <= 0 || d <= 0 || n > 64 || d > 64) {
+		return false;
+	}
+
+	numerator = (int) n;
+	denominator = (int) d;
+	return true;
+}
+
+static std::string
+json_string_array (const std::vector<std::string>& values)
+{
+	std::ostringstream ss;
+	ss << "[";
+	for (size_t i = 0; i < values.size (); ++i) {
+		if (i > 0) {
+			ss << ",";
+		}
+		ss << "\"" << json_escape (values[i]) << "\"";
+	}
+	ss << "]";
+	return ss.str ();
+}
+
+static double
+midi_json_event_quarters (const MidiJsonEventDef& e, int numerator, int denominator, int ticks_per_quarter)
+{
+	const double quarters_per_bar = (double) numerator * (4.0 / (double) denominator);
+	const double quarters_per_beat_unit = 4.0 / (double) denominator;
+	return ((double) (e.bar - 1) * quarters_per_bar)
+		+ ((e.beat - 1.0) * quarters_per_beat_unit)
+		+ ((double) e.tick / (double) ticks_per_quarter);
+}
+
+static double
+beats_to_double (const Temporal::Beats& beats)
+{
+	return beats.get_beats () + (beats.get_ticks () / (double) Temporal::ticks_per_beat);
+}
+
+static bool
+quarters_to_midi_json_time (
+	double quarters,
+	int time_sig_num,
+	int time_sig_den,
+	int ticks_per_quarter,
+	int& bar_out,
+	int& beat_out,
+	int& tick_out)
+{
+	if (!std::isfinite (quarters) || quarters < 0.0 || ticks_per_quarter <= 0 || time_sig_num <= 0 || time_sig_den <= 0) {
+		return false;
+	}
+
+	const double quarters_per_bar = (double) time_sig_num * (4.0 / (double) time_sig_den);
+	const double quarters_per_beat_unit = 4.0 / (double) time_sig_den;
+	if (!std::isfinite (quarters_per_bar) || quarters_per_bar <= 0.0 || !std::isfinite (quarters_per_beat_unit) || quarters_per_beat_unit <= 0.0) {
+		return false;
+	}
+
+	const int ticks_per_beat_unit = std::max (1, (int) std::llround (quarters_per_beat_unit * (double) ticks_per_quarter));
+
+	int bar_index = (int) std::floor (quarters / quarters_per_bar);
+	double in_bar = quarters - ((double) bar_index * quarters_per_bar);
+	if (in_bar < 0.0) {
+		in_bar = 0.0;
+	}
+
+	int beat_index = (int) std::floor (in_bar / quarters_per_beat_unit);
+	if (beat_index < 0) {
+		beat_index = 0;
+	}
+	if (beat_index >= time_sig_num) {
+		beat_index = time_sig_num - 1;
+	}
+
+	double in_beat = in_bar - ((double) beat_index * quarters_per_beat_unit);
+	if (in_beat < 0.0) {
+		in_beat = 0.0;
+	}
+	if (in_beat > quarters_per_beat_unit) {
+		in_beat = quarters_per_beat_unit;
+	}
+
+	int tick = (int) std::llround (in_beat * (double) ticks_per_quarter);
+	if (tick >= ticks_per_beat_unit) {
+		tick -= ticks_per_beat_unit;
+		++beat_index;
+	}
+	if (beat_index >= time_sig_num) {
+		beat_index = 0;
+		++bar_index;
+	}
+
+	bar_out = bar_index + 1;
+	beat_out = beat_index + 1;
+	tick_out = std::max (0, tick);
+	return true;
+}
+
+static bool
+parse_midi_json_events (
+	const pt::ptree& midi_root,
+	std::vector<MidiJsonEventDef>& expanded_events,
+	int& channel,
+	bool& is_drum_mode,
+	int& ticks_per_quarter,
+	int& time_sig_num,
+	int& time_sig_den,
+	std::vector<std::string>& warnings,
+	std::string& error)
+{
+	expanded_events.clear ();
+	warnings.clear ();
+	error.clear ();
+
+	const int64_t channel_in = midi_root.get<int64_t> ("channel", 9);
+	if (channel_in < 0 || channel_in > 15) {
+		error = "Invalid midi.channel (expected 0..15)";
+		return false;
+	}
+	channel = (int) channel_in;
+
+	is_drum_mode = midi_root.get<bool> ("is_drum_mode", true);
+
+	const int64_t tpq_in = midi_root.get<int64_t> ("ticks_per_quarter", 480);
+	if (tpq_in <= 0 || tpq_in > 96000) {
+		error = "Invalid midi.ticks_per_quarter (expected 1..96000)";
+		return false;
+	}
+	ticks_per_quarter = (int) tpq_in;
+
+	const std::string time_signature = midi_root.get<std::string> ("time_signature", "4/4");
+	if (!parse_time_signature (time_signature, time_sig_num, time_sig_den)) {
+		error = "Invalid midi.time_signature (expected format N/D)";
+		return false;
+	}
+
+	const boost::optional<const pt::ptree&> midi_events = midi_root.get_child_optional ("midi_events");
+	if (!midi_events) {
+		error = "Missing midi.midi_events";
+		return false;
+	}
+
+	std::map<int, std::vector<MidiJsonEventDef> > events_by_bar;
+	for (pt::ptree::const_iterator it = midi_events->begin (); it != midi_events->end (); ++it) {
+		const pt::ptree& ev = it->second;
+
+		if (ev.get_optional<std::string> ("comment")) {
+			continue;
+		}
+
+		const boost::optional<int64_t> bar_opt = ev.get_optional<int64_t> ("bar");
+		if (!bar_opt || *bar_opt < 1 || *bar_opt > 1000000) {
+			error = "Each midi event must provide bar >= 1";
+			return false;
+		}
+		const int bar = (int) *bar_opt;
+
+		const boost::optional<int64_t> repeat_opt = ev.get_optional<int64_t> ("repeat");
+		if (repeat_opt) {
+			if (*repeat_opt < 0 || *repeat_opt > 1000000) {
+				error = "Invalid repeat value (expected >= 0)";
+				return false;
+			}
+
+			const int source_bar = (*repeat_opt == 0) ? (bar - 1) : (int) *repeat_opt;
+			std::map<int, std::vector<MidiJsonEventDef> >::const_iterator src = events_by_bar.find (source_bar);
+			if (src == events_by_bar.end ()) {
+				std::ostringstream w;
+				w << "Repeat skipped at bar " << bar << ": source bar " << source_bar << " not found";
+				warnings.push_back (w.str ());
+				continue;
+			}
+
+			for (size_t i = 0; i < src->second.size (); ++i) {
+				MidiJsonEventDef copy = src->second[i];
+				copy.bar = bar;
+				expanded_events.push_back (copy);
+				events_by_bar[bar].push_back (copy);
+			}
+			continue;
+		}
+
+		const boost::optional<double> beat_opt = ev.get_optional<double> ("b");
+		if (!beat_opt || !std::isfinite (*beat_opt) || *beat_opt < 1.0) {
+			error = "Each normal midi event must provide b >= 1";
+			return false;
+		}
+
+		const boost::optional<int64_t> note_opt = ev.get_optional<int64_t> ("n");
+		if (!note_opt || *note_opt < 0 || *note_opt > 127) {
+			error = "Each normal midi event must provide n (0..127)";
+			return false;
+		}
+
+		const int64_t tick_in = ev.get<int64_t> ("t", 0);
+		if (tick_in < 0) {
+			error = "Invalid midi event t (expected >= 0)";
+			return false;
+		}
+
+		const int64_t velocity_in = ev.get<int64_t> ("v", 64);
+		if (velocity_in < 0 || velocity_in > 127) {
+			error = "Invalid midi event v (expected 0..127)";
+			return false;
+		}
+
+		const boost::optional<int64_t> event_channel_opt = ev.get_optional<int64_t> ("channel");
+		int event_channel = channel;
+		if (event_channel_opt) {
+			if (*event_channel_opt < 0 || *event_channel_opt > 15) {
+				error = "Invalid midi event channel (expected 0..15)";
+				return false;
+			}
+			event_channel = (int) *event_channel_opt;
+		}
+
+		std::string type = ev.get<std::string> ("type", "note_on");
+		std::transform (type.begin (), type.end (), type.begin (), ::tolower);
+
+		MidiJsonEventDef out;
+		out.bar = bar;
+		out.beat = *beat_opt;
+		out.tick = (int) tick_in;
+		out.note = (int) *note_opt;
+		out.velocity = (int) velocity_in;
+		out.channel = event_channel;
+		out.type = type;
+
+		expanded_events.push_back (out);
+		events_by_bar[bar].push_back (out);
+	}
+
+	return true;
+}
+
+static bool
+build_midi_json_note_defs (
+	const std::vector<MidiJsonEventDef>& expanded_events,
+	bool is_drum_mode,
+	int ticks_per_quarter,
+	int time_sig_num,
+	int time_sig_den,
+	std::vector<MidiJsonNoteDef>& notes,
+	std::vector<std::string>& warnings,
+	std::string& error)
+{
+	notes.clear ();
+	error.clear ();
+
+	struct TimedEvent {
+		double quarters;
+		size_t ordinal;
+		MidiJsonEventDef ev;
+	};
+
+	std::vector<TimedEvent> events;
+	events.reserve (expanded_events.size ());
+	for (size_t i = 0; i < expanded_events.size (); ++i) {
+		const double q = midi_json_event_quarters (expanded_events[i], time_sig_num, time_sig_den, ticks_per_quarter);
+		if (!std::isfinite (q) || q < 0.0) {
+			error = "Invalid event timing produced by midi_events";
+			return false;
+		}
+
+		TimedEvent te;
+		te.quarters = q;
+		te.ordinal = i;
+		te.ev = expanded_events[i];
+		events.push_back (te);
+	}
+
+	std::sort (
+		events.begin (),
+		events.end (),
+		[] (const TimedEvent& a, const TimedEvent& b) {
+			if (a.quarters != b.quarters) {
+				return a.quarters < b.quarters;
+			}
+			return a.ordinal < b.ordinal;
+		});
+
+	if (is_drum_mode) {
+		const double default_length = 48.0 / (double) ticks_per_quarter;
+		if (!std::isfinite (default_length) || default_length <= 0.0) {
+			error = "Invalid drum note length derived from ticks_per_quarter";
+			return false;
+		}
+
+			for (size_t i = 0; i < events.size (); ++i) {
+				MidiJsonNoteDef n;
+				n.start_quarters = events[i].quarters;
+				n.length_quarters = default_length;
+				n.note = events[i].ev.note;
+				n.velocity = events[i].ev.velocity;
+				n.channel = events[i].ev.channel;
+				notes.push_back (n);
+			}
+			return true;
+		}
+
+	struct PendingOn {
+		double quarters;
+		int velocity;
+	};
+	std::map<int, std::vector<PendingOn> > active_by_note;
+
+	for (size_t i = 0; i < events.size (); ++i) {
+		const MidiJsonEventDef& ev = events[i].ev;
+		const bool is_off = (ev.type == "note_off") || (ev.velocity == 0);
+		const bool is_on = (ev.type.empty () || ev.type == "note_on");
+		const int note_key = (ev.channel * 128) + ev.note;
+
+		if (is_off) {
+			std::vector<PendingOn>& stack = active_by_note[note_key];
+			if (stack.empty ()) {
+				std::ostringstream w;
+				w << "Unmatched note_off skipped for note " << ev.note << " on channel " << (ev.channel + 1) << " at bar " << ev.bar;
+				warnings.push_back (w.str ());
+				continue;
+			}
+
+			const PendingOn on = stack.back ();
+			stack.pop_back ();
+
+			const double len = events[i].quarters - on.quarters;
+			if (!std::isfinite (len) || len <= 0.0) {
+				std::ostringstream w;
+				w << "Non-positive note length skipped for note " << ev.note << " at bar " << ev.bar;
+				warnings.push_back (w.str ());
+				continue;
+			}
+
+			MidiJsonNoteDef n;
+			n.start_quarters = on.quarters;
+			n.length_quarters = len;
+			n.note = ev.note;
+			n.velocity = on.velocity;
+			n.channel = ev.channel;
+			notes.push_back (n);
+			continue;
+		}
+
+		if (!is_on) {
+			std::ostringstream w;
+			w << "Unknown event type '" << ev.type << "' skipped at bar " << ev.bar;
+			warnings.push_back (w.str ());
+			continue;
+		}
+
+		PendingOn on;
+		on.quarters = events[i].quarters;
+		on.velocity = ev.velocity;
+		active_by_note[note_key].push_back (on);
+	}
+
+	for (std::map<int, std::vector<PendingOn> >::const_iterator it = active_by_note.begin (); it != active_by_note.end (); ++it) {
+		if (!it->second.empty ()) {
+			const int channel = it->first / 128;
+			const int note = it->first % 128;
+			std::ostringstream w;
+			w << "Unclosed note_on skipped for note " << note << " on channel " << (channel + 1)
+			  << " (" << it->second.size () << " pending)";
+			warnings.push_back (w.str ());
+		}
+	}
+
+	return true;
+}
+
+static bool
+create_midi_region_on_track (
+	ARDOUR::Session& session,
+	const std::shared_ptr<ARDOUR::Track>& track,
+	samplepos_t start_sample,
+	samplepos_t end_sample,
+	const std::string& requested_name,
+	std::shared_ptr<ARDOUR::Region>& out_region,
+	std::string& error)
+{
+	error.clear ();
+	out_region.reset ();
+
+	const std::shared_ptr<ARDOUR::MidiTrack> midi_track = std::dynamic_pointer_cast<ARDOUR::MidiTrack> (track);
+	if (!midi_track) {
+		error = "trackId is not a MIDI track";
+		return false;
+	}
+
+	const std::shared_ptr<ARDOUR::Playlist> playlist = midi_track->playlist ();
+	if (!playlist) {
+		error = "Track has no playlist";
+		return false;
+	}
+
+	const Temporal::timepos_t start_pos (start_sample);
+	const Temporal::timepos_t end_pos (end_sample);
+	const Temporal::timecnt_t region_length = start_pos.distance (end_pos);
+	if (region_length.samples () <= 0) {
+		error = "Invalid region length";
+		return false;
+	}
+
+	std::shared_ptr<ARDOUR::MidiSource> midi_src;
+	try {
+		midi_src = session.create_midi_source_by_stealing_name (track);
+	} catch (...) {
+		midi_src.reset ();
+	}
+	if (!midi_src) {
+		error = "Failed to create MIDI source";
+		return false;
+	}
+
+	ARDOUR::SourceList srcs;
+	srcs.push_back (std::dynamic_pointer_cast<ARDOUR::Source> (midi_src));
+	if (srcs.empty () || !srcs.front ()) {
+		error = "Failed to resolve MIDI source";
+		return false;
+	}
+
+	const Temporal::timecnt_t source_start (Temporal::BeatTime); /* zero beats */
+
+	PBD::PropertyList whole_file_props;
+	whole_file_props.add (ARDOUR::Properties::start, source_start);
+	whole_file_props.add (ARDOUR::Properties::length, region_length);
+	whole_file_props.add (ARDOUR::Properties::automatic, true);
+	whole_file_props.add (ARDOUR::Properties::whole_file, true);
+	whole_file_props.add (ARDOUR::Properties::name, PBD::basename_nosuffix (midi_src->name ()));
+	whole_file_props.add (ARDOUR::Properties::opaque, session.config.get_draw_opaque_midi_regions ());
+
+	std::shared_ptr<ARDOUR::Region> whole_file_region = ARDOUR::RegionFactory::create (srcs, whole_file_props);
+	if (!whole_file_region) {
+		error = "Failed to create whole-file MIDI region";
+		return false;
+	}
+
+	PBD::PropertyList playlist_region_props;
+	if (requested_name.empty ()) {
+		playlist_region_props.add (ARDOUR::Properties::name, whole_file_region->name ());
+	} else {
+		playlist_region_props.add (ARDOUR::Properties::name, requested_name);
+	}
+
+	std::shared_ptr<ARDOUR::Region> region = ARDOUR::RegionFactory::create (whole_file_region, playlist_region_props);
+	if (!region) {
+		error = "Failed to create MIDI playlist region";
+		return false;
+	}
+
+	session.begin_reversible_command ("add midi region");
+	playlist->clear_changes ();
+	playlist->clear_owned_changes ();
+	region->set_position (start_pos);
+	playlist->add_region (region, start_pos, 1.0, false);
+	playlist->rdiff_and_add_command (&session);
+	session.commit_reversible_command ();
+
+	out_region = region;
+	return true;
+}
+
+static std::string
+midi_region_brief_json (const std::shared_ptr<ARDOUR::Region>& region)
+{
+	const samplepos_t start_sample = region->position_sample ();
+	const samplepos_t end_sample = start_sample + region->length_samples ();
+
+	std::ostringstream ss;
+	ss << "{\"regionId\":\"" << json_escape (region->id ().to_s ()) << "\""
+	   << ",\"name\":\"" << json_escape (region->name ()) << "\""
+	   << ",\"type\":\"midi\"";
+
+	const std::shared_ptr<ARDOUR::Playlist> playlist = region->playlist ();
+	if (playlist) {
+		ss << ",\"playlistId\":\"" << json_escape (playlist->id ().to_s ()) << "\"";
+	} else {
+		ss << ",\"playlistId\":null";
+	}
+
+	ss << ",\"startSample\":" << start_sample
+	   << ",\"endSample\":" << end_sample
+	   << ",\"lengthSamples\":" << region->length_samples ()
+	   << ",\"startBbt\":" << bbt_json_at_sample (start_sample)
+	   << ",\"endBbt\":" << bbt_json_at_sample (end_sample)
+	   << "}";
+	return ss.str ();
+}
+
+static std::string
+midi_note_json (
+	const std::shared_ptr<ARDOUR::Region>& region,
+	const std::shared_ptr<Evoral::Note<Temporal::Beats> >& note,
+	const std::string& position_origin)
+{
+	const Temporal::Beats start_source_beats = note->time ();
+	const Temporal::Beats length_beats = note->length ();
+	const Temporal::Beats end_source_beats = start_source_beats + length_beats;
+	const double start_source_beats_double = start_source_beats.get_beats () + (start_source_beats.get_ticks () / (double) Temporal::ticks_per_beat);
+	const double length_beats_double = length_beats.get_beats () + (length_beats.get_ticks () / (double) Temporal::ticks_per_beat);
+	const double end_source_beats_double = end_source_beats.get_beats () + (end_source_beats.get_ticks () / (double) Temporal::ticks_per_beat);
+
+	const samplepos_t start_sample = region->source_beats_to_absolute_time (start_source_beats).samples ();
+	const samplepos_t end_sample = region->source_beats_to_absolute_time (end_source_beats).samples ();
+
+	std::ostringstream ss;
+	ss << "{\"regionId\":\"" << json_escape (region->id ().to_s ()) << "\""
+	   << ",\"regionName\":\"" << json_escape (region->name ()) << "\""
+	   << ",\"noteId\":" << note->id ()
+	   << ",\"note\":" << (int) note->note ()
+	   << ",\"velocity\":" << (int) note->velocity ()
+	   << ",\"channel\":" << ((int) note->channel () + 1)
+	   << ",\"startSourceBeats\":" << start_source_beats_double
+	   << ",\"lengthBeats\":" << length_beats_double
+	   << ",\"endSourceBeats\":" << end_source_beats_double
+	   << ",\"startSample\":" << start_sample
+	   << ",\"endSample\":" << end_sample
+	   << ",\"startBbt\":" << bbt_json_at_sample (start_sample)
+	   << ",\"endBbt\":" << bbt_json_at_sample (end_sample)
+	   << ",\"positionOrigin\":\"" << json_escape (position_origin) << "\""
+	   << "}";
+
+	return ss.str ();
+}
+
 static bool
 valid_fader_position (double p)
 {
@@ -1486,6 +2055,63 @@ track_info_json (const std::shared_ptr<ARDOUR::Route>& route)
 	return ss.str ();
 }
 
+static std::string
+playlist_regions_json (const std::shared_ptr<ARDOUR::Playlist>& playlist, bool include_hidden)
+{
+	std::vector<std::shared_ptr<ARDOUR::Region> > regions;
+	const ARDOUR::RegionList& all_regions = playlist->region_list_property ().rlist ();
+	for (ARDOUR::RegionList::const_iterator it = all_regions.begin (); it != all_regions.end (); ++it) {
+		if (!*it) {
+			continue;
+		}
+		if (!include_hidden && (*it)->hidden ()) {
+			continue;
+		}
+		regions.push_back (*it);
+	}
+
+	std::sort (
+		regions.begin (),
+		regions.end (),
+		[] (const std::shared_ptr<ARDOUR::Region>& a, const std::shared_ptr<ARDOUR::Region>& b) {
+			if (a->position_sample () != b->position_sample ()) {
+				return a->position_sample () < b->position_sample ();
+			}
+			if (a->length_samples () != b->length_samples ()) {
+				return a->length_samples () < b->length_samples ();
+			}
+			return a->id () < b->id ();
+		});
+
+	std::ostringstream ss;
+	ss << "[";
+	for (size_t i = 0; i < regions.size (); ++i) {
+		const std::shared_ptr<ARDOUR::Region>& region = regions[i];
+		if (i > 0) {
+			ss << ",";
+		}
+
+		const samplepos_t start_sample = region->position_sample ();
+		const samplepos_t end_sample = start_sample + region->length_samples ();
+
+		ss << "{\"regionId\":\"" << json_escape (region->id ().to_s ()) << "\""
+		   << ",\"name\":\"" << json_escape (region->name ()) << "\""
+		   << ",\"type\":\"" << region->data_type ().to_string () << "\""
+		   << ",\"startSample\":" << start_sample
+		   << ",\"endSample\":" << end_sample
+		   << ",\"lengthSamples\":" << region->length_samples ()
+		   << ",\"startBbt\":" << bbt_json_at_sample (start_sample)
+		   << ",\"endBbt\":" << bbt_json_at_sample (end_sample)
+		   << ",\"hidden\":" << (region->hidden () ? "true" : "false")
+		   << ",\"muted\":" << (region->muted () ? "true" : "false")
+		   << ",\"locked\":" << (region->locked () ? "true" : "false")
+		   << ",\"positionLocked\":" << (region->position_locked () ? "true" : "false")
+		   << "}";
+	}
+	ss << "]";
+	return ss.str ();
+}
+
 } // namespace
 
 MCPHttpServer::MCPHttpServer (ARDOUR::Session& session, uint16_t port)
@@ -1840,10 +2466,12 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"type\":{\"type\":\"string\",\"enum\":[\"audio\",\"midi\"]},\"count\":{\"type\":\"integer\",\"minimum\":1},\"name\":{\"type\":\"string\"},\"inputChannels\":{\"type\":\"integer\",\"minimum\":1},\"outputChannels\":{\"type\":\"integer\",\"minimum\":1},\"strictIo\":{\"type\":\"boolean\"},\"insert\":{\"type\":\"string\",\"enum\":[\"end\",\"before\",\"after\"]},\"relativeToId\":{\"type\":\"string\"}},\"additionalProperties\":false}},"
 				"{\"name\":\"buses_add\",\"title\":\"Add Bus\",\"description\":\"Add one or more buses (audio or MIDI). Optional insertion: end, before, or after a reference route (or selected route).\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"type\":{\"type\":\"string\",\"enum\":[\"audio\",\"midi\"]},\"count\":{\"type\":\"integer\",\"minimum\":1},\"name\":{\"type\":\"string\"},\"inputChannels\":{\"type\":\"integer\",\"minimum\":1},\"outputChannels\":{\"type\":\"integer\",\"minimum\":1},\"strictIo\":{\"type\":\"boolean\"},\"insert\":{\"type\":\"string\",\"enum\":[\"end\",\"before\",\"after\"]},\"relativeToId\":{\"type\":\"string\"}},\"additionalProperties\":false}},"
-					"{\"name\":\"track_get_info\",\"title\":\"Get Route Info\",\"description\":\"Get one route info (fader, pan, rec, mute, solo, sends, plugins).\","
-				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"}},\"required\":[\"id\"],\"additionalProperties\":false}},"
-					"{\"name\":\"plugin_get_description\",\"title\":\"Plugin Description\",\"description\":\"Get plugin descriptor and parameter metadata for a route plugin.\","
-					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"pluginIndex\":{\"type\":\"integer\",\"minimum\":0}},\"required\":[\"id\",\"pluginIndex\"],\"additionalProperties\":false}},"
+						"{\"name\":\"track_get_info\",\"title\":\"Get Route Info\",\"description\":\"Get one route info (fader, pan, rec, mute, solo, sends, plugins).\","
+					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"}},\"required\":[\"id\"],\"additionalProperties\":false}},"
+						"{\"name\":\"track_get_regions\",\"title\":\"Get Track Regions\",\"description\":\"List regions in one track playlist.\","
+					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"includeHidden\":{\"type\":\"boolean\"}},\"required\":[\"id\"],\"additionalProperties\":false}},"
+						"{\"name\":\"plugin_get_description\",\"title\":\"Plugin Description\",\"description\":\"Get plugin descriptor and parameter metadata for a route plugin.\","
+						"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"pluginIndex\":{\"type\":\"integer\",\"minimum\":0}},\"required\":[\"id\",\"pluginIndex\"],\"additionalProperties\":false}},"
 					"{\"name\":\"plugin_set_parameter\",\"title\":\"Set Plugin Parameter\",\"description\":\"Set a plugin parameter by parameter index or control ID.\","
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"pluginIndex\":{\"type\":\"integer\",\"minimum\":0},\"parameterIndex\":{\"type\":\"integer\",\"minimum\":0},\"controlId\":{\"type\":\"integer\",\"minimum\":0},\"value\":{\"type\":\"number\"},\"interface\":{\"type\":\"number\"}},\"required\":[\"id\",\"pluginIndex\"],\"additionalProperties\":false}},"
 					"{\"name\":\"plugin_set_enabled\",\"title\":\"Set Plugin Enabled\",\"description\":\"Enable or disable one route plugin by index.\","
@@ -1868,10 +2496,15 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"sendIndex\":{\"type\":\"integer\",\"minimum\":0},\"position\":{\"type\":\"number\",\"minimum\":0,\"maximum\":1},\"db\":{\"type\":\"number\"}},\"required\":[\"id\",\"sendIndex\"],\"oneOf\":[{\"required\":[\"position\"]},{\"required\":[\"db\"]}],\"additionalProperties\":false}},"
 				"{\"name\":\"track_set_fader\",\"title\":\"Set Track Fader\",\"description\":\"Set track fader by normalized position (0.0 to 1.0) or dB.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"position\":{\"type\":\"number\",\"minimum\":0,\"maximum\":1},\"db\":{\"type\":\"number\"}},\"required\":[\"id\"],\"oneOf\":[{\"required\":[\"position\"]},{\"required\":[\"db\"]}],\"additionalProperties\":false}},"
-				"{\"name\":\"midi_region_add\",\"title\":\"Add MIDI Region\",\"description\":\"Create an empty MIDI region on a MIDI track using sample or bar+beat range endpoints.\","
-				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"trackId\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"startSample\":{\"type\":\"integer\",\"minimum\":0},\"endSample\":{\"type\":\"integer\",\"minimum\":0},\"startBar\":{\"type\":\"integer\",\"minimum\":1},\"startBeat\":{\"type\":\"number\",\"minimum\":1},\"endBar\":{\"type\":\"integer\",\"minimum\":1},\"endBeat\":{\"type\":\"number\",\"minimum\":1}},\"required\":[\"trackId\"],\"additionalProperties\":false}}"
-				"]}");
-	}
+						"{\"name\":\"midi_region_add\",\"title\":\"Add MIDI Region\",\"description\":\"Create an empty MIDI region on a MIDI track using sample or bar+beat range endpoints.\","
+						"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"trackId\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"startSample\":{\"type\":\"integer\",\"minimum\":0},\"endSample\":{\"type\":\"integer\",\"minimum\":0},\"startBar\":{\"type\":\"integer\",\"minimum\":1},\"startBeat\":{\"type\":\"number\",\"minimum\":1},\"endBar\":{\"type\":\"integer\",\"minimum\":1},\"endBeat\":{\"type\":\"number\",\"minimum\":1}},\"required\":[\"trackId\"],\"additionalProperties\":false}},"
+					"{\"name\":\"midi_note_add\",\"title\":\"Add MIDI Note\",\"description\":\"Add one MIDI note to an existing MIDI region at region beats, sample, or bar+beat position.\","
+					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"regionId\":{\"type\":\"string\"},\"note\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":127},\"velocity\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":127},\"channel\":{\"type\":\"integer\",\"minimum\":1,\"maximum\":16},\"lengthBeats\":{\"type\":\"number\",\"exclusiveMinimum\":0},\"regionBeat\":{\"type\":\"number\",\"minimum\":0},\"sample\":{\"type\":\"integer\",\"minimum\":0},\"bar\":{\"type\":\"integer\",\"minimum\":1},\"beat\":{\"type\":\"number\",\"minimum\":1}},\"required\":[\"regionId\",\"note\",\"lengthBeats\"],\"oneOf\":[{\"required\":[\"regionBeat\"]},{\"required\":[\"sample\"]},{\"required\":[\"bar\",\"beat\"]}],\"additionalProperties\":false}},"
+					"{\"name\":\"midi_note_import_json\",\"title\":\"Import MIDI JSON\",\"description\":\"Import a MIDI JSON pattern (with repeats) into an existing MIDI region, or create a new MIDI region and populate it.\","
+					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"midi\":{\"type\":\"object\"},\"regionId\":{\"type\":\"string\"},\"trackId\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"startSample\":{\"type\":\"integer\",\"minimum\":0},\"endSample\":{\"type\":\"integer\",\"minimum\":0},\"startBar\":{\"type\":\"integer\",\"minimum\":1},\"startBeat\":{\"type\":\"number\",\"minimum\":1},\"endBar\":{\"type\":\"integer\",\"minimum\":1},\"endBeat\":{\"type\":\"number\",\"minimum\":1}},\"required\":[\"midi\"],\"oneOf\":[{\"required\":[\"regionId\"]},{\"required\":[\"trackId\"]}],\"additionalProperties\":false}},"
+					"{\"name\":\"midi_note_get_json\",\"title\":\"Export MIDI JSON\",\"description\":\"Export all notes from a MIDI region as import-compatible MIDI JSON (standard mode with note_on/note_off events).\",\"inputSchema\":{\"type\":\"object\",\"properties\":{\"regionId\":{\"type\":\"string\"},\"ticksPerQuarter\":{\"type\":\"integer\",\"minimum\":1},\"timeSignature\":{\"type\":\"string\"}},\"required\":[\"regionId\"],\"additionalProperties\":false}}"
+					"]}");
+			}
 
 	if (method == "tools/call") {
 		std::string tool_name = canonical_tool_name (root.get<std::string> ("params.name", ""));
@@ -3000,7 +3633,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"") + (add_tracks ? "Track(s) added" : "Bus(es) added") + "\"}],\"structuredContent\":" + structured.str () + "}");
 				}
 
-				if (tool_name == "midi_region/add") {
+					if (tool_name == "midi_region/add") {
 					const std::string track_id = root.get<std::string> ("params.arguments.trackId", "");
 					const std::string requested_name = root.get<std::string> ("params.arguments.name", "");
 
@@ -3098,14 +3731,537 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 					}
 					structured << "}";
 
-					return jsonrpc_result (
-						id,
-						std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"MIDI region added\"}],\"structuredContent\":")
-							+ structured.str () + "}");
-				}
+						return jsonrpc_result (
+							id,
+							std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"MIDI region added\"}],\"structuredContent\":")
+								+ structured.str () + "}");
+					}
 
-				if (tool_name == "track/get_info") {
-				const std::string route_id = root.get<std::string> ("params.arguments.id", "");
+					if (tool_name == "midi_note/add") {
+						const std::string region_id = root.get<std::string> ("params.arguments.regionId", "");
+						if (region_id.empty ()) {
+							return jsonrpc_error (id, -32602, "Missing regionId");
+						}
+
+						const boost::optional<int64_t> note_opt = root.get_optional<int64_t> ("params.arguments.note");
+						if (!note_opt || *note_opt < 0 || *note_opt > 127) {
+							return jsonrpc_error (id, -32602, "Invalid note (expected 0..127)");
+						}
+
+						const boost::optional<double> length_beats_opt = root.get_optional<double> ("params.arguments.lengthBeats");
+						if (!length_beats_opt || !std::isfinite (*length_beats_opt) || *length_beats_opt <= 0.0) {
+							return jsonrpc_error (id, -32602, "Invalid lengthBeats (expected > 0)");
+						}
+
+						const int64_t velocity_in = root.get<int64_t> ("params.arguments.velocity", 100);
+						if (velocity_in < 0 || velocity_in > 127) {
+							return jsonrpc_error (id, -32602, "Invalid velocity (expected 0..127)");
+						}
+
+						const int64_t channel_in = root.get<int64_t> ("params.arguments.channel", 1);
+						if (channel_in < 1 || channel_in > 16) {
+							return jsonrpc_error (id, -32602, "Invalid channel (expected 1..16)");
+						}
+
+						const boost::optional<double> region_beat_opt = root.get_optional<double> ("params.arguments.regionBeat");
+						const boost::optional<int64_t> sample_opt = root.get_optional<int64_t> ("params.arguments.sample");
+
+						samplepos_t bbt_sample = 0;
+						bool have_bbt_target = false;
+						std::string bbt_error;
+						if (!parse_optional_bbt_target_sample (root, "params.arguments", bbt_sample, have_bbt_target, bbt_error)) {
+							return jsonrpc_error (id, -32602, bbt_error);
+						}
+
+						if (region_beat_opt && (!std::isfinite (*region_beat_opt) || *region_beat_opt < 0.0)) {
+							return jsonrpc_error (id, -32602, "Invalid regionBeat (expected >= 0)");
+						}
+
+						if (sample_opt && *sample_opt < 0) {
+							return jsonrpc_error (id, -32602, "Invalid sample (expected >= 0)");
+						}
+
+						int position_arg_count = 0;
+						if (region_beat_opt) {
+							++position_arg_count;
+						}
+						if (sample_opt) {
+							++position_arg_count;
+						}
+						if (have_bbt_target) {
+							++position_arg_count;
+						}
+						if (position_arg_count != 1) {
+							return jsonrpc_error (id, -32602, "Provide exactly one position: regionBeat, sample, or bar+beat");
+						}
+
+						const std::shared_ptr<ARDOUR::Region> region = ARDOUR::RegionFactory::region_by_id (PBD::ID (region_id));
+						const std::shared_ptr<ARDOUR::MidiRegion> midi_region = std::dynamic_pointer_cast<ARDOUR::MidiRegion> (region);
+						if (!midi_region) {
+							return jsonrpc_error (id, -32602, "regionId is not a MIDI region");
+						}
+
+						const std::shared_ptr<ARDOUR::MidiModel> model = midi_region->model ();
+						if (!model) {
+							return jsonrpc_error (id, -32000, "MIDI region model not available");
+						}
+
+						Temporal::Beats start_source_beats;
+						std::string position_origin;
+						if (region_beat_opt) {
+							start_source_beats = midi_region->region_beats_to_source_beats (Temporal::Beats::from_double (*region_beat_opt));
+							position_origin = "regionBeat";
+						} else {
+							samplepos_t target_sample = 0;
+							if (sample_opt) {
+								target_sample = (samplepos_t) *sample_opt;
+								position_origin = "sample";
+							} else {
+								target_sample = bbt_sample;
+								position_origin = "bbt";
+							}
+							start_source_beats = midi_region->absolute_time_to_source_beats (Temporal::timepos_t (target_sample));
+						}
+
+						if (start_source_beats < Temporal::Beats ()) {
+							return jsonrpc_error (id, -32602, "Target position is before source start");
+						}
+
+						const Temporal::Beats length_beats = Temporal::Beats::from_double (*length_beats_opt);
+						if (length_beats < Temporal::Beats::one_tick ()) {
+							return jsonrpc_error (id, -32602, "lengthBeats too small (minimum is one tick)");
+						}
+
+						std::shared_ptr<Evoral::Note<Temporal::Beats> > note (
+							new Evoral::Note<Temporal::Beats> (
+								(uint8_t) (channel_in - 1),
+								start_source_beats,
+								length_beats,
+								(uint8_t) *note_opt,
+								(uint8_t) velocity_in));
+
+						ARDOUR::MidiModel::NoteDiffCommand* cmd = model->new_note_diff_command ("add midi note");
+						cmd->add (note);
+						model->apply_diff_command_as_commit (_session, cmd);
+
+						const std::shared_ptr<Evoral::Note<Temporal::Beats> > inserted = model->find_note (note->id ());
+						if (!inserted) {
+							return jsonrpc_error (id, -32000, "MIDI note insertion was rejected by overlap policy");
+						}
+
+						std::ostringstream structured;
+						structured << "{\"added\":" << midi_note_json (region, inserted, position_origin)
+							<< ",\"requested\":{"
+							<< "\"note\":" << *note_opt
+							<< ",\"velocity\":" << velocity_in
+							<< ",\"channel\":" << channel_in
+							<< ",\"lengthBeats\":" << *length_beats_opt;
+						if (region_beat_opt) {
+							structured << ",\"regionBeat\":" << *region_beat_opt
+								<< ",\"sample\":null"
+								<< ",\"bar\":null"
+								<< ",\"beat\":null";
+						} else if (sample_opt) {
+							structured << ",\"regionBeat\":null"
+								<< ",\"sample\":" << *sample_opt
+								<< ",\"bar\":null"
+								<< ",\"beat\":null";
+						} else {
+							const int req_bar = root.get<int> ("params.arguments.bar", 0);
+							const double req_beat = root.get<double> ("params.arguments.beat", 0.0);
+							structured << ",\"regionBeat\":null"
+								<< ",\"sample\":null"
+								<< ",\"bar\":" << req_bar
+								<< ",\"beat\":" << req_beat;
+						}
+						structured << "}}";
+
+						return jsonrpc_result (
+							id,
+							std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"MIDI note added\"}],\"structuredContent\":")
+								+ structured.str () + "}");
+					}
+
+					if (tool_name == "midi_note/import_json") {
+						boost::optional<pt::ptree&> midi_opt = root.get_child_optional ("params.arguments.midi");
+						if (!midi_opt) {
+							return jsonrpc_error (id, -32602, "Missing midi object");
+						}
+
+						const std::string region_id = root.get<std::string> ("params.arguments.regionId", "");
+						const std::string track_id_arg = root.get<std::string> ("params.arguments.trackId", "");
+						const std::string requested_name = root.get<std::string> ("params.arguments.name", "");
+
+						bool created_region = false;
+						std::shared_ptr<ARDOUR::Track> target_track;
+						std::shared_ptr<ARDOUR::Region> target_region;
+
+						if (!region_id.empty ()) {
+							target_region = ARDOUR::RegionFactory::region_by_id (PBD::ID (region_id));
+							if (!target_region) {
+								return jsonrpc_error (id, -32602, "regionId not found");
+							}
+
+							if (!track_id_arg.empty ()) {
+								std::shared_ptr<ARDOUR::Route> r = _session.route_by_id (PBD::ID (track_id_arg));
+								target_track = std::dynamic_pointer_cast<ARDOUR::Track> (r);
+							}
+						} else {
+							if (track_id_arg.empty ()) {
+								return jsonrpc_error (id, -32602, "Provide regionId, or trackId with range endpoints");
+							}
+
+							std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (track_id_arg));
+							target_track = std::dynamic_pointer_cast<ARDOUR::Track> (route);
+							const std::shared_ptr<ARDOUR::MidiTrack> midi_track = std::dynamic_pointer_cast<ARDOUR::MidiTrack> (target_track);
+							if (!midi_track) {
+								return jsonrpc_error (id, -32602, "trackId is not a MIDI track");
+							}
+
+							samplepos_t start_sample = 0;
+							samplepos_t end_sample = 0;
+							std::string range_error;
+							if (!parse_range_endpoints (root, "params.arguments", start_sample, end_sample, range_error)) {
+								return jsonrpc_error (id, -32602, range_error);
+							}
+							if (end_sample <= start_sample) {
+								return jsonrpc_error (id, -32602, "Invalid range: end must be greater than start");
+							}
+
+							std::string create_error;
+							if (!create_midi_region_on_track (_session, target_track, start_sample, end_sample, requested_name, target_region, create_error)) {
+								return jsonrpc_error (id, -32000, create_error);
+							}
+							created_region = true;
+						}
+
+						const std::shared_ptr<ARDOUR::MidiRegion> midi_region = std::dynamic_pointer_cast<ARDOUR::MidiRegion> (target_region);
+						if (!midi_region) {
+							return jsonrpc_error (id, -32602, "Target region is not a MIDI region");
+						}
+
+						const std::shared_ptr<ARDOUR::MidiModel> model = midi_region->model ();
+						if (!model) {
+							return jsonrpc_error (id, -32000, "MIDI region model not available");
+						}
+
+						std::vector<MidiJsonEventDef> expanded_events;
+						std::vector<MidiJsonNoteDef> note_defs;
+						std::vector<std::string> warnings;
+						int channel = 9;
+						bool is_drum_mode = true;
+						int ticks_per_quarter = 480;
+						int time_sig_num = 4;
+						int time_sig_den = 4;
+						std::string parse_error;
+
+						if (!parse_midi_json_events (*midi_opt, expanded_events, channel, is_drum_mode, ticks_per_quarter, time_sig_num, time_sig_den, warnings, parse_error)) {
+							return jsonrpc_error (id, -32602, parse_error);
+						}
+						if (!build_midi_json_note_defs (expanded_events, is_drum_mode, ticks_per_quarter, time_sig_num, time_sig_den, note_defs, warnings, parse_error)) {
+							return jsonrpc_error (id, -32602, parse_error);
+						}
+
+						ARDOUR::MidiModel::NoteDiffCommand* cmd = model->new_note_diff_command ("import midi json");
+						std::vector<std::shared_ptr<Evoral::Note<Temporal::Beats> > > requested_notes;
+						requested_notes.reserve (note_defs.size ());
+
+						bool uses_per_event_channels = false;
+						for (size_t i = 0; i < expanded_events.size (); ++i) {
+							if (expanded_events[i].channel != channel) {
+								uses_per_event_channels = true;
+								break;
+							}
+						}
+
+						for (size_t i = 0; i < note_defs.size (); ++i) {
+							if (note_defs[i].note < 0 || note_defs[i].note > 127 || note_defs[i].velocity < 0 || note_defs[i].velocity > 127 || note_defs[i].channel < 0 || note_defs[i].channel > 15) {
+								std::ostringstream w;
+								w << "Skipped invalid note/velocity/channel values at index " << i;
+								warnings.push_back (w.str ());
+								continue;
+							}
+
+							const Temporal::Beats start_source_beats = midi_region->region_beats_to_source_beats (Temporal::Beats::from_double (note_defs[i].start_quarters));
+							if (start_source_beats < Temporal::Beats ()) {
+								std::ostringstream w;
+								w << "Skipped note before source start at index " << i;
+								warnings.push_back (w.str ());
+								continue;
+							}
+
+							const Temporal::Beats length_beats = Temporal::Beats::from_double (note_defs[i].length_quarters);
+							if (length_beats < Temporal::Beats::one_tick ()) {
+								std::ostringstream w;
+								w << "Skipped note shorter than one tick at index " << i;
+								warnings.push_back (w.str ());
+								continue;
+							}
+
+							std::shared_ptr<Evoral::Note<Temporal::Beats> > note (
+								new Evoral::Note<Temporal::Beats> (
+									(uint8_t) note_defs[i].channel,
+									start_source_beats,
+									length_beats,
+									(uint8_t) note_defs[i].note,
+									(uint8_t) note_defs[i].velocity));
+							cmd->add (note);
+							requested_notes.push_back (note);
+						}
+
+						if (!requested_notes.empty ()) {
+							model->apply_diff_command_as_commit (_session, cmd);
+						} else {
+							delete cmd;
+						}
+
+						size_t inserted_count = 0;
+						for (size_t i = 0; i < requested_notes.size (); ++i) {
+							if (model->find_note (requested_notes[i]->id ())) {
+								++inserted_count;
+							}
+						}
+
+						const size_t rejected_count = (note_defs.size () >= inserted_count) ? (note_defs.size () - inserted_count) : 0;
+
+						std::ostringstream structured;
+						structured << "{\"createdRegion\":" << (created_region ? "true" : "false")
+							<< ",\"region\":" << midi_region_brief_json (target_region)
+							<< ",\"summary\":{"
+							<< "\"channel\":" << (channel + 1)
+							<< ",\"defaultChannel\":" << (channel + 1)
+							<< ",\"usesPerEventChannels\":" << (uses_per_event_channels ? "true" : "false")
+							<< ",\"isDrumMode\":" << (is_drum_mode ? "true" : "false")
+							<< ",\"ticksPerQuarter\":" << ticks_per_quarter
+							<< ",\"timeSignature\":{\"numerator\":" << time_sig_num << ",\"denominator\":" << time_sig_den << "}"
+							<< ",\"eventsExpanded\":" << expanded_events.size ()
+							<< ",\"notesRequested\":" << note_defs.size ()
+							<< ",\"notesAttempted\":" << requested_notes.size ()
+							<< ",\"notesInserted\":" << inserted_count
+							<< ",\"notesRejected\":" << rejected_count
+							<< "}"
+							<< ",\"warnings\":" << json_string_array (warnings);
+						if (target_track) {
+							structured << ",\"trackId\":\"" << json_escape (target_track->id ().to_s ()) << "\""
+								<< ",\"trackName\":\"" << json_escape (target_track->name ()) << "\"";
+						} else {
+							structured << ",\"trackId\":null"
+								<< ",\"trackName\":null";
+						}
+						if (requested_name.empty ()) {
+							structured << ",\"requestedName\":null";
+						} else {
+							structured << ",\"requestedName\":\"" << json_escape (requested_name) << "\"";
+						}
+						structured << "}";
+
+						return jsonrpc_result (
+							id,
+							std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"MIDI JSON imported\"}],\"structuredContent\":")
+								+ structured.str () + "}");
+					}
+
+					if (tool_name == "midi_note/get_json") {
+						const std::string region_id = root.get<std::string> ("params.arguments.regionId", "");
+						if (region_id.empty ()) {
+							return jsonrpc_error (id, -32602, "Missing regionId");
+						}
+
+						const int64_t ticks_per_quarter_in = root.get<int64_t> ("params.arguments.ticksPerQuarter", 480);
+						if (ticks_per_quarter_in <= 0 || ticks_per_quarter_in > 96000) {
+							return jsonrpc_error (id, -32602, "Invalid ticksPerQuarter (expected 1..96000)");
+						}
+						const int ticks_per_quarter = (int) ticks_per_quarter_in;
+
+						const std::string time_signature = root.get<std::string> ("params.arguments.timeSignature", "4/4");
+						int time_sig_num = 4;
+						int time_sig_den = 4;
+						if (!parse_time_signature (time_signature, time_sig_num, time_sig_den)) {
+							return jsonrpc_error (id, -32602, "Invalid timeSignature (expected format N/D)");
+						}
+
+						const std::shared_ptr<ARDOUR::Region> region = ARDOUR::RegionFactory::region_by_id (PBD::ID (region_id));
+						if (!region) {
+							return jsonrpc_error (id, -32602, "regionId not found");
+						}
+						const std::shared_ptr<ARDOUR::MidiRegion> midi_region = std::dynamic_pointer_cast<ARDOUR::MidiRegion> (region);
+						if (!midi_region) {
+							return jsonrpc_error (id, -32602, "regionId is not a MIDI region");
+						}
+
+						const std::shared_ptr<ARDOUR::MidiModel> model = midi_region->model ();
+						if (!model) {
+							return jsonrpc_error (id, -32000, "MIDI region model not available");
+						}
+
+						struct ExportEvent {
+							double quarters;
+							size_t ordinal;
+							int note;
+							int velocity;
+							int channel;
+							const char* type;
+						};
+
+						std::vector<ExportEvent> events;
+						std::vector<std::string> warnings;
+						std::map<int, size_t> channel_counts;
+						size_t notes_seen = 0;
+						size_t notes_exported = 0;
+
+						const ARDOUR::MidiModel::Notes& notes = model->notes ();
+						for (ARDOUR::MidiModel::Notes::const_iterator it = notes.begin (); it != notes.end (); ++it) {
+							const std::shared_ptr<Evoral::Note<Temporal::Beats> >& note = *it;
+							if (!note) {
+								continue;
+							}
+							++notes_seen;
+
+							const int note_num = (int) note->note ();
+							const int velocity = (int) note->velocity ();
+							const int channel = (int) note->channel ();
+							if (note_num < 0 || note_num > 127 || velocity < 0 || velocity > 127 || channel < 0 || channel > 15) {
+								std::ostringstream w;
+								w << "Skipped note with invalid note/velocity/channel (noteId " << note->id () << ")";
+								warnings.push_back (w.str ());
+								continue;
+							}
+
+							const Temporal::Beats start_source_beats = note->time ();
+							const Temporal::Beats end_source_beats = start_source_beats + note->length ();
+							if (end_source_beats <= start_source_beats) {
+								std::ostringstream w;
+								w << "Skipped note with non-positive length (noteId " << note->id () << ")";
+								warnings.push_back (w.str ());
+								continue;
+							}
+
+							const Temporal::Beats start_region_beats = midi_region->source_beats_to_region_time (start_source_beats).beats ();
+							const Temporal::Beats end_region_beats = midi_region->source_beats_to_region_time (end_source_beats).beats ();
+							const double start_quarters = beats_to_double (start_region_beats);
+							const double end_quarters = beats_to_double (end_region_beats);
+							if (!std::isfinite (start_quarters) || !std::isfinite (end_quarters) || end_quarters <= start_quarters) {
+								std::ostringstream w;
+								w << "Skipped note with invalid export timing (noteId " << note->id () << ")";
+								warnings.push_back (w.str ());
+								continue;
+							}
+
+							const size_t base_ordinal = events.size ();
+
+							ExportEvent on;
+							on.quarters = start_quarters;
+							on.ordinal = base_ordinal;
+							on.note = note_num;
+							on.velocity = velocity;
+							on.channel = channel;
+							on.type = "note_on";
+							events.push_back (on);
+
+							ExportEvent off;
+							off.quarters = end_quarters;
+							off.ordinal = base_ordinal + 1;
+							off.note = note_num;
+							off.velocity = 0;
+							off.channel = channel;
+							off.type = "note_off";
+							events.push_back (off);
+
+							channel_counts[channel] += 1;
+							++notes_exported;
+						}
+
+						std::sort (
+							events.begin (),
+							events.end (),
+							[] (const ExportEvent& a, const ExportEvent& b) {
+								if (a.quarters != b.quarters) {
+									return a.quarters < b.quarters;
+								}
+								const int a_type_order = (std::strcmp (a.type, "note_off") == 0) ? 0 : 1;
+								const int b_type_order = (std::strcmp (b.type, "note_off") == 0) ? 0 : 1;
+								if (a_type_order != b_type_order) {
+									return a_type_order < b_type_order;
+								}
+								if (a.channel != b.channel) {
+									return a.channel < b.channel;
+								}
+								if (a.note != b.note) {
+									return a.note < b.note;
+								}
+								return a.ordinal < b.ordinal;
+							});
+
+						int default_channel = 9;
+						size_t best_count = 0;
+						for (std::map<int, size_t>::const_iterator it = channel_counts.begin (); it != channel_counts.end (); ++it) {
+							if (it->second > best_count) {
+								best_count = it->second;
+								default_channel = it->first;
+							}
+						}
+
+						std::ostringstream events_json;
+						events_json << "[";
+						bool first_event = true;
+						size_t events_exported = 0;
+						for (size_t i = 0; i < events.size (); ++i) {
+							int bar = 0;
+							int beat = 0;
+							int tick = 0;
+							if (!quarters_to_midi_json_time (events[i].quarters, time_sig_num, time_sig_den, ticks_per_quarter, bar, beat, tick)) {
+								std::ostringstream w;
+								w << "Skipped event with unrepresentable timing at event index " << i;
+								warnings.push_back (w.str ());
+								continue;
+							}
+
+							if (!first_event) {
+								events_json << ",";
+							}
+							first_event = false;
+							events_json << "{\"bar\":" << bar
+								<< ",\"b\":" << beat
+								<< ",\"t\":" << tick
+								<< ",\"n\":" << events[i].note
+								<< ",\"v\":" << events[i].velocity
+								<< ",\"type\":\"" << events[i].type << "\"";
+							if (events[i].channel != default_channel) {
+								events_json << ",\"channel\":" << events[i].channel;
+							}
+							events_json << "}";
+							++events_exported;
+						}
+						events_json << "]";
+
+						std::ostringstream midi_json;
+						midi_json << "{\"channel\":" << default_channel
+							<< ",\"is_drum_mode\":false"
+							<< ",\"time_signature\":\"" << json_escape (time_signature) << "\""
+							<< ",\"ticks_per_quarter\":" << ticks_per_quarter
+							<< ",\"midi_events\":" << events_json.str ()
+							<< "}";
+
+						std::ostringstream structured;
+						structured << "{\"region\":" << midi_region_brief_json (region)
+							<< ",\"midi\":" << midi_json.str ()
+							<< ",\"summary\":{"
+							<< "\"notesInRegion\":" << notes_seen
+							<< ",\"notesExported\":" << notes_exported
+							<< ",\"eventsExported\":" << events_exported
+							<< ",\"defaultChannel\":" << default_channel
+							<< "}"
+							<< ",\"warnings\":" << json_string_array (warnings)
+							<< "}";
+
+						return jsonrpc_result (
+							id,
+							std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"MIDI JSON exported\"}],\"structuredContent\":")
+								+ structured.str () + "}");
+					}
+
+					if (tool_name == "track/get_info") {
+					const std::string route_id = root.get<std::string> ("params.arguments.id", "");
 
 				if (route_id.empty ()) {
 					return jsonrpc_error (id, -32602, "Missing track id");
@@ -3116,13 +4272,52 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 					return jsonrpc_error (id, -32602, "Route not found");
 				}
 
-				std::string structured = track_info_json (route);
-				return jsonrpc_result (
-					id,
-					std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Route info\"}],\"structuredContent\":") + structured + "}");
-				}
+					std::string structured = track_info_json (route);
+					return jsonrpc_result (
+						id,
+						std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Route info\"}],\"structuredContent\":") + structured + "}");
+					}
 
-				if (tool_name == "plugin/get_description") {
+					if (tool_name == "track/get_regions") {
+					const std::string route_id = root.get<std::string> ("params.arguments.id", "");
+					const bool include_hidden = root.get<bool> ("params.arguments.includeHidden", false);
+
+					if (route_id.empty ()) {
+						return jsonrpc_error (id, -32602, "Missing track id");
+					}
+
+					const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
+					if (!route) {
+						return jsonrpc_error (id, -32602, "Route not found");
+					}
+
+					const std::shared_ptr<ARDOUR::Track> track = std::dynamic_pointer_cast<ARDOUR::Track> (route);
+					if (!track) {
+						return jsonrpc_error (id, -32602, "Route is not a track");
+					}
+
+					const std::shared_ptr<ARDOUR::Playlist> playlist = track->playlist ();
+					if (!playlist) {
+						return jsonrpc_error (id, -32000, "Track has no playlist");
+					}
+
+					const std::string regions = playlist_regions_json (playlist, include_hidden);
+					std::ostringstream structured;
+					structured << "{\"id\":\"" << json_escape (route->id ().to_s ()) << "\""
+						<< ",\"name\":\"" << json_escape (route->name ()) << "\""
+						<< ",\"type\":\"" << json_escape (route_type_string (route)) << "\""
+						<< ",\"playlistId\":\"" << json_escape (playlist->id ().to_s ()) << "\""
+						<< ",\"includeHidden\":" << (include_hidden ? "true" : "false")
+						<< ",\"regions\":" << regions
+						<< "}";
+
+					return jsonrpc_result (
+						id,
+						std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Track regions listed\"}],\"structuredContent\":")
+							+ structured.str () + "}");
+					}
+
+					if (tool_name == "plugin/get_description") {
 					const std::string route_id = root.get<std::string> ("params.arguments.id", "");
 					const int plugin_index = root.get<int> ("params.arguments.pluginIndex", -1);
 
