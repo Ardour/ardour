@@ -45,7 +45,9 @@ private:
 	Gtk::Label _hint_label;
 
 	void refresh_connection_info ();
-	void port_changed ();
+	void commit_port ();
+	void port_activate ();
+	bool port_focus_out (GdkEventFocus*);
 	void debug_changed ();
 };
 

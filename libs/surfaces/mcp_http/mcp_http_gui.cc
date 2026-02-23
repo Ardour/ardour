@@ -89,7 +89,8 @@ MCPHttpGUI::MCPHttpGUI (MCPHttp& cp)
 	pack_start (_table, false, false, 0);
 	pack_start (_hint_label, false, false, 0);
 
-	_port_entry.signal_value_changed ().connect (sigc::mem_fun (*this, &MCPHttpGUI::port_changed));
+	_port_entry.signal_activate ().connect (sigc::mem_fun (*this, &MCPHttpGUI::port_activate));
+	_port_entry.signal_focus_out_event ().connect (sigc::mem_fun (*this, &MCPHttpGUI::port_focus_out));
 	_debug_combo.signal_changed ().connect (sigc::mem_fun (*this, &MCPHttpGUI::debug_changed));
 }
 
@@ -109,15 +110,32 @@ MCPHttpGUI::refresh_connection_info ()
 }
 
 void
-MCPHttpGUI::port_changed ()
+MCPHttpGUI::commit_port ()
 {
+	_port_entry.update ();
+
 	const int port = _port_entry.get_value_as_int ();
 	if (port < 1 || port > 65535) {
+		_port_entry.set_value ((double) _cp.port ());
 		return;
 	}
 
 	_cp.set_port ((uint16_t) port);
+	_port_entry.set_value ((double) _cp.port ());
 	refresh_connection_info ();
+}
+
+void
+MCPHttpGUI::port_activate ()
+{
+	commit_port ();
+}
+
+bool
+MCPHttpGUI::port_focus_out (GdkEventFocus*)
+{
+	commit_port ();
+	return false;
 }
 
 void
