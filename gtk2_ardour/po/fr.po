@@ -3753,7 +3753,7 @@ msgstr "%+.4f%%"
 
 #: audio_clock.cc:1131
 msgid "Pull"
-msgstr ""
+msgstr "Pull"
 
 #: audio_clock.cc:1372
 msgid "TimeSignature|TS"
@@ -16216,7 +16216,7 @@ msgstr "Apparence/Traduction"
 
 #: rc_option_editor.cc:3212
 msgid "Internationalization"
-msgstr "Traduction"
+msgstr "Internationalisation"
 
 #: rc_option_editor.cc:3216
 msgid "Use translations"
