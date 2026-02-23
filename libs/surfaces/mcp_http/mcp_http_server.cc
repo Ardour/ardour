@@ -1893,6 +1893,8 @@ send_list_json (const std::shared_ptr<ARDOUR::Route>& route)
 		ss << "{\"index\":" << i
 		   << ",\"name\":\"" << json_escape (route->send_name (i)) << "\""
 		   << ",\"active\":" << (p->active () ? "true" : "false")
+		   << ",\"preFader\":" << (p->get_pre_fader () ? "true" : "false")
+		   << ",\"postFader\":" << (p->get_pre_fader () ? "false" : "true")
 		   << ",\"position\":" << position
 		   << ",\"db\":" << db;
 
@@ -1933,6 +1935,8 @@ send_level_json (const std::shared_ptr<ARDOUR::Route>& route, uint32_t send_inde
 	   << ",\"sendIndex\":" << send_index
 	   << ",\"name\":\"" << json_escape (route->send_name (send_index)) << "\""
 	   << ",\"active\":" << ((p && p->active ()) ? "true" : "false")
+	   << ",\"preFader\":" << ((p && p->get_pre_fader ()) ? "true" : "false")
+	   << ",\"postFader\":" << ((p && p->get_pre_fader ()) ? "false" : "true")
 	   << ",\"position\":" << position
 	   << ",\"db\":" << db;
 
@@ -1947,6 +1951,132 @@ send_level_json (const std::shared_ptr<ARDOUR::Route>& route, uint32_t send_inde
 
 	ss << "}";
 	return ss.str ();
+}
+
+static bool
+find_internal_send_index (
+	const std::shared_ptr<ARDOUR::Route>& source_route,
+	const std::shared_ptr<ARDOUR::Route>& target_route,
+	uint32_t& send_index_out)
+{
+	if (!source_route || !target_route) {
+		return false;
+	}
+
+	for (uint32_t i = 0;; ++i) {
+		std::shared_ptr<ARDOUR::Processor> p = source_route->nth_send (i);
+		if (!p) {
+			break;
+		}
+
+		std::shared_ptr<ARDOUR::InternalSend> isend = std::dynamic_pointer_cast<ARDOUR::InternalSend> (p);
+		if (!isend) {
+			continue;
+		}
+
+		std::shared_ptr<ARDOUR::Route> target = isend->target_route ();
+		if (target && target->id () == target_route->id ()) {
+			send_index_out = i;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+static bool
+recreate_aux_send_with_position (
+	const std::shared_ptr<ARDOUR::Route>& source_route,
+	uint32_t send_index,
+	bool post_fader,
+	uint32_t& resolved_send_index,
+	std::string& error)
+{
+	if (!source_route) {
+		error = "Route not found";
+		return false;
+	}
+
+	std::shared_ptr<ARDOUR::Processor> send_proc = source_route->nth_send (send_index);
+	if (!send_proc) {
+		error = "Send not found";
+		return false;
+	}
+
+	std::shared_ptr<ARDOUR::InternalSend> isend = std::dynamic_pointer_cast<ARDOUR::InternalSend> (send_proc);
+	if (!isend) {
+		error = "Only internal aux sends are supported";
+		return false;
+	}
+
+	std::shared_ptr<ARDOUR::Route> target_route = isend->target_route ();
+	if (!target_route) {
+		error = "Send target route not found";
+		return false;
+	}
+
+	if (((!send_proc->get_pre_fader ()) && post_fader) || (send_proc->get_pre_fader () && !post_fader)) {
+		resolved_send_index = send_index;
+		return true;
+	}
+
+	std::shared_ptr<ARDOUR::AutomationControl> send_gain = source_route->send_level_controllable (send_index);
+	std::shared_ptr<ARDOUR::AutomationControl> send_enable = source_route->send_enable_controllable (send_index);
+	std::shared_ptr<ARDOUR::AutomationControl> send_pan = source_route->send_pan_azimuth_controllable (send_index);
+	std::shared_ptr<ARDOUR::AutomationControl> send_pan_enable = source_route->send_pan_azimuth_enable_controllable (send_index);
+
+	const bool have_gain = !!send_gain;
+	const bool have_enable = !!send_enable;
+	const bool have_pan = !!send_pan;
+	const bool have_pan_enable = !!send_pan_enable;
+	const bool processor_enabled = send_proc->enabled ();
+	const double gain_value = have_gain ? send_gain->get_value () : 0.0;
+	const double enable_value = have_enable ? send_enable->get_value () : 0.0;
+	const double pan_value = have_pan ? send_pan->get_value () : 0.0;
+	const double pan_enable_value = have_pan_enable ? send_pan_enable->get_value () : 0.0;
+
+	if (source_route->remove_processor (send_proc) != 0) {
+		error = "Failed to remove existing send";
+		return false;
+	}
+
+	std::shared_ptr<ARDOUR::Processor> before = source_route->before_processor_for_placement (post_fader ? ARDOUR::PostFader : ARDOUR::PreFader);
+	if (source_route->add_aux_send (target_route, before) != 0) {
+		error = "Failed to re-create send at requested position";
+		return false;
+	}
+
+	if (!find_internal_send_index (source_route, target_route, resolved_send_index)) {
+		error = "Send not found after re-create";
+		return false;
+	}
+
+	if (have_gain) {
+		if (std::shared_ptr<ARDOUR::AutomationControl> c = source_route->send_level_controllable (resolved_send_index)) {
+			c->set_value (gain_value, PBD::Controllable::NoGroup);
+		}
+	}
+	if (have_enable) {
+		if (std::shared_ptr<ARDOUR::AutomationControl> c = source_route->send_enable_controllable (resolved_send_index)) {
+			c->set_value (enable_value, PBD::Controllable::NoGroup);
+		}
+	} else {
+		if (std::shared_ptr<ARDOUR::Processor> p = source_route->nth_send (resolved_send_index)) {
+			p->enable (processor_enabled);
+		}
+	}
+	if (have_pan) {
+		if (std::shared_ptr<ARDOUR::AutomationControl> c = source_route->send_pan_azimuth_controllable (resolved_send_index)) {
+			c->set_value (pan_value, PBD::Controllable::NoGroup);
+		}
+	}
+	if (have_pan_enable) {
+		if (std::shared_ptr<ARDOUR::AutomationControl> c = source_route->send_pan_azimuth_enable_controllable (resolved_send_index)) {
+			c->set_value (pan_enable_value, PBD::Controllable::NoGroup);
+		}
+	}
+
+	return true;
 }
 
 static std::string
@@ -2784,6 +2914,12 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"position\":{\"type\":\"number\",\"minimum\":0,\"maximum\":1}},\"required\":[\"id\",\"position\"],\"additionalProperties\":false}},"
 					"{\"name\":\"track_set_send_level\",\"title\":\"Set Send Level\",\"description\":\"Set route send level by send index using normalized position (0.0 to 1.0) or dB.\","
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"sendIndex\":{\"type\":\"integer\",\"minimum\":0},\"position\":{\"type\":\"number\",\"minimum\":0,\"maximum\":1},\"db\":{\"type\":\"number\"}},\"required\":[\"id\",\"sendIndex\"],\"oneOf\":[{\"required\":[\"position\"]},{\"required\":[\"db\"]}],\"additionalProperties\":false}},"
+					"{\"name\":\"track_add_send\",\"title\":\"Add Send\",\"description\":\"Add one internal aux send from a source route to a target route. Optional level and enabled state are applied to the resolved send.\","
+					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"targetId\":{\"type\":\"string\"},\"position\":{\"type\":\"number\",\"minimum\":0,\"maximum\":1},\"db\":{\"type\":\"number\"},\"enabled\":{\"type\":\"boolean\"},\"postFader\":{\"type\":\"boolean\"}},\"required\":[\"id\",\"targetId\"],\"additionalProperties\":false},\"outputSchema\":{\"type\":\"object\",\"required\":[\"created\",\"send\",\"sends\"],\"properties\":{\"created\":{\"type\":\"boolean\"},\"send\":{\"type\":\"object\"},\"sends\":{\"type\":\"array\"}},\"additionalProperties\":true}},"
+					"{\"name\":\"track_set_send_position\",\"title\":\"Set Send Position\",\"description\":\"Set send pre/post-fader position for an existing internal aux send.\","
+					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"sendIndex\":{\"type\":\"integer\",\"minimum\":0},\"postFader\":{\"type\":\"boolean\"}},\"required\":[\"id\",\"sendIndex\",\"postFader\"],\"additionalProperties\":false},\"outputSchema\":{\"type\":\"object\",\"required\":[\"id\",\"routeName\",\"sendIndex\",\"preFader\",\"postFader\"],\"properties\":{\"id\":{\"type\":\"string\"},\"routeName\":{\"type\":\"string\"},\"sendIndex\":{\"type\":\"integer\"},\"preFader\":{\"type\":\"boolean\"},\"postFader\":{\"type\":\"boolean\"}},\"additionalProperties\":true}},"
+					"{\"name\":\"track_remove_send\",\"title\":\"Remove Send\",\"description\":\"Remove one route send by send index. Optional targetId can be used as a safety check for internal sends.\","
+					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"sendIndex\":{\"type\":\"integer\",\"minimum\":0},\"targetId\":{\"type\":\"string\"}},\"required\":[\"id\",\"sendIndex\"],\"additionalProperties\":false},\"outputSchema\":{\"type\":\"object\",\"required\":[\"removed\",\"routeId\",\"routeName\",\"sendIndex\",\"sends\"],\"properties\":{\"removed\":{\"type\":\"boolean\"},\"routeId\":{\"type\":\"string\"},\"routeName\":{\"type\":\"string\"},\"sendIndex\":{\"type\":\"integer\"},\"sends\":{\"type\":\"array\"}},\"additionalProperties\":true}},"
 				"{\"name\":\"track_set_fader\",\"title\":\"Set Track Fader\",\"description\":\"Set track fader by normalized position (0.0 to 1.0) or dB.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"position\":{\"type\":\"number\",\"minimum\":0,\"maximum\":1},\"db\":{\"type\":\"number\"}},\"required\":[\"id\"],\"oneOf\":[{\"required\":[\"position\"]},{\"required\":[\"db\"]}],\"additionalProperties\":false}},"
 						"{\"name\":\"midi_region_add\",\"title\":\"Add MIDI Region\",\"description\":\"Create an empty MIDI region on a MIDI track. Provide either startSample+endSample, or startBar+startBeat+endBar+endBeat.\","
@@ -6455,6 +6591,215 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 					return jsonrpc_result (
 						id,
 						std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Send level updated\"}],\"structuredContent\":") + structured + "}");
+				}
+
+				if (tool_name == "track/add_send") {
+					const std::string route_id = root.get<std::string> ("params.arguments.id", "");
+					const std::string target_id = root.get<std::string> ("params.arguments.targetId", "");
+					const boost::optional<double> position = root.get_optional<double> ("params.arguments.position");
+					const boost::optional<double> db = root.get_optional<double> ("params.arguments.db");
+					const boost::optional<bool> enabled = root.get_optional<bool> ("params.arguments.enabled");
+					const boost::optional<bool> post_fader = root.get_optional<bool> ("params.arguments.postFader");
+
+					if (route_id.empty ()) {
+						return jsonrpc_error (id, -32602, "Missing source route id");
+					}
+					if (target_id.empty ()) {
+						return jsonrpc_error (id, -32602, "Missing target route id");
+					}
+					if (position && db) {
+						return jsonrpc_error (id, -32602, "Provide only one of: position or db");
+					}
+					if (position && !valid_fader_position (*position)) {
+						return jsonrpc_error (id, -32602, "Invalid send position (expected 0.0 to 1.0)");
+					}
+					if (db && !valid_fader_db (*db)) {
+						return jsonrpc_error (id, -32602, "Invalid dB value");
+					}
+
+					const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
+					const std::shared_ptr<ARDOUR::Route> target_route = _session.route_by_id (PBD::ID (target_id));
+					if (!route) {
+						return jsonrpc_error (id, -32602, "Source route not found");
+					}
+					if (!target_route) {
+						return jsonrpc_error (id, -32602, "Target route not found");
+					}
+					if (route->id () == target_route->id ()) {
+						return jsonrpc_error (id, -32602, "Cannot add send to the same route");
+					}
+					if (route->is_singleton ()) {
+						return jsonrpc_error (id, -32602, "Cannot add send from singleton route");
+					}
+					if (target_route->is_singleton ()) {
+						return jsonrpc_error (id, -32602, "Cannot add send to singleton route");
+					}
+					std::shared_ptr<ARDOUR::Route> monitor_out = _session.monitor_out ();
+					if (monitor_out && monitor_out->id () == target_route->id ()) {
+						return jsonrpc_error (id, -32602, "Cannot add aux send to monitor route");
+					}
+
+					const bool existed_before = (route->internal_send_for (target_route) != 0);
+					std::shared_ptr<ARDOUR::Processor> before;
+					if (post_fader) {
+						before = route->before_processor_for_placement (*post_fader ? ARDOUR::PostFader : ARDOUR::PreFader);
+					}
+					const int rc = route->add_aux_send (target_route, before);
+					if (rc != 0) {
+						return jsonrpc_error (id, -32000, "Failed to add send");
+					}
+
+					uint32_t sid = 0;
+					if (!find_internal_send_index (route, target_route, sid)) {
+						return jsonrpc_error (id, -32000, "Send not found after add");
+					}
+
+					std::shared_ptr<ARDOUR::AutomationControl> send_gain = route->send_level_controllable (sid);
+					if (position || db) {
+						if (!send_gain) {
+							return jsonrpc_error (id, -32602, "Send has no level control");
+						}
+
+						double internal_gain = send_gain->get_value ();
+						if (position) {
+							internal_gain = send_gain->interface_to_internal (*position);
+						} else {
+							internal_gain = (*db <= -192.0) ? 0.0 : dB_to_coefficient (*db);
+						}
+
+						if (!std::isfinite (internal_gain)) {
+							return jsonrpc_error (id, -32602, "Invalid mapped send gain");
+						}
+
+						internal_gain = std::max (send_gain->lower (), std::min (send_gain->upper (), internal_gain));
+						send_gain->set_value (internal_gain, PBD::Controllable::NoGroup);
+					}
+
+					if (enabled) {
+						std::shared_ptr<ARDOUR::AutomationControl> send_enable = route->send_enable_controllable (sid);
+						if (send_enable) {
+							send_enable->set_value (*enabled ? 1.0 : 0.0, PBD::Controllable::NoGroup);
+						} else {
+							std::shared_ptr<ARDOUR::Processor> send_proc = route->nth_send (sid);
+							if (!send_proc) {
+								return jsonrpc_error (id, -32000, "Send not found while setting enabled state");
+							}
+							send_proc->enable (*enabled);
+						}
+					}
+
+					std::ostringstream structured;
+					structured << "{\"created\":" << (existed_before ? "false" : "true")
+						   << ",\"send\":" << send_level_json (route, sid)
+						   << ",\"sends\":" << send_list_json (route)
+						   << "}";
+
+					const char* text = existed_before ? "Send already existed; state updated" : "Send added";
+					return jsonrpc_result (
+						id,
+						std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"") + text + "\"}],\"structuredContent\":" + structured.str () + "}");
+				}
+
+				if (tool_name == "track/set_send_position") {
+					const std::string route_id = root.get<std::string> ("params.arguments.id", "");
+					const int send_index = root.get<int> ("params.arguments.sendIndex", -1);
+					const boost::optional<bool> post_fader = root.get_optional<bool> ("params.arguments.postFader");
+
+					if (route_id.empty ()) {
+						return jsonrpc_error (id, -32602, "Missing route id");
+					}
+					if (send_index < 0) {
+						return jsonrpc_error (id, -32602, "Invalid sendIndex (expected >= 0)");
+					}
+					if (!post_fader) {
+						return jsonrpc_error (id, -32602, "Missing postFader boolean");
+					}
+
+					const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
+					if (!route) {
+						return jsonrpc_error (id, -32602, "Route not found");
+					}
+
+					uint32_t sid = 0;
+					std::string err;
+					if (!recreate_aux_send_with_position (route, (uint32_t) send_index, *post_fader, sid, err)) {
+						return jsonrpc_error (id, -32000, err.empty () ? "Failed to set send position" : err);
+					}
+
+					std::string structured = send_level_json (route, sid);
+					return jsonrpc_result (
+						id,
+						std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Send position updated\"}],\"structuredContent\":") + structured + "}");
+				}
+
+				if (tool_name == "track/remove_send") {
+					const std::string route_id = root.get<std::string> ("params.arguments.id", "");
+					const int send_index = root.get<int> ("params.arguments.sendIndex", -1);
+					const std::string target_id = root.get<std::string> ("params.arguments.targetId", "");
+
+					if (route_id.empty ()) {
+						return jsonrpc_error (id, -32602, "Missing route id");
+					}
+					if (send_index < 0) {
+						return jsonrpc_error (id, -32602, "Invalid sendIndex (expected >= 0)");
+					}
+
+					const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
+					if (!route) {
+						return jsonrpc_error (id, -32602, "Route not found");
+					}
+
+					const uint32_t sid = (uint32_t) send_index;
+					std::shared_ptr<ARDOUR::Processor> send_proc = route->nth_send (sid);
+					if (!send_proc) {
+						return jsonrpc_error (id, -32602, "Send not found");
+					}
+
+					std::ostringstream removed;
+					removed << "{\"routeId\":\"" << json_escape (route->id ().to_s ()) << "\""
+					        << ",\"routeName\":\"" << json_escape (route->name ()) << "\""
+					        << ",\"sendIndex\":" << sid
+					        << ",\"name\":\"" << json_escape (route->send_name (sid)) << "\""
+					        << ",\"active\":" << (send_proc->active () ? "true" : "false")
+					        << ",\"preFader\":" << (send_proc->get_pre_fader () ? "true" : "false")
+					        << ",\"postFader\":" << (send_proc->get_pre_fader () ? "false" : "true");
+
+					std::shared_ptr<ARDOUR::InternalSend> isend = std::dynamic_pointer_cast<ARDOUR::InternalSend> (send_proc);
+					if (isend) {
+						std::shared_ptr<ARDOUR::Route> target_route = isend->target_route ();
+						if (!target_id.empty ()) {
+							if (!target_route) {
+								return jsonrpc_error (id, -32602, "Internal send has no target route");
+							}
+							if (target_route->id ().to_s () != target_id) {
+								return jsonrpc_error (id, -32602, "Send targetId mismatch");
+							}
+						}
+						if (target_route) {
+							removed << ",\"targetRouteId\":\"" << json_escape (target_route->id ().to_s ()) << "\""
+							        << ",\"targetRouteName\":\"" << json_escape (target_route->name ()) << "\"";
+						}
+					} else if (!target_id.empty ()) {
+						return jsonrpc_error (id, -32602, "targetId is only supported for internal sends");
+					}
+					removed << "}";
+
+					if (route->remove_processor (send_proc) != 0) {
+						return jsonrpc_error (id, -32000, "Failed to remove send");
+					}
+
+					std::ostringstream structured;
+					structured << "{\"removed\":true"
+					           << ",\"routeId\":\"" << json_escape (route->id ().to_s ()) << "\""
+					           << ",\"routeName\":\"" << json_escape (route->name ()) << "\""
+					           << ",\"sendIndex\":" << sid
+					           << ",\"removedSend\":" << removed.str ()
+					           << ",\"sends\":" << send_list_json (route)
+					           << "}";
+
+					return jsonrpc_result (
+						id,
+						std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Send removed\"}],\"structuredContent\":") + structured.str () + "}");
 				}
 
 				if (tool_name == "track/set_fader") {
