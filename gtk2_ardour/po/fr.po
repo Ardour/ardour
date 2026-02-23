@@ -10379,7 +10379,7 @@ msgstr "Pré-atténuation"
 
 #: gain_meter.cc:864 mixer_strip.cc:2048
 msgid "Post Fader"
-msgstr "Post-atténuation"
+msgstr "Après-atténuation"
 
 #: generic_pluginui.cc:93
 msgid "MIDI Keyboard (audition only)"
