@@ -123,6 +123,15 @@ The server applies port changes immediately after committing the setting.
 - `midi_note/get_json`
 - `midi_note/import_json`
 
+## Bulk MIDI JSON Notes
+
+Use the JSON tools for fast note generation and round-trip editing:
+
+- `midi_note/import_json`: bulk insert or layer many notes in one call.
+- `midi_note/get_json`: export region notes in the same JSON shape for reuse or editing.
+- Drum mode (`is_drum_mode: true`) imports per-hit notes as zero-length events (note-on and note-off at the same timestamp).
+- Non-drum mode uses normal note durations from on/off pairs.
+
 ## Prompt Cookbook
 
 Use these with your MCP-capable assistant to get started quickly.

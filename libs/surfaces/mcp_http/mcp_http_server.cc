@@ -1582,23 +1582,19 @@ build_midi_json_note_defs (
 		});
 
 	if (is_drum_mode) {
-		const double default_length = 48.0 / (double) ticks_per_quarter;
-		if (!std::isfinite (default_length) || default_length <= 0.0) {
-			error = "Invalid drum note length derived from ticks_per_quarter";
-			return false;
-		}
+		const double default_length = 0.0;
 
-			for (size_t i = 0; i < events.size (); ++i) {
-				MidiJsonNoteDef n;
-				n.start_quarters = events[i].quarters;
-				n.length_quarters = default_length;
-				n.note = events[i].ev.note;
-				n.velocity = events[i].ev.velocity;
-				n.channel = events[i].ev.channel;
-				notes.push_back (n);
-			}
-			return true;
+		for (size_t i = 0; i < events.size (); ++i) {
+			MidiJsonNoteDef n;
+			n.start_quarters = events[i].quarters;
+			n.length_quarters = default_length;
+			n.note = events[i].ev.note;
+			n.velocity = events[i].ev.velocity;
+			n.channel = events[i].ev.channel;
+			notes.push_back (n);
 		}
+		return true;
+	}
 
 	struct PendingOn {
 		double quarters;
@@ -5181,7 +5177,13 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 							}
 
 							const Temporal::Beats length_beats = Temporal::Beats::from_double (note_defs[i].length_quarters);
-							if (length_beats < Temporal::Beats::one_tick ()) {
+							if (length_beats < Temporal::Beats ()) {
+								std::ostringstream w;
+								w << "Skipped note with negative length at index " << i;
+								warnings.push_back (w.str ());
+								continue;
+							}
+							if (!is_drum_mode && length_beats < Temporal::Beats::one_tick ()) {
 								std::ostringstream w;
 								w << "Skipped note shorter than one tick at index " << i;
 								warnings.push_back (w.str ());
@@ -5319,9 +5321,9 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 
 							const Temporal::Beats start_source_beats = note->time ();
 							const Temporal::Beats end_source_beats = start_source_beats + note->length ();
-							if (end_source_beats <= start_source_beats) {
+							if (end_source_beats < start_source_beats) {
 								std::ostringstream w;
-								w << "Skipped note with non-positive length (noteId " << note->id () << ")";
+								w << "Skipped note with negative length (noteId " << note->id () << ")";
 								warnings.push_back (w.str ());
 								continue;
 							}
@@ -5330,7 +5332,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 							const Temporal::Beats end_region_beats = midi_region->source_beats_to_region_time (end_source_beats).beats ();
 							const double start_quarters = beats_to_double (start_region_beats);
 							const double end_quarters = beats_to_double (end_region_beats);
-							if (!std::isfinite (start_quarters) || !std::isfinite (end_quarters) || end_quarters <= start_quarters) {
+							if (!std::isfinite (start_quarters) || !std::isfinite (end_quarters) || end_quarters < start_quarters) {
 								std::ostringstream w;
 								w << "Skipped note with invalid export timing (noteId " << note->id () << ")";
 								warnings.push_back (w.str ());
@@ -5367,6 +5369,9 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 							[] (const ExportEvent& a, const ExportEvent& b) {
 								if (a.quarters != b.quarters) {
 									return a.quarters < b.quarters;
+								}
+								if (a.channel == b.channel && a.note == b.note && a.ordinal != b.ordinal) {
+									return a.ordinal < b.ordinal;
 								}
 								const int a_type_order = (std::strcmp (a.type, "note_off") == 0) ? 0 : 1;
 								const int b_type_order = (std::strcmp (b.type, "note_off") == 0) ? 0 : 1;
