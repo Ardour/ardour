@@ -4,7 +4,6 @@
 #include <cppunit/TestResultCollector.h>
 #include <cppunit/TestRunner.h>
 #include <cppunit/BriefTestProgressListener.h>
-#include <glibmm/thread.h>
 #include "scalar_properties.h"
 
 #include "pbd/pbd.h"

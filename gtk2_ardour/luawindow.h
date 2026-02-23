@@ -17,8 +17,6 @@
  */
 #pragma once
 
-#include <glibmm/thread.h>
-
 #include <ytkmm/box.h>
 #include <ytkmm/scrolledwindow.h>
 #include <ytkmm/label.h>

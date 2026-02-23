@@ -1,5 +1,3 @@
-#include <glibmm/thread.h>
-
 #include "signals_test.h"
 #include "pbd/signals.h"
 
