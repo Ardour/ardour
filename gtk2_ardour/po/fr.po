@@ -1238,16 +1238,16 @@ msgid ""
 "<b>When enabled</b>, triggering Cues will result in Cue Markers added to the "
 "timeline"
 msgstr ""
-"<b>Si coché</b>, le déclenchement des Cues entraînera l'ajout de marqueurs "
-"de cue à la ligne de temps"
+"<b>Si coché</b>, le déclenchement des Cues entraînera l'ajout de repères de "
+"cue à la ligne de temps"
 
 #: application_bar.cc:437
 msgid ""
 "<b>When enabled</b>, Cue Markers will trigger the associated Cue when passed "
 "on the timeline"
 msgstr ""
-"<b>Si coché</b>, les marqueurs de Cue déclencheront le Cue associé "
-"lorsqu'ils seront transmis sur la ligne de temps"
+"<b>Si coché</b>, les repères de Cue déclencheront le Cue associé lorsqu'ils "
+"seront transmis sur la ligne de temps"
 
 #: application_bar.cc:438
 msgid "Reset All Peak Meters"
@@ -2583,11 +2583,11 @@ msgstr "Aller à zéro"
 
 #: ardour_ui_ed.cc:402 ardour_ui_ed.cc:405
 msgid "Go to Start"
-msgstr "Aller au marqueur de début"
+msgstr "Aller au repère de début"
 
 #: ardour_ui_ed.cc:408
 msgid "Go to End"
-msgstr "Aller au marqueur la fin"
+msgstr "Aller au repère la fin"
 
 #: ardour_ui_ed.cc:411
 msgid "Go to Wall Clock"
@@ -2596,7 +2596,7 @@ msgstr "Aller à l'heure actuelle"
 #: ardour_ui_ed.cc:418 ardour_ui_ed.cc:421
 #, fuzzy
 msgid "Begin/End Numpad Marker Jump"
-msgstr "Commencer/terminer au saut de marqueur"
+msgstr "Commencer/terminer au saut de repère"
 
 #: ardour_ui_ed.cc:424
 #, fuzzy
@@ -2885,7 +2885,7 @@ msgstr "Ajouter un repère d'arrangement à la tête de lecture"
 
 #: ardour_ui_ed.cc:697
 msgid "Add BBT Marker from Playhead"
-msgstr "Ajouter un marqueur BBT à la tête de lecture"
+msgstr "Ajouter un repère BBT à la tête de lecture"
 
 #: ardour_ui_ed.cc:700
 msgid "Nudge Next Later"
@@ -4079,7 +4079,7 @@ msgstr "Interpolation"
 
 #: bbt_marker_dialog.cc:33
 msgid "New Music Time"
-msgstr "Nouveau marqueur BBT"
+msgstr "Nouveau repère BBT"
 
 #: bbt_marker_dialog.cc:37 bbt_marker_dialog.cc:51 cue_editor.cc:511
 #: cue_editor.cc:781 editing_context.cc:80 editing_context.cc:105
@@ -5401,7 +5401,7 @@ msgstr "Effacer l'intervalle"
 
 #: editor.cc:1476
 msgid "Delete all markers in Section"
-msgstr "Effacer tous les marqueurs de la section"
+msgstr "Effacer tous les repères de la section"
 
 #: editor.cc:1486 editor_markers.cc:1142 editor_markers.cc:1196
 msgid "Move Playhead to Marker"
@@ -5641,7 +5641,7 @@ msgstr ""
 
 #: editor.cc:2795
 msgid "Adjust Markers"
-msgstr "Ajuster les marqueurs"
+msgstr "Ajuster les repères"
 
 #: editor.cc:2890
 msgid "Smart Mode (add range functions to Grab Mode)"
@@ -5688,7 +5688,7 @@ msgid ""
 "Move markers and ranges when stretching the Grid\n"
 "(this option is only available when session Time Domain is Beat Time)"
 msgstr ""
-"Déplacer les marqueurs et les intervalles lors de l'étirement de la grille\n"
+"Déplacer les repères et les intervalles lors de l'étirement de la grille\n"
 "(cette option n'est disponible que lorsque le domaine temporel de la session "
 "est réglé sur temps musical)"
 
@@ -5931,7 +5931,7 @@ msgstr "Sélection de régions"
 
 #: editor_actions.cc:114
 msgid "Marker Interaction"
-msgstr "Intéraction des marqueurs"
+msgstr "Interaction des repères"
 
 #: editor_actions.cc:115
 msgid "Fade"
@@ -6648,7 +6648,7 @@ msgstr ""
 
 #: editor_actions.cc:543
 msgid "Next Marker Click Mode"
-msgstr "Passer au mode de clic sur marqueur suivant"
+msgstr "Passer au mode de clic sur repère suivant"
 
 #: editor_actions.cc:555
 msgid "Step Mouse Mode"
@@ -6890,7 +6890,7 @@ msgstr "Fondu de sortie"
 # dans "Dupliquer"
 #: editor_actions.cc:1382
 msgid "Fill Track"
-msgstr "Jusqu'au marqueur de fin"
+msgstr "Jusqu'au repère de fin"
 
 #: editor_actions.cc:1385 editor_markers.cc:1306
 msgid "Set Loop Range"
@@ -7042,19 +7042,19 @@ msgstr "Insérer la région depuis la liste des sources"
 
 #: editor_actions.cc:1481
 msgid "Convert Region Cue Markers to CD Markers"
-msgstr "Convertir les marqueurs Cue de région en marqueurs CD"
+msgstr "Convertir les repères internes de région en repères CD"
 
 #: editor_actions.cc:1482
 msgid "Convert Region Cue Markers to Location Markers"
-msgstr "Convertir les marqueurs Cue de région en marqueurs d'emplacement"
+msgstr "Convertir les repères internes de région en repères d'emplacement"
 
 #: editor_actions.cc:1483
 msgid "Add Region Cue Marker"
-msgstr "Ajouter un repère de région Cue"
+msgstr "Ajouter un repère interne de région"
 
 #: editor_actions.cc:1484
 msgid "Clear Region Cue Markers"
-msgstr "Supprimer les repères de région Cue"
+msgstr "Supprimer les repères internes de région"
 
 #: editor_actions.cc:1485
 msgid "Set Sync Position"
@@ -7221,7 +7221,7 @@ msgstr ""
 
 #: editor_canvas_events.cc:1145
 msgid "New Arrangement Marker"
-msgstr "Nouveau marqueur d'arrangement"
+msgstr "Nouveau repère d'arrangement"
 
 #: editor_canvas_events.cc:1146
 msgid "Select Arrangement Section"
@@ -7473,8 +7473,8 @@ msgstr "Partager le statut d'activation ?"
 #: editor_mouse.cc:2111
 msgid "programming error: marker canvas item has no marker object pointer!"
 msgstr ""
-"erreur de programmation : l'élément de marqueur de canvas n'a pas de "
-"pointeur d'objet marqueur !"
+"erreur de programmation : l'élément de repère de canvas n'a pas de pointeur "
+"d'objet repère !"
 
 #: editor_export_audio.cc:157
 msgid ""
@@ -7591,7 +7591,7 @@ msgstr "Déplacer le repère sur la tête de lecture"
 
 #: editor_markers.cc:1149
 msgid "Edit Marker"
-msgstr "Éditer le marqueur"
+msgstr "Éditer le repère"
 
 #: editor_markers.cc:1154
 msgid "Create Range to Next Marker"
@@ -7730,25 +7730,23 @@ msgstr ""
 msgid ""
 "programming error: tempo marker canvas item has no marker object pointer!"
 msgstr ""
-"erreur de programmation : l'élément de canevas de marqueur de tempo n'a pas "
-"de pointer d'objet de marqueur !"
+"erreur de programmation : l'élément de canevas de repère de tempo n'a pas de "
+"pointer d'objet de repère !"
 
 #: editor_mouse.cc:1366 editor_tempodisplay.cc:561
 msgid "programming error: marker for tempo is not a tempo marker!"
 msgstr ""
-"erreur de programmation : le marqueur pour tempo n'est pas un marqueur de "
-"tempo !"
+"erreur de programmation : le repère pour tempo n'est pas un repère de tempo !"
 
 #: editor_mouse.cc:1378 editor_tempodisplay.cc:537
 msgid "programming error: bbt marker canvas item has no marker object pointer!"
 msgstr ""
-"erreur de programmation : l'élément de canevas de marqueur BBT n'a pas de "
-"pointer d'objet de marqueur !"
+"erreur de programmation : l'élément de canevas de repère BBT n'a pas de "
+"pointer d'objet de repère !"
 
 #: editor_mouse.cc:1383 editor_tempodisplay.cc:542
 msgid "programming error: marker for bbt is not a bbt marker!"
-msgstr ""
-"erreur de programmation : le marqueur pour BBT n'est pas un marqueur BBT !"
+msgstr "erreur de programmation : le repère pour BBT n'est pas un repère BBT !"
 
 #: editor_mouse.cc:1401 editor_tempodisplay.cc:788
 msgid "programming error: marker for meter is not a meter marker!"
@@ -8554,23 +8552,23 @@ msgstr "Déplacer les fichiers embarqués dans le dossier de session"
 
 #: editor_ops.cc:8869
 msgid "New Cue Marker Name"
-msgstr "Nom du nouveau marqueur de Cue"
+msgstr "Nom du nouveau repère de Cue"
 
 #: editor_ops.cc:8918
 msgid "add cue marker"
-msgstr "ajouter un marqueur Cue"
+msgstr "ajouter un repère Cue"
 
 #: editor_ops.cc:8960
 msgid "remove cue marker"
-msgstr "supprimer le marqueur Cue"
+msgstr "supprimer le repère Cue"
 
 #: editor_ops.cc:9020
 msgid "clear cue markers"
-msgstr "effacer les marqueurs Cue"
+msgstr "effacer les repères Cue"
 
 #: editor_ops.cc:9072
 msgid "region markers -> global markers"
-msgstr "marqueur de région -> marqueur globaux"
+msgstr "repères de région -> repères globaux"
 
 #: editor_ops.cc:9084
 msgid "Smallest gap size to remove (seconds):"
@@ -8582,7 +8580,7 @@ msgstr "Laisser un écart de (secondes) :"
 
 #: editor_ops.cc:9101
 msgid "Shift global markers too"
-msgstr "Modifier également les marqueurs globaux"
+msgstr "Modifier également les repères globaux"
 
 #: editor_ops.cc:9124
 msgid "The threshold value you entered is not a number"
@@ -8748,11 +8746,11 @@ msgstr "Effacer tous les tempos suivants"
 
 #: editor_rulers.cc:259
 msgid "Clear All Earlier Tempos (w/BBT markers)"
-msgstr "Effacer tous les tempos précédents (avec marquers BBT)"
+msgstr "Effacer tous les tempos précédents (repères BBT inclus)"
 
 #: editor_rulers.cc:260
 msgid "Clear All Later Tempos (w/BBT markers)"
-msgstr "Effacer tous les tempos suivants (avec marqueurs BBT)"
+msgstr "Effacer tous les tempos suivants (repères BBT inclus)"
 
 #: editor_rulers.cc:264 tempo_dialog.cc:625
 msgid "New Time Signature"
@@ -8760,7 +8758,7 @@ msgstr "Nouvelle signature rythmique"
 
 #: editor_rulers.cc:308
 msgid "Add BBT Marker"
-msgstr "Ajouter un marqueur BBT"
+msgstr "Ajouter un repère BBT"
 
 #: editor_rulers.cc:316
 msgid "Location Marker"
@@ -8951,7 +8949,7 @@ msgstr "ajouter la signature rythmique"
 
 #: editor_tempodisplay.cc:526
 msgid "add BBT marker"
-msgstr "ajouter un marqueur BBT"
+msgstr "ajouter un repère BBT"
 
 #: editor_tempodisplay.cc:573 editor_tempodisplay.cc:675
 msgid "done"
@@ -8975,7 +8973,7 @@ msgstr "éditer le tempo BBT"
 
 #: editor_tempodisplay.cc:763
 msgid "remove BBT marker"
-msgstr "supprimer le marqueur BBT"
+msgstr "supprimer le repère BBT"
 
 #: editor_tempodisplay.cc:771
 msgid "remove tempo change"
@@ -9836,7 +9834,7 @@ msgstr "Créer un fichier TOC pour la création de CD / DVD"
 
 #: export_format_dialog.cc:102
 msgid "Create chapter mark file for MP4 chapter marks"
-msgstr "Créer un fichier de marqueur de chapitre pour MP4"
+msgstr "Créer un fichier de repère de chapitre pour MP4"
 
 #: export_format_dialog.cc:103
 msgid "Tag file with session's metadata"
@@ -16714,10 +16712,10 @@ msgid ""
 "You can always rename markers by right-clicking on them."
 msgstr ""
 "<b>Si coché</b>, fait apparaître une boîte de dialogue lors de la création "
-"d'un nouveau marqueur pour permettre de définir son nom.\n"
+"d'un nouveau repère pour permettre de définir son nom.\n"
 "\n"
-"Vous pouvez toujours renommer les marqueurs en cliquant dessus avec le "
-"bouton droit de la souris."
+"Vous pouvez toujours renommer les repères en cliquant dessus avec le bouton "
+"droit de la souris."
 
 #: rc_option_editor.cc:3719
 msgid "Stop at the end of the session"
@@ -16734,10 +16732,10 @@ msgid ""
 msgstr ""
 "<b>Si coché</b>, si %1 <b>n'enregistre pas</b>, and <b> tous les "
 "emplacements déclenchés ne sont pas utilisés</b> le transport est interrompu "
-"quand il atteint le marqueur de fin de session actuel.\n"
+"quand il atteint le repère de fin de session actuel.\n"
 "\n"
-"<b>Si décoché</b>, Ardour continuera toujours à rouler au-delà du marqueur "
-"de fin de session"
+"<b>Si décoché</b>, Ardour continuera toujours à rouler au-delà du repère de "
+"fin de session"
 
 #: rc_option_editor.cc:3733
 msgid "Keep record-enable engaged on stop"
@@ -16898,7 +16896,7 @@ msgstr "2.0 secondes"
 #: rc_option_editor.cc:3819
 msgid "Create a marker when a MIDI program change is received (and RECORDING)"
 msgstr ""
-"Créer un marqueur lorsqu'un changement de programme MIDI est reçu en cours "
+"Créer un repère lorsqu'un changement de programme MIDI est reçu en cours "
 "enregistrement"
 
 #: rc_option_editor.cc:3826
@@ -16906,7 +16904,7 @@ msgid ""
 "Locate to the next matching scene marker when a MIDI program change is "
 "received (and NOT recording)"
 msgstr ""
-"Placer la tête de lecture au marqueur correspondant suivant lorsqu'un "
+"Placer la tête de lecture au repère correspondant suivant lorsqu'un "
 "changement de programme MIDI est reçu et qu'un enregistrement n'est pas en "
 "cours"
 
@@ -17020,7 +17018,7 @@ msgstr "Vari-speed"
 msgid "Marker Locate (MMC ffwd/rewd jumps to next/prior marker)"
 msgstr ""
 "Le retour arrière et l'avance rapide MMC déplacent la tête de lecture au "
-"marqueur suivant/précédent"
+"repère suivant/précédent"
 
 #: rc_option_editor.cc:3930
 msgid "Show Transport Masters Window"
@@ -19585,7 +19583,7 @@ msgstr ""
 "Le domaine temporel contrôle la façon dont certains éléments de la ligne de "
 "temps réagissent à l'édition de la carte de tempo.\n"
 "\n"
-"Si vous choisissez le temps musical, certains éléments (comme les marqueurs) "
+"Si vous choisissez le temps musical, certains éléments (comme les repères) "
 "se déplaceront lorsque vous changerez le tempo.\n"
 "\n"
 "Si vous choisissez Temps audio, ces éléments ne bougeront pas lorsque vous "
@@ -20537,7 +20535,7 @@ msgstr "Utiliser la carte des tempos MIDI"
 
 #: sfdb_ui.cc:1895
 msgid "Import MIDI markers"
-msgstr "Importer les marqueurs MIDI"
+msgstr "Importer les repères MIDI"
 
 #: sfdb_ui.cc:1910 sfdb_ui.cc:2098
 msgid "file timestamp"
