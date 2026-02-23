@@ -12,6 +12,7 @@ def build(bld):
     obj.source = '''
             interface.cc
             mcp_http.cc
+            mcp_http_gui.cc
             mcp_http_server.cc
     '''
     obj.defines      = [ 'PACKAGE="ardour_mcp_http"' ]
@@ -19,7 +20,6 @@ def build(bld):
     obj.includes     = ['.', './mcp_http']
     obj.name         = 'libardour_mcp_http'
     obj.target       = 'ardour_mcp_http'
-    obj.uselib       = 'GLIBMM XML WEBSOCKETS OPENSSL'
-    obj.use          = 'libardour libardour_cp libgtkmm2ext libpbd'
+    obj.uselib       = 'GLIBMM GIOMM PANGOMM XML WEBSOCKETS OPENSSL'
+    obj.use          = 'libardour libardour_cp libgtkmm2ext libpbd libytkmm'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
-
