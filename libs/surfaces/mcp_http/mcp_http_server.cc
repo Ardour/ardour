@@ -36,7 +36,9 @@
 #include "pbd/basename.h"
 #include "pbd/id.h"
 #include "pbd/controllable.h"
+#include "pbd/event_loop.h"
 #include "pbd/memento_command.h"
+#include "pbd/pthread_utils.h"
 #include "pbd/stateful_diff_command.h"
 #include "pbd/xml++.h"
 
@@ -139,6 +141,18 @@ is_number_literal (const std::string& s)
 	char* endptr = 0;
 	std::strtod (s.c_str (), &endptr);
 	return endptr && *endptr == '\0';
+}
+
+static int
+clamp_debug_level (int level)
+{
+	if (level < 0) {
+		return 0;
+	}
+	if (level > 2) {
+		return 2;
+	}
+	return level;
 }
 
 static std::string
@@ -2340,9 +2354,11 @@ region_info_json (
 
 } // namespace
 
-MCPHttpServer::MCPHttpServer (ARDOUR::Session& session, uint16_t port)
+MCPHttpServer::MCPHttpServer (ARDOUR::Session& session, uint16_t port, int debug_level, PBD::EventLoop* event_loop)
 	: _session (session)
 	, _port (port)
+	, _debug_level (clamp_debug_level (debug_level))
+	, _event_loop (event_loop)
 	, _context (0)
 	, _running (false)
 {
@@ -2412,8 +2428,26 @@ MCPHttpServer::stop ()
 }
 
 void
+MCPHttpServer::set_debug_level (int level)
+{
+	_debug_level.store (clamp_debug_level (level));
+}
+
+int
+MCPHttpServer::debug_level () const
+{
+	return _debug_level.load ();
+}
+
+void
 MCPHttpServer::run ()
 {
+	if (_event_loop) {
+		PBD::EventLoop::set_event_loop_for_thread (_event_loop);
+	}
+
+	PBD::notify_event_loops_about_thread_creation (pthread_self (), "MCPHttp", 2048);
+
 	/* Session transport requests allocate SessionEvent objects from a per-thread pool. */
 	ARDOUR::SessionEvent::create_per_thread_pool ("MCPHttp events", 256);
 	Temporal::TempoMap::fetch ();
@@ -2590,16 +2624,32 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 {
 	pt::ptree root;
 	std::istringstream is (payload);
+	const int dbg = debug_level ();
 
 	try {
 		pt::read_json (is, root);
 	} catch (...) {
+		if (dbg >= 1) {
+			PBD::warning << "MCPHttp: JSON parse error" << endmsg;
+		}
 		return jsonrpc_error ("null", -32700, "Parse error");
 	}
 
 	std::string method = root.get<std::string> ("method", "");
 	std::string id = jsonrpc_id (root);
 	const bool has_id = has_jsonrpc_id (root);
+
+	if (dbg >= 2) {
+		PBD::info << "MCPHttp: request payload: " << payload << endmsg;
+	}
+	if (dbg >= 1) {
+		if (method == "tools/call") {
+			const std::string requested_tool = canonical_tool_name (root.get<std::string> ("params.name", ""));
+			PBD::info << "MCPHttp: tools/call " << requested_tool << endmsg;
+		} else {
+			PBD::info << "MCPHttp: " << method << endmsg;
+		}
+	}
 
 	if (method.empty ()) {
 		return jsonrpc_error (id, -32600, "Invalid Request");

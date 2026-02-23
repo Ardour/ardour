@@ -21,8 +21,10 @@
 
 #include <stdint.h>
 #include <memory>
+#include <string>
 
 #include "control_protocol/control_protocol.h"
+#include "pbd/event_loop.h"
 
 namespace ARDOUR {
 class Session;
@@ -38,24 +40,52 @@ extern const char* const mcp_http_surface_id;
 class MCPHttp : public ARDOUR::ControlProtocol
 {
 public:
+	enum DebugLevel {
+		DebugOff = 0,
+		DebugBasic = 1,
+		DebugVerbose = 2
+	};
+
 	MCPHttp (ARDOUR::Session&);
 	virtual ~MCPHttp ();
 
-	int set_active (bool);
-	void stripable_selection_changed () {}
+	XMLNode& get_state () const override;
+	int set_state (const XMLNode&, int version) override;
+
+	bool has_editor () const override { return true; }
+	void* get_gui () const override;
+	void tear_down_gui () override;
+
+	int set_active (bool) override;
+	void stripable_selection_changed () override {}
 
 	ARDOUR::Session& ardour_session () const;
+
+	void set_port (uint16_t);
 	uint16_t port () const
 	{
 		return _port;
 	}
 
+	void set_debug_level (int);
+	int debug_level () const
+	{
+		return _debug_level;
+	}
+
+	std::string endpoint_url () const;
+	std::string protocol_name () const;
+
 private:
 	int start ();
 	int stop ();
+	void build_gui ();
 
 	std::unique_ptr<MCPHttpServer> _server;
 	uint16_t _port;
+	int _debug_level;
+	PBD::EventLoop* _event_loop;
+	mutable void* _gui;
 };
 
 } // namespace ArdourSurface

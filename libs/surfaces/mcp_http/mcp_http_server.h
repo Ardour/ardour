@@ -19,12 +19,17 @@
 #ifndef _ardour_surface_mcp_http_server_h_
 #define _ardour_surface_mcp_http_server_h_
 
+#include <atomic>
 #include <stdint.h>
 #include <string>
 #include <thread>
 #include <unordered_map>
 
 #include <libwebsockets.h>
+
+namespace PBD {
+class EventLoop;
+}
 
 namespace ARDOUR {
 class Session;
@@ -35,11 +40,13 @@ namespace ArdourSurface {
 class MCPHttpServer
 {
 public:
-	MCPHttpServer (ARDOUR::Session&, uint16_t port);
+	MCPHttpServer (ARDOUR::Session&, uint16_t port, int debug_level, PBD::EventLoop* event_loop);
 	~MCPHttpServer ();
 
 	int start ();
 	int stop ();
+	void set_debug_level (int);
+	int debug_level () const;
 
 private:
 	struct ClientContext {
@@ -53,6 +60,8 @@ private:
 
 	ARDOUR::Session& _session;
 	uint16_t _port;
+	std::atomic<int> _debug_level;
+	PBD::EventLoop* _event_loop;
 	struct lws_context* _context;
 	struct lws_protocols _protocols[2];
 	struct lws_context_creation_info _info;
