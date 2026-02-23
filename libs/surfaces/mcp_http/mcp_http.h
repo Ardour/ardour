@@ -24,7 +24,10 @@
 #include <string>
 
 #include "control_protocol/control_protocol.h"
-#include "pbd/event_loop.h"
+
+namespace PBD {
+class EventLoop;
+}
 
 namespace ARDOUR {
 class Session;

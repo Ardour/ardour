@@ -17,6 +17,7 @@
  */
 
 #include "pbd/error.h"
+#include "pbd/event_loop.h"
 #include "pbd/i18n.h"
 #include "pbd/xml++.h"
 
