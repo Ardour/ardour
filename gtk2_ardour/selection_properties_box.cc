@@ -224,17 +224,19 @@ SelectionPropertiesBox::selection_changed ()
 		}
 	}
 
-	RegionView* rv = nullptr;
-	if (selection.regions.size () == 1) {
-		rv = selection.regions.front ();
+	RegionSelection rs;
+	if (!selection.regions.empty()) {
+		rs = selection.regions;
 	} else if (!selection.points.empty ()) {
 		RegionFxLine *rfx = dynamic_cast<RegionFxLine*>(&selection.points.back()->line ());
 		if (rfx) {
-			rv = &rfx->region_view();
+			rs.push_back (&rfx->region_view());
 		}
 	}
 
-	if (rv && 0 != (_disposition & ShowRegions)) {
+	if (!rs.empty() && 0 != (_disposition & ShowRegions)) {
+		RegionView* rv = rs.front();
+
 		if (!_region_editor || _region_editor->region () != rv->region ()) {
 			delete_region_editor ();
 			AudioRegionView* arv = dynamic_cast<AudioRegionView*> (rv);
@@ -261,20 +263,41 @@ SelectionPropertiesBox::selection_changed ()
 
 			} else {
 
-				std::shared_ptr<ARDOUR::MidiTrack> mt = std::dynamic_pointer_cast<ARDOUR::MidiTrack> (mrv->midi_view()->track());
-				std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion>(mrv->region());
+				std::shared_ptr<ARDOUR::MidiRegion> first_midi;
 
-				if (mt && mr) {
-					if (!_pianoroll) {
-						_pianoroll = new Pianoroll (X_("region editor pianoroll"), true);
-						_pianoroll->get_canvas_viewport()->set_size_request (-1, 120);
-						if (_session) {
-							_pianoroll->set_session (_session);
-						}
+				for (auto & rv : rs) {
+
+					MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rv);
+
+					if (!mrv) {
+						continue;
 					}
 
-					_pianoroll->add_region (mr, mt);
-					_pianoroll->set_region (mr);
+					std::shared_ptr<ARDOUR::MidiTrack> mt = std::dynamic_pointer_cast<ARDOUR::MidiTrack> (mrv->midi_view()->track());
+					std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion>(mrv->region());
+
+					if (mt && mr) {
+						if (!_pianoroll) {
+							_pianoroll = new Pianoroll (X_("region editor pianoroll"), true);
+							_pianoroll->get_canvas_viewport()->set_size_request (-1, 120);
+							if (_session) {
+								_pianoroll->set_session (_session);
+							}
+						}
+
+						std::cerr << "Add " << mr->name() << std::endl;
+
+						_pianoroll->add_region (mr, mt);
+
+						if (!first_midi) {
+							first_midi = mr;
+						}
+					}
+				}
+
+				if (first_midi) {
+					std::cerr << "set " << first_midi->name() << std::endl;
+					_pianoroll->set_region (first_midi);
 
 					_region_editor_box.pack_start (_pianoroll->contents(), true, true);
 
