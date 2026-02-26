@@ -99,6 +99,8 @@ Pianoroll::Pianoroll (std::string const & name, bool with_transport)
 
 Pianoroll::~Pianoroll ()
 {
+	set_region (nullptr);
+
 	drop_grid (); // unparent gridlines before deleting _canvas_viewport
 
 	delete view;
@@ -581,7 +583,7 @@ Pianoroll::maybe_update ()
 
 		if (!playing_trigger) {
 
-			if (_drags->active() || !view || !_track || !_track->triggerbox()) {
+			if (_drags->active() || !view || !view->midi_track()->triggerbox()) {
 				return;
 			}
 
@@ -1466,35 +1468,40 @@ Pianoroll::build_cc_menu (ArdourWidgets::MetaButton* ccbtn)
 }
 
 void
-Pianoroll::set_track (std::shared_ptr<ARDOUR::Track> track)
+Pianoroll::add_region (std::shared_ptr<ARDOUR::Region> region, std::shared_ptr<ARDOUR::MidiTrack> track)
 {
-	EC_LOCAL_TEMPO_SCOPE;
+	PianorollMidiView* new_view = new PianorollMidiView (track, *data_group, *no_scroll_group, *this, *bg, 0xff0000ff);
 
-	CueEditor::set_track (track);
+	std::shared_ptr<ARDOUR::MidiRegion> mr (std::dynamic_pointer_cast<ARDOUR::MidiRegion> (region));
+	assert (mr);
 
-	if (view) {
-		view->set_track (std::dynamic_pointer_cast<MidiTrack> (track));
-	}
+	new_view->set_region (mr);
+	new_view->set_show_source (show_source);
+	new_view->show_start (true);
+	new_view->show_end (true);
 
-	if (_track == track) {
+	region_view_map.insert (std::make_pair (region, new_view));
+
+	region->DropReferences.connect (view_connections, invalidator (*this), sigc::bind (sigc::mem_fun (*this, &Pianoroll::region_going_away), std::weak_ptr<ARDOUR::Region> (region)), gui_context());
+}
+
+void
+Pianoroll::region_going_away (std::weak_ptr<ARDOUR::Region> wr)
+{
+	std::shared_ptr<ARDOUR::Region> region (wr.lock());
+	if (!region) {
 		return;
 	}
 
-#ifdef PIANOROLL_USER_BUTTONS
-	cc_dropdown1->menu().items().clear ();
-	cc_dropdown2->menu().items().clear ();
-	cc_dropdown3->menu().items().clear ();
-
-	if (cc_dropdown1->get_mapped ()) {
-		build_cc_menu (cc_dropdown1);
+	auto rvm = region_view_map.find (region);
+	if (rvm != region_view_map.end()) {
+		region_view_map.erase (rvm);
+		if (region_view_map.empty()) {
+			set_region (nullptr);
+		} else {
+			set_region (region_view_map.begin()->first);
+		}
 	}
-	if (cc_dropdown2->get_mapped ()) {
-		build_cc_menu (cc_dropdown2);
-	}
-	if (cc_dropdown3->get_mapped ()) {
-		build_cc_menu (cc_dropdown3);
-	}
-#endif
 }
 
 void
@@ -1506,17 +1513,33 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 		return;
 	}
 
-	std::shared_ptr<MidiRegion> r (std::dynamic_pointer_cast<ARDOUR::MidiRegion> (region));
+	/* unset everything */
 
-	if (!r) {
-		view->set_region (nullptr);
-		_update_connection.disconnect ();
+	view = nullptr;
+	view_connections.drop_connections ();
+	automation_connection.disconnect ();
+	_update_connection.disconnect ();
+
+	if (!region) {
 		return;
 	}
 
-	view->set_region (r);
-	view->show_start (true);
-	view->show_end (true);
+	std::shared_ptr<MidiRegion> r (std::dynamic_pointer_cast<ARDOUR::MidiRegion> (region));
+
+	auto rvm = region_view_map.find (region);
+
+	if (rvm == region_view_map.end()) {
+		error << _("Attempt to set pianoroll region that was not added!") << endmsg;
+		return;
+	}
+
+	/* OK, time to switch the "active" view */
+
+	view = rvm->second;
+	CueEditor::set_track (view->midi_track());
+
+	automation_connection = view->AutomationStateChange.connect (sigc::mem_fun (*this, &Pianoroll::automation_state_changed));
+	view->VisibleChannelChanged.connect (view_connections, invalidator (*this), std::bind (&Pianoroll::visible_channel_changed, this), gui_context());
 
 	layered_automation_button->set_active_state (Gtkmm2ext::Off);
 	layered_automation = false;
