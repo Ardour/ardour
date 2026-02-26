@@ -98,8 +98,8 @@ class Pianoroll : public CueEditor
 	int32_t get_grid_beat_divisions (Editing::GridType gt) const { return 1; }
 	int32_t get_grid_music_divisions (Editing::GridType gt) const { return 1; }
 
+	void add_region (std::shared_ptr<ARDOUR::Region>, std::shared_ptr<ARDOUR::MidiTrack>);
 	void set_region (std::shared_ptr<ARDOUR::Region>);
-	void set_track (std::shared_ptr<ARDOUR::Track>);
 
 	double max_extents_scale() const { return 1.2; }
 	void set_samples_per_pixel (samplecnt_t);
@@ -198,6 +198,11 @@ class Pianoroll : public CueEditor
 	void rebuild_parameter_button_map ();
 
 	PianorollMidiBackground* bg;
+
+	typedef std::map<std::shared_ptr<ARDOUR::Region>, PianorollMidiView*> RegionMidiViewMap;
+	RegionMidiViewMap region_view_map;
+	void region_going_away (std::weak_ptr<ARDOUR::Region> region);
+
 	PianorollMidiView* view;
 
 	void build_canvas ();
@@ -223,6 +228,7 @@ class Pianoroll : public CueEditor
 	BBTMetric bbt_metric;
 
 	PBD::ScopedConnectionList view_connections;
+	sigc::connection automation_connection;
 	void maybe_update ();
 	void trigger_prop_change (PBD::PropertyChange const &);
 

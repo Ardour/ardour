@@ -57,7 +57,7 @@ PianorollWindow::set_show_source (bool yn)
 void
 PianorollWindow::set (std::shared_ptr<MidiTrack> track, std::shared_ptr<MidiRegion> region)
 {
-	pianoroll->set_track (track);
+	pianoroll->add_region (region, track);
 	pianoroll->set_region (region);
 
 	delete region_editor;

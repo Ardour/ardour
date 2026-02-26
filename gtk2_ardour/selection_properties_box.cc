@@ -273,7 +273,7 @@ SelectionPropertiesBox::selection_changed ()
 						}
 					}
 
-					_pianoroll->set_track (mt);
+					_pianoroll->add_region (mr, mt);
 					_pianoroll->set_region (mr);
 
 					_region_editor_box.pack_start (_pianoroll->contents(), true, true);
