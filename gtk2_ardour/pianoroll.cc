@@ -374,6 +374,9 @@ Pianoroll::pack_outer (Gtk::Box& box)
 	box.pack_start (visible_channel_label, false, false);
 	box.pack_start (visible_channel_selector, false, false);
 	box.pack_start (note_mode_button, false, false);
+
+	box.pack_end (region_dropdown, false, false);
+	region_dropdown.show ();
 }
 
 void
@@ -1480,9 +1483,23 @@ Pianoroll::add_region (std::shared_ptr<ARDOUR::Region> region, std::shared_ptr<A
 	new_view->show_start (true);
 	new_view->show_end (true);
 
-	region_view_map.insert (std::make_pair (region, new_view));
+	auto res = region_view_map.insert (std::make_pair (region, new_view));
+	if (res.second) {
+		rebuild_region_dropdown ();
+	}
 
 	region->DropReferences.connect (view_connections, invalidator (*this), sigc::bind (sigc::mem_fun (*this, &Pianoroll::region_going_away), std::weak_ptr<ARDOUR::Region> (region)), gui_context());
+}
+
+void
+Pianoroll::rebuild_region_dropdown ()
+{
+	region_dropdown.clear_items ();
+	for (auto & [region,view] : region_view_map) {
+		std::weak_ptr<ARDOUR::Region> wr (region);
+		region_dropdown.add_menu_elem (Gtk::Menu_Helpers::MenuElem (region->name(), [this,wr]() { std::shared_ptr<ARDOUR::Region> r (wr.lock()); if (r) set_region (r); }));
+	}
+	std::cerr << "dropd own now has " << region_view_map.size() << std::endl;
 }
 
 void
@@ -1494,8 +1511,18 @@ Pianoroll::region_going_away (std::weak_ptr<ARDOUR::Region> wr)
 	}
 
 	auto rvm = region_view_map.find (region);
-	if (rvm != region_view_map.end()) {
-		region_view_map.erase (rvm);
+	if (rvm == region_view_map.end()) {
+		return;
+	}
+
+	bool switch_views = (view == rvm->second);
+
+	/* Clean up the view */
+	delete rvm->second;
+	region_view_map.erase (rvm);
+	rebuild_region_dropdown ();
+
+	if (switch_views) {
 		if (region_view_map.empty()) {
 			set_region (nullptr);
 		} else {
@@ -1560,6 +1587,8 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 			note_mode_actions[mt->note_mode()]->set_active (true);
 		}
 	}
+
+	region_dropdown.set_active (region->name());
 }
 
 bool

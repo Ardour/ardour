@@ -179,6 +179,9 @@ class Pianoroll : public CueEditor
 	ArdourCanvas::Rectangle* meter_bar;
 	ArdourCanvas::PianoRollHeader* prh;
 
+	ArdourWidgets::ArdourDropdown region_dropdown;
+	void rebuild_region_dropdown ();
+
 	ArdourWidgets::ArdourButton* layered_automation_button;
 	bool layered_automation;
 	void layered_automation_button_clicked();
