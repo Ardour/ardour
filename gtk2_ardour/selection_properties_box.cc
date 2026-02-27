@@ -235,7 +235,7 @@ SelectionPropertiesBox::selection_changed ()
 	}
 
 	if (!rs.empty() && 0 != (_disposition & ShowRegions)) {
-		RegionView* rv = rs.front();
+		RegionView* rv = rs.back();
 
 		if (!_region_editor || _region_editor->region () != rv->region ()) {
 			delete_region_editor ();
@@ -261,59 +261,60 @@ SelectionPropertiesBox::selection_changed ()
 				_region_fx_box = new RegionFxPropertiesBox (rv->region ());
 				_region_editor_box.pack_start (*_region_fx_box);
 
-			} else {
-
-				std::shared_ptr<ARDOUR::MidiRegion> first_midi;
-
-				for (auto & rv : rs) {
-
-					MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rv);
-
-					if (!mrv) {
-						continue;
-					}
-
-					std::shared_ptr<ARDOUR::MidiTrack> mt = std::dynamic_pointer_cast<ARDOUR::MidiTrack> (mrv->midi_view()->track());
-					std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion>(mrv->region());
-
-					if (mt && mr) {
-						if (!_pianoroll) {
-							_pianoroll = new Pianoroll (X_("region editor pianoroll"), true);
-							_pianoroll->get_canvas_viewport()->set_size_request (-1, 120);
-							if (_session) {
-								_pianoroll->set_session (_session);
-							}
-						}
-
-						std::cerr << "Add " << mr->name() << std::endl;
-
-						_pianoroll->add_region (mr, mt);
-
-						if (!first_midi) {
-							first_midi = mr;
-						}
-					}
-				}
-
-				if (first_midi) {
-					std::cerr << "set " << first_midi->name() << std::endl;
-					_pianoroll->set_region (first_midi);
-
-					_region_editor_box.pack_start (_pianoroll->contents(), true, true);
-
-					_pianoroll->contents().hide (); // Why is this needed?
-					_pianoroll->contents().show_all ();
-				}
 			}
-
-			rv->RegionViewGoingAway.connect_same_thread (_region_connection, std::bind (&SelectionPropertiesBox::delete_region_editor, this));
 
 #ifndef MIXBUS
 			float min_h = _region_editor->size_request().height;
 			float ui_scale = std::max<float> (1.f, UIConfiguration::instance().get_ui_scale());
 			_region_editor_box.set_size_request (-1, std::max (365 * ui_scale, min_h));
 #endif
+
+			rv->RegionViewGoingAway.connect_same_thread (_region_connection, std::bind (&SelectionPropertiesBox::delete_region_editor, this));
 		}
+
+		std::shared_ptr<ARDOUR::MidiRegion> first_midi;
+
+		for (auto & rv : rs) {
+
+			MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rv);
+
+			if (!mrv) {
+				continue;
+			}
+
+			std::shared_ptr<ARDOUR::MidiTrack> mt = std::dynamic_pointer_cast<ARDOUR::MidiTrack> (mrv->midi_view()->track());
+			std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion>(mrv->region());
+
+			if (mt && mr) {
+				if (!_pianoroll) {
+					_pianoroll = new Pianoroll (X_("region editor pianoroll"), true);
+					_pianoroll->get_canvas_viewport()->set_size_request (-1, 120);
+					if (_session) {
+						_pianoroll->set_session (_session);
+					}
+				}
+
+				std::cerr << "Add " << mr->name() << std::endl;
+
+				_pianoroll->add_region (mr, mt);
+
+				if (!first_midi) {
+					first_midi = mr;
+				}
+			}
+		}
+
+		if (first_midi) {
+			std::cerr << "set " << first_midi->name() << std::endl;
+			_pianoroll->set_region (first_midi);
+
+			_region_editor_box.pack_start (_pianoroll->contents(), true, true);
+
+			_pianoroll->contents().hide (); // Why is this needed?
+			_pianoroll->contents().show_all ();
+		}
+
+
 	} else {
 		/* only hide region props when selecting a track or trigger,
 		 * retain existing RegionEditor, when selecting another additional region, or
