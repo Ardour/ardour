@@ -691,19 +691,18 @@ PianoRollHeaderBase::button_press_handler (GdkEventButton* ev)
 
 	_scroomer_button_state = _scroomer_state;
 
-
-	if (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS) {
-		if (_midi_context.visibility_range_style () == MidiViewBackground::FullRange) {
-			_midi_context.set_note_visibility_range_style (MidiViewBackground::ContentsRange);
-		} else {
-			_midi_context.set_note_visibility_range_style (MidiViewBackground::FullRange);
-		}
-		return true;
-	}
-
 	if (ev->x <= _scroomer_size) {
 
 		/* button press on scroomer handler */
+
+		if (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS) {
+			if (_midi_context.visibility_range_style () == MidiViewBackground::FullRange) {
+				_midi_context.set_note_visibility_range_style (MidiViewBackground::ContentsRange);
+			} else {
+				_midi_context.set_note_visibility_range_style (MidiViewBackground::FullRange);
+			}
+			return true;
+		}
 
 		if (ev->button != 1) {
 			return true;
