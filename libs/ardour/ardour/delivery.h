@@ -24,6 +24,12 @@
 
 #include <string>
 
+#if __cplusplus >= 202002L
+#include <memory>
+#else
+#include <boost/smart_ptr/atomic_shared_ptr.hpp>
+#endif
+
 #include "pbd/ringbuffer.h"
 
 #include "ardour/libardour_visibility.h"
@@ -118,10 +124,14 @@ public:
 	using RTARingBuffer    = PBD::RingBuffer<ARDOUR::Sample>;
 	using RTARingBufferPtr = std::shared_ptr<RTARingBuffer>;
 	using RTABufferList    = std::vector<RTARingBufferPtr>;
+#if __cplusplus >= 202002L
 	using RTABufferListPtr = std::shared_ptr<RTABufferList>;
+#else
+	using RTABufferListPtr = boost::shared_ptr<RTABufferList>;
+#endif
 
 	void set_analysis_buffers (RTABufferListPtr rb) {
-		_rtabuffers = rb;
+		_rtabuffers.store (rb);
 	}
 	bool analysis_active () const;
 	void set_analysis_active (bool);
@@ -169,7 +179,11 @@ private:
 	std::shared_ptr<GainControl>       _gain_control;
 	std::shared_ptr<AutomationControl> _polarity_control;
 
-	RTABufferListPtr  _rtabuffers;
+#if __cplusplus >= 202002L
+	std::atomic<std::shared_ptr<RTABufferList>> _rtabuffers;
+#else
+	boost::atomic_shared_ptr<RTABufferList> _rtabuffers;
+#endif
 	std::atomic<bool> _rta_active;
 
 	static bool panners_legal;

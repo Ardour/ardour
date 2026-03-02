@@ -374,7 +374,7 @@ Delivery::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample
 			Amp::apply_simple_gain (bufs, nframes, GAIN_COEFF_ZERO);
 		}
 
-		RTABufferListPtr rtabuffers = _rtabuffers;
+		RTABufferListPtr rtabuffers = _rtabuffers.load ();
 		if (_rta_active.load () && rtabuffers && !rtabuffers->empty ()) {
 			BufferSet& silent_bufs = _session.get_silent_buffers(ChanCount(DataType::AUDIO, 1));
 			for (auto const& rb : *rtabuffers) {
