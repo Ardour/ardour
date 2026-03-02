@@ -21,12 +21,9 @@
 
 #include "ardour/ardour.h"
 #include "ardour/dsp_filter.h"
+#include "ardour/delivery.h"
 #include "ardour/session_handle.h"
 #include "ardour/types.h"
-
-namespace ARDOUR {
-	class Delivery;
-}
 
 class RTAManager
 	: public ARDOUR::SessionHandlePtr
@@ -62,7 +59,7 @@ public:
 		using RTARingBuffer    = PBD::RingBuffer<ARDOUR::Sample>;
 		using RTARingBufferPtr = std::shared_ptr<RTARingBuffer>;
 		using RTABufferList    = std::vector<RTARingBufferPtr>;
-		using RTABufferListPtr = std::shared_ptr<RTABufferList>;
+		using RTABufferListPtr = ARDOUR::Delivery::RTABufferListPtr;
 
 		void route_io_changed ();
 
