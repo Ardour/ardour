@@ -18,6 +18,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <vector>
+#include <set>
+
 #include "pbd/compose.h"
 
 #include "gtkmm2ext/gui_thread.h"
@@ -272,48 +275,7 @@ SelectionPropertiesBox::selection_changed ()
 			rv->RegionViewGoingAway.connect_same_thread (_region_connection, std::bind (&SelectionPropertiesBox::delete_region_editor, this));
 		}
 
-		std::shared_ptr<ARDOUR::MidiRegion> first_midi;
-
-		for (auto & rv : rs) {
-
-			MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rv);
-
-			if (!mrv) {
-				continue;
-			}
-
-			std::shared_ptr<ARDOUR::MidiTrack> mt = std::dynamic_pointer_cast<ARDOUR::MidiTrack> (mrv->midi_view()->track());
-			std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion>(mrv->region());
-
-			if (mt && mr) {
-				if (!_pianoroll) {
-					_pianoroll = new Pianoroll (X_("region editor pianoroll"), true);
-					_pianoroll->get_canvas_viewport()->set_size_request (-1, 120);
-					if (_session) {
-						_pianoroll->set_session (_session);
-					}
-				}
-
-				std::cerr << "Add " << mr->name() << std::endl;
-
-				_pianoroll->add_region (mr, mt);
-
-				if (!first_midi) {
-					first_midi = mr;
-				}
-			}
-		}
-
-		if (first_midi) {
-			std::cerr << "set " << first_midi->name() << std::endl;
-			_pianoroll->set_region (first_midi);
-
-			_region_editor_box.pack_start (_pianoroll->contents(), true, true);
-
-			_pianoroll->contents().hide (); // Why is this needed?
-			_pianoroll->contents().show_all ();
-		}
-
+		show_similar_midi_regions (rs);
 
 	} else {
 		/* only hide region props when selecting a track or trigger,
@@ -348,4 +310,58 @@ SelectionPropertiesBox::selection_changed ()
 	} else {
 		_time_info_box->hide ();
 	}
+}
+
+void
+SelectionPropertiesBox::show_similar_midi_regions (RegionSelection& rs)
+{
+	std::vector<MidiRegionView*> midi_region_views;
+	std::set<Temporal::Beats> positions;
+
+	for (auto & rv : rs) {
+		MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rv);
+		if (mrv) {
+			midi_region_views.push_back (mrv);
+			positions.insert (mrv->region()->position().beats());
+		}
+	}
+
+	if (midi_region_views.empty()) {
+		return;
+	}
+
+	if (positions.size() > 1) {
+		/* multiple positions for the regions, so just use the last
+		   one, which (might be) the most recently selected.
+		*/
+		midi_region_views = std::vector<MidiRegionView*> ({ midi_region_views.back() });
+	}
+
+	for (auto & mrv : midi_region_views) {
+
+		std::shared_ptr<ARDOUR::MidiTrack> mt = std::dynamic_pointer_cast<ARDOUR::MidiTrack> (mrv->midi_view()->track());
+		std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion>(mrv->region());
+
+		if (mt && mr) {
+			if (!_pianoroll) {
+				_pianoroll = new Pianoroll (X_("region editor pianoroll"), true);
+				_pianoroll->get_canvas_viewport()->set_size_request (-1, 120);
+				if (_session) {
+					_pianoroll->set_session (_session);
+				}
+			}
+
+			std::cerr << "Add " << mr->name() << std::endl;
+
+			_pianoroll->add_region (mr, mt);
+		}
+	}
+
+	std::cerr << "set " << midi_region_views.back()->region()->name() << std::endl;
+	_pianoroll->set_region (midi_region_views.back()->region());
+
+	_region_editor_box.pack_start (_pianoroll->contents(), true, true);
+
+	_pianoroll->contents().hide (); // Why is this needed?
+	_pianoroll->contents().show_all ();
 }
