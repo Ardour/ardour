@@ -64,6 +64,7 @@ def options(opt):
 
 def configure(conf):
     autowaf.check_pkg(conf, 'cairomm-1.0', uselib_store='CAIROMM', atleast_version='1.8.4')
+    autowaf.check_pkg(conf, 'pangocairo', uselib_store='PANGOCAIRO', mandatory=True)
 
 def build(bld):
     # Library
@@ -78,9 +79,7 @@ def build(bld):
 
     obj.export_includes = ['.']
     obj.includes     = ['.']
-    obj.uselib       = 'SIGCPP CAIROMM PANGOMM BOOST XML OSX LIBMM GIOMM'
-    if bld.env['build_target'] == 'msvc':
-        obj.uselib  += ['PANGOCAIRO']
+    obj.uselib       = 'SIGCPP CAIROMM PANGOMM BOOST XML OSX LIBMM GIOMM PANGOCAIRO'
     obj.use          = [ 'libpbd', 'libgtkmm2ext', 'libytkmm' ]
     obj.name         = 'libcanvas'
     obj.target       = 'canvas'
