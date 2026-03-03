@@ -74,7 +74,7 @@ Pianoroll::Pianoroll (std::string const & name, bool with_transport)
 	, prh (nullptr)
 	, layered_automation (true)
 	, bg (nullptr)
-	, view (nullptr)
+	, _active_view (nullptr)
 	, bbt_metric (*this)
 	, ignore_channel_changes (false)
 {
@@ -118,7 +118,7 @@ Pianoroll::set_show_source (bool yn)
 	EC_LOCAL_TEMPO_SCOPE;
 
 	CueEditor::set_show_source (yn);
-	if (view) {
+	for (auto & [region,view] : region_view_map) {
 		view->set_show_source (yn);
 	}
 }
@@ -259,13 +259,17 @@ Pianoroll::set_layered_automation (bool yn)
 {
 	if ((layered_automation = yn)) {
 		layered_automation_button->set_active_state (Gtkmm2ext::ExplicitActive);
-		if (view && view->n_visible_automation() > 1) {
-			view->hide_all_automation ();
+		for (auto & [region,view] : region_view_map) {
+			if (view->n_visible_automation() > 1) {
+				view->hide_all_automation ();
+			}
 		}
 	} else {
 		layered_automation_button->set_active_state (Gtkmm2ext::Off);
-		if (view && view->n_visible_automation() > 1) {
-			view->hide_all_automation ();
+		for (auto & [region,view] : region_view_map) {
+			if (view->n_visible_automation() > 1) {
+				view->hide_all_automation ();
+			}
 		}
 	}
 }
@@ -396,7 +400,7 @@ Pianoroll::set_visible_channel (int n)
 
 	rebuild_parameter_button_map ();
 
-	if (view) {
+	for (auto & [region,view] : region_view_map) {
 		view->set_visible_channel (n);
 		view->swap_automation_channel (n);
 	}
@@ -509,14 +513,6 @@ Pianoroll::build_canvas ()
 	prh->ExtendNoteSelection.connect (sigc::mem_fun (*this, &Pianoroll::extend_note_selection));
 	prh->ToggleNoteSelection.connect (sigc::mem_fun (*this, &Pianoroll::toggle_note_selection));
 
-	view = new PianorollMidiView (nullptr, *data_group, *no_scroll_group, *this, *bg, 0xff0000ff);
-	view->AutomationStateChange.connect (sigc::mem_fun (*this, &Pianoroll::automation_state_changed));
-	view->VisibleChannelChanged.connect (view_connections, invalidator (*this), std::bind (&Pianoroll::visible_channel_changed, this), gui_context());
-	view->set_show_source (show_source);
-
-	bg->set_view (view);
-	prh->set_view (view);
-
 	/* This must be called after prh and bg have had their view set */
 
 	double w, h;
@@ -559,12 +555,12 @@ Pianoroll::visible_channel_changed ()
 
 	/* Something else changed it */
 
-	if (!view) {
+	if (!_active_view) {
 		return; /* Ought to be impossible */
 	}
 
-	_visible_channel = view->visible_channel();
-	visible_channel_selector.set_active (string_compose ("%1", view->visible_channel() + 1));
+	_visible_channel = _active_view->visible_channel();
+	visible_channel_selector.set_active (string_compose ("%1", _active_view->visible_channel() + 1));
 }
 
 void
@@ -591,7 +587,7 @@ Pianoroll::maybe_update ()
 
 		if (!playing_trigger) {
 
-			if (_drags->active() || !view || !view->midi_track()->triggerbox()) {
+			if (_drags->active() || !_active_view || !_active_view->midi_track()->triggerbox()) {
 				return;
 			}
 
@@ -609,7 +605,7 @@ Pianoroll::maybe_update ()
 			}
 		}
 
-	} else if (view->midi_region()) {
+	} else if (_active_view->midi_region()) {
 
 		Temporal::TempoMap::SharedPtr global_tempo_map (Temporal::TempoMap::global_fetch());
 		Temporal::TempoMap::SharedPtr local_tempo_map (Temporal::TempoMap::use());
@@ -630,7 +626,7 @@ Pianoroll::maybe_update ()
 
 		/* Do the same for the source position */
 
-		samplepos_t spos = local_tempo_map->sample_at (global_tempo_map->quarters_at (view->midi_region()->source_position()));
+		samplepos_t spos = local_tempo_map->sample_at (global_tempo_map->quarters_at (_active_view->midi_region()->source_position()));
 
 		if (pos < spos) {
 			_playhead_cursor->set_position (0);
@@ -684,8 +680,10 @@ Pianoroll::canvas_allocate (Gtk::Allocation alloc)
 
 	double timebars = n_timebars * timebar_height;
 	bg->set_size (alloc.get_width(), alloc.get_height() - timebars);
-	view->set_height (alloc.get_height() - timebars);
-	prh->set (ArdourCanvas::Rect (0, 0, prh->x1(), view->midi_context().height()));
+	for (auto & [region,view] : region_view_map) {
+		view->set_height (alloc.get_height() - timebars);
+	}
+	prh->set (ArdourCanvas::Rect (0, 0, prh->x1(), _active_view->midi_context().height()));
 
 	_track_canvas_width = _visible_canvas_width - prh->x1();
 	_timeline_origin = prh->x1();
@@ -699,7 +697,7 @@ Pianoroll::canvas_allocate (Gtk::Allocation alloc)
 
 		zoom_to_show (max_zoom_extent());
 		if (_region) {
-			bg->display_region (*view);
+			bg->display_region (*_active_view);
 		}
 		zoom_in_allocate = false;
 	}
@@ -754,7 +752,7 @@ Pianoroll::set_samples_per_pixel (samplecnt_t spp)
 
 	CueEditor::set_samples_per_pixel (spp);
 
-	if (view) {
+	for (auto & [region,view] : region_view_map) {
 		view->set_samples_per_pixel (spp);
 	}
 
@@ -849,8 +847,8 @@ Pianoroll::idle_data_captured ()
 
 	CueEditor::idle_data_captured ();
 
-	if (view) {
-		view->clip_data_recorded (data_capture_duration);
+	if (_active_view) {
+		_active_view->clip_data_recorded (data_capture_duration);
 	}
 
 	return false;
@@ -924,7 +922,7 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 		switch (mouse_mode) {
 		case Editing::MouseContent:
 			/* rubberband drag to select notes */
-			_drags->set (new RubberbandSelectDrag (*this, item, [&](GdkEvent* ev, timepos_t const & pos) { return view->velocity_rb_click (ev, pos); }), event);
+			_drags->set (new RubberbandSelectDrag (*this, item, [&](GdkEvent* ev, timepos_t const & pos) { return _active_view->velocity_rb_click (ev, pos); }), event);
 			break;
 		case Editing::MouseDraw:
 			_drags->set (new VelocityLineDrag (*this, *static_cast<ArdourCanvas::Rectangle*>(item), false, Temporal::BeatTime), event);
@@ -939,11 +937,11 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 		switch (mouse_mode) {
 		case Editing::MouseContent:
 			/* rubberband drag to select automation points */
-			_drags->set (new RubberbandSelectDrag (*this, item, [&](GdkEvent* ev, timepos_t const & pos) { return view->automation_rb_click (ev, pos); }), event);
+			_drags->set (new RubberbandSelectDrag (*this, item, [&](GdkEvent* ev, timepos_t const & pos) { return _active_view->automation_rb_click (ev, pos); }), event);
 			break;
 		case Editing::MouseDraw:
 			_drags->set (new AutomationDrawDrag (*this, nullptr, *static_cast<ArdourCanvas::Rectangle*>(item), false, Temporal::BeatTime,
-			                                     [&](GdkEvent* ev, timepos_t const & pos) { return view->automation_rb_click (ev, pos); }), event);
+			                                     [&](GdkEvent* ev, timepos_t const & pos) { return _active_view->automation_rb_click (ev, pos); }), event);
 			break;
 		default:
 			break;
@@ -956,7 +954,7 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 		select_automation_line (&event->button, item, op);
 		switch (mouse_mode) {
 		case Editing::MouseContent:
-			_drags->set (new LineDrag (*this, item, [&](GdkEvent* ev,timepos_t const & pos, double) { view->line_drag_click (ev, pos); }), event);
+			_drags->set (new LineDrag (*this, item, [&](GdkEvent* ev,timepos_t const & pos, double) { _active_view->line_drag_click (ev, pos); }), event);
 			break;
 		default:
 			break;
@@ -1071,21 +1069,21 @@ Pianoroll::popup_region_context_menu (ArdourCanvas::Item* item, GdkEvent* event)
 
 	using namespace Gtk::Menu_Helpers;
 
-	if (!view) {
+	if (!_active_view) {
 		return;
 	}
 
-	const uint32_t sel_size = view->selection_size ();
-	MidiViews mvs ({view});
+	const uint32_t sel_size = _active_view->selection_size ();
+	MidiViews mvs ({_active_view});
 
 	MenuList& items = _region_context_menu.items();
 	items.clear();
 
 	if (sel_size > 0) {
-		items.push_back (MenuElem(_("Delete"), sigc::mem_fun (*view, &MidiView::delete_selection)));
+		items.push_back (MenuElem(_("Delete"), sigc::mem_fun (*_active_view, &MidiView::delete_selection)));
 	}
 
-	items.push_back(MenuElem(_("Edit..."), sigc::bind(sigc::mem_fun(*this, &EditingContext::edit_notes), view)));
+	items.push_back(MenuElem(_("Edit..."), sigc::bind(sigc::mem_fun(*this, &EditingContext::edit_notes), _active_view)));
 	items.push_back(MenuElem(_("Transpose..."),  sigc::bind(sigc::mem_fun(*this, &EditingContext::transpose_regions), mvs)));
 	items.push_back(MenuElem(_("Legatize"), sigc::bind(sigc::mem_fun(*this, &EditingContext::legatize_regions), mvs, false)));
 	if (sel_size < 2) {
@@ -1179,11 +1177,11 @@ Pianoroll::midi_action (void (MidiView::*method)())
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	if (!view) {
+	if (!_active_view) {
 		return;
 	}
 
-	(view->*method) ();
+	(_active_view->*method) ();
 }
 
 void
@@ -1191,11 +1189,11 @@ Pianoroll::escape ()
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	if (!view) {
+	if (!_active_view) {
 		return;
 	}
 
-	view->clear_selection ();
+	_active_view->clear_selection ();
 }
 
 Gdk::Cursor*
@@ -1339,8 +1337,8 @@ Pianoroll::enter_handler (ArdourCanvas::Item* item, GdkEvent* ev, ItemType item_
 	switch (item_type) {
 	case AutomationTrackItem:
 		/* item is the base rectangle */
-		if (view) {
-			view->automation_entry ();
+		if (_active_view) {
+			_active_view->automation_entry ();
 		}
 		break;
 
@@ -1383,7 +1381,7 @@ Pianoroll::leave_handler (ArdourCanvas::Item* item, GdkEvent* ev, ItemType item_
 			}
 		}
 		if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-			view->automation_leave ();
+			_active_view->automation_leave ();
 		}
 		break;
 
@@ -1400,8 +1398,8 @@ Pianoroll::selectable_owners()
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	if (view) {
-		return view->selectable_owners();
+	if (_active_view) {
+		return _active_view->selectable_owners();
 	}
 
 	return std::list<SelectableOwner*> ();
@@ -1450,7 +1448,7 @@ Pianoroll::unset_region ()
 {
 	if (region_view_map.empty()) {
 		CueEditor::unset_region ();
-		// view->set_region (nullptr);
+		// _active_view->set_region (nullptr);
 	}
 }
 
@@ -1521,7 +1519,7 @@ Pianoroll::region_going_away (std::weak_ptr<ARDOUR::Region> wr)
 		return;
 	}
 
-	bool switch_views = (view == rvm->second);
+	bool switch_views = (_active_view == rvm->second);
 
 	/* Clean up the view */
 	delete rvm->second;
@@ -1548,7 +1546,7 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 
 	/* unset everything */
 
-	view = nullptr;
+	_active_view = nullptr;
 	view_connections.drop_connections ();
 	automation_connection.disconnect ();
 	_update_connection.disconnect ();
@@ -1568,22 +1566,22 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 
 	/* OK, time to switch the "active" view */
 
-	view = rvm->second;
-	CueEditor::set_track (view->midi_track());
+	_active_view = rvm->second;
+	CueEditor::set_track (_active_view->midi_track());
 
-	automation_connection = view->AutomationStateChange.connect (sigc::mem_fun (*this, &Pianoroll::automation_state_changed));
-	view->VisibleChannelChanged.connect (view_connections, invalidator (*this), std::bind (&Pianoroll::visible_channel_changed, this), gui_context());
+	automation_connection = _active_view->AutomationStateChange.connect (sigc::mem_fun (*this, &Pianoroll::automation_state_changed));
+	_active_view->VisibleChannelChanged.connect (view_connections, invalidator (*this), std::bind (&Pianoroll::visible_channel_changed, this), gui_context());
 
 	layered_automation_button->set_active_state (Gtkmm2ext::Off);
 	layered_automation = false;
 
-	set_visible_channel (view->pick_visible_channel());
+	set_visible_channel (_active_view->pick_visible_channel());
 
 	/* Compute zoom level to show entire source plus some margin if possible */
 
 	zoom_to_show (max_zoom_extent());
 
-	bg->display_region (*view);
+	bg->display_region (*_active_view);
 
 	maybe_set_from_rsu ();
 
@@ -1625,8 +1623,8 @@ Pianoroll::user_automation_active_button_click (GdkEventButton* ev, MetaButton* 
 		return false;
 	}
 
-	if (view) {
-		view->set_active_automation (i->second);
+	if (_active_view) {
+		_active_view->set_active_automation (i->second);
 	}
 
 #endif
@@ -1656,7 +1654,7 @@ Pianoroll::user_automation_show_button_click (GdkEventButton* ev, MetaButton* me
 void
 Pianoroll::automation_active_button_click (Evoral::ParameterType type, int id)
 {
-	if (!view)  {
+	if (!_active_view)  {
 		return;
 	}
 
@@ -1664,33 +1662,33 @@ Pianoroll::automation_active_button_click (Evoral::ParameterType type, int id)
 
 	Evoral::Parameter p (type, _visible_channel, id);
 
-	if (view->is_active_automation (p)) {
-		view->unset_active_automation ();
+	if (_active_view->is_active_automation (p)) {
+		_active_view->unset_active_automation ();
 		return;
 	}
 
-	if (!layered_automation && !view->is_visible_automation (p)) {
-		view->hide_all_automation ();
+	if (!layered_automation && !_active_view->is_visible_automation (p)) {
+		_active_view->hide_all_automation ();
 	}
 
-	view->set_active_automation (p);
+	_active_view->set_active_automation (p);
 }
 
 void
 Pianoroll::automation_show_button_click (Evoral::ParameterType type, int id)
 {
-	if (!view)  {
+	if (!_active_view)  {
 		return;
 	}
 
 	EC_LOCAL_TEMPO_SCOPE;
 
 	Evoral::Parameter param (type, _visible_channel, id);
-	if (!layered_automation && !view->is_visible_automation (param)) {
+	if (!layered_automation && !_active_view->is_visible_automation (param)) {
 		/* Param is about to become visible, hide everything else */
-		view->hide_all_automation ();
+		_active_view->hide_all_automation ();
 	}
-	view->toggle_visibility (param);
+	_active_view->toggle_visibility (param);
 }
 
 void
@@ -1698,14 +1696,14 @@ Pianoroll::automation_state_changed ()
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	assert (view);
+	assert (_active_view);
 
 	for (ParameterButtonMap::iterator i = parameter_button_map.begin(); i != parameter_button_map.end(); ++i) {
 		std::string str (ARDOUR::EventTypeMap::instance().to_symbol (i->second));
 
 		/* Indicate active automation state with selected/not-selected visual state */
 
-		if (view->is_active_automation (i->second)) {
+		if (_active_view->is_active_automation (i->second)) {
 			i->first->set_editing (true);
 		} else {
 			i->first->set_editing (false);
@@ -1713,7 +1711,7 @@ Pianoroll::automation_state_changed ()
 
 		/* Indicate visible automation state with explicit widget active state (LED) */
 
-		if (view->is_visible_automation (i->second)) {
+		if (_active_view->is_visible_automation (i->second)) {
 			i->first->set_showing (true);
 		} else {
 			i->first->set_showing (false);
@@ -1775,8 +1773,8 @@ Pianoroll::point_selection_changed ()
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	if (view) {
-		view->point_selection_changed ();
+	if (_active_view) {
+		_active_view->point_selection_changed ();
 	}
 }
 
@@ -1794,15 +1792,15 @@ Pianoroll::paste (float times, bool from_context_menu)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	if (view) {
-		// view->paste (Editing::Cut);
+	if (_active_view) {
+		// _active_view->paste (Editing::Cut);
 	}
 }
 
 void
 Pianoroll::keyboard_paste ()
 {
-	if (!view || !_region) {
+	if (!_active_view || !_region) {
 		return;
 	}
 
@@ -1813,7 +1811,7 @@ Pianoroll::keyboard_paste ()
 
 	PasteContext pc (0, 1, ItemCounts(), true);
 	begin_reversible_command (string_compose (_("paste %1"), X_("MIDI")));
-	view->paste (absolute_where, get_cut_buffer(), pc);
+	_active_view->paste (absolute_where, get_cut_buffer(), pc);
 	commit_reversible_command ();
 }
 
@@ -1866,9 +1864,9 @@ Pianoroll::cut_copy (Editing::CutCopyOp op)
 	switch (current_mouse_mode()) {
 	case MouseDraw:
 	case MouseContent:
-		if (view) {
+		if (_active_view) {
 			begin_reversible_command (opname + ' ' + X_("MIDI"));
-			view->cut_copy_clear (*selection, op);
+			_active_view->cut_copy_clear (*selection, op);
 			commit_reversible_command ();
 		}
 		return;
@@ -1889,11 +1887,11 @@ Pianoroll::select_all_within (Temporal::timepos_t const & start, Temporal::timep
 
 	std::list<Selectable*> found;
 
-	if (!view) {
+	if (!_active_view) {
 		return;
 	}
 
-	AutomationLine* al = view->active_automation_line();
+	AutomationLine* al = _active_view->active_automation_line();
 
 	if (!al) {
 		return;
@@ -1905,7 +1903,7 @@ Pianoroll::select_all_within (Temporal::timepos_t const & start, Temporal::timep
 
 	/* translate y0 and y1 to use the top of the automation area as the * origin */
 
-	double automation_origin = view->automation_group_position().y;
+	double automation_origin = _active_view->automation_group_position().y;
 
 	y0 -= automation_origin;
 	y1 -= automation_origin;
@@ -1931,7 +1929,7 @@ Pianoroll::select_all_within (Temporal::timepos_t const & start, Temporal::timep
 	al->get_selectables (start, end, botfrac, topfrac, found);
 
 	if (found.empty()) {
-		view->clear_selection ();
+		_active_view->clear_selection ();
 		return;
 	}
 
@@ -2050,11 +2048,11 @@ Pianoroll::shift_contents (timepos_t const & t, bool model)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	if (!view) {
+	if (!_active_view) {
 		return;
 	}
 
-	view->shift_midi (t, model);
+	_active_view->shift_midi (t, model);
 }
 
 InstrumentInfo*
@@ -2062,11 +2060,17 @@ Pianoroll::instrument_info () const
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	if (!view || !view->midi_track()) {
+	if (!_active_view || !_active_view->midi_track()) {
 		return nullptr;
 	}
 
-	return &view->midi_track()->instrument_info ();
+	return &_active_view->midi_track()->instrument_info ();
+}
+
+std::shared_ptr<ARDOUR::MidiTrack>
+Pianoroll::midi_track() const
+{
+	return std::dynamic_pointer_cast<ARDOUR::MidiTrack> (_track);
 }
 
 void
@@ -2088,14 +2092,14 @@ Pianoroll::set_note_selection (uint8_t note)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	if (!view) {
+	if (!_active_view) {
 		return;
 	}
 
-	uint16_t chn_mask = view->midi_track()->get_playback_channel_mask();
+	uint16_t chn_mask = _active_view->midi_track()->get_playback_channel_mask();
 
 	begin_reversible_selection_op (X_("Set Note Selection"));
-	view->select_matching_notes (note, chn_mask, false, false);
+	_active_view->select_matching_notes (note, chn_mask, false, false);
 	commit_reversible_selection_op();
 }
 
@@ -2104,14 +2108,14 @@ Pianoroll::add_note_selection (uint8_t note)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	if (!view) {
+	if (!_active_view) {
 		return;
 	}
 
-	const uint16_t chn_mask = view->midi_track()->get_playback_channel_mask();
+	const uint16_t chn_mask = _active_view->midi_track()->get_playback_channel_mask();
 
 	begin_reversible_selection_op (X_("Add Note Selection"));
-	view->select_matching_notes (note, chn_mask, true, false);
+	_active_view->select_matching_notes (note, chn_mask, true, false);
 	commit_reversible_selection_op();
 }
 
@@ -2120,14 +2124,14 @@ Pianoroll::extend_note_selection (uint8_t note)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	if (!view) {
+	if (!_active_view) {
 		return;
 	}
 
-	const uint16_t chn_mask = view->midi_track()->get_playback_channel_mask();
+	const uint16_t chn_mask = _active_view->midi_track()->get_playback_channel_mask();
 
 	begin_reversible_selection_op (X_("Extend Note Selection"));
-	view->select_matching_notes (note, chn_mask, true, true);
+	_active_view->select_matching_notes (note, chn_mask, true, true);
 	commit_reversible_selection_op();
 }
 
@@ -2136,14 +2140,14 @@ Pianoroll::toggle_note_selection (uint8_t note)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	if (!view) {
+	if (!_active_view) {
 		return;
 	}
 
-	const uint16_t chn_mask = view->midi_track()->get_playback_channel_mask();
+	const uint16_t chn_mask = _active_view->midi_track()->get_playback_channel_mask();
 
 	begin_reversible_selection_op (X_("Toggle Note Selection"));
-	view->toggle_matching_notes (note, chn_mask);
+	_active_view->toggle_matching_notes (note, chn_mask);
 	commit_reversible_selection_op();
 }
 
@@ -2160,8 +2164,8 @@ Pianoroll::begin_write ()
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	if (view) {
-		view->begin_write ();
+	if (_active_view) {
+		_active_view->begin_write ();
 	}
 }
 
@@ -2170,8 +2174,8 @@ Pianoroll::end_write ()
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	if (view) {
-		view->end_write ();
+	if (_active_view) {
+		_active_view->end_write ();
 	}
 }
 
@@ -2193,8 +2197,8 @@ Pianoroll::show_count_in (std::string const & str)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	if (view) {
-		view->set_overlay_text (str);
+	if (_active_view) {
+		_active_view->set_overlay_text (str);
 	}
 }
 
@@ -2203,8 +2207,8 @@ Pianoroll::hide_count_in ()
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	if (view) {
-		view->hide_overlay_text ();
+	if (_active_view) {
+		_active_view->hide_overlay_text ();
 	}
 }
 

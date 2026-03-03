@@ -37,7 +37,6 @@
 
 #include "editing.h"
 #include "gui_thread.h"
-#include "midi_view.h"
 #include "midi_view_background.h"
 #include "mouse_cursors.h"
 #include "prh_base.h"
@@ -52,7 +51,6 @@ using namespace Gtkmm2ext;
 PianoRollHeaderBase::PianoRollHeaderBase (MidiViewBackground& bg)
 	: _midi_context (bg)
 	, _adj (_midi_context.note_range_adjustment)
-	, _view (nullptr)
 	, _font_descript (UIConfiguration::instance().get_NormalFont())
 	, _font_descript_big_c (UIConfiguration::instance().get_NormalFont())
 	, _font_descript_midnam (UIConfiguration::instance().get_NormalFont())
@@ -87,13 +85,6 @@ PianoRollHeaderBase::alloc_layouts (Glib::RefPtr<Pango::Context> context)
 	_font_descript_big_c.set_absolute_size (10.0 * Pango::SCALE);
 	_big_c_layout->set_font_description(_font_descript_big_c);
 	_midnam_layout = Pango::Layout::create (context);
-}
-
-void
-PianoRollHeaderBase::set_view (MidiView* v)
-{
-	_view = v;
-	_midi_context.NoteRangeChanged.connect (sigc::mem_fun (*this, &PianoRollHeaderBase::note_range_changed));
 }
 
 bool

@@ -23,13 +23,12 @@
 #include "ardour/smf_source.h"
 #include "ardour/midi_region.h"
 
+#include "midi_view.h"
 #include "pianoroll.h"
 #include "pianoroll_background.h"
-#include "midi_view.h"
 
 PianorollMidiBackground::PianorollMidiBackground (ArdourCanvas::Item* parent, Pianoroll& pr)
 	: MidiViewBackground (parent, pr)
-	, view (nullptr)
 	, pianoroll (pr)
 	, _width (0)
 	, _height (0)
@@ -93,12 +92,6 @@ PianorollMidiBackground::record_layer_check (std::shared_ptr<ARDOUR::Region>, sa
 }
 
 void
-PianorollMidiBackground::set_view (MidiView* mv)
-{
-	view = mv;
-}
-
-void
 PianorollMidiBackground::apply_note_range_to_children ()
 {
 	pianoroll. apply_note_range (lowest_note(), highest_note());
@@ -111,4 +104,10 @@ PianorollMidiBackground::display_region (MidiView& mv)
 	assert (smf);
 	(void) update_data_note_range (smf->model()->lowest_note(), smf->model()->highest_note());
 	apply_note_range (smf->model()->lowest_note(), smf->model()->highest_note(), true, RangeCanMove (CanMoveTop|CanMoveBottom));
+}
+
+std::shared_ptr<ARDOUR::MidiTrack>
+PianorollMidiBackground::midi_track() const
+{
+	return pianoroll.midi_track();
 }
