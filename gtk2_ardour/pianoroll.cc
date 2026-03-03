@@ -99,11 +99,16 @@ Pianoroll::Pianoroll (std::string const & name, bool with_transport)
 
 Pianoroll::~Pianoroll ()
 {
-	set_region (nullptr);
+	for (auto & [region,view] : region_view_map) {
+		delete view;
+	}
+
+	view_connections.drop_connections ();
+	automation_connection.disconnect ();
+	_update_connection.disconnect ();
 
 	drop_grid (); // unparent gridlines before deleting _canvas_viewport
 
-	delete view;
 	delete bg;
 }
 
