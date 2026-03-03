@@ -1598,6 +1598,14 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 	region_dropdown.set_active (region->name());
 }
 
+void
+Pianoroll::apply_note_range (uint8_t lowest, uint8_t highest)
+{
+	for (auto & [region,view] : region_view_map) {
+		view->apply_note_range (lowest, highest);
+	}
+}
+
 bool
 Pianoroll::user_automation_active_button_click (GdkEventButton* ev, MetaButton* mb)
 {

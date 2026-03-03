@@ -148,6 +148,8 @@ class Pianoroll : public CueEditor
 	void set_layered_automation (bool);
 	void set_note_highlight (uint8_t note);
 
+	void apply_note_range (uint8_t lowest, uint8_t highest);
+
   protected:
 	Temporal::timepos_t snap_to_grid (Temporal::timepos_t const & start,
 	                                  Temporal::RoundMode   direction,
