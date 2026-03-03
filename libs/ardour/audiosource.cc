@@ -1190,7 +1190,7 @@ AudioSource::truncate_peakfile ()
 #ifdef COMPILER_MSVC
 		if (_chsize_s (_peakfile_fd, target_length))
 #else
-		if (ftruncate (_peakfile_fd, target_length))
+		if (ftruncate (_peakfile_fd, _peak_byte_max))
 #endif
 		{
 			error << string_compose (_("could not truncate peakfile %1 to %2 (error: %3)"),
