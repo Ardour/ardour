@@ -71,7 +71,7 @@ return function()
 		end
 
 		if target_out < nbr_oports then
-			for n = nbr_iports - 1, target_out, -1 do
+			for n = nbr_oports - 1, target_out, -1 do
 				if not o:nth(n):isnil() then
 					print (" - Remove Output", n)
 					o:remove_port (o:nth(n))
