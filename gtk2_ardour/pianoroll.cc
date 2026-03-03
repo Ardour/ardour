@@ -1506,7 +1506,6 @@ Pianoroll::rebuild_region_dropdown ()
 		std::weak_ptr<ARDOUR::Region> wr (region);
 		region_dropdown.add_menu_elem (Gtk::Menu_Helpers::MenuElem (region->name(), [this,wr]() { std::shared_ptr<ARDOUR::Region> r (wr.lock()); if (r) set_region (r); }));
 	}
-	std::cerr << "dropd own now has " << region_view_map.size() << std::endl;
 }
 
 void
