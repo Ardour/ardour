@@ -101,7 +101,9 @@ PianorollMidiBackground::set_view (MidiView* mv)
 void
 PianorollMidiBackground::apply_note_range_to_children ()
 {
-	pianoroll. apply_note_range (lowest_note(), highest_note());
+	if (view) {
+		view->apply_note_range (lowest_note(), highest_note());
+	}
 }
 
 void

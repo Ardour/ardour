@@ -203,26 +203,6 @@ MidiView::init (std::shared_ptr<MidiTrack> mt)
 	_midi_context.NoteModeChanged.connect (sigc::mem_fun (*this, &MidiView::note_mode_changed));
 }
 
-
-MidiView::~MidiView ()
-{
-	hide_verbose_cursor ();
-
-	region_going_away ();
-
-	delete _list_editor;
-
-	if (_unfinished_live_notes) {
-		end_write();
-	}
-	_entered_note = 0;
-	clear_events ();
-
-	delete _note_group;
-	delete _note_diff_command;
-	delete _step_edit_cursor;
-}
-
 void
 MidiView::note_mode_changed ()
 {
@@ -374,7 +354,6 @@ void
 MidiView::set_region (std::shared_ptr<MidiRegion> mr)
 {
 	end_write ();
-	region_connections.drop_connections ();
 
 	_midi_region = mr;
 
@@ -1636,6 +1615,24 @@ MidiView::update_sysexes ()
 		gui->item().set_position (ArdourCanvas::Duple (x, 1.0));
 	}
 }
+
+MidiView::~MidiView ()
+{
+	hide_verbose_cursor ();
+
+	delete _list_editor;
+
+	if (_unfinished_live_notes) {
+		end_write();
+	}
+	_entered_note = 0;
+	clear_events ();
+
+	delete _note_group;
+	delete _note_diff_command;
+	delete _step_edit_cursor;
+}
+
 void
 MidiView::region_resized (const PropertyChange& what_changed)
 {

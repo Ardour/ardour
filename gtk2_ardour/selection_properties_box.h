@@ -73,7 +73,5 @@ private:
 
 	PBD::ScopedConnection _region_connection;
 	PBD::ScopedConnection _editor_connection;
-
-	void show_similar_midi_regions (RegionSelection&);
 };
 
