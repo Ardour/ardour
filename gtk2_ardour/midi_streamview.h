@@ -88,6 +88,8 @@ public:
 
 	ARDOUR::InstrumentInfo* instrument_info() const;
 
+	std::shared_ptr<ARDOUR::MidiTrack> midi_track() const;
+
 protected:
 	void setup_rec_box ();
 	void update_rec_box ();

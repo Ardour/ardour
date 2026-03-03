@@ -98,6 +98,8 @@ class Pianoroll : public CueEditor
 	int32_t get_grid_beat_divisions (Editing::GridType gt) const { return 1; }
 	int32_t get_grid_music_divisions (Editing::GridType gt) const { return 1; }
 
+	std::shared_ptr<ARDOUR::MidiTrack> midi_track() const;
+
 	void add_region (std::shared_ptr<ARDOUR::Region>, std::shared_ptr<ARDOUR::MidiTrack>);
 	void set_region (std::shared_ptr<ARDOUR::Region>);
 
@@ -133,7 +135,7 @@ class Pianoroll : public CueEditor
 	void keyboard_paste ();
 	void cut_copy (Editing::CutCopyOp);
 
-	PianorollMidiView* midi_view() const { return view; }
+	PianorollMidiView* midi_view() const { return _active_view; }
 	void set_session (ARDOUR::Session*);
 	bool allow_trim_cursors () const;
 
@@ -208,7 +210,7 @@ class Pianoroll : public CueEditor
 	RegionMidiViewMap region_view_map;
 	void region_going_away (std::weak_ptr<ARDOUR::Region> region);
 
-	PianorollMidiView* view;
+	PianorollMidiView* _active_view;
 
 	void build_canvas ();
 	void canvas_allocate (Gtk::Allocation);

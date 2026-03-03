@@ -58,8 +58,6 @@ class PianoRollHeaderBase : virtual public sigc::trackable {
 	sigc::signal<void,uint8_t> ToggleNoteSelection;
 	sigc::signal<void,uint8_t> ExtendNoteSelection;
 
-	void set_view (MidiView*);
-
 	virtual void redraw () = 0;
 	virtual void redraw (double x, double y, double w, double h) = 0;
 	virtual double height() const = 0;
@@ -75,10 +73,7 @@ class PianoRollHeaderBase : virtual public sigc::trackable {
   protected:
 	MidiViewBackground& _midi_context;
 	Gtk::Adjustment&    _adj;
-	MidiView*           _view;
-
 	uint8_t             _event[3];
-
 	mutable Glib::RefPtr<Pango::Layout> _layout;
 	mutable Glib::RefPtr<Pango::Layout> _big_c_layout;
 	mutable Glib::RefPtr<Pango::Layout> _midnam_layout;

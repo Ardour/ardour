@@ -92,6 +92,13 @@ MidiStreamView::~MidiStreamView ()
 	undisplay_track ();
 }
 
+std::shared_ptr<ARDOUR::MidiTrack>
+MidiStreamView::midi_track() const
+{
+	return _trackview.midi_track();
+}
+
+
 InstrumentInfo*
 MidiStreamView::instrument_info() const
 {

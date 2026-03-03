@@ -37,6 +37,7 @@
 
 namespace ARDOUR {
 	class InstrumentInfo;
+	class MidiTrack;
 }
 
 namespace ArdourCanvas {
@@ -78,6 +79,8 @@ class MidiViewBackground : public virtual ViewBackground
 		ContentsRange,
 		UserRange
 	};
+
+	virtual std::shared_ptr<ARDOUR::MidiTrack> midi_track() const = 0;
 
 	ARDOUR::NoteMode  note_mode() const { return _note_mode; }
 	void set_note_mode (ARDOUR::NoteMode nm);
