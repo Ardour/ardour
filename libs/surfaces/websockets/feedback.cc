@@ -20,12 +20,12 @@
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 
-#include "pbd/abstract_ui.inc.cc" // instantiate template
-
 #include "feedback.h"
 #include "transport.h"
 #include "server.h"
 #include "state.h"
+
+#include "pbd/abstract_ui.inc.cc" // instantiate template
 
 // TO DO: make this configurable
 #define POLL_INTERVAL_MS 100

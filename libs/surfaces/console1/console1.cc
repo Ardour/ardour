@@ -18,7 +18,6 @@
 
 #include <optional>
 
-#include "pbd/abstract_ui.inc.cc" // instantiate template
 #include "pbd/controllable.h"
 #include "pbd/i18n.h"
 
@@ -40,6 +39,8 @@
 #include "console1.h"
 #include "c1_control.h"
 #include "c1_gui.h"
+
+#include "pbd/abstract_ui.inc.cc" // instantiate template
 
 using namespace ARDOUR;
 using namespace ArdourSurface;
