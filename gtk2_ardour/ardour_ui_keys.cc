@@ -382,11 +382,11 @@ ARDOUR_UI::transport_numpad_event (int num)
 			transport_record(true);
 			break;
 		case 4:
-			action = X_("Loop");
+			toggle_session_auto_loop();
 			break;
 		case 5:
 			transport_record(false);
-			action = X_("Loop");
+			toggle_session_auto_loop();
 			break;
 		case 6:
 			action = X_("TogglePunch");
