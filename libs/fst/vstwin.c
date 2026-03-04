@@ -389,7 +389,7 @@ fst_move_window_into_view (VSTState* fst)
 static HMODULE
 fst_load_vst_library(const char * path)
 {
-	gunichar2* wpath = g_utf8_to_utf16 (file_name, -1, 0, 0, 0);
+	gunichar2* wpath = g_utf8_to_utf16 (path, -1, 0, 0, 0);
 	if (!wpath) {
 		return NULL;
 	}
