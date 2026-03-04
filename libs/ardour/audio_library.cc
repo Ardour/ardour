@@ -87,8 +87,9 @@ AudioLibrary::save_changes ()
 {
 #ifdef HAVE_LRDF
 #ifdef PLATFORM_WINDOWS
+	string path;
 	try {
-		string path = Glib::locale_from_utf8 (Glib::filename_from_uri(src));
+		path = Glib::locale_from_utf8 (Glib::filename_from_uri(src));
 	} catch (Glib::ConvertError&) {
 		PBD::warning << string_compose(_("Could not convert '%1' URL. Audio Library not saved"), src) << endmsg;
 		return;
