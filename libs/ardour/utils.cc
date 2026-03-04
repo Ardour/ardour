@@ -37,7 +37,6 @@
 #include <cstring>
 #include <cerrno>
 #include <iostream>
-#include <sys/time.h>
 #include <errno.h>
 #include <fcntl.h>
 
