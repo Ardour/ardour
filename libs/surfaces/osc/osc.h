@@ -30,9 +30,7 @@
 #include <string>
 #include <vector>
 
-#include <sys/time.h>
 #include <pthread.h>
-
 
 #include <lo/lo.h>
 

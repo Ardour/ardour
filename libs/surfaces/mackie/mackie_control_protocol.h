@@ -29,7 +29,6 @@
 #include <list>
 #include <set>
 
-#include <sys/time.h>
 #include <pthread.h>
 #define ABSTRACT_UI_EXPORTS
 #include "pbd/abstract_ui.h"

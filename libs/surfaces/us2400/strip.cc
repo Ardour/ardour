@@ -23,8 +23,6 @@
 
 #include <stdint.h>
 
-#include <sys/time.h>
-
 #include <glibmm/convert.h>
 
 #include "midi++/port.h"
