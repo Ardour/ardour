@@ -19,12 +19,15 @@
  */
 
 #ifndef PLATFORM_WINDOWS
-#include <sys/mman.h>
-#include <sys/time.h>
-#endif
-
-#ifdef COMPILER_MINGW
-#include <sys/time.h>
+# include <sys/mman.h>
+# include <sys/time.h>
+#else
+/* struct timeval */
+# ifdef COMPILER_MINGW
+#  include <sys/time.h>
+# else
+#  include <winsock2.h>
+# endif
 #endif
 
 #include <glibmm.h>
