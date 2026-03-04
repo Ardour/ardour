@@ -21,12 +21,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#ifdef HAVE_USB
+#include "pbd/pthread_utils.h"
+
 #ifdef COMPILER_MSVC
 #define _WINSOCKAPI_
 #endif
-
-#ifdef HAVE_USB
-#include "pbd/pthread_utils.h"
 
 #include <libusb.h>
 /* ControlProtocolManager is a singleton, so we can use static
