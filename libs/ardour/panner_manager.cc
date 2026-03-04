@@ -66,7 +66,7 @@ PannerManager::instance ()
 
 static bool panner_filter (const string& str, void */*arg*/)
 {
-#ifdef COMPILER_MSVC
+#if defined(COMPILER_MSVC) && !defined(WAF_BUILD)
 	/**
 	 * Different build targets (Debug / Release etc) use different versions
 	 * of the 'C' runtime (which can't be 'mixed & matched'). Therefore, in
