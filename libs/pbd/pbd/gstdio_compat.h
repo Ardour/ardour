@@ -85,3 +85,9 @@ pbd_g_stat(const gchar* filename, GStatBufW64* buf)
 #  define g_lstat pbd_g_stat
 #endif
 
+#if defined COMPILER_MSVC && !defined S_ISDIR
+#include <sys/stat.h>
+#define S_ISDIR(mode) (((mode) & _S_IFDIR) != 0)
+#define S_ISREG(mode) (((mode) & _S_IFMT) == _S_IFREG)
+#define S_IXUSR _S_IEXEC
+#endif
