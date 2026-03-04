@@ -202,7 +202,7 @@ sigpipe_handler (int /*signal*/)
 }
 #endif
 
-#if (!defined COMPILER_MSVC && defined PLATFORM_WINDOWS)
+#if defined WAF_BUILD && defined PLATFORM_WINDOWS
 
 static void command_line_parse_error (int *argc, char** argv[]) {}
 
@@ -223,7 +223,7 @@ static void command_line_parse_error (int *argc, char** argv[]) {
 static void command_line_parse_error (int *argc, char** argv[]) {}
 #endif
 
-#if (defined(COMPILER_MSVC) && defined(NDEBUG) && !defined(RDC_BUILD))
+#if defined(COMPILER_MSVC) && defined(NDEBUG) && !defined(RDC_BUILD) && !defined(WAF_BUILD)
 /*
  *  Release build with MSVC uses ardour_main()
  */
