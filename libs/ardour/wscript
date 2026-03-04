@@ -119,6 +119,9 @@ libardour_sources = [
         'luaproc.cc',
         'luascripting.cc',
         'lufs_meter.cc',
+        'lv2_evbuf.cc',
+        'uri_map.cc',
+        'lv2_plugin.cc',
         'meter.cc',
         'midi_automation_list_binder.cc',
         'midi_buffer.cc',
@@ -398,6 +401,7 @@ def build(bld):
     obj.target       = 'ardour'
     obj.uselib       = ['GLIBMM','GTHREAD','AUBIO','SIGCPP','XML','UUID', 'LO', 'USB',
                         'SNDFILE','SAMPLERATE','LRDF','AUDIOUNITS', 'GIOMM', 'FFTW3F',
+                        'LILV','SERD','SORD',
                         'OSX','BOOST','CURL','TAGLIB','VAMPSDK','VAMPHOSTSDK','RUBBERBAND']
     obj.use          = ['libpbd','libmidipp','libevoral',
                         'libaudiographer',
@@ -435,11 +439,8 @@ def build(bld):
         obj.uselib += ['SOUNDTOUCH']
     #obj.add_objects = 'default/libs/surfaces/control_protocol/smpte_1.o'
 
-    if bld.is_defined('HAVE_LILV') :
-        obj.source += ['lv2_plugin.cc', 'lv2_evbuf.cc', 'uri_map.cc']
-        obj.uselib += ['LILV']
-        if bld.is_defined('HAVE_SUIL'):
-            obj.use += [ 'libsuil' ]
+    if bld.is_defined('HAVE_SUIL'):
+        obj.use += [ 'libsuil' ]
 
     if bld.is_defined('WINDOWS_VST_SUPPORT'):
         obj.source += [ 'windows_vst_plugin.cc']
