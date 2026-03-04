@@ -33,8 +33,6 @@
 
 #pragma once
 
-#include <sys/time.h>
-
 #include <cmath>
 #include <list>
 #include <map>

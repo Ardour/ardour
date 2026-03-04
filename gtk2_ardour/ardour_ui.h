@@ -34,16 +34,6 @@
 
 #include <time.h>
 
-/* need _BSD_SOURCE to get timersub macros */
-
-#ifdef _BSD_SOURCE
-#include <sys/time.h>
-#else
-#define _BSD_SOURCE
-#include <sys/time.h>
-#undef _BSD_SOURCE
-#endif
-
 #include <list>
 #include <cmath>
 
