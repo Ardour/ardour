@@ -1,0 +1,71 @@
+diff a/gtk2_ardour/ardour_ui_keys.cc b/gtk2_ardour/ardour_ui_keys.cc	(rejected hunks)
+@@ -45,6 +45,8 @@
+ #include "gtkmm2ext/debug.h"
+ #include "gtkmm2ext/utils.h"
+ 
++#include "pbd/i18n.h"
++
+ using namespace ARDOUR;
+ using namespace PBD;
+ using namespace Gtkmm2ext;
+@@ -363,17 +365,50 @@ ARDOUR_UI::transport_numpad_event (int num)
+ 	if ( _numpad_locate_happening ) {
+ 		_pending_locate_num = _pending_locate_num*10 + num;
+ 	} else {
++		char const * const group = X_("Transport");
++		char const * action = nullptr;
++
+ 		switch (num) {
+-			case 0: toggle_roll(false, false);                           break;
+-			case 1: transport_rewind();                                  break;
+-			case 2: transport_forward();                                 break;
+-			case 3: transport_record(true);                              break;
+-			case 4: toggle_session_auto_loop();                          break;
+-			case 5: transport_record(false); toggle_session_auto_loop(); break;
+-			case 6: toggle_punch();                                      break;
+-			case 7: toggle_click();                                      break;
+-			case 8: toggle_auto_return();                                break;
+-			case 9: toggle_follow_edits();                               break;
++		case 0:
++			toggle_roll (false, false);
++			break;
++		case 1:
++			transport_rewind();
++			break;
++		case 2:
++			transport_forward();
++			break;
++		case 3:
++			transport_record(true);
++			break;
++		case 4:
++			action = X_("Loop");
++			break;
++		case 5:
++			transport_record(false);
++			action = X_("Loop");
++			break;
++		case 6:
++			action = X_("TogglePunch");
++			break;
++		case 7:
++			action = X_("ToggleClick");
++			break;
++		case 8:
++			action = X_("ToggleAutoReturn");
++			break;
++		case 9:
++			action = X_("ToggleFollowEdits");
++			break;
++		default:
++			return;
++		}
++
++		if (action) {
++			Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (group, action);
++			if (tact) {
++				tact->set_active (!tact->get_active());
++			}
+ 		}
+ 	}
+ }
