@@ -370,10 +370,10 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 		rounded_function = Gtkmm2ext::rectangle;
 	}
 
-	int padding_top = 1 * scale;
-	int padding_bottom = 1 * scale;
-	int padding_left = 1 * scale;
-	int padding_right = 1 * scale;
+	int padding_top = 0;
+	int padding_bottom = 0;
+	int padding_left = 0;
+	int padding_right = 0;
 
 	// draw edge (filling a rect underneath, rather than stroking a border on top, allows the corners to be lighter-weight.
 	if ((_elements & (Body|Edge)) == (Body|Edge)) {
@@ -381,6 +381,11 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 		rounded_function (cr, 0, 0, get_width(), get_height(), corner_radius + 1.5*scale);
 		Gtkmm2ext::set_source_rgba (cr, outline_color);
 		cairo_fill(cr);
+
+		padding_top = 1 * scale;
+		padding_bottom = 1 * scale;
+		padding_left = 1 * scale;
+		padding_right = 1 * scale;
 
 		if (_border_mask != HIDE_NONE) {
 			if (_border_mask & HIDE_TOP) {
