@@ -403,6 +403,9 @@ protected:
 
 	std::shared_ptr<RegionList> regions_touched_locked (timepos_t const & start, timepos_t const & end, bool with_tail);
 
+	bool region_is_audible_at_locked (std::shared_ptr<Region>, timepos_t const&);
+	bool region_is_audible_at_internal (std::shared_ptr<RegionList> const&, std::shared_ptr<Region>, timepos_t const&);
+
 	void notify_region_removed (std::shared_ptr<Region>);
 	void notify_region_added (std::shared_ptr<Region>);
 	void notify_layering_changed ();

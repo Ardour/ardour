@@ -1917,7 +1917,19 @@ Playlist::region_is_audible_at (std::shared_ptr<Region> r, timepos_t const& pos)
 		RegionReadLock rlock (this);
 		rlist = find_regions_at (pos);
 	}
+	return region_is_audible_at_internal (rlist, r, pos);
+}
 
+bool
+Playlist::region_is_audible_at_locked (std::shared_ptr<Region> r, timepos_t const& pos)
+{
+	std::shared_ptr<RegionList> rlist = find_regions_at (pos);
+	return region_is_audible_at_internal (rlist, r, pos);
+}
+
+bool
+Playlist::region_is_audible_at_internal (std::shared_ptr<RegionList> const& rlist, std::shared_ptr<Region> r, timepos_t const& pos)
+{
 	if (!rlist->size ()) {
 		return false;
 	}
