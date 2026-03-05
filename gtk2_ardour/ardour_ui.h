@@ -422,23 +422,26 @@ protected:
 	void monitor_cut_all ();
 	void monitor_mono ();
 
-	void toggle_auto_play ();
-	void toggle_auto_input ();
-	void toggle_punch ();
 	void unset_dual_punch ();
 	bool ignore_dual_punch;
-	void toggle_punch_in ();
-	void toggle_punch_out ();
 	void toggle_session_monitoring_in ();
 	void toggle_session_monitoring_disk ();
 	void show_loop_punch_ruler_and_disallow_hide ();
 	void reenable_hide_loop_punch_ruler_if_appropriate ();
-	void toggle_auto_return ();
-	void toggle_click ();
-	void toggle_click_on_rec ();
 	void toggle_session_auto_loop ();
 	void toggle_rc_options_window ();
 	void toggle_session_options_window ();
+
+	void punch_in_action_toggled ();
+	void punch_out_action_toggled ();
+	void punch_action_toggled ();
+	void auto_return_action_toggled ();
+	void auto_play_action_toggled ();
+	void auto_input_action_toggled ();
+	void click_action_toggled ();
+	void click_on_rec_action_toggled ();
+	void follow_edits_action_toggled ();
+
 
 private:
 
@@ -527,8 +530,6 @@ private:
 	/* Transport Control */
 
 	Gtk::Table               tabbables_table;
-
-	void toggle_follow_edits ();
 
 	void set_transport_controllable_state (const XMLNode&);
 	XMLNode& get_transport_controllable_state ();
