@@ -354,11 +354,11 @@ pixops_composite_nearest (guchar        *dest_buf,
 			  double         scale_y,
 			  int            overall_alpha)
 {
-  int i;
-  int x;
-  int x_step = (1 << SCALE_SHIFT) / scale_x;
-  int y_step = (1 << SCALE_SHIFT) / scale_y;
-  int xmax, xstart, xstop, x_pos, y_pos;
+  gint64 i;
+  gint64 x;
+  gint64 x_step = (1 << SCALE_SHIFT) / scale_x;
+  gint64 y_step = (1 << SCALE_SHIFT) / scale_y;
+  gint64 xmax, xstart, xstop, x_pos, y_pos;
   const guchar *p;
   unsigned int  a0;
 
@@ -444,13 +444,13 @@ pixops_composite_color_nearest (guchar        *dest_buf,
 				guint32        color1,
 				guint32        color2)
 {
-  int i, j;
-  int x;
-  int x_step = (1 << SCALE_SHIFT) / scale_x;
-  int y_step = (1 << SCALE_SHIFT) / scale_y;
+  gint64 i, j;
+  gint64 x;
+  gint64 x_step = (1 << SCALE_SHIFT) / scale_x;
+  gint64 y_step = (1 << SCALE_SHIFT) / scale_y;
   int r1, g1, b1, r2, g2, b2;
   int check_shift = get_check_shift (check_size);
-  int xmax, xstart, xstop, x_pos, y_pos;
+  gint64 xmax, xstart, xstop, x_pos, y_pos;
   const guchar *p;
   unsigned int  a0;
 
@@ -1246,20 +1246,20 @@ pixops_process (guchar         *dest_buf,
 		PixopsLineFunc  line_func,
 		PixopsPixelFunc pixel_func)
 {
-  int i, j;
-  int x, y;			/* X and Y position in source (fixed_point) */
+  gint64 i, j;
+  gint64 x, y;			/* X and Y position in source (fixed_point) */
 
   guchar **line_bufs;
   int *filter_weights;
 
-  int x_step;
-  int y_step;
+  gint64 x_step;
+  gint64 y_step;
 
   int check_shift;
-  int scaled_x_offset;
+  gint64 scaled_x_offset;
 
-  int run_end_x;
-  int run_end_index;
+  gint64 run_end_x;
+  gint64 run_end_index;
 
   x_step = (1 << SCALE_SHIFT) / scale_x; /* X step in source (fixed point) */
   y_step = (1 << SCALE_SHIFT) / scale_y; /* Y step in source (fixed point) */
