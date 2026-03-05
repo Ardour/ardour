@@ -597,6 +597,22 @@ Editor::Editor ()
 	summary_bottom_spacer->set_size_request(-1, 3);
 	summary_bottom_spacer->show();
 
+	VBox* summary_zoom_vbox = manage (new Gtk::VBox);
+	HBox* summary_zoom_hbox = manage (new Gtk::HBox);
+	summary_zoom_hbox->set_size_request(80, 21);
+	summary_zoom_hbox->pack_end(full_zoom_button, false, false, 0);
+	summary_zoom_hbox->pack_end(zoom_in_button, false, false, 0);
+	summary_zoom_hbox->pack_end(zoom_out_button, false, false, 0);
+	summary_zoom_vbox->pack_end(*summary_zoom_hbox, false, false, 0);
+
+	zoom_out_button.set_corner_mask(ArdourButton::NONE);
+	zoom_in_button.set_corner_mask(ArdourButton::NONE);
+	full_zoom_button.set_corner_mask(ArdourButton::NONE);
+	zoom_in_button.set_border_mask(ArdourButton::HIDE_LEFT | ArdourButton::HIDE_RIGHT);
+	full_zoom_button.set_border_mask(ArdourButton::HIDE_RIGHT);
+
+	_summary->add(*summary_zoom_vbox);
+
 	_summary_hbox.pack_start (*summary_left_spacer, false, false);
 	_summary_hbox.pack_start (*summary_arrows_left, false, false);
 	_summary_hbox.pack_start (*_summary, true, true);
@@ -2748,9 +2764,9 @@ Editor::setup_toolbar ()
 	if (ARDOUR::Profile->get_mixbus()) {
 		_zoom_box.pack_start (zoom_preset_selector, false, false);
 	} else {
-		_zoom_box.pack_start (zoom_out_button, false, false);
-		_zoom_box.pack_start (zoom_in_button, false, false);
-		_zoom_box.pack_start (full_zoom_button, false, false);
+		// _zoom_box.pack_start (zoom_out_button, false, false);
+		// _zoom_box.pack_start (zoom_in_button, false, false);
+		// _zoom_box.pack_start (full_zoom_button, false, false);
 		_zoom_box.pack_start (zoom_focus_selector, false, false);
 	}
 
