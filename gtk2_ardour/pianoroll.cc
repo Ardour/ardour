@@ -1654,41 +1654,37 @@ Pianoroll::user_automation_show_button_click (GdkEventButton* ev, MetaButton* me
 void
 Pianoroll::automation_active_button_click (Evoral::ParameterType type, int id)
 {
-	if (!_active_view)  {
-		return;
-	}
-
 	EC_LOCAL_TEMPO_SCOPE;
 
 	Evoral::Parameter p (type, _visible_channel, id);
 
-	if (_active_view->is_active_automation (p)) {
-		_active_view->unset_active_automation ();
-		return;
-	}
+	for (auto & [region,view] : region_view_map) {
+		if (view->is_active_automation (p)) {
+			view->unset_active_automation ();
+		}
 
-	if (!layered_automation && !_active_view->is_visible_automation (p)) {
-		_active_view->hide_all_automation ();
-	}
+		if (!layered_automation && !view->is_visible_automation (p)) {
+			view->hide_all_automation ();
+		}
 
-	_active_view->set_active_automation (p);
+		view->set_active_automation (p);
+	}
 }
 
 void
 Pianoroll::automation_show_button_click (Evoral::ParameterType type, int id)
 {
-	if (!_active_view)  {
-		return;
-	}
-
 	EC_LOCAL_TEMPO_SCOPE;
 
 	Evoral::Parameter param (type, _visible_channel, id);
-	if (!layered_automation && !_active_view->is_visible_automation (param)) {
-		/* Param is about to become visible, hide everything else */
-		_active_view->hide_all_automation ();
+
+	for (auto & [region,view] : region_view_map) {
+		if (!layered_automation && !view->is_visible_automation (param)) {
+			/* Param is about to become visible, hide everything else */
+			view->hide_all_automation ();
+		}
+		view->toggle_visibility (param);
 	}
-	_active_view->toggle_visibility (param);
 }
 
 void
@@ -1696,25 +1692,26 @@ Pianoroll::automation_state_changed ()
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	assert (_active_view);
+	for (auto & [region,view] : region_view_map) {
 
-	for (ParameterButtonMap::iterator i = parameter_button_map.begin(); i != parameter_button_map.end(); ++i) {
-		std::string str (ARDOUR::EventTypeMap::instance().to_symbol (i->second));
+		for (ParameterButtonMap::iterator i = parameter_button_map.begin(); i != parameter_button_map.end(); ++i) {
+			std::string str (ARDOUR::EventTypeMap::instance().to_symbol (i->second));
 
-		/* Indicate active automation state with selected/not-selected visual state */
+			/* Indicate active automation state with selected/not-selected visual state */
 
-		if (_active_view->is_active_automation (i->second)) {
-			i->first->set_editing (true);
-		} else {
-			i->first->set_editing (false);
-		}
+			if (view->is_active_automation (i->second)) {
+				i->first->set_editing (true);
+			} else {
+				i->first->set_editing (false);
+			}
 
-		/* Indicate visible automation state with explicit widget active state (LED) */
+			/* Indicate visible automation state with explicit widget active state (LED) */
 
-		if (_active_view->is_visible_automation (i->second)) {
-			i->first->set_showing (true);
-		} else {
-			i->first->set_showing (false);
+			if (view->is_visible_automation (i->second)) {
+				i->first->set_showing (true);
+			} else {
+				i->first->set_showing (false);
+			}
 		}
 	}
 }
