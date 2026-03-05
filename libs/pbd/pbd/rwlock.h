@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <pthread.h>
+#include <shared_mutex>
 
 #include "pbd/libpbd_visibility.h"
 
@@ -42,35 +42,35 @@ public:
 
 	inline void reader_lock ()
 	{
-		pthread_rwlock_rdlock (&_rw_lock);
+		_rw_lock.lock_shared ();
 	}
 	inline bool reader_trylock ()
 	{
-		return 0 == pthread_rwlock_tryrdlock (&_rw_lock);
+		return _rw_lock.try_lock_shared ();
 	}
 	inline void reader_unlock ()
 	{
-		pthread_rwlock_unlock (&_rw_lock);
+		_rw_lock.unlock_shared ();
 	}
 
 	inline void writer_lock ()
 	{
-		pthread_rwlock_wrlock (&_rw_lock);
+		_rw_lock.lock ();
 	}
 	inline bool writer_trylock ()
 	{
-		return 0 == pthread_rwlock_trywrlock (&_rw_lock);
+		return _rw_lock.try_lock ();
 	}
 	inline void writer_unlock ()
 	{
-		pthread_rwlock_unlock (&_rw_lock);
+		_rw_lock.unlock ();
 	}
 
 private:
 	RWLock (const RWLock&)            = delete;
 	RWLock& operator= (const RWLock&) = delete;
 
-	pthread_rwlock_t _rw_lock;
+	std::shared_mutex _rw_lock;
 };
 
 class LIBPBD_API RWLock::ReaderLock

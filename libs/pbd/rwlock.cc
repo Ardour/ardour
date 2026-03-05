@@ -22,12 +22,10 @@ using namespace PBD;
 
 RWLock::RWLock ()
 {
-	pthread_rwlock_init (&_rw_lock, NULL);
 }
 
 RWLock::~RWLock ()
 {
-	pthread_rwlock_destroy (&_rw_lock);
 }
 
 RWLock::ReaderLock::ReaderLock (RWLock& rwlock, RWLock::LockFlags m)
