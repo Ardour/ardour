@@ -370,43 +370,37 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 		rounded_function = Gtkmm2ext::rectangle;
 	}
 
+	int padding_top = 1 * scale;
+	int padding_bottom = 1 * scale;
+	int padding_left = 1 * scale;
+	int padding_right = 1 * scale;
+
 	// draw edge (filling a rect underneath, rather than stroking a border on top, allows the corners to be lighter-weight.
 	if ((_elements & (Body|Edge)) == (Body|Edge)) {
-
-		if (_border_mask != NONE) {
-			cairo_save(cr);
-
-			cairo_rectangle (cr, 1, 1, get_width() - 2, get_height() - 2);
-
-			if (!(_border_mask & HIDE_TOP)) {
-				cairo_rectangle (cr, 0, 0, get_width(), 1);
-			}
-			if (!(_border_mask & HIDE_BOTTOM)) {
-				cairo_rectangle (cr, 0, get_height() - 1, get_width(), 1);
-			}
-			if (!(_border_mask & HIDE_LEFT)) {
-				cairo_rectangle (cr, 0, 0, 1, get_height());
-			}
-			if (!(_border_mask & HIDE_RIGHT)) {
-				cairo_rectangle (cr, get_width() - 1, 0, 1, get_height());
-			}
-
-			cairo_clip(cr);
-			cairo_new_path(cr);
-		}
 
 		rounded_function (cr, 0, 0, get_width(), get_height(), corner_radius + 1.5*scale);
 		Gtkmm2ext::set_source_rgba (cr, outline_color);
 		cairo_fill(cr);
 
-		if (_border_mask != NONE) {
-			cairo_restore(cr);
+		if (_border_mask != HIDE_NONE) {
+			if (_border_mask & HIDE_TOP) {
+				padding_top = 0;
+			}
+			if (_border_mask & HIDE_BOTTOM) {
+				padding_bottom = 0;
+			}
+			if (_border_mask & HIDE_LEFT) {
+				padding_left = 0;
+			}
+			if (_border_mask & HIDE_RIGHT) {
+				padding_right = 0;
+			}
 		}
 	}
 
 	// background fill
 	if ((_elements & Body)==Body) {
-		rounded_function (cr, 1*scale, 1*scale, get_width() - 2*scale, get_height() - 2*scale, corner_radius);
+		rounded_function (cr, padding_left, padding_top, get_width() - (padding_left + padding_right), get_height() - (padding_top + padding_bottom), corner_radius);
 		if (active_state() == Gtkmm2ext::ImplicitActive && !((_elements & Indicator)==Indicator)) {
 			Gtkmm2ext::set_source_rgba (cr, fill_inactive_color);
 			cairo_fill (cr);
@@ -425,7 +419,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	if ((_elements & Body)==Body) {
 		if (active_state() == Gtkmm2ext::ImplicitActive && !((_elements & Indicator)==Indicator)) {
 			cairo_set_line_width (cr, 2.0*scale);
-			rounded_function (cr, 2*scale, 2*scale, get_width() - 4*scale, get_height() - 4*scale, corner_radius-0.5*scale);
+			rounded_function (cr, padding_left*2, padding_top*2, get_width() - (padding_left + padding_right)*2, get_height() - (padding_top + padding_bottom)*2, corner_radius-0.5*scale);
 			Gtkmm2ext::set_source_rgba (cr, fill_active_color);
 			cairo_stroke (cr);
 		}
@@ -437,11 +431,11 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 		if (use_concave && active_state() == Gtkmm2ext::ExplicitActive && (!((_elements & Indicator)==Indicator) || use_custom_led_color)) {
 			// concave
 			cairo_set_source (cr, concave_pattern);
-			Gtkmm2ext::rounded_rectangle (cr, 1, 1, get_width() - 2, get_height() - 2, corner_radius);
+			Gtkmm2ext::rounded_rectangle (cr, padding_left, padding_top, get_width() - (padding_left + padding_right), get_height() - (padding_top + padding_bottom), corner_radius);
 			cairo_fill (cr);
 		} else {
 			cairo_set_source (cr, convex_pattern);
-			Gtkmm2ext::rounded_rectangle (cr, 1, 1, get_width() - 2*scale, get_height() - 2*scale, corner_radius);
+			Gtkmm2ext::rounded_rectangle (cr, padding_left, padding_top, get_width() - (padding_left + padding_right), get_height() - (padding_top + padding_bottom), corner_radius);
 			cairo_fill (cr);
 		}
 	}
@@ -688,7 +682,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 
 	// a transparent overlay to indicate insensitivity
 	if ((visual_state() & Gtkmm2ext::Insensitive)) {
-		rounded_function (cr, 1, 1, get_width() - 2, get_height() - 2*scale, corner_radius);
+		rounded_function (cr, padding_left, padding_top, get_width() - (padding_left + padding_right), get_height() - (padding_top + padding_bottom), corner_radius);
 		Gtkmm2ext::set_source_rgb_a (cr, fill_inactive_color, 0.6);
 		cairo_fill (cr);
 	}
@@ -696,7 +690,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	// if requested, show hovering
 	if (UIConfigurationBase::instance().get_widget_prelight() && !((visual_state() & Gtkmm2ext::Insensitive))) {
 		if (_hovering) {
-			rounded_function (cr, 1, 1, get_width() - 2*scale, get_height() - 2*scale, corner_radius);
+			rounded_function (cr, padding_left, padding_top, get_width() - (padding_left + padding_right), get_height() - (padding_top + padding_bottom), corner_radius);
 			cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.2);
 			cairo_fill (cr);
 		}
@@ -704,7 +698,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 
 	//user is currently pressing the button. dark outline helps to indicate this
 	if (_grabbed && !(_elements & (Inactive|Menu))) {
-		rounded_function (cr, 1, 1, get_width() - 2*scale, get_height() - 2*scale, corner_radius);
+		rounded_function (cr, padding_left, padding_top, get_width() - (padding_left + padding_right), get_height() - (padding_top + padding_bottom), corner_radius);
 		cairo_set_line_width(cr, 2*scale);
 		cairo_set_source_rgba (cr, 0.1, 0.1, 0.1, .5);
 		cairo_stroke (cr);
@@ -714,7 +708,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	if (visual_state() & Gtkmm2ext::Selected) {
 		cairo_set_line_width(cr, 1*scale);
 		cairo_set_source_rgba (cr, 1, 0, 0, 0.8);
-		rounded_function (cr, 0.5, 0.5, get_width() - 1*scale, get_height() - 1*scale, corner_radius);
+		rounded_function (cr, padding_left - 0.5, padding_top - 0.5, get_width() - (padding_left + padding_right) + 1, get_height() - (padding_top + padding_bottom) + 1, corner_radius);
 		cairo_stroke (cr);
 	}
 
@@ -724,7 +718,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	//   (the editor is always the first receiver for KeyDown).
 	//   It's needed for eg. the engine-dialog at startup or after closing a session.
 	if (_focused) {
-		rounded_function (cr, 1.5, 1.5, get_width() - 3*scale, get_height() - 3*scale, corner_radius);
+		rounded_function (cr, padding_left + 0.5, padding_top + 0.5, get_width() - (padding_left + padding_right) - 1, get_height() - (padding_top + padding_bottom) - 1, corner_radius);
 		cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.8);
 		double dashes = 1;
 		cairo_set_dash (cr, &dashes, 1, 0);
