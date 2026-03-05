@@ -175,7 +175,25 @@ public:
 
 	void toggle_monitor_action (ARDOUR::MonitorChoice monitor_choice, bool group_override = false, bool all = false);
 
+	class RedisplaySuspender {
+		public:
+			RedisplaySuspender() {
+				Mixer_UI::instance()->no_track_list_redisplay = true;
+				Mixer_UI::instance()->ignore_track_reorder = true;
+				Mixer_UI::instance()->_in_group_rebuild_or_clear = true;
+			}
+			~RedisplaySuspender () {
+				Mixer_UI::instance()->no_track_list_redisplay = false;
+				Mixer_UI::instance()->ignore_track_reorder = false;
+				Mixer_UI::instance()->redisplay_track_list ();
+				Mixer_UI::instance()->redisplay_track_list ();
+				Mixer_UI::instance()->route_groups_changed ();
+			}
+	};
+
 protected:
+	friend class RedisplaySuspender;
+
 	void set_axis_targets_for_operation ();
 	PBD::ControllableSet selected_gaincontrols ();
 
@@ -500,4 +518,3 @@ private:
 	void toggle_processors ();
 	void ab_plugins ();
 };
-

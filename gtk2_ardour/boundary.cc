@@ -40,8 +40,8 @@ StartBoundaryRect::covers (ArdourCanvas::Duple const & point) const
 	ArdourCanvas::Rect self (item_to_window (_rect));
 	const double scale = UIConfiguration::instance().get_ui_scale();
 
-	if ((point.x >= self.x1 - (20. * scale)) && (point.x < self.x1)) {
-		/* within 20 (scaled) pixels of the boundary, on the right */
+	if ((point.x < self.x0) || (fabs ((point.x - self.x1) < (20. * scale)))) {
+		/* before the start, or within 20 (scaled) pixels of the boundary, on the right */
 		return true;
 	}
 
@@ -88,8 +88,8 @@ EndBoundaryRect::covers (ArdourCanvas::Duple const & point) const
 	ArdourCanvas::Rect self (item_to_window (_rect));
 	const double scale = UIConfiguration::instance().get_ui_scale();
 
-	if ((point.x >= self.x0) && (point.x < self.x0 + (20. * scale))) {
-		/* within 20 (scaled) pixels of the left edge */
+	if ((point.x >= self.x0) || ((self.x0 - point.x) < (20. * scale))) {
+		/* paste the edge, or within 20 (scaled) pixels of the edge */
 		return true;
 	}
 

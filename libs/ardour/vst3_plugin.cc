@@ -275,53 +275,7 @@ VST3Plugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) cons
 PluginOutputConfiguration
 VST3Plugin::possible_output () const
 {
-	auto const& bi (_plug->bus_info_out ());
-	if (bi.size () < 2) {
-		return Plugin::possible_output ();
-	}
-#if 0
-	PluginOutputConfiguration oc;
-	int32_t sum = 0;
-	for (auto const& n : bi) {
-		sum += n.second.n_chn;
-		oc.insert (sum);
-	}
-	return oc;
-#else
-	/* first main out, + individual stereo main outs, +all main outs, + individual aux outs */
-
-	auto    i         = bi.begin ();
-	int32_t sum       = i->second.n_chn;
-	bool    seen_aux  = i->second.type == Vst::kAux;
-	bool    seen_mono = sum == 1;
-
-	PluginOutputConfiguration oc;
-	oc.insert (sum);
-
-	for (++i; i != bi.end (); ++i) {
-		if (seen_aux || seen_mono) {
-			sum += i->second.n_chn;
-			oc.insert (sum);
-		} else if (i->second.type == Vst::kAux) {
-			oc.insert (sum);
-			seen_aux = true;
-			sum += i->second.n_chn;
-			oc.insert (sum);
-		} else {
-			sum += i->second.n_chn;
-			if (i->second.n_chn == 1) {
-				seen_mono = true;
-				oc.insert (sum);
-			} else if (!seen_mono) {
-				oc.insert (sum);
-			}
-		}
-	}
-	if (!seen_aux && seen_mono) {
-		oc.insert (sum);
-	}
-	return oc;
-#endif
+	return _plug->output_config ();
 }
 
 ChanCount
@@ -751,7 +705,7 @@ VST3Plugin::connect_and_run (BufferSet&  bufs,
                              ChanMapping const& in_map, ChanMapping const& out_map,
                              pframes_t n_samples, samplecnt_t offset)
 {
-	Glib::Threads::Mutex::Lock tm (_plug->process_lock (), Glib::Threads::TRY_LOCK);
+	PBD::Mutex::Lock tm (_plug->process_lock (), PBD::Mutex::TryLock);
 	if (!tm.locked ()) {
 		return 0;
 	}
@@ -913,9 +867,8 @@ VST3Plugin::load_preset (PresetRecord r)
 		return false;
 	}
 
-
 	if (tmp[0] == "VST3-P") {
-		Glib::Threads::Mutex::Lock lx (_plug->process_lock ());
+		PBD::Mutex::Lock lx (_plug->process_lock ());
 		PBD::Unwinder<bool> uw (_plug->component_is_synced (), true);
 		int program = PBD::atoi (tmp[2]);
 		assert (!r.user);
@@ -933,7 +886,7 @@ VST3Plugin::load_preset (PresetRecord r)
 		std::string const& fn = _preset_uri_map[r.uri];
 
 		if (Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
-			Glib::Threads::Mutex::Lock lx (_plug->process_lock ());
+			PBD::Mutex::Lock lx (_plug->process_lock ());
 			PBD::Unwinder<bool> uw (_plug->component_is_synced (), true);
 			RAMStream stream (fn);
 			ok = _plug->load_state (stream);
@@ -1074,7 +1027,6 @@ VST3Plugin::find_presets ()
 
 	// TODO check _plug->unit_data()
 	// IUnitData: programDataSupported -> setUnitProgramData (IBStream)
-
 
 	std::shared_ptr<VST3PluginInfo> info = std::dynamic_pointer_cast<VST3PluginInfo> (get_info ());
 	PBD::Searchpath                 psp  = info->preset_search_path ();
@@ -1341,6 +1293,27 @@ VST3PI::VST3PI (std::shared_ptr<ARDOUR::VST3PluginModule> m, std::string unique_
 		query_io_config ();
 	}
 
+	/* cache default bus width, later calls to setBusArrangements will change these */
+	for (int32 i = 0; i < _n_bus_in; ++i) {
+		Vst::BusInfo bus;
+		if (_component->getBusInfo (Vst::kAudio, Vst::kInput, i, bus) == kResultTrue) {
+			_bus_channel_cnt_in[i] = bus.channelCount;
+		} else {
+			_bus_channel_cnt_in[i] = 0;
+		}
+	}
+
+	for (int32 i = 0; i < _n_bus_out; ++i) {
+		Vst::BusInfo bus;
+		if (_component->getBusInfo (Vst::kAudio, Vst::kOutput, i, bus) == kResultTrue) {
+			_bus_channel_cnt_out[i] = bus.channelCount;
+		} else {
+			_bus_channel_cnt_out[i] = 0;
+		}
+	}
+
+	init_output_configuration ();
+
 	if (!connect_components ()) {
 		//_controller->terminate(); // XXX ?
 		_component->terminate ();
@@ -1597,13 +1570,55 @@ VST3PI::query_io_config ()
 
 }
 
+void
+VST3PI::init_output_configuration ()
+{
+	_output_configs.clear ();
+
+	auto const& bi (bus_info_out ());
+	if (bi.size () < 2) {
+		return;
+	}
+	/* first main out, + individual stereo main outs, +all main outs, + individual aux outs */
+
+	auto    i         = bi.begin ();
+	int32_t sum       = i->second.n_chn;
+	bool    seen_aux  = i->second.type == Vst::kAux;
+	bool    seen_mono = sum == 1;
+
+	_output_configs.insert (sum);
+
+	for (++i; i != bi.end (); ++i) {
+		if (seen_aux || seen_mono) {
+			sum += i->second.n_chn;
+			_output_configs.insert (sum);
+		} else if (i->second.type == Vst::kAux) {
+			_output_configs.insert (sum);
+			seen_aux = true;
+			sum += i->second.n_chn;
+			_output_configs.insert (sum);
+		} else {
+			sum += i->second.n_chn;
+			if (i->second.n_chn == 1) {
+				seen_mono = true;
+				_output_configs.insert (sum);
+			} else if (!seen_mono) {
+				_output_configs.insert (sum);
+			}
+		}
+	}
+	if (!seen_aux && seen_mono) {
+		_output_configs.insert (sum);
+	}
+}
+
 tresult
 VST3PI::restartComponent (int32 flags)
 {
 	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::restartComponent %1%2\n", std::hex, flags));
 
 	if (flags & Vst::kReloadComponent) {
-		Glib::Threads::Mutex::Lock pl (_process_lock, Glib::Threads::NOT_LOCK);
+		PBD::Mutex::Lock pl (_process_lock, PBD::Mutex::NotLock);
 		if (!AudioEngine::instance ()->in_process_thread () && !_is_loading_state && !_restart_component_is_synced && !_process_offline) {
 			pl.acquire ();
 		} else {
@@ -1621,7 +1636,7 @@ VST3PI::restartComponent (int32 flags)
 		activate ();
 	}
 	if (flags & Vst::kParamValuesChanged) {
-		Glib::Threads::Mutex::Lock pl (_process_lock, Glib::Threads::NOT_LOCK);
+		PBD::Mutex::Lock pl (_process_lock, PBD::Mutex::NotLock);
 		if (!AudioEngine::instance ()->in_process_thread () && !_is_loading_state && !_restart_component_is_synced && !_process_offline) {
 			pl.acquire ();
 		}
@@ -1636,7 +1651,7 @@ VST3PI::restartComponent (int32 flags)
 		 * the latency changes, and Ardour does not require it either, latency
 		 * changes are automatically picked up.
 		 */
-		Glib::Threads::Mutex::Lock pl (_process_lock, Glib::Threads::NOT_LOCK);
+		PBD::Mutex::Lock pl (_process_lock, PBD::Mutex::NotLock);
 		if (!AudioEngine::instance ()->in_process_thread () && !_is_loading_state && !_restart_component_is_synced && !_process_offline) {
 			/* Some plugins (e.g BlendEQ) call this from the process,
 			 * IPlugProcessor::ProcessBuffers. In that case taking the
@@ -2306,8 +2321,6 @@ VST3PI::set_event_bus_state (bool enable)
 void
 VST3PI::request_bus_layout (uint32_t in, uint32_t aux_in, uint32_t out)
 {
-	// TODO only if changed .. and if plugin doesn't have defaults
-
 	DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::request_bus_layout: in = %1 aux-in = %2 out = %3\n",  in, aux_in, out));
 
 	bool was_active = _is_processing;
@@ -2319,37 +2332,60 @@ VST3PI::request_bus_layout (uint32_t in, uint32_t aux_in, uint32_t out)
 	VSTSpeakerArrangements sa_in;
 	VSTSpeakerArrangements sa_out;
 
+	/* This needs work for busses >= 64 channels.
+	 * also bitset shifting only work until 1 << 18 (speaker layout 11.2.6)
+	 * ~/src/ardour/libs/vst3/pluginterfaces/vst/vstspeaker.h
+	 */
 	Vst::SpeakerArrangement sa = ((uint64_t)1 << in) - 1;
 	if (in == 1 /*Vst::SpeakerArr::kSpeakerL */ && !_no_kMono) {
 		sa = Vst::SpeakerArr::kMono; /* 1 << 19 */
+	} else if (in > 63) {
+		sa = 0xffffffffffffffff;
 	}
 
-	if (_n_bus_in > 0) {
-		sa_in.push_back (sa);
+	while (sa_in.size () < (VSTSpeakerArrangements::size_type) _n_bus_in) {
+		size_t  const bn    = sa_in.size ();
+		int32_t const n_chn = _bus_channel_cnt_in[bn];
+
+		Vst::SpeakerArrangement s = sa;
+		if (n_chn > 0) {
+			s &= ((uint64_t)1 << n_chn) - 1;
+		}
+
+		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::request_bus_layout bus-width = %1 ; in[%2] = %3%4 \n", n_chn, bn, std::hex, s));
+		sa_in.push_back (s);
+
+		if (n_chn > 0) {
+			sa = sa >> n_chn;
+		}
+		if (sa_in.size () == 1) {
+			/* add aux inputs */
+			sa |= ((uint64_t)1 << aux_in) - 1;
+		}
 	}
 
 	sa = ((uint64_t)1 << out) - 1;
 	if (out == 1 /*Vst::SpeakerArr::kSpeakerL */ && !_no_kMono) {
 		sa = Vst::SpeakerArr::kMono; /* 1 << 19 */
-	}
-
-	if (_n_bus_out > 0) {
-		sa_out.push_back (sa);
-	}
-
-	sa = ((uint64_t)1 << aux_in) - 1;
-
-	if (_n_bus_in > 1) {
-		sa_in.push_back (sa);
-	}
-
-	sa = 0;
-	while (sa_in.size () < (VSTSpeakerArrangements::size_type) _n_bus_in) {
-		sa_in.push_back (sa);
+	} else if (out > 63) {
+		sa = 0xffffffffffffffff;
 	}
 
 	while (sa_out.size () < (VSTSpeakerArrangements::size_type) _n_bus_out) {
-		sa_out.push_back (sa);
+		size_t  const bn    = sa_out.size ();
+		int32_t const n_chn = _bus_channel_cnt_out[bn];
+
+		Vst::SpeakerArrangement s = sa;
+
+		if (n_chn > 0) {
+			s &= ((uint64_t)1 << n_chn) - 1;
+		}
+
+		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::request_bus_layout bus-width = %1 ; out[%2] = %3%4 \n", n_chn, bn, std::hex, s));
+		sa_out.push_back (s);
+		if (n_chn > 0) {
+			sa = sa >> n_chn;
+		}
 	}
 
 	Vst::SpeakerArrangement null_arrangement = {};

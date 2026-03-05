@@ -1383,7 +1383,7 @@ MidiModel::write_section_to (std::shared_ptr<MidiSource>     source,
 				mst.remove (mev.note(), mev.channel());
 
 			} else if (mev.is_note_on()) {
-				mst.add (mev.note(), mev.channel());
+				mst.add (mev.note(), mev.channel(), mev.velocity());
 				source->append_event_beats(source_lock, mev);
 			} else {
 				source->append_event_beats(source_lock, mev);
@@ -1706,7 +1706,7 @@ void
 MidiModel::source_interpolation_changed (Evoral::Parameter const& p, AutomationList::InterpolationStyle s)
 {
 	{
-		Glib::Threads::Mutex::Lock lm (_control_lock);
+		PBD::Mutex::Lock lm (_control_lock);
 		control(p)->list()->set_interpolation (s);
 	}
 	/* re-read MIDI */
@@ -1726,7 +1726,7 @@ void
 MidiModel::source_automation_state_changed (Evoral::Parameter const& p, AutoState s)
 {
 	{
-		Glib::Threads::Mutex::Lock lm (_control_lock);
+		PBD::Mutex::Lock lm (_control_lock);
 		std::shared_ptr<AutomationList> al = std::dynamic_pointer_cast<AutomationList> (control(p)->list ());
 		al->set_automation_state (s);
 	}

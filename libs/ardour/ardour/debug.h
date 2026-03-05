@@ -120,6 +120,7 @@ namespace PBD {
 		LIBARDOUR_API extern DebugBits Freesound;
 		LIBARDOUR_API extern DebugBits ClipRecording;
 		LIBARDOUR_API extern DebugBits TempoEstimation;
+		LIBARDOUR_API extern DebugBits TriggerStop;
 
 	}
 }

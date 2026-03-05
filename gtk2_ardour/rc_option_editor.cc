@@ -3123,10 +3123,10 @@ These settings will only take effect after %1 is restarted.\n\
 
 #if !(defined PLATFORM_WINDOWS || defined __APPLE__)
 	bo = new BoolOption (
-			"allow-to-resize-engine-dialog",
-			_("Allow resizing the audio/MIDI setup dialog"),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_allow_to_resize_engine_dialog),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_allow_to_resize_engine_dialog)
+			"allow-to-resize-init-dialog",
+			_("Allow resizing of session and engine dialogs"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_allow_to_resize_init_dialog),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_allow_to_resize_init_dialog)
 			);
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (),
 				_("On some XWayland systems the engine-dialog is blank when shown a second time (from the main menu). Allowing to resize the window works around this oddity."));
@@ -3584,18 +3584,6 @@ These settings will only take effect after %1 is restarted.\n\
 
 	add_option (_("MIDI"), new OptionEditorHeading (_("Session")));
 
-	bo = new BoolOption (
-		"allow-non-quarter-pulse",
-		_("Allow non quarter-note pulse"),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_allow_non_quarter_pulse),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_allow_non_quarter_pulse)
-		);
-	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-					    string_compose (_("<b>When enabled</b> %1 will allow tempo to be expressed in divisions per minute\n"
-							      "<b>When disabled</b> %1 will only allow tempo to be expressed in quarter notes per minute"),
-							    PROGRAM_NAME));
-	add_option (_("MIDI"), bo);
-
 	add_option (_("MIDI"),
 	     new SpinOption<int32_t> (
 		     "initial-program-change",
@@ -3617,10 +3605,28 @@ These settings will only take effect after %1 is restarted.\n\
 
 	add_option (_("MIDI"),
 	     new BoolOption (
-		     "scroll_velocity_editing",
+		     "scroll-velocity-editing",
 		     _("Scroll wheel use when editing MIDI adjusts selected note velocity"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_scroll_velocity_editing),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_scroll_velocity_editing)
+		     ));
+
+	add_option (_("MIDI"), new OptionEditorHeading (_("MIDI Chase")));
+	add_option (_("MIDI"),
+	     new BoolOption (
+		     "midi-chase",
+		     _("When locating, track sustained MIDI notes and play them when rolling"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_chase),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_chase)
+		     ));
+
+	add_option (_("MIDI"), new OptionEditorHeading (_("Output Port Panic")));
+	add_option (_("MIDI"),
+	     new BoolOption (
+		     "midi-panic-when-looping",
+		     _("MIDI output ports should send panic message at end of a timeline (transport) loop"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_panic_when_looping),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_panic_when_looping)
 		     ));
 
 	add_option (_("MIDI"), new OptionEditorHeading (_("Audition")));
@@ -3819,6 +3825,17 @@ These settings will only take effect after %1 is restarted.\n\
 	                     );
 	add_option (_("Transport"), bo);
 
+	ComboOption<MarkerLocatePriority>* mlp = new ComboOption<MarkerLocatePriority> (
+					"marker-locate-priority-choice",
+					_("Marker Locate Priority"),
+					sigc::mem_fun (*_rc_config, &RCConfiguration::get_marker_locate_priority),
+					sigc::mem_fun (*_rc_config, &RCConfiguration::set_marker_locate_priority)
+					);
+	mlp->add (FirstMarker, _("First"));
+	mlp->add (LastMarker, _("Last"));
+	mlp->add (NextMarker, _("Next"));
+	add_option (_("Transport"), mlp);
+	Gtkmm2ext::UI::instance()->set_tip (mlp->tip_widget(), _("Options for locating to program change/snapshot markers"));
 
 	bo = new BoolOption ("stop-on-grid",
 	                     _("Stop transport using the current grid (if any)"),
@@ -4726,6 +4743,18 @@ These settings will only take effect after %1 is restarted.\n\
 	add_option (_("Metronome"), new OptionEditorHeading (_("Options")));
 
 	bo = new BoolOption (
+		"allow-non-quarter-pulse",
+		_("Allow non quarter-note pulse"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_allow_non_quarter_pulse),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_allow_non_quarter_pulse)
+		);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+					    string_compose (_("<b>When enabled</b> %1 will allow tempo to be expressed in divisions per minute\n"
+							      "<b>When disabled</b> %1 will only allow tempo to be expressed in quarter notes per minute"),
+							    PROGRAM_NAME));
+	add_option (_("Metronome"), bo);
+
+	bo = new BoolOption (
 			"click-record-only",
 			_("Enable metronome only while recording"),
 			sigc::mem_fun (*_rc_config, &RCConfiguration::get_click_record_only),
@@ -5165,6 +5194,8 @@ These settings will only take effect after %1 is restarted.\n\
 	                                   "It is intended to be connected to a NxN pad device (such as the Ableton Push 2 or Novation Launchpad)\n"
 	                                   "or a regular MIDI device capable of sending sequential note numbers (like a typical keyboard)"));
 	add_option (_("Triggering"), dtip);
+	add_option (_("Triggering"),
+	            new RcActionButton (_("Clear all custom trigger MIDI bindings"), sigc::ptr_fun (TriggerBox::clear_custom_midi_bindings)));
 
 	add_option (_("Triggering"), new OptionEditorHeading (_("Clip Library")));
 

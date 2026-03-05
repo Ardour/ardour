@@ -134,7 +134,7 @@ STStretch::run (std::shared_ptr<Region> r, Progress* progress)
 	double stretch = region->stretch () * tsr.time_fraction;
 	stretch = std::min(20.0, std::max(0.02, stretch));
 	samplecnt_t read_start = region->ancestral_start () +
-	                         samplecnt_t (region->start () / (double)region->stretch ());
+	                         samplecnt_t (region->start_sample () / (double)region->stretch ());
 
 	samplecnt_t read_duration =
 	    samplecnt_t (region->length () / (double)region->stretch ());

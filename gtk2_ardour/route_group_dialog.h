@@ -26,7 +26,7 @@
 #include <ytkmm/checkbutton.h>
 
 #include "ardour_dialog.h"
-#include "stripable_colorpicker.h"
+#include "ardour_color_dialog.h"
 
 namespace ARDOUR {
 	class RouteGroup;
@@ -44,19 +44,19 @@ private:
 	std::shared_ptr<ARDOUR::RouteGroup> _group;
 	std::string _initial_name;
 
-	Gtk::Entry _name;
-	Gtk::CheckButton _active;
-	Gtk::CheckButton _gain;
-	Gtk::CheckButton _relative;
-	Gtk::CheckButton _mute;
-	Gtk::CheckButton _solo;
-	Gtk::CheckButton _rec_enable;
-	Gtk::CheckButton _sursend_enable;
-	Gtk::CheckButton _select;
-	Gtk::CheckButton _edit;
-	Gtk::CheckButton _route_active;
-	Gtk::CheckButton _share_color;
-	Gtk::CheckButton _share_monitoring;
+	Gtk::Entry        _name;
+	Gtk::CheckButton  _active;
+	Gtk::CheckButton  _gain;
+	Gtk::CheckButton  _relative;
+	Gtk::CheckButton  _mute;
+	Gtk::CheckButton  _solo;
+	Gtk::CheckButton  _rec_enable;
+	Gtk::CheckButton  _sursend_enable;
+	Gtk::CheckButton  _select;
+	Gtk::CheckButton  _edit;
+	Gtk::CheckButton  _route_active;
+	Gtk::CheckButton  _share_color;
+	Gtk::CheckButton  _share_monitoring;
 	ArdourColorButton _color;
 
 	void gain_toggled ();

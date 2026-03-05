@@ -310,7 +310,7 @@ StepEditor::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Tem
 	}
 
 	if (_step_edit_within_chord) {
-		_chord_tracker.add (pitch, channel);
+		_chord_tracker.add (pitch, channel, velocity);
 	}
 
 	if (_step_edit_triplet_countdown > 0) {

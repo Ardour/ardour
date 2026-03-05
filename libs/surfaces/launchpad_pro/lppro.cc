@@ -905,7 +905,7 @@ LaunchPadPro::ports_release ()
 	asp->drain (10000, 500000);
 
 	{
-		Glib::Threads::Mutex::Lock em (AudioEngine::instance()->process_lock());
+		PBD::Mutex::Lock em (AudioEngine::instance()->process_lock());
 		AudioEngine::instance()->unregister_port (_daw_in);
 		AudioEngine::instance()->unregister_port (_daw_out);
 	}
@@ -1061,7 +1061,7 @@ LaunchPadPro::stripable_selection_changed ()
 			 * becomes "slow" (i.e. deferred for as long as it takes
 			 * to resolve notes).
 			 */
-			current_midi_track->input()->disconnect (current_midi_track->input()->nth(0), pad_port->name(), this);
+			current_midi_track->input()->disconnect (current_midi_track->input()->nth(0), pad_port->name());
 		}
 
 		/* now connect the pad port to this (newly) selected midi
@@ -1069,7 +1069,7 @@ LaunchPadPro::stripable_selection_changed ()
 		 */
 
 		if (new_pad_target && pad_port) {
-			new_pad_target->input()->connect (new_pad_target->input()->nth (0), pad_port->name(), this);
+			new_pad_target->input()->connect (new_pad_target->input()->nth (0), pad_port->name());
 			_current_pad_target = new_pad_target;
 		}
 	}

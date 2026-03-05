@@ -25,10 +25,9 @@
 #include <atomic>
 #include <memory>
 #include <string>
-#include <set>
 
-#include <glibmm/threads.h>
-
+#include "pbd/mutex.h"
+#include "pbd/rwlock.h"
 #include "pbd/statefuldestructible.h"
 
 #include "ardour/ardour.h"
@@ -59,8 +58,8 @@ public:
 		Missing = 0x400, /* used for MIDI only */
 	};
 
-	typedef Glib::Threads::RWLock::ReaderLock ReaderLock;
-	typedef Glib::Threads::RWLock::WriterLock WriterLock;
+	typedef PBD::RWLock::ReaderLock ReaderLock;
+	typedef PBD::RWLock::WriterLock WriterLock;
 
 	Source (Session&, DataType type, const std::string& name, Flag flags=Flag(0));
 	Source (Session&, const XMLNode&);
@@ -137,7 +136,7 @@ public:
 
 	void set_allow_remove_if_empty (bool yn);
 
-	Glib::Threads::RWLock& mutex() { return _lock; }
+	PBD::RWLock& mutex() { return _lock; }
 	Flag flags() const { return _flags; }
 
 	virtual void inc_use_count ();
@@ -177,8 +176,8 @@ public:
 	typedef std::vector<SegmentDescriptor> SegmentDescriptors;
 	SegmentDescriptors segment_descriptors;
 
-	mutable Glib::Threads::RWLock _lock;
-	mutable Glib::Threads::Mutex _analysis_lock;
+	mutable PBD::RWLock _lock;
+	mutable PBD::Mutex _analysis_lock;
 
   private:
 	void fix_writable_flags ();

@@ -98,7 +98,6 @@ MidiStretch::run (std::shared_ptr<Region> r, Progress*)
 	/* Note: pass true into force_discrete for the begin() iterator so that the model doesn't
 	 * do interpolation of controller data when we stretch.
 	 */
-	MidiModel::TimeType final_time;
 
 	for (Evoral::Sequence<MidiModel::TimeType>::const_iterator i = old_model->begin (MidiModel::TimeType(), true); i != old_model->end(); ++i) {
 
@@ -108,8 +107,6 @@ MidiStretch::run (std::shared_ptr<Region> r, Progress*)
 		Evoral::Event<MidiModel::TimeType> ev(*i, true);
 		ev.set_time (new_time);
 		new_model->append(ev, Evoral::next_event_id());
-
-		final_time = max (final_time, new_time);
 	}
 
 	new_model->end_write (Evoral::Sequence<Temporal::Beats>::ResolveStuckNotes);
@@ -119,8 +116,8 @@ MidiStretch::run (std::shared_ptr<Region> r, Progress*)
 
 	const int ret = finish (region, nsrcs, new_name);
 
-	/* set length of new region to precisely match source length */
-
+	/* set start (length) of new region to precisely match source start (length) */
+	results[0]->set_start (region->start().scale(_request.time_fraction));
 	results[0]->set_length (region->length().scale (_request.time_fraction));
 
 	return ret;

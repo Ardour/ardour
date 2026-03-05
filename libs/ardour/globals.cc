@@ -53,6 +53,10 @@
 #include <windows.h> // for LARGE_INTEGER
 #endif
 
+#ifdef COMPILER_MSVC
+#include <io.h>
+#endif
+
 #ifdef HAVE_FFTW35F
 #include <fftw3.h>
 #endif
@@ -166,7 +170,7 @@ std::map<std::string, bool> ARDOUR::reserved_io_names;
 
 float ARDOUR::ui_scale_factor = 1.0;
 
-Glib::Threads::Mutex ARDOUR::fft_planner_lock;
+PBD::Mutex ARDOUR::fft_planner_lock;
 
 static bool have_old_configuration_files = false;
 static bool running_from_gui             = false;

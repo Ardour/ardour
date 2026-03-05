@@ -313,7 +313,7 @@ Session::import_pt_rest (PTFFormat& ptf)
 	SourceList all_ch_srcs;
 
 	RouteList routes;
-	list<std::shared_ptr<AudioTrack> > tracks;
+	AudioTrackList tracks;
 	std::shared_ptr<AudioTrack> existing_track;
 	Session::PtfLookup utr;
 	vector<midipair> uniquetr;
@@ -351,7 +351,7 @@ Session::import_pt_rest (PTFFormat& ptf)
 
 	/* Freeze playlists of tracks that already exist in ardour that we will touch */
 	for (vector<PTFFormat::track_t>::const_iterator a = ptf.tracks ().begin (); a != ptf.tracks ().end (); ++a) {
-		if (existing_track = dynamic_pointer_cast<AudioTrack> (route_by_name (a->name))) {
+		if ((existing_track = dynamic_pointer_cast<AudioTrack> (route_by_name (a->name)))) {
 			if (track_map[a->name] != existing_track) {
 				track_map[a->name] = existing_track;
 				std::shared_ptr<Playlist> playlist = existing_track->playlist();

@@ -20,6 +20,7 @@
 
 #include <string>
 
+#include "pbd/rwlock.h"
 #include "ardour/transport_master.h"
 #include "ardour/types.h"
 
@@ -91,10 +92,10 @@ class LIBARDOUR_API TransportMasterManager
   private:
 	TransportMasterManager();
 
-	TransportMasters      _transport_masters;
-	mutable Glib::Threads::RWLock  lock;
-	double                _master_speed;
-	samplepos_t           _master_position;
+	TransportMasters    _transport_masters;
+	mutable PBD::RWLock _lock;
+	double              _master_speed;
+	samplepos_t         _master_position;
 
 	std::shared_ptr<TransportMaster> _current_master;
 	Session* _session;

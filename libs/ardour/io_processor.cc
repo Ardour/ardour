@@ -344,11 +344,11 @@ void
 IOProcessor::disconnect ()
 {
 	if (_input) {
-		_input->disconnect (this);
+		_input->disconnect ();
 	}
 
 	if (_output) {
-		_output->disconnect (this);
+		_output->disconnect ();
 	}
 }
 

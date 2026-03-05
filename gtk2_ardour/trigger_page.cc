@@ -869,8 +869,7 @@ TriggerPage::no_strip_drag_data_received (Glib::RefPtr<Gdk::DragContext> const& 
 			if ((Config->get_output_auto_connect() & AutoConnectMaster) && session()->master_out()) {
 				output_chan =  session()->master_out()->n_inputs().n_audio();
 			}
-			std::list<std::shared_ptr<AudioTrack> > audio_tracks;
-			audio_tracks = session()->new_audio_track (region->sources().size(), output_chan, 0, 1, region->name(), PresentationInfo::max_order, Normal, true, true);
+			AudioTrackList audio_tracks = session()->new_audio_track (region->sources().size(), output_chan, 0, 1, region->name(), PresentationInfo::max_order, Normal, true, true);
 			if (!audio_tracks.empty()) {
 				triggerbox = audio_tracks.front()->triggerbox ();
 			}

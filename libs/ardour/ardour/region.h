@@ -33,6 +33,7 @@
 #include "temporal/tempo.h"
 
 #include "pbd/undo.h"
+#include "pbd/rwlock.h"
 #include "pbd/signals.h"
 #include "ardour/ardour.h"
 #include "ardour/data_type.h"
@@ -79,6 +80,7 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<uint64_t>          reg_group;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              contents; // type doesn't matter here, used for signal only
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              region_fx; // type doesn't matter here, used for signal only
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              region_fx_changed; // type doesn't matter here, used for signal only
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              region_tempo; // type doesn't matter here, used for signal only
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              region_meter; // type doesn't matter here, used for signal only
 };
@@ -116,8 +118,6 @@ public:
 	static void make_property_quarks ();
 
 	static PBD::Signal<void(std::shared_ptr<RegionList>, const PBD::PropertyChange&)> RegionsPropertyChanged;
-
-	PBD::Signal<void()> RegionFxChanged;
 
 	typedef std::map <PBD::PropertyChange, RegionList> ChangeMap;
 
@@ -185,7 +185,7 @@ public:
 	struct RegionGroupRetainer {
 		RegionGroupRetainer ()
 		{
-			Glib::Threads::Mutex::Lock lm (_operation_rgroup_mutex);
+			PBD::Mutex::Lock lm (_operation_rgroup_mutex);
 			if (_retained_group_id == 0) {
 				_retained_take_cnt = 0;
 				++_next_group_id;
@@ -199,7 +199,7 @@ public:
 		~RegionGroupRetainer ()
 		{
 			if (_clear_on_destruction) {
-				Glib::Threads::Mutex::Lock lm (_operation_rgroup_mutex);
+				PBD::Mutex::Lock lm (_operation_rgroup_mutex);
 				_retained_group_id = 0;
 				_next_group_id += _retained_take_cnt;
 				_operation_rgroup_map.clear();
@@ -519,17 +519,17 @@ public:
 	virtual void reorder_plugins (RegionFxList const&);
 
 	bool has_region_fx () const {
-		Glib::Threads::RWLock::ReaderLock lm (_fx_lock);
+		PBD::RWLock::ReaderLock lm (_fx_lock);
 		return !_plugins.empty ();
 	}
 
 	size_t n_region_fx () const {
-		Glib::Threads::RWLock::ReaderLock lm (_fx_lock);
+		PBD::RWLock::ReaderLock lm (_fx_lock);
 		return _plugins.size ();
 	}
 
 	std::shared_ptr<RegionFxPlugin> nth_plugin (uint32_t n) const {
-		Glib::Threads::RWLock::ReaderLock lm (_fx_lock);
+		PBD::RWLock::ReaderLock lm (_fx_lock);
 		for (auto const& i : _plugins) {
 			if (0 == n--) {
 				return i;
@@ -539,7 +539,7 @@ public:
 	}
 
 	void foreach_plugin (std::function<void(std::weak_ptr<RegionFxPlugin>)> method) const {
-		Glib::Threads::RWLock::ReaderLock lm (_fx_lock);
+		PBD::RWLock::ReaderLock lm (_fx_lock);
 		for (auto const& i : _plugins) {
 			method (std::weak_ptr<RegionFxPlugin> (i));
 		}
@@ -599,10 +599,10 @@ protected:
 
 	DataType _type;
 
-	mutable Glib::Threads::RWLock _fx_lock;
-	uint32_t                      _fx_latency;
-	uint32_t                      _fx_tail;
-	RegionFxList                  _plugins;
+	mutable PBD::RWLock _fx_lock;
+	uint32_t            _fx_latency;
+	uint32_t            _fx_tail;
+	RegionFxList        _plugins;
 
 	PBD::Property<bool>      _sync_marked;
 	PBD::Property<bool>      _left_of_split;
@@ -685,11 +685,11 @@ private:
 	static uint64_t _retained_take_cnt;
 	static uint64_t _next_group_id;
 
-	static Glib::Threads::Mutex         _operation_rgroup_mutex;
+	static PBD::Mutex         _operation_rgroup_mutex;
 	static std::map<uint64_t, uint64_t> _operation_rgroup_map;
 
 	std::atomic<int>          _source_deleted;
-	Glib::Threads::Mutex      _source_list_lock;
+	PBD::Mutex      _source_list_lock;
 	PBD::ScopedConnectionList _source_deleted_connections;
 };
 

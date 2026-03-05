@@ -376,7 +376,6 @@ TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float sz,
 				context->fill ();
 				context->stroke ();
 			} else {				/* boxy arrow */
-				context->rel_line_to (0, size);
 				context->move_to (margin, margin);
 				context->rel_line_to (0, size);
 				context->rel_line_to (size * 1 / 3, 0);
@@ -684,8 +683,8 @@ TriggerEntry::play_button_event (GdkEvent* ev)
 								/* Record till done */
 								trigger()->arm ();
 							} else {
-								/* use trigger follow length */
-								trigger()->arm (trigger()->follow_length());
+								/* use trigger capture duration */
+								trigger()->arm ();
 							}
 						}
 						return true;
@@ -720,18 +719,30 @@ TriggerEntry::play_button_event (GdkEvent* ev)
 			break;
 		case GDK_BUTTON_RELEASE:
 			switch (ev->button.button) {
-				case 1:
-					if (_grabbed) {
-						trigger ()->unbang ();
-						play_button->ungrab ();
-						_grabbed = false;
+			case 1:
+				if (_grabbed) {
+					trigger ()->unbang ();
+					play_button->ungrab ();
+					_grabbed = false;
+				}
+				break;
+			case 2:
+				if (Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier)) {
+					/* begin/end MIDI Learn */
+					if (trigger()) {
+						if (trigger()->box().learning()) {
+							trigger()->box().stop_midi_learn ();
+						} else {
+							trigger_midi_learn ();
+						}
 					}
-					break;
-				case 3:
-					launch_context_menu ();
-					return true;
-				default:
-					break;
+				}
+				break;
+			case 3:
+				launch_context_menu ();
+				return true;
+			default:
+				break;
 			}
 			break;
 		case GDK_ENTER_NOTIFY:
@@ -760,7 +771,6 @@ TriggerEntry::follow_button_event (GdkEvent* ev)
 		case GDK_BUTTON_RELEASE:
 			switch (ev->button.button) {
 				case 1:
-				case 3:
 					follow_context_menu (&ev->button);
 				default:
 					break;

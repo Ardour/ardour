@@ -263,7 +263,7 @@ TriggerClipPicker::parameter_changed (std::string const& p)
 }
 
 void
-TriggerClipPicker::clip_added (std::string const&, void* src)
+TriggerClipPicker::clip_added (std::string const& path, void* src)
 {
 	if (!_clip_library_listed) {
 		_clip_library_dir = clip_library_dir ();
@@ -272,6 +272,7 @@ TriggerClipPicker::clip_added (std::string const&, void* src)
 	if (src == this) {
 		list_dir (clip_library_dir ());
 	} else {
+		_current_path = Glib::path_get_dirname (path);
 		list_dir (_current_path);
 	}
 }

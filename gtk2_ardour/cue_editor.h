@@ -209,7 +209,6 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner
 	bool loop_button_press (GdkEventButton*);
 
 	ArdourWidgets::ArdourDropdown length_selector;
-	Temporal::BBT_Offset rec_length;
 
 	bool zoom_in_allocate;
 
@@ -218,6 +217,7 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner
 	bool rec_button_press (GdkEventButton*);
 	virtual void rec_enable_change ();
 	void blink_rec_enable (bool);
+	void setup_record_blink ();
 	sigc::connection rec_blink_connection;
 
 	sigc::connection _update_connection;
@@ -226,6 +226,7 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner
 	PBD::ScopedConnectionList track_connections;
 
 	void trigger_arm_change ();
+	void count_in_change (ARDOUR::Trigger const *);
 
 	double timebar_height;
 	size_t n_timebars;

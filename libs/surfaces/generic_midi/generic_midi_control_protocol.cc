@@ -29,7 +29,9 @@
 
 #ifdef COMPILER_MSVC
 #include <io.h> // Microsoft's nearest equivalent to <unistd.h>
+#ifndef WAF_BUILD
 #include <ardourext/misc.h>
+#endif
 #else
 #include <regex.h>
 #endif
@@ -154,7 +156,7 @@ GenericMidiControlProtocol::~GenericMidiControlProtocol ()
 
 	if (_input_port) {
 		DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("unregistering input port %1\n", std::shared_ptr<ARDOUR::Port>(_input_port)->name()));
-		Glib::Threads::Mutex::Lock em (AudioEngine::instance()->process_lock());
+		PBD::Mutex::Lock em (AudioEngine::instance()->process_lock());
 		AudioEngine::instance()->unregister_port (_input_port);
 		_input_port.reset ();
 	}
@@ -162,7 +164,7 @@ GenericMidiControlProtocol::~GenericMidiControlProtocol ()
 	if (_output_port) {
 		_output_port->drain (10000,  250000); /* check every 10 msecs, wait up to 1/4 second for the port to drain */
 		DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("unregistering output port %1\n", std::shared_ptr<ARDOUR::Port>(_output_port)->name()));
-		Glib::Threads::Mutex::Lock em (AudioEngine::instance()->process_lock());
+		PBD::Mutex::Lock em (AudioEngine::instance()->process_lock());
 		AudioEngine::instance()->unregister_port (_output_port);
 		_output_port.reset ();
 	}
@@ -231,8 +233,8 @@ void
 GenericMidiControlProtocol::drop_all ()
 {
 	DEBUG_TRACE (DEBUG::GenericMidi, "Drop all bindings\n");
-	Glib::Threads::Mutex::Lock lm (pending_lock);
-	Glib::Threads::Mutex::Lock lm2 (controllables_lock);
+	PBD::Mutex::Lock lm (pending_lock);
+	PBD::Mutex::Lock lm2 (controllables_lock);
 
 	for (MIDIControllables::iterator i = controllables.begin(); i != controllables.end(); ++i) {
 		delete *i;
@@ -263,7 +265,7 @@ void
 GenericMidiControlProtocol::drop_bindings ()
 {
 	DEBUG_TRACE (DEBUG::GenericMidi, "Drop bindings, leave learned\n");
-	Glib::Threads::Mutex::Lock lm2 (controllables_lock);
+	PBD::Mutex::Lock lm2 (controllables_lock);
 
 	for (MIDIControllables::iterator i = controllables.begin(); i != controllables.end(); ) {
 		if (!(*i)->learned()) {
@@ -383,7 +385,7 @@ GenericMidiControlProtocol::_send_feedback ()
 	   first on to ALSA.
 	*/
 
-	Glib::Threads::Mutex::Lock lm (controllables_lock, Glib::Threads::TRY_LOCK);
+	PBD::Mutex::Lock lm (controllables_lock, PBD::Mutex::TryLock);
 	if (!lm.locked ()) {
 		return;
 	}
@@ -404,7 +406,7 @@ GenericMidiControlProtocol::start_learning (std::weak_ptr <Controllable> wc)
 		return false;
 	}
 
-	Glib::Threads::Mutex::Lock lm2 (controllables_lock);
+	PBD::Mutex::Lock lm2 (controllables_lock);
 	DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Learn binding: Controlable number: %1\n", c));
 
 	/* drop any existing mappings for the same controllable for which
@@ -427,7 +429,7 @@ GenericMidiControlProtocol::start_learning (std::weak_ptr <Controllable> wc)
 	 */
 
 	{
-		Glib::Threads::Mutex::Lock lm (pending_lock);
+		PBD::Mutex::Lock lm (pending_lock);
 
 		for (MIDIPendingControllables::iterator i = pending_controllables.begin(); i != pending_controllables.end(); ) {
 			if (((*i)->mc)->get_controllable() == c) {
@@ -461,7 +463,7 @@ GenericMidiControlProtocol::start_learning (std::weak_ptr <Controllable> wc)
 	/* stuff the new controllable into pending */
 
 	{
-		Glib::Threads::Mutex::Lock lm (pending_lock);
+		PBD::Mutex::Lock lm (pending_lock);
 
 		MIDIPendingControllable* element = new MIDIPendingControllable (mc, own_mc);
 		c->LearningFinished.connect_same_thread (element->connection, std::bind (&GenericMidiControlProtocol::learning_stopped, this, mc));
@@ -475,8 +477,8 @@ GenericMidiControlProtocol::start_learning (std::weak_ptr <Controllable> wc)
 void
 GenericMidiControlProtocol::learning_stopped (MIDIControllable* mc)
 {
-	Glib::Threads::Mutex::Lock lm (pending_lock);
-	Glib::Threads::Mutex::Lock lm2 (controllables_lock);
+	PBD::Mutex::Lock lm (pending_lock);
+	PBD::Mutex::Lock lm2 (controllables_lock);
 
 	for (MIDIPendingControllables::iterator i = pending_controllables.begin(); i != pending_controllables.end(); ) {
 		if ( (*i)->mc == mc) {
@@ -503,8 +505,8 @@ GenericMidiControlProtocol::stop_learning (std::weak_ptr<PBD::Controllable> wc)
 		return;
 	}
 
-	Glib::Threads::Mutex::Lock lm (pending_lock);
-	Glib::Threads::Mutex::Lock lm2 (controllables_lock);
+	PBD::Mutex::Lock lm (pending_lock);
+	PBD::Mutex::Lock lm2 (controllables_lock);
 	MIDIControllable* dptr = 0;
 
 	/* learning timed out, and we've been told to consider this attempt to learn to be cancelled. find the
@@ -529,7 +531,7 @@ GenericMidiControlProtocol::stop_learning (std::weak_ptr<PBD::Controllable> wc)
 void
 GenericMidiControlProtocol::check_used_event (int pos, int control_number)
 {
-	Glib::Threads::Mutex::Lock lm2 (controllables_lock);
+	PBD::Mutex::Lock lm2 (controllables_lock);
 
 	MIDI::channel_t channel = (pos & 0xf);
 	MIDI::byte value = control_number;
@@ -612,7 +614,7 @@ GenericMidiControlProtocol::get_state () const
 
 	node.add_child_nocopy (*children);
 
-	Glib::Threads::Mutex::Lock lm2 (controllables_lock);
+	PBD::Mutex::Lock lm2 (controllables_lock);
 	for (auto const & c : controllables) {
 
 		/* we don't care about bindings that come from a bindings map, because
@@ -662,7 +664,7 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 	std::shared_ptr<Controllable> c;
 
 	{
-		Glib::Threads::Mutex::Lock lm (pending_lock);
+		PBD::Mutex::Lock lm (pending_lock);
 		for (MIDIPendingControllables::iterator i = pending_controllables.begin(); i != pending_controllables.end(); ++i) {
 			(*i)->connection.disconnect();
 			if ((*i)->own_mc) {
@@ -701,7 +703,7 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 	node.get_property ("session-state", load_dynamic_bindings);
 
 	if (load_dynamic_bindings) {
-		Glib::Threads::Mutex::Lock lm2 (controllables_lock);
+		PBD::Mutex::Lock lm2 (controllables_lock);
 		XMLNode* controls_node = node.child (X_("Controls"));
 
 		if (controls_node) {
@@ -812,7 +814,7 @@ GenericMidiControlProtocol::load_bindings (const string& xmlpath)
 			if (child->property ("uri")) {
 				/* controllable */
 
-				Glib::Threads::Mutex::Lock lm2 (controllables_lock);
+				PBD::Mutex::Lock lm2 (controllables_lock);
 				if ((mc = create_binding (*child)) != 0) {
 					controllables.push_back (mc);
 				}
@@ -956,7 +958,7 @@ GenericMidiControlProtocol::create_binding (const XMLNode& node)
 void
 GenericMidiControlProtocol::reset_controllables ()
 {
-	Glib::Threads::Mutex::Lock lm2 (controllables_lock);
+	PBD::Mutex::Lock lm2 (controllables_lock);
 
 	for (MIDIControllables::iterator iter = controllables.begin(); iter != controllables.end(); ) {
 		MIDIControllable* existingBinding = (*iter);

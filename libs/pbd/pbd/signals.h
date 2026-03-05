@@ -32,14 +32,13 @@
 
 #include <atomic>
 
-#include <glibmm/threads.h>
-
 #include <boost/bind/protect.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <optional>
 
 #include "pbd/libpbd_visibility.h"
 #include "pbd/event_loop.h"
+#include "pbd/mutex.h"
 #include "pbd/stack_allocator.h"
 
 #ifndef NDEBUG
@@ -89,7 +88,7 @@ public:
 #endif
 
 protected:
-	mutable Glib::Threads::Mutex _mutex;
+	mutable PBD::Mutex _mutex;
 	std::atomic<bool>            _in_dtor;
 #ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
 	bool _debug_connection;
@@ -160,12 +159,12 @@ public:
 	operator() (A... a);
 
 	bool empty () const {
-		Glib::Threads::Mutex::Lock lm (_mutex);
+		PBD::Mutex::Lock lm (_mutex);
 		return _slots.empty ();
 	}
 
 	size_t size () const {
-		Glib::Threads::Mutex::Lock lm (_mutex);
+		PBD::Mutex::Lock lm (_mutex);
 		return _slots.size ();
 	}
 
@@ -201,7 +200,7 @@ public:
 
 	void disconnect ()
 	{
-		Glib::Threads::Mutex::Lock lm (_mutex);
+		PBD::Mutex::Lock lm (_mutex);
 		SignalBase* signal = _signal.exchange (0, std::memory_order_acq_rel);
 		if (signal) {
 			/* It is safe to assume that signal has not been destructed.
@@ -233,7 +232,7 @@ public:
 			 * be an effective NO-OP since SignalBase::_in_dtor is true,
 			 * then we can proceed.
 			 */
-			Glib::Threads::Mutex::Lock lm (_mutex);
+			PBD::Mutex::Lock lm (_mutex);
 		}
 		if (_invalidation_record) {
 			_invalidation_record->unref ();
@@ -241,7 +240,7 @@ public:
 	}
 
 private:
-	Glib::Threads::Mutex     _mutex;
+	PBD::Mutex     _mutex;
 	std::atomic<SignalBase*> _signal;
 	PBD::EventLoop::InvalidationRecord* _invalidation_record;
 };
@@ -292,7 +291,7 @@ class LIBPBD_API ScopedConnectionList
 	void add_connection (const UnscopedConnection& c);
 	void drop_connections ();
 
-	std::list<ScopedConnectionList*>::size_type size() const { Glib::Threads::Mutex::Lock lm (_scoped_connection_lock); return _scoped_connection_list.size(); }
+	std::list<ScopedConnectionList*>::size_type size() const { PBD::Mutex::Lock lm (_scoped_connection_lock); return _scoped_connection_list.size(); }
 
   private:
 	/* Even though our signals code is thread-safe, this additional list of
@@ -306,7 +305,7 @@ class LIBPBD_API ScopedConnectionList
 	       one from another.
 	 */
 
-	mutable Glib::Threads::Mutex _scoped_connection_lock;
+	mutable PBD::Mutex _scoped_connection_lock;
 
 	typedef std::list<ScopedConnection*> ConnectionList;
 	ConnectionList _scoped_connection_list;
@@ -325,7 +324,7 @@ template <typename Combiner, typename R, typename... A>
 SignalWithCombiner<Combiner, R(A...)>::~SignalWithCombiner ()
 {
 	_in_dtor.store (true, std::memory_order_release);
-	Glib::Threads::Mutex::Lock lm (_mutex);
+	PBD::Mutex::Lock lm (_mutex);
 	/* Tell our connection objects that we are going away, so they don't try to call us */
 	for (typename Slots::const_iterator i = _slots.begin(); i != _slots.end(); ++i) {
 		i->first->signal_going_away ();
@@ -461,7 +460,7 @@ SignalWithCombiner<Combiner, R(A...)>::operator() (A... a)
 	 */
 
 	{
-		Glib::Threads::Mutex::Lock lm (_mutex);
+		PBD::Mutex::Lock lm (_mutex);
 		/* copy only the raw pointer, no need for a shared_ptr in this
 		 * context, we only use the address as a lookup into the _slots
 		 * container. Note: because of the use of a stack allocator,
@@ -491,7 +490,7 @@ SignalWithCombiner<Combiner, R(A...)>::operator() (A... a)
 			bool still_there = false;
 
 			{
-				Glib::Threads::Mutex::Lock lm (_mutex);
+				PBD::Mutex::Lock lm (_mutex);
 				typename Slots::const_iterator f = std::find_if (_slots.begin(), _slots.end(), [&](typename Slots::value_type const & elem) { return elem.first.get() == c; });
 				if (f != _slots.end()) {
 					functor = f->second;
@@ -562,7 +561,7 @@ SignalWithCombiner<Combiner, R(A...)>::operator() (A... a)
 			bool still_there = false;
 
 			{
-				Glib::Threads::Mutex::Lock lm (_mutex);
+				PBD::Mutex::Lock lm (_mutex);
 				typename Slots::const_iterator f = std::find_if (_slots.begin(), _slots.end(), [&](typename Slots::value_type const & elem) { return elem.first.get() == c; });
 
 				if (f != _slots.end()) {
@@ -597,7 +596,7 @@ SignalWithCombiner<Combiner, R(A...)>::_connect (PBD::EventLoop::InvalidationRec
                                                  slot_function_type f)
 {
 	std::shared_ptr<Connection> c (new Connection (this, ir));
-	Glib::Threads::Mutex::Lock lm (_mutex);
+	PBD::Mutex::Lock lm (_mutex);
 	_slots[c] = f;
 
 #ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
@@ -617,7 +616,7 @@ void
 SignalWithCombiner<Combiner, R(A...)>::disconnect (std::shared_ptr<Connection> c)
 {
 	/* ~ScopedConnection can call this concurrently with our d'tor */
-	Glib::Threads::Mutex::Lock lm (_mutex, Glib::Threads::TRY_LOCK);
+	PBD::Mutex::Lock lm (_mutex, PBD::Mutex::TryLock);
 	while (!lm.locked()) {
 		if (_in_dtor.load (std::memory_order_acquire)) {
 			/* d'tor signal_going_away() took care of everything already */

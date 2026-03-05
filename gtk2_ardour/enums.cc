@@ -208,6 +208,7 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM(MouseContent);
 	REGISTER (mouse_mode);
 
+	REGISTER_CLASS_ENUM (StartupFSM, NotWaiting);
 	REGISTER_CLASS_ENUM (StartupFSM, WaitingForPreRelease);
 	REGISTER_CLASS_ENUM (StartupFSM, WaitingForNewUser);
 	REGISTER_CLASS_ENUM (StartupFSM, WaitingForSessionPath);
@@ -220,6 +221,7 @@ setup_gtk_ardour_enums ()
 	REGISTER_CLASS_ENUM (StartupFSM, NewSessionDialog);
 	REGISTER_CLASS_ENUM (StartupFSM, AudioMIDISetup);
 	REGISTER_CLASS_ENUM (StartupFSM, PluginDialog);
+	REGISTER_CLASS_ENUM (StartupFSM, ApplicationPseudoDialog);
 	REGISTER (startup_dialog);
 
 	REGISTER_ENUM (RESPONSE_NONE);

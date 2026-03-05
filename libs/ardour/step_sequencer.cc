@@ -631,7 +631,7 @@ StepSequencer::reschedule (samplepos_t start_sample)
 bool
 StepSequencer::run (MidiBuffer& buf, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t, bool)
 {
-	Glib::Threads::Mutex::Lock lm (_sequence_lock);
+	PBD::Mutex::Lock lm (_sequence_lock);
 
 	bool resolve = false;
 	bool need_reschedule = check_requests ();
@@ -703,7 +703,7 @@ void
 StepSequencer::reset ()
 {
 	{
-		Glib::Threads::Mutex::Lock lm1 (_sequence_lock);
+		PBD::Mutex::Lock lm1 (_sequence_lock);
 		for (StepSequences::iterator s = _sequences.begin(); s != _sequences.end(); ++s) {
 			(*s)->reset ();
 		}

@@ -1752,8 +1752,8 @@ RegionMoveDrag::create_destination_time_axis (std::shared_ptr<Region> region, Ti
 	TimeAxisView* tav = 0;
 	try {
 		if (std::dynamic_pointer_cast<AudioRegion> (region)) {
-			list<std::shared_ptr<AudioTrack>> audio_tracks;
-			uint32_t                          output_chan = region->sources ().size ();
+			AudioTrackList  audio_tracks;
+			uint32_t        output_chan = region->sources ().size ();
 			if ((Config->get_output_auto_connect () & AutoConnectMaster) && editing_context.session ()->master_out ()) {
 				output_chan = editing_context.session ()->master_out ()->n_inputs ().n_audio ();
 			}
@@ -3433,7 +3433,6 @@ void
 BBTMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (!movement_occurred) {
-		Temporal::MusicTimePoint& point (const_cast<Temporal::MusicTimePoint&>(_marker->mt_point ()));
 		/* reset thread local tempo map to the original state */
 		_editor.abort_tempo_map_edit ();
 
@@ -4591,7 +4590,22 @@ MarkerDrag::motion (GdkEvent* event, bool)
 			}
 
 		} else {
+
+			if (move_both || (*x).move_both) {
+				if (copy_location->start().is_zero()) {
+					if (f_delta.is_negative()) {
+						continue;
+					}
+				}
+			}
+
 			timepos_t new_start = copy_location->start () + f_delta;
+
+			if (!new_start.is_positive()) {
+				f_delta = f_delta + new_start;
+				new_start = timepos_t::zero (new_start.time_domain());
+			}
+
 			timepos_t new_end   = copy_location->end () + f_delta;
 
 			if (is_start) { // start-of-range marker
@@ -5016,8 +5030,7 @@ LineDrag::motion (GdkEvent* event, bool first_move)
 	}
 
 	double cy = _fixed_grab_y + _cumulative_y_drag + dy;
-
-	_cumulative_y_drag = cy - _fixed_grab_y;
+	_cumulative_y_drag += dy;
 
 	cy = max (0.0, cy);
 	cy = min ((double)_line->height (), cy);
@@ -5052,7 +5065,7 @@ LineDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	} else {
 
-		click_functor (event, grab_time(), _fixed_grab_y);
+		click_functor (event, grab_time(), event->button.x);
 	}
 }
 
@@ -7608,8 +7621,10 @@ FreehandLineDrag<OrderedPointList,OrderedPoint>::mid_drag_key_event (GdkEventKey
 
 /**********************/
 
-AutomationDrawDrag::AutomationDrawDrag (EditingContext& ec, ArdourCanvas::Item* p, ArdourCanvas::Rectangle& r, bool hbounded, Temporal::TimeDomain time_domain)
+AutomationDrawDrag::AutomationDrawDrag (EditingContext& ec, ArdourCanvas::Item* p, ArdourCanvas::Rectangle& r, bool hbounded, Temporal::TimeDomain time_domain,
+                                        std::function<bool(GdkEvent*,timepos_t const &)> cf)
 	: FreehandLineDrag<Evoral::ControlList::OrderedPoints,Evoral::ControlList::OrderedPoint> (ec, p, r, hbounded, time_domain)
+	, click_functor (cf)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New AutomationDrawDrag\n");
 }
@@ -7622,9 +7637,7 @@ void
 AutomationDrawDrag::finished (GdkEvent* event, bool motion_occured)
 {
 	if (!motion_occured) {
-		/* DragManager will tell editor that no motion happened, and
-		   Editor::button_release_handler() will do the right thing.
-		*/
+		(void) click_functor (event, grab_time());
 		return;
 	}
 

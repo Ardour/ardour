@@ -123,7 +123,7 @@ private:
 
 	void panshell_changed ();
 	void pannable_changed ();
-	void snd_output_changed (IOChange, void*);
+	void snd_output_changed (IOChange);
 
 	int set_state_2X (XMLNode const &, int);
 

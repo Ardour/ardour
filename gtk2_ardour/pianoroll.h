@@ -146,6 +146,7 @@ class Pianoroll : public CueEditor
 	Temporal::timepos_t source_to_timeline (Temporal::timepos_t const & source_pos) const;
 
 	void set_layered_automation (bool);
+	void set_note_highlight (uint8_t note);
 
   protected:
 	Temporal::timepos_t snap_to_grid (Temporal::timepos_t const & start,

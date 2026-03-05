@@ -222,7 +222,6 @@ Editor::Editor ()
 	, editor_mixer_strip_width (Wide)
 	, constructed (false)
 	, _properties_box (nullptr)
-	, _pianoroll (nullptr)
 	, no_save_visual (false)
 	, marker_click_behavior (MarkerClickSelectOnly)
 	, _join_object_range_state (JOIN_OBJECT_RANGE_NONE)
@@ -613,8 +612,10 @@ Editor::Editor ()
 	tabbox->pack_start (_notebook_tab1);
 	tabbox->pack_start (_notebook_tab2);
 
-	_editor_list_vbox.pack_start (*tabbox, false, false, 2);
-	_editor_list_vbox.pack_start (_the_notebook);
+	_editor_list_vbox.set_spacing (3);
+	_editor_list_vbox.pack_start (*manage (new ArdourVSpacer (0)), false, false, 2); // align top with editor shadow
+	_editor_list_vbox.pack_start (*tabbox, false, false);
+	_editor_list_vbox.pack_start (_the_notebook, true, true, 3);
 
 	content_right_pane.set_drag_cursor (*_cursors->expand_left_right);
 	editor_summary_pane.set_drag_cursor (*_cursors->expand_up_down);
@@ -756,7 +757,6 @@ Editor::~Editor()
 	delete _snapshots;
 	delete _sections;
 	delete _locations;
-	delete _pianoroll;
 	delete _properties_box;
 	delete selection;
 	delete cut_buffer;
@@ -1233,11 +1233,6 @@ Editor::set_session (Session *t)
 	_locations->set_session (_session);
 	_properties_box->set_session (_session);
 
-	if (_pianoroll) {
-		_pianoroll->set_session (_session);
-	}
-
-	/* _pianoroll is packed on demand in Editor::region_selection_changed */
 	_bottom_hbox.show_all();
 
 	if (rhythm_ferret) {
@@ -2445,72 +2440,60 @@ Editor::snap_to_timecode (timepos_t const & presnap, Temporal::RoundMode directi
 	samplepos_t start_sample = presnap.samples();
 	const samplepos_t one_timecode_second = (samplepos_t)(rint(_session->timecode_frames_per_second()) * _session->samples_per_timecode_frame());
 	samplepos_t one_timecode_minute = (samplepos_t)(rint(_session->timecode_frames_per_second()) * _session->samples_per_timecode_frame() * 60);
+	samplepos_t subdivision;
 
 	TimecodeRulerScale scale = (gpref != SnapToGrid_Unscaled) ? timecode_ruler_scale : timecode_show_samples;
 
 	switch (scale) {
-	case timecode_show_bits:
-	case timecode_show_samples:
-		if ((direction == Temporal::RoundUpMaybe || direction == Temporal::RoundDownMaybe) &&
-		    fmod((double)start_sample, (double)_session->samples_per_timecode_frame()) == 0) {
-			/* start is already on a whole timecode frame, do nothing */
-		} else if (((direction == 0) && (fmod((double)start_sample, (double)_session->samples_per_timecode_frame()) > (_session->samples_per_timecode_frame() / 2))) || (direction > 0)) {
-			start_sample = (samplepos_t) (ceil ((double) start_sample / _session->samples_per_timecode_frame()) * _session->samples_per_timecode_frame());
-		} else {
-			start_sample = (samplepos_t) (floor ((double) start_sample / _session->samples_per_timecode_frame()) *  _session->samples_per_timecode_frame());
-		}
-		start = timepos_t (start_sample);
-		break;
-
-	case timecode_show_seconds:
-		if (_session->config.get_timecode_offset_negative()) {
-			start_sample += _session->config.get_timecode_offset ();
-		} else {
-			start_sample -= _session->config.get_timecode_offset ();
-		}
-		if ((direction == Temporal::RoundUpMaybe || direction == Temporal::RoundDownMaybe) &&
-		    (start_sample % one_timecode_second == 0)) {
-			/* start is already on a whole second, do nothing */
-		} else if (((direction == 0) && (start_sample % one_timecode_second > one_timecode_second / 2)) || direction > 0) {
-			start_sample = (samplepos_t) ceil ((double) start_sample / one_timecode_second) * one_timecode_second;
-		} else {
-			start_sample = (samplepos_t) floor ((double) start_sample / one_timecode_second) * one_timecode_second;
-		}
-
-		if (_session->config.get_timecode_offset_negative()) {
-			start_sample -= _session->config.get_timecode_offset ();
-		} else {
-			start_sample += _session->config.get_timecode_offset ();
-		}
-		start = timepos_t (start_sample);
-		break;
-
-	case timecode_show_minutes:
-	case timecode_show_hours:
-	case timecode_show_many_hours:
-		if (_session->config.get_timecode_offset_negative()) {
-			start_sample += _session->config.get_timecode_offset ();
-		} else {
-			start_sample -= _session->config.get_timecode_offset ();
-		}
-		if ((direction == Temporal::RoundUpMaybe || direction == Temporal::RoundDownMaybe) &&
-		    (start_sample % one_timecode_minute == 0)) {
-			/* start is already on a whole minute, do nothing */
-		} else if (((direction == 0) && (start_sample % one_timecode_minute > one_timecode_minute / 2)) || direction > 0) {
-			start_sample = (samplepos_t) ceil ((double) start_sample / one_timecode_minute) * one_timecode_minute;
-		} else {
-			start_sample = (samplepos_t) floor ((double) start_sample / one_timecode_minute) * one_timecode_minute;
-		}
-		if (_session->config.get_timecode_offset_negative()) {
-			start_sample -= _session->config.get_timecode_offset ();
-		} else {
-			start_sample += _session->config.get_timecode_offset ();
-		}
-		start = timepos_t (start_sample);
-		break;
-	default:
-		fatal << "Editor::smpte_snap_to_internal() called with non-timecode snap type!" << endmsg;
+		case timecode_show_bits:
+		case timecode_show_samples:
+			subdivision = _session->samples_per_timecode_frame();
+			break;
+		case timecode_show_seconds:
+			subdivision = one_timecode_second;
+			break;
+		case timecode_show_minutes:
+		case timecode_show_hours:
+		case timecode_show_many_hours:
+			subdivision = one_timecode_minute;
+			break;
+		default:
+			fatal << "Editor::smpte_snap_to_internal() called with non-timecode snap type!" << endmsg;
 	}
+
+	if (subdivision != _session->samples_per_timecode_frame()) {
+		if (_session->config.get_timecode_offset_negative()) {
+			start_sample += _session->config.get_timecode_offset ();
+		} else {
+			start_sample -= _session->config.get_timecode_offset ();
+		}
+	}
+
+	if ((direction == Temporal::RoundUpMaybe || direction == Temporal::RoundDownMaybe) &&
+		(start_sample % subdivision == 0)) {
+		/* start is already on a whole second, do nothing */
+	} else if ((direction == Temporal::RoundUpAlways || direction == Temporal::RoundDownAlways) &&
+		(start_sample % subdivision == 0)) {
+		if (direction > 0) {
+			start_sample = start_sample + subdivision;
+		} else if (direction < 0) {
+			start_sample = start_sample - subdivision;
+		}
+	} else if (((direction == 0) && (start_sample % subdivision > subdivision / 2)) || direction > 0) {
+		start_sample = (samplepos_t) ceil ((double) start_sample / subdivision) * subdivision;
+	} else {
+		start_sample = (samplepos_t) floor ((double) start_sample / subdivision) * subdivision;
+	}
+
+	if (subdivision != _session->samples_per_timecode_frame()) {
+		if (_session->config.get_timecode_offset_negative()) {
+			start_sample += _session->config.get_timecode_offset ();
+		} else {
+			start_sample -= _session->config.get_timecode_offset ();
+		}
+	}
+
+	start = timepos_t (start_sample);
 
 	return start;
 }
@@ -2523,43 +2506,45 @@ Editor::snap_to_minsec (timepos_t const & presnap, Temporal::RoundMode direction
 	const samplepos_t one_second = _session->sample_rate();
 	const samplepos_t one_minute = one_second * 60;
 	const samplepos_t one_hour = one_minute * 60;
+	samplepos_t subdivision;
 
 	MinsecRulerScale scale = (gpref != SnapToGrid_Unscaled) ? minsec_ruler_scale : minsec_show_seconds;
 
 	switch (scale) {
 		case minsec_show_msecs:
-		case minsec_show_seconds: {
-			if ((direction == Temporal::RoundUpMaybe || direction == Temporal::RoundDownMaybe) &&
-				presnap_sample % one_second == 0) {
-				/* start is already on a whole second, do nothing */
-			} else if (((direction == 0) && (presnap_sample % one_second > one_second / 2)) || (direction > 0)) {
-				presnap_sample = (samplepos_t) ceil ((double) presnap_sample / one_second) * one_second;
-			} else {
-				presnap_sample = (samplepos_t) floor ((double) presnap_sample / one_second) * one_second;
-			}
-		} break;
+			subdivision = one_second / 1000;
+			break;
+		case minsec_show_csecs:
+			subdivision = one_second / 100;
+			break;
+		case minsec_show_dsecs:
+			subdivision = one_second / 10;
+			break;
+		case minsec_show_seconds:
+			subdivision = one_second;
+			break;
+		case minsec_show_minutes:
+			subdivision = one_minute;
+			break;
+		default:
+			subdivision = one_hour;
+			break;
+	}
 
-		case minsec_show_minutes: {
-			if ((direction == Temporal::RoundUpMaybe || direction == Temporal::RoundDownMaybe) &&
-				presnap_sample % one_minute == 0) {
-				/* start is already on a whole minute, do nothing */
-			} else if (((direction == 0) && (presnap_sample % one_minute > one_minute / 2)) || (direction > 0)) {
-				presnap_sample = (samplepos_t) ceil ((double) presnap_sample / one_minute) * one_minute;
-			} else {
-				presnap_sample = (samplepos_t) floor ((double) presnap_sample / one_minute) * one_minute;
-			}
-		} break;
-
-		default: {
-			if ((direction == Temporal::RoundUpMaybe || direction == Temporal::RoundDownMaybe) &&
-				presnap_sample % one_hour == 0) {
-				/* start is already on a whole hour, do nothing */
-			} else if (((direction == 0) && (presnap_sample % one_hour > one_hour / 2)) || (direction > 0)) {
-				presnap_sample = (samplepos_t) ceil ((double) presnap_sample / one_hour) * one_hour;
-			} else {
-				presnap_sample = (samplepos_t) floor ((double) presnap_sample / one_hour) * one_hour;
-			}
-		} break;
+	if ((direction == Temporal::RoundUpMaybe || direction == Temporal::RoundDownMaybe) &&
+		presnap_sample % subdivision == 0) {
+		/* start is already on a whole subdivision, do nothing */
+	} else if ((direction == Temporal::RoundUpAlways || direction == Temporal::RoundDownAlways) &&
+		(presnap_sample % subdivision == 0)) {
+		if (direction > 0) {
+			presnap_sample = presnap_sample + subdivision;
+		} else if (direction < 0) {
+			presnap_sample = presnap_sample - subdivision;
+		}
+	} else if (((direction == 0) && (presnap_sample % subdivision > subdivision / 2)) || (direction > 0)) {
+		presnap_sample = (samplepos_t) ceil ((double) presnap_sample / subdivision) * subdivision;
+	} else {
+		presnap_sample = (samplepos_t) floor ((double) presnap_sample / subdivision) * subdivision;
 	}
 
 	return timepos_t (presnap_sample);
@@ -2568,21 +2553,31 @@ Editor::snap_to_minsec (timepos_t const & presnap, Temporal::RoundMode direction
 timepos_t
 Editor::snap_to_cd_frames (timepos_t const & presnap, Temporal::RoundMode direction, SnapPref gpref) const
 {
-	if ((gpref != SnapToGrid_Unscaled) && (minsec_ruler_scale != minsec_show_msecs)) {
+	if ((gpref != SnapToGrid_Unscaled) && !(minsec_ruler_scale == minsec_show_msecs ||
+	                                        minsec_ruler_scale == minsec_show_csecs ||
+	                                        minsec_ruler_scale == minsec_show_dsecs)) {
 		return snap_to_minsec (presnap, direction, gpref);
 	}
 
 	const samplepos_t one_second = _session->sample_rate();
+	const samplepos_t cd_frame = one_second/75;
 
 	samplepos_t presnap_sample = presnap.samples();
 
 	if ((direction == Temporal::RoundUpMaybe || direction == Temporal::RoundDownMaybe) &&
-		presnap_sample % (one_second/75) == 0) {
+		presnap_sample % (cd_frame) == 0) {
 		/* start is already on a whole CD sample, do nothing */
-	} else if (((direction == 0) && (presnap_sample % (one_second/75) > (one_second/75) / 2)) || (direction > 0)) {
-		presnap_sample = (samplepos_t) ceil ((double) presnap_sample / (one_second / 75)) * (one_second / 75);
+	} else if ((direction == Temporal::RoundUpAlways || direction == Temporal::RoundDownAlways) &&
+		(presnap_sample % (cd_frame) == 0)) {
+		if (direction > 0) {
+			presnap_sample = presnap_sample + (cd_frame);
+		} else if (direction < 0) {
+			presnap_sample = presnap_sample - (cd_frame);
+		}
+	} else if (((direction == 0) && (presnap_sample % (cd_frame) > (cd_frame) / 2)) || (direction > 0)) {
+		presnap_sample = (samplepos_t) ceil ((double) presnap_sample / (cd_frame)) * (cd_frame);
 	} else {
-		presnap_sample = (samplepos_t) floor ((double) presnap_sample / (one_second / 75)) * (one_second / 75);
+		presnap_sample = (samplepos_t) floor ((double) presnap_sample / (cd_frame)) * (cd_frame);
 	}
 
 	return timepos_t (presnap_sample);
@@ -2683,6 +2678,8 @@ Editor::setup_toolbar ()
 		mouse_mode_size_group->add_widget (tav_expand_button);
 		mouse_mode_size_group->add_widget (follow_playhead_button);
 		mouse_mode_size_group->add_widget (follow_edits_button);
+		mouse_mode_size_group->add_widget (_notebook_tab1);
+		mouse_mode_size_group->add_widget (_notebook_tab2);
 	} else {
 		mouse_mode_size_group->add_widget (zoom_preset_selector);
 		mouse_mode_size_group->add_widget (visible_tracks_selector);

@@ -23,7 +23,6 @@
 #include <list>
 #include <map>
 #include <set>
-#include <glibmm/threads.h>
 
 #define ABSTRACT_UI_EXPORTS
 #include "pbd/abstract_ui.h"
@@ -41,7 +40,7 @@ namespace PBD {
 #include "midi_surface/midi_byte_array.h"
 #include "midi_surface/midi_surface.h"
 
-#include "glibmm/main.h"
+#include <glibmm/main.h>
 
 namespace MIDI {
 	class Parser;

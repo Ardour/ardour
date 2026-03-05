@@ -37,7 +37,6 @@
 #include <cstring>
 #include <cerrno>
 #include <iostream>
-#include <sys/time.h>
 #include <errno.h>
 #include <fcntl.h>
 
@@ -777,7 +776,12 @@ ARDOUR::compute_sha1_of_file (std::string path)
 	Sha1Digest s;
 	sha1_init (&s);
 
-	while ((n_read = ::read(fd, buf, sizeof(buf))) > 0) {
+#ifdef COMPILER_MSVC
+	while ((n_read = ::_read(fd, buf, sizeof(buf))) > 0)
+#else
+	while ((n_read = ::read(fd, buf, sizeof(buf))) > 0)
+#endif
+	{
 		sha1_write (&s, (const uint8_t*) buf, n_read);
 	}
 
@@ -913,3 +917,32 @@ ARDOUR::estimate_audio_tempo_source (TimelineRange const & range, std::shared_pt
 	return true;
 }
 
+std::string
+ARDOUR::maybe_clean_pipewire_midi_port_name (std::string pn)
+{
+	string::size_type pos = pn.find (X_("Midi-Bridge:"));
+
+	if (pos == string::npos) {
+		return pn;
+	}
+
+	/* Remove "Midi-Bridge:" prefix */
+
+	pn = pn.erase (pos, 12);
+
+	/* Remove capture/playback suffix, which we don't need because we show
+	 * the right ports in the right context
+	 */
+
+	pos = pn.find (X_(" (capture)"));
+	if (pos != string::npos) {
+		pn.erase (pos);
+	} else {
+		pos = pn.find (X_(" (playback)"));
+		if (pos != string::npos) {
+			pn.erase (pos);
+		}
+	}
+
+	return pn;
+}

@@ -32,7 +32,7 @@ ExportStatus::ExportStatus ()
 void
 ExportStatus::init ()
 {
-	Glib::Threads::Mutex::Lock l (_run_lock);
+	PBD::Mutex::Lock l (_run_lock);
 	stop = false;
 	_running = false;
 	_aborted = false;
@@ -57,7 +57,7 @@ ExportStatus::init ()
 void
 ExportStatus::abort (bool error_occurred)
 {
-	Glib::Threads::Mutex::Lock l (_run_lock);
+	PBD::Mutex::Lock l (_run_lock);
 	_aborted = true;
 	_errors = _errors || error_occurred;
 	_running = false;
@@ -66,7 +66,7 @@ ExportStatus::abort (bool error_occurred)
 void
 ExportStatus::finish (TransportRequestSource trs)
 {
-	Glib::Threads::Mutex::Lock l (_run_lock);
+	PBD::Mutex::Lock l (_run_lock);
 	set_running (false);
 	Finished (trs); /* EMIT SIGNAL */
 }

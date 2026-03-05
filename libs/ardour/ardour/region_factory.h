@@ -23,12 +23,12 @@
 
 #pragma once
 
-#include <glibmm/threads.h>
 #include <map>
 #include <set>
 
 #include "pbd/id.h"
 #include "pbd/property_list.h"
+#include "pbd/mutex.h"
 #include "pbd/signals.h"
 
 #include "ardour/libardour_visibility.h"
@@ -108,7 +108,7 @@ public:
 
 	static void foreach_region (std::function<void (std::shared_ptr<Region>)> f)
 	{
-		Glib::Threads::Mutex::Lock ls (region_map_lock);
+		PBD::Mutex::Lock ls (region_map_lock);
 		for (RegionMap::const_iterator i = region_map.begin (); i != region_map.end (); ++i) {
 			f ((*i).second);
 		}
@@ -156,10 +156,10 @@ private:
 	static void update_region_name_number_map (std::shared_ptr<Region>);
 	static void remove_from_region_name_map (std::string);
 
-	static Glib::Threads::Mutex region_map_lock;
+	static PBD::Mutex region_map_lock;
 	static RegionMap            region_map;
 
-	static Glib::Threads::Mutex region_name_maps_mutex;
+	static PBD::Mutex region_name_maps_mutex;
 	/** map of partial region names and suffix numbers */
 	static std::map<std::string, uint32_t> region_name_number_map;
 	/** map of complete region names with their region ID */

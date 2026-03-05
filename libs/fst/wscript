@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from waflib.extras import autowaf as autowaf
 import os
 import sys
 import re
@@ -25,7 +26,7 @@ def build(bld):
             'VERSIONSTRING="' + bld.env['VERSION'] + '"',
             'PACKAGE="' + I18N_PACKAGE + bld.env['MAJOR'] + '"',
             'LIBARDOUR="' + bld.env['lwrcase_dirname'] + '"',
-            'LOCALEDIR="' + os.path.join(os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
+            'LOCALEDIR="' + os.path.join(autowaf.normpath(bld.env['DATADIR']), 'locale') + '"',
             ]
         obj.use = [ 'libpbd' ]
         obj.uselib = 'GIOMM DL UUID ARCHIVE CURL XML'

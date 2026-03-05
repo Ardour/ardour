@@ -78,7 +78,7 @@ Delivery::Delivery (Session& s, std::shared_ptr<IO> io, std::shared_ptr<Pannable
 	resize_midi_mute_buffer ();
 
 	if (_output) {
-		_output->changed.connect_same_thread (*this, std::bind (&Delivery::output_changed, this, _1, _2));
+		_output->changed.connect_same_thread (*this, std::bind (&Delivery::output_changed, this, _1));
 	}
 }
 
@@ -106,7 +106,7 @@ Delivery::Delivery (Session& s, std::shared_ptr<Pannable> pannable, std::shared_
 	resize_midi_mute_buffer ();
 
 	if (_output) {
-		_output->changed.connect_same_thread (*this, std::bind (&Delivery::output_changed, this, _1, _2));
+		_output->changed.connect_same_thread (*this, std::bind (&Delivery::output_changed, this, _1));
 	}
 }
 
@@ -249,7 +249,7 @@ Delivery::configure_io (ChanCount in, ChanCount out)
 		if (_output) {
 			if (_output->n_ports() != out) {
 				if (_output->n_ports() != ChanCount::ZERO) {
-					_output->ensure_io (out, false, this);
+					_output->ensure_io (out, false);
 				} else {
 					/* I/O not yet configured */
 				}
@@ -374,7 +374,7 @@ Delivery::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample
 			Amp::apply_simple_gain (bufs, nframes, GAIN_COEFF_ZERO);
 		}
 
-		RTABufferListPtr rtabuffers = _rtabuffers;
+		RTABufferListPtr rtabuffers = _rtabuffers.load ();
 		if (_rta_active.load () && rtabuffers && !rtabuffers->empty ()) {
 			BufferSet& silent_bufs = _session.get_silent_buffers(ChanCount(DataType::AUDIO, 1));
 			for (auto const& rb : *rtabuffers) {
@@ -764,7 +764,7 @@ Delivery::set_name (const std::string& name)
 }
 
 void
-Delivery::output_changed (IOChange change, void* /*src*/)
+Delivery::output_changed (IOChange change)
 {
 	if (change.type & IOChange::ConfigurationChanged) {
 		reset_panner ();

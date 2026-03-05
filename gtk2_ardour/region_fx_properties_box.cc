@@ -58,7 +58,7 @@ RegionFxPropertiesBox::RegionFxPropertiesBox (std::shared_ptr<ARDOUR::Region> r)
 	viewport->set_shadow_type(Gtk::SHADOW_NONE);
 	viewport->set_border_width(0);
 
-	_region->RegionFxChanged.connect (_region_connection, invalidator (*this), std::bind (&RegionFxPropertiesBox::idle_redisplay_plugins, this), gui_context ());
+	_region->PropertyChanged.connect (_region_connection, invalidator (*this), std::bind (&RegionFxPropertiesBox::region_property_changed, this, _1), gui_context ());
 
 	redisplay_plugins ();
 }
@@ -70,6 +70,14 @@ RegionFxPropertiesBox::~RegionFxPropertiesBox ()
 	if (_idle_redisplay_plugins_id >= 0) {
 		g_source_destroy (g_main_context_find_source_by_id (NULL, _idle_redisplay_plugins_id));
 		_idle_redisplay_plugins_id = -1;
+	}
+}
+
+void
+RegionFxPropertiesBox::region_property_changed (PBD::PropertyChange const& what_changed)
+{
+	if (what_changed.contains (Properties::region_fx_changed)) {
+		idle_redisplay_plugins ();
 	}
 }
 

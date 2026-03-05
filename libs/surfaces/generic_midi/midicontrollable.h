@@ -151,7 +151,7 @@ private:
 	bool            _bank_relative;
 
 	void drop_controllable ();
-	Glib::Threads::Mutex controllable_lock;
+	PBD::Mutex controllable_lock;
 
 	void midi_receiver (MIDI::Parser &p, MIDI::byte *, size_t);
 	void midi_sense_note (MIDI::Parser &, MIDI::EventTwoBytes *, bool is_on);

@@ -39,6 +39,7 @@
 
 #include <glib.h>
 
+#include "pbd/rwlock.h"
 #include "pbd/sequence_property.h"
 #include "pbd/stateful.h"
 #include "pbd/statefuldestructible.h"
@@ -306,21 +307,21 @@ protected:
 	friend class Session;
 
 protected:
-	class RegionReadLock : public Glib::Threads::RWLock::ReaderLock
+	class RegionReadLock : public PBD::RWLock::ReaderLock
 	{
 	public:
 		RegionReadLock (Playlist const * pl)
-		    : Glib::Threads::RWLock::ReaderLock (pl->region_lock)
+		    : PBD::RWLock::ReaderLock (pl->region_lock)
 		{
 		}
 		~RegionReadLock () {}
 	};
 
-	class RegionWriteLock : public Glib::Threads::RWLock::WriterLock
+	class RegionWriteLock : public PBD::RWLock::WriterLock
 	{
 	public:
 		RegionWriteLock (Playlist* pl, bool do_block_notify = true)
-		    : Glib::Threads::RWLock::WriterLock (pl->region_lock)
+		    : PBD::RWLock::WriterLock (pl->region_lock)
 		    , playlist (pl)
 		    , block_notify (do_block_notify)
 		{
@@ -331,7 +332,7 @@ protected:
 
 		~RegionWriteLock ()
 		{
-			Glib::Threads::RWLock::WriterLock::release ();
+			PBD::RWLock::WriterLock::release ();
 			thawlist.release ();
 			if (block_notify) {
 				playlist->release_notifications ();
@@ -402,6 +403,9 @@ protected:
 
 	std::shared_ptr<RegionList> regions_touched_locked (timepos_t const & start, timepos_t const & end, bool with_tail);
 
+	bool region_is_audible_at_locked (std::shared_ptr<Region>, timepos_t const&);
+	bool region_is_audible_at_internal (std::shared_ptr<RegionList> const&, std::shared_ptr<Region>, timepos_t const&);
+
 	void notify_region_removed (std::shared_ptr<Region>);
 	void notify_region_added (std::shared_ptr<Region>);
 	void notify_layering_changed ();
@@ -464,7 +468,7 @@ private:
 	friend class RegionReadLock;
 	friend class RegionWriteLock;
 
-	mutable Glib::Threads::RWLock region_lock;
+	mutable PBD::RWLock region_lock;
 
 private:
 	void setup_layering_indices (RegionList const &);

@@ -23,12 +23,16 @@
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/utils.h"
 
+#include "ardour/midi_region.h"
+#include "ardour/midi_track.h"
 #include "ardour/session.h"
 
 #include "audio_region_editor.h"
 #include "audio_region_view.h"
 #include "control_point.h"
 #include "editor.h"
+#include "midi_region_view.h"
+#include "pianoroll.h"
 #include "region_fx_line.h"
 #include "region_fx_properties_box.h"
 #include "region_view.h"
@@ -51,6 +55,7 @@ SelectionPropertiesBox::SelectionPropertiesBox (DispositionMask mask)
 	: _region_editor (nullptr)
 	, _region_fx_box (nullptr)
 	, _disposition (mask)
+	, _pianoroll (nullptr)
 {
 	init ();
 
@@ -80,6 +85,7 @@ SelectionPropertiesBox::~SelectionPropertiesBox ()
 	delete _region_editor;
 	delete _region_fx_box;
 	delete _slot_prop_box;
+	delete _pianoroll;
 }
 
 void
@@ -115,6 +121,10 @@ SelectionPropertiesBox::set_session (Session* s)
 	_route_prop_box->set_session(s);
 	_slot_prop_box->set_session(s);
 
+	if (_pianoroll) {
+		_pianoroll->set_session (_session);
+	}
+
 	selection_changed();
 }
 
@@ -148,11 +158,13 @@ SelectionPropertiesBox::delete_region_editor ()
 	if (!_region_editor) {
 		return;
 	}
-	assert (_region_fx_box);
 	_region_editor_box.remove (*_region_editor);
-	_region_editor_box.remove (*_region_fx_box);
 	delete _region_editor;
 	delete _region_fx_box;
+	delete _pianoroll;
+	_region_editor = nullptr;
+	_pianoroll = nullptr;
+	_region_fx_box = nullptr;
 	_region_editor = nullptr;
 	_region_fx_box = nullptr;
 	_region_editor_box.hide ();
@@ -185,13 +197,34 @@ SelectionPropertiesBox::selection_changed ()
 	if (!selection.tracks.empty () && 0 != (_disposition & ShowRoutes)) {
 		TimeAxisView *tav = selection.tracks.back (); //the LAST selected stripable is the clicked one. see selection.cc line ~92
 		RouteTimeAxisView *rtav = dynamic_cast<RouteTimeAxisView *>(tav);
+
+		/* If the selected time axis isn't a route, check the parent */
+		if (!rtav) {
+			tav = tav->get_parent ();
+			rtav = dynamic_cast<RouteTimeAxisView *>(tav);
+		}
+
 		if (rtav) {
 			_route_prop_box->set_route (rtav->route());
 			show_route_properties = true;
 		}
 	}
 
-	RegionView* rv = 0;
+	if (!selection.points.empty()) {
+		AutomationTimeAxisView* atv = selection.points.back()->line().automation_time_axis_view();
+		if (atv) {
+			/* Points are selected in an automation time axis, show route properties for corresponding route */
+			TimeAxisView* tav = atv->get_parent ();
+			RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView *>(tav);
+
+			if (rtav) {
+				_route_prop_box->set_route (rtav->route());
+				show_route_properties = true;
+			}
+		}
+	}
+
+	RegionView* rv = nullptr;
 	if (selection.regions.size () == 1) {
 		rv = selection.regions.front ();
 	} else if (!selection.points.empty ()) {
@@ -217,8 +250,39 @@ SelectionPropertiesBox::selection_changed ()
 			_region_editor->show_all ();
 			_region_editor_box.pack_start (*_region_editor, false, false);
 
-			_region_fx_box = new RegionFxPropertiesBox (rv->region ());
-			_region_editor_box.pack_start (*_region_fx_box);
+			MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rv);
+
+			if (!mrv) {
+				/* Audio regions get RegionFX box, but MIDI
+				   regions do not (as of Feb 2026, anyway)
+				*/
+				_region_fx_box = new RegionFxPropertiesBox (rv->region ());
+				_region_editor_box.pack_start (*_region_fx_box);
+
+			} else {
+
+				std::shared_ptr<ARDOUR::MidiTrack> mt = std::dynamic_pointer_cast<ARDOUR::MidiTrack> (mrv->midi_view()->track());
+				std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion>(mrv->region());
+
+				if (mt && mr) {
+					if (!_pianoroll) {
+						_pianoroll = new Pianoroll (X_("region editor pianoroll"), true);
+						_pianoroll->get_canvas_viewport()->set_size_request (-1, 120);
+						if (_session) {
+							_pianoroll->set_session (_session);
+						}
+					}
+
+					_pianoroll->set_track (mt);
+					_pianoroll->set_region (mr);
+
+					_region_editor_box.pack_start (_pianoroll->contents(), true, true);
+
+					_pianoroll->contents().hide (); // Why is this needed?
+					_pianoroll->contents().show_all ();
+				}
+			}
+
 			rv->RegionViewGoingAway.connect_same_thread (_region_connection, std::bind (&SelectionPropertiesBox::delete_region_editor, this));
 
 #ifndef MIXBUS
@@ -232,7 +296,7 @@ SelectionPropertiesBox::selection_changed ()
 		 * retain existing RegionEditor, when selecting another additional region, or
 		 * when switching tools (grab -> draw) to edit region-gain, or note entry.
 		 */
-		if (!selection.tracks.empty ()|| !selection.markers.empty () || !selection.playlists.empty () || !selection.triggers.empty ()) {
+		if (!selection.tracks.empty () || !selection.points.empty() || !selection.markers.empty () || !selection.playlists.empty () || !selection.triggers.empty ()) {
 			delete_region_editor ();
 		}
 	}

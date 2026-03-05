@@ -27,6 +27,8 @@
 #include "gtk2ardour-config.h"
 #endif
 
+#include <boost/algorithm/string.hpp>
+
 #include "gtkmm2ext/utils.h"
 
 #include "ardour/profile.h"
@@ -282,7 +284,7 @@ Editor::initialize_canvas ()
 
 	vector<TargetEntry> target_table;
 
-	target_table.push_back (TargetEntry ("x-ardour/region.pbdid", TARGET_SAME_APP));
+	target_table.push_back (TargetEntry ("x-ardour/region.pbdids", TARGET_SAME_APP));
 	target_table.push_back (TargetEntry ("text/uri-list"));
 	target_table.push_back (TargetEntry ("text/plain"));
 	target_table.push_back (TargetEntry ("application/x-rootwin-drop"));
@@ -400,7 +402,21 @@ Editor::track_canvas_drag_data_received (const RefPtr<Gdk::DragContext>& context
 		return;
 	}
 	if (data.get_target() == "x-ardour/region.pbdid") {
-		drop_regions (context, x, y, data, info, time);
+		PBD::ID rid (data.get_data_as_string ());
+		drop_region (context, x, y, rid, info, time);
+	} else if (data.get_target() == "x-ardour/region.pbdids") {
+		std::vector<std::string> ids;
+		std::vector<PBD::ID> rids;
+		std::string const& data_str (data.get_data_as_string ());
+		boost::split (ids, data_str, boost::is_any_of(","));
+		for (auto const& id: ids) {
+			rids.push_back (id);
+		}
+		if (rids.size () == 1) {
+			drop_region (context, x, y, rids.front (), info, time);
+		} else {
+			drop_regions (context, x, y, rids, info, time);
+		}
 	} else {
 		drop_paths (context, x, y, data, info, time);
 	}
@@ -636,6 +652,11 @@ Editor::session_gui_extents (bool use_extra) const
 			session_extent_start = std::min (session_extent_start, e.first);
 			session_extent_end   = std::max (session_extent_end, e.second);
 		}
+	}
+
+	if (_session->actively_recording ()) {
+		session_extent_start = std::min (session_extent_start, timepos_t (_session->last_transport_start ()));
+		session_extent_end   = std::max (session_extent_end, timepos_t (_session->transport_sample ()));
 	}
 
 	/* ToDo: also incorporate automation regions (in case the session has no audio/midi but is just used for automating plugins or the like) */

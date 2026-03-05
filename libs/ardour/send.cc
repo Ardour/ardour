@@ -119,7 +119,7 @@ Send::Send (Session& s, std::shared_ptr<Pannable> p, std::shared_ptr<MuteMaster>
 		panner_shell()->PannableChanged.connect_same_thread (*this, std::bind (&Send::pannable_changed, this));
 	}
 	if (_output) {
-		_output->changed.connect_same_thread (*this, std::bind (&Send::snd_output_changed, this, _1, _2));
+		_output->changed.connect_same_thread (*this, std::bind (&Send::snd_output_changed, this, _1));
 	}
 }
 
@@ -569,7 +569,7 @@ Send::display_to_user () const
 }
 
 void
-Send::snd_output_changed (IOChange change, void* /*src*/)
+Send::snd_output_changed (IOChange change)
 {
 	if (change.type & IOChange::ConnectionsChanged) {
 		if (!_output->connected() && _remove_on_disconnect) {

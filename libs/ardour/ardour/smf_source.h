@@ -55,6 +55,7 @@ public:
 	void _append_event_beats (const WriterLock& lock, const Evoral::Event<Temporal::Beats>& ev, bool allow_meta);
 	void append_event_samples (const WriterLock& lock, const Evoral::Event<samplepos_t>& ev, samplepos_t source_start);
 
+	void round_length_to_bars (int pulses);
 	void update_length (timepos_t const & dur);
 
 	void mark_streaming_midi_write_started (const WriterLock& lock, NoteMode mode);

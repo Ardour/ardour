@@ -721,8 +721,8 @@ RouteGroup::make_subgroup (bool aux, Placement placement)
 		std::shared_ptr<Bundle> bundle = _subgroup_bus->input()->bundle ();
 
 		for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-			(*i)->output()->disconnect (this);
-			(*i)->output()->connect_ports_to_bundle (bundle, false, true, this);
+			(*i)->output()->disconnect ();
+			(*i)->output()->connect_ports_to_bundle (bundle, false, true);
 		}
 	}
 }
@@ -735,7 +735,7 @@ RouteGroup::destroy_subgroup ()
 	}
 
 	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-		(*i)->output()->disconnect (this);
+		(*i)->output()->disconnect ();
 		/* XXX find a new bundle to connect to */
 	}
 

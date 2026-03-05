@@ -139,6 +139,9 @@ CairoWidget::get_height () const
 void
 CairoWidget::size_allocate (Gtk::Allocation& alloc)
 {
+	if (alloc.get_width () >= 32767 || alloc.get_height () >= 32767) {
+		use_image_surface (false);
+	}
 	if (_canvas_widget) {
 		memcpy (&_allocation, &alloc, sizeof(Gtk::Allocation));
 		return;
@@ -269,6 +272,10 @@ CairoWidget::on_size_allocate (Gtk::Allocation& alloc)
 		Gtk::EventBox::on_size_allocate (alloc);
 	} else {
 		memcpy (&_allocation, &alloc, sizeof(Gtk::Allocation));
+	}
+
+	if (alloc.get_width () >= 32767 || alloc.get_height () >= 32767) {
+		use_image_surface (false);
 	}
 
 	if (_use_image_surface) {

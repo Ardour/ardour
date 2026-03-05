@@ -301,7 +301,7 @@ InstrumentInfo::get_controller_name (Evoral::Parameter param) const
 	std::shared_ptr<const Control> const& c = control_names->control (param.id ());
 
 	if (c) {
-		return string_compose (c->name () + " [%1]", int(param.channel ()) + 1);
+		return string_compose ("[%1] %2:%3", int (param.channel ()) + 1, param.id (), c->name ());
 	}
 
 	return "";

@@ -28,8 +28,6 @@
 #include <algorithm>
 #include <sstream>
 
-#include <glibmm/threads.h>
-
 #include "pbd/types_convert.h"
 #include "pbd/xml++.h"
 
@@ -85,6 +83,7 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<uint64_t> reg_group;
 		PBD::PropertyDescriptor<bool> contents;
 		PBD::PropertyDescriptor<bool> region_fx;
+		PBD::PropertyDescriptor<bool> region_fx_changed;
 		PBD::PropertyDescriptor<bool> region_tempo;
 		PBD::PropertyDescriptor<bool> region_meter;
 
@@ -102,7 +101,7 @@ uint64_t Region::_retained_take_cnt = 0;
 uint64_t Region::_next_group_id     = 0;
 
 std::map<uint64_t, uint64_t> Region::_operation_rgroup_map;
-Glib::Threads::Mutex         Region::_operation_rgroup_mutex;
+PBD::Mutex         Region::_operation_rgroup_mutex;
 
 /* access the group-id for an operation on a region, honoring the existing region's group status */
 uint64_t
@@ -124,7 +123,7 @@ Region::get_region_operation_group_id (uint64_t old_region_group, RegionOperatio
 	/* since the GUI is single-threaded, and it's hard/impossible to edit
 	 * during a rec-stop, this 'should' never be contentious
 	 */
-	Glib::Threads::Mutex::Lock lm (_operation_rgroup_mutex);
+	PBD::Mutex::Lock lm (_operation_rgroup_mutex);
 
 	/* if a region group has not been assigned for this key, assign one */
 	if (_operation_rgroup_map.find (region_group_key) == _operation_rgroup_map.end ()) {
@@ -191,6 +190,8 @@ Region::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for contents = %1\n",	Properties::contents.property_id));
 	Properties::region_fx.property_id = g_quark_from_static_string (X_("region-fx"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for region-fx = %1\n",	Properties::region_fx.property_id));
+	Properties::region_fx_changed.property_id = g_quark_from_static_string (X_("region-fx-changed"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for region-fx-changed = %1\n",	Properties::region_fx_changed.property_id));
 	Properties::time_domain.property_id = g_quark_from_static_string (X_("time_domain"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for time_domain = %1\n",	Properties::time_domain.property_id));
 	Properties::reg_group.property_id = g_quark_from_static_string (X_("rgroup"));
@@ -1482,7 +1483,7 @@ Region::state () const
 	}
 
 	{
-		Glib::Threads::RWLock::ReaderLock lm (_fx_lock);
+		PBD::RWLock::ReaderLock lm (_fx_lock);
 		for (auto const & p : _plugins) {
 			node->add_child_nocopy (p->get_state ());
 		}
@@ -1607,7 +1608,7 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 	}
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (_fx_lock);
+		PBD::RWLock::WriterLock lm (_fx_lock);
 		bool changed = !_plugins.empty ();
 
 		for (auto const& rfx : _plugins) {
@@ -1635,8 +1636,9 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 		if (changed) {
 			fx_latency_changed (true);
 			fx_tail_changed (true);
-			send_change (PropertyChange (Properties::region_fx)); // trigger DiskReader overwrite
-			RegionFxChanged (); /* EMIT SIGNAL */
+			PropertyChange pc (Properties::region_fx_changed);
+			pc.add (Properties::region_fx); // trigger DiskReader overwrite
+			send_change (pc);
 		}
 	}
 
@@ -1786,7 +1788,7 @@ Region::master_source_names ()
 void
 Region::set_master_sources (const SourceList& srcs)
 {
-	Glib::Threads::Mutex::Lock lx (_source_list_lock);
+	PBD::Mutex::Lock lx (_source_list_lock);
 	for (SourceList::const_iterator i = _master_sources.begin (); i != _master_sources.end(); ++i) {
 		(*i)->dec_use_count ();
 	}
@@ -2146,7 +2148,7 @@ Region::rename_cue_marker (CueMarker& cm, std::string const & str)
 void
 Region::drop_sources ()
 {
-	Glib::Threads::Mutex::Lock lx (_source_list_lock);
+	PBD::Mutex::Lock lx (_source_list_lock);
 	for (SourceList::const_iterator i = _sources.begin (); i != _sources.end(); ++i) {
 		(*i)->dec_use_count ();
 	}
@@ -2164,7 +2166,7 @@ Region::drop_sources ()
 void
 Region::use_sources (SourceList const & s)
 {
-	Glib::Threads::Mutex::Lock lx (_source_list_lock);
+	PBD::Mutex::Lock lx (_source_list_lock);
 	for (SourceList::const_iterator i = s.begin (); i != s.end(); ++i) {
 		_sources.push_back (*i);
 		(*i)->inc_use_count ();
@@ -2458,7 +2460,7 @@ Region::add_plugin (std::shared_ptr<RegionFxPlugin> rfx, std::shared_ptr<RegionF
 void
 Region::reorder_plugins (RegionFxList const& new_order)
 {
-	Glib::Threads::RWLock::WriterLock lm (_fx_lock);
+	PBD::RWLock::WriterLock lm (_fx_lock);
 
 	RegionFxList                 as_it_will_be;
 	RegionFxList::iterator       oiter = _plugins.begin ();

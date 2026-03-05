@@ -595,7 +595,7 @@ ARDOUR_UI::starting ()
 
 	if (nsm_init ()) {
 		return -1;
-	} else  {
+	} else {
 
 		if (nsm) {
 			return 0;
@@ -622,11 +622,17 @@ ARDOUR_UI::starting ()
 		 * 3) no audio/MIDI setup required
 		 */
 
-		startup_fsm->start ();
+		if (!startup_fsm->complete()) {
+			startup_fsm->start ();
+		} else {
+			DEBUG_TRACE (DEBUG::GuiStartup, "Starting: SFSM already completed (by load_from_application_api)\n");
+		}
 
 		if (startup_fsm->complete()) {
 			delete startup_fsm;
 			startup_fsm = 0;
+		} else {
+			DEBUG_TRACE (DEBUG::GuiStartup, "Starting: SFSM incomplete; not deleted.\n");
 		}
 	}
 
@@ -700,10 +706,6 @@ ARDOUR_UI::load_session_from_startup_fsm ()
 	}
 
 	int ret = load_session (session_path, session_name, session_template);
-
-	if (!ret) {
-		startup_fsm->set_complete ();
-	}
 
 	return ret;
 }
@@ -825,6 +827,7 @@ ARDOUR_UI::check_memory_locking ()
 void
 ARDOUR_UI::load_from_application_api (const std::string& path)
 {
+	DEBUG_TRACE (DEBUG::GuiStartup, string_compose (X_("load_from_application_api %1\n"), path));
 	/* OS X El Capitan (and probably later) now somehow passes the command
 	   line arguments to an app via the openFile delegate protocol. Ardour
 	   already does its own command line processing, and having both

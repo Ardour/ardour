@@ -18,7 +18,7 @@ end
 function dsp_params ()
 	return
 	{
-		{ ["type"] = "input", name = "Threshold", min = -20, max = 0, default = -6, doc = "Threshold in dBFS for all channels" },
+		{ ["type"] = "input", name = "Threshold", min = -60, max = 0, default = -6, doc = "Threshold in dBFS for all channels" },
 		{ ["type"] = "output", name = "Level", min = -120, max = 0 },
 	}
 end

@@ -80,7 +80,7 @@ CurveTest::rtGet ()
 
 	{
 		// Write-lock list
-		Glib::Threads::RWLock::WriterLock lm(cl->lock());
+		PBD::RWLock::WriterLock lm(cl->lock());
 
 		// Attempt to get vector in RT (expect failure)
 		CPPUNIT_ASSERT (!cl->curve().rt_safe_get_vector (t1024, t2047, vec, 1024));

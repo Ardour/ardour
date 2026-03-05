@@ -28,7 +28,7 @@ using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
 
-SoloControl::SoloControl (Session& session, std::string const & name, Soloable& s, Muteable& m, Temporal::TimeDomainProvider const & tdp)
+SoloControl::SoloControl (Session& session, std::string const & name, Soloable& s, Muteable& m, Temporal::TimeDomainProvider const & tdp, bool is_vca)
 	: SlavableAutomationControl (session, SoloAutomation, ParameterDescriptor (SoloAutomation),
 	                             std::shared_ptr<AutomationList>(new AutomationList(Evoral::Parameter(SoloAutomation), tdp)),
 	                             name)
@@ -42,6 +42,7 @@ SoloControl::SoloControl (Session& session, std::string const & name, Soloable& 
 	_list->set_interpolation (Evoral::ControlList::Discrete);
 	/* solo changes must be synchronized by the process cycle */
 	set_flag (Controllable::RealTime);
+	_is_vca = is_vca;
 }
 
 void

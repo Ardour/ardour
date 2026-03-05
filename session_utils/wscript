@@ -36,9 +36,9 @@ def build_ardour_util(bld, util):
     obj.defines = [
         'VERSIONSTRING="' + bld.env['VERSION'] + '"',
         'UTILNAME="'   + str(pgmprefix + '-' + util) + '"',
-        'DATA_DIR="'   + os.path.normpath(bld.env['DATADIR']) + '"',
-        'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
-        'LOCALEDIR="'  + os.path.join(os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
+        'DATA_DIR="'   + autowaf.normpath(bld.env['DATADIR']) + '"',
+        'CONFIG_DIR="' + autowaf.normpath(bld.env['SYSCONFDIR']) + '"',
+        'LOCALEDIR="'  + os.path.join(autowaf.normpath(bld.env['DATADIR']), 'locale') + '"',
         'PACKAGE="'    + "ARDOURUTILS" + '"',
         ]
     obj.install_path = bld.env['LIBDIR'] + '/utils'

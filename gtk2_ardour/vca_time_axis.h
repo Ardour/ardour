@@ -21,7 +21,6 @@
 
 #include "widgets/ardour_button.h"
 
-#include "stripable_colorpicker.h"
 #include "stripable_time_axis.h"
 #include "gain_meter.h"
 
@@ -95,8 +94,5 @@ protected:
 
 	void drop_all_slaves ();
 	void choose_color ();
-
-private:
-	StripableColorDialog _color_picker;
 };
 

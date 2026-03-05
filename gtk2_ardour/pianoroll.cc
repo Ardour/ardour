@@ -932,7 +932,8 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 			_drags->set (new RubberbandSelectDrag (*this, item, [&](GdkEvent* ev, timepos_t const & pos) { return view->automation_rb_click (ev, pos); }), event);
 			break;
 		case Editing::MouseDraw:
-			_drags->set (new AutomationDrawDrag (*this, nullptr, *static_cast<ArdourCanvas::Rectangle*>(item), false, Temporal::BeatTime), event);
+			_drags->set (new AutomationDrawDrag (*this, nullptr, *static_cast<ArdourCanvas::Rectangle*>(item), false, Temporal::BeatTime,
+			                                     [&](GdkEvent* ev, timepos_t const & pos) { return view->automation_rb_click (ev, pos); }), event);
 			break;
 		default:
 			break;
@@ -989,6 +990,8 @@ Pianoroll::button_press_handler_2 (ArdourCanvas::Item*, GdkEvent*, ItemType)
 bool
 Pianoroll::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
+	NoteBase* e;
+
 	EC_LOCAL_TEMPO_SCOPE;
 
 	if (!Keyboard::is_context_menu_event (&event->button)) {
@@ -1001,6 +1004,28 @@ Pianoroll::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, It
 				/* grab dragged, so do nothing else */
 				return true;
 			}
+		}
+
+		if (event->button.button == 2) {
+			switch (current_mouse_mode()) {
+			case Editing::MouseContent:
+			case Editing::MouseDraw:
+				switch (item_type) {
+				case NoteItem:
+					e = reinterpret_cast<NoteBase*> (item->get_data ("notebase"));
+					assert (e);
+					if (midi_view()) {
+						midi_view()->delete_note (e->note());
+					}
+					return true;
+				default:
+					break;
+				}
+				break;
+			default:
+				break;
+			}
+			return true;
 		}
 
 	} else {
@@ -2054,6 +2079,14 @@ Pianoroll::toggle_note_selection (uint8_t note)
 	begin_reversible_selection_op (X_("Toggle Note Selection"));
 	view->toggle_matching_notes (note, chn_mask);
 	commit_reversible_selection_op();
+}
+
+void
+Pianoroll::set_note_highlight (uint8_t note)
+{
+	if (prh) {
+		prh->set_note_highlight (note);
+	}
 }
 
 void

@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include "ytkmm/colorselection.h"
 #include "ytkmm/entry.h"
 
 #include "gtkmm2ext/actions.h"
@@ -33,8 +34,12 @@ namespace Gtk
 	class Menu;
 }
 
+namespace ArdourWidgets {
+	class PopUp;
+}
+
 class TriggerJumpDialog;
-class StripableColorDialog;
+class ArdourColorDialog;
 
 class TriggerUI : virtual public sigc::trackable
 {
@@ -88,7 +93,9 @@ public:
 	void edit_trigger ();
 
 	void trigger_midi_learn ();
+	void trigger_stop_midi_learn ();
 	void trigger_midi_unlearn ();
+	void trigger_learning_finished (ArdourWidgets::PopUp*);
 
 private:
 	void trigger_changed (PBD::PropertyChange const& );  //calls on_trigger_changed to subclasses
@@ -121,7 +128,7 @@ protected:
 	Gtk::Menu*              _context_menu;
 	bool                    _ignore_menu_action;
 
-	StripableColorDialog*   _color_dialog;
+	ArdourColorDialog*   _color_dialog;
 
 	void                  trigger_swap (uint32_t);
 	PBD::ScopedConnection trigger_swap_connection;
@@ -129,6 +136,8 @@ protected:
 	ARDOUR::TriggerReference tref;
 	sigc::connection          color_connection;
 	PBD::ScopedConnectionList trigger_connections;
+
+	PBD::ScopedConnection learning_connection;
 };
 
 

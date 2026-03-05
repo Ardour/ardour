@@ -43,15 +43,17 @@ MidiNoteTracker::reset ()
 {
 	DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1: reset\n", this));
 	memset (_active_notes, 0, sizeof (_active_notes));
+	memset (_active_velocities, 0, sizeof (_active_velocities));
 	_on = 0;
 }
 
 void
-MidiNoteTracker::add (uint8_t note, uint8_t chn)
+MidiNoteTracker::add (uint8_t note, uint8_t chn, uint8_t velocity)
 {
 	const int coff = chn << 7;
 	if (_active_notes[note + coff] == 0) {
 		++_on;
+		_active_velocities[note+coff] = velocity;
 	}
 	++_active_notes[note + coff];
 
@@ -61,9 +63,10 @@ MidiNoteTracker::add (uint8_t note, uint8_t chn)
 	}
 #endif
 
-	DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1 ON %2/%3 voices %5 total on %4\n",
+	DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1 ON %2/%3 voices %5 total on %4 vel %6\n",
 							       this, (int) note, (int) chn, _on,
-							       (int) _active_notes[note + coff]));
+	                                                       (int) _active_notes[note + coff],
+	                                                       (int) _active_velocities[note+coff]));
 }
 
 void
@@ -76,6 +79,7 @@ MidiNoteTracker::remove (uint8_t note, uint8_t chn)
 	case 1:
 		--_on;
 		_active_notes [note + coff] = 0;
+		_active_velocities[note+coff] = 0;
 		break;
 	default:
 		--_active_notes [note + coff];
@@ -105,10 +109,10 @@ MidiNoteTracker::track (const uint8_t* evbuf)
 		reset();
 		break;
 	case MIDI_CMD_NOTE_ON:
-		add(evbuf[1], chan);
+		add (evbuf[1], chan, evbuf[2]);
 		break;
 	case MIDI_CMD_NOTE_OFF:
-		remove(evbuf[1], chan);
+		remove (evbuf[1], chan);
 		break;
 	}
 }
@@ -116,42 +120,13 @@ MidiNoteTracker::track (const uint8_t* evbuf)
 void
 MidiNoteTracker::resolve_notes (MidiBuffer &dst, samplepos_t time, bool reset)
 {
-	push_notes (dst, time, reset, MIDI_CMD_NOTE_OFF, 64);
+	push_notes (dst, time, reset, MIDI_CMD_NOTE_OFF);
 }
 
 void
 MidiNoteTracker::flush_notes (MidiBuffer &dst, samplepos_t time, bool reset)
 {
-	push_notes (dst, time, reset, MIDI_CMD_NOTE_ON, 64);
-}
-
-void
-MidiNoteTracker::push_notes (MidiBuffer &dst, samplepos_t time, bool reset, int cmd, int velocity)
-{
-	DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1 MB-resolve notes @ %2 on = %3\n", this, time, _on));
-
-	if (!_on) {
-		return;
-	}
-
-	for (int channel = 0; channel < 16; ++channel) {
-		const int coff = channel << 7;
-		for (int note = 0; note < 128; ++note) {
-			while (_active_notes[note + coff]) {
-				uint8_t buffer[3] = { ((uint8_t) (cmd | channel)), uint8_t (note), (uint8_t) velocity };
-				Evoral::Event<MidiBuffer::TimeType> ev (Evoral::MIDI_EVENT, time, 3, buffer, false);
-				/* note that we do not care about failure from
-				   push_back() ... should we warn someone ?
-				*/
-				dst.push_back (ev);
-				_active_notes[note + coff]--;
-				DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1: MB-push note %2/%3 at %4\n", this, (int) note, (int) channel, time));
-			}
-		}
-	}
-	if (reset) {
-		_on = 0;
-	}
+	push_notes (dst, time, reset, MIDI_CMD_NOTE_ON);
 }
 
 void
@@ -228,7 +203,9 @@ MidiNoteTracker::dump (ostream& o) const
 		for (int x = 0; x < 128; ++x) {
 			if (_active_notes[coff + x]) {
 				o << "Channel " << c+1 << " Note " << x << " is on ("
-				  << (int) _active_notes[coff+x] <<  " times)\n";
+				  << (int) _active_notes[coff+x] <<  " times) velocity = "
+				  << (int) _active_velocities[coff+x]
+				  << std::endl;
 			}
 		}
 	}
@@ -311,7 +288,7 @@ MidiStateTracker::track (const uint8_t* evbuf)
 		break;
 
 	case MIDI_CMD_NOTE_ON:
-		add (evbuf[1], chan);
+		add (evbuf[1], chan, evbuf[2]);
 		break;
 	case MIDI_CMD_NOTE_OFF:
 		remove (evbuf[1], chan);
@@ -525,14 +502,16 @@ MidiStateTracker::resolve_diff (MidiStateTracker const & other, Evoral::EventSin
 
 	uint8_t buf[3];
 
-	std::cerr << "MST::rd\n";
-	dump (std::cerr);
-	std::cerr << "MST::rd other\n";
-	other.dump (std::cerr);
+	/* If this loop counter is not volatile, then gcc with -O3 will cause
+	 * the inner loop to never exit (n continues to grow, and we eventually
+	 * crash. Debug builds do not suffer from this issue.
+	 */
+
+	volatile int n;
 
 	for (int channel = 0; channel < 16; ++channel) {
 
-		for (int n = 0; n < 128; ++n) {
+		for (n = 0; n < 128; ++n) {
 
 			bool on;
 
@@ -541,7 +520,6 @@ MidiStateTracker::resolve_diff (MidiStateTracker const & other, Evoral::EventSin
 				buf[1] = n;
 				buf[2] = 64; /* not good, needs nuance */
 				dst.write (time, Evoral::MIDI_EVENT, 3, buf);
-				std::cerr << "MST:rd note " << n << " turned " << (on ? "off" : "on") << std::endl;
 			}
 
 			if (control[channel][n] != other.control[channel][n]) {
@@ -549,7 +527,6 @@ MidiStateTracker::resolve_diff (MidiStateTracker const & other, Evoral::EventSin
 				buf[1] = n;
 				buf[2] = other.control[channel][n];
 				dst.write (time, Evoral::MIDI_EVENT, 3, buf);
-				std::cerr << "MST:rd control" << n << " set to " << (int) other.control[channel][n] << std::endl;
 			}
 		}
 

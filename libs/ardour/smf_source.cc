@@ -457,6 +457,19 @@ SMFSource::write_unlocked (const WriterLock&            lock,
 }
 
 void
+SMFSource::round_length_to_bars (int pulses)
+{
+	/* extend the length of the SMF source to the end of a bar */
+	int pulses_per_bar = 4;
+	Evoral::SMF::Tempo *tempo = nth_tempo (0);
+	if (tempo && (tempo->numerator > 0)) {
+		pulses_per_bar = tempo->numerator;
+	}
+	const Temporal::Beats  length_beats = Temporal::Beats::ticks_at_rate (pulses, ppqn());
+	update_length (timepos_t (length_beats.round_up_to_multiple (Temporal::Beats (pulses_per_bar,0))));
+}
+
+void
 SMFSource::update_length (timepos_t const & dur)
 {
 	/* no time domain switching here */
@@ -851,10 +864,8 @@ SMFSource::load_model_unlocked (bool force_reload)
 		bool ignored;
 		std::shared_ptr<Temporal::TempoMap> tmap = tempo_map (ignored);
 		Temporal::BBT_Time bbt (tmap->bbt_at (fd));
-		std::cerr << "SMF file duration " << fd << " = " << bbt << ' ';
 		bbt = tmap->round_up_to_bar (Temporal::BBT_Argument (bbt));
 		_length = tmap->quarters_at (Temporal::BBT_Argument (bbt));
-		std::cerr << " rounded up to bar " << bbt << " aka " << _length.beats() << std::endl;
 	}
 
 	_model->set_duration (_length.beats());

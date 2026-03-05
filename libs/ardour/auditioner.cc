@@ -20,8 +20,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <glibmm/threads.h>
-
 #include "pbd/error.h"
 
 #include "ardour/amp.h"
@@ -84,7 +82,7 @@ Auditioner::init ()
 		lookup_fallback_synth ();
 	}
 
-	_output->changed.connect_same_thread (*this, std::bind (&Auditioner::output_changed, this, _1, _2));
+	_output->changed.connect_same_thread (*this, std::bind (&Auditioner::output_changed, this, _1));
 
 	return 0;
 }
@@ -163,7 +161,7 @@ Auditioner::load_synth ()
 			error << _("Failed to load synth for MIDI-Audition.") << endmsg;
 		}
 
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 		if (configure_processors (&ps)) {
 			error << _("Cannot setup auditioner processing flow.") << endmsg;
 			unload_synth (true);
@@ -215,7 +213,7 @@ Auditioner::connect ()
 		}
 	}
 
-	_output->disconnect (this);
+	_output->disconnect ();
 
 	if (left.empty() && right.empty()) {
 		if (_output->n_ports().n_audio() == 0) {
@@ -231,11 +229,11 @@ Auditioner::connect ()
 			_main_outs->defer_pan_reset ();
 
 			if (left.length()) {
-				_output->add_port (left, this, DataType::AUDIO);
+				_output->add_port (left, DataType::AUDIO);
 			}
 
 			if (right.length()) {
-				_output->add_port (right, this, DataType::AUDIO);
+				_output->add_port (right, DataType::AUDIO);
 			}
 
 			_main_outs->allow_pan_reset ();
@@ -276,7 +274,7 @@ Auditioner::data_type () const {
 int
 Auditioner::roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool& need_butler)
 {
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
+	PBD::RWLock::ReaderLock lm (_processor_lock, PBD::RWLock::TryLock);
 	if (!lm.locked()) {
 		return 0;
 	}
@@ -374,7 +372,7 @@ Auditioner::audition_region (std::shared_ptr<Region> region, bool loop)
 
 	_loop = loop;
 
-	Glib::Threads::Mutex::Lock lm (lock);
+	PBD::Mutex::Lock lm (lock);
 
 	if (std::dynamic_pointer_cast<AudioRegion>(region) != 0) {
 
@@ -397,7 +395,7 @@ Auditioner::audition_region (std::shared_ptr<Region> region, bool loop)
 
 		{
 			ProcessorStreams ps;
-			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+			PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 
 			if (configure_processors (&ps)) {
 				error << string_compose (_("Cannot setup auditioner processing flow for %1 channels"),
@@ -627,7 +625,7 @@ Auditioner::idle_synth_update ()
 }
 
 void
-Auditioner::output_changed (IOChange change, void* /*src*/)
+Auditioner::output_changed (IOChange change)
 {
 	if (0 == (change.type & IOChange::ConnectionsChanged)) {
 		return;

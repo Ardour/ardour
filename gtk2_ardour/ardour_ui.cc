@@ -1128,6 +1128,9 @@ ARDOUR_UI::ask_about_scratch_deletion ()
 	int r = msg.run ();
 
 	if (r == Gtk::RESPONSE_OK) {
+#ifdef PLATFORM_WINDOWS
+		_session->close_all_sources ();
+#endif
 		PBD::remove_directory (path);
 	} else {
 		_session->end_unnamed_status ();
@@ -1441,7 +1444,12 @@ ARDOUR_UI::update_timecode_format ()
 		std::shared_ptr<TimecodeTransportMaster> tcmaster;
 		std::shared_ptr<TransportMaster> tm = TransportMasterManager::instance().current();
 
-		if ((tm->type() == LTC || tm->type() == MTC) && (tcmaster = std::dynamic_pointer_cast<TimecodeTransportMaster>(tm)) != 0 && tm->locked()) {
+		/* it should be impossible for tm to be NULL, but there anecdotal evidence
+		 * that it can be when re-starting the engine under some circumstances.
+		 */
+		assert (tm);
+
+		if (tm && (tm->type() == LTC || tm->type() == MTC) && (tcmaster = std::dynamic_pointer_cast<TimecodeTransportMaster>(tm)) != 0 && tm->locked()) {
 			matching = (tcmaster->apparent_timecode_format() == _session->config.get_timecode_format());
 		} else {
 			matching = true;
@@ -1470,19 +1478,19 @@ ARDOUR_UI::session_latency_updated (bool for_playback)
 	}
 
 	if (!_session) {
-		pdc_info_label.set_text ("PDC: --");
-		latency_info_label.set_text ("I/O Latency: --");
+		pdc_info_label.set_text (string_compose (_("PDC: %1"), "--"));
+		latency_info_label.set_text (string_compose (_("I/O Latency: %1"), "--"));
 	} else {
 		samplecnt_t wrl = _session->worst_route_latency ();
 		samplecnt_t iol = _session->io_latency ();
 		float rate      = _session->nominal_sample_rate ();
 
-		pdc_info_label.set_text (string_compose ("PDC: %1", samples_as_time_string (wrl, rate)));
+		pdc_info_label.set_text (string_compose (_("PDC: %1"), samples_as_time_string (wrl, rate)));
 
 		if (_session->engine().check_for_ambiguous_latency (true)) {
-			latency_info_label.set_markup ("I/O Latency: <span background=\"red\" foreground=\"white\">ambiguous</span>");
+			latency_info_label.set_markup (string_compose (_("I/O Latency: %1%2%3"), "<span background=\"red\" foreground=\"white\">", _("ambiguous"), "</span>"));
 		} else {
-			latency_info_label.set_text (string_compose ("I/O Latency: %1", samples_as_time_string (iol, rate)));
+			latency_info_label.set_text (string_compose (_("I/O Latency: %1"), samples_as_time_string (iol, rate)));
 		}
 	}
 }
@@ -1570,8 +1578,8 @@ ARDOUR_UI::session_add_audio_route (
 	ARDOUR::PresentationInfo::order_t order,
 	bool trigger_visibility)
 {
-	list<std::shared_ptr<AudioTrack> > tracks;
-	RouteList routes;
+	RouteList      routes;
+	AudioTrackList tracks;
 
 	assert (_session);
 
@@ -1601,7 +1609,7 @@ ARDOUR_UI::session_add_audio_route (
 	}
 
 	if (strict_io) {
-		for (list<std::shared_ptr<AudioTrack> >::iterator i = tracks.begin(); i != tracks.end(); ++i) {
+		for (AudioTrackList::iterator i = tracks.begin(); i != tracks.end(); ++i) {
 			(*i)->set_strict_io (true);
 		}
 		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
@@ -1775,34 +1783,42 @@ ARDOUR_UI::trx_record_enable_all_tracks ()
 void
 ARDOUR_UI::transport_record (bool roll)
 {
-	if (_session) {
-		switch (_session->record_status()) {
-		case Disabled:
-			if (_session->ntracks() == 0) {
-				ArdourMessageDialog msg (_main_window, _("Please create one or more tracks before trying to record.\nYou can do this with the \"Add Track or Bus\" option in the Session menu."));
-				msg.run ();
-				return;
-			}
-			_session->maybe_enable_record ();
-			if (roll) {
-				ActionManager::get_action (X_("Region"), X_("add-region-cue-marker"))->set_sensitive(true);
-				transport_roll ();
-			}
-			break;
-		case Recording:
-			if (roll) {
-				_session->request_stop();
-			} else {
-				_session->disable_record (false, true);
-			}
-			break;
+	if (!_session) {
+		return;
+	}
 
-		case Enabled:
-			if (roll) {
-				transport_roll();
-			} else {
-				_session->disable_record (false, true);
-			}
+	if (_session->rec_enabled_triggerbox()) {
+		ArdourMessageDialog msg (_main_window, _("You have one more tracks enabled for cue recording.\n\nYou cannot simultaneously record cues and to the timeline."));
+		msg.run ();
+		return;
+	}
+
+	switch (_session->record_status()) {
+	case Disabled:
+		if (_session->ntracks() == 0) {
+			ArdourMessageDialog msg (_main_window, _("Please create one or more tracks before trying to record.\nYou can do this with the \"Add Track or Bus\" option in the Session menu."));
+			msg.run ();
+			return;
+		}
+		_session->maybe_enable_record ();
+		if (roll) {
+			ActionManager::get_action (X_("Region"), X_("add-region-cue-marker"))->set_sensitive(true);
+			transport_roll ();
+		}
+		break;
+	case Recording:
+		if (roll) {
+			_session->request_stop();
+		} else {
+			_session->disable_record (false, true);
+		}
+		break;
+
+	case Enabled:
+		if (roll) {
+			transport_roll();
+		} else {
+			_session->disable_record (false, true);
 		}
 	}
 }
@@ -1858,9 +1874,8 @@ ARDOUR_UI::get_smart_mode() const
 	return ( editor->get_smart_mode() );
 }
 
-
 void
-ARDOUR_UI::spacebar_action (bool with_abort, bool roll_out_of_bounded_mode)
+ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 {
 	if (!_session) {
 		return;
@@ -1870,16 +1885,6 @@ ARDOUR_UI::spacebar_action (bool with_abort, bool roll_out_of_bounded_mode)
 
 	if (armed_tb && _session->transport_rolling()) {
 		armed_tb->finish_recording ();
-		return;
-	}
-
-	toggle_roll (with_abort, roll_out_of_bounded_mode);
-}
-
-void
-ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
-{
-	if (!_session) {
 		return;
 	}
 

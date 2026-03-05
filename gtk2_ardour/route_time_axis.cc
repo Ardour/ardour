@@ -50,6 +50,7 @@
 
 #include "ardour/amp.h"
 #include "ardour/meter.h"
+#include "ardour/midi_track.h"
 #include "ardour/pan_controllable.h"
 #include "ardour/pannable.h"
 #include "ardour/panner.h"
@@ -225,8 +226,8 @@ RouteTimeAxisView::set_route (std::shared_ptr<Route> rt)
 	}
 
 	_route->meter_change.connect (*this, invalidator (*this), bind (&RouteTimeAxisView::meter_changed, this), gui_context());
-	_route->input()->changed.connect (*this, invalidator (*this), std::bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
-	_route->output()->changed.connect (*this, invalidator (*this), std::bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
+	_route->input()->changed.connect (*this, invalidator (*this), std::bind (&RouteTimeAxisView::io_changed, this, _1), gui_context());
+	_route->output()->changed.connect (*this, invalidator (*this), std::bind (&RouteTimeAxisView::io_changed, this, _1), gui_context());
 	_route->track_number_changed.connect (*this, invalidator (*this), std::bind (&RouteTimeAxisView::label_view, this), gui_context());
 
 	if (ARDOUR::Profile->get_mixbus()) {
@@ -792,6 +793,17 @@ RouteTimeAxisView::build_display_menu ()
 		build_playlist_menu ();
 		items.push_back (MenuElem (_("Playlist"), *playlist_action_menu));
 		items.back().set_sensitive (_editor.get_selection().tracks.size() <= 1);
+	}
+
+	{
+		std::shared_ptr<MidiTrack> mt (std::dynamic_pointer_cast<MidiTrack> (_route));
+		if (mt) {
+			items.push_back (CheckMenuElem (_("Chase MIDI notes")));
+			Gtk::CheckMenuItem* c = dynamic_cast<Gtk::CheckMenuItem*> (&items.back());
+			c->set_active (mt->chase_notes());
+			c->signal_activate().connect ([mt]() { mt->set_chase_notes (!mt->chase_notes()); });
+			items.push_back (SeparatorElem());
+		}
 	}
 
 	if (!is_midi_track () && _route->the_instrument ()) {
@@ -2376,7 +2388,7 @@ RouteTimeAxisView::meter_changed ()
 }
 
 void
-RouteTimeAxisView::io_changed (IOChange /*change*/, void */*src*/)
+RouteTimeAxisView::io_changed (IOChange /*change*/)
 {
 	reset_meter ();
 	if (_route && !no_redraw && !_session->routes_deletion_in_progress ()) {

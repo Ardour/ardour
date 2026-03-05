@@ -464,7 +464,7 @@ IOPluginWindow::IOButton::port_connected_or_disconnected (std::weak_ptr<Port> wa
 void
 IOPluginWindow::IOButton::disconnect ()
 {
-	_io->disconnect (this);
+	_io->disconnect ();
 }
 
 void
@@ -578,7 +578,7 @@ IOPluginWindow::IOButton::button_press (GdkEventButton* ev)
 void
 IOPluginWindow::IOButton::bundle_chosen (std::shared_ptr<Bundle> c)
 {
-	_io->connect_ports_to_bundle (c, true, this);
+	_io->connect_ports_to_bundle (c, true);
 }
 
 void

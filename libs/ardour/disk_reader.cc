@@ -206,6 +206,37 @@ DiskReader::realtime_locate (bool for_loop_end)
 	}
 }
 
+void
+DiskReader::clear_midi_chase ()
+{
+	_locate_tracker.reset ();
+}
+
+void
+DiskReader::midi_chase (samplepos_t spos)
+{
+	RTMidiBuffer* rtmb = rt_midibuffer();
+	if (!rtmb) {
+		return;
+	}
+
+	_locate_tracker.reset ();
+
+	if (rtmb) {
+		for (size_t n = 0; n < rtmb->size(); ++n) {
+			uint32_t sz;
+			RTMidiBuffer::Item const & item ((*rtmb)[n]);
+			if (item.timestamp > spos) {
+				break;
+			}
+			uint8_t const * buf = rtmb->bytes (item, sz);
+			if (sz == 3) {
+				_locate_tracker.track (buf);
+			}
+		}
+	}
+}
+
 float
 DiskReader::buffer_load () const
 {
@@ -468,7 +499,7 @@ midi:
 
 	/* MIDI data handling */
 
-	const bool no_playlist_modification_pending = 0 == (_pending_overwrite.load () & PlaylistModified);
+	const bool playlist_modification_pending = 0 != (_pending_overwrite.load () & PlaylistModified);
 
 	if (bufs.count ().n_midi ()) {
 		MidiBuffer& dst (bufs.get_midi (0));
@@ -478,16 +509,12 @@ midi:
 			run_must_resolve = false;
 		}
 
-		if (!no_disk_output && !declick_in_progress () && (ms & MonitoringDisk) && !still_locating && no_playlist_modification_pending && speed) {
+		if (!no_disk_output && !declick_in_progress () && (ms & MonitoringDisk) && !still_locating && !playlist_modification_pending && speed) {
 			get_midi_playback (dst, start_sample, end_sample, ms, scratch_bufs, speed, disk_samples_to_consume);
 		}
 	}
 
-	/* decide if we need the butler */
-
-	if (!still_locating && no_playlist_modification_pending) {
-		bool butler_required = false;
-
+	if (!still_locating) {
 		if (speed < 0.0) {
 			playback_sample -= disk_samples_to_consume;
 		} else {
@@ -499,6 +526,11 @@ midi:
 			Temporal::Range loop_range (loc->start (), loc->end ());
 			playback_sample = loop_range.squish (timepos_t (playback_sample)).samples ();
 		}
+	}
+
+	/* decide if we need the butler */
+	if (!still_locating && !playlist_modification_pending) {
+		bool butler_required = false;
 
 		if (_playlists[DataType::AUDIO]) {
 			if (!c->empty ()) {
@@ -1502,6 +1534,10 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 
 	if (ms & MonitoringDisk) {
 		/* disk data needed */
+
+		if (Config->get_midi_chase() && _locate_tracker.on()) {
+			_locate_tracker.flush_notes (dst, 0, true);
+		}
 
 		Location* loc = _loop_location;
 

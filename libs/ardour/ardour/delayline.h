@@ -72,7 +72,7 @@ private:
 	MidiDlyBuf  _midi_buf;
 
 #ifndef NDEBUG
-	Glib::Threads::Mutex _set_delay_mutex;
+	PBD::Mutex _set_delay_mutex;
 #endif
 };
 

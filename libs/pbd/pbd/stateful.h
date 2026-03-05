@@ -123,7 +123,7 @@ class LIBPBD_API Stateful {
 	XMLNode *_extra_xml;
 	XMLNode *_instant_xml;
 	PBD::PropertyChange     _pending_changed;
-	Glib::Threads::Mutex _lock;
+	PBD::Mutex _lock;
 
 	std::string _xml_node_name; ///< name of node to use for this object in XML
 	OwnedPropertyList* _properties;
@@ -138,7 +138,7 @@ class LIBPBD_API Stateful {
 
   private:
 	friend struct ForceIDRegeneration;
-	static Glib::Threads::Private<bool> _regenerate_xml_or_string_ids;
+	static thread_local bool _regenerate_xml_or_string_ids;
 
 	PBD::ID           _id;
 	std::atomic<int> _stateful_frozen;

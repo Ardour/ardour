@@ -26,8 +26,6 @@
 #include <vector>
 #include <cmath>
 
-#include <glibmm/threads.h>
-
 #include "pbd/fastlog.h"
 #include "pbd/undo.h"
 #include "pbd/rcu.h"
@@ -101,11 +99,11 @@ public:
 
 	virtual void silence (samplecnt_t);
 
-	int ensure_io (ChanCount cnt, bool clear, void *src);
+	int ensure_io (ChanCount cnt, bool clear);
 
-	int connect_ports_to_bundle (std::shared_ptr<Bundle>, bool exclusive, void *);
-	int connect_ports_to_bundle (std::shared_ptr<Bundle>, bool, bool, void *);
-	int disconnect_ports_from_bundle (std::shared_ptr<Bundle>, void *);
+	int connect_ports_to_bundle (std::shared_ptr<Bundle>, bool exclusive);
+	int connect_ports_to_bundle (std::shared_ptr<Bundle>, bool, bool);
+	int disconnect_ports_from_bundle (std::shared_ptr<Bundle>);
 
 	BundleList bundles_connected ();
 
@@ -113,11 +111,11 @@ public:
 
 	bool can_add_port (DataType) const;
 
-	int add_port (std::string connection, void *src, DataType type = DataType::NIL);
-	int remove_port (std::shared_ptr<Port>, void *src);
-	int connect (std::shared_ptr<Port> our_port, std::string other_port, void *src);
-	int disconnect (std::shared_ptr<Port> our_port, std::string other_port, void *src);
-	int disconnect (void *src);
+	int add_port (std::string connection, DataType type = DataType::NIL);
+	int remove_port (std::shared_ptr<Port>);
+	int connect (std::shared_ptr<Port> our_port, std::string other_port);
+	int disconnect (std::shared_ptr<Port> our_port, std::string other_port);
+	int disconnect ();
 	bool connected_to (std::shared_ptr<const IO>) const;
 	bool connected_to (const std::string&) const;
 	bool connected () const;
@@ -148,7 +146,7 @@ public:
 	 * IOChange contains ConfigurationChanged.  In other cases,
 	 * the process lock status is undefined.
 	 */
-	PBD::Signal<void(IOChange, void *)> changed;
+	PBD::Signal<void(IOChange)> changed;
 
 	XMLNode& get_state () const;
 
@@ -230,7 +228,7 @@ private:
 	static int parse_io_string (const std::string&, std::vector<std::string>& chns);
 	static int parse_gain_string (const std::string&, std::vector<std::string>& chns);
 
-	int ensure_ports (ChanCount, bool clear, void *src);
+	int ensure_ports (ChanCount, bool clear);
 
 	void bundle_changed (Bundle::Change);
 	int set_port_state_2X (const XMLNode& node, int version, bool in);

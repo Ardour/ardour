@@ -199,10 +199,10 @@ UnknownProcessor::add_sidechain_from_xml (const XMLNode& node, int version)
 
 	_sidechain.reset (new SideChain (_session, "toBeRenamed"));
 	for (uint32_t n = 0; n < n_audio; ++n) {
-		_sidechain->input()->add_port ("", owner(), DataType::AUDIO); // add a port, don't connect.
+		_sidechain->input()->add_port ("", DataType::AUDIO); // add a port, don't connect.
 	}
 	for (uint32_t n = 0; n < n_midi; ++n) {
-		_sidechain->input()->add_port ("", owner(), DataType::MIDI); // add a port, don't connect.
+		_sidechain->input()->add_port ("", DataType::MIDI); // add a port, don't connect.
 	}
 	_sidechain->set_state (node, version);
 }

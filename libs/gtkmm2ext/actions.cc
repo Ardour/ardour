@@ -260,11 +260,11 @@ ActionManager::get_action (const string& name, bool or_die)
 	}
 
 	if (or_die) {
+		cerr << "Failed to find action: [" << name << ']' << endl;
+		PBD::stacktrace (std::cerr, 8);
 		throw MissingActionException (name);
 	}
 
-	cerr << "Failed to find action: [" << name << ']' << endl;
-	PBD::stacktrace (std::cerr, 8);
 	return RefPtr<Action>();
 }
 

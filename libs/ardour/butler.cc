@@ -250,7 +250,7 @@ Butler::thread_work ()
 				   so do not bother with buffer refills at this
 				   time.
 				*/
-				Glib::Threads::Mutex::Lock lm (request_lock);
+				PBD::Mutex::Lock lm (request_lock);
 				DEBUG_TRACE (DEBUG::Butler, string_compose ("\tlocate pending, so just pause @ %1 till woken again\n", g_get_monotonic_time ()));
 				paused.signal ();
 				continue;
@@ -346,7 +346,7 @@ Butler::thread_work ()
 		}
 
 		{
-			Glib::Threads::Mutex::Lock lm (request_lock);
+			PBD::Mutex::Lock lm (request_lock);
 
 			if (should_run && (disk_work_outstanding || transport_work_requested ())) {
 				DEBUG_TRACE (DEBUG::Butler, string_compose ("at end, should run %1 disk work %2 transport work %3 ... goto restart\n",
@@ -449,7 +449,7 @@ Butler::summon ()
 void
 Butler::stop ()
 {
-	Glib::Threads::Mutex::Lock lm (request_lock);
+	PBD::Mutex::Lock lm (request_lock);
 	DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: asking butler to stop @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time ()));
 	queue_request (Request::Pause);
 	paused.wait (request_lock);
@@ -458,7 +458,7 @@ Butler::stop ()
 void
 Butler::wait_until_finished ()
 {
-	Glib::Threads::Mutex::Lock lm (request_lock);
+	PBD::Mutex::Lock lm (request_lock);
 	DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: waiting for butler to finish @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time ()));
 	queue_request (Request::Pause);
 	paused.wait (request_lock);

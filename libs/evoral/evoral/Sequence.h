@@ -30,7 +30,8 @@
 #include <utility>
 #include <vector>
 
-#include <glibmm/threads.h>
+#include "pbd/mutex.h"
+#include "pbd/rwlock.h"
 
 #include "evoral/visibility.h"
 #include "evoral/Note.h"
@@ -73,15 +74,15 @@ public:
 
 protected:
 	struct WriteLockImpl {
-		WriteLockImpl(Glib::Threads::RWLock& s, Glib::Threads::Mutex& c)
-			: sequence_lock(new Glib::Threads::RWLock::WriterLock(s))
-			, control_lock(new Glib::Threads::Mutex::Lock(c)) { }
+		WriteLockImpl(PBD::RWLock& s, PBD::Mutex& c)
+			: sequence_lock(new PBD::RWLock::WriterLock(s))
+			, control_lock(new PBD::Mutex::Lock(c)) { }
 		~WriteLockImpl() {
 			delete sequence_lock;
 			delete control_lock;
 		}
-		Glib::Threads::RWLock::WriterLock* sequence_lock;
-		Glib::Threads::Mutex::Lock*        control_lock;
+		PBD::RWLock::WriterLock* sequence_lock;
+		PBD::Mutex::Lock*        control_lock;
 	};
 
 public:
@@ -91,10 +92,10 @@ public:
 	typedef typename std::shared_ptr<const Evoral::Note<Time> > constNotePtr;
 	typedef typename std::set<WeakNotePtr, std::owner_less<WeakNotePtr> > WeakActiveNotes;
 
-	typedef std::shared_ptr<Glib::Threads::RWLock::ReaderLock> ReadLock;
+	typedef std::shared_ptr<PBD::RWLock::ReaderLock> ReadLock;
 	typedef std::shared_ptr<WriteLockImpl>                     WriteLock;
 
-	virtual ReadLock  read_lock() const { return ReadLock(new Glib::Threads::RWLock::ReaderLock(_lock)); }
+	virtual ReadLock  read_lock() const { return ReadLock(new PBD::RWLock::ReaderLock(_lock)); }
 	virtual WriteLock write_lock()      { return WriteLock(new WriteLockImpl(_lock, _control_lock)); }
 
 	void clear();
@@ -325,7 +326,7 @@ protected:
 	bool                   _edited;
 	bool                   _overlapping_pitches_accepted;
 	OverlapPitchResolution _overlap_pitch_resolution;
-	mutable Glib::Threads::RWLock   _lock;
+	mutable PBD::RWLock    _lock;
 	bool                   _writing;
 
 	virtual int resolve_overlaps_unlocked (const NotePtr, void* /* arg */ = 0) {

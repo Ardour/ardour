@@ -813,13 +813,13 @@ Session::rewire_selected_midi (std::shared_ptr<MidiTrack> new_midi_target)
 			/* disconnect port */
 			disconnect_port_for_rewire (*p);
 			/* connect it to the new target */
-			new_midi_target->input()->connect (new_midi_target->input()->nth(0), (*p), this);
+			new_midi_target->input()->connect (new_midi_target->input()->nth(0), (*p));
 			/* and grouped tracks */
 			std::shared_ptr<RouteGroup> group = new_midi_target->route_group ();
 			if (group && group->is_active () && group->is_select ()) {
 				for (auto const& r : *group->route_list ()) {
 					if (dynamic_pointer_cast<MidiTrack> (r)) {
-						r->input()->connect (r->input()->nth(0), (*p), this);
+						r->input()->connect (r->input()->nth(0), (*p));
 					}
 				}
 			}
@@ -853,17 +853,17 @@ Session::rewire_midi_selection_ports ()
 		return;
 	}
 
-	target->input()->disconnect (this);
+	target->input()->disconnect ();
 
 	for (vector<string>::const_iterator p = msp.begin(); p != msp.end(); ++p) {
 		disconnect_port_for_rewire (*p);
-		target->input()->connect (target->input()->nth (0), (*p), this);
+		target->input()->connect (target->input()->nth (0), (*p));
 
 		std::shared_ptr<RouteGroup> group = target->route_group ();
 		if (group && group->is_active () && group->is_select ()) {
 			for (auto const& r : *group->route_list ()) {
 				if (dynamic_pointer_cast<MidiTrack> (r)) {
-					r->input()->connect (r->input()->nth(0), (*p), this);
+					r->input()->connect (r->input()->nth(0), (*p));
 				}
 			}
 		}

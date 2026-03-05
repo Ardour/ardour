@@ -33,7 +33,6 @@
 #include <algorithm>
 
 #include "pbd/gstdio_compat.h"
-#include <glibmm/threads.h>
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
 #include "pbd/xml++.h"
@@ -319,7 +318,7 @@ Source::set_cue_state (XMLNode const & cues, int /* version */)
 bool
 Source::has_been_analysed() const
 {
-	Glib::Threads::Mutex::Lock lm (_analysis_lock);
+	PBD::Mutex::Lock lm (_analysis_lock);
 	return _analysed;
 }
 
@@ -332,7 +331,7 @@ Source::set_been_analysed (bool yn)
 		}
 	}
 	if (yn != _analysed) {
-		Glib::Threads::Mutex::Lock lm (_analysis_lock);
+		PBD::Mutex::Lock lm (_analysis_lock);
 		_analysed = yn;
 	}
 	AnalysisChanged(); // EMIT SIGNAL

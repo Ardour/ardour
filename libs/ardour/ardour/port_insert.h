@@ -125,7 +125,7 @@ private:
 	/* disallow copy construction */
 	PortInsert (const PortInsert&);
 
-	void io_changed (IOChange change, void*);
+	void io_changed (IOChange change);
 	void latency_changed ();
 
 	std::shared_ptr<Delivery>    _out;

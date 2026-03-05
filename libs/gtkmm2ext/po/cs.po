@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-26 15:25+0100\n"
+"POT-Creation-Date: 2026-01-24 15:59+0100\n"
 "PO-Revision-Date: 2025-12-26 15:32+0100\n"
 "Last-Translator: Martin Vlk <martin@vlkk.cz>\n"
 "Language-Team: Czech <translation-team-cs@lists.sourceforge.net>\n"
@@ -50,23 +50,23 @@ msgstr "RegionList"
 msgid "ProcessorMenu"
 msgstr "ProcessorMenu"
 
-#: bindings.cc:514
+#: bindings.cc:519
 msgid "Escape"
 msgstr "Escape"
 
-#: bindings.cc:937 bindings.cc:939
+#: bindings.cc:951 bindings.cc:953
 msgid "Window"
 msgstr "Window"
 
-#: bindings.cc:937
+#: bindings.cc:951
 msgid " (Categorized)"
 msgstr "(Zařazeno)"
 
-#: bindings.cc:939
+#: bindings.cc:953
 msgid " (Alphabetical)"
 msgstr "(Abecedně)"
 
-#: bindings.cc:955
+#: bindings.cc:969
 msgid "Uncategorized"
 msgstr "Nezařazeno"
 
@@ -184,4 +184,3 @@ msgstr "Nelze přejmenovat váš vlastní soubor s přiřazením kláves (%1)"
 #: textviewer.cc:32
 msgid "Close"
 msgstr "Zavřít"
-

@@ -52,19 +52,24 @@ StripImportDialog::StripImportDialog (Session* s)
 {
 	set_session (s);
 
-	_open_button = manage (new Button (Stock::GO_FORWARD));
-	_ok_button   = manage (new Button (Stock::OK));
+	_open_button   = manage (new Button (Stock::GO_FORWARD));
+	_ok_button     = manage (new Button (Stock::OK));
+	_cancel_button = manage (new Button (Stock::CANCEL));
+
+	_progress_bar.set_no_show_all ();
 
 	get_action_area ()->pack_start (_info_text);
-	add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	get_action_area ()->pack_end (*_cancel_button);
 	get_action_area ()->pack_end (*_open_button);
 	get_action_area ()->pack_end (*_ok_button);
 
+	_cancel_button->show ();
 	_open_button->show ();
 	_ok_button->hide ();
 
 	_open_button->signal_clicked ().connect (mem_fun (*this, &StripImportDialog::maybe_switch_to_import_page), false);
 	_ok_button->signal_clicked ().connect (mem_fun (*this, &StripImportDialog::ok_activated), false);
+	_cancel_button->signal_clicked ().connect ([this] { ArdourDialog::response (RESPONSE_CANCEL);});
 
 	_open_button->set_sensitive (false);
 	_ok_button->set_sensitive (false);
@@ -732,10 +737,9 @@ StripImportDialog::setup_strip_import_page ()
 	_show_all_toggle->set_can_focus (true);
 	_show_all_toggle->signal_clicked.connect (mem_fun (*this, &StripImportDialog::refill_import_table));
 
-	HBox* hbox = manage (new HBox ());
-	hbox->set_spacing (4);
-	hbox->pack_start (*_action, true, false);
-	hbox->pack_start (*_show_all_toggle, true, false);
+	_action_box.set_spacing (4);
+	_action_box.pack_start (*_action, true, false);
+	_action_box.pack_start (*_show_all_toggle, true, false);
 
 	VBox* vbox = manage (new VBox ());
 	vbox->pack_start (_strip_table, false, false, 4);
@@ -745,7 +749,8 @@ StripImportDialog::setup_strip_import_page ()
 
 	_page_strip.set_spacing (4);
 	_page_strip.pack_start (_strip_scroller);
-	_page_strip.pack_end (*hbox, false, false, 4);
+	_page_strip.pack_end (_progress_bar, false, false, 4);
+	_page_strip.pack_end (_action_box, false, false, 4);
 	_page_strip.show_all ();
 
 	_ok_button->set_sensitive (true);
@@ -757,6 +762,38 @@ StripImportDialog::setup_strip_import_page ()
 void
 StripImportDialog::ok_activated ()
 {
-	_session->import_route_state (_path, _import_map);
-	ArdourDialog::on_response (RESPONSE_ACCEPT);
+	ArdourDialog::response (RESPONSE_ACCEPT);
+}
+
+void
+StripImportDialog::on_response (int response_id)
+{
+	_cancel_button->set_sensitive (false);
+	_ok_button->set_sensitive (false);
+}
+
+bool
+StripImportDialog::on_delete_event (GdkEventAny* ev)
+{
+	if (!_cancel_button->sensitive ()) {
+		return true;
+	}
+	return ArdourDialog::on_delete_event (ev);
+}
+
+void
+StripImportDialog::do_import ()
+{
+	_session->import_route_state (_path, _import_map, Session::CreateRouteGroup, this);
+}
+
+void
+StripImportDialog::update_progress_gui (float p)
+{
+	_action_box.hide ();
+	_progress_bar.show ();
+	if (p == 0) {
+		_progress_bar.set_text (_("Importing Track State"));
+	}
+	_progress_bar.set_fraction (p);
 }

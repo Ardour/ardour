@@ -28,8 +28,6 @@
 #include <ytkmm/accelmap.h>
 #include <ytkmm/comboboxtext.h>
 
-#include <glibmm/threads.h>
-
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/window_title.h>
@@ -573,7 +571,7 @@ Meterbridge::remove_strip (MeterStrip* strip)
 void
 Meterbridge::sync_order_keys ()
 {
-	Glib::Threads::Mutex::Lock lm (_resync_mutex);
+	PBD::Mutex::Lock lm (_resync_mutex);
 
 	MeterOrderRouteSorter sorter;
 	strips.sort(sorter);

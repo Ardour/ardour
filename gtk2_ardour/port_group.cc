@@ -674,13 +674,38 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 				*/
 
 				string lp = p;
+
+#if 0
+				/* We'd like to be able to clean up pipewire
+				   MIDI port names, but that results in port
+				   names that do not match the actual port
+				   names, and this will cause attempts to
+				   connect ports (and also to display
+				   connections) to fail.
+
+				   We would need some sort of
+				   indirection/aliasing so that the displayed
+				   name and the "real" name were both available
+				   to the port matrix.
+				*/
+				lp = ARDOUR::maybe_clean_pipewire_midi_port_name (lp);
+				/* This is one context where we need the prefix
+				 * to be able to put the ports into a port
+				 * group
+				 */
+				if (lp.find (':') == string::npos) {
+					lp = string (X_("system:")) + lp;
+				}
+#endif
+
+				/* Ignore our own monitor ports */
+				string llp = lp;
 				string monitor = _("Monitor");
+				boost::to_lower (llp);
+				boost::to_lower (monitor); /* may have been translated into upper case */
 
-				boost::to_lower (lp);
-				boost::to_lower (monitor);
-
-				if ((lp.find (monitor) != string::npos) &&
-				    (lp.find (lpn) != string::npos)) {
+				if ((llp.find (monitor) != string::npos) &&
+				    (llp.find (lpn) != string::npos)) {
 					continue;
 				}
 
@@ -708,14 +733,14 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 
 						/* we own this port (named after the program) */
 
-						extra_program[t].push_back (p);
+						extra_program[t].push_back (lp);
 
 					} else if (flags & IsPhysical) {
 
-						extra_system[t].push_back (p);
+						extra_system[t].push_back (lp);
 
 					} else {
-						extra_other[t].push_back (p);
+						extra_other[t].push_back (lp);
 					}
 				}
 			}

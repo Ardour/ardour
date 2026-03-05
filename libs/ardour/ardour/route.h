@@ -32,13 +32,14 @@
 #include <set>
 #include <string>
 
-#include <glibmm/threads.h>
 #include "pbd/fastlog.h"
 #include "pbd/xml++.h"
 #include "pbd/undo.h"
+#include "pbd/mutex.h"
 #include "pbd/stateful.h"
 #include "pbd/controllable.h"
 #include "pbd/destructible.h"
+#include "pbd/rwlock.h"
 
 #include "temporal/domain_swap.h"
 #include "temporal/types.h"
@@ -66,7 +67,7 @@
 
 class RoutePinWindowProxy;
 class PatchChangeGridDialog;
-class ArdourWindow;
+class RouteCommentEditor;
 
 namespace ARDOUR {
 
@@ -139,8 +140,8 @@ public:
 	std::string comment() { return _comment; }
 	void set_comment (std::string str, void *src);
 
-	ArdourWindow* comment_editor () const { return _comment_editor_window; }
-	void set_comment_editor (ArdourWindow* w) { _comment_editor_window = w; }
+	RouteCommentEditor* comment_editor () const { return _comment_editor_window; }
+	void set_comment_editor (RouteCommentEditor* w) { _comment_editor_window = w; }
 
 	bool set_name (const std::string& str);
 	static void set_name_in_state (XMLNode &, const std::string &);
@@ -233,14 +234,14 @@ public:
 	void flush_processors ();
 
 	void foreach_processor (std::function<void(std::weak_ptr<Processor>)> method) const {
-		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+		PBD::RWLock::ReaderLock lm (_processor_lock);
 		for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
 			method (std::weak_ptr<Processor> (*i));
 		}
 	}
 
 	std::shared_ptr<Processor> nth_processor (uint32_t n) {
-		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+		PBD::RWLock::ReaderLock lm (_processor_lock);
 		ProcessorList::iterator i;
 		for (i = _processors.begin(); i != _processors.end() && n; ++i, --n) {}
 		if (i == _processors.end()) {
@@ -621,7 +622,7 @@ protected:
 	samplecnt_t    _output_latency;
 
 	ProcessorList  _processors;
-	mutable Glib::Threads::RWLock _processor_lock;
+	mutable PBD::RWLock _processor_lock;
 
 	std::shared_ptr<IO>               _input;
 	std::shared_ptr<IO>               _output;
@@ -668,11 +669,11 @@ protected:
 	std::shared_ptr<SoloIsolateControl> _solo_isolate_control;
 	std::shared_ptr<SoloSafeControl> _solo_safe_control;
 
-	std::string    _comment;
-	ArdourWindow*  _comment_editor_window;
+	std::string          _comment;
+	RouteCommentEditor*  _comment_editor_window;
+
 	bool           _have_internal_generator;
 	DataType       _default_type;
-
 	InstrumentInfo _instrument_info;
 	bool           _instrument_fanned_out;
 	Location*      _loop_location;
@@ -712,7 +713,7 @@ protected:
 
 	SlavableAutomationControlList slavables () const;
 
-	virtual void input_change_handler (IOChange, void *src);
+	virtual void input_change_handler (IOChange);
 
 private:
 	/* no copy construction */
@@ -721,12 +722,12 @@ private:
 	int set_state_2X (const XMLNode&, int);
 	void set_processor_state_2X (XMLNodeList const &, int);
 
-	void output_change_handler (IOChange, void *src);
-	void sidechain_change_handler (IOChange, void *src);
+	void output_change_handler (IOChange);
+	void sidechain_change_handler (IOChange);
 
 	void processor_selfdestruct (std::weak_ptr<Processor>);
 	std::vector<std::weak_ptr<Processor> > selfdestruct_sequence;
-	Glib::Threads::Mutex  selfdestruct_lock;
+	PBD::Mutex  selfdestruct_lock;
 
 	int input_port_count_changing (ChanCount);
 	int output_port_count_changing (ChanCount);
@@ -734,7 +735,7 @@ private:
 	bool output_effectively_connected_real () const;
 	mutable std::map<Route*, bool> _connection_cache;
 
-	int configure_processors_unlocked (ProcessorStreams*, Glib::Threads::RWLock::WriterLock*);
+	int configure_processors_unlocked (ProcessorStreams*, PBD::RWLock::WriterLock*);
 	bool set_meter_point_unlocked ();
 	void apply_processor_order (const ProcessorList& new_order);
 

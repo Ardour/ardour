@@ -1099,7 +1099,8 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			{
 				AutomationTimeAxisView* atv = static_cast<AutomationTimeAxisView*> (item->get_data ("trackview"));
 				if (atv) {
-					_drags->set (new AutomationDrawDrag (*this, nullptr, atv->base_item(), false, Temporal::AudioTime), event);
+					_drags->set (new AutomationDrawDrag (*this, nullptr, atv->base_item(), false, Temporal::AudioTime,
+					                                     [&](GdkEvent* ev, timepos_t const & pos) { return rb_click (ev, pos); }), event);
 				}
 			}
 			break;
@@ -1126,7 +1127,8 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			RegionView* rv;
 			if ((rv = dynamic_cast<RegionView*> (clicked_regionview))) {
 				ArdourCanvas::Rectangle* r = dynamic_cast<ArdourCanvas::Rectangle*> (rv->get_canvas_frame());
-				_drags->set (new AutomationDrawDrag (*this, rv->get_canvas_group(), *r, true, Temporal::AudioTime), event);
+				_drags->set (new AutomationDrawDrag (*this, rv->get_canvas_group(), *r, true, Temporal::AudioTime,
+				                                     [&](GdkEvent* ev, timepos_t const & pos) { return rb_click (ev, pos); }), event);
 			}
 		}
 			break;
@@ -1318,7 +1320,6 @@ bool
 Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
 	timepos_t where (canvas_event_time (event));
-	AutomationTimeAxisView* atv = 0;
 
 	/* no action if we're recording */
 
@@ -1627,8 +1628,13 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			switch (item_type) {
 			case RegionItem:
 			{
-				/* since we have FreehandLineDrag we can only get here after a drag, when no movement has happened.
-				 * Except when a drag was aborted by pressing Esc.
+				/* since we have FreehandLineDrag we can only
+				 * get here after a drag, when no movement has
+				 * happened.  Except when a drag was aborted by
+				 * pressing Esc. We can't handle this with a
+				 * click functor because we (may) need the
+				 * canvas item here, and that would involve
+				 * significant code refactoring.
 				 */
 				if (!were_dragging) {
 					return true;
@@ -1648,15 +1654,10 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				break;
 			}
 
-			case AutomationTrackItem: {
-				bool with_guard_points = Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier);
-				atv = dynamic_cast<AutomationTimeAxisView*>(clicked_axisview);
-				if (atv) {
-					atv->add_automation_event (event, where, event->button.y, with_guard_points);
-				}
-				return true;
+			case AutomationTrackItem:
+				/* handled by a click functor given to an AutomationDrawDrag */
 				break;
-			}
+
 			default:
 				break;
 			}

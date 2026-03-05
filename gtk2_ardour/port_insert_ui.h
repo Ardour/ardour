@@ -44,8 +44,8 @@ public:
 
 private:
 	void fast_update ();
-	void send_changed (ARDOUR::IOChange, void*);
-	void return_changed (ARDOUR::IOChange, void*);
+	void send_changed (ARDOUR::IOChange);
+	void return_changed (ARDOUR::IOChange);
 
 	bool check_latency_measurement ();
 	void set_latency_label ();

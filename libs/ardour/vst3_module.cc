@@ -129,11 +129,18 @@ class VST3WindowsModule : public VST3PluginModule
 {
 public:
 	VST3WindowsModule (const std::string& path)
+		: _handle (0)
 	{
 #ifndef NDEBUG
 		_path = path;
 #endif
-		if ((_handle = LoadLibraryA (Glib::locale_from_utf8 (path).c_str ())) == 0) {
+		gunichar2* wpath = g_utf8_to_utf16 (path.c_str(), -1, 0, 0, 0);
+		if (wpath) {
+			_handle = LoadLibraryW ((LPCWSTR)wpath);
+			g_free (wpath);
+		}
+
+		if (_handle == 0) {
 			throw failed_constructor ();
 		}
 

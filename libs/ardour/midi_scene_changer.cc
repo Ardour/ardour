@@ -71,7 +71,7 @@ MIDISceneChanger::gather (const Locations::LocationList& locations)
 {
 	std::shared_ptr<SceneChange> sc;
 
-	Glib::Threads::RWLock::WriterLock lm (scene_lock);
+	PBD::RWLock::WriterLock lm (scene_lock);
 
 	scenes.clear ();
 
@@ -174,7 +174,7 @@ MIDISceneChanger::run (samplepos_t start, samplepos_t end)
 		return;
 	}
 
-	Glib::Threads::RWLock::ReaderLock lm (scene_lock, Glib::Threads::TRY_LOCK);
+	PBD::RWLock::ReaderLock lm (scene_lock, PBD::RWLock::TryLock);
 
 	if (!lm.locked()) {
 		return;
@@ -203,7 +203,7 @@ MIDISceneChanger::locate (samplepos_t pos)
 	std::shared_ptr<MIDISceneChange> msc;
 
 	{
-		Glib::Threads::RWLock::ReaderLock lm (scene_lock);
+		PBD::RWLock::ReaderLock lm (scene_lock);
 
 		if (scenes.empty()) {
 			return;
@@ -374,21 +374,48 @@ MIDISceneChanger::jump_to (int bank, int program)
 {
 	const Locations::LocationList& locations (_session.locations()->list());
 	std::shared_ptr<SceneChange> sc;
-	timepos_t where = timepos_t::max (Temporal::AudioTime);
 
-	for (Locations::LocationList::const_iterator l = locations.begin(); l != locations.end(); ++l) {
-
-		if ((sc = (*l)->scene_change()) != 0) {
-
-			std::shared_ptr<MIDISceneChange> msc = std::dynamic_pointer_cast<MIDISceneChange> (sc);
-
-			if (msc->bank() == bank && msc->program() == program && (*l)->start() < where) {
-				where = (*l)->start();
+	switch (Config->get_marker_locate_priority()) {
+		case FirstMarker:
+			for (const auto& l : locations) {
+				if ((sc = l->scene_change()) != 0) {
+					std::shared_ptr<MIDISceneChange> msc = std::dynamic_pointer_cast<MIDISceneChange> (sc);
+					if (msc->bank() == bank && msc->program() == program) {
+						_session.request_locate (l->start_sample (), false, MustStop);
+						return;
+					}
+				}
 			}
-		}
-	}
+			break;
+		case LastMarker:
+			for (auto l = locations.rbegin(); l != locations.rend(); ++l) {
+				if ((sc = (*l)->scene_change()) != 0) {
+					std::shared_ptr<MIDISceneChange> msc = std::dynamic_pointer_cast<MIDISceneChange> (sc);
+					if (msc->bank() == bank && msc->program() == program) {
+						_session.request_locate ((*l)->start_sample (), false, MustStop);
+						return;
+					}
+				}
+			}
+			break;
+		case NextMarker:
+			Location *first = nullptr;
+			for (const auto& l : locations) {
+				if ((sc = l->scene_change()) != 0) {
+					std::shared_ptr<MIDISceneChange> msc = std::dynamic_pointer_cast<MIDISceneChange> (sc);
+					if (msc->bank() == bank && msc->program() == program && l->start_sample() > _session.transport_sample()) {
+						_session.request_locate (l->start_sample (), false, MustStop);
+						return;
+					}
 
-	if (where != timepos_t::max (Temporal::AudioTime)) {
-		_session.request_locate (where.samples());
+					if (!first) {
+						first = l;
+					}
+				}
+			}
+			if (first) {
+				_session.request_locate (first->start_sample (), false, MustStop);
+			}
+			break;
 	}
 }

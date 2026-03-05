@@ -32,9 +32,8 @@
 
 #include <sys/types.h>
 
-#include <glibmm/threads.h>
-
 #include "pbd/undo.h"
+#include "pbd/rwlock.h"
 #include "pbd/stateful.h"
 #include "pbd/statefuldestructible.h"
 
@@ -95,6 +94,8 @@ public:
 	int set_start (timepos_t const & s, bool force = false);
 	int set_end (timepos_t const & e, bool force = false);
 	int set (timepos_t const & start, timepos_t const & end);
+
+	void update_section_end (timepos_t const&);
 
 	int move_to (timepos_t const & pos);
 
@@ -350,7 +351,7 @@ public:
 		 */
 		Locations::LocationList copy;
 		{
-			Glib::Threads::RWLock::ReaderLock lm (_lock);
+			PBD::RWLock::ReaderLock lm (_lock);
 			copy = locations;
 		}
 		(obj.*method)(copy);
@@ -361,7 +362,8 @@ private:
 
 	LocationList locations;
 	Location*    current_location;
-	mutable Glib::Threads::RWLock _lock;
+
+	mutable PBD::RWLock _lock;
 
 	int set_current_unlocked (Location *);
 	void location_changed (Location*);

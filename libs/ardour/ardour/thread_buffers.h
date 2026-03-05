@@ -21,8 +21,6 @@
 #ifndef __libardour_thread_buffers__
 #define __libardour_thread_buffers__
 
-#include <glibmm/threads.h>
-
 #include "ardour/chan_count.h"
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"

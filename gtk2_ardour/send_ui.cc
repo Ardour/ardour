@@ -55,7 +55,7 @@ SendUI::SendUI (Gtk::Window* parent, Session* session, std::shared_ptr<Send> s)
 	_panners.set_panner (s->panner_shell (), s->panner ());
 
 	_send->set_metering (true);
-	_send->output ()->changed.connect (_send_connection, invalidator (*this), std::bind (&SendUI::outs_changed, this, _1, _2), gui_context ());
+	_send->output ()->changed.connect (_send_connection, invalidator (*this), std::bind (&SendUI::outs_changed, this, _1), gui_context ());
 
 	_gpm.setup_meters ();
 	_gpm.set_fader_name (X_("SendUIFader"));
@@ -94,9 +94,9 @@ SendUI::~SendUI ()
 }
 
 void
-SendUI::outs_changed (IOChange change, void* /*ignored*/)
+SendUI::outs_changed (IOChange change)
 {
-	ENSURE_GUI_THREAD (*this, &SendUI::outs_changed, change, ignored)
+	ENSURE_GUI_THREAD (*this, &SendUI::outs_changed, change)
 	if (change.type & IOChange::ConfigurationChanged) {
 		uint32_t const in  = _send->pans_required ();
 		uint32_t const out = _send->pan_outs ();

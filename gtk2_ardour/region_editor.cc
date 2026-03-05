@@ -263,7 +263,6 @@ RegionEditor::RegionEditor (Session* s, std::shared_ptr<Region> r)
 	region_changed (change);
 
 	_region->PropertyChanged.connect (_state_connection, invalidator (*this), std::bind (&RegionEditor::region_changed, this, _1), gui_context ());
-	_region->RegionFxChanged.connect (_region_connection, invalidator (*this), std::bind (&RegionEditor::region_fx_changed, this), gui_context ());
 
 	_spin_arrow_grab = false;
 
@@ -319,6 +318,10 @@ RegionEditor::region_changed (const PBD::PropertyChange& what_changed)
 	if (what_changed.contains (tempo_stuff)) {
 		tempo_changed (what_changed);
 	}
+
+	if (what_changed.contains (ARDOUR::Properties::region_fx_changed)) {
+		_region_fx_box.redisplay_plugins ();
+	}
 }
 
 void
@@ -340,12 +343,6 @@ RegionEditor::tempo_changed (PBD::PropertyChange const & changed)
 			_region_meter_entry.set_text (_("undefined"));
 		}
 	}
-}
-
-void
-RegionEditor::region_fx_changed ()
-{
-	_region_fx_box.redisplay_plugins ();
 }
 
 gint

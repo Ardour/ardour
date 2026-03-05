@@ -74,7 +74,7 @@ IOPlug::~IOPlug ()
 		std::dynamic_pointer_cast<ReadOnlyControl>(i->second)->drop_references ();
 	}
 
-	Glib::Threads::Mutex::Lock lm (_control_lock);
+	PBD::Mutex::Lock lm (_control_lock);
 	for (Controls::const_iterator li = _controls.begin(); li != _controls.end(); ++li) {
 		std::dynamic_pointer_cast<AutomationControl>(li->second)->drop_references ();
 	}
@@ -442,10 +442,10 @@ IOPlug::ensure_io ()
 	PBD::Unwinder<bool> uw (_configuring_io, true);
 
 	/* must be called with process-lock held */
-	if (_input->ensure_io (_n_in, false, this) != 0) {
+	if (_input->ensure_io (_n_in, false) != 0) {
 		return false;
 	}
-	if (_output->ensure_io (_n_out, false, this) != 0) {
+	if (_output->ensure_io (_n_out, false) != 0) {
 		return false;
 	}
 

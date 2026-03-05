@@ -36,6 +36,7 @@ class RegionEditor;
 class RegionFxPropertiesBox;
 class RoutePropertiesBox;
 class SlotPropertiesBox;
+class Pianoroll;
 
 class SelectionPropertiesBox : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 {
@@ -67,8 +68,8 @@ private:
 	Gtk::HBox              _region_editor_box;
 	RegionEditor*          _region_editor;
 	RegionFxPropertiesBox* _region_fx_box;
-
 	DispositionMask _disposition;
+	Pianoroll*              _pianoroll;
 
 	PBD::ScopedConnection _region_connection;
 	PBD::ScopedConnection _editor_connection;

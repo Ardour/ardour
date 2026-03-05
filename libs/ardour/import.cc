@@ -252,8 +252,7 @@ compose_status_message (const string& path,
 }
 
 static void
-write_audio_data_to_new_files (ImportableSource* source, ImportStatus& status,
-                               vector<std::shared_ptr<Source> >& newfiles)
+write_audio_data_to_new_files (ImportableSource* source, ImportStatus& status, vector<std::shared_ptr<Source> >& newfiles)
 {
 	const samplecnt_t nframes = ResampledImportableSource::blocksize;
 	std::shared_ptr<AudioFileSource> afs;
@@ -399,6 +398,8 @@ write_midi_type0_data_to_one_file (Evoral::SMF* source, ImportStatus& status, si
 				break;
 			}
 
+			t += delta_t;
+
 			if (size == 0) {
 				/* metadata not meant for us */
 				continue;
@@ -412,8 +413,6 @@ write_midi_type0_data_to_one_file (Evoral::SMF* source, ImportStatus& status, si
 			if (size > bufsize) {
 				bufsize = size;
 			}
-
-			t += delta_t;
 
 			/* if requested by user, each sourcefile gets only a single channel's data */
 
@@ -447,6 +446,7 @@ write_midi_type0_data_to_one_file (Evoral::SMF* source, ImportStatus& status, si
 			/* we wrote something */
 
 			smfs->mark_streaming_write_completed (target_lock, timecnt_t (source->duration()));
+			smfs->round_length_to_bars (t);
 
 			/* the streaming write that we've just finished
 			 * only wrote data to the SMF object, which is
@@ -670,6 +670,7 @@ write_midi_type1_data_to_one_file (Evoral::SMF* source, ImportStatus& status, st
 		}
 
 		smfs->mark_streaming_write_completed (target_lock, timecnt_t (Temporal::Beats::ticks_at_rate (our_t, source->ppqn())));
+		smfs->round_length_to_bars (our_t);
 
 		if (written) {
 
@@ -708,6 +709,12 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 	size_t nfiles = newsrcs.size();
 	size_t n = 0;
 	int32_t meta_track = -1;
+	vector<std::shared_ptr<Source>>::iterator nsi;
+
+	/* If we're splitting channels, do the inner loop once for each
+	   channel; otherwise, just do it once.
+	*/
+	int channel_limit = (split_midi_channels ? 16 : 1);
 
 	switch (source->smf_format()) {
 	case 0:
@@ -732,7 +739,6 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 		break;
 
 	case 1:
-		channel = 0;
 
 		for (uint16_t n = 0; n < source->num_tracks(); ++n) {
 			if (track_contains_tempo_or_key_metadata (source, n)) {
@@ -741,32 +747,34 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 			}
 		}
 
-		for (auto nsi = newsrcs.begin(); nsi != newsrcs.end(); ) {
+		for (n = 0, nsi = newsrcs.begin(); n < source->num_tracks(); ++n) {
+			for (int channel = 0; channel < channel_limit; ++channel) {
 
-			std::shared_ptr<SMFSource> smfs = std::dynamic_pointer_cast<SMFSource> (*nsi);
-			assert (smfs);
+				std::shared_ptr<SMFSource> smfs = std::dynamic_pointer_cast<SMFSource> (*nsi);
+				assert (smfs);
 
-			bool meta_only = write_midi_type1_data_to_one_file (source, status, smfs, n, split_midi_channels, channel, meta_track);
+				/* Note that "channel" is irrelevant if
+				 * split_midi_channels is false - all events
+				 * for this track will be written to the new
+				 * file. It matters only if split_midi_channels
+				 * is true, and if so, we'll run this inner
+				 * loop for every channel.
+				 */
 
-			if (meta_only) {
-				std::shared_ptr<FileSource> fs (std::dynamic_pointer_cast<FileSource>(*nsi));
-				assert (fs);
-				fs->mark_removable ();
-				nsi = newsrcs.erase (nsi);
-			}
+				bool meta_only = write_midi_type1_data_to_one_file (source, status, smfs, n, split_midi_channels, channel, meta_track);
 
-			if (split_midi_channels) {
-				channel = (channel + 1) % 16;
-			}
+				if (meta_only) {
+					std::shared_ptr<FileSource> fs (std::dynamic_pointer_cast<FileSource>(*nsi));
+					assert (fs);
+					fs->mark_removable ();
+					nsi = newsrcs.erase (nsi);
+				} else {
+					++nsi;
+				}
 
-			if (status.cancel) {
-				break;
-			}
-
-			++n;
-
-			if (!meta_only) {
-				++nsi;
+				if (status.cancel) {
+					break;
+				}
 			}
 		}
 		break;
@@ -1022,8 +1030,7 @@ Session::import_files (ImportStatus& status)
 		}
 
 		if (source) { // audio
-			status.doing_what = compose_status_message (*p, source->samplerate(),
-			                                            sample_rate(), status.current, status.total);
+			status.doing_what = compose_status_message (*p, source->samplerate(), sample_rate(), status.current, status.total);
 			write_audio_data_to_new_files (source.get(), status, successful_imports);
 		} else if (smf_reader) { // midi
 			status.doing_what = string_compose(_("Loading MIDI file %1"), *p);
@@ -1039,9 +1046,18 @@ Session::import_files (ImportStatus& status)
 			}
 		}
 
+		if (status.cancel) {
+			break;
+		}
+
+		std::copy (successful_imports.begin(), successful_imports.end(), std::back_inserter(status.sources));
+		successful_imports.clear ();
+
 		++status.current;
 		status.progress = 0;
 	}
+
+	std::cerr << "paths done, cancel = " << status.cancel << std::endl;
 
 	if (!status.cancel) {
 		struct tm* now;
@@ -1052,7 +1068,7 @@ Session::import_files (ImportStatus& status)
 
 		/* flush the final length(s) to the header(s) */
 
-		for (Sources::iterator x = successful_imports.begin(); x != successful_imports.end(); ) {
+		for (Sources::iterator x = status.sources.begin(); x != status.sources.end(); ) {
 
 			if ((afs = std::dynamic_pointer_cast<AudioFileSource>(*x)) != 0) {
 				afs->update_header((*x)->natural_position().samples(), *now, xnow);
@@ -1085,22 +1101,21 @@ Session::import_files (ImportStatus& status)
 			/* don't create tracks for empty MIDI sources (channels) */
 
 			if ((smfs = std::dynamic_pointer_cast<SMFSource>(*x)) != 0 && smfs->is_empty()) {
-				x = successful_imports.erase(x);
+				x = status.sources.erase(x);
 			} else {
 				++x;
 			}
 		}
 
-		std::copy (successful_imports.begin(), successful_imports.end(), std::back_inserter(status.sources));
-
 		/* Now, and only now, announce the newly created and to-be-used sources */
 
-		for (auto & src : successful_imports) {
+		for (auto & src : status.sources) {
 			SourceFactory::SourceCreated (src);
 		}
 
 	} else {
 		try {
+			std::cerr << "Cancelled, will remove " << delete_if_cancelled.size() << std::endl;
 			std::for_each (delete_if_cancelled.begin(), delete_if_cancelled.end(), remove_file_source);
 		} catch (...) {
 			error << _("Failed to remove some files after failed/cancelled import operation") << endmsg;

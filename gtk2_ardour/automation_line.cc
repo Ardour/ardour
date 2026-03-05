@@ -38,8 +38,6 @@
 #include <climits>
 #include <vector>
 
-#include "boost/shared_ptr.hpp"
-
 #include "pbd/floating.h"
 #include "pbd/memento_command.h"
 #include "pbd/stl_delete.h"
@@ -485,6 +483,13 @@ AutomationLine::delta_to_string (double delta) const
 	if (!get_uses_gain_mapping () && _desc.logarithmic) {
 		return "x " + ARDOUR::value_as_string (_desc, delta);
 	} else {
+		switch (_desc.type) {
+			case MidiPitchBenderAutomation:
+				delta += 8192;
+				break;
+			default:
+				break;
+		}
 		return u8"\u0394 " + ARDOUR::value_as_string (_desc, delta);
 	}
 }
@@ -511,6 +516,9 @@ AutomationLine::string_to_fraction (string const & s) const
 			} else {
 				v = dB_to_coefficient (v);
 			}
+			break;
+		case MidiPitchBenderAutomation:
+			v += 8192;
 			break;
 		default:
 			break;

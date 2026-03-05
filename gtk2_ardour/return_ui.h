@@ -54,7 +54,7 @@ private:
 	sigc::connection fast_screen_update_connection;
 	PBD::ScopedConnection input_change_connection;
 
-	void ins_changed (ARDOUR::IOChange, void*);
+	void ins_changed (ARDOUR::IOChange);
 };
 
 class ReturnUIWindow : public ArdourWindow

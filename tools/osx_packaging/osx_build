@@ -189,11 +189,14 @@ mkdir -p $ExportFormats
 mkdir -p $Etc
 mkdir -p $MackieControl
 mkdir -p $OSC
-mkdir -p $LuaScripts
 mkdir -p $Themes
 
-if test -z "$VBM"; then
-mkdir -p $PatchFiles
+if test -z "$VBM" -a -z "$LIVETRAX"; then
+	mkdir -p $PatchFiles
+fi
+
+if test -z "$LIVETRAX"; then
+	mkdir -p $LuaScripts
 fi
 
 EXECUTABLE=${BUNDLENAME}
@@ -369,21 +372,25 @@ done
 
 # MIDNAM Patch Files
 # got to be careful with names here
-if test -z "$VBM"; then
+if test -z "$VBM" -a -z "$LIVETRAX"; then
+	echo "Copying MIDNAM Patchfiles"
 	for x in $BUILD_ROOT/../share/patchfiles/*.midnam ; do
 		cp "$x" $PatchFiles
 	done
 fi
 
-# Lua Script Files
-# got to be careful with names here
-for x in $BUILD_ROOT/../share/scripts/*.lua ; do
-	BN=$(basename $x)
-	if test "${BN:0:1}" = "_"; then
-		continue;
-	fi
-	cp "$x" $LuaScripts
-done
+if test -z "$LIVETRAX"; then
+	echo "Copying Lua Scripts"
+	# Lua Script Files
+	# got to be careful with names here
+	for x in $BUILD_ROOT/../share/scripts/*.lua ; do
+		BN=$(basename $x)
+		if test "${BN:0:1}" = "_"; then
+			continue;
+		fi
+		cp "$x" $LuaScripts
+	done
+fi
 
 # recursively copy web-surface html/js
 cp -R $BUILD_ROOT/../share/web_surfaces $WebSurfaces
@@ -406,10 +413,12 @@ for x in $BUILD_ROOT/../share/osc/*.preset ; do
 done
 
 # Mixbus MixerSettings (if any)
-for x in $BUILD_ROOT/../share/mixer_settings/*.lua ; do
-	mkdir -p $MixerSettings  # create on demand
-	cp "$x" $MixerSettings
-done
+if test -d $BUILD_ROOT/../share/mixer_settings; then
+	for x in $BUILD_ROOT/../share/mixer_settings/*.lua ; do
+		mkdir -p $MixerSettings  # create on demand
+		cp "$x" $MixerSettings
+	done
+fi
 
 # VAMP plugins that we use
 cp $BUILD_ROOT/libs/vamp-plugins/libardourvampplugins.dylib $Frameworks

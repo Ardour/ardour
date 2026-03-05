@@ -1,5 +1,4 @@
-/*
- * Copyright (C) 2000-2017 Paul Davis <paul@linuxaudiosystems.com>
+/* Copyright (C) 2000-2017 Paul Davis <paul@linuxaudiosystems.com>
  * Copyright (C) 2006-2014 David Robillard <d@drobilla.net>
  * Copyright (C) 2006 Jesse Chappell <jesse@essej.net>
  * Copyright (C) 2007-2011 Carl Hetherington <carl@carlh.net>
@@ -32,7 +31,6 @@
 #include <errno.h>
 
 #include <glibmm.h>
-#include <glibmm/threads.h>
 
 #include "pbd/xml++.h"
 #include "pbd/replace_all.h"
@@ -55,7 +53,7 @@
 
 #include "pbd/i18n.h"
 
-#define BLOCK_PROCESS_CALLBACK() Glib::Threads::Mutex::Lock em (AudioEngine::instance()->process_lock())
+#define BLOCK_PROCESS_CALLBACK() PBD::Mutex::Lock em (AudioEngine::instance()->process_lock())
 
 using namespace std;
 using namespace ARDOUR;
@@ -131,7 +129,7 @@ IO::connection_change (std::shared_ptr<Port> a, std::shared_ptr<Port> b)
 	 */
 	std::shared_ptr<PortSet const> ports = _ports.reader();
 	if (ports->contains (a) || ports->contains (b)) {
-		changed (IOChange (IOChange::ConnectionsChanged), this); /* EMIT SIGNAL */
+		changed (IOChange (IOChange::ConnectionsChanged)); /* EMIT SIGNAL */
 	}
 }
 
@@ -148,7 +146,7 @@ IO::silence (samplecnt_t nframes)
 }
 
 int
-IO::disconnect (std::shared_ptr<Port> our_port, string other_port, void* src)
+IO::disconnect (std::shared_ptr<Port> our_port, string other_port)
 {
 	if (other_port.length() == 0 || our_port == 0) {
 		return 0;
@@ -169,7 +167,7 @@ IO::disconnect (std::shared_ptr<Port> our_port, string other_port, void* src)
 		return -1;
 	}
 
-	changed (IOChange (IOChange::ConnectionsChanged), src); /* EMIT SIGNAL */
+	changed (IOChange (IOChange::ConnectionsChanged)); /* EMIT SIGNAL */
 
 	_session.set_dirty ();
 
@@ -177,7 +175,7 @@ IO::disconnect (std::shared_ptr<Port> our_port, string other_port, void* src)
 }
 
 int
-IO::connect (std::shared_ptr<Port> our_port, string other_port, void* src)
+IO::connect (std::shared_ptr<Port> our_port, string other_port)
 {
 	if (other_port.length() == 0 || our_port == 0) {
 		return 0;
@@ -196,7 +194,7 @@ IO::connect (std::shared_ptr<Port> our_port, string other_port, void* src)
 		return -1;
 	}
 
-	changed (IOChange (IOChange::ConnectionsChanged), src); /* EMIT SIGNAL */
+	changed (IOChange (IOChange::ConnectionsChanged)); /* EMIT SIGNAL */
 	_session.set_dirty ();
 	return 0;
 }
@@ -217,7 +215,7 @@ IO::can_add_port (DataType type) const
 }
 
 int
-IO::remove_port (std::shared_ptr<Port> port, void* src)
+IO::remove_port (std::shared_ptr<Port> port)
 {
 	ChanCount before = ports()->count ();
 	ChanCount after = before;
@@ -253,7 +251,7 @@ IO::remove_port (std::shared_ptr<Port> port, void* src)
 		PortCountChanged (n_ports()); /* EMIT SIGNAL */
 
 		if (change.type != IOChange::NoChange) {
-			changed (change, src);
+			changed (change);
 			std::shared_ptr<PortSet const> ports = _ports.reader();
 			_buffers.attach_buffers (*ports);
 		}
@@ -268,6 +266,8 @@ IO::remove_port (std::shared_ptr<Port> port, void* src)
 	}
 
 	_session.set_dirty ();
+	/* drop references */
+	_ports.flush ();
 
 	return 0;
 }
@@ -275,11 +275,10 @@ IO::remove_port (std::shared_ptr<Port> port, void* src)
 /** Add a port.
  *
  * @param destination Name of port to connect new port to.
- * @param src Source for emitted ConfigurationChanged signal.
  * @param type Data type of port.  Default value (NIL) will use this IO's default type.
  */
 int
-IO::add_port (string destination, void* src, DataType type)
+IO::add_port (string destination, DataType type)
 {
 	std::shared_ptr<Port> our_port;
 
@@ -332,7 +331,7 @@ IO::add_port (string destination, void* src, DataType type)
 		PortCountChanged (n_ports()); /* EMIT SIGNAL */
 
 		change.type = IOChange::ConfigurationChanged;
-		changed (change, src); /* EMIT SIGNAL */
+		changed (change); /* EMIT SIGNAL */
 		_buffers.attach_buffers (*ports());
 	}
 
@@ -350,13 +349,13 @@ IO::add_port (string destination, void* src, DataType type)
 }
 
 int
-IO::disconnect (void* src)
+IO::disconnect ()
 {
 	for (auto const& p : *ports()) {
 		p->disconnect_all ();
 	}
 
-	changed (IOChange (IOChange::ConnectionsChanged), src); /* EMIT SIGNAL */
+	changed (IOChange (IOChange::ConnectionsChanged)); /* EMIT SIGNAL */
 
 	return 0;
 }
@@ -464,7 +463,7 @@ IO::ensure_ports_locked (ChanCount count, bool clear, bool& changed)
 
 /** Caller must hold process lock */
 int
-IO::ensure_ports (ChanCount count, bool clear, void* src)
+IO::ensure_ports (ChanCount count, bool clear)
 {
 #ifndef PLATFORM_WINDOWS
 	assert (!AudioEngine::instance()->process_lock().trylock());
@@ -486,7 +485,7 @@ IO::ensure_ports (ChanCount count, bool clear, void* src)
 	if (changed) {
 		change.after = ports()->count ();
 		change.type = IOChange::ConfigurationChanged;
-		this->changed (change, src); /* EMIT SIGNAL */
+		this->changed (change); /* EMIT SIGNAL */
 		_buffers.attach_buffers (*ports());
 		setup_bundle ();
 		_session.set_dirty ();
@@ -506,13 +505,13 @@ IO::reestablish_port_subscriptions ()
 
 /** Caller must hold process lock */
 int
-IO::ensure_io (ChanCount count, bool clear, void* src)
+IO::ensure_io (ChanCount count, bool clear)
 {
 #ifndef PLATFORM_WINDOWS
 	assert (!AudioEngine::instance()->process_lock().trylock());
 #endif
 
-	return ensure_ports (count, clear, src);
+	return ensure_ports (count, clear);
 }
 
 XMLNode&
@@ -860,9 +859,9 @@ IO::create_ports (const XMLNode& node, int version)
 	get_port_counts (node, version, n, c);
 
 	{
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		BLOCK_PROCESS_CALLBACK ();
 
-		if (ensure_ports (n, !_session.inital_connect_or_deletion_in_progress (), this)) {
+		if (ensure_ports (n, !_session.inital_connect_or_deletion_in_progress ())) {
 			error << string_compose(_("%1: cannot create I/O ports"), _name) << endmsg;
 			return -1;
 		}
@@ -1021,10 +1020,10 @@ IO::set_ports (const string& str)
 	}
 
 	{
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		BLOCK_PROCESS_CALLBACK ();
 
 		// FIXME: audio-only
-		if (ensure_ports (ChanCount(DataType::AUDIO, nports), true, this)) {
+		if (ensure_ports (ChanCount(DataType::AUDIO, nports), true)) {
 			return -1;
 		}
 	}
@@ -1048,7 +1047,7 @@ IO::set_ports (const string& str)
 		} else if (n > 0) {
 
 			for (int x = 0; x < n; ++x) {
-				connect (nth (i), ports[x], this);
+				connect (nth (i), ports[x]);
 			}
 		}
 
@@ -1293,13 +1292,12 @@ IO::connected_latency (bool for_playback) const
 }
 
 int
-IO::connect_ports_to_bundle (std::shared_ptr<Bundle> c, bool exclusive, void* src) {
-	return connect_ports_to_bundle(c, exclusive, false, src);
+IO::connect_ports_to_bundle (std::shared_ptr<Bundle> c, bool exclusive) {
+	return connect_ports_to_bundle(c, exclusive, false);
 }
 
 int
-IO::connect_ports_to_bundle (std::shared_ptr<Bundle> c, bool exclusive,
-                             bool allow_partial, void* src)
+IO::connect_ports_to_bundle (std::shared_ptr<Bundle> c, bool exclusive, bool allow_partial)
 {
 	BLOCK_PROCESS_CALLBACK ();
 
@@ -1311,12 +1309,12 @@ IO::connect_ports_to_bundle (std::shared_ptr<Bundle> c, bool exclusive,
 
 	c->connect (_bundle, _session.engine(), allow_partial);
 
-	changed (IOChange (IOChange::ConnectionsChanged), src); /* EMIT SIGNAL */
+	changed (IOChange (IOChange::ConnectionsChanged)); /* EMIT SIGNAL */
 	return 0;
 }
 
 int
-IO::disconnect_ports_from_bundle (std::shared_ptr<Bundle> c, void* src)
+IO::disconnect_ports_from_bundle (std::shared_ptr<Bundle> c)
 {
 	BLOCK_PROCESS_CALLBACK ();
 
@@ -1324,7 +1322,7 @@ IO::disconnect_ports_from_bundle (std::shared_ptr<Bundle> c, void* src)
 
 	/* If this is a UserBundle, make a note of what we've done */
 
-	changed (IOChange (IOChange::ConnectionsChanged), src); /* EMIT SIGNAL */
+	changed (IOChange (IOChange::ConnectionsChanged)); /* EMIT SIGNAL */
 	return 0;
 }
 

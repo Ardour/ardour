@@ -1144,6 +1144,11 @@ Editor::build_marker_menu (Location* loc)
 	items.push_back (MenuElem (_("Move Marker to Playhead"), sigc::mem_fun(*this, &Editor::marker_menu_set_from_playhead)));
 
 	items.push_back (SeparatorElem());
+	ArdourMarker* am = find_marker_from_location_id (loc->id(), true);
+	if (am) {
+		items.push_back (MenuElem (_("Edit Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::edit_marker), am, true)));
+		items.push_back (SeparatorElem());
+	}
 
 	if (!loc->is_cue_marker()) {
 		items.push_back (MenuElem (_("Create Range to Next Marker"), sigc::mem_fun(*this, &Editor::marker_menu_range_to_next)));
@@ -1929,12 +1934,24 @@ Editor::edit_location (Location& loc, bool with_scene, bool with_command)
 		l3->set_alignment (1.0);
 		b3->pack_start (*channel, true, false);
 
-		use_scene_button = manage (new Gtk::CheckButton (_("Clear scene change")));
+		use_scene_button = manage (new Gtk::CheckButton (_("Use scene change")));
+		use_scene_button->signal_toggled().connect  ([this,use_scene_button,program,bank,channel]() {
+			bool s = use_scene_button->get_active();
+			program->set_sensitive (s);
+			bank->set_sensitive (s);
+			channel->set_sensitive (s);
+		});
+
 		if (!msc) {
-			use_scene_button->set_sensitive (false);
+			/* toggle twice to be sure to trigger toggled callback */
+			use_scene_button->set_active (true);
+			use_scene_button->set_active (false);
 		} else {
-			use_scene_button->signal_toggled().connect  (sigc::bind (sigc::mem_fun (dialog, &Gtk::Dialog::set_response_sensitive), Gtk::RESPONSE_ACCEPT, true));
+			/* toggle twice to be sure to trigger toggled callback */
+			use_scene_button->set_active (false);
+			use_scene_button->set_active (true);
 		}
+
 
 		Gtk::HBox* b4 = manage (new Gtk::HBox);
 		b4->pack_start (*use_scene_button, true, false);
@@ -1972,7 +1989,7 @@ Editor::edit_location (Location& loc, bool with_scene, bool with_command)
 
 	if (with_scene) {
 
-		if (use_scene_button->get_active()) {
+		if (!use_scene_button->get_active()) {
 			loc.set_scene_change (nullptr);
 		} else {
 

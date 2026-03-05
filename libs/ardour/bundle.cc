@@ -70,7 +70,7 @@ Bundle::Bundle (std::shared_ptr<Bundle> other)
 ChanCount
 Bundle::nchannels () const
 {
-	Glib::Threads::Mutex::Lock lm (_channel_mutex);
+	PBD::Mutex::Lock lm (_channel_mutex);
 
 	ChanCount c;
 	for (vector<Channel>::const_iterator i = _channel.begin(); i != _channel.end(); ++i) {
@@ -92,7 +92,7 @@ Bundle::channel_ports (uint32_t c) const
 {
 	assert (c < n_total());
 
-	Glib::Threads::Mutex::Lock lm (_channel_mutex);
+	PBD::Mutex::Lock lm (_channel_mutex);
 	return _channel[c].ports;
 }
 
@@ -107,7 +107,7 @@ Bundle::add_port_to_channel (uint32_t ch, string portname)
 	assert (portname.find_first_of (':') != string::npos);
 
 	{
-		Glib::Threads::Mutex::Lock lm (_channel_mutex);
+		PBD::Mutex::Lock lm (_channel_mutex);
 		_channel[ch].ports.push_back (portname);
 	}
 
@@ -126,7 +126,7 @@ Bundle::remove_port_from_channel (uint32_t ch, string portname)
 	bool changed = false;
 
 	{
-		Glib::Threads::Mutex::Lock lm (_channel_mutex);
+		PBD::Mutex::Lock lm (_channel_mutex);
 		PortList& pl = _channel[ch].ports;
 		PortList::iterator i = find (pl.begin(), pl.end(), portname);
 
@@ -152,7 +152,7 @@ Bundle::set_port (uint32_t ch, string portname)
 	assert (portname.find_first_of (':') != string::npos);
 
 	{
-		Glib::Threads::Mutex::Lock lm (_channel_mutex);
+		PBD::Mutex::Lock lm (_channel_mutex);
 		_channel[ch].ports.clear ();
 		_channel[ch].ports.push_back (portname);
 	}
@@ -165,7 +165,7 @@ void
 Bundle::add_channel (std::string const & n, DataType t)
 {
 	{
-		Glib::Threads::Mutex::Lock lm (_channel_mutex);
+		PBD::Mutex::Lock lm (_channel_mutex);
 		_channel.push_back (Channel (n, t));
 	}
 
@@ -177,7 +177,7 @@ void
 Bundle::add_channel (std::string const & n, DataType t, PortList p)
 {
 	{
-		Glib::Threads::Mutex::Lock lm (_channel_mutex);
+		PBD::Mutex::Lock lm (_channel_mutex);
 		_channel.push_back (Channel (n, t, p));
 	}
 
@@ -189,7 +189,7 @@ void
 Bundle::add_channel (std::string const & n, DataType t, std::string const & p)
 {
 	{
-		Glib::Threads::Mutex::Lock lm (_channel_mutex);
+		PBD::Mutex::Lock lm (_channel_mutex);
 		_channel.push_back (Channel (n, t, p));
 	}
 
@@ -201,7 +201,7 @@ Bundle::port_attached_to_channel (uint32_t ch, std::string portname)
 {
 	assert (ch < n_total());
 
-	Glib::Threads::Mutex::Lock lm (_channel_mutex);
+	PBD::Mutex::Lock lm (_channel_mutex);
 	return (std::find (_channel[ch].ports.begin (), _channel[ch].ports.end (), portname) != _channel[ch].ports.end ());
 }
 
@@ -213,7 +213,7 @@ Bundle::remove_channel (uint32_t ch)
 {
 	assert (ch < n_total());
 
-	Glib::Threads::Mutex::Lock lm (_channel_mutex);
+	PBD::Mutex::Lock lm (_channel_mutex);
 	_channel.erase (_channel.begin () + ch);
 
 	lm.release();
@@ -224,7 +224,7 @@ Bundle::remove_channel (uint32_t ch)
 void
 Bundle::remove_channels ()
 {
-	Glib::Threads::Mutex::Lock lm (_channel_mutex);
+	PBD::Mutex::Lock lm (_channel_mutex);
 
 	_channel.clear ();
 
@@ -238,7 +238,7 @@ Bundle::remove_channels ()
 bool
 Bundle::offers_port (std::string p) const
 {
-	Glib::Threads::Mutex::Lock lm (_channel_mutex);
+	PBD::Mutex::Lock lm (_channel_mutex);
 
 	for (std::vector<Channel>::const_iterator i = _channel.begin(); i != _channel.end(); ++i) {
 		for (PortList::const_iterator j = i->ports.begin(); j != i->ports.end(); ++j) {
@@ -257,7 +257,7 @@ Bundle::offers_port (std::string p) const
 bool
 Bundle::offers_port_alone (std::string p) const
 {
-	Glib::Threads::Mutex::Lock lm (_channel_mutex);
+	PBD::Mutex::Lock lm (_channel_mutex);
 
 	for (std::vector<Channel>::const_iterator i = _channel.begin(); i != _channel.end(); ++i) {
 		if (i->ports.size() == 1 && i->ports[0] == p) {
@@ -277,7 +277,7 @@ Bundle::channel_name (uint32_t ch) const
 {
 	assert (ch < n_total());
 
-	Glib::Threads::Mutex::Lock lm (_channel_mutex);
+	PBD::Mutex::Lock lm (_channel_mutex);
 	return _channel[ch].name;
 }
 
@@ -291,7 +291,7 @@ Bundle::set_channel_name (uint32_t ch, std::string const & n)
 	assert (ch < n_total());
 
 	{
-		Glib::Threads::Mutex::Lock lm (_channel_mutex);
+		PBD::Mutex::Lock lm (_channel_mutex);
 		_channel[ch].name = n;
 	}
 
@@ -391,7 +391,7 @@ void
 Bundle::remove_ports_from_channels ()
 {
 	{
-		Glib::Threads::Mutex::Lock lm (_channel_mutex);
+		PBD::Mutex::Lock lm (_channel_mutex);
 		for (uint32_t c = 0; c < n_total(); ++c) {
 			_channel[c].ports.clear ();
 		}
@@ -410,7 +410,7 @@ Bundle::remove_ports_from_channel (uint32_t ch)
 	assert (ch < n_total());
 
 	{
-		Glib::Threads::Mutex::Lock lm (_channel_mutex);
+		PBD::Mutex::Lock lm (_channel_mutex);
 		_channel[ch].ports.clear ();
 	}
 
@@ -593,7 +593,7 @@ Bundle::channel_type (uint32_t c) const
 {
 	assert (c < n_total());
 
-	Glib::Threads::Mutex::Lock lm (_channel_mutex);
+	PBD::Mutex::Lock lm (_channel_mutex);
 	return _channel[c].type;
 }
 
@@ -640,7 +640,7 @@ Bundle::type_channel_to_overall (DataType t, uint32_t c) const
 		return c;
 	}
 
-	Glib::Threads::Mutex::Lock lm (_channel_mutex);
+	PBD::Mutex::Lock lm (_channel_mutex);
 
 	vector<Channel>::const_iterator i = _channel.begin ();
 
@@ -674,7 +674,7 @@ Bundle::overall_channel_to_type (DataType t, uint32_t c) const
 		return c;
 	}
 
-	Glib::Threads::Mutex::Lock lm (_channel_mutex);
+	PBD::Mutex::Lock lm (_channel_mutex);
 
 	assert (_channel.size () > c);
 

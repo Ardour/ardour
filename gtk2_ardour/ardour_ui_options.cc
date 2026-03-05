@@ -120,35 +120,6 @@ ARDOUR_UI::toggle_use_mmc ()
 	ActionManager::toggle_config_state ("Options", "UseMMC", &RCConfiguration::set_mmc_control, &RCConfiguration::get_mmc_control);
 }
 
-void
-ARDOUR_UI::toggle_auto_input ()
-{
-	ActionManager::toggle_config_state_foo ("Transport", "ToggleAutoInput", sigc::mem_fun (_session->config, &SessionConfiguration::set_auto_input), sigc::mem_fun (_session->config, &SessionConfiguration::get_auto_input));
-}
-
-void
-ARDOUR_UI::toggle_auto_play ()
-{
-	ActionManager::toggle_config_state_foo ("Transport", "ToggleAutoPlay", sigc::mem_fun (_session->config, &SessionConfiguration::set_auto_play), sigc::mem_fun (_session->config, &SessionConfiguration::get_auto_play));
-}
-
-void
-ARDOUR_UI::toggle_auto_return ()
-{
-	ActionManager::toggle_config_state_foo ("Transport", "ToggleAutoReturn", sigc::mem_fun (_session->config, &SessionConfiguration::set_auto_return), sigc::mem_fun (_session->config, &SessionConfiguration::get_auto_return));
-}
-
-void
-ARDOUR_UI::toggle_click ()
-{
-	ActionManager::toggle_config_state ("Transport", "ToggleClick", &RCConfiguration::set_clicking, &RCConfiguration::get_clicking);
-}
-
-void
-ARDOUR_UI::toggle_click_on_rec ()
-{
-	ActionManager::toggle_config_state ("Transport", "ToggleClickOnRec", &RCConfiguration::set_click_record_only, &RCConfiguration::get_click_record_only);
-}
 
 void
 ARDOUR_UI::toggle_session_monitoring_in ()
@@ -197,7 +168,43 @@ ARDOUR_UI::unset_dual_punch ()
 }
 
 void
-ARDOUR_UI::toggle_punch ()
+ARDOUR_UI::auto_input_action_toggled ()
+{
+	ActionManager::toggle_config_state_foo ("Transport", "ToggleAutoInput", sigc::mem_fun (_session->config, &SessionConfiguration::set_auto_input), sigc::mem_fun (_session->config, &SessionConfiguration::get_auto_input));
+}
+
+void
+ARDOUR_UI::auto_play_action_toggled ()
+{
+	ActionManager::toggle_config_state_foo ("Transport", "ToggleAutoPlay", sigc::mem_fun (_session->config, &SessionConfiguration::set_auto_play), sigc::mem_fun (_session->config, &SessionConfiguration::get_auto_play));
+}
+
+void
+ARDOUR_UI::auto_return_action_toggled ()
+{
+	ActionManager::toggle_config_state_foo ("Transport", "ToggleAutoReturn", sigc::mem_fun (_session->config, &SessionConfiguration::set_auto_return), sigc::mem_fun (_session->config, &SessionConfiguration::get_auto_return));
+}
+
+void
+ARDOUR_UI::click_action_toggled ()
+{
+	ActionManager::toggle_config_state ("Transport", "ToggleClick", &RCConfiguration::set_clicking, &RCConfiguration::get_clicking);
+}
+
+void
+ARDOUR_UI::click_on_rec_action_toggled ()
+{
+	ActionManager::toggle_config_state ("Transport", "ToggleClickOnRec", &RCConfiguration::set_click_record_only, &RCConfiguration::get_click_record_only);
+}
+
+void
+ARDOUR_UI::follow_edits_action_toggled ()
+{
+	ActionManager::toggle_config_state (X_("Transport"), X_("ToggleFollowEdits"), &UIConfiguration::set_follow_edits, &UIConfiguration::get_follow_edits);
+}
+
+void
+ARDOUR_UI::punch_action_toggled ()
 {
 	if (ignore_dual_punch) {
 		return;
@@ -214,7 +221,7 @@ ARDOUR_UI::toggle_punch ()
 }
 
 void
-ARDOUR_UI::toggle_punch_in ()
+ARDOUR_UI::punch_in_action_toggled ()
 {
 	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Transport"), X_("TogglePunchIn"));
 
@@ -232,7 +239,7 @@ ARDOUR_UI::toggle_punch_in ()
 }
 
 void
-ARDOUR_UI::toggle_punch_out ()
+ARDOUR_UI::punch_out_action_toggled ()
 {
 	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Transport"), X_("TogglePunchOut"));
 

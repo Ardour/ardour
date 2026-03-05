@@ -34,7 +34,7 @@
 
 #include <gtkmm2ext/dndtreeview.h>
 
-#include <glibmm/threads.h>
+#include <pbd/mutex.h>
 
 #include "ardour/session_handle.h"
 
@@ -110,7 +110,7 @@ private:
 	FFTGraph fft_graph;
 
 	bool track_list_ready;
-	Glib::Threads::Mutex track_list_lock;
+	PBD::Mutex track_list_lock;
 
 	friend class FFTGraph;
 };

@@ -388,8 +388,11 @@
 [auto-return-after-rewind-ffwd]
 [auto-return-target-list]
 [automation-follows-regions]
+  automation follows regions
 [automation-interval-msecs]
+  automation
 [automation-thinning-factor]
+  automation
 [buffering-preset]
 [capture-buffer-seconds]
 [click-emphasis-sound]
@@ -477,6 +480,8 @@
   meter type track
 [midi-audition-synth-uri]
   midi audition synthesizer plugin name id uri location
+[midi-chase]
+  midi chase notes locate play
 [midi-clock-resolution]
   midi clock resolution quantize limit precision
 [midi-clock-sets-tempo]
@@ -485,6 +490,8 @@
   midi generic control surface feedback
 [midi-input-follows-selection]
   midi inputs port device follow selection tracks
+[midi-panic-when-looping]
+  midi panic looping ports notes off
 [midi-track-buffer-seconds]
 [minimum-disk-read-bytes]
   disk disc i/o io chunk read size bytes buffering

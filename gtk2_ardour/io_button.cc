@@ -373,9 +373,9 @@ IOButtonBase::set_label (IOButtonBase& self, ARDOUR::Session& session, std::shar
 		string                   maybe_client = "";
 		vector<string>           connections;
 		std::shared_ptr<PortSet> ps (io->ports ());
-		for (PortSet::iterator port = ps->begin (dt);
-		     port != ps->end (dt);
-		     ++port) {
+
+		for (PortSet::iterator port = ps->begin (dt); port != ps->end (dt); ++port) {
+
 			port_connections.clear ();
 			port->get_connections (port_connections);
 			if (port_connections.empty ()) {
@@ -392,11 +392,25 @@ IOButtonBase::set_label (IOButtonBase& self, ARDOUR::Session& session, std::shar
 			}
 			connections.push_back (connection);
 
+			/* Fix Pipewire's JACK port names for all MIDI
+			   ports. Audio ports (somehow) don't have the client
+			   name for system:XXXX ports, but MIDI ports have
+			   "Midi-Bridge:"
+			*/
+			connection = ARDOUR::maybe_clean_pipewire_midi_port_name (connection);
+
+			/* If the connection name contains a colon, the prefix
+			 * is a JACK client name that we're not interested in
+			 * displaying here.
+			 */
+
 			connection = connection.substr (0, connection.find (":"));
+
 
 			if (maybe_client.empty ()) {
 				maybe_client = connection;
 			}
+
 			if (maybe_client != connection) {
 				break;
 			}
@@ -501,22 +515,22 @@ void
 IOButton::bundle_chosen (std::shared_ptr<ARDOUR::Bundle> c)
 {
 	if (_input) {
-		_route->input ()->connect_ports_to_bundle (c, true, this);
+		_route->input ()->connect_ports_to_bundle (c, true);
 	} else {
-		_route->output ()->connect_ports_to_bundle (c, true, true, this);
+		_route->output ()->connect_ports_to_bundle (c, true, true);
 	}
 }
 
 void
 IOButton::disconnect ()
 {
-	io ()->disconnect (this);
+	io ()->disconnect ();
 }
 
 void
 IOButton::add_port (DataType t)
 {
-	if (io ()->add_port ("", this, t) != 0) {
+	if (io ()->add_port ("", t) != 0) {
 		ArdourMessageDialog msg (_("It is not possible to add a port here."));
 		msg.set_title (_("Cannot add port"));
 		msg.run ();
@@ -770,5 +784,12 @@ IOButton::maybe_add_bundle_to_menu (std::shared_ptr<Bundle> b, ARDOUR::BundleLis
 	_menu_bundles.push_back (b);
 
 	MenuList& citems = _menu.items ();
-	citems.push_back (MenuElemNoMnemonic (b->name (), sigc::bind (sigc::mem_fun (*this, &IOButton::bundle_chosen), b)));
+	string n (b->name());
+	string::size_type pos = n.find (X_("system:"));
+
+	if (pos == 0) {
+		n.erase (0, 7);
+	}
+
+	citems.push_back (MenuElemNoMnemonic (n, sigc::bind (sigc::mem_fun (*this, &IOButton::bundle_chosen), b)));
 }

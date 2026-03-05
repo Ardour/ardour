@@ -19,15 +19,21 @@
 
 #pragma once
 
+#include <sigc++/trackable.h>
+#include <sigc++/connection.h>
+
 #include <atomic>
+#include <functional>
 #include <string>
+#include <list>
 #include <vector>
-#include <map>
 #include <stdint.h>
 #include <pthread.h>
-#include <glibmm/threads.h>
 
 #include "pbd/libpbd_visibility.h"
+#include "pbd/mutex.h"
+#include "pbd/private.h"
+#include "pbd/rwlock.h"
 
 namespace PBD
 {
@@ -87,7 +93,7 @@ public:
 	};
 
 	virtual bool call_slot (InvalidationRecord*, const std::function<void()>&) = 0;
-	virtual Glib::Threads::RWLock& slot_invalidation_rwlock() = 0;
+	virtual PBD::RWLock& slot_invalidation_rwlock() = 0;
 
 	std::string event_loop_name() const { return _name; }
 
@@ -109,12 +115,12 @@ public:
 	static InvalidationRecord* __invalidator (sigc::trackable& trackable, const char*, int);
 
 private:
-	static Glib::Threads::Private<EventLoop> thread_event_loop;
+	static PBD::Private<EventLoop> thread_event_loop;
 	std::string _name;
 
 	typedef std::vector<ThreadBufferMapping> ThreadRequestBufferList;
 	static ThreadRequestBufferList thread_buffer_requests;
-	static Glib::Threads::Mutex   thread_buffer_requests_lock;
+	static PBD::Mutex   thread_buffer_requests_lock;
 
 	struct RequestBufferSupplier {
 

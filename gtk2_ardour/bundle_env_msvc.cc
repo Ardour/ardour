@@ -363,19 +363,7 @@ fixup_bundle_environment (int argc, char* argv[], string & localedir)
 	std::string path;
 	const  char *cstr;
 
-	// First, set up 'ARDOUR_DLL_PATH'
-	path  = dir_path;
-	path += "\\lib\\ardour3\\surfaces;";
-	path += dir_path;
-	path += "\\lib\\ardour3\\panners;";
-	path += dir_path;
-	path += "\\lib\\ardour3\\backends;";
-	path += dir_path;
-	path += "\\bin";
-	Glib::setenv ("ARDOUR_DLL_PATH", path, true);
-
-
-	// Next, set up 'ARDOUR_DATA_PATH'
+	// First, set up 'ARDOUR_DATA_PATH'
 	path  = get_module_folder() + "\\";
 	path += PROGRAM_NAME;
 	path += PROGRAM_VERSION;

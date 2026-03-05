@@ -30,9 +30,7 @@
 #include <string>
 #include <vector>
 
-#include <sys/time.h>
 #include <pthread.h>
-
 
 #include <lo/lo.h>
 
@@ -94,7 +92,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	bool get_active () const;
 
 	// generic osc send
-	Glib::Threads::Mutex _lo_lock;
+	PBD::Mutex _lo_lock;
 	int float_message (std::string, float value, lo_address addr);
 	int int_message (std::string, int value, lo_address addr);
 	int text_message (std::string path, std::string val, lo_address addr);
@@ -207,7 +205,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		 */
 
 // storage for  each surface's settings
-	mutable Glib::Threads::Mutex surfaces_lock;
+	mutable PBD::Mutex surfaces_lock;
 	typedef std::vector<OSCSurface> Surface;
 	Surface _surface;
 
@@ -356,6 +354,10 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	void add_marker_name(const std::string &markername) {
 		add_marker(markername);
 	}
+
+	int goto_marker(const char* types, lo_arg **argv, int argc, lo_message msg);
+	int rename_marker_at_playhead(char *n, lo_message msg);
+	int rename_marker(char *on, char *nn, lo_message msg);
 
 	// cue
 	Sorted cue_get_sorted_stripables(std::shared_ptr<ARDOUR::Stripable> aux, uint32_t id, lo_address);
@@ -541,6 +543,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK1_MSG(bank_delta,f);
 	PATH_CALLBACK1_MSG(use_group,f);
 	PATH_CALLBACK1_MSG_s(name_session,s);
+	PATH_CALLBACK1_MSG_s(rename_marker_at_playhead,s);
 	PATH_CALLBACK1_MSG_s(sel_new_personal_send,s);
 	PATH_CALLBACK1_MSG(sel_master_send_enable,i);
 	PATH_CALLBACK1_MSG(sel_pan_elevation,f);
@@ -601,6 +604,18 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		return 0; \
 	}
 
+#define PATH_CALLBACK2_MSG_s_s(name,arg1type,arg2type) \
+	static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, lo_message msg, void *user_data) { \
+		return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, msg); \
+	} \
+	int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, lo_message msg) { \
+		OSC_DEBUG; \
+		if (argc > 1) {	\
+			name (&argv[0]->arg1type, &argv[1]->arg2type, msg); \
+		} \
+		return 0; \
+	}
+
 #define PATH_CALLBACK3(name,arg1type,arg2type,arg3type) \
 	static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, lo_message msg, void *user_data) { \
 		return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, msg); \
@@ -651,6 +666,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK2_MSG(trigger_bang,i,i);
 	PATH_CALLBACK2_MSG(trigger_unbang,i,i);
 	PATH_CALLBACK2_MSG(trigger_stop,i,i);  /* second arg is 'stop now' */
+
+	PATH_CALLBACK2_MSG_s_s(rename_marker,s,s);
 
 	int strip_parse (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
 	int master_parse (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
@@ -713,7 +730,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int scrub (float delta, lo_message msg);
 	int jog (float delta, lo_message msg);
 	int jog_mode (float mode, lo_message msg);
-	int set_marker (const char* types, lo_arg **argv, int argc, lo_message msg);
 	int click_level (float position);
 	int sel_previous (lo_message msg);
 	int sel_next (lo_message msg);

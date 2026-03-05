@@ -39,7 +39,6 @@
 #include "pbd/file_utils.h"
 #include "pbd/locale_guard.h"
 
-#include <glibmm/threads.h>
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 

@@ -24,17 +24,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstdint>
 #include <cstdlib>
 #include <cmath>
 #include <algorithm>
+#include <memory>
 #include <typeinfo>
 
+#include "ardour/audioregion.h"
 #include "ardour/audio_track.h"
 #include "ardour/midi_track.h"
 #include "ardour/midi_region.h"
+#include "ardour/operations.h"
 #include "ardour/profile.h"
 #include "ardour/region_factory.h"
 
+#include "ardour/types.h"
 #include "canvas/canvas.h"
 #include "canvas/text.h"
 #include "canvas/scroll_group.h"
@@ -1347,7 +1352,7 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context,
 
 	if (can_drop) {
 
-		if (target == "x-ardour/region.pbdid") {
+		if (target == "x-ardour/region.pbdid" || target == "x-ardour/region.pbdids") {
 			if (tv.first == 0 && pbdid_dragged_dt != DataType::NIL) {
 				/* drop to drop-zone */
 				context->drag_status (Gdk::ACTION_COPY, time);
@@ -1385,9 +1390,9 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context,
 }
 
 void
-Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
+Editor::drop_region (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
                       int x, int y,
-                      const SelectionData& data,
+                      PBD::ID const& rid,
                       guint /*info*/, guint /*time*/)
 {
 	GdkEvent event;
@@ -1401,7 +1406,6 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
 	event.motion.state = Gdk::BUTTON1_MASK;
 	samplepos_t const pos = window_event_sample (&event, &px, &py);
 
-	PBD::ID rid (data.get_data_as_string ());
 	std::shared_ptr<Region> region = RegionFactory::region_by_id (rid);
 
 	if (!region) { return; }
@@ -1418,7 +1422,7 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
 				if ((Config->get_output_auto_connect() & AutoConnectMaster) && session()->master_out()) {
 					output_chan =  session()->master_out()->n_inputs().n_audio();
 				}
-				list<std::shared_ptr<AudioTrack> > audio_tracks;
+				AudioTrackList audio_tracks;
 				audio_tracks = session()->new_audio_track (region->sources().size(), output_chan, 0, 1, region->name(), PresentationInfo::max_order);
 				rtav = dynamic_cast<RouteTimeAxisView*> (time_axis_view_from_stripable (audio_tracks.front()));
 			} else if (std::dynamic_pointer_cast<MidiRegion> (region)) {
@@ -1447,6 +1451,186 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
 			_drags->set (new RegionInsertDrag (*this, region_copy, rtav, timepos_t (pos), drag_time_domain (region_copy.get())), &event);
 			_drags->end_grab (&event);
 		}
+	}
+}
+
+void
+Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& context,
+                      int x, int y,
+                      std::vector<PBD::ID> const& rids,
+                      guint info, guint time)
+{
+	if (rids.empty ()) {
+		return;
+	}
+
+	GdkEvent event;
+	double px;
+	double py;
+
+	event.type = GDK_BUTTON_PRESS;
+	event.button.x = x;
+	event.button.y = y;
+	/* assume we're dragging with button 1 */
+	event.motion.state = Gdk::BUTTON1_MASK;
+	samplepos_t const pos = window_event_sample (&event, &px, &py);
+
+	std::pair<TimeAxisView*, int> const tv = trackview_by_y_position (py, false);
+
+	if (tv.first == 0) {
+		/* drop to dropzone */
+		std::map<shared_ptr<Playlist>, shared_ptr<Region>> import_map;
+
+		/* step 1: create tracks */
+		if (pbdid_dragged_dt == DataType::MIDI) {
+			for (auto const& rid : rids) {
+				std::shared_ptr<Region> region = RegionFactory::region_by_id (rid);
+				ChanCount one_midi_port (DataType::MIDI, 1);
+				list<std::shared_ptr<MidiTrack> > midi_tracks;
+				midi_tracks = session()->new_midi_track (one_midi_port, one_midi_port,
+				                                         Config->get_strict_io () || Profile->get_mixbus (),
+				                                         std::shared_ptr<ARDOUR::PluginInfo>(),
+				                                         (ARDOUR::Plugin::PresetRecord*) 0,
+				                                         nullptr, 1, region->name(), PresentationInfo::max_order, Normal, true);
+				if (midi_tracks.size () == 1) {
+					std::shared_ptr<Playlist> playlist = midi_tracks.front()->playlist ();
+					std::shared_ptr<Region> region_copy = RegionFactory::create (region, true);
+					import_map[playlist] = region_copy;
+				}
+			}
+		} else if (pbdid_dragged_dt == DataType::AUDIO) {
+			RouteList routes;
+			AudioTrackList tracks;
+			bool use_master_chan = (Config->get_output_auto_connect() & AutoConnectMaster) && session()->master_out();
+
+			for (auto const& rid : rids) {
+				std::shared_ptr<Region> region = RegionFactory::region_by_id (rid);
+				uint32_t output_chan = region->sources().size();
+				if (use_master_chan) {
+					output_chan = _session->master_out()->n_inputs().n_audio();
+				}
+				bool ok = _session->new_audio_routes_tracks_bulk (routes, tracks, region->sources().size(), output_chan, 0, 1, region->name(), PresentationInfo::max_order);
+				if (ok) {
+					std::shared_ptr<Playlist> playlist = tracks.back()->playlist ();
+					std::shared_ptr<Region> region_copy = RegionFactory::create (region, true);
+					import_map[playlist] = region_copy;
+				}
+
+			}
+			if (!routes.empty ()) {
+				_session->add_routes (routes, true, true, PresentationInfo::max_order);
+			}
+		}
+
+		/* step 2: add regions to created tracks */
+		timepos_t insert_pos (pos);
+		snap_to_with_modifier (insert_pos, &event);
+		begin_reversible_command (Operations::insert_region);
+
+		for (auto& [playlist, r] : import_map) {
+			playlist->clear_changes ();
+			playlist->clear_owned_changes ();
+			playlist->add_region (r, insert_pos, 1.0, false);
+			playlist->rdiff_and_add_command (_session);
+		}
+		commit_reversible_command ();
+
+		return;
+	}
+
+	RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (tv.first);
+	if (!rtav) {
+		return;
+	}
+
+	bool sequence_regions;
+	std::shared_ptr<AudioRegion> first_region;
+
+	if (pbdid_dragged_dt == DataType::MIDI && 0 != dynamic_cast<MidiTimeAxisView*> (rtav)) {
+		sequence_regions = true;
+	} else if (pbdid_dragged_dt == DataType::AUDIO && 0 != dynamic_cast<AudioTimeAxisView*> (rtav)) {
+		uint32_t chn = 0;
+		size_t   nar = 0;
+		timecnt_t length;
+
+		for (auto const& rid : rids) {
+			std::shared_ptr<AudioRegion> ar = dynamic_pointer_cast<AudioRegion> (RegionFactory::region_by_id (rid));
+			if (!ar) {
+				continue;
+			}
+			chn += ar->n_channels ();
+			if (length.is_zero ()) {
+				first_region = ar;
+				length = ar->length ();
+			} else if (length != ar->length ()) {
+				chn = UINT32_MAX;
+				break;
+			}
+			++nar;
+		}
+
+		// XXX check route's _disk_reader->output_streams().n_audio() ?
+		if (rtav->route ()->n_inputs ().n_audio () != chn || chn < 2 || nar < 2 || chn == UINT32_MAX) {
+			sequence_regions = true;
+		} else {
+			sequence_regions = false;
+		}
+	} else {
+		assert (0);
+		return;
+	}
+
+	if (sequence_regions) {
+		timepos_t insert_pos (pos);
+		snap_to_with_modifier (insert_pos, &event);
+
+		std::shared_ptr<Playlist> playlist = rtav->playlist ();
+		begin_reversible_command (Operations::insert_region);
+		playlist->clear_changes ();
+		playlist->clear_owned_changes ();
+
+		for (auto const& rid : rids) {
+			std::shared_ptr<Region> region = RegionFactory::region_by_id (rid);
+			std::shared_ptr<Region> region_copy = RegionFactory::create (region, true);
+			playlist->add_region (region_copy, insert_pos, 1.0, false);
+			if (should_ripple ()) {
+				playlist->ripple (insert_pos, region_copy->length (), region_copy);
+			}
+			insert_pos += region_copy->length ();
+		}
+		playlist->rdiff_and_add_command (_session);
+		commit_reversible_command ();
+	} else {
+		/* make multi-channel region */
+		std::string region_name = region_name_from_path (first_region->name(), true, false); // XXX use track name?
+		
+		while (RegionFactory::region_by_name (region_name)) {
+			region_name = bump_name_once (region_name, '.');
+		}
+
+		PropertyList plist;
+		plist.add (ARDOUR::Properties::start, timecnt_t (Temporal::AudioTime));
+		plist.add (ARDOUR::Properties::length, first_region->length ());
+		plist.add (ARDOUR::Properties::name, region_name);
+		plist.add (ARDOUR::Properties::layer, 0);
+		plist.add (ARDOUR::Properties::whole_file, false);
+		plist.add (ARDOUR::Properties::external, true);
+		plist.add (ARDOUR::Properties::opaque, true);
+
+		SourceList sources;
+		for (auto const& rid : rids) {
+			std::shared_ptr<AudioRegion> ar = dynamic_pointer_cast<AudioRegion> (RegionFactory::region_by_id (rid));
+			if (!ar) {
+				continue;
+			}
+			sources.insert (sources.end (), ar->sources ().begin(), ar->sources ().end());
+		}
+
+		std::shared_ptr<Region> r = RegionFactory::create (sources, plist);
+		std::dynamic_pointer_cast<AudioRegion>(r)->special_set_position (sources[0]->natural_position());
+
+		_drags->set (new RegionInsertDrag (*this, r, rtav, timepos_t (pos), Temporal::AudioTime), &event);
+		_drags->end_grab (&event);
 	}
 }
 

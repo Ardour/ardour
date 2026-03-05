@@ -27,8 +27,6 @@
 
 #include <boost/intrusive/list.hpp>
 
-#include <glibmm/threads.h>
-
 #include "pbd/command.h"
 #include "pbd/enum_convert.h"
 #include "pbd/integer_division.h"
@@ -176,7 +174,7 @@ class LIBTEMPORAL_API Tempo {
 	 * @param npm Note Types per minute
 	 * @param note_type Note Type (default `4': quarter note)
 	 */
-	Tempo (double npm, int8_t note_type)
+	Tempo (double npm, uint8_t note_type)
 		: _npm (npm)
 		, _enpm (npm)
 		, _superclocks_per_note_type (double_npm_to_scpn (npm))
@@ -261,7 +259,7 @@ class LIBTEMPORAL_API Tempo {
 	double       _enpm;
 	superclock_t _superclocks_per_note_type;
 	superclock_t _end_superclocks_per_note_type;
-	int8_t       _note_type;
+	uint8_t      _note_type;
 	bool         _locked_to_meter; /* XXX name has unclear meaning with nutempo */
 	bool         _continuing; /* true if our effective end tempo is defined
 	                           * by the following tempo in the TempoMap;

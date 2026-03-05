@@ -53,7 +53,7 @@ double
 SoloSafeControl::get_value () const
 {
 	if (slaved()) {
-		Glib::Threads::RWLock::ReaderLock lm (master_lock);
+		PBD::RWLock::ReaderLock lm (master_lock);
 		return get_masters_value_locked () ? 1.0 : 0.0;
 	}
 

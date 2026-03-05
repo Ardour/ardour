@@ -1235,7 +1235,7 @@ LaunchKey4::ports_release ()
 	asp->drain (10000, 500000);
 
 	{
-		Glib::Threads::Mutex::Lock em (AudioEngine::instance()->process_lock());
+		PBD::Mutex::Lock em (AudioEngine::instance()->process_lock());
 		AudioEngine::instance()->unregister_port (_daw_in);
 		AudioEngine::instance()->unregister_port (_daw_out);
 	}
@@ -1462,14 +1462,14 @@ LaunchKey4::build_color_map ()
 	for (size_t n = 0; n < sizeof (novation_color_chart_left_side) / sizeof (novation_color_chart_left_side[0]); ++n) {
 		uint32_t color = novation_color_chart_left_side[n];
 		/* Add 1 to account for missing zero at zero in the table */
-		std::pair<int,uint32_t> p (1 + n, color);
+		std::pair<int,uint32_t> p (static_cast<int>(1 + n), color);
 		color_map.insert (p);
 	}
 
 	for (size_t n = 0; n < sizeof (novation_color_chart_right_side) / sizeof (novation_color_chart_right_side[0]); ++n) {
 		uint32_t color = novation_color_chart_right_side[n];
 		/* Add 40 to account for start offset number shown in page 10 of the LP manual */
-		std::pair<int,uint32_t> p (40 + n, color);
+		std::pair<int,uint32_t> p (static_cast<int>(40 + n), color);
 		color_map.insert (p);
 	}
 }

@@ -34,8 +34,6 @@
 #undef interface
 #endif
 
-#include <glibmm/thread.h>
-
 #include <ytkmm/widget.h>
 #include <ytkmm/style.h>
 #ifndef GTK_NEW_TOOLTIP_API
@@ -193,7 +191,7 @@ private:
 	void process_error_message (Transmitter::Channel, const char *);
 	void do_quit ();
 
-	Glib::Threads::Mutex   error_lock;
+	PBD::Mutex   error_lock;
 	std::list<std::string> error_stack;
 
 	void color_selection_done (bool status);

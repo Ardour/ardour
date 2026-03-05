@@ -45,6 +45,8 @@
 #include "gtkmm2ext/debug.h"
 #include "gtkmm2ext/utils.h"
 
+#include "pbd/i18n.h"
+
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtkmm2ext;
@@ -212,40 +214,44 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 
 		KeyboardKey k (ev->state, ev->keyval);
 
-		/* Check hierarchy from current focus widget upwards */
+		if (!loading_session()) {
+			/* Check hierarchy from current focus widget upwards */
 
-		while (focus) {
+			while (focus) {
 
-			Gtkmm2ext::BindingSet* focus_bindings = get_bindings_from_widget_hierarchy (&focus);
+				Gtkmm2ext::BindingSet* focus_bindings = get_bindings_from_widget_hierarchy (&focus);
 
-			if (focus && focus_bindings) {
-				for (auto & bindings : *focus_bindings) {
-					DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tusing widget (%3) bindings %1 @ %2 for this event\n", bindings->name(), bindings, gtk_widget_get_name (focus)));
-					if (bindings->activate (k, Bindings::Press)) {
+				if (focus && focus_bindings) {
+					for (auto & bindings : *focus_bindings) {
+						DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tusing widget (%3) bindings %1 @ %2 for this event\n", bindings->name(), bindings, gtk_widget_get_name (focus)));
+						if (bindings->activate (k, Bindings::Press)) {
+							DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
+							return true;
+						}
+					}
+				}
+
+				if (focus) {
+					focus = gtk_widget_get_parent (focus);
+				}
+			}
+
+			/* Use any "top level" bindings passed to us (could be from a
+			 * top level tab or a top level window)
+			 */
+
+			if (top_level_bindings) {
+				for (auto & tlb : *top_level_bindings) {
+					DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tusing top level bindings %1 @ %2 for this event\n", tlb->name(), tlb));
+
+					if (tlb->activate (k, Bindings::Press)) {
 						DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
 						return true;
 					}
 				}
 			}
-
-			if (focus) {
-				focus = gtk_widget_get_parent (focus);
-			}
-		}
-
-		/* Use any "top level" bindings passed to us (could be from a
-		 * top level tab or a top level window)
-		 */
-
-		if (top_level_bindings) {
-			for (auto & tlb : *top_level_bindings) {
-				DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tusing top level bindings %1 @ %2 for this event\n", tlb->name(), tlb));
-
-				if (tlb->activate (k, Bindings::Press)) {
-					DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
-					return true;
-				}
-			}
+		} else {
+			DEBUG_TRACE (DEBUG::Accelerators, "bindings skipped because session is still loading\n");
 		}
 
 		/* Use any global bindings */
@@ -272,6 +278,11 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 
 		if (window.get_realized () && (!window.get_focus() || window.get_focus()->get_realized ()) && gtk_window_propagate_key_event (win, ev)) {
 			DEBUG_TRACE (DEBUG::Accelerators, "\thandled by propagate\n");
+			return true;
+		}
+
+		if (loading_session()) {
+			DEBUG_TRACE (DEBUG::Accelerators, "bindings skipped because session is still loading\n");
 			return true;
 		}
 
@@ -354,17 +365,50 @@ ARDOUR_UI::transport_numpad_event (int num)
 	if ( _numpad_locate_happening ) {
 		_pending_locate_num = _pending_locate_num*10 + num;
 	} else {
+		char const * const group = X_("Transport");
+		char const * action = nullptr;
+
 		switch (num) {
-			case 0: toggle_roll(false, false);                           break;
-			case 1: transport_rewind();                                  break;
-			case 2: transport_forward();                                 break;
-			case 3: transport_record(true);                              break;
-			case 4: toggle_session_auto_loop();                          break;
-			case 5: transport_record(false); toggle_session_auto_loop(); break;
-			case 6: toggle_punch();                                      break;
-			case 7: toggle_click();                                      break;
-			case 8: toggle_auto_return();                                break;
-			case 9: toggle_follow_edits();                               break;
+		case 0:
+			toggle_roll (false, false);
+			break;
+		case 1:
+			transport_rewind();
+			break;
+		case 2:
+			transport_forward();
+			break;
+		case 3:
+			transport_record(true);
+			break;
+		case 4:
+			toggle_session_auto_loop();
+			break;
+		case 5:
+			transport_record(false);
+			toggle_session_auto_loop();
+			break;
+		case 6:
+			action = X_("TogglePunch");
+			break;
+		case 7:
+			action = X_("ToggleClick");
+			break;
+		case 8:
+			action = X_("ToggleAutoReturn");
+			break;
+		case 9:
+			action = X_("ToggleFollowEdits");
+			break;
+		default:
+			return;
+		}
+
+		if (action) {
+			Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (group, action);
+			if (tact) {
+				tact->set_active (!tact->get_active());
+			}
 		}
 	}
 }

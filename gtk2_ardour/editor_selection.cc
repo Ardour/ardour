@@ -1733,59 +1733,23 @@ Editor::region_selection_changed ()
 	}
 	update_selection_markers ();
 
-	if (selection->regions.size () == 1)  {
-		RegionView* rv = (selection->regions.front ());
+	if (!selection->regions.empty()) {
+		RegionView* rv = (selection->regions.back ());
 		assert (rv);
 		maybe_edit_region_in_bottom_pane (*rv);
-	} else {
-		_bottom_hbox.set_child_packing (*_properties_box, true, true);
-		if (_pianoroll && _pianoroll->contents().get_parent()) {
-			_pianoroll->contents().unmap ();
-			_pianoroll->contents().get_parent()->remove (_pianoroll->contents());
-		}
 	}
 }
 
 void
-Editor::maybe_edit_region_in_bottom_pane (RegionView& rv)
+Editor::maybe_edit_region_in_bottom_pane (RegionView&)
 {
-	bool pack_pianoroll = false;
-	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&rv);
-
-	if (mrv && UIConfiguration::instance().get_region_edit_disposition() != Editing::NeverBottomPane) {
-		std::shared_ptr<ARDOUR::MidiTrack> mt = std::dynamic_pointer_cast<ARDOUR::MidiTrack> (mrv->midi_view()->track());
-		std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion>(mrv->region());
-		if (mrv && mt && mr) {
-
-			if (!_pianoroll) {
-				// XXX this should really not happen here
-				_pianoroll = new Pianoroll ("editor pianoroll", true);
-				_pianoroll->get_canvas_viewport()->set_size_request (-1, 120);
-				if (_session) {
-					_pianoroll->set_session (_session);
-				}
-			}
-
-			_pianoroll->set_track (mt);
-			_pianoroll->set_region (mr);
-			pack_pianoroll = true;
-		}
-	}
-
-	if (pack_pianoroll) {
-		_bottom_hbox.set_child_packing (*_properties_box, false, false);
-
-		if (!_pianoroll->contents().get_parent()) {
-			_bottom_hbox.pack_start (_pianoroll->contents(), true, true);
-		}
-		_pianoroll->contents().hide (); // Why is this needed?
-		_pianoroll->contents().show_all ();
-	} else {
-		if (_pianoroll && _pianoroll->contents().get_parent()) {
-			_pianoroll->contents().unmap ();
-			_pianoroll->contents().get_parent()->remove (_pianoroll->contents());
-		}
-		_bottom_hbox.set_child_packing (*_properties_box, true, true);
+	switch (UIConfiguration::instance().get_region_edit_disposition()) {
+	case OpenBottomPane:
+		show_att_bottom (true);
+		break;
+	default:
+		/* we're good: if it's visible, it's visible */
+		break;
 	}
 }
 

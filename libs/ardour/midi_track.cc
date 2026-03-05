@@ -91,6 +91,7 @@ MidiTrack::MidiTrack (Session& sess, string name, TrackMode mode)
 	, _input_active (true)
 	, _restore_pgm_on_load (true)
 	, _last_seen_external_midi_note (-1)
+	, _chase_notes (true)
 {
 	_session.SessionLoaded.connect_same_thread (*this, std::bind (&MidiTrack::restore_controls, this));
 
@@ -115,7 +116,7 @@ MidiTrack::init ()
 	_velocity_control.reset (new VelocityControl (_session));
 	add_control (_velocity_control);
 
-	_input->changed.connect_same_thread (*this, std::bind (&MidiTrack::track_input_active, this, _1, _2));
+	_input->changed.connect_same_thread (*this, std::bind (&MidiTrack::track_input_active, this, _1));
 
 	_disk_writer->set_note_mode (_note_mode);
 	_disk_reader->reset_tracker ();
@@ -128,6 +129,18 @@ MidiTrack::init ()
 #endif
 
 	return 0;
+}
+
+void
+MidiTrack::set_chase_notes (bool yn)
+{
+	if (_chase_notes != yn) {
+		_chase_notes = yn;
+		if (!yn && _disk_reader) {
+			_disk_reader->clear_midi_chase ();
+		}
+		_session.set_dirty();
+	}
 }
 
 void
@@ -207,6 +220,11 @@ MidiTrack::set_state (const XMLNode& node, int version)
 		capture_channel_mode = playback_channel_mode;
 	}
 
+	if (!node.get_property ("chase-notes", _chase_notes)) {
+		/* default is to chase */
+		_chase_notes = true;
+	}
+
 	XMLProperty const * prop;
 
 	unsigned int playback_channel_mask = 0xffff;
@@ -275,6 +293,7 @@ MidiTrack::state(bool save_template) const
 	root.set_property ("step-editing", _step_editing);
 	root.set_property ("input-active", _input_active);
 	root.set_property ("restore-pgm", _restore_pgm_on_load);
+	root.set_property ("chase-notes", _chase_notes);
 
 	for (Controls::const_iterator c = _controls.begin(); c != _controls.end(); ++c) {
 		if (std::dynamic_pointer_cast<MidiTrack::MidiControl>(c->second)) {
@@ -408,7 +427,7 @@ MidiTrack::no_roll_unlocked (pframes_t nframes, samplepos_t start_sample, sample
 void
 MidiTrack::realtime_locate (bool for_loop_end)
 {
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
+	PBD::RWLock::ReaderLock lm (_processor_lock, PBD::RWLock::TryLock);
 
 	if (!lm.locked ()) {
 		return;
@@ -443,7 +462,11 @@ MidiTrack::non_realtime_locate (samplepos_t spos)
 		return;
 	}
 
-	Glib::Threads::Mutex::Lock lm (_control_lock, Glib::Threads::TRY_LOCK);
+	if (_chase_notes && Config->get_midi_chase()) {
+		_disk_reader->midi_chase (spos);
+	}
+
+	PBD::Mutex::Lock lm (_control_lock, PBD::Mutex::TryLock);
 	if (!lm.locked()) {
 		return;
 	}
@@ -567,7 +590,7 @@ MidiTrack::export_stuff (BufferSet&                   buffers,
 		return -1;
 	}
 
-	Glib::Threads::RWLock::ReaderLock rlock (_processor_lock);
+	PBD::RWLock::ReaderLock rlock (_processor_lock);
 
 	std::shared_ptr<MidiPlaylist> mpl = _disk_writer->midi_playlist();
 	if (!mpl) {
@@ -884,7 +907,7 @@ MidiTrack::map_input_active (bool yn)
 }
 
 void
-MidiTrack::track_input_active (IOChange change, void* /* src */)
+MidiTrack::track_input_active (IOChange change)
 {
 	if (change.type & IOChange::ConfigurationChanged) {
 		map_input_active (_input_active);
@@ -982,7 +1005,7 @@ MidiTrack::playlist_contents_changed ()
 }
 
 void
-MidiTrack::input_change_handler (IOChange change, void *src)
+MidiTrack::input_change_handler (IOChange change)
 {
 	note_connections.drop_connections ();
 	_last_seen_external_midi_note = -1;
@@ -994,7 +1017,7 @@ MidiTrack::input_change_handler (IOChange change, void *src)
 		}
 	}
 
-	Track::input_change_handler (change, src);
+	Track::input_change_handler (change);
 }
 
 void

@@ -151,7 +151,7 @@ URIMap::URIMap()
 uint32_t
 URIMap::uri_to_id(const char* uri)
 {
-	Glib::Threads::Mutex::Lock lm (_lock);
+	PBD::Mutex::Lock lm (_lock);
 
 	const std::string urimm(uri);
 	const Map::const_iterator i = _map.find(urimm);
@@ -167,7 +167,7 @@ URIMap::uri_to_id(const char* uri)
 const char*
 URIMap::id_to_uri(const uint32_t id) const
 {
-	Glib::Threads::Mutex::Lock lm (_lock);
+	PBD::Mutex::Lock lm (_lock);
 
 	const Unmap::const_iterator i = _unmap.find(id);
 	return (i != _unmap.end()) ? i->second.c_str() : NULL;

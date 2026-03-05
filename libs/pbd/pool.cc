@@ -132,7 +132,7 @@ SingleAllocMultiReleasePool::~SingleAllocMultiReleasePool ()
 void*
 MultiAllocSingleReleasePool::alloc ()
 {
-	Glib::Threads::Mutex::Lock guard (m_lock);
+	PBD::Mutex::Lock guard (m_lock);
 	return Pool::alloc ();
 }
 
@@ -151,7 +151,7 @@ SingleAllocMultiReleasePool::alloc ()
 void
 SingleAllocMultiReleasePool::release (void* ptr)
 {
-	Glib::Threads::Mutex::Lock guard (m_lock);
+	PBD::Mutex::Lock guard (m_lock);
 	Pool::release (ptr);
 }
 
@@ -228,7 +228,7 @@ PerThreadPool::per_thread_pool (bool must_exist)
 void
 PerThreadPool::set_trash (RingBuffer<CrossThreadPool*>* t)
 {
-	Glib::Threads::Mutex::Lock lm (_trash_mutex);
+	PBD::Mutex::Lock lm (_trash_mutex);
 	_trash = t;
 }
 
@@ -236,7 +236,7 @@ PerThreadPool::set_trash (RingBuffer<CrossThreadPool*>* t)
 void
 PerThreadPool::add_to_trash (CrossThreadPool* p)
 {
-	Glib::Threads::Mutex::Lock lm (_trash_mutex);
+	PBD::Mutex::Lock lm (_trash_mutex);
 
 	if (!_trash) {
 		warning << "Pool " << p->name () << " has no trash collector; a memory leak has therefore occurred" << endmsg;

@@ -24,11 +24,10 @@
 #include <string>
 #include <pthread.h>
 
-#include <glibmm/threads.h>
-
 #include "pbd/libpbd_visibility.h"
 #include "pbd/receiver.h"
 #include "pbd/ringbufferNPT.h"
+#include "pbd/rwlock.h"
 #include "pbd/signals.h"
 #include "pbd/base_ui.h"
 
@@ -60,9 +59,9 @@ public:
 
 	void register_thread (pthread_t, std::string, uint32_t num_requests);
 	bool call_slot (EventLoop::InvalidationRecord*, const std::function<void()>&);
-	Glib::Threads::RWLock& slot_invalidation_rwlock() { return request_buffer_map_lock; }
+	PBD::RWLock& slot_invalidation_rwlock() { return request_buffer_map_lock; }
 
-	Glib::Threads::RWLock request_buffer_map_lock;
+	PBD::RWLock request_buffer_map_lock;
 
 protected:
 	struct RequestBuffer : public PBD::RingBufferNPT<RequestObject> {

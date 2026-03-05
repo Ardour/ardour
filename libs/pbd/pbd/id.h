@@ -21,12 +21,11 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 #include <string>
 
-#include <glibmm/threads.h>
-
 #include "pbd/libpbd_visibility.h"
+#include "pbd/mutex.h"
 
 namespace PBD {
 
@@ -70,7 +69,7 @@ class LIBPBD_API ID {
 	uint64_t _id;
 	bool string_assign (std::string);
 
-	static Glib::Threads::Mutex* counter_lock;
+	static PBD::Mutex* counter_lock;
 	static uint64_t _counter;
 };
 

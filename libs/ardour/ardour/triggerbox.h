@@ -25,15 +25,14 @@
 #include <memory>
 #include <vector>
 #include <string>
-#include <exception>
-
-#include <glibmm/threads.h>
 
 #include "pbd/crossthread.h"
+#include "pbd/mutex.h"
 #include "pbd/pcg_rand.h"
 #include "pbd/pool.h"
 #include "pbd/properties.h"
 #include "pbd/ringbuffer.h"
+#include "pbd/rwlock.h"
 #include "pbd/stateful.h"
 
 #include "midi++/types.h"
@@ -155,6 +154,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	PBD::Property<uint32_t>             _follow_count;
 	PBD::Property<Temporal::BBT_Offset> _quantization;
 	PBD::Property<Temporal::BBT_Offset> _follow_length;
+	PBD::Property<Temporal::BBT_Offset> _capture_duration;
 	PBD::Property<bool>                 _use_follow_length;
 	PBD::Property<bool>                 _legato;
 	PBD::Property<gain_t>               _gain;
@@ -183,6 +183,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 		uint32_t follow_count = 1;
 		Temporal::BBT_Offset quantization = Temporal::BBT_Offset (1, 0, 0);
 		Temporal::BBT_Offset follow_length = Temporal::BBT_Offset (1, 0, 0);
+		Temporal::BBT_Offset capture_duration = Temporal::BBT_Offset (1, 0, 0);
 		bool use_follow_length = false;
 		bool legato = false;
 		gain_t gain = 1.0;
@@ -214,6 +215,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 			follow_count = other.follow_count;
 			quantization = other.quantization;
 			follow_length = other.follow_length;
+			capture_duration = other.capture_duration;
 			use_follow_length = other.use_follow_length;
 			legato = other.legato;
 			gain = other.gain;
@@ -248,6 +250,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	TRIGGERBOX_PROPERTY_DECL (follow_count, uint32_t);
 	TRIGGERBOX_PROPERTY_DECL_CONST_REF (quantization, Temporal::BBT_Offset);
 	TRIGGERBOX_PROPERTY_DECL_CONST_REF (follow_length, Temporal::BBT_Offset);
+	TRIGGERBOX_PROPERTY_DECL_CONST_REF (capture_duration, Temporal::BBT_Offset);
 	TRIGGERBOX_PROPERTY_DECL (use_follow_length, bool);
 	TRIGGERBOX_PROPERTY_DECL (legato, bool);
 	TRIGGERBOX_PROPERTY_DECL (velocity_effect, float);
@@ -300,6 +303,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	bool armed() const { return _armed; }
 	PBD::Signal<void()> ArmChanged;
 	static PBD::Signal<void(Trigger const *)> TriggerArmChanged;
+
 
 	Temporal::BBT_Argument compute_start (Temporal::TempoMap::SharedPtr const &, samplepos_t start, samplepos_t end, Temporal::BBT_Offset const & q, samplepos_t& start_samples, bool& will_start);
 	virtual timepos_t compute_end (Temporal::TempoMap::SharedPtr const &, Temporal::BBT_Time const &, samplepos_t, Temporal::Beats &) = 0;
@@ -374,6 +378,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void begin_switch (TriggerPtr);
 
 	bool explicitly_stopped() const { return _explicitly_stopped; }
+	void set_scene_switch (bool yn);
 
 	uint32_t loop_count() const { return _loop_cnt; }
 
@@ -451,6 +456,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	uint32_t                  _loop_cnt; /* how many times in a row has this played */
 	void*                     _ui;
 	bool                      _explicitly_stopped;
+	bool                      _scene_switch;
 	gain_t                    _pending_velocity_gain;
 	gain_t                    _velocity_gain;
 	bool                      _cue_launched;
@@ -824,6 +830,7 @@ struct SlotArmInfo {
 	Temporal::Beats end_beats;
 	samplepos_t end_samples;
 	samplecnt_t captured;
+	MidiNoteTracker tracker;
 	RTMidiBufferBeats* midi_buf;
 	AudioTrigger::AudioData audio_buf;
 	RubberBand::RubberBandStretcher* stretcher;
@@ -848,12 +855,15 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 	static PBD::Signal<void()> CueRecordingChanged;
 
 	void set_record_enabled (bool yn);
+	bool rec_enabled() const;
 	RecordState record_enabled() const { return _record_state; }
 	PBD::Signal<void()> RecEnableChanged;
+	PBD::Signal<void(Trigger const *)> ReCountIn;
 	static PBD::Signal<void()> TriggerRecEnableChanged;
 	static PBD::Signal<void(Trigger const *)> RegionCaptured;
 
 	void arm_from_another_thread (Trigger& slot, samplepos_t, uint32_t chans, Temporal::BBT_Offset const &);
+	void setup_arm_info_bounds (SlotArmInfo& ai, samplepos_t, Trigger& slot, Temporal::BBT_Offset const & duration);
 	void disarm();
 	void disarm_all();
 	bool armed() const { return (bool) _arm_info.load(); }
@@ -955,6 +965,8 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 	void begin_midi_learn (int index);
 	void midi_unlearn (int index);
 	void stop_midi_learn ();
+	bool learning () const { return _learning; }
+	static PBD::Signal<void()> TriggerMIDILearned;
 
 	static Temporal::BBT_Offset assumed_trigger_duration () { return _assumed_trigger_duration; }
 	static void set_assumed_trigger_duration (Temporal::BBT_Offset const &);
@@ -1000,7 +1012,7 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 
 	DataType _data_type;
 	int32_t _order;
-	mutable Glib::Threads::RWLock trigger_lock; /* protects all_triggers */
+	mutable PBD::RWLock trigger_lock; /* protects all_triggers */
 	Triggers all_triggers;
 
 	typedef std::vector<Trigger*> PendingTriggers;
@@ -1080,10 +1092,11 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 	 * the GUI to read (so that it can update itself).
 	 */
 	mutable EventRingBuffer<samplepos_t> _gui_feed_fifo;
-	mutable Glib::Threads::Mutex         _gui_feed_reset_mutex;
+	mutable PBD::Mutex         _gui_feed_reset_mutex;
 
 	typedef  std::map<std::vector<uint8_t>,std::pair<int,int> > CustomMidiMap;
 	static CustomMidiMap _custom_midi_map;
+	static PBD::Mutex    _bindings_mutex;
 
 	static void midi_input_handler (MIDI::Parser&, MIDI::byte*, size_t, samplecnt_t);
 	static std::shared_ptr<MIDI::Parser> input_parser;
@@ -1094,7 +1107,6 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 
 	static bool _learning;
 	static std::pair<int,int> learning_for;
-	static PBD::Signal<void()> TriggerMIDILearned;
 
 	static void init_pool();
 
@@ -1130,6 +1142,7 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> use_follow_length;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<Temporal::BBT_Offset> quantization;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<Temporal::BBT_Offset> follow_length;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<Temporal::BBT_Offset> capture_duration;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<Trigger::LaunchStyle> launch_style;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<FollowAction> follow_action0;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<FollowAction> follow_action1;

@@ -21,9 +21,8 @@
 
 #include <memory>
 
-#include <glibmm/threads.h>
-
 #include "pbd/abstract_ui.h"
+#include "pbd/mutex.h"
 
 #include "component.h"
 #include "typed_value.h"
@@ -57,7 +56,7 @@ public:
 	void update_all (std::string, uint32_t, uint32_t, uint32_t, TypedValue) const;
 
 private:
-	Glib::Threads::Mutex      _client_state_lock;
+	PBD::Mutex      _client_state_lock;
 	PBD::ScopedConnectionList _transport_connections;
 	sigc::connection          _periodic_connection;
 

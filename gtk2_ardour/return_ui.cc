@@ -59,7 +59,7 @@ ReturnUI::ReturnUI (Gtk::Window* parent, std::shared_ptr<Return> r, Session* ses
 	show_all ();
 
 	_return->set_metering (true);
-	_return->input()->changed.connect (input_change_connection, invalidator (*this), std::bind (&ReturnUI::ins_changed, this, _1, _2), gui_context());
+	_return->input()->changed.connect (input_change_connection, invalidator (*this), std::bind (&ReturnUI::ins_changed, this, _1), gui_context());
 
 	_gpm.setup_meters ();
 	_gpm.set_fader_name (X_("ReturnUIFader"));
@@ -79,9 +79,9 @@ ReturnUI::~ReturnUI ()
 }
 
 void
-ReturnUI::ins_changed (IOChange change, void* /*ignored*/)
+ReturnUI::ins_changed (IOChange change)
 {
-	ENSURE_GUI_THREAD (*this, &ReturnUI::ins_changed, change, ignored)
+	ENSURE_GUI_THREAD (*this, &ReturnUI::ins_changed, change)
 	if (change.type & IOChange::ConfigurationChanged) {
 		_gpm.setup_meters ();
 	}

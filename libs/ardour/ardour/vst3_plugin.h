@@ -24,9 +24,9 @@
 #include <vector>
 
 #include <optional>
-#include <glibmm/threads.h>
 
 #include "pbd/search_path.h"
+#include "pbd/mutex.h"
 #include "pbd/signals.h"
 
 #include "ardour/plugin.h"
@@ -139,6 +139,8 @@ public:
 	uint32_t n_audio_aux_in () const { return _n_aux_inputs; }
 	uint32_t n_audio_aux_out () const { return _n_aux_outputs; }
 
+	ARDOUR::PluginOutputConfiguration output_config () const { return _output_configs; }
+
 	struct AudioBusInfo {
 		AudioBusInfo (Vst::BusType t, int32_t c, bool a) : type (t), n_chn (c), n_used_chn (c), dflt (a) {}
 		AudioBusInfo () : type (Vst::kMain), n_chn (0), n_used_chn (0) {}
@@ -166,7 +168,7 @@ public:
 	std::string  format_parameter (uint32_t p) const;
 	Vst::ParamID index_to_id (uint32_t) const;
 
-	Glib::Threads::Mutex& process_lock () { return _process_lock; }
+	PBD::Mutex& process_lock () { return _process_lock; }
 	bool& component_is_synced () { return _restart_component_is_synced; }
 
 
@@ -244,6 +246,7 @@ private:
 
 	bool  update_processor ();
 	void  query_io_config ();
+	void  init_output_configuration ();
 	int32 count_channels (Vst::MediaType, Vst::BusDirection, Vst::BusType);
 
 
@@ -285,7 +288,7 @@ private:
 
 	IPtr<Vst::IAudioProcessor> _processor;
 	Vst::ProcessContext        _context;
-	Glib::Threads::Mutex       _process_lock;
+	PBD::Mutex                 _process_lock;
 
 	/* Parameters */
 	Vst3ParameterChanges _input_param_changes;
@@ -341,12 +344,17 @@ private:
 	std::vector<Vst::AudioBusBuffers> _busbuf_in;
 	std::vector<Vst::AudioBusBuffers> _busbuf_out;
 
+	ARDOUR::PluginOutputConfiguration _output_configs;
+
 	/* cache channels/bus Vst::AudioBusBuffers::numChannels */
 	std::map<int, int> _n_buschn_in;
 	std::map<int, int> _n_buschn_out;
 
 	std::map<int, AudioBusInfo> _bus_info_in;
 	std::map<int, AudioBusInfo> _bus_info_out;
+
+	std::map<int, int32_t> _bus_channel_cnt_in;
+	std::map<int, int32_t> _bus_channel_cnt_out;
 
 	int _n_inputs;
 	int _n_outputs;
@@ -404,6 +412,7 @@ public:
 	std::set<Evoral::Parameter> automatable () const;
 	std::string                 describe_parameter (Evoral::Parameter);
 	IOPortDescription           describe_io_port (DataType dt, bool input, uint32_t id) const;
+
 	PluginOutputConfiguration   possible_output () const;
 
 	void request_bus_layout (ChanCount const& /*in*/, ChanCount const& /*aux_in*/, ChanCount const& /*out*/);

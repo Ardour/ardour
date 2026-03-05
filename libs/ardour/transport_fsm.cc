@@ -589,6 +589,7 @@ TransportFSM::start_locate_while_stopped (Event const & l) const
 	assert (l.type == Locate);
 	DEBUG_TRACE (DEBUG::TFSMEvents, "start_locate_while_stopped\n");
 
+	_last_locate = l;
 	set_roll_after (compute_should_roll (l.ltd));
 	api->locate (l.target, l.for_loop_end, l.force);
 }

@@ -20,12 +20,12 @@
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 
-#include "pbd/abstract_ui.inc.cc" // instantiate template
-
 #include "feedback.h"
 #include "transport.h"
 #include "server.h"
 #include "state.h"
+
+#include "pbd/abstract_ui.inc.cc" // instantiate template
 
 // TO DO: make this configurable
 #define POLL_INTERVAL_MS 100
@@ -212,7 +212,7 @@ ArdourFeedback::poll () const
 	update_all (Node::transport_time, transport ().time ());
 	update_all (Node::transport_bbt, transport ().bbt ());
 
-	Glib::Threads::Mutex::Lock lock (mixer ().mutex ());
+	PBD::Mutex::Lock lock (mixer ().mutex ());
 
 	for (ArdourMixer::StripMap::iterator it = mixer ().strips ().begin (); it != mixer ().strips ().end (); ++it) {
 		double db = it->second->meter_level_db ();

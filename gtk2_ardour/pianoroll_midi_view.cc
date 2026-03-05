@@ -258,7 +258,7 @@ PianorollMidiView::reset_width_dependent_items (double pixel_width)
 	MidiView::reset_width_dependent_items (pixel_width);
 
 	if (overlay_text) {
-		overlay_text->set_position (ArdourCanvas::Duple ((pixel_width / 2.0) - overlay_text->text_width(), (_height / 2.0 - overlay_text->text_height())));
+		overlay_text->set_position (ArdourCanvas::Duple ((midi_context().width() / 2.0) - (overlay_text->text_width()/2.), (midi_context().height() / 2.0) - (overlay_text->text_height() / 2.)));
 	}
 
 	for (auto & a : automation_map) {

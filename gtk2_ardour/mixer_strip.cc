@@ -309,7 +309,7 @@ MixerStrip::init ()
 
 	global_vpacker.set_no_show_all ();
 	global_vpacker.set_border_width (1);
-	global_vpacker.set_spacing (0);
+	global_vpacker.set_spacing (2);
 
 	width_button.set_name ("mixer strip button");
 	hide_button.set_name ("mixer strip button");
@@ -332,7 +332,6 @@ MixerStrip::init ()
 	number_label.set_tweaks (ArdourButton::OccasionalText);
 	set_tooltip (&number_label, _("Double-click to edit the route color.\nRight-click to show the route operations context menu."));
 
-	global_vpacker.set_spacing (2);
 	global_vpacker.pack_start (width_hide_box, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (name_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (input_button_box, Gtk::PACK_SHRINK);
@@ -1917,13 +1916,13 @@ MixerStrip::override_rec_mon_visibility () const
 void
 MixerStrip::add_input_port (DataType t)
 {
-	_route->input()->add_port ("", this, t);
+	_route->input()->add_port ("", t);
 }
 
 void
 MixerStrip::add_output_port (DataType t)
 {
-	_route->output()->add_port ("", this, t);
+	_route->output()->add_port ("", t);
 }
 
 void

@@ -283,6 +283,9 @@ EditingContext::EditingContext (std::string const & name)
 
 EditingContext::~EditingContext()
 {
+	if (pending_visual_change.idle_handler_id >= 0) {
+		g_source_remove (pending_visual_change.idle_handler_id);
+	}
 	if (_midi_actions) {
 		ActionManager::drop_action_group (_midi_actions);
 	}
@@ -620,6 +623,9 @@ EditingContext::register_midi_actions (Bindings* midi_bindings, std::string cons
 	ActionManager::register_action (_midi_actions, X_("decrease-velocity-smush-together"), _("Decrease Velocity (maintain ratios, allow mush)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::decrease_note_velocity_smush_together));
 	ActionManager::register_action (_midi_actions, X_("decrease-velocity-fine-smush-together"), _("Decrease Velocity (fine, allow mush, non-relative)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::decrease_note_velocity_fine_smush_together));
 
+	ActionManager::register_action (_midi_actions, X_("duplicate-notes"), _("Duplicate Notes"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::duplicate_notes));
+	ActionManager::register_action (_midi_actions, X_("multi-duplicate-notes"), _("Multi-Duplicate Notes"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::multi_duplicate_notes));
+
 	ActionManager::register_action (_midi_actions, X_("transpose-up-octave"), _("Transpose Up (octave)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::transpose_up_octave));
 	ActionManager::register_action (_midi_actions, X_("transpose-up-octave-smush"), _("Transpose Up (octave, allow mush)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::transpose_up_octave_smush));
 	ActionManager::register_action (_midi_actions, X_("transpose-up-semitone"), _("Transpose Up (semitone)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::transpose_up_tone));
@@ -864,7 +870,7 @@ EditingContext::grid_type_chosen (GridType gt)
 
 	grid_type_selector.set_active (grid_type_short_labels[grid_ind]);
 
-	if (UIConfiguration::instance().get_show_grids_ruler()) {
+	if (UIConfiguration::instance().get_show_grids_ruler() && !ARDOUR_UI::instance()->loading_session()) {
 		show_rulers_for_grid ();
 	}
 
@@ -3730,6 +3736,46 @@ EditingContext::metric_get_minsec (std::vector<ArdourCanvas::Ruler::Mark>& marks
 		}
 		break;
 
+	case minsec_show_csecs:
+		for (n = 0; n < minsec_nmarks && n < upper; pos += minsec_mark_interval, ++n) {
+			sample_to_clock_parts (pos, _session->sample_rate(), &hrs, &mins, &secs, &millisecs);
+			if ((millisecs * 10) % minsec_mark_modulo == 0) {
+				if (millisecs == 0) {
+					mark.style = ArdourCanvas::Ruler::Mark::Major;
+				} else {
+					mark.style = ArdourCanvas::Ruler::Mark::Minor;
+				}
+				snprintf (buf, sizeof(buf), "%02ld:%02ld:%02ld.%03ld", hrs, mins, secs, millisecs);
+			} else {
+				buf[0] = '\0';
+				mark.style = ArdourCanvas::Ruler::Mark::Micro;
+			}
+			mark.label = buf;
+			mark.position = pos/1000.0;
+			marks.push_back (mark);
+		}
+		break;
+
+	case minsec_show_dsecs:
+		for (n = 0; n < minsec_nmarks && n < upper; pos += minsec_mark_interval, ++n) {
+			sample_to_clock_parts (pos, _session->sample_rate(), &hrs, &mins, &secs, &millisecs);
+			if ((millisecs * 100) % minsec_mark_modulo == 0) {
+				if (millisecs == 0) {
+					mark.style = ArdourCanvas::Ruler::Mark::Major;
+				} else {
+					mark.style = ArdourCanvas::Ruler::Mark::Minor;
+				}
+				snprintf (buf, sizeof(buf), "%02ld:%02ld:%02ld.%03ld", hrs, mins, secs, millisecs);
+			} else {
+				buf[0] = '\0';
+				mark.style = ArdourCanvas::Ruler::Mark::Micro;
+			}
+			mark.label = buf;
+			mark.position = pos/1000.0;
+			marks.push_back (mark);
+		}
+		break;
+
 	case minsec_show_seconds:
 		for (n = 0; n < minsec_nmarks; pos += minsec_mark_interval, ++n) {
 			sample_to_clock_parts (pos, _session->sample_rate(), &hrs, &mins, &secs, &millisecs);
@@ -3806,6 +3852,7 @@ EditingContext::metric_get_minsec (std::vector<ArdourCanvas::Ruler::Mark>& marks
 void
 EditingContext::set_minsec_ruler_scale (samplepos_t lower, samplepos_t upper)
 {
+	std::cout << "set_minsec_ruler_scale" << std::endl;
 	EC_LOCAL_TEMPO_SCOPE;
 
 	samplepos_t fr = _session->sample_rate() * 1000;
@@ -3832,22 +3879,22 @@ EditingContext::set_minsec_ruler_scale (samplepos_t lower, samplepos_t upper)
 		minsec_nmarks = 2 + (range / minsec_mark_interval);
 	} else if (range <= (fr / 2)) { /* 0-0.5 second */
 		minsec_mark_interval = fr / 100;  /* show 1/100 seconds */
-		minsec_ruler_scale = minsec_show_msecs;
+		minsec_ruler_scale = minsec_show_csecs;
 		minsec_mark_modulo = 100;
 		minsec_nmarks = 2 + (range / minsec_mark_interval);
 	} else if (range <= fr) { /* 0-1 second */
 		minsec_mark_interval = fr / 10;  /* show 1/10 seconds */
-		minsec_ruler_scale = minsec_show_msecs;
+		minsec_ruler_scale = minsec_show_dsecs;
 		minsec_mark_modulo = 200;
 		minsec_nmarks = 2 + (range / minsec_mark_interval);
 	} else if (range <= 2 * fr) { /* 1-2 seconds */
 		minsec_mark_interval = fr / 10; /* show 1/10 seconds */
-		minsec_ruler_scale = minsec_show_msecs;
+		minsec_ruler_scale = minsec_show_dsecs;
 		minsec_mark_modulo = 500;
 		minsec_nmarks = 2 + (range / minsec_mark_interval);
 	} else if (range <= 8 * fr) { /* 2-5 seconds */
 		minsec_mark_interval =  fr / 5; /* show 2 seconds */
-		minsec_ruler_scale = minsec_show_msecs;
+		minsec_ruler_scale = minsec_show_dsecs;
 		minsec_mark_modulo = 1000;
 		minsec_nmarks = 2 + (range / minsec_mark_interval);
 	} else if (range <= 16 * fr) { /* 8-16 seconds */

@@ -1622,11 +1622,14 @@ class FreehandLineDrag : public Drag
 class AutomationDrawDrag : public FreehandLineDrag<Evoral::ControlList::OrderedPoints, Evoral::ControlList::OrderedPoint>
 {
   public:
-	AutomationDrawDrag (EditingContext&, ArdourCanvas::Item*, ArdourCanvas::Rectangle&, bool, Temporal::TimeDomain);
+	AutomationDrawDrag (EditingContext&, ArdourCanvas::Item*, ArdourCanvas::Rectangle&, bool, Temporal::TimeDomain, std::function<bool(GdkEvent*,Temporal::timepos_t const &)>);
 	~AutomationDrawDrag ();
 
 	void finished (GdkEvent*, bool);
 	void aborted (bool) {}
+
+private:
+	std::function<bool(GdkEvent*,Temporal::timepos_t const &)> click_functor;
 };
 
 class VelocityLineDrag : public FreehandLineDrag<Evoral::ControlList::OrderedPoints, Evoral::ControlList::OrderedPoint>

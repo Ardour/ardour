@@ -24,7 +24,6 @@
 #include <list>
 #include <set>
 
-#include <sys/time.h>
 #include <pthread.h>
 #define ABSTRACT_UI_EXPORTS
 #include "pbd/abstract_ui.h"
@@ -136,7 +135,7 @@ class US2400Protocol
 	   support for the protocol is not optional.
 	*/
 
-	mutable Glib::Threads::Mutex surfaces_lock;
+	mutable PBD::Mutex surfaces_lock;
 	typedef std::list<std::shared_ptr<US2400::Surface> > Surfaces;
 	Surfaces surfaces;
 

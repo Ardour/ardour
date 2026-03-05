@@ -224,7 +224,7 @@ bool
 AudioSource::peaks_ready (std::function<void()> doThisWhenReady, ScopedConnection** connect_here_if_not, EventLoop* event_loop) const
 {
 	bool ret;
-	Glib::Threads::Mutex::Lock lm (_peaks_ready_lock);
+	PBD::Mutex::Lock lm (_peaks_ready_lock);
 
 	if (!(ret = _peaks_built)) {
 		*connect_here_if_not = new ScopedConnection;
@@ -277,7 +277,7 @@ AudioSource::rename_peakfile (string newpath)
 int
 AudioSource::initialize_peakfile (const string& audio_path, const bool in_session)
 {
-	Glib::Threads::Mutex::Lock lm (_initialize_peaks_lock);
+	PBD::Mutex::Lock lm (_initialize_peaks_lock);
 	GStatBuf statbuf;
 
 	_peakpath = construct_peak_filepath (audio_path, in_session);
@@ -963,7 +963,7 @@ AudioSource::done_with_peakfile_writes (bool done)
 	}
 
 	if (done) {
-		Glib::Threads::Mutex::Lock lm (_peaks_ready_lock);
+		PBD::Mutex::Lock lm (_peaks_ready_lock);
 		_peaks_built = true;
 		PeaksReady (); /* EMIT SIGNAL */
 	}
@@ -1029,7 +1029,7 @@ AudioSource::compute_and_write_peaks (Sample const * buf, samplecnt_t first_samp
 			_peak_byte_max = max (_peak_byte_max, (off_t) (byte + sizeof(PeakData)));
 
 			{
-				Glib::Threads::Mutex::Lock lm (_peaks_ready_lock);
+				PBD::Mutex::Lock lm (_peaks_ready_lock);
 				PeakRangeReady (peak_leftover_sample, peak_leftover_cnt); /* EMIT SIGNAL */
 				if (intermediate_peaks_ready) {
 					PeaksReady (); /* EMIT SIGNAL */
@@ -1131,7 +1131,12 @@ AudioSource::compute_and_write_peaks (Sample const * buf, samplecnt_t first_samp
 
 		if (endpos < target_length) {
 			DEBUG_TRACE(DEBUG::Peaks, string_compose ("Truncating Peakfile A %1 to %2\n", _peakpath, target_length));
-			if (ftruncate (_peakfile_fd, target_length)) {
+#ifdef COMPILER_MSVC
+			if (_chsize_s (_peakfile_fd, target_length))
+#else
+			if (ftruncate (_peakfile_fd, target_length))
+#endif
+			{
 				/* error doesn't actually matter so continue on without testing */
 			}
 		}
@@ -1157,7 +1162,7 @@ AudioSource::compute_and_write_peaks (Sample const * buf, samplecnt_t first_samp
 	_peak_byte_max = max (_peak_byte_max, (off_t) (first_peak_byte + bytes_to_write));
 
 	if (samples_done) {
-		Glib::Threads::Mutex::Lock lm (_peaks_ready_lock);
+		PBD::Mutex::Lock lm (_peaks_ready_lock);
 		PeakRangeReady (first_sample, samples_done); /* EMIT SIGNAL */
 		if (intermediate_peaks_ready) {
 			PeaksReady (); /* EMIT SIGNAL */
@@ -1182,7 +1187,12 @@ AudioSource::truncate_peakfile ()
 
 	if (end > _peak_byte_max) {
 		DEBUG_TRACE(DEBUG::Peaks, string_compose ("Truncating Peakfile B %1 to %2\n", _peakpath, _peak_byte_max));
-		if (ftruncate (_peakfile_fd, _peak_byte_max)) {
+#ifdef COMPILER_MSVC
+		if (_chsize_s (_peakfile_fd, _peak_byte_max))
+#else
+		if (ftruncate (_peakfile_fd, _peak_byte_max))
+#endif
+		{
 			error << string_compose (_("could not truncate peakfile %1 to %2 (error: %3)"),
 						 _peakpath, _peak_byte_max, errno) << endmsg;
 		}
@@ -1213,7 +1223,7 @@ AudioSource::mark_streaming_write_completed (const WriterLock& lock, Temporal::t
 	estimate_tempo ();
 
 	{
-		Glib::Threads::Mutex::Lock lm (_peaks_ready_lock);
+		PBD::Mutex::Lock lm (_peaks_ready_lock);
 
 		if (_peaks_built) {
 			PeaksReady (); /* EMIT SIGNAL */

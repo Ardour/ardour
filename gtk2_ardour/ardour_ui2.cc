@@ -372,13 +372,6 @@ ARDOUR_UI::click_button_clicked (GdkEventButton* ev)
 }
 
 void
-ARDOUR_UI::toggle_follow_edits ()
-{
-	RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Transport"), X_("ToggleFollowEdits"));
-	UIConfiguration::instance().set_follow_edits (tact->get_active ());
-}
-
-void
 ARDOUR_UI::update_title ()
 {
 	stringstream snap_label;

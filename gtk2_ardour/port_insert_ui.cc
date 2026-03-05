@@ -115,8 +115,8 @@ PortInsertUI::PortInsertUI (Gtk::Window* parent, ARDOUR::Session* sess, std::sha
 	Gtkmm2ext::UI::instance ()->set_tip (_measure_latency_button, _("Measure Latency using the first port of each direction\n(note that gain is not applied during measurement).\nRight-click to forget previous measurements,\nand revert to use default port latency."));
 
 	_pi->set_metering (true);
-	_pi->input ()->changed.connect (_connections, invalidator (*this), std::bind (&PortInsertUI::return_changed, this, _1, _2), gui_context ());
-	_pi->output ()->changed.connect (_connections, invalidator (*this), std::bind (&PortInsertUI::send_changed, this, _1, _2), gui_context ());
+	_pi->input ()->changed.connect (_connections, invalidator (*this), std::bind (&PortInsertUI::return_changed, this, _1), gui_context ());
+	_pi->output ()->changed.connect (_connections, invalidator (*this), std::bind (&PortInsertUI::send_changed, this, _1), gui_context ());
 	_pi->LatencyChanged.connect (_connections, invalidator (*this), std::bind (&PortInsertUI::set_latency_label, this), gui_context ());
 
 	_fast_screen_update_connection = Timers::super_rapid_connect (sigc::mem_fun (*this, &PortInsertUI::fast_update));
@@ -135,18 +135,18 @@ PortInsertUI::~PortInsertUI ()
 }
 
 void
-PortInsertUI::send_changed (IOChange change, void* /*ignored*/)
+PortInsertUI::send_changed (IOChange change)
 {
-	ENSURE_GUI_THREAD (*this, &PortInsertUI::outs_changed, change, ignored);
+	ENSURE_GUI_THREAD (*this, &PortInsertUI::outs_changed, change);
 	if (change.type & IOChange::ConfigurationChanged) {
 		_output_gpm.setup_meters ();
 	}
 }
 
 void
-PortInsertUI::return_changed (IOChange change, void* /*ignored*/)
+PortInsertUI::return_changed (IOChange change)
 {
-	ENSURE_GUI_THREAD (*this, &PortInsertUI::outs_changed, change, ignored);
+	ENSURE_GUI_THREAD (*this, &PortInsertUI::outs_changed, change);
 	if (change.type & IOChange::ConfigurationChanged) {
 		_input_gpm.setup_meters ();
 	}

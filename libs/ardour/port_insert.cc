@@ -73,8 +73,8 @@ PortInsert::PortInsert (Session& s, std::shared_ptr<Pannable> pannable, std::sha
 
 	_io_latency = _session.engine().samples_per_cycle();
 
-	input ()->changed.connect_same_thread (*this, std::bind (&PortInsert::io_changed, this, _1, _2));
-	output ()->changed.connect_same_thread (*this, std::bind (&PortInsert::io_changed, this, _1, _2));
+	input ()->changed.connect_same_thread (*this, std::bind (&PortInsert::io_changed, this, _1));
+	output ()->changed.connect_same_thread (*this, std::bind (&PortInsert::io_changed, this, _1));
 }
 
 PortInsert::~PortInsert ()
@@ -311,7 +311,7 @@ PortInsert::signal_latency() const
 }
 
 void
-PortInsert::io_changed (IOChange change, void*)
+PortInsert::io_changed (IOChange change)
 {
 	if (change.type & IOChange::ConnectionsChanged) {
 		if (output ()->connected () && input ()->connected ()) {
@@ -332,11 +332,11 @@ PortInsert::configure_io (ChanCount in, ChanCount out)
 
 	/* for an insert, processor input corresponds to IO output, and vice versa */
 
-	if (_input->ensure_io (in, false, this) != 0) {
+	if (_input->ensure_io (in, false) != 0) {
 		return false;
 	}
 
-	if (_output->ensure_io (out, false, this) != 0) {
+	if (_output->ensure_io (out, false) != 0) {
 		return false;
 	}
 

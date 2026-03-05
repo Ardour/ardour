@@ -748,7 +748,7 @@ PortMatrix::add_channel (std::shared_ptr<Bundle> b, DataType t)
 	std::shared_ptr<IO> io = io_from_bundle (b);
 
 	if (io) {
-		int const r = io->add_port ("", this, t);
+		int const r = io->add_port ("", t);
 		if (r == -1) {
 			ArdourMessageDialog msg (_("It is not possible to add a port here."));
 			msg.set_title (_("Cannot add port"));
@@ -777,7 +777,7 @@ PortMatrix::remove_channel (ARDOUR::BundleChannel b)
 	if (io->n_ports ().n_total () == 1) {
 		errmsg = _("The last port cannot be removed");
 	} else {
-		if (-1 == io->remove_port (p, this)) {
+		if (-1 == io->remove_port (p)) {
 			errmsg = _("This port cannot be removed.");
 		}
 	}

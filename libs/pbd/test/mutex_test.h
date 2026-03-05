@@ -1,17 +1,20 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
-#include "glibmm/threads.h"
+#include "pbd/mutex.h"
 
 class MutexTest : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE (MutexTest);
-	CPPUNIT_TEST (testBasic);
+	CPPUNIT_TEST (test_mutex);
+	CPPUNIT_TEST (test_cond);
 	CPPUNIT_TEST_SUITE_END ();
 
 public:
 	MutexTest ();
-	void testBasic ();
+	void test_mutex ();
+	void test_cond ();
 
 private:
-	Glib::Threads::Mutex m_mutex;
+	PBD::Mutex _mutex;
+	PBD::Cond  _cond;
 };

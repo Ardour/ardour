@@ -43,7 +43,7 @@ public:
 
 private:
 	void fast_update ();
-	void outs_changed (ARDOUR::IOChange, void*);
+	void outs_changed (ARDOUR::IOChange);
 
 	bool invert_press (GdkEventButton* ev);
 	bool invert_release (GdkEventButton* ev);

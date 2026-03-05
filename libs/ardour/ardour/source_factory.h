@@ -23,7 +23,9 @@
 #include <stdint.h>
 #include <string>
 
+#include "pbd/mutex.h"
 #include "pbd/pthread_utils.h"
+
 #include "ardour/source.h"
 
 class XMLNode;
@@ -49,8 +51,8 @@ public:
 	static std::shared_ptr<Source> createForRecovery (DataType, Session&, const std::string& path, int chn);
 	static std::shared_ptr<Source> createFromPlaylist (DataType, Session&, std::shared_ptr<Playlist> p, const PBD::ID& orig, const std::string& name, uint32_t chn, timepos_t start, timepos_t const& len, bool copy, bool defer_peaks);
 
-	static Glib::Threads::Cond  PeaksToBuild;
-	static Glib::Threads::Mutex peak_building_lock;
+	static PBD::Cond  PeaksToBuild;
+	static PBD::Mutex peak_building_lock;
 
 	static bool                      peak_thread_run;
 	static std::vector<PBD::Thread*> peak_thread_pool;

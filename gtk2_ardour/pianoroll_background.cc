@@ -82,8 +82,9 @@ PianorollMidiBackground::get_preferred_midi_channel () const
 }
 
 void
-PianorollMidiBackground::set_note_highlight (bool yn)
+PianorollMidiBackground::set_note_highlight (uint8_t note)
 {
+	pianoroll.set_note_highlight (note);
 }
 
 void

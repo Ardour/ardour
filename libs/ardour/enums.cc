@@ -160,6 +160,7 @@ setup_enum_writer ()
 	TransportFSM::MotionState _TransportFSM_MotionState;
 	TransportFSM::ButlerState _TransportFSM_ButlerState;
 	TransportFSM::DirectionState _TransportFSM_DirectionState;
+	MarkerLocatePriority _MarkerLocatePriority;
 	LoopFadeChoice _LoopFadeChooice;
 	TransportState _TransportState;
 	LocateTransportDisposition _LocateTransportDisposition;
@@ -906,6 +907,11 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (TransportFSM, Backwards);
 	REGISTER_CLASS_ENUM (TransportFSM, Reversing);
 	REGISTER (_TransportFSM_DirectionState);
+	
+	REGISTER_ENUM (FirstMarker);
+	REGISTER_ENUM (LastMarker);
+	REGISTER_ENUM (NextMarker);
+	REGISTER (_MarkerLocatePriority);
 
 	REGISTER_ENUM (NoLoopFade);
 	REGISTER_ENUM (EndLoopFade);

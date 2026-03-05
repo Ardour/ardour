@@ -602,3 +602,31 @@ Tabbable::att_bottom_button_toggled ()
 		showhide_att_bottom (false);
 	}
 }
+
+void
+Tabbable::show_att_bottom (bool yn)
+{
+	Glib::RefPtr<Gtk::Action> act = bottom_attachment_button.get_related_action();
+	if (act) {
+		Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic(act);
+		if (tact) {
+			tact->set_active (yn);
+		}
+	}
+}
+
+bool
+Tabbable::should_show_att_bottom ()
+{
+	/* ought to be const but get_related_action() is not */
+
+	Glib::RefPtr<Gtk::Action> act = bottom_attachment_button.get_related_action();
+	if (act) {
+		Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic(act);
+		if (tact) {
+			return tact->get_active ();
+		}
+	}
+
+	return false;
+}

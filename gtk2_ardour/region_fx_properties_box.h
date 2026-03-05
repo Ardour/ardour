@@ -39,11 +39,14 @@ public:
 	RegionFxPropertiesBox (std::shared_ptr<ARDOUR::Region>);
 	~RegionFxPropertiesBox ();
 
+	bool empty() const { return _proc_uis.empty(); }
+
 private:
 	void drop_plugin_uis ();
 	void redisplay_plugins ();
 	void add_fx_to_display (std::weak_ptr<ARDOUR::RegionFxPlugin>);
 	void idle_redisplay_plugins ();
+	void region_property_changed (PBD::PropertyChange const&);
 
 	static int _idle_redisplay_processors (gpointer);
 
@@ -57,5 +60,4 @@ private:
 
 	PBD::ScopedConnectionList _processor_connections;
 	PBD::ScopedConnection     _region_connection;
-		sigc::connection screen_update_connection;
 };

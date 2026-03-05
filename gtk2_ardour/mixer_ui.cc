@@ -34,8 +34,6 @@
 #include <sigc++/bind.h>
 
 
-#include <glibmm/threads.h>
-
 #include <ytkmm/accelmap.h>
 #include <ytkmm/menu.h>
 #include <ytkmm/offscreenwindow.h>
@@ -1054,7 +1052,7 @@ Mixer_UI::fan_out (std::weak_ptr<Route> wr, bool to_busses, bool group)
 		outputs = std::max (outputs, _session->master_out ()->n_inputs ().n_audio ());
 	}
 
-	route->output ()->disconnect (this);
+	route->output ()->disconnect ();
 	route->panner_shell ()->set_bypassed (true);
 
 	std::shared_ptr<AutomationControl> msac = route->master_send_enable_controllable ();
@@ -1075,7 +1073,7 @@ Mixer_UI::fan_out (std::weak_ptr<Route> wr, bool to_busses, bool group)
 					r = rl.front ();
 					assert (r);
 				} else {
-					list<std::shared_ptr<AudioTrack> > tl = _session->new_audio_track (busnames[bn], outputs, NULL, 1, bn, PresentationInfo::max_order, Normal, false);
+					AudioTrackList tl = _session->new_audio_track (busnames[bn], outputs, NULL, 1, bn, PresentationInfo::max_order, Normal, false);
 					r = tl.front ();
 					assert (r);
 
@@ -3792,14 +3790,20 @@ Mixer_UI::register_actions ()
 	if (!Profile->get_mixbus ()) {
 		act = ActionManager::register_toggle_action (group, "ToggleMixerList", _("Mixer: Show Sidebar List"), sigc::mem_fun (*this, &Tabbable::att_left_button_toggled));
 		left_attachment_button.set_related_action (act);
+#warning this string can be used after 9.0
+		// Gtkmm2ext::set_tooltip (right_attachment_button, _("Show/Hide Left Panel"));
 	} else {
 		act = ActionManager::register_toggle_action (group, "ToggleMixerList", _("Mixer: Show Sidebar List"), sigc::mem_fun (*this, &Tabbable::att_right_button_toggled));
 		right_attachment_button.set_related_action (act);
+#warning this string can be used after 9.0
+		// Gtkmm2ext::set_tooltip (right_attachment_button, _("Show/Hide Right Panel"));
 	}
 
 #ifdef MIXBUS
 	act = ActionManager::register_toggle_action (group, "ToggleMixerProps", _("Mixer: Show Properties Bottom"), sigc::mem_fun (*this, &Tabbable::att_bottom_button_toggled));
 	bottom_attachment_button.set_related_action (act);
+#warning this string can be used after 9.0
+	// Gtkmm2ext::set_tooltip (bottom_attachment_button, _("Show/Hide Bottom Panel"));
 #endif
 
 	ActionManager::register_toggle_action (group, X_("ToggleVCAPane"), _("Mixer: Show VCAs"), sigc::mem_fun (*this, &Mixer_UI::toggle_vcas));

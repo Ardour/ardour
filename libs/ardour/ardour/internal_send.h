@@ -73,6 +73,7 @@ private:
 	bool _allow_feedback;
 	PBD::ID _send_to_id;
 	PBD::ScopedConnection connect_c;
+	PBD::ScopedConnection cycle_connection;
 	PBD::ScopedConnection source_connection;
 	PBD::ScopedConnectionList target_connections;
 

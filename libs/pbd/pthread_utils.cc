@@ -66,7 +66,7 @@ using namespace std;
 typedef std::map<pthread_t, std::string> ThreadMap;
 static ThreadMap                         all_threads;
 static pthread_mutex_t                   thread_map_lock = PTHREAD_MUTEX_INITIALIZER;
-static Glib::Threads::Private<char>      thread_name (free);
+static thread_local std::string          thread_name;
 static int                               base_priority_relative_to_max = -20;
 
 #ifdef PLATFORM_WINDOWS
@@ -243,7 +243,7 @@ void
 pthread_set_name (const char* str)
 {
 	/* copy string and delete it when exiting */
-	thread_name.set (strdup (str)); // leaks
+	thread_name = std::string (str);
 
 #if !defined __PTW32_VERSION && defined _GNU_SOURCE
 	/* set public thread name, up to 16 chars */
@@ -257,7 +257,7 @@ pthread_set_name (const char* str)
 const char*
 pthread_name ()
 {
-	const char* str = thread_name.get ();
+	const char* str = thread_name.c_str();
 
 	if (str) {
 		return str;

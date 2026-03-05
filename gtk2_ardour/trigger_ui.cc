@@ -42,18 +42,18 @@
 #include "gtkmm2ext/colors.h"
 #include <gtkmm2ext/utils.h>
 
-#include "slot_properties_box.h"
+#include "widgets/popup.h"
 
+#include "ardour_color_dialog.h"
 #include "ardour_ui.h"
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "public_editor.h"
 #include "region_view.h"
-#include "stripable_colorpicker.h"
+#include "slot_properties_box.h"
 #include "trigger_jump_dialog.h"
-#include "ui_config.h"
-
 #include "trigger_ui.h"
+#include "ui_config.h"
 
 #include "pbd/i18n.h"
 
@@ -147,14 +147,33 @@ void
 TriggerUI::choose_color (Gtk::Window* parent)
 {
 	if (!_color_dialog) {
-		_color_dialog = new StripableColorDialog;
-		color_connection.disconnect ();
+		_color_dialog = new ArdourColorDialog;
+		tref.box()->DropReferences.connect (trigger_connections, invalidator (*this), [this]() { delete _color_dialog; _color_dialog = nullptr; }, gui_context());
 	}
 
-	tref.box()->DropReferences.connect (trigger_connections,invalidator (*this), [this]() { _color_dialog->reset (); color_connection.disconnect (); }, gui_context());
-	color_connection = _color_dialog->ColorChanged.connect ([this](uint32_t color) { if (trigger ()) { trigger()->set_color(color); }});
+	_color_dialog->set_title (_("Set Trigger Color"));
+	Gdk::Color c (Gtkmm2ext::gdk_color_from_rgba (trigger()->color()));
+	_color_dialog->get_color_selection()->set_current_color (c);
+	_color_dialog->get_color_selection()->set_previous_color (c);
+	if (parent) {
+		_color_dialog->set_transient_for (*parent);
+	}
 
-	_color_dialog->popup (_("Set Trigger Color"), trigger()->color(), parent);
+	_color_dialog->signal_response().connect ([this](int response) {
+		if (!trigger()) {
+			return;
+		}
+		switch (response) {
+		case Gtk::RESPONSE_OK:
+			trigger()->set_color (Gtkmm2ext::gdk_color_to_rgba (_color_dialog->get_color_selection()->get_current_color()));
+			break;
+		default:
+			break;
+		}
+		_color_dialog->hide ();
+	});
+
+	_color_dialog->present ();
 }
 
 void
@@ -400,13 +419,32 @@ TriggerUI::context_menu ()
 }
 
 void
+TriggerUI::trigger_learning_finished (ArdourWidgets::PopUp* prompter)
+{
+	learning_connection.disconnect ();
+	if (prompter) {
+		prompter->touch ();
+	}
+}
+
+void
 TriggerUI::trigger_midi_learn ()
 {
 	if (!trigger()) {
 		return;
 	}
 
+	ArdourWidgets::PopUp* prompter = new ArdourWidgets::PopUp (Gtk::WIN_POS_MOUSE, 30000, true);
+	prompter->set_text (_("operate controller now"));
+	prompter->touch (); // shows popup
+	tref.box()->TriggerMIDILearned.connect (learning_connection, invalidator (*this), std::bind (&TriggerUI::trigger_learning_finished, this, prompter), gui_context());
 	tref.box()->begin_midi_learn (trigger()->index());
+}
+
+void
+TriggerUI::trigger_stop_midi_learn ()
+{
+	tref.box()->stop_midi_learn ();
 }
 
 void
@@ -795,8 +833,8 @@ TriggerUI::set_trigger (ARDOUR::TriggerReference tr)
 			_color_dialog->get_color_selection()->set_previous_color (c);
 			_color_dialog->get_color_selection()->set_current_color (c);
 		} else {
-			color_connection.disconnect ();
-			_color_dialog->reset ();
+			delete _color_dialog;
+			_color_dialog = nullptr;
 		}
 	}
 

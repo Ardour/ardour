@@ -110,7 +110,7 @@ PluginInsert::drop_references ()
 	 * controllable, but that runs after ~PluginInsert.
 	 */
 	{
-		Glib::Threads::Mutex::Lock lm (_control_lock);
+		PBD::Mutex::Lock lm (_control_lock);
 		for (Controls::const_iterator li = _controls.begin(); li != _controls.end(); ++li) {
 			std::dynamic_pointer_cast<AutomationControl>(li->second)->drop_references ();
 		}
@@ -247,10 +247,10 @@ PluginInsert::add_sidechain (uint32_t n_audio, uint32_t n_midi)
 	_sidechain.reset (new SideChain (_session, n.str ()));
 	_sidechain->activate ();
 	for (uint32_t n = 0; n < n_audio; ++n) {
-		_sidechain->input()->add_port ("", owner(), DataType::AUDIO); // add a port, don't connect.
+		_sidechain->input()->add_port ("", DataType::AUDIO); // add a port, don't connect.
 	}
 	for (uint32_t n = 0; n < n_midi; ++n) {
-		_sidechain->input()->add_port ("", owner(), DataType::MIDI); // add a port, don't connect.
+		_sidechain->input()->add_port ("", DataType::MIDI); // add a port, don't connect.
 	}
 	PluginConfigChanged (); /* EMIT SIGNAL */
 	return true;
@@ -1331,7 +1331,7 @@ PluginInsert::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		_timing_stats.reset ();
 	}
 
-	if (_active != _pending_active && !_pending_active) {
+	if (_active && !_pending_active) {
 		/* deactivate */
 		for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 			(*i)->deactivate ();
@@ -1358,7 +1358,7 @@ PluginInsert::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		if (_session.transport_rolling() || _session.bounce_processing()) {
 			automate_and_run (bufs, start_sample, end_sample, speed, nframes);
 		} else {
-			Glib::Threads::Mutex::Lock lm (control_lock(), Glib::Threads::TRY_LOCK);
+			PBD::Mutex::Lock lm (control_lock(), PBD::Mutex::TryLock);
 			connect_and_run (bufs, start_sample, end_sample, speed, nframes, 0, lm.locked());
 		}
 #if defined MIXBUS && defined NDEBUG
@@ -1389,7 +1389,7 @@ PluginInsert::automate_and_run (BufferSet& bufs, samplepos_t start, samplepos_t 
 	Evoral::ControlEvent next_event (timepos_t (Temporal::AudioTime), 0.0f);
 	samplecnt_t offset = 0;
 
-	Glib::Threads::Mutex::Lock lm (control_lock(), Glib::Threads::TRY_LOCK);
+	PBD::Mutex::Lock lm (control_lock(), PBD::Mutex::TryLock);
 
 	if (!lm.locked()) {
 		connect_and_run (bufs, start, end, speed, nframes, offset, false);
@@ -2264,20 +2264,46 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 bool
 PluginInsert::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 {
+	/* set plugin's natural_i/o_streams */
 	if (plugin()->get_info ()->variable_bus_layout ()) {
-		ChanCount input_streams = natural_input_streams ();
+		/* save old value, compare if changed */
+		ChanCount input_streams  = natural_input_streams ();
+		ChanCount output_streams = natural_output_streams ();
+
 		ChanCount sc;
 		if (_sidechain) {
 			_sidechain->can_support_io_configuration (sc, sc);
 		}
-		for (auto const& p : _plugins) {
-			if (_custom_cfg) {
-				p->request_bus_layout (_custom_sinks, sc, _custom_sinks);
-			} else {
-				p->request_bus_layout (in, sc, in);
+
+		ChanCount request_in = _custom_cfg ? _custom_sinks : in;
+		ChanCount request_out;
+
+		if (_custom_cfg) {
+			request_out = _custom_out;
+		} else if (_preset_out.n_audio () > 0) {
+			request_out = _preset_out;
+		} else {
+			request_out = in;
+
+			if (in.n_midi () > 0 && out.n_audio () == 0) {
+				request_out.set (DataType::AUDIO, 2);
+			}
+
+			if (_strict_io && is_instrument ()) {
+				ChanCount max_out (DataType::AUDIO, 2); // TODO use master-out ?
+				max_out.set (DataType::MIDI, out.get(DataType::MIDI));
+				request_out = ChanCount::min (request_out, max_out);
 			}
 		}
-		if (input_streams != natural_input_streams ()) {
+
+		DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: Request Bus layout in = %2 sc = %3 out = %4\n", name(), request_in, sc, request_out));
+
+		for (auto const& p : _plugins) {
+			p->request_bus_layout (request_in, sc, request_out);
+		}
+
+		if (input_streams != natural_input_streams () || output_streams != natural_output_streams ()) {
+			DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: Natural I/O mapping changed\n", name()));
 			mapping_changed ();
 		}
 	}
@@ -2469,7 +2495,7 @@ PluginInsert::automatic_can_support_io_configuration (ChanCount const& inx, Chan
 		 */
 		//out = in; // hint
 		ChanCount aux_in = sidechain_input_pins ();
-		if (out.n_midi () > 0 && out.n_audio () == 0) { out.set (DataType::AUDIO, 2); }
+		if (in.n_midi () > 0 && out.n_audio () == 0) { out.set (DataType::AUDIO, 2); }
 		if (out.n_audio () == 0) { out.set (DataType::AUDIO, 1); }
 		bool const r = _plugins.front()->match_variable_io (in, aux_in, out);
 		if (!r) {

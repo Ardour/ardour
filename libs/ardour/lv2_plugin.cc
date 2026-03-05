@@ -194,6 +194,7 @@ public:
 	LilvNode* lv2_ControlPort;
 	LilvNode* lv2_InputPort;
 	LilvNode* lv2_OutputPort;
+	LilvNode* lv2_CVPort;
 	LilvNode* lv2_connectionOptional;
 	LilvNode* lv2_designation;
 	LilvNode* lv2_enumeration;
@@ -1838,7 +1839,7 @@ LV2Plugin::add_slave (std::shared_ptr<Plugin> p, bool)
 {
 	std::shared_ptr<LV2Plugin> lv2 = std::dynamic_pointer_cast<LV2Plugin> (p);
 	if (lv2) {
-		Glib::Threads::Mutex::Lock lm (_slave_lock);
+		PBD::Mutex::Lock lm (_slave_lock);
 		_slaves.insert (lv2);
 	}
 }
@@ -1848,7 +1849,7 @@ LV2Plugin::remove_slave (std::shared_ptr<Plugin> p)
 {
 	std::shared_ptr<LV2Plugin> lv2 = std::dynamic_pointer_cast<LV2Plugin> (p);
 	if (lv2) {
-		Glib::Threads::Mutex::Lock lm (_slave_lock);
+		PBD::Mutex::Lock lm (_slave_lock);
 		_slaves.erase (lv2);
 	}
 }
@@ -1952,7 +1953,7 @@ LV2Plugin::write_from_ui(uint32_t       index,
 	}
 #endif
 
-	Glib::Threads::Mutex::Lock lm (_slave_lock, Glib::Threads::TRY_LOCK);
+	PBD::Mutex::Lock lm (_slave_lock, PBD::Mutex::TryLock);
 	if (lm.locked()) {
 		for (auto const& i : _slaves) {
 			i->write_from_ui (index, protocol, size, body);
@@ -2301,7 +2302,7 @@ LV2Plugin::emit_to_ui(void* controller, UIMessageSink sink)
 int
 LV2Plugin::work(Worker& worker, uint32_t size, const void* data)
 {
-	Glib::Threads::Mutex::Lock lm(_work_mutex);
+	PBD::Mutex::Lock lm(_work_mutex);
 	return _impl->work_iface->work(
 		_impl->instance->lv2_handle, work_respond, &worker, size, data);
 }
@@ -3590,6 +3591,7 @@ LV2World::LV2World()
 	lv2_ControlPort        = lilv_new_uri(world, LILV_URI_CONTROL_PORT);
 	lv2_InputPort          = lilv_new_uri(world, LILV_URI_INPUT_PORT);
 	lv2_OutputPort         = lilv_new_uri(world, LILV_URI_OUTPUT_PORT);
+	lv2_CVPort             = lilv_new_uri(world, LILV_URI_CV_PORT);
 	lv2_connectionOptional = lilv_new_uri(world, LV2_CORE__connectionOptional);
 	lv2_inPlaceBroken      = lilv_new_uri(world, LV2_CORE__inPlaceBroken);
 	lv2_isSideChain        = lilv_new_uri(world, LV2_CORE_PREFIX "isSideChain");
@@ -3711,6 +3713,7 @@ LV2World::~LV2World()
 	lilv_node_free(lv2_isSideChain);
 	lilv_node_free(lv2_inPlaceBroken);
 	lilv_node_free(lv2_connectionOptional);
+	lilv_node_free(lv2_CVPort);
 	lilv_node_free(lv2_OutputPort);
 	lilv_node_free(lv2_InputPort);
 	lilv_node_free(lv2_ControlPort);

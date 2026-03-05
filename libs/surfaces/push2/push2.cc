@@ -1354,7 +1354,7 @@ Push2::set_percussive_mode (bool yn)
 Push2Layout*
 Push2::current_layout () const
 {
-	Glib::Threads::Mutex::Lock lm (layout_lock);
+	PBD::Mutex::Lock lm (layout_lock);
 	return _current_layout;
 }
 
@@ -1390,7 +1390,7 @@ Push2::stripable_selection_changed ()
 			 * becomes "slow" (i.e. deferred for as long as it takes
 			 * to resolve notes).
 			 */
-			current_midi_track->input()->disconnect (current_midi_track->input()->nth(0), pad_port->name(), this);
+			current_midi_track->input()->disconnect (current_midi_track->input()->nth(0), pad_port->name());
 		}
 
 		/* now connect the pad port to this (newly) selected midi
@@ -1398,7 +1398,7 @@ Push2::stripable_selection_changed ()
 		 */
 
 		if (new_pad_target && pad_port) {
-			new_pad_target->input()->connect (new_pad_target->input()->nth (0), pad_port->name(), this);
+			new_pad_target->input()->connect (new_pad_target->input()->nth (0), pad_port->name());
 			_current_pad_target = new_pad_target;
 			_selection_color = get_color_index (new_pad_target->presentation_info().color());
 			_contrast_color = get_color_index (Gtkmm2ext::HSV (new_pad_target->presentation_info().color()).opposite().color());

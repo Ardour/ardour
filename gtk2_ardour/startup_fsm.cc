@@ -115,6 +115,7 @@ StartupFSM::~StartupFSM ()
 void
 StartupFSM::set_complete ()
 {
+	DEBUG_TRACE (DEBUG::GuiStartup, string_compose (X_("FSM complete. State was: %1\n"), enum_2_string (_state)));
 	app_quit_connection.disconnect ();
 	hide_quit_connection.disconnect ();
 
@@ -203,7 +204,7 @@ StartupFSM::end_dialog (T& d)
 void
 StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_id)
 {
-	DEBUG_TRACE (DEBUG::GuiStartup, string_compose ("Response %1 from %2 (nsr: %3 / nu: %4)\n", enum_2_string (Gtk::ResponseType (response)), enum_2_string (dialog_id), new_session_required, new_user));
+	DEBUG_TRACE (DEBUG::GuiStartup, string_compose ("Response %1 from %2 (nsr: %3 / nu: %4) state %5\n", enum_2_string (Gtk::ResponseType (response)), enum_2_string (dialog_id), new_session_required, new_user, enum_2_string (_state)));
 
 	/* Notes:
 	 *

@@ -389,9 +389,13 @@ fst_move_window_into_view (VSTState* fst)
 static HMODULE
 fst_load_vst_library(const char * path)
 {
-	char legalized_path[PATH_MAX];
-	strcpy (legalized_path, g_locale_from_utf8(path, -1, NULL, NULL, NULL));
-	return ( LoadLibraryA (legalized_path) );
+	gunichar2* wpath = g_utf8_to_utf16 (path, -1, 0, 0, 0);
+	if (!wpath) {
+		return NULL;
+	}
+	void* handle = LoadLibraryW ((LPCWSTR)wpath);
+	g_free (wpath);
+	return handle;
 }
 
 VSTHandle *

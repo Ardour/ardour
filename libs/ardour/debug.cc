@@ -116,3 +116,4 @@ PBD::DebugBits PBD::DEBUG::WiimoteControl = PBD::new_debug_bit ("wiimotecontrol"
 PBD::DebugBits PBD::DEBUG::Freesound = PBD::new_debug_bit ("freesound");
 PBD::DebugBits PBD::DEBUG::ClipRecording = PBD::new_debug_bit ("cliprecording");
 PBD::DebugBits PBD::DEBUG::TempoEstimation = PBD::new_debug_bit ("tempoestimation");
+PBD::DebugBits PBD::DEBUG::TriggerStop = PBD::new_debug_bit ("triggerstop");

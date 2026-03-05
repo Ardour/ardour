@@ -47,7 +47,6 @@
 #include <stdint.h>
 
 #include <boost/dynamic_bitset.hpp>
-#include <glibmm/threads.h>
 
 #include <ltc.h>
 
@@ -56,7 +55,9 @@
 #include "pbd/event_loop.h"
 #include "pbd/file_archive.h"
 #include "pbd/history_owner.h"
+#include "pbd/mutex.h"
 #include "pbd/rcu.h"
+#include "pbd/rwlock.h"
 #include "pbd/statefuldestructible.h"
 #include "pbd/signals.h"
 #include "pbd/undo.h"
@@ -695,7 +696,7 @@ public:
 	};
 
 	bool export_route_state (std::shared_ptr<RouteList> rl, const std::string& path, bool with_sources);
-	int  import_route_state (const std::string& path, std::map<PBD::ID, PBD::ID> const&, RouteGroupImportMode rgim = CreateRouteGroup);
+	int  import_route_state (const std::string& path, std::map<PBD::ID, PBD::ID> const&, RouteGroupImportMode rgim = CreateRouteGroup, PBD::Progress* p = 0);
 
 	std::map<PBD::ID, RouteImportInfo> parse_route_state (const std::string& path, bool& match_pbd_id);
 
@@ -768,7 +769,7 @@ public:
 
 	/* fundamental operations. duh. */
 
-	std::list<std::shared_ptr<AudioTrack> > new_audio_track (
+	AudioTrackList new_audio_track (
 		int input_channels,
 		int output_channels,
 		std::shared_ptr<RouteGroup> route_group,
@@ -784,7 +785,7 @@ public:
 	 * useful for speeding up imports of various kinds that involve lots of tracks */
 	bool new_audio_routes_tracks_bulk (
 		RouteList& routes,
-		std::list<std::shared_ptr<AudioTrack> >& tracks,
+		AudioTrackList& tracks,
 		int input_channels,
 		int output_channels,
 		std::shared_ptr<RouteGroup> route_group,
@@ -812,6 +813,8 @@ public:
 
 	void remove_routes (std::shared_ptr<RouteList>);
 	void remove_route (std::shared_ptr<Route>);
+
+	void add_routes (RouteList&, bool input_auto_connect, bool output_auto_connect, PresentationInfo::order_t);
 
 	void resort_routes ();
 
@@ -926,6 +929,8 @@ public:
 	int  cleanup_peakfiles ();
 	int  cleanup_sources (CleanupReport&);
 	int  cleanup_trash_sources (CleanupReport&);
+
+	void close_all_sources ();
 
 	int destroy_sources (std::list<std::shared_ptr<Source> > const&);
 
@@ -1398,6 +1403,7 @@ public:
 	bool unbang_trigger_at(int32_t route_index, int32_t row_index);
 	void clear_cue (int row_index);
 	std::shared_ptr<TriggerBox> armed_triggerbox () const;
+	std::shared_ptr<TriggerBox> rec_enabled_triggerbox () const;
 
 	void start_domain_bounce (Temporal::DomainBounceInfo&);
 	void finish_domain_bounce (Temporal::DomainBounceInfo&);
@@ -1637,9 +1643,9 @@ private:
 	volatile bool    _save_queued_pending;
 	bool             _no_save_signal;
 
-	Glib::Threads::Mutex save_state_lock;
-	Glib::Threads::Mutex save_source_lock;
-	Glib::Threads::Mutex peak_cleanup_lock;
+	PBD::Mutex save_state_lock;
+	PBD::Mutex save_source_lock;
+	PBD::Mutex peak_cleanup_lock;
 
 	int        load_options (const XMLNode&);
 	int        load_state (std::string snapshot_name, bool from_template = false);
@@ -1659,7 +1665,7 @@ private:
 	PBD::ReallocPool _mempool;
 #endif
 	LuaState lua;
-	mutable Glib::Threads::Mutex lua_lock;
+	mutable PBD::Mutex lua_lock;
 	luabridge::LuaRef * _lua_run;
 	luabridge::LuaRef * _lua_add;
 	luabridge::LuaRef * _lua_del;
@@ -1676,7 +1682,7 @@ private:
 	SerializedRCUManager<IOPlugList> _io_plugins;
 
 	std::vector<std::shared_ptr<MixerScene>> _mixer_scenes;
-	mutable Glib::Threads::RWLock              _mixer_scenes_lock;
+	mutable PBD::RWLock                      _mixer_scenes_lock;
 
 	Butler* _butler;
 
@@ -1799,10 +1805,10 @@ private:
 		ChanCount output_offset;
 	};
 
-	Glib::Threads::Mutex  _update_latency_lock;
+	PBD::Mutex  _update_latency_lock;
 
 	typedef std::queue<AutoConnectRequest> AutoConnectQueue;
-	Glib::Threads::Mutex _auto_connect_queue_lock;
+	PBD::Mutex _auto_connect_queue_lock;
 	AutoConnectQueue     _auto_connect_queue;
 	std::atomic<unsigned int>   _latency_recompute_pending;
 
@@ -1968,7 +1974,6 @@ private:
 
 	SerializedRCUManager<RouteList>  routes;
 
-	void add_routes (RouteList&, bool input_auto_connect, bool output_auto_connect, PresentationInfo::order_t);
 	void add_routes_inner (RouteList&, bool input_auto_connect, bool output_auto_connect, PresentationInfo::order_t);
 	bool _adding_routes_in_progress;
 	bool _reconnecting_routes_in_progress;
@@ -1991,7 +1996,7 @@ private:
 	bool find_route_name (std::string const &, uint32_t& id, std::string& name, bool);
 	void count_existing_track_channels (ChanCount& in, ChanCount& out);
 	void auto_connect_route (std::shared_ptr<Route>, bool, bool, const ChanCount&, const ChanCount&, const ChanCount& io = ChanCount(), const ChanCount& oo = ChanCount());
-	void midi_output_change_handler (IOChange change, void* /*src*/, std::weak_ptr<Route> midi_track);
+	void midi_output_change_handler (IOChange change, std::weak_ptr<Route> midi_track);
 
 	/* track numbering */
 
@@ -2010,9 +2015,27 @@ private:
 	void listen_position_changed ();
 	void solo_control_mode_changed ();
 
+	bool _solo_change_in_progress;
+
+	struct SoloChange {
+		SoloChange (bool s, PBD::Controllable::GroupControlDisposition g, std::weak_ptr<Route> r)
+			: self_solo_changed (s)
+			, gcd (g)
+			, route (r)
+		{}
+		bool                                       self_solo_changed;
+		PBD::Controllable::GroupControlDisposition gcd;
+		std::weak_ptr<Route>                       route;
+	};
+#ifdef _MSC_VER
+	std::vector<SoloChange> _solo_change_queue;
+#else
+	std::vector<SoloChange, PBD::StackAllocator<SoloChange, 8>> _solo_change_queue;
+#endif
+
 	/* REGION MANAGEMENT */
 
-	mutable Glib::Threads::Mutex region_lock;
+	mutable PBD::Mutex region_lock;
 
 	int load_regions (const XMLNode& node);
 	int load_compounds (const XMLNode& node);
@@ -2023,7 +2046,7 @@ private:
 
 	/* SOURCES */
 
-	mutable Glib::Threads::Mutex source_lock;
+	mutable PBD::Mutex source_lock;
 
 public:
 
@@ -2034,7 +2057,7 @@ public:
 	typedef std::map<PBD::ID,std::shared_ptr<Source> > SourceMap;
 
 	void foreach_source (std::function<void( std::shared_ptr<Source> )> f) {
-		Glib::Threads::Mutex::Lock ls (source_lock);
+		PBD::Mutex::Lock ls (source_lock);
 		for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
 			f ( (*i).second );
 		}
@@ -2124,7 +2147,7 @@ private:
 	    could not report free space.
 	*/
 	bool _total_free_4k_blocks_uncertain;
-	Glib::Threads::Mutex space_lock;
+	PBD::Mutex space_lock;
 
 	bool no_questions_about_missing_files;
 
@@ -2175,7 +2198,7 @@ private:
 	Sample*                       click_emphasis_data;
 	samplecnt_t                   click_length;
 	samplecnt_t                   click_emphasis_length;
-	mutable Glib::Threads::RWLock click_lock;
+	mutable PBD::RWLock          _click_lock;
 	samplecnt_t                  _click_io_latency;
 	PBD::ScopedConnection        _click_io_connection;
 	Temporal::GridIterator       _click_iterator;
@@ -2234,7 +2257,7 @@ private:
 	int find_all_sources_across_snapshots (std::set<std::string>& result, bool exclude_this_snapshot);
 
 	typedef std::set<std::shared_ptr<PBD::Controllable> > Controllables;
-	Glib::Threads::Mutex controllables_lock;
+	PBD::Mutex controllables_lock;
 	Controllables controllables;
 
 	std::shared_ptr<PBD::Controllable> _solo_cut_control;
@@ -2359,6 +2382,7 @@ private:
 	void setup_click ();
 	void setup_click_state (const XMLNode*);
 	void setup_bundles ();
+	void setup_bundles_rcu ();
 
 	void port_registry_changed ();
 	void probe_ctrl_surfaces ();

@@ -500,13 +500,14 @@ ExportProfileManager::update_ranges ()
 		return;
 	}
 
+	Locations const* locations = session.locations ();
 	/* Loop */
-	if (session.locations ()->auto_loop_location ()) {
+	if (locations->auto_loop_location ()) {
 		ranges->push_back (session.locations ()->auto_loop_location ());
 	}
 
 	/* Session */
-	if (session.locations ()->session_range_location ()) {
+	if (locations->session_range_location ()) {
 		ranges->push_back (session.locations ()->session_range_location ());
 	}
 
@@ -515,14 +516,20 @@ ExportProfileManager::update_ranges ()
 	if (selection_range) {
 		ranges->push_back (selection_range.get ());
 	}
-
 	/* ranges */
 
-	LocationList const& list (session.locations ()->list ());
-	for (LocationList::const_iterator it = list.begin (); it != list.end (); ++it) {
-		if ((*it)->is_range_marker ()) {
-			ranges->push_back (*it);
+	LocationList const& list (locations->list ());
+	for (auto const& loc : list) {
+		if (loc->is_range_marker ()) {
+			ranges->push_back (loc);
 		}
+	}
+
+	/* arrangements */
+	Location* l = nullptr;
+	timepos_t start, end;
+	while ((l = locations->next_section (l, start, end)) != nullptr) {
+		ranges->push_back (l);
 	}
 }
 
@@ -890,10 +897,10 @@ ExportProfileManager::get_warnings ()
 	TimespanStatePtr timespan_state = timespans.front ();
 
 	/* Check "global" config ***/
-	TimespanListPtr timespans = timespan_state->timespans;
+	TimespanListPtr timespan_list = timespan_state->timespans;
 
 	/* Check Timespans are not empty */
-	if (timespans->empty ()) {
+	if (timespan_list->empty ()) {
 		warnings->errors.push_back (_("No timespan has been selected!"));
 	}
 
@@ -955,6 +962,36 @@ ExportProfileManager::get_warnings ()
 		for (auto const& i : filenames) {
 			ExportFilenamePtr filename    = i->filename;
 			filename->include_format_name = duplicates_found;
+		}
+
+		if (duplicates_found) {
+			/* make sure that include_format_name does not produce duplicates either */
+			std::string format_name;
+			for (auto const& fm : formats) {
+				if (format_name.empty ()) {
+					format_name = fm->format->name ();
+				} else if (format_name == fm->format->name ()) {
+					warnings->errors.push_back (_("Chosen format combination results in identical file-names!"));
+					return warnings;
+				}
+			}
+		}
+	}
+
+	/* handle_duplicate timespan names */
+	for (auto const& timespan_state: timespans) {
+		TimespanListPtr timespan_list = timespan_state->timespans;
+		if (!timespan_list) {
+			continue;
+		}
+		std::string n;
+		for (auto const& ts: *(timespan_list)) {
+			if (n.empty ()) {
+				n = ts->name();
+			} else if (n == ts->name()) {
+				warnings->errors.push_back (_("Multiple Timespan/Ranges have the same name resulting in identical file-names!"));
+				return warnings;
+			}
 		}
 	}
 

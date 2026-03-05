@@ -122,7 +122,7 @@ class MidiViewBackground : public virtual ViewBackground
 	virtual int y_position () const { return 0; }
 
 	virtual uint8_t get_preferred_midi_channel () const = 0;
-	virtual void set_note_highlight (bool) = 0;
+	virtual void set_note_highlight (uint8_t) = 0;
 	virtual void record_layer_check (std::shared_ptr<ARDOUR::Region>, samplepos_t) = 0;
 
 	virtual void set_size (int w, int h) {}

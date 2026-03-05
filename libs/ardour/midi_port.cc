@@ -386,8 +386,11 @@ MidiPort::transport_stopped ()
 }
 
 void
-MidiPort::realtime_locate (bool)
+MidiPort::realtime_locate (bool for_loop_end)
 {
+	if (for_loop_end && !Config->get_midi_panic_when_looping()) {
+		return;
+	}
 	_resolve_required = true;
 }
 

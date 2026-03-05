@@ -160,10 +160,6 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 			_has_master_display = (mcp.device_info().has_master_fader() && mcp.device_info().has_qcon_second_lcd());
 		}
 
-		if ( is_v1m ) {
-			_has_master_display = (mcp.device_info().has_master_fader() && mcp.device_info().has_qcon_second_lcd());
-		}
-
 		_has_master_meter = mcp.device_info().has_qcon_master_meters();
 
 		if (_mcp.device_info().has_global_controls()) {

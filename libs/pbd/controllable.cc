@@ -37,7 +37,7 @@ PBD::Signal<void(std::weak_ptr<PBD::Controllable> )> Controllable::StopLearning;
 PBD::Signal<void(std::weak_ptr<PBD::Controllable> )> Controllable::GUIFocusChanged;
 PBD::Signal<void(std::weak_ptr<PBD::Controllable> )> Controllable::ControlTouched;
 
-Glib::Threads::RWLock Controllable::registry_lock;
+PBD::RWLock Controllable::registry_lock;
 Controllable::Controllables Controllable::registry;
 PBD::ScopedConnectionList Controllable::registry_connections;
 
@@ -116,7 +116,7 @@ Controllable::clear_flag (Flag f)
 void
 Controllable::add (Controllable& ctl)
 {
-	Glib::Threads::RWLock::WriterLock lm (registry_lock);
+	PBD::RWLock::WriterLock lm (registry_lock);
 	registry.insert (&ctl);
 	ctl.DropReferences.connect_same_thread (registry_connections, std::bind (&Controllable::remove, &ctl));
 	ctl.Destroyed.connect_same_thread (registry_connections, std::bind (&Controllable::remove, &ctl));
@@ -125,7 +125,7 @@ Controllable::add (Controllable& ctl)
 void
 Controllable::remove (Controllable* ctl)
 {
-	Glib::Threads::RWLock::WriterLock lm (registry_lock);
+	PBD::RWLock::WriterLock lm (registry_lock);
 	Controllables::iterator i = std::find (registry.begin(), registry.end(), ctl);
 	if (i != registry.end()) {
 		registry.erase (i);
@@ -135,7 +135,7 @@ Controllable::remove (Controllable* ctl)
 std::shared_ptr<Controllable>
 Controllable::by_id (const ID& id)
 {
-	Glib::Threads::RWLock::ReaderLock lm (registry_lock);
+	PBD::RWLock::ReaderLock lm (registry_lock);
 
 	for (Controllables::iterator i = registry.begin(); i != registry.end(); ++i) {
 		if ((*i)->id() == id) {
@@ -149,7 +149,7 @@ ControllableSet
 Controllable::registered_controllables ()
 {
 	ControllableSet rv;
-	Glib::Threads::RWLock::ReaderLock lm (registry_lock);
+	PBD::RWLock::ReaderLock lm (registry_lock);
 	for (auto const& i : registry) {
 		try {
 			rv.insert (i->shared_from_this ());
@@ -164,7 +164,7 @@ Controllable::registered_controllables ()
 void
 Controllable::dump_registry ()
 {
-	Glib::Threads::RWLock::ReaderLock lm (registry_lock);
+	PBD::RWLock::ReaderLock lm (registry_lock);
 	if (registry.size() == 0) {
 		return;
 	}

@@ -24,7 +24,7 @@
 
 #include <string>
 
-#include <glibmm/threads.h>
+#include "pbd/mutex.h"
 
 #include "evoral/PatchChange.h"
 
@@ -112,7 +112,7 @@ private:
 	std::shared_ptr<MidiRegion> midi_region;
 	samplepos_t current_sample;
 	mutable std::atomic<int> _auditioning;
-	Glib::Threads::Mutex lock;
+	PBD::Mutex lock;
 	timecnt_t length;
 	sampleoffset_t _seek_sample;
 	bool _reload_synth;
@@ -134,7 +134,7 @@ private:
 	void unload_synth (bool);
 	static void*_drop_ports (void*);
 	void actually_drop_ports ();
-	void output_changed (IOChange, void*);
+	void output_changed (IOChange);
 	timepos_t _import_position;
 };
 

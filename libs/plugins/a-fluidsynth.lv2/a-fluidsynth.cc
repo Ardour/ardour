@@ -216,8 +216,13 @@ load_sf2 (AFluidSynth* self, const char* fn)
 	pthread_mutex_lock (&self->bp_lock);
 	for (chn = 0; (preset = fluid_sfont_iteration_next (sfont)); ++chn) {
 		if (chn < 16) {
+			if (chn == 9 && FLUID_OK == fluid_synth_program_select (self->synth, chn, synth_id, 128, 0)) {
+				continue;
+			}
+
 			fluid_synth_program_select (self->synth, chn, synth_id,
-			                            fluid_preset_get_banknum (preset), fluid_preset_get_num (preset));
+			                            fluid_preset_get_banknum (preset),
+			                            fluid_preset_get_num (preset));
 		}
 #ifndef LV2_EXTENDED
 		else {
@@ -236,7 +241,7 @@ load_sf2 (AFluidSynth* self, const char* fn)
 		/* fill remaining channels */
 		fluid_sfont_iteration_start (sfont);
 		fluid_preset_t* preset = fluid_sfont_iteration_next (sfont);
-		for (;chn < 16; ++chn) {
+		for (; preset && chn < 16; ++chn) {
 			fluid_synth_program_select (self->synth, chn, synth_id,
 			                            fluid_preset_get_banknum (preset), fluid_preset_get_num (preset));
 		}
@@ -463,6 +468,9 @@ instantiate (const LV2_Descriptor*     descriptor,
 	fluid_synth_set_gain (self->synth, 1.0f);
 	fluid_synth_set_polyphony (self->synth, 256);
 	fluid_synth_set_sample_rate (self->synth, (float)rate);
+
+	/* allow 14bit bank-select on drum channel, otherwise MSB is ignored and drums enforced */
+	fluid_synth_set_channel_type (self->synth, 9, CHANNEL_TYPE_MELODIC);
 
 	fluid_synth_set_reverb_on (self->synth, 0);
 	fluid_synth_set_chorus_on (self->synth, 0);

@@ -2042,7 +2042,9 @@ Editor::toggle_location_at_playhead_cursor ()
 void
 Editor::add_location_from_playhead_cursor ()
 {
-	add_location_mark (timepos_t (_session->audible_sample()));
+	if (_session) {
+		add_location_mark (timepos_t (_session->audible_sample()));
+	}
 }
 
 bool
@@ -6338,6 +6340,10 @@ tracklist_to_stripables (TrackViewList list)
 void
 Editor::play_solo_selection (bool restart)
 {
+	if (!_session) {
+		return;
+	}
+
 	//note: session::solo_selection takes care of invalidating the region playlist
 
 	if ((!selection->tracks.empty()) && selection->time.length() > 0) {  //a range is selected; solo the tracks and roll
@@ -9458,6 +9464,10 @@ Editor::temporal_zoom_session ()
 		samplecnt_t end = _session->current_end_sample();
 
 		if (_session->actively_recording ()) {
+			if (start == 0 && end == 0) {
+				start = _session->last_transport_start();
+			}
+
 			samplepos_t cur = _playhead_cursor->current_sample ();
 			if (cur > end) {
 				/* recording beyond the end marker; zoom out

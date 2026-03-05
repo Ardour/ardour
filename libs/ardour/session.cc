@@ -39,7 +39,6 @@
 #include <limits.h>
 
 #include <glibmm/datetime.h>
-#include <glibmm/threads.h>
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
 
@@ -313,6 +312,7 @@ Session::Session (AudioEngine &eng,
 	, _route_deletion_in_progress (false)
 	, _route_reorder_in_progress (false)
 	, _track_number_decimals(1)
+	, _solo_change_in_progress (false)
 	, default_fade_steepness (0)
 	, default_fade_msecs (0)
 	, _total_free_4k_blocks (0)
@@ -667,7 +667,7 @@ Session::destroy ()
 	_state_of_the_state = StateOfTheState (CannotSave | Deletion);
 
 	{
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 		ltc_tx_cleanup();
 		if (_ltc_output_port) {
 			AudioEngine::instance()->unregister_port (_ltc_output_port);
@@ -700,7 +700,7 @@ Session::destroy ()
 	_click_io_connection.disconnect ();
 
 	{
-		Glib::Threads::Mutex::Lock lm (controllables_lock);
+		PBD::Mutex::Lock lm (controllables_lock);
 		for (Controllables::iterator i = controllables.begin(); i != controllables.end(); ++i) {
 			(*i)->DropReferences (); /* EMIT SIGNAL */
 		}
@@ -720,7 +720,7 @@ Session::destroy ()
 
 	{
 		/* unregister all lua functions, drop held references (if any) */
-		Glib::Threads::Mutex::Lock tm (lua_lock, Glib::Threads::TRY_LOCK);
+		PBD::Mutex::Lock tm (lua_lock, PBD::Mutex::TryLock);
 		if (_lua_cleanup) {
 			(*_lua_cleanup)();
 		}
@@ -832,7 +832,7 @@ Session::destroy ()
 
 	{
 		DEBUG_TRACE (DEBUG::Destruction, "delete sources\n");
-		Glib::Threads::Mutex::Lock lm (source_lock);
+		PBD::Mutex::Lock lm (source_lock);
 		for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
 			DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for source %1 ; pre-ref = %2\n", i->second->name(), i->second.use_count()));
 			i->second->drop_references ();
@@ -865,7 +865,7 @@ Session::destroy ()
 	 * those anymore, but they do leak memory if not removed
 	 */
 	while (!immediate_events.empty ()) {
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 		SessionEvent *ev = immediate_events.front ();
 		DEBUG_TRACE (DEBUG::SessionEvents, string_compose ("Drop event: %1\n", enum_2_string (ev->type)));
 		immediate_events.pop_front ();
@@ -897,7 +897,7 @@ Session::destroy ()
 		/* unregister all dropped ports, process pending port deletion. */
 		// this may call ARDOUR::Port::drop ... jack_port_unregister ()
 		// jack1 cannot cope with removing ports while processing
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 		AudioEngine::instance()->clear_pending_port_deletions ();
 	}
 
@@ -949,9 +949,9 @@ Session::block_processing()
 	 * of the next cycle. So wait until any ongoing
 	 * process-callback returns.
 	 */
-	Glib::Threads::Mutex::Lock lm (_engine.process_lock());
+	PBD::Mutex::Lock lm (_engine.process_lock());
 	/* latency callback may be in process, wait until it completed */
-	Glib::Threads::Mutex::Lock lx (_engine.latency_lock());
+	PBD::Mutex::Lock lx (_engine.latency_lock());
 }
 
 void
@@ -960,7 +960,7 @@ Session::setup_ltc ()
 	_ltc_output_port = AudioEngine::instance()->register_output_port (DataType::AUDIO, X_("LTC-Out"), false, TransportGenerator);
 
 	{
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 		/* TODO use auto-connect thread */
 		reconnect_ltc_output ();
 	}
@@ -1028,7 +1028,7 @@ Session::setup_click_state (const XMLNode* node)
 
 		for (uint32_t physport = 0; physport < 2; ++physport) {
 			if (outs.size() > physport) {
-				if (_click_io->add_port (outs[physport], this)) {
+				if (_click_io->add_port (outs[physport])) {
 					// relax, even though its an error
 				}
 			}
@@ -1069,7 +1069,7 @@ Session::auto_connect_io (std::shared_ptr<IO> io)
 			continue;
 		}
 
-		if (io->connect (p, connect_to, this)) {
+		if (io->connect (p, connect_to)) {
 			error << string_compose (_("cannot connect %1 output %2 to %3"), io->name(), n, connect_to) << endmsg;
 			break;
 		}
@@ -1161,9 +1161,9 @@ Session::add_monitor_section ()
 	BOOST_MARK_ROUTE(r);
 
 	try {
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-		r->input()->ensure_io (_master_out->output()->n_ports(), false, this);
-		r->output()->ensure_io (_master_out->output()->n_ports(), false, this);
+		PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		r->input()->ensure_io (_master_out->output()->n_ports(), false);
+		r->output()->ensure_io (_master_out->output()->n_ports(), false);
 	} catch (...) {
 		error << _("Cannot create monitor section. 'Monitor' Port name is not unique.") << endmsg;
 		return;
@@ -1190,7 +1190,7 @@ Session::add_monitor_section ()
 		 * this, i think.
 		 */
 
-		_master_out->output()->disconnect (this);
+		_master_out->output()->disconnect ();
 
 		for (uint32_t n = 0; n < limit; ++n) {
 			std::shared_ptr<AudioPort> p = _monitor_out->input()->ports()->nth_audio_port (n);
@@ -1198,7 +1198,7 @@ Session::add_monitor_section ()
 
 			if (o) {
 				string connect_to = o->name();
-				if (_monitor_out->input()->connect (p, connect_to, this)) {
+				if (_monitor_out->input()->connect (p, connect_to)) {
 					error << string_compose (_("cannot connect control input %1 to %2"), n, connect_to)
 					      << endmsg;
 					break;
@@ -1236,7 +1236,7 @@ Session::auto_connect_monitor_bus ()
 		std::shared_ptr<Bundle> b = bundle_by_name (Config->get_monitor_bus_preferred_bundle());
 
 		if (b) {
-			_monitor_out->output()->connect_ports_to_bundle (b, true, this);
+			_monitor_out->output()->connect_ports_to_bundle (b, true);
 		} else {
 			warning << string_compose (_("The preferred I/O for the monitor bus (%1) cannot be found"),
 					Config->get_monitor_bus_preferred_bundle())
@@ -1267,7 +1267,7 @@ Session::auto_connect_monitor_bus ()
 				}
 
 				if (!connect_to.empty()) {
-					if (_monitor_out->output()->connect (p, connect_to, this)) {
+					if (_monitor_out->output()->connect (p, connect_to)) {
 						error << string_compose (
 								_("cannot connect control output %1 to %2"),
 								n, connect_to)
@@ -1283,7 +1283,7 @@ Session::auto_connect_monitor_bus ()
 void
 Session::setup_route_monitor_sends (bool enable, bool need_process_lock)
 {
-	Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
+	PBD::Mutex::Lock lx (AudioEngine::instance()->process_lock (), PBD::Mutex::NotLock);
 	if (need_process_lock) {
 		/* Hold process lock while doing this so that we don't hear bits and
 		 * pieces of audio as we work on each route.
@@ -1329,15 +1329,15 @@ Session::reset_monitor_section ()
 	 * this, i think.
 	 */
 
-	_master_out->output()->disconnect (this);
-	_monitor_out->output()->disconnect (this);
+	_master_out->output()->disconnect ();
+	_monitor_out->output()->disconnect ();
 
 	// monitor section follow master bus - except midi
 	ChanCount mon_chn (_master_out->output()->n_ports());
 	mon_chn.set_midi (0);
 
-	_monitor_out->input()->ensure_io (mon_chn, false, this);
-	_monitor_out->output()->ensure_io (mon_chn, false, this);
+	_monitor_out->input()->ensure_io (mon_chn, false);
+	_monitor_out->output()->ensure_io (mon_chn, false);
 
 	for (uint32_t n = 0; n < limit; ++n) {
 		std::shared_ptr<AudioPort> p = _monitor_out->input()->ports()->nth_audio_port (n);
@@ -1345,7 +1345,7 @@ Session::reset_monitor_section ()
 
 		if (o) {
 			string connect_to = o->name();
-			if (_monitor_out->input()->connect (p, connect_to, this)) {
+			if (_monitor_out->input()->connect (p, connect_to)) {
 				error << string_compose (_("cannot connect control input %1 to %2"), n, connect_to)
 				      << endmsg;
 				break;
@@ -1362,7 +1362,7 @@ Session::reset_monitor_section ()
 			std::shared_ptr<Bundle> b = bundle_by_name (Config->get_monitor_bus_preferred_bundle());
 
 			if (b) {
-				_monitor_out->output()->connect_ports_to_bundle (b, true, this);
+				_monitor_out->output()->connect_ports_to_bundle (b, true);
 			} else {
 				warning << string_compose (_("The preferred I/O for the monitor bus (%1) cannot be found"),
 							   Config->get_monitor_bus_preferred_bundle())
@@ -1393,7 +1393,7 @@ Session::reset_monitor_section ()
 					}
 
 					if (!connect_to.empty()) {
-						if (_monitor_out->output()->connect (p, connect_to, this)) {
+						if (_monitor_out->output()->connect (p, connect_to)) {
 							error << string_compose (
 								_("cannot connect control output %1 to %2"),
 								n, connect_to)
@@ -1525,9 +1525,9 @@ Session::add_surround_master ()
 	BOOST_MARK_ROUTE(r);
 
 	try {
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-		r->input()->ensure_io (ChanCount (), false, this);
-		r->output()->ensure_io (ChanCount (DataType::AUDIO, 16), false, this);
+		PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		r->input()->ensure_io (ChanCount (), false);
+		r->output()->ensure_io (ChanCount (DataType::AUDIO, 16), false);
 	} catch (...) {
 		error << _("Cannot create surround master. 'Surround' Port name is not unique.") << endmsg;
 		return;
@@ -1559,12 +1559,12 @@ Session::auto_connect_surround_master ()
 	std::shared_ptr<IO> io    = _surround_master->output ();
 	uint32_t            limit = io->n_ports ().n_audio ();
 
-	Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+	PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 	/* connect binaural outputs, port 12, 13 */
 	for (uint32_t n = 12, p = 0; n < limit && outputs.size () > p; ++n, ++p) {
 		std::shared_ptr<AudioPort> ap = io->audio (n);
 
-		if (io->connect (ap, outputs[p], this)) {
+		if (io->connect (ap, outputs[p])) {
 			error << string_compose (_("cannot connect %1 output %2 to %3"), io->name(), n, outputs[p]) << endmsg;
 			break;
 		}
@@ -1580,7 +1580,7 @@ Session::auto_connect_surround_master ()
 void
 Session::setup_route_surround_sends (bool enable, bool need_process_lock)
 {
-	Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
+	PBD::Mutex::Lock lx (AudioEngine::instance()->process_lock (), PBD::Mutex::NotLock);
 	if (need_process_lock) {
 		/* Hold process lock while doing this so that we don't hear bits and
 		 * pieces of audio as we work on each route.
@@ -1619,9 +1619,9 @@ Session::add_master_bus (ChanCount const& count)
 	BOOST_MARK_ROUTE(r);
 
 	{
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-		r->input()->ensure_io (count, false, this);
-		r->output()->ensure_io (count, false, this);
+		PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		r->input()->ensure_io (count, false);
+		r->output()->ensure_io (count, false);
 	}
 
 	rl.push_back (r);
@@ -2286,6 +2286,10 @@ Session::maybe_enable_record (bool rt_context)
 		return;
 	}
 
+	if (rec_enabled_triggerbox()) {
+		return;
+	}
+
 	_record_status.store (Enabled);
 
 	// TODO make configurable, perhaps capture-buffer-seconds dependnet?
@@ -2448,7 +2452,7 @@ Session::set_block_size (pframes_t nframes)
 
 	DEBUG_TRACE (DEBUG::LatencyCompensation, "Session::set_block_size -> update worst i/o latency\n");
 	/* when this is called from the auto-connect thread, the process-lock is held */
-	Glib::Threads::Mutex::Lock lx (_update_latency_lock);
+	PBD::Mutex::Lock lx (_update_latency_lock);
 	set_worst_output_latency ();
 	set_worst_input_latency ();
 }
@@ -2782,13 +2786,13 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, bool s
 			BOOST_MARK_TRACK (track);
 
 			{
-				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-				if (track->input()->ensure_io (input, false, this)) {
+				PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+				if (track->input()->ensure_io (input, false )) {
 					error << "cannot configure " << input << " out configuration for new midi track" << endmsg;
 					goto failed;
 				}
 
-				if (track->output()->ensure_io (output, false, this)) {
+				if (track->output()->ensure_io (output, false)) {
 					error << "cannot configure " << output << " out configuration for new midi track" << endmsg;
 					goto failed;
 				}
@@ -2866,15 +2870,15 @@ Session::new_midi_route (std::shared_ptr<RouteGroup> route_group, uint32_t how_m
 			BOOST_MARK_ROUTE(bus);
 
 			{
-				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+				PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 
-				if (bus->input()->ensure_io (ChanCount(DataType::MIDI, 1), false, this)) {
+				if (bus->input()->ensure_io (ChanCount(DataType::MIDI, 1), false)) {
 					error << _("cannot configure new midi bus input") << endmsg;
 					goto failure;
 				}
 
 
-				if (bus->output()->ensure_io (ChanCount(DataType::MIDI, 1), false, this)) {
+				if (bus->output()->ensure_io (ChanCount(DataType::MIDI, 1), false)) {
 					error << _("cannot configure new midi bus output") << endmsg;
 					goto failure;
 				}
@@ -2920,7 +2924,7 @@ Session::new_midi_route (std::shared_ptr<RouteGroup> route_group, uint32_t how_m
 
 
 void
-Session::midi_output_change_handler (IOChange change, void * /*src*/, std::weak_ptr<Route> wr)
+Session::midi_output_change_handler (IOChange change, std::weak_ptr<Route> wr)
 {
 	std::shared_ptr<Route> midi_route (wr.lock());
 
@@ -3007,7 +3011,7 @@ Session::ensure_route_presentation_info_gap (PresentationInfo::order_t first_new
  *  @param name_template string to use for the start of the name, or "" to use "Audio".
  */
 bool
-Session::new_audio_routes_tracks_bulk (RouteList& routes, list< std::shared_ptr<AudioTrack> >& tracks,
+Session::new_audio_routes_tracks_bulk (RouteList& routes, AudioTrackList& tracks,
                                        int input_channels, int output_channels, std::shared_ptr<RouteGroup> route_group,
                                        uint32_t how_many, string name_template, PresentationInfo::order_t order,
                                        TrackMode mode, bool input_auto_connect,
@@ -3044,9 +3048,9 @@ Session::new_audio_routes_tracks_bulk (RouteList& routes, list< std::shared_ptr<
 			BOOST_MARK_TRACK (track);
 
 			{
-				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+				PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 
-				if (track->input()->ensure_io (ChanCount(DataType::AUDIO, input_channels), false, this)) {
+				if (track->input()->ensure_io (ChanCount(DataType::AUDIO, input_channels), false)) {
 					error << string_compose (
 						_("cannot configure %1 in/%2 out configuration for new audio track"),
 						input_channels, output_channels)
@@ -3054,7 +3058,7 @@ Session::new_audio_routes_tracks_bulk (RouteList& routes, list< std::shared_ptr<
 					goto failed;
 				}
 
-				if (track->output()->ensure_io (ChanCount(DataType::AUDIO, output_channels), false, this)) {
+				if (track->output()->ensure_io (ChanCount(DataType::AUDIO, output_channels), false)) {
 					error << string_compose (
 						_("cannot configure %1 in/%2 out configuration for new audio track"),
 						input_channels, output_channels)
@@ -3096,14 +3100,14 @@ Session::new_audio_routes_tracks_bulk (RouteList& routes, list< std::shared_ptr<
 /** Caller must not hold process lock
  *  @param name_template string to use for the start of the name, or "" to use "Audio".
  */
-list< std::shared_ptr<AudioTrack> >
+AudioTrackList
 Session::new_audio_track (int input_channels, int output_channels, std::shared_ptr<RouteGroup> route_group,
                           uint32_t how_many, string name_template, PresentationInfo::order_t order,
                           TrackMode mode, bool input_auto_connect,
                           bool trigger_visibility)
 {
-	RouteList routes;
-	list<std::shared_ptr<AudioTrack> > tracks;
+	RouteList      routes;
+	AudioTrackList tracks;
 
 	new_audio_routes_tracks_bulk (routes,
 				      tracks,
@@ -3159,9 +3163,9 @@ Session::new_audio_route (int input_channels, int output_channels, std::shared_p
 			BOOST_MARK_ROUTE(bus);
 
 			{
-				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+				PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 
-				if (bus->input()->ensure_io (ChanCount(DataType::AUDIO, input_channels), false, this)) {
+				if (bus->input()->ensure_io (ChanCount(DataType::AUDIO, input_channels), false)) {
 					error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
 								 input_channels, output_channels)
 					      << endmsg;
@@ -3169,7 +3173,7 @@ Session::new_audio_route (int input_channels, int output_channels, std::shared_p
 				}
 
 
-				if (bus->output()->ensure_io (ChanCount(DataType::AUDIO, output_channels), false, this)) {
+				if (bus->output()->ensure_io (ChanCount(DataType::AUDIO, output_channels), false)) {
 					error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
 								 input_channels, output_channels)
 					      << endmsg;
@@ -3273,7 +3277,11 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 				string const route_name  = node_copy.property(X_("name"))->value ();
 
 				/* generate a new name by adding a number to the end of the template name */
-				if (!find_route_name (route_name, ++number, name, true)) {
+				bool definitely_add_number = true;
+				/* ... unless when importing route state */
+				node_copy.get_property (X_("definitely-add-number"), definitely_add_number);
+
+				if (!find_route_name (route_name, ++number, name, definitely_add_number)) {
 					fatal << _("Session: Failed to generate unique name and ID for track from template.") << endmsg;
 					abort(); /*NOTREACHED*/
 				}
@@ -3440,13 +3448,13 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 				   loading this normally happens in a different way.
 				*/
 
-				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+				PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 
 				IOChange change (IOChange::Type (IOChange::ConfigurationChanged | IOChange::ConnectionsChanged));
 				change.after = route->input()->n_ports();
-				route->input()->changed (change, this);
+				route->input()->changed (change);
 				change.after = route->output()->n_ports();
-				route->output()->changed (change, this);
+				route->output()->changed (change);
 			}
 
 			ret.push_back (route);
@@ -3476,7 +3484,7 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 
 	if (!ret.empty()) {
 		/* set/unset monitor-send */
-		Glib::Threads::Mutex::Lock lm (_engine.process_lock());
+		PBD::Mutex::Lock lm (_engine.process_lock());
 		for (RouteList::iterator x = ret.begin(); x != ret.end(); ++x) {
 			if ((*x)->can_monitor ()) {
 				if (_monitor_out) {
@@ -3670,7 +3678,7 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 	}
 
 	if (_monitor_out && !loading()) {
-		Glib::Threads::Mutex::Lock lm (_engine.process_lock());
+		PBD::Mutex::Lock lm (_engine.process_lock());
 
 		for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x) {
 			if ((*x)->can_monitor ()) {
@@ -3680,7 +3688,7 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 	}
 
 	if (_surround_master && !loading()) {
-		Glib::Threads::Mutex::Lock lm (_engine.process_lock());
+		PBD::Mutex::Lock lm (_engine.process_lock());
 		for (auto & r : new_routes) {
 			r->enable_surround_send ();
 		}
@@ -3722,7 +3730,7 @@ Session::load_and_connect_instruments (RouteList& new_routes, bool strict_io, st
 		}
 	}
 	for (RouteList::iterator r = new_routes.begin(); r != new_routes.end(); ++r) {
-		(*r)->output()->changed.connect_same_thread (*this, std::bind (&Session::midi_output_change_handler, this, _1, _2, std::weak_ptr<Route>(*r)));
+		(*r)->output()->changed.connect_same_thread (*this, std::bind (&Session::midi_output_change_handler, this, _1, std::weak_ptr<Route>(*r)));
 	}
 }
 
@@ -3865,27 +3873,32 @@ Session::remove_routes (std::shared_ptr<RouteList> routes_to_remove)
 
 			// We need to disconnect the route's inputs and outputs
 
-			(*iter)->input()->disconnect (0);
-			(*iter)->output()->disconnect (0);
+			(*iter)->input()->disconnect ();
+			(*iter)->output()->disconnect ();
 
-			/* if the route had internal sends sending to it, remove them */
+			if (!deletion_in_progress ()) {
+				PBD::Mutex::Lock lx (AudioEngine::instance()->process_lock (), PBD::Mutex::NotLock);
+				ProcessorChangeBlocker pcb (this, false);
 
-			if (!deletion_in_progress () && (*iter)->internal_return()) {
+				if ((*iter)->internal_return() || (_monitor_out && (*iter)->can_monitor ())) {
+					lx.acquire ();
+				}
 
-				std::shared_ptr<RouteList const> r = routes.reader ();
-				for (auto const& i : *r) {
-					std::shared_ptr<Send> s = i->internal_send_for (*iter);
-					if (s) {
-						i->remove_processor (s);
+				/* if the route had internal sends sending to it, remove them */
+				if ((*iter)->internal_return()) {
+					std::shared_ptr<RouteList const> r = routes.reader ();
+					for (auto const& i : *r) {
+						std::shared_ptr<Send> s = i->internal_send_for (*iter);
+						if (s) {
+							i->remove_processor (s, nullptr, false);
+						}
 					}
 				}
-			}
 
-			/* if the monitoring section had a pointer to this route, remove it */
-			if (!deletion_in_progress () && _monitor_out && (*iter)->can_monitor ()) {
-				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-				ProcessorChangeBlocker pcb (this, false);
-				(*iter)->remove_monitor_send ();
+				/* if the monitoring section had a pointer to this route, remove it */
+				if (_monitor_out && (*iter)->can_monitor ()) {
+					(*iter)->remove_monitor_send ();
+				}
 			}
 
 			std::shared_ptr<MidiTrack> mt = std::dynamic_pointer_cast<MidiTrack> (*iter);
@@ -4058,6 +4071,17 @@ Session::route_solo_isolated_changed (std::weak_ptr<Route> wpr)
 void
 Session::route_solo_changed (bool self_solo_changed, Controllable::GroupControlDisposition group_override,  std::weak_ptr<Route> wpr)
 {
+	if (_solo_change_in_progress) {
+		/* when VCA master changes multiple solos, first collect all Changed signals,
+		 * so that SoloControl::transitioned_into_solo is set before processing
+		 * up/downstream propagation.
+		 * Slaved Solos behave like they are in a group, but `group_already_accounted_for`
+		 * is not set for VCAs, leading to https://tracker.ardour.org/view.php?id=10192
+		 */
+		_solo_change_queue.push_back (SoloChange (self_solo_changed, group_override, wpr));
+		return;
+	}
+
 	DEBUG_TRACE (DEBUG::Solo, string_compose ("route solo change, self = %1, update\n", self_solo_changed));
 
 	std::shared_ptr<Route> route (wpr.lock());
@@ -4804,7 +4828,7 @@ Session::find_whole_file_parent (std::shared_ptr<Region const> child) const
 	RegionFactory::RegionMap::const_iterator i;
 	std::shared_ptr<Region> region;
 
-	Glib::Threads::Mutex::Lock lm (region_lock);
+	PBD::Mutex::Lock lm (region_lock);
 
 	for (i = regions.begin(); i != regions.end(); ++i) {
 
@@ -4850,7 +4874,7 @@ Session::destroy_sources (list<std::shared_ptr<Source> > const& srcs)
 	for (list<std::shared_ptr<Source> >::const_iterator s = srcs.begin(); s != srcs.end(); ++s) {
 
 		{
-			Glib::Threads::Mutex::Lock ls (source_lock);
+			PBD::Mutex::Lock ls (source_lock);
 			/* remove from the main source list */
 			sources.erase ((*s)->id());
 		}
@@ -4940,7 +4964,7 @@ Session::add_source (std::shared_ptr<Source> source)
 	entry.second = source;
 
 	{
-		Glib::Threads::Mutex::Lock lm (source_lock);
+		PBD::Mutex::Lock lm (source_lock);
 		result = sources.insert (entry);
 	}
 
@@ -4991,7 +5015,7 @@ Session::remove_source (std::weak_ptr<Source> src, bool drop_references)
 	}
 
 	{
-		Glib::Threads::Mutex::Lock lm (source_lock);
+		PBD::Mutex::Lock lm (source_lock);
 
 		if ((i = sources.find (source->id())) != sources.end()) {
 			sources.erase (i);
@@ -5029,7 +5053,7 @@ Session::remove_source (std::weak_ptr<Source> src, bool drop_references)
 std::shared_ptr<Source>
 Session::source_by_id (const PBD::ID& id)
 {
-	Glib::Threads::Mutex::Lock lm (source_lock);
+	PBD::Mutex::Lock lm (source_lock);
 	SourceMap::iterator i;
 	std::shared_ptr<Source> source;
 
@@ -5047,7 +5071,7 @@ Session::audio_source_by_path_and_channel (const string& path, uint16_t chn) con
 	   as a property.
 	*/
 
-	Glib::Threads::Mutex::Lock lm (source_lock);
+	PBD::Mutex::Lock lm (source_lock);
 
 	for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
 		std::shared_ptr<AudioFileSource> afs
@@ -5068,7 +5092,7 @@ Session::midi_source_by_path (const std::string& path, bool need_source_lock) co
 	   for unique identification, in addition to a path.
 	*/
 
-	Glib::Threads::Mutex::Lock lm (source_lock, Glib::Threads::NOT_LOCK);
+	PBD::Mutex::Lock lm (source_lock, PBD::Mutex::NotLock);
 	if (need_source_lock) {
 		lm.acquire ();
 	}
@@ -5091,7 +5115,7 @@ uint32_t
 Session::count_sources_by_origin (const string& path)
 {
 	uint32_t cnt = 0;
-	Glib::Threads::Mutex::Lock lm (source_lock);
+	PBD::Mutex::Lock lm (source_lock);
 
 	for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
 		std::shared_ptr<FileSource> fs
@@ -5493,7 +5517,7 @@ Session::create_midi_source_by_stealing_name (std::shared_ptr<Track> track)
 bool
 Session::playlist_is_active (std::shared_ptr<Playlist> playlist)
 {
-	Glib::Threads::Mutex::Lock lm (_playlists->lock);
+	PBD::Mutex::Lock lm (_playlists->lock);
 	for (PlaylistSet::iterator i = _playlists->playlists.begin(); i != _playlists->playlists.end(); i++) {
 		if ( (*i) == playlist ) {
 			return true;
@@ -5554,7 +5578,7 @@ Session::load_io_plugin (std::shared_ptr<IOPlug> ioplugin)
 	{
 		RCUWriter<IOPlugList> writer (_io_plugins);
 		std::shared_ptr<IOPlugList> iop = writer.get_copy ();
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 		ioplugin->ensure_io ();
 		iop->push_back (ioplugin);
 		ioplugin->LatencyChanged.connect_same_thread (*this, std::bind (&Session::update_latency_compensation, this, true, false));
@@ -5589,7 +5613,7 @@ Session::register_lua_function (
 		const LuaScriptParamList& args
 		)
 {
-	Glib::Threads::Mutex::Lock lm (lua_lock);
+	PBD::Mutex::Lock lm (lua_lock);
 
 	lua_State* L = lua.getState();
 
@@ -5609,7 +5633,7 @@ Session::register_lua_function (
 void
 Session::unregister_lua_function (const std::string& name)
 {
-	Glib::Threads::Mutex::Lock lm (lua_lock);
+	PBD::Mutex::Lock lm (lua_lock);
 	(*_lua_del)(name); // throws luabridge::LuaException
 	lua.collect_garbage ();
 	lm.release();
@@ -5621,7 +5645,7 @@ Session::unregister_lua_function (const std::string& name)
 std::vector<std::string>
 Session::registered_lua_functions ()
 {
-	Glib::Threads::Mutex::Lock lm (lua_lock);
+	PBD::Mutex::Lock lm (lua_lock);
 	std::vector<std::string> rv;
 
 	try {
@@ -5645,7 +5669,7 @@ void
 Session::try_run_lua (pframes_t nframes)
 {
 	if (_n_lua_scripts == 0) return;
-	Glib::Threads::Mutex::Lock tm (lua_lock, Glib::Threads::TRY_LOCK);
+	PBD::Mutex::Lock tm (lua_lock, PBD::Mutex::TryLock);
 	if (tm.locked ()) {
 		try { (*_lua_run)(nframes); } catch (...) { }
 		lua.collect_garbage_step ();
@@ -5891,7 +5915,7 @@ Session::graph_reordered (bool called_from_backend)
 std::optional<samplecnt_t>
 Session::available_capture_duration ()
 {
-	Glib::Threads::Mutex::Lock lm (space_lock);
+	PBD::Mutex::Lock lm (space_lock);
 
 	if (_total_free_4k_blocks_uncertain) {
 		return std::optional<samplecnt_t> ();
@@ -5948,7 +5972,7 @@ Session::ensure_buffers_unlocked (ChanCount howmany)
 	if (_required_thread_buffers >= howmany) {
 		return;
 	}
-	Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+	PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 	ensure_buffers (howmany);
 }
 
@@ -7344,7 +7368,7 @@ Session::update_latency (bool playback)
 	 *  IO::* uses  BLOCK_PROCESS_CALLBACK to prevent concurrency,
 	 *  so the same has to be done here to prevent a race.
 	 */
-	Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock (), Glib::Threads::TRY_LOCK);
+	PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock (), PBD::Mutex::TryLock);
 	if (!lm.locked()) {
 		/* IO::ensure_ports() calls jack_port_register() while holding the process-lock,
 		 * JACK2 may block and call JACKAudioBackend::_latency_callback() which
@@ -7400,7 +7424,7 @@ Session::update_latency (bool playback)
 		 */
 
 		/* prevent any concurrent latency updates */
-		Glib::Threads::Mutex::Lock lx (_update_latency_lock);
+		PBD::Mutex::Lock lx (_update_latency_lock);
 		update_route_latency (true, /*apply_to_delayline*/ true, NULL);
 
 		/* release before emitting signals */
@@ -7409,7 +7433,7 @@ Session::update_latency (bool playback)
 	} else {
 		/* process lock is not needed to update worst-case latency */
 		lm.release ();
-		Glib::Threads::Mutex::Lock lx (_update_latency_lock);
+		PBD::Mutex::Lock lx (_update_latency_lock);
 		update_route_latency (false, false, NULL);
 	}
 
@@ -7425,10 +7449,10 @@ Session::update_latency (bool playback)
 	set_owned_port_public_latency (playback);
 
 	if (playback) {
-		Glib::Threads::Mutex::Lock lx (_update_latency_lock);
+		PBD::Mutex::Lock lx (_update_latency_lock);
 		set_worst_output_latency ();
 	} else {
-		Glib::Threads::Mutex::Lock lx (_update_latency_lock);
+		PBD::Mutex::Lock lx (_update_latency_lock);
 		set_worst_input_latency ();
 	}
 
@@ -7513,7 +7537,7 @@ Session::update_latency_compensation (bool force_whole_graph, bool called_from_b
 	 * GUI thread (via route_processors_changed) and
 	 * auto_connect_thread_run may race.
 	 */
-	Glib::Threads::Mutex::Lock lx (_update_latency_lock, Glib::Threads::TRY_LOCK);
+	PBD::Mutex::Lock lx (_update_latency_lock, PBD::Mutex::TryLock);
 	if (!lx.locked()) {
 		/* no need to do this twice */
 		return;
@@ -7559,7 +7583,7 @@ Session::update_latency_compensation (bool force_whole_graph, bool called_from_b
 		DEBUG_TRACE (DEBUG::LatencyCompensation, "update_latency_compensation: directly apply to routes\n");
 		lx.release (); // XXX cannot hold this lock when acquiring process_lock ?!
 #ifndef MIXBUS
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
+		PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock (), PBD::Mutex::NotLock);
 #endif
 		lm.acquire ();
 
@@ -7799,7 +7823,7 @@ Session::auto_connect_route (std::shared_ptr<Route> route,
 		const ChanCount& input_offset,
 		const ChanCount& output_offset)
 {
-	Glib::Threads::Mutex::Lock lx (_auto_connect_queue_lock);
+	PBD::Mutex::Lock lx (_auto_connect_queue_lock);
 
 	DEBUG_TRACE (DEBUG::PortConnectAuto,
 	             string_compose ("Session::auto_connect_route '%1' ci: %2 co: %3 is=(%4) os=(%5) io=(%6) oo=(%7)\n",
@@ -7892,7 +7916,7 @@ Session::auto_connect (const AutoConnectRequest& ar)
 					port = physinputs[(in_offset.get(*t) + i) % nphysical_in];
 				}
 
-				if (!port.empty() && route->input()->connect (route->input()->ports()->port(*t, i), port, this)) {
+				if (!port.empty() && route->input()->connect (route->input()->ports()->port(*t, i), port)) {
 					DEBUG_TRACE (DEBUG::PortConnectAuto, "Failed to auto-connect input.");
 					break;
 				}
@@ -7918,7 +7942,7 @@ Session::auto_connect (const AutoConnectRequest& ar)
 					}
 				}
 
-				if (!port.empty() && route->output()->connect (route->output()->ports()->port(*t, i), port, this)) {
+				if (!port.empty() && route->output()->connect (route->output()->ports()->port(*t, i), port)) {
 					DEBUG_TRACE (DEBUG::PortConnectAuto, "Failed to auto-connect output.");
 					break;
 				}
@@ -7934,7 +7958,7 @@ Session::auto_connect_thread_start ()
 		return;
 	}
 
-	Glib::Threads::Mutex::Lock lx (_auto_connect_queue_lock);
+	PBD::Mutex::Lock lx (_auto_connect_queue_lock);
 	while (!_auto_connect_queue.empty ()) {
 		_auto_connect_queue.pop ();
 	}
@@ -7956,7 +7980,7 @@ Session::auto_connect_thread_terminate ()
 	}
 
 	{
-		Glib::Threads::Mutex::Lock lx (_auto_connect_queue_lock);
+		PBD::Mutex::Lock lx (_auto_connect_queue_lock);
 		while (!_auto_connect_queue.empty ()) {
 			_auto_connect_queue.pop ();
 		}
@@ -7990,7 +8014,7 @@ Session::auto_connect_thread_run ()
 	PBD::notify_event_loops_about_thread_creation (pthread_self(), X_("autoconnect"), 1024);
 	pthread_mutex_lock (&_auto_connect_mutex);
 
-	Glib::Threads::Mutex::Lock lx (_auto_connect_queue_lock);
+	PBD::Mutex::Lock lx (_auto_connect_queue_lock);
 	while (_ac_thread_active.load ()) {
 
 		if (!_auto_connect_queue.empty ()) {
@@ -8001,7 +8025,7 @@ Session::auto_connect_thread_run ()
 			 *   graph_order_callback() -> resort_routes() -> direct_feeds_according_to_reality () -> backend::connected_to()
 			 * Ardour::IO uses the process-lock to avoid concurrency, too
 			 */
-			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+			PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 
 			while (!_auto_connect_queue.empty ()) {
 				const AutoConnectRequest ar (_auto_connect_queue.front());
@@ -8040,7 +8064,7 @@ Session::auto_connect_thread_run ()
 		if (_engine.port_deletions_pending ().read_space () > 0) {
 			// this may call ARDOUR::Port::drop ... jack_port_unregister ()
 			// jack1 cannot cope with removing ports while processing
-			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+			PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 			_engine.clear_pending_port_deletions ();
 		}
 
@@ -8121,7 +8145,7 @@ Session::had_destructive_tracks() const
 bool
 Session::nth_mixer_scene_valid (size_t nth) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_mixer_scenes_lock);
+	PBD::RWLock::ReaderLock lm (_mixer_scenes_lock);
 	if (_mixer_scenes.size () <= nth) {
 		return false;
 	}
@@ -8136,7 +8160,7 @@ Session::apply_nth_mixer_scene (size_t nth)
 {
 	std::shared_ptr<MixerScene> scene;
 	{
-		Glib::Threads::RWLock::ReaderLock lm (_mixer_scenes_lock);
+		PBD::RWLock::ReaderLock lm (_mixer_scenes_lock);
 		if (_mixer_scenes.size () <= nth) {
 			return false;
 		}
@@ -8156,7 +8180,7 @@ Session::apply_nth_mixer_scene (size_t nth, RouteList const& rl)
 {
 	std::shared_ptr<MixerScene> scene;
 	{
-		Glib::Threads::RWLock::ReaderLock lm (_mixer_scenes_lock);
+		PBD::RWLock::ReaderLock lm (_mixer_scenes_lock);
 		if (_mixer_scenes.size () <= nth) {
 			return false;
 		}
@@ -8194,13 +8218,13 @@ Session::store_nth_mixer_scene (size_t nth)
 std::shared_ptr<MixerScene>
 Session::nth_mixer_scene (size_t nth, bool create_if_missing)
 {
-	Glib::Threads::RWLock::ReaderLock lm (_mixer_scenes_lock);
+	PBD::RWLock::ReaderLock lm (_mixer_scenes_lock);
 	if (create_if_missing) {
 		if (_mixer_scenes.size() > nth && _mixer_scenes[nth]) {
 			return _mixer_scenes[nth];
 		}
 		lm.release ();
-		Glib::Threads::RWLock::WriterLock lw (_mixer_scenes_lock);
+		PBD::RWLock::WriterLock lw (_mixer_scenes_lock);
 		if (_mixer_scenes.size() <= nth) {
 			_mixer_scenes.resize (nth + 1);
 		}
@@ -8216,7 +8240,7 @@ Session::nth_mixer_scene (size_t nth, bool create_if_missing)
 std::vector<std::shared_ptr<MixerScene>>
 Session::mixer_scenes () const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_mixer_scenes_lock);
+	PBD::RWLock::ReaderLock lm (_mixer_scenes_lock);
 	return _mixer_scenes;
 }
 
@@ -8288,3 +8312,21 @@ Session::armed_triggerbox () const
 
 	return armed_tb;
 }
+
+std::shared_ptr<TriggerBox>
+Session::rec_enabled_triggerbox () const
+{
+	std::shared_ptr<TriggerBox> re_tb;
+	std::shared_ptr<RouteList const> rl = routes.reader();
+
+	for (auto const & r : *rl) {
+		std::shared_ptr<TriggerBox> tb = r->triggerbox();
+		if (tb && tb->rec_enabled()) {
+			re_tb = tb;
+			break;
+		}
+	}
+
+	return re_tb;
+}
+

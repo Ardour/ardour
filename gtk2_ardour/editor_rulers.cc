@@ -136,8 +136,10 @@ Editor::initialize_rulers ()
 
 #ifdef __APPLE__
 	Pango::FontDescription font (UIConfiguration::instance().get_VerySmallFont());
+	Pango::FontDescription bold_font (UIConfiguration::instance().get_VerySmallBoldFont());
 #else
 	Pango::FontDescription font (UIConfiguration::instance().get_SmallFont());
+	Pango::FontDescription bold_font (UIConfiguration::instance().get_SmallBoldFont());
 #endif
 
 	_timecode_metric = new TimecodeMetric (this);
@@ -147,24 +149,28 @@ Editor::initialize_rulers ()
 
 	timecode_ruler = new ArdourCanvas::Ruler (_time_markers_group, _timecode_metric,
 						  ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, timebar_height));
-	timecode_ruler->set_font_description (font);
+	timecode_ruler->set_font_description (bold_font);
+	timecode_ruler->set_minor_font_description (font);
 	CANVAS_DEBUG_NAME (timecode_ruler, "timecode ruler");
 	timecode_nmarks = 0;
 
 	samples_ruler = new ArdourCanvas::Ruler (_time_markers_group, _samples_metric,
 						 ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, timebar_height));
-	samples_ruler->set_font_description (font);
+	samples_ruler->set_font_description (bold_font);
+	samples_ruler->set_minor_font_description (font);
 	CANVAS_DEBUG_NAME (samples_ruler, "samples ruler");
 
 	minsec_ruler = new ArdourCanvas::Ruler (_time_markers_group, _minsec_metric,
 						ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, timebar_height));
-	minsec_ruler->set_font_description (font);
+	minsec_ruler->set_font_description (bold_font);
+	minsec_ruler->set_minor_font_description (font);
 	CANVAS_DEBUG_NAME (minsec_ruler, "minsec ruler");
 	minsec_nmarks = 0;
 
 	bbt_ruler = new ArdourCanvas::Ruler (_time_markers_group, _bbt_metric,
 	                                     ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, timebar_height));
-	bbt_ruler->set_font_description (font);
+	bbt_ruler->set_font_description (bold_font);
+	bbt_ruler->set_minor_font_description (font);
 	CANVAS_DEBUG_NAME (bbt_ruler, "bbt ruler");
 	timecode_nmarks = 0;
 
@@ -310,7 +316,7 @@ Editor::popup_ruler_menu (timepos_t const & where, ItemType t)
 		add_items.push_back (MenuElem (_("Location Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::add_location_mark_with_flag), where, Location::Flags (Location::IsMark), 0)));
 		add_items.push_back (MenuElem (_("Arrangement Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::add_location_mark_with_flag), where, Location::Flags(Location::IsMark | Location::IsSection), 0)));
 		add_items.push_back (MenuElem (_("CD Track Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::add_location_mark_with_flag), where, Location::Flags(Location::IsMark |Location::IsCDMarker), 0)));
-		add_items.push_back (MenuElem ("Cue Marker..."));
+		add_items.push_back (MenuElem (_("Cue Marker...")));
 		Gtk::MenuItem& cue_submenu = add_items.back();
 		Gtk::Menu* cue_menu = new Gtk::Menu;
 		MenuList& cue_items = cue_menu->items();
@@ -1323,22 +1329,22 @@ Editor::set_minsec_ruler_scale (samplepos_t lower, samplepos_t upper)
 		minsec_nmarks = 2 + (range / minsec_mark_interval);
 	} else if (range <= (fr / 2)) { /* 0-0.5 second */
 		minsec_mark_interval = fr / 100;  /* show 1/100 seconds */
-		minsec_ruler_scale = minsec_show_msecs;
+		minsec_ruler_scale = minsec_show_csecs;
 		minsec_mark_modulo = 100;
 		minsec_nmarks = 2 + (range / minsec_mark_interval);
 	} else if (range <= fr) { /* 0-1 second */
 		minsec_mark_interval = fr / 10;  /* show 1/10 seconds */
-		minsec_ruler_scale = minsec_show_msecs;
+		minsec_ruler_scale = minsec_show_dsecs;
 		minsec_mark_modulo = 200;
 		minsec_nmarks = 2 + (range / minsec_mark_interval);
 	} else if (range <= 2 * fr) { /* 1-2 seconds */
 		minsec_mark_interval = fr / 10; /* show 1/10 seconds */
-		minsec_ruler_scale = minsec_show_msecs;
+		minsec_ruler_scale = minsec_show_dsecs;
 		minsec_mark_modulo = 500;
 		minsec_nmarks = 2 + (range / minsec_mark_interval);
 	} else if (range <= 8 * fr) { /* 2-5 seconds */
 		minsec_mark_interval =  fr / 5; /* show 2 seconds */
-		minsec_ruler_scale = minsec_show_msecs;
+		minsec_ruler_scale = minsec_show_dsecs;
 		minsec_mark_modulo = 1000;
 		minsec_nmarks = 2 + (range / minsec_mark_interval);
 	} else if (range <= 16 * fr) { /* 8-16 seconds */

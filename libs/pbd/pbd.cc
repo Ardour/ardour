@@ -28,8 +28,6 @@
 
 #include <giomm.h>
 
-#include <glibmm/thread.h>
-
 #include "pbd/pbd.h"
 #include "pbd/ccurl.h"
 #include "pbd/debug.h"

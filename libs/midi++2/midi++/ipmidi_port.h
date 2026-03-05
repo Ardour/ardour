@@ -23,7 +23,7 @@
 #include <string>
 #include <iostream>
 #if defined(PLATFORM_WINDOWS)
-#include <winsock.h>
+#include <winsock2.h>
 #elif defined(__FreeBSD__) || defined(__OpenBSD__)
 #include <netinet/in.h>
 #include <sys/socket.h>
@@ -42,10 +42,9 @@
 #include <net/if.h>
 #endif
 
-#include <glibmm/threads.h>
-
 #include "pbd/xml++.h"
 #include "pbd/crossthread.h"
+#include "pbd/mutex.h"
 #include "pbd/signals.h"
 #include "pbd/ringbuffer.h"
 
@@ -76,7 +75,7 @@ private:
     int sockin;
     int sockout;
     struct sockaddr_in addrout;
-    Glib::Threads::Mutex write_lock;
+    PBD::Mutex write_lock;
 
     bool open_sockets (int base_port, const std::string& ifname);
     void close_sockets ();

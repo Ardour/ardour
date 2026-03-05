@@ -416,6 +416,9 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	void decrease_note_velocity_smush_together ()      { change_velocities (false, false, true, true); }
 	void decrease_note_velocity_fine_smush_together () { change_velocities (false, true, true, true); }
 
+	void duplicate_notes () { _duplicate_notes (1); }
+	void multi_duplicate_notes ();
+
 	void transpose_up_octave () { transpose (true, false, false); }
 	void transpose_up_octave_smush () { transpose (true, false, true); }
 	void transpose_up_tone () { transpose (true, true, false); }
@@ -664,7 +667,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 
 	void start_note_splitting ();
 	void end_note_splitting ();
-	
+
 	void split_notes_grid ();
 	void split_notes_more ();
 	void split_notes_less ();
@@ -685,6 +688,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	void color_note (NoteBase*, int channel);
 	virtual bool post_paste (Temporal::timepos_t const & pos, const ::Selection& selection, PasteContext& ctx) { return false; }
 	bool show_context_menu (GdkEventButton*);
+
+	void _duplicate_notes (int times);
+
 };
-
-

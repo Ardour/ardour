@@ -66,8 +66,9 @@ TempoDialog::TempoDialog (TempoMap::SharedPtr const & map, timepos_t const & pos
 {
 	Temporal::BBT_Time when (_map->bbt_at (pos));
 	Tempo const & tempo (_map->tempo_at (pos));
+	Meter const & meter (_map->meter_at (pos));
 
-	init (when, tempo.note_types_per_minute(), tempo.end_note_types_per_minute(), tempo.note_type(), Tempo::Constant, true, BeatTime);
+	init (when, tempo.note_types_per_minute(), tempo.end_note_types_per_minute(), meter.note_value(), Tempo::Constant, true, BeatTime);
 }
 
 TempoDialog::TempoDialog (TempoMap::SharedPtr const & map, TempoPoint& point, const string&)
@@ -86,7 +87,9 @@ TempoDialog::TempoDialog (TempoMap::SharedPtr const & map, TempoPoint& point, co
 	, tap_tempo_button (_("Tap tempo"))
 {
 	Temporal::BBT_Time when (map->bbt_at (point.time()));
-	init (when, _section->note_types_per_minute(), _section->end_note_types_per_minute(), _section->note_type(), _section->type(), map->is_initial (point), Temporal::BeatTime);
+	Meter const & meter (_map->meter_at (point.time()));
+
+	init (when, _section->note_types_per_minute(), _section->end_note_types_per_minute(), meter.note_value(), _section->type(), map->is_initial (point), Temporal::BeatTime);
 }
 
 void
@@ -184,7 +187,7 @@ TempoDialog::init (const Temporal::BBT_Time& when, double bpm, double end_bpm, d
 
 	int row = 0;
 
-	if (UIConfiguration::instance().get_allow_non_quarter_pulse()) {
+	if (UIConfiguration::instance().get_allow_non_quarter_pulse() || note_type != 4) {
 		table->attach (pulse_selector_label, 0, 1, row, row + 1);
 		table->attach (pulse_selector, 1, 5, row, row + 1);
 
@@ -496,7 +499,7 @@ TempoDialog::get_note_type ()
 
 	if (x == note_types.end()) {
 		error << string_compose(_("incomprehensible pulse note type (%1)"), pulse_selector.get_active_text()) << endmsg;
-		return 0;
+		return 4;
 	}
 
 	return x->second;

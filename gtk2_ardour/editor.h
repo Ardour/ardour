@@ -33,8 +33,6 @@
 
 #pragma once
 
-#include <sys/time.h>
-
 #include <cmath>
 #include <list>
 #include <map>
@@ -136,7 +134,6 @@ class MidiExportDialog;
 class MixerStrip;
 class MouseCursors;
 class NoteBase;
-class Pianoroll;
 class PluginSelector;
 class ProgressReporter;
 class QuantizeDialog;
@@ -527,7 +524,6 @@ private:
 
 	Gtk::HBox                    _bottom_hbox;
 	SelectionPropertiesBox*      _properties_box;
-	Pianoroll*                   _pianoroll;
 
 	typedef std::pair<TimeAxisView*,XMLNode*> TAVState;
 
@@ -1902,11 +1898,19 @@ private:
 	        guint                                 info,
 	        guint                                 time);
 
+	void drop_region (
+	        const Glib::RefPtr<Gdk::DragContext>& context,
+	        gint                                  x,
+	        gint                                  y,
+	        const PBD::ID&                        rid,
+	        guint                                 info,
+	        guint                                 time);
+
 	void drop_regions (
 	        const Glib::RefPtr<Gdk::DragContext>& context,
 	        gint                                  x,
 	        gint                                  y,
-	        const Gtk::SelectionData&             data,
+	        std::vector<PBD::ID> const&           rids,
 	        guint                                 info,
 	        guint                                 time);
 

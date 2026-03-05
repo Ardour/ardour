@@ -940,10 +940,15 @@ bool bValidPath = false;
 LIBPBD_API void* PBD_APICALLTYPE
 dlopen (const char *file_name, int mode)
 {
+	gunichar2* wpath = g_utf8_to_utf16 (file_name, -1, 0, 0, 0);
+	if (!wpath) {
+		return NULL;
+	}
 	// Note that 'mode' is ignored in Win32
-	return(::LoadLibraryA(Glib::locale_from_utf8(file_name).c_str()));
+	void* handle = LoadLibraryW ((LPCWSTR)wpath);
+	g_free (wpath);
+	return handle;
 }
-
 
 //***************************************************************
 //

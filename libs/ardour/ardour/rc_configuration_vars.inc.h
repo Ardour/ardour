@@ -77,6 +77,8 @@ CONFIG_VARIABLE (bool, first_midi_bank_is_zero, "display-first-midi-bank-as-zero
 CONFIG_VARIABLE (int32_t, inter_scene_gap_samples, "inter-scene-gap-samples", 1)
 CONFIG_VARIABLE (bool, midi_input_follows_selection, "midi-input-follows-selection", 1)
 CONFIG_VARIABLE (std::string, default_trigger_input_port, "default-trigger-input-port", "")
+CONFIG_VARIABLE (bool, midi_chase, "midi-chase", true)
+CONFIG_VARIABLE (bool, midi_panic_when_looping, "midi-panic-when-looping", true)
 
 /* Timecode and related */
 
@@ -173,6 +175,7 @@ CONFIG_VARIABLE (bool, stop_at_session_end, "stop-at-session-end", false)
 CONFIG_VARIABLE (float, preroll_seconds, "preroll-seconds", -2.0f)
 CONFIG_VARIABLE (bool, loop_is_mode, "loop-is-mode", false)
 CONFIG_VARIABLE (bool, roll_will_loop, "roll-will-loop", false)
+CONFIG_VARIABLE (MarkerLocatePriority, marker_locate_priority, "marker-locate-priority", NextMarker)
 CONFIG_VARIABLE (LoopFadeChoice, loop_fade_choice, "loop-fade-choice", XFadeLoop)
 CONFIG_VARIABLE (float, shuttle_speed_factor, "shuttle-speed-factor", 1.0f) // used for MMC shuttle
 CONFIG_VARIABLE (float, shuttle_speed_threshold, "shuttle-speed-threshold", 5.0f) // used for MMC shuttle

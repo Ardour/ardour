@@ -26,13 +26,13 @@
 
 #include <time.h>
 
-#include <glibmm/threads.h>
+#include "pbd/mutex.h"
+#include "pbd/stateful.h"
+#include "pbd/xml++.h"
 
 #include "ardour/source.h"
 #include "ardour/ardour.h"
 #include "ardour/readable.h"
-#include "pbd/stateful.h"
-#include "pbd/xml++.h"
 
 namespace ARDOUR {
 
@@ -109,7 +109,7 @@ class LIBARDOUR_API AudioSource : virtual public Source, public ARDOUR::AudioRea
 
 	static std::vector<std::shared_ptr<Sample[]> > _mixdown_buffers;
 	static std::vector<std::shared_ptr<gain_t[]> > _gain_buffers;
-	static Glib::Threads::Mutex    _level_buffer_lock;
+	static PBD::Mutex                              _level_buffer_lock;
 
 	std::string         _peakpath;
 
@@ -141,8 +141,8 @@ class LIBARDOUR_API AudioSource : virtual public Source, public ARDOUR::AudioRea
 	 *  PeaksReady means that _peaks_built cannot be changed
 	 *  during the handling of the signal.
 	 */
-        mutable Glib::Threads::Mutex _peaks_ready_lock;
-        Glib::Threads::Mutex _initialize_peaks_lock;
+        mutable PBD::Mutex _peaks_ready_lock;
+        PBD::Mutex _initialize_peaks_lock;
 
 	int        _peakfile_fd;
 	samplecnt_t peak_leftover_cnt;

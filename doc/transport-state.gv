@@ -1,26 +1,70 @@
+// libs/ardour/ardour/transport_fsm.h
+// EVENTS:
+// - ButlerDone
+// - ButlerRequired
+// - DeclickDone
+// - StartTransport
+// - StopTransport
+// - Locate
+// - LocateDone
+// - SetSpeed
+//
+// STATES (motion)
+// * Stopped
+// * Rolling
+// * DeclickToStop
+// * DeclickToLocate
+// * WaitingForLocate
+//
+// STATES (butler)
+// * NotWaitingForButler
+// * WaitingForButle
+//
+// STATES (direction) -- NOT INCLUDED HERE
+// * Forwards
+// * Backwards
+// * Reversing
+
+
 digraph finite_state_machine {
 	rankdir=TB;
-	start="STOPPED";
+	pad=0.2;
+	start="Stopped";
 
 	node [shape = ellipse];
-	STOPPED     -> locateWait [ label = "Locate/Chase", fontcolor=red ];
-	STOPPED     -> prerollWait [ label = "speed(!0)",fontcolor=red];
 
-	masterWait  -> prerollWait [ label = "MasterHere", fontcolor=red ];
+	// Motion
+	Stopped          -> Stopped           [ label = "SetSpeed", fontcolor=red ]
+	Stopped          -> Stopped           [ label = "StopTransport", fontcolor=red ]
+	DeclickToStop    -> Stopped           [ label = "DeclickDone, reset_speed", fontcolor=red ]
+	WaitingForLocate -> Stopped           [ label = "LocateDone", fontcolor=red ]
 
-	prerollWait -> ROLLING;
-	prerollWait -> STOPPED [ label = "speed(0)", fontcolor=red ];
-	ROLLING     -> DECLICKOUT  [ label = "speed(0)/Locate/Chase",fontcolor=red ]
-	ROLLING     -> reverseWait [ label = "speed(-speed)",fontcolor=red ];
+	Stopped          -> Rolling           [ label = "StartTransport", fontcolor=red ]
+	Rolling          -> Rolling           [ label = "StartTransport", fontcolor=red ]
+	WaitingForLocate -> Rolling           [ label = "LocateDone, should-roll",  fontcolor=red ]
 
-	reverseWait -> ROLLING;
+	Rolling          -> DeclickToLocate   [ label = "SetSpeed, reverse_after_declick", fontcolor=red ]
+	Rolling          -> DeclickToLocate   [ label = "Locate", fontcolor=red ]
+	DeclickToLocate  -> DeclickToLocate   [ label = "Locate, interrupt locate", fontcolor=red ]
+	DeclickToLocate  -> DeclickToLocate   [ label = "StartTransport", fontcolor=green, style=dotted ] // defer WaitingForLocate [DeclickDone] -> Rolling
+	DeclickToLocate  -> DeclickToLocate   [ label = "StopTransport", fontcolor=green, style=dotted ]  // defer WaitingForLocate [DeclickDone] -> Stopped
 
-	DECLICKOUT  -> STOPPED;
-	DECLICKOUT  -> locateWait;
-	DECLICKOUT  -> masterWait [ label = "Chase",fontcolor=red ];
+	Rolling          -> DeclickToStop     [ label = "StopTransport", fontcolor=red ]
+	DeclickToStop    -> DeclickToStop     [ label = "DeclickDone, no speed reset",  fontcolor=red ]
+	DeclickToStop    -> DeclickToStop     [ label = "StartTransport", fontcolor=green, style=dotted ] // defer
+	DeclickToStop    -> DeclickToStop     [ label = "StopTransport", fontcolor=green, style=dotted ]  // defer
 
-	locateWait  -> masterWait  [ label = "Chase",fontcolor=red ];
-	locateWait  -> STOPPED     [ label = "autoplay-off",fontcolor=blue ];
-	locateWait  -> prerollWait [ label = "autoplay-on",fontcolor=blue ];
+	Stopped          -> WaitingForLocate  [ label = "Locate", fontcolor=red ]
+	Rolling          -> WaitingForLocate  [ label = "Locate, while looping", fontcolor=red ]
+	WaitingForLocate -> WaitingForLocate  [ label = "Locate, interrupt locate", fontcolor=red ]
+	DeclickToLocate  -> WaitingForLocate  [ label = "DeclickDone", fontcolor=red ]
+	WaitingForLocate -> WaitingForLocate  [ label = "StartTransport", fontcolor=green, style=dotted ] // defer
+	WaitingForLocate -> WaitingForLocate  [ label = "StopTransport", fontcolor=green ] // defer
 
+
+	// Butler
+	node [shape = box];
+	NotWaitingForButler -> WaitingForButler    [ label = "ButlerRequired", fontcolor=blue ]
+	WaitingForButler    -> WaitingForButler    [ label = "ButlerRequired", fontcolor=blue ]
+	WaitingForButler    -> NotWaitingForButler [ label = "ButlerDone", fontcolor=blue ]
 }
