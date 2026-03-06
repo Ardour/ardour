@@ -73,14 +73,7 @@ public:
 		}
 	}
 
-	void push (std::function<void ()> task)
-	{
-		{
-			std::unique_lock<std::mutex> lock (_queue_lock);
-			_queue.emplace (std::move (task));
-		}
-		_trigger.notify_one ();
-	}
+	void push(std::function<void()> task);
 
 private:
 	std::vector<std::thread>           _threads;
