@@ -84,6 +84,12 @@ Pianoroll::Pianoroll (std::string const & name, bool with_transport)
 	load_bindings ();
 	register_actions ();
 
+	using namespace Gtk::Menu_Helpers;
+
+	policy_dropdown.add_menu_elem (MenuElem (_("All Regions"), sigc::bind (sigc::mem_fun (*this, &Pianoroll::set_editing_policy), AllViews)));
+	policy_dropdown.add_menu_elem (MenuElem (_("Active Region"), sigc::bind (sigc::mem_fun (*this, &Pianoroll::set_editing_policy), ActiveView)));
+	policy_dropdown.set_active (1);
+
 	build_upper_toolbar ();
 	build_canvas ();
 
@@ -392,7 +398,9 @@ Pianoroll::pack_outer (Gtk::Box& box)
 	box.pack_start (note_mode_button, false, false);
 
 	box.pack_end (region_dropdown, false, false);
+	box.pack_end (policy_dropdown, false, false);
 	region_dropdown.show ();
+	policy_dropdown.show ();
 }
 
 void

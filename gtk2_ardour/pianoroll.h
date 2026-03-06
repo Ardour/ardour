@@ -196,6 +196,8 @@ class Pianoroll : public CueEditor
 	ArdourWidgets::ArdourDropdown region_dropdown;
 	void rebuild_region_dropdown ();
 
+	ArdourWidgets::ArdourDropdown policy_dropdown;
+
 	ArdourWidgets::ArdourButton* layered_automation_button;
 	bool layered_automation;
 	void layered_automation_button_clicked();
