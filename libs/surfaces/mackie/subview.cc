@@ -107,8 +107,7 @@ void
 Subview::reset_all_vpot_controls()
 {
 	for (const auto& vpot : _strip_vpots_over_all_surfaces) {
-		if (vpot != nullptr)
-		{
+		if (vpot != nullptr) {
 			vpot->set_control (std::shared_ptr<AutomationControl>());
 		}
 	}
