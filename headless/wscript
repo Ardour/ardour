@@ -22,7 +22,7 @@ def build(bld):
     obj.source    = hardour_sources
     obj.target = 'hardour-' + bld.env['VERSION']
     obj.includes = ['.']
-    obj.linkflags= bld.env['compiler_flags_dict']['execstack']
+    obj.linkflags= [ bld.env['compiler_flags_dict']['execstack'] ]
     obj.use      = [ 'libpbd',
                      'libardour',
                      'libardour_cp',
@@ -52,9 +52,9 @@ def build(bld):
         obj.use    += ' libappleutility'
     elif bld.env['build_target'] == 'mingw' or bld.env['build_target'] == 'msvc':
         if bld.env['DEBUG'] == False:
-            obj.linkflags += ' -mwindows'
+            obj.linkflags += bld.env['compiler_flags_dict']['mwindows']
 
     obj.includes += ['../libs']
 
     if bld.is_defined('NEED_INTL'):
-        obj.linkflags += ' -lintl'
+        obj.linkflags.append ('-lintl')

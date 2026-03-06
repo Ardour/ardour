@@ -85,6 +85,10 @@ compiler_flags_dictionaries= {
         'execstack': '',
         # force C++17
         'cxx17': ['-std=c++17'],
+        # mingw's version of /SUBSYSTEM:WINDOWS,
+        'mwindows': ['-mwindows'],
+        # mingw's default is -mconsole (/SUBSYSTEM:CONSOLE)
+        'mconsole': ['-mconsole'],
     },
     'msvc' : {
         'debuggable' : ['/DDEBUG', '/Od', '/Z7', '/MDd', '/Gd', '/EHsc'],
@@ -120,6 +124,8 @@ compiler_flags_dictionaries= {
         'c-anonymous-union': '',
         'execstack': '',
         'cxx17': ['/std:c++17'],
+        'mwindows': ['/SUBSYSTEM:WINDOWS', '/ENTRY:mainCRTStartup'],
+        'mconsole': ['/SUBSYSTEM:CONSOLE', '/ENTRY:mainCRTStartup'],
     },
 }
 

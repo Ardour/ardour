@@ -45,7 +45,7 @@ def build(bld):
     obj.source       = 'luasession.cc'
     obj.target       = 'luasession'
     obj.includes     = ['../libs']
-    obj.linkflags    = bld.env['compiler_flags_dict']['execstack']
+    obj.linkflags    = [ bld.env['compiler_flags_dict']['execstack'] ]
     obj.use          = ['liblua',
                         'libpbd',
                         'libardour',
@@ -76,10 +76,10 @@ def build(bld):
         obj.uselib += ' AUDIOUNITS OSX'
         obj.use    += ' libappleutility'
     elif bld.env['build_target'] == 'mingw' or bld.env['build_target'] == 'msvc':
-        obj.linkflags += ' -mwindows'
+        obj.linkflags += bld.env['compiler_flags_dict']['mconsole']
 
     if bld.is_defined('NEED_INTL'):
-        obj.linkflags += ' -lintl'
+        obj.linkflags.append ('-lintl')
 
     if bld.env['build_target'] == 'mingw' or bld.env['build_target'] == 'msvc':
         obj.install_path = bld.env['BINDIR']

@@ -655,7 +655,7 @@ def build(bld):
         'LOCALEDIR="' + autowaf.normpath(bld.env['LOCALEDIR']) + '"',
         ]
     obj.install_path = bld.env['DLLDIR']
-    obj.linkflags    = bld.env['compiler_flags_dict']['execstack']
+    obj.linkflags    = [ bld.env['compiler_flags_dict']['execstack'] ]
     obj.uselib       = 'UUID FLAC FONTCONFIG GTHREAD OGG PANGOMM CURL DL CANVAS FFTW3F LO TAGLIB XML LILV RUBBERBAND AUBIO LRDF ARCHIVE VAMPSDK VAMPHOSTSDK GLIBMM GIOMM PANGOFT2 LIBPNG'
 
     if bld.env['build_target'] == 'msvc':
@@ -687,10 +687,7 @@ def build(bld):
 
     if bld.env['build_target'] == 'mingw' or bld.env['build_target'] == 'msvc':
         obj.use += [ 'PANGOFT2' ]
-        if bld.env['build_target'] == 'mingw':
-            obj.linkflags += ' -mwindows'
-        else:
-            obj.linkflags += ' /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup'
+        obj.linkflags += bld.env['compiler_flags_dict']['mwindows']
 
     if bld.is_defined('HAVE_SUIL'):
         obj.source += [ 'lv2_plugin_ui.cc' ]
@@ -700,7 +697,7 @@ def build(bld):
         bld.env['LIB_FFTW3F'] += ['fftw3f_threads']
 
     if bld.is_defined('NEED_INTL'):
-        obj.linkflags += ' -lintl'
+        obj.linkflags.append ('-lintl')
 
     if bld.is_defined('WINDOWS_VST_SUPPORT'):
         obj.source += [ 'windows_vst_plugin_ui.cc' ]
