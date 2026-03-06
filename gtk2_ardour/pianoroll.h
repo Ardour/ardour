@@ -75,12 +75,21 @@ struct ControllerControls : public Gtk::HBox {
 class Pianoroll : public CueEditor
 {
   public:
+	enum EditingPolicy {
+		ActiveView,
+		AllViews
+	};
+
+
 	Pianoroll (std::string const & name, bool with_transport_controls = false);
 	~Pianoroll ();
 
 	Gtk::Widget& contents ();
 
 	samplecnt_t current_page_samples() const;
+
+	void set_editing_policy (EditingPolicy);
+	EditingPolicy editing_policy() const { return _editing_policy; }
 
 	void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<std::shared_ptr<Evoral::Note<Temporal::Beats> > > > >&) const {}
 
@@ -182,6 +191,7 @@ class Pianoroll : public CueEditor
 	ArdourCanvas::Rectangle* tempo_bar;
 	ArdourCanvas::Rectangle* meter_bar;
 	ArdourCanvas::PianoRollHeader* prh;
+	EditingPolicy _editing_policy;
 
 	ArdourWidgets::ArdourDropdown region_dropdown;
 	void rebuild_region_dropdown ();

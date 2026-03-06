@@ -72,6 +72,7 @@ using namespace Temporal;
 Pianoroll::Pianoroll (std::string const & name, bool with_transport)
 	: CueEditor (name, with_transport)
 	, prh (nullptr)
+	, _editing_policy (ActiveView)
 	, layered_automation (true)
 	, bg (nullptr)
 	, _active_view (nullptr)
@@ -110,6 +111,12 @@ Pianoroll::~Pianoroll ()
 	drop_grid (); // unparent gridlines before deleting _canvas_viewport
 
 	delete bg;
+}
+
+void
+Pianoroll::set_editing_policy (EditingPolicy ep)
+{
+	_editing_policy = ep;
 }
 
 void
