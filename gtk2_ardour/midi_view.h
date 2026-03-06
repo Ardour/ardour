@@ -97,6 +97,8 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 
 	void init (bool wfd);
 
+	void set_sensitive (bool);
+
 	virtual void set_samples_per_pixel (double) {};
 
 	virtual bool display_is_enabled() const { return true; }

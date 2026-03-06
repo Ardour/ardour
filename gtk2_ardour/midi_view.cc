@@ -224,6 +224,20 @@ MidiView::~MidiView ()
 }
 
 void
+MidiView::set_sensitive (bool yn)
+{
+	for (auto & [model,gui] : _events) {
+		gui->item()->set_ignore_events (!yn);
+	}
+	for (auto & [model,gui] : _patch_changes) {
+		gui->item().set_ignore_events (!yn);
+	}
+	for (auto & [model,gui] : _sys_exes) {
+		gui->item().set_ignore_events (!yn);
+	}
+}
+
+void
 MidiView::note_mode_changed ()
 {
 	clear_events ();
