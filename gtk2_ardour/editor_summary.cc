@@ -223,11 +223,11 @@ EditorSummary::render_background_image ()
 	cairo_set_line_width (cr, 1);
 	Gtkmm2ext::set_source_rgba (cr, _marker_color);
 
-	const double p = (_session->current_start_sample() - _start) * _x_scale;
+	const double p = 0.5 + round((_session->current_start_sample() - _start) * _x_scale);
 	cairo_move_to (cr, p, 0);
 	cairo_line_to (cr, p, get_height());
 
-	double const q = (_session->current_end_sample() - _start) * _x_scale;
+	double const q = 0.5 + round((_session->current_end_sample() - _start) * _x_scale);
 	cairo_move_to (cr, q, 0);
 	cairo_line_to (cr, q, get_height());
 	cairo_stroke (cr);
@@ -1030,7 +1030,7 @@ EditorSummary::route_gui_changed (PBD::PropertyChange const& what_changed)
 double
 EditorSummary::playhead_sample_to_position (samplepos_t t) const
 {
-	return (t - _start) * _x_scale;
+	return 0.5 + round((t - _start) * _x_scale);
 }
 
 samplepos_t
