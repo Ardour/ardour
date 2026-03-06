@@ -88,6 +88,8 @@ ArdourDropdown::set_active (int c)
 		if (0 == n--) {
 			_menu.set_active (c);
 			_menu.activate_item (i);
+			set_text (i.get_label());
+			StateChanged ();
 			break;
 		}
 	}
