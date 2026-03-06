@@ -3852,7 +3852,6 @@ EditingContext::metric_get_minsec (std::vector<ArdourCanvas::Ruler::Mark>& marks
 void
 EditingContext::set_minsec_ruler_scale (samplepos_t lower, samplepos_t upper)
 {
-	std::cout << "set_minsec_ruler_scale" << std::endl;
 	EC_LOCAL_TEMPO_SCOPE;
 
 	samplepos_t fr = _session->sample_rate() * 1000;
