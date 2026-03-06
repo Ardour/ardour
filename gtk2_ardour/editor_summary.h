@@ -94,6 +94,8 @@ private:
 
 	void summary_zoom_step (  int steps );
 
+	int get_variable_width ();
+
 	samplepos_t _start; ///< start sample of the overview
 	samplepos_t _end; ///< end sample of the overview
 

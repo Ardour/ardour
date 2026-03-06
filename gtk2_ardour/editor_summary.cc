@@ -164,7 +164,7 @@ EditorSummary::render_background_image ()
 
 	/* calculate x scale */
 	if (_end != _start) {
-		_x_scale = static_cast<double> (get_width()) / (_end - _start);
+		_x_scale = static_cast<double> (get_variable_width()) / (_end - _start);
 	} else {
 		_x_scale = 1;
 	}
@@ -387,11 +387,22 @@ EditorSummary::set_overlays_dirty_rect (int x, int y, int w, int h)
 void
 EditorSummary::on_size_request (Gtk::Requisition *req)
 {
-	/* The left/right buttons will determine our height */
 	req->width = -1;
-	req->height = -1;
+	req->height = 20;
 }
 
+/** Adjust width when the buttons hide a significant part of the surface
+ *  @param req GTK requisition
+ */
+int
+EditorSummary::get_variable_width ()
+{
+	if (get_height() > 30) {
+		return get_width();
+	} else {
+		return get_width() - (21 * 5 - 1);
+	}
+}
 
 void
 EditorSummary::centre_on_click (GdkEventButton* ev)
@@ -403,8 +414,8 @@ EditorSummary::centre_on_click (GdkEventButton* ev)
 	double ex = ev->x - w / 2;
 	if (ex < 0) {
 		ex = 0;
-	} else if ((ex + w) > get_width()) {
-		ex = get_width() - w;
+	} else if ((ex + w) > get_variable_width()) {
+		ex = get_variable_width() - w;
 	}
 
 	set_editor (ex);
@@ -714,7 +725,7 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 			pair<double, double> xr;
 			get_editor (&xr);
 			double w = xr.second - xr.first;
-			if (x + w < get_width()) {
+			if (x + w < get_variable_width()) {
 				set_editor (x);
 			}
 		}
@@ -735,7 +746,7 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 		} else if (_zoom_trim_position == RIGHT) {
 
 			/* zoom-behavior-tweaks: protect the right edge from expanding beyond the edge */
-			if ((xr.second + dx) < get_width()) {
+			if ((xr.second + dx) < get_variable_width()) {
 				xr.second += dx;
 			}
 

@@ -576,6 +576,7 @@ Editor::Editor ()
 	summary_arrow_left->set_act_on_release(false);
 	summary_arrow_left->signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &Editor::scroll_press), LEFT), false);
 	summary_arrow_left->signal_button_release_event().connect (sigc::mem_fun (*this, &Editor::scroll_release), false);
+	summary_arrow_left->set_size_request(21,21);
 
 	ArdourButton* summary_arrow_right = manage (new ArdourButton);
 	summary_arrow_right->set_corner_mask(ArdourButton::RIGHT);
@@ -583,45 +584,45 @@ Editor::Editor ()
 	summary_arrow_right->set_act_on_release(false);
 	summary_arrow_right->signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &Editor::scroll_press), RIGHT), false);
 	summary_arrow_right->signal_button_release_event().connect (sigc::mem_fun (*this, &Editor::scroll_release), false);
+	summary_arrow_right->set_size_request(21, 21);
 
-	VBox* summary_arrows_left = manage (new VBox);
-	summary_arrows_left->pack_start (*summary_arrow_left);
-
-	VBox* summary_arrows_right = manage (new VBox);
-	summary_arrows_right->pack_start (*summary_arrow_right);
-
-	Gtk::EventBox* summary_left_spacer = manage (new Gtk::EventBox); // extra space before the left arrow
+	Gtk::EventBox* summary_left_spacer = manage (new Gtk::EventBox); // extra h-space before the summary
 	summary_left_spacer->set_size_request(4, -1);
 	summary_left_spacer->show();
-	Gtk::EventBox* summary_bottom_spacer = manage (new Gtk::EventBox); // extra space after the summary
+	Gtk::EventBox* summary_bottom_spacer = manage (new Gtk::EventBox); // extra v-space after the summary
 	summary_bottom_spacer->set_size_request(-1, 3);
 	summary_bottom_spacer->show();
 
 	VBox* summary_zoom_vbox = manage (new Gtk::VBox);
 	HBox* summary_zoom_hbox = manage (new Gtk::HBox);
-	summary_zoom_hbox->set_size_request(80, 21);
+	summary_zoom_hbox->set_size_request(21 * 5, 21);
+
+	summary_zoom_hbox->pack_end(*summary_arrow_right, false, false, 0);
 	summary_zoom_hbox->pack_end(full_zoom_button, false, false, 0);
 	summary_zoom_hbox->pack_end(zoom_in_button, false, false, 0);
 	summary_zoom_hbox->pack_end(zoom_out_button, false, false, 0);
+	summary_zoom_hbox->pack_end(*summary_arrow_left, false, false, 0);
 	summary_zoom_vbox->pack_end(*summary_zoom_hbox, false, false, 0);
 
+	summary_arrow_left->set_corner_mask(ArdourButton::NONE);
 	zoom_out_button.set_corner_mask(ArdourButton::NONE);
 	zoom_in_button.set_corner_mask(ArdourButton::NONE);
 	full_zoom_button.set_corner_mask(ArdourButton::NONE);
-	zoom_in_button.set_border_mask(ArdourButton::HIDE_LEFT | ArdourButton::HIDE_RIGHT);
-	full_zoom_button.set_border_mask(ArdourButton::HIDE_RIGHT);
+	summary_arrow_right->set_corner_mask(ArdourButton::NONE);
+
+	summary_arrow_left->set_border_mask(ArdourButton::HIDE_BOTTOM);
+	zoom_out_button.set_border_mask(ArdourButton::HIDE_LEFT | ArdourButton::HIDE_RIGHT | ArdourButton::HIDE_BOTTOM);
+	zoom_in_button.set_border_mask(ArdourButton::HIDE_BOTTOM);
+	full_zoom_button.set_border_mask(ArdourButton::HIDE_LEFT | ArdourButton::HIDE_RIGHT | ArdourButton::HIDE_BOTTOM);
+	summary_arrow_right->set_border_mask(ArdourButton::HIDE_RIGHT | ArdourButton::HIDE_BOTTOM);
 
 	_summary->add(*summary_zoom_vbox);
-
-	_summary_hbox.pack_start (*summary_left_spacer, false, false);
-	_summary_hbox.pack_start (*summary_arrows_left, false, false);
 
 	Gtk::Frame* summary_frame = manage (new Gtk::Frame); // summary border
 	summary_frame->set_name("SummaryFrame");
 	summary_frame->add(*_summary);
 
 	_summary_hbox.pack_start (*summary_frame, true, true);
-	_summary_hbox.pack_start (*summary_arrows_right, false, false);
 
 	_summary_vbox.pack_start (_summary_hbox, true, true);
 	_summary_vbox.pack_start (*summary_bottom_spacer, false, false);
