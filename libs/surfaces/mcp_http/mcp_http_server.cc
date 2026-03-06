@@ -68,6 +68,7 @@
 #include "ardour/session.h"
 #include "ardour/session_event.h"
 #include "ardour/source.h"
+#include "ardour/stripable.h"
 #include "ardour/tempo.h"
 #include "ardour/track.h"
 
@@ -345,30 +346,18 @@ static std::string
 tracks_list_json (ARDOUR::Session& session, bool include_hidden)
 {
 	std::shared_ptr<ARDOUR::RouteList const> routes = session.get_routes ();
-	std::vector<std::shared_ptr<ARDOUR::Route> > sorted;
+	ARDOUR::RouteList sorted;
 
 	if (routes) {
-		sorted.assign (routes->begin (), routes->end ());
+		sorted = *routes;
+		sorted.sort (ARDOUR::Stripable::Sorter ());
 	}
-
-	std::sort (
-		sorted.begin (),
-		sorted.end (),
-		[] (const std::shared_ptr<ARDOUR::Route>& a, const std::shared_ptr<ARDOUR::Route>& b) {
-			if (!a) {
-				return false;
-			}
-			if (!b) {
-				return true;
-			}
-			return a->presentation_info ().order () < b->presentation_info ().order ();
-		});
 
 	std::ostringstream ss;
 	ss << "{\"tracks\":[";
 
 	bool first = true;
-	for (std::vector<std::shared_ptr<ARDOUR::Route> >::const_iterator it = sorted.begin (); it != sorted.end (); ++it) {
+	for (ARDOUR::RouteList::const_iterator it = sorted.begin (); it != sorted.end (); ++it) {
 		const std::shared_ptr<ARDOUR::Route>& route = *it;
 		if (!route) {
 			continue;
@@ -403,28 +392,16 @@ static std::string
 tracks_list_text (ARDOUR::Session& session, bool include_hidden)
 {
 	std::shared_ptr<ARDOUR::RouteList const> routes = session.get_routes ();
-	std::vector<std::shared_ptr<ARDOUR::Route> > sorted;
+	ARDOUR::RouteList sorted;
 
 	if (routes) {
-		sorted.assign (routes->begin (), routes->end ());
+		sorted = *routes;
+		sorted.sort (ARDOUR::Stripable::Sorter ());
 	}
-
-	std::sort (
-		sorted.begin (),
-		sorted.end (),
-		[] (const std::shared_ptr<ARDOUR::Route>& a, const std::shared_ptr<ARDOUR::Route>& b) {
-			if (!a) {
-				return false;
-			}
-			if (!b) {
-				return true;
-			}
-			return a->presentation_info ().order () < b->presentation_info ().order ();
-		});
 
 	std::ostringstream ss;
 	int count = 0;
-	for (std::vector<std::shared_ptr<ARDOUR::Route> >::const_iterator it = sorted.begin (); it != sorted.end (); ++it) {
+	for (ARDOUR::RouteList::const_iterator it = sorted.begin (); it != sorted.end (); ++it) {
 		const std::shared_ptr<ARDOUR::Route>& route = *it;
 		if (!route) {
 			continue;
@@ -436,7 +413,7 @@ tracks_list_text (ARDOUR::Session& session, bool include_hidden)
 	}
 
 	ss << "Tracks (" << count << "):";
-	for (std::vector<std::shared_ptr<ARDOUR::Route> >::const_iterator it = sorted.begin (); it != sorted.end (); ++it) {
+	for (ARDOUR::RouteList::const_iterator it = sorted.begin (); it != sorted.end (); ++it) {
 		const std::shared_ptr<ARDOUR::Route>& route = *it;
 		if (!route) {
 			continue;
@@ -1836,7 +1813,34 @@ valid_fader_position (double p)
 static bool
 valid_fader_db (double d)
 {
-	return std::isfinite (d);
+	if (std::isnan (d)) {
+		return false;
+	}
+
+	if (std::isinf (d)) {
+		return d < 0.0;
+	}
+
+	/* Match OSC silence floor and enforce explicit MCP dB bounds. */
+	return d >= -193.0 && d <= 6.0;
+}
+
+static bool
+db_is_silence_floor (double db)
+{
+	return !std::isfinite (db) || db <= -192.0;
+}
+
+static double
+db_to_gain_with_floor (double db)
+{
+	return db_is_silence_floor (db) ? 0.0 : dB_to_coefficient (db);
+}
+
+static double
+normalized_db_value (double db)
+{
+	return db_is_silence_floor (db) ? -193.0 : db;
 }
 
 static std::string
@@ -1857,7 +1861,7 @@ track_fader_json (const std::shared_ptr<ARDOUR::Route>& route)
 	ss << "{\"id\":\"" << json_escape (route->id ().to_s ()) << "\""
 	   << ",\"name\":\"" << json_escape (route->name ()) << "\""
 	   << ",\"position\":" << position
-	   << ",\"db\":" << db
+	   << ",\"db\":" << normalized_db_value (db)
 	   << "}";
 	return ss.str ();
 }
@@ -1890,13 +1894,13 @@ send_list_json (const std::shared_ptr<ARDOUR::Route>& route)
 		}
 		first = false;
 
-		ss << "{\"index\":" << i
-		   << ",\"name\":\"" << json_escape (route->send_name (i)) << "\""
-		   << ",\"active\":" << (p->active () ? "true" : "false")
-		   << ",\"preFader\":" << (p->get_pre_fader () ? "true" : "false")
-		   << ",\"postFader\":" << (p->get_pre_fader () ? "false" : "true")
-		   << ",\"position\":" << position
-		   << ",\"db\":" << db;
+			ss << "{\"index\":" << i
+			   << ",\"name\":\"" << json_escape (route->send_name (i)) << "\""
+			   << ",\"active\":" << (p->active () ? "true" : "false")
+			   << ",\"preFader\":" << (p->get_pre_fader () ? "true" : "false")
+			   << ",\"postFader\":" << (p->get_pre_fader () ? "false" : "true")
+			   << ",\"position\":" << position
+			   << ",\"db\":" << normalized_db_value (db);
 
 		std::shared_ptr<ARDOUR::InternalSend> isend = std::dynamic_pointer_cast<ARDOUR::InternalSend> (p);
 		if (isend) {
@@ -1938,7 +1942,7 @@ send_level_json (const std::shared_ptr<ARDOUR::Route>& route, uint32_t send_inde
 	   << ",\"preFader\":" << ((p && p->get_pre_fader ()) ? "true" : "false")
 	   << ",\"postFader\":" << ((p && p->get_pre_fader ()) ? "false" : "true")
 	   << ",\"position\":" << position
-	   << ",\"db\":" << db;
+	   << ",\"db\":" << normalized_db_value (db);
 
 	std::shared_ptr<ARDOUR::InternalSend> isend = std::dynamic_pointer_cast<ARDOUR::InternalSend> (p);
 	if (isend) {
@@ -2613,7 +2617,7 @@ track_info_json (const std::shared_ptr<ARDOUR::Route>& route)
 		}
 
 		ss << ",\"fader\":{\"position\":" << gain->internal_to_interface (gain->get_value ())
-		   << ",\"db\":" << db << "}";
+		   << ",\"db\":" << normalized_db_value (db) << "}";
 	} else {
 		ss << ",\"fader\":null";
 	}
@@ -3247,7 +3251,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"search\":{\"type\":\"string\"},\"type\":{\"type\":\"string\"},\"includeHidden\":{\"type\":\"boolean\"},\"includeInternal\":{\"type\":\"boolean\"}},\"additionalProperties\":false},\"outputSchema\":{\"type\":\"object\",\"required\":[\"count\",\"plugins\"],\"properties\":{\"count\":{\"type\":\"integer\"},\"plugins\":{\"type\":\"array\"}},\"additionalProperties\":true}},"
 					"{\"name\":\"plugin_add\",\"title\":\"Add Plugin\",\"description\":\"Add one plugin to a route by pluginId (preferred) or uniqueId+type. position inserts at plugin index.\","
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"pluginId\":{\"type\":\"string\"},\"uniqueId\":{\"type\":\"string\"},\"type\":{\"type\":\"string\"},\"position\":{\"type\":\"integer\",\"minimum\":0},\"enabled\":{\"type\":\"boolean\"}},\"required\":[\"id\"],\"allOf\":[{\"oneOf\":[{\"required\":[\"pluginId\"]},{\"required\":[\"uniqueId\"]}]}],\"additionalProperties\":false},\"outputSchema\":{\"type\":\"object\",\"required\":[\"id\",\"pluginIndex\",\"plugins\"],\"properties\":{\"id\":{\"type\":\"string\"},\"pluginIndex\":{\"type\":\"integer\"},\"plugins\":{\"type\":\"array\"}},\"additionalProperties\":true}},"
-				"{\"name\":\"track_get_fader\",\"title\":\"Get Track Fader\",\"description\":\"Get current track fader as normalized position and dB.\","
+					"{\"name\":\"track_get_fader\",\"title\":\"Get Track Fader\",\"description\":\"Get current track fader as normalized position and dB.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"}},\"required\":[\"id\"],\"additionalProperties\":false}},"
 				"{\"name\":\"track_select\",\"title\":\"Select Track\",\"description\":\"Select a route in Ardour.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"}},\"required\":[\"id\"],\"additionalProperties\":false}},"
@@ -3263,16 +3267,16 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"value\":{\"type\":\"boolean\"}},\"required\":[\"id\",\"value\"],\"additionalProperties\":false}},"
 					"{\"name\":\"track_set_pan\",\"title\":\"Set Pan\",\"description\":\"Set route pan position (0.0 to 1.0).\","
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"position\":{\"type\":\"number\",\"minimum\":0,\"maximum\":1}},\"required\":[\"id\",\"position\"],\"additionalProperties\":false}},"
-					"{\"name\":\"track_set_send_level\",\"title\":\"Set Send Level\",\"description\":\"Set route send level by send index using normalized position (0.0 to 1.0) or dB.\","
-					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"sendIndex\":{\"type\":\"integer\",\"minimum\":0},\"position\":{\"type\":\"number\",\"minimum\":0,\"maximum\":1},\"db\":{\"type\":\"number\"}},\"required\":[\"id\",\"sendIndex\"],\"oneOf\":[{\"required\":[\"position\"]},{\"required\":[\"db\"]}],\"additionalProperties\":false}},"
-					"{\"name\":\"track_add_send\",\"title\":\"Add Send\",\"description\":\"Add one internal aux send from a source route to a target route. Optional level and enabled state are applied to the resolved send.\","
-					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"targetId\":{\"type\":\"string\"},\"position\":{\"type\":\"number\",\"minimum\":0,\"maximum\":1},\"db\":{\"type\":\"number\"},\"enabled\":{\"type\":\"boolean\"},\"postFader\":{\"type\":\"boolean\"}},\"required\":[\"id\",\"targetId\"],\"additionalProperties\":false},\"outputSchema\":{\"type\":\"object\",\"required\":[\"created\",\"send\",\"sends\"],\"properties\":{\"created\":{\"type\":\"boolean\"},\"send\":{\"type\":\"object\"},\"sends\":{\"type\":\"array\"}},\"additionalProperties\":true}},"
+						"{\"name\":\"track_set_send_level\",\"title\":\"Set Send Level\",\"description\":\"Set route send level by send index using normalized position (0.0 to 1.0) or dB. For dB mode, valid range is -193.0 to +6.0, and -193.0 is silence floor.\","
+						"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"sendIndex\":{\"type\":\"integer\",\"minimum\":0},\"position\":{\"type\":\"number\",\"minimum\":0,\"maximum\":1},\"db\":{\"type\":\"number\",\"minimum\":-193.0,\"maximum\":6.0}},\"required\":[\"id\",\"sendIndex\"],\"oneOf\":[{\"required\":[\"position\"]},{\"required\":[\"db\"]}],\"additionalProperties\":false}},"
+						"{\"name\":\"track_add_send\",\"title\":\"Add Send\",\"description\":\"Add one internal aux send from a source route to a target route. Optional level and enabled state are applied to the resolved send. For dB mode, valid range is -193.0 to +6.0, and -193.0 is silence floor.\","
+						"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"targetId\":{\"type\":\"string\"},\"position\":{\"type\":\"number\",\"minimum\":0,\"maximum\":1},\"db\":{\"type\":\"number\",\"minimum\":-193.0,\"maximum\":6.0},\"enabled\":{\"type\":\"boolean\"},\"postFader\":{\"type\":\"boolean\"}},\"required\":[\"id\",\"targetId\"],\"additionalProperties\":false},\"outputSchema\":{\"type\":\"object\",\"required\":[\"created\",\"send\",\"sends\"],\"properties\":{\"created\":{\"type\":\"boolean\"},\"send\":{\"type\":\"object\"},\"sends\":{\"type\":\"array\"}},\"additionalProperties\":true}},"
 					"{\"name\":\"track_set_send_position\",\"title\":\"Set Send Position\",\"description\":\"Set send pre/post-fader position for an existing internal aux send.\","
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"sendIndex\":{\"type\":\"integer\",\"minimum\":0},\"postFader\":{\"type\":\"boolean\"}},\"required\":[\"id\",\"sendIndex\",\"postFader\"],\"additionalProperties\":false},\"outputSchema\":{\"type\":\"object\",\"required\":[\"id\",\"routeName\",\"sendIndex\",\"preFader\",\"postFader\"],\"properties\":{\"id\":{\"type\":\"string\"},\"routeName\":{\"type\":\"string\"},\"sendIndex\":{\"type\":\"integer\"},\"preFader\":{\"type\":\"boolean\"},\"postFader\":{\"type\":\"boolean\"}},\"additionalProperties\":true}},"
 					"{\"name\":\"track_remove_send\",\"title\":\"Remove Send\",\"description\":\"Remove one route send by send index. Optional targetId can be used as a safety check for internal sends.\","
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"sendIndex\":{\"type\":\"integer\",\"minimum\":0},\"targetId\":{\"type\":\"string\"}},\"required\":[\"id\",\"sendIndex\"],\"additionalProperties\":false},\"outputSchema\":{\"type\":\"object\",\"required\":[\"removed\",\"routeId\",\"routeName\",\"sendIndex\",\"sends\"],\"properties\":{\"removed\":{\"type\":\"boolean\"},\"routeId\":{\"type\":\"string\"},\"routeName\":{\"type\":\"string\"},\"sendIndex\":{\"type\":\"integer\"},\"sends\":{\"type\":\"array\"}},\"additionalProperties\":true}},"
-				"{\"name\":\"track_set_fader\",\"title\":\"Set Track Fader\",\"description\":\"Set track fader by normalized position (0.0 to 1.0) or dB.\","
-				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"position\":{\"type\":\"number\",\"minimum\":0,\"maximum\":1},\"db\":{\"type\":\"number\"}},\"required\":[\"id\"],\"oneOf\":[{\"required\":[\"position\"]},{\"required\":[\"db\"]}],\"additionalProperties\":false}},"
+						"{\"name\":\"track_set_fader\",\"title\":\"Set Track Fader\",\"description\":\"Set track fader by normalized position (0.0 to 1.0) or dB. For dB mode, valid range is -193.0 to +6.0, and -193.0 is silence floor.\","
+					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"position\":{\"type\":\"number\",\"minimum\":0,\"maximum\":1},\"db\":{\"type\":\"number\",\"minimum\":-193.0,\"maximum\":6.0}},\"required\":[\"id\"],\"oneOf\":[{\"required\":[\"position\"]},{\"required\":[\"db\"]}],\"additionalProperties\":false}},"
 						"{\"name\":\"midi_region_add\",\"title\":\"Add MIDI Region\",\"description\":\"Create an empty MIDI region on a MIDI track. Provide either startSample+endSample, or startBar+startBeat+endBar+endBeat.\","
 						"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"trackId\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"startSample\":{\"type\":\"integer\",\"minimum\":0},\"endSample\":{\"type\":\"integer\",\"minimum\":0},\"startBar\":{\"type\":\"integer\",\"minimum\":1},\"startBeat\":{\"type\":\"number\",\"minimum\":1},\"endBar\":{\"type\":\"integer\",\"minimum\":1},\"endBeat\":{\"type\":\"number\",\"minimum\":1}},\"required\":[\"trackId\"],\"oneOf\":[{\"required\":[\"startSample\",\"endSample\"]},{\"required\":[\"startBar\",\"startBeat\",\"endBar\",\"endBeat\"]}],\"additionalProperties\":false},\"outputSchema\":{\"type\":\"object\",\"required\":[\"created\"],\"properties\":{\"created\":{\"type\":\"object\"},\"usedDefaultName\":{\"type\":\"boolean\"}},\"additionalProperties\":true}},"
 					"{\"name\":\"midi_note_add\",\"title\":\"Add MIDI Note\",\"description\":\"Add one MIDI note to an existing MIDI region at region beats, sample, or bar+beat position.\","
@@ -7410,11 +7414,11 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						internal_gain = send_gain->interface_to_internal (*position);
 					} else {
 						if (!valid_fader_db (*db)) {
-							return jsonrpc_error (id, -32602, "Invalid dB value");
+							return jsonrpc_error (id, -32602, "Invalid dB value (expected -193.0 to +6.0 dB; use -193.0 for silence)");
 						}
 
 						/* Match OSC /strip/send/gain behavior. */
-						internal_gain = (*db <= -192.0) ? 0.0 : dB_to_coefficient (*db);
+						internal_gain = db_to_gain_with_floor (*db);
 					}
 
 					if (!std::isfinite (internal_gain)) {
@@ -7451,7 +7455,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						return jsonrpc_error (id, -32602, "Invalid send position (expected 0.0 to 1.0)");
 					}
 					if (db && !valid_fader_db (*db)) {
-						return jsonrpc_error (id, -32602, "Invalid dB value");
+						return jsonrpc_error (id, -32602, "Invalid dB value (expected -193.0 to +6.0 dB; use -193.0 for silence)");
 					}
 
 					const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
@@ -7501,7 +7505,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						if (position) {
 							internal_gain = send_gain->interface_to_internal (*position);
 						} else {
-							internal_gain = (*db <= -192.0) ? 0.0 : dB_to_coefficient (*db);
+							internal_gain = db_to_gain_with_floor (*db);
 						}
 
 						if (!std::isfinite (internal_gain)) {
@@ -7674,11 +7678,11 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 				internal_gain = gain->interface_to_internal (*position);
 			} else {
 				if (!valid_fader_db (*db)) {
-					return jsonrpc_error (id, -32602, "Invalid dB value");
+					return jsonrpc_error (id, -32602, "Invalid dB value (expected -193.0 to +6.0 dB; use -193.0 for silence)");
 				}
 
 				/* Match OSC behavior for /gain: map dB to coefficient, then clamp to control bounds. */
-				internal_gain = (*db <= -192.0) ? 0.0 : dB_to_coefficient (*db);
+				internal_gain = db_to_gain_with_floor (*db);
 				internal_gain = std::max (gain->lower (), std::min (gain->upper (), internal_gain));
 			}
 
