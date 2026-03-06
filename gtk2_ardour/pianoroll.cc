@@ -90,6 +90,13 @@ Pianoroll::Pianoroll (std::string const & name, bool with_transport)
 	policy_dropdown.add_menu_elem (MenuElem (_("Active Region"), sigc::bind (sigc::mem_fun (*this, &Pianoroll::set_editing_policy), ActiveView)));
 	policy_dropdown.set_active (1);
 
+	colors_dropdown.add_menu_elem (MenuElem (_("Velocity"), sigc::bind (sigc::mem_fun (*this, &Pianoroll::set_color_scheme), MidiView::ColorByVelocity)));
+	colors_dropdown.add_menu_elem (MenuElem (_("Pitch"), sigc::bind (sigc::mem_fun (*this, &Pianoroll::set_color_scheme), MidiView::ColorByPitch)));
+	colors_dropdown.add_menu_elem (MenuElem (_("Channel"), sigc::bind (sigc::mem_fun (*this, &Pianoroll::set_color_scheme), MidiView::ColorByChannel)));
+	colors_dropdown.add_menu_elem (MenuElem (_("Region"), sigc::bind (sigc::mem_fun (*this, &Pianoroll::set_color_scheme), MidiView::ColorByRegion)));
+	colors_dropdown.set_active (1);
+	ArdourWidgets::set_tooltip (colors_dropdown, _("Color Scheme for MIDI events"));
+
 	build_upper_toolbar ();
 	build_canvas ();
 
@@ -402,10 +409,19 @@ Pianoroll::pack_outer (Gtk::Box& box)
 	box.pack_start (visible_channel_selector, false, false);
 	box.pack_start (note_mode_button, false, false);
 
+	box.pack_end (colors_dropdown, false, false);
 	box.pack_end (region_dropdown, false, false);
 	box.pack_end (policy_dropdown, false, false);
 	region_dropdown.show ();
 	policy_dropdown.show ();
+}
+
+void
+Pianoroll::set_color_scheme (int cs)
+{
+	for (auto & [region,view] : region_view_map) {
+		view->set_color_scheme ((MidiView::ColorScheme) cs);
+	}
 }
 
 void
