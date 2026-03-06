@@ -605,11 +605,20 @@ EditorSummary::get_position (double x, double y) const
 	x_edge_size = min (x_edge_size, 8);
 	x_edge_size = max (x_edge_size, 1);
 
+
 	bool const near_left = (std::abs (x - _view_rectangle_x.first) < x_edge_size);
 	bool const near_right = (std::abs (x - _view_rectangle_x.second) < x_edge_size);
 	bool const within_x = _view_rectangle_x.first < x && x < _view_rectangle_x.second;
 
-	if (near_left) {
+	// we need mouse coordinates relative to the summary in order to define
+	// whether we're hovering the toolbar or not
+	gint x1, y1;
+	get_pointer(x1, y1);
+	bool const on_toolbar = x1 >= get_width() - (5 * 21) && y1 >= get_height() - 21;
+
+	if (on_toolbar) {
+		return TOOLBAR;
+	} else if (near_left) {
 		return LEFT;
 	} else if (near_right) {
 		return RIGHT;
@@ -647,6 +656,9 @@ EditorSummary::set_cursor (SummaryPosition p)
 		break;
 	case TO_LEFT_OR_RIGHT:
 		get_window()->set_cursor (*_editor._cursors->move);
+		break;
+	case TOOLBAR:
+		get_window()->set_cursor ();
 		break;
 	default:
 		assert (0);

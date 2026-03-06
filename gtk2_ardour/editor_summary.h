@@ -59,7 +59,8 @@ private:
 		RIGHT,
 		BOTTOM,
 		INSIDE,
-		TO_LEFT_OR_RIGHT
+		TO_LEFT_OR_RIGHT,
+		TOOLBAR
 	};
 
 	void on_size_request (Gtk::Requisition *);
