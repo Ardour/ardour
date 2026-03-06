@@ -978,7 +978,7 @@ msgstr "4 canaux"
 
 #: add_route_dialog.cc:943
 msgid "5 Channel"
-msgstr "3 canaux"
+msgstr "5 canaux"
 
 #: add_route_dialog.cc:947
 msgid "6 Channel"
