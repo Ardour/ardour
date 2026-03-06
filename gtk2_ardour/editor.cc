@@ -576,7 +576,6 @@ Editor::Editor ()
 	summary_arrow_left->set_act_on_release(false);
 	summary_arrow_left->signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &Editor::scroll_press), LEFT), false);
 	summary_arrow_left->signal_button_release_event().connect (sigc::mem_fun (*this, &Editor::scroll_release), false);
-	summary_arrow_left->set_size_request(21,21);
 
 	ArdourButton* summary_arrow_right = manage (new ArdourButton);
 	summary_arrow_right->set_corner_mask(ArdourButton::RIGHT);
@@ -584,7 +583,6 @@ Editor::Editor ()
 	summary_arrow_right->set_act_on_release(false);
 	summary_arrow_right->signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &Editor::scroll_press), RIGHT), false);
 	summary_arrow_right->signal_button_release_event().connect (sigc::mem_fun (*this, &Editor::scroll_release), false);
-	summary_arrow_right->set_size_request(21, 21);
 
 	Gtk::EventBox* summary_left_spacer = manage (new Gtk::EventBox); // extra h-space before the summary
 	summary_left_spacer->set_size_request(4, -1);
@@ -595,13 +593,24 @@ Editor::Editor ()
 
 	VBox* summary_zoom_vbox = manage (new Gtk::VBox);
 	HBox* summary_zoom_hbox = manage (new Gtk::HBox);
-	summary_zoom_hbox->set_size_request(21 * 5, 21);
+	summary_zoom_hbox->set_size_request(-1, 21);
 
-	summary_zoom_hbox->pack_end(*summary_arrow_right, false, false, 0);
-	summary_zoom_hbox->pack_end(full_zoom_button, false, false, 0);
-	summary_zoom_hbox->pack_end(zoom_in_button, false, false, 0);
-	summary_zoom_hbox->pack_end(zoom_out_button, false, false, 0);
-	summary_zoom_hbox->pack_end(*summary_arrow_left, false, false, 0);
+	HBox* summary_toolbar = manage (new Gtk::HBox);
+	summary_toolbar->set_size_request(21 * 5, -1);
+	summary_toolbar->pack_start(*summary_arrow_left, true, true, 0);
+	summary_toolbar->pack_start(zoom_out_button, true, true, 0);
+	summary_toolbar->pack_start(zoom_in_button, true, true, 0);
+	summary_toolbar->pack_start(full_zoom_button, true, true, 0);
+	summary_toolbar->pack_start(*summary_arrow_right, true, true, 0);
+
+	Glib::RefPtr<SizeGroup> grp = SizeGroup::create (Gtk::SIZE_GROUP_BOTH);
+	grp->add_widget(*summary_arrow_right);
+	grp->add_widget(full_zoom_button);
+	grp->add_widget(zoom_in_button);
+	grp->add_widget(zoom_out_button);
+	grp->add_widget(*summary_arrow_left);
+
+	summary_zoom_hbox->pack_end(*summary_toolbar, false, false, 0);
 	summary_zoom_vbox->pack_end(*summary_zoom_hbox, false, false, 0);
 
 	summary_arrow_left->set_corner_mask(ArdourButton::NONE);
