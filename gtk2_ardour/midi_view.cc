@@ -129,6 +129,7 @@ MidiView::MidiView (std::shared_ptr<MidiTrack> mt,
 	, selection_drag (nullptr)
 	, draw_drag (nullptr)
 	, _visible_channel (-1)
+	, _color_scheme (ColorByVelocity)
 	, _optimization_iterator (_events.end())
 	, _list_editor (nullptr)
 	, _no_sound_notes (false)
@@ -168,6 +169,7 @@ MidiView::MidiView (MidiView const & other)
 	, selection_drag (nullptr)
 	, draw_drag (nullptr)
 	, _visible_channel (-1)
+	, _color_scheme (ColorByVelocity)
 	, _optimization_iterator (_events.end())
 	, _list_editor (0)
 	, _no_sound_notes (false)
@@ -242,6 +244,13 @@ MidiView::set_sensitive (bool yn)
 	if (yn) {
 		_note_group->raise_to_top ();
 	}
+}
+
+void
+MidiView::set_color_scheme (ColorScheme cs)
+{
+	_color_scheme = cs;
+	/* XXX do something to recolor everything */
 }
 
 void
