@@ -605,7 +605,6 @@ EditorSummary::get_position (double x, double y) const
 	x_edge_size = min (x_edge_size, 8);
 	x_edge_size = max (x_edge_size, 1);
 
-
 	bool const near_left = (std::abs (x - _view_rectangle_x.first) < x_edge_size);
 	bool const near_right = (std::abs (x - _view_rectangle_x.second) < x_edge_size);
 	bool const within_x = _view_rectangle_x.first < x && x < _view_rectangle_x.second;
