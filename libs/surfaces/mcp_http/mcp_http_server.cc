@@ -38,6 +38,7 @@
 #include "pbd/basename.h"
 #include "pbd/id.h"
 #include "pbd/controllable.h"
+#include "pbd/enumwriter.h"
 #include "pbd/event_loop.h"
 #include "pbd/memento_command.h"
 #include "pbd/pthread_utils.h"
@@ -463,139 +464,68 @@ route_list_json (const ARDOUR::RouteList& routes)
 }
 
 static std::string
-marker_type_json (uint32_t flags)
+marker_type_json (ARDOUR::Location::Flags flags)
 {
+	static const struct TypeName {
+		const char* enum_name;
+		const char* wire_name;
+	} names[] = {
+		{"IsMark", "mark"},
+		{"IsHidden", "hidden"},
+		{"IsCueMarker", "cue"},
+		{"IsCDMarker", "cd"},
+		{"IsXrun", "xrun"},
+		{"IsSection", "section"},
+		{"IsScene", "scene"},
+		{"IsRangeMarker", "range"},
+		{"IsSessionRange", "session_range"},
+		{"IsAutoLoop", "auto_loop"},
+		{"IsAutoPunch", "auto_punch"},
+		{"IsClockOrigin", "clock_origin"},
+		{"IsSkip", "skip"}
+	};
+
+	const std::string flags_text = enum_2_string (flags);
 	std::ostringstream ss;
 	ss << "[";
 
 	bool first = true;
-	struct Kind {
-		uint32_t bit;
-		const char* name;
-	};
-	const Kind kinds[] = {
-		{(uint32_t) ARDOUR::Location::IsMark, "mark"},
-		{(uint32_t) ARDOUR::Location::IsCueMarker, "cue"},
-		{(uint32_t) ARDOUR::Location::IsCDMarker, "cd"},
-		{(uint32_t) ARDOUR::Location::IsXrun, "xrun"},
-		{(uint32_t) ARDOUR::Location::IsSection, "section"},
-		{(uint32_t) ARDOUR::Location::IsScene, "scene"},
-		{(uint32_t) ARDOUR::Location::IsRangeMarker, "range"},
-		{(uint32_t) ARDOUR::Location::IsSessionRange, "session_range"},
-		{(uint32_t) ARDOUR::Location::IsAutoLoop, "auto_loop"},
-		{(uint32_t) ARDOUR::Location::IsAutoPunch, "auto_punch"},
-		{(uint32_t) ARDOUR::Location::IsClockOrigin, "clock_origin"},
-		{(uint32_t) ARDOUR::Location::IsSkip, "skip"},
-	};
+	size_t start = 0;
+	while (start < flags_text.size ()) {
+		size_t comma = flags_text.find (',', start);
+		if (comma == std::string::npos) {
+			comma = flags_text.size ();
+		}
 
-	for (size_t i = 0; i < (sizeof (kinds) / sizeof (kinds[0])); ++i) {
-		if (!(flags & kinds[i].bit)) {
+		size_t token_begin = flags_text.find_first_not_of (" \t", start);
+		size_t token_end = comma;
+		while (token_end > start && (flags_text[token_end - 1] == ' ' || flags_text[token_end - 1] == '\t')) {
+			--token_end;
+		}
+		if (token_begin == std::string::npos || token_begin >= token_end) {
+			start = comma + 1;
 			continue;
 		}
+
+		std::string token = flags_text.substr (token_begin, token_end - token_begin);
+		for (size_t i = 0; i < (sizeof (names) / sizeof (names[0])); ++i) {
+			if (token == names[i].enum_name) {
+				token = names[i].wire_name;
+				break;
+			}
+		}
+
 		if (!first) {
 			ss << ",";
 		}
 		first = false;
-		ss << "\"" << kinds[i].name << "\"";
-	}
-
-	ss << "]";
-	return ss.str ();
-}
-
-static bool
-parse_location_flags (const XMLNode& node, uint32_t& flags_out)
-{
-	flags_out = 0;
-	if (node.get_property ("flags", flags_out)) {
-		return true;
-	}
-
-	const XMLProperty* prop = node.property ("flags");
-	if (!prop) {
-		return false;
-	}
-
-	const std::string v = prop->value ();
-	if (v.empty ()) {
-		return false;
-	}
-
-	char* endptr = 0;
-	unsigned long parsed = std::strtoul (v.c_str (), &endptr, 0);
-	if (endptr && *endptr == '\0') {
-		flags_out = (uint32_t) parsed;
-		return true;
-	}
-
-	struct FlagName {
-		const char* name;
-		uint32_t bit;
-	};
-	const FlagName named_flags[] = {
-		{"IsMark", (uint32_t) ARDOUR::Location::IsMark},
-		{"IsAutoPunch", (uint32_t) ARDOUR::Location::IsAutoPunch},
-		{"IsAutoLoop", (uint32_t) ARDOUR::Location::IsAutoLoop},
-		{"IsHidden", (uint32_t) ARDOUR::Location::IsHidden},
-		{"IsCDMarker", (uint32_t) ARDOUR::Location::IsCDMarker},
-		{"IsRangeMarker", (uint32_t) ARDOUR::Location::IsRangeMarker},
-		{"IsSessionRange", (uint32_t) ARDOUR::Location::IsSessionRange},
-		{"IsSkip", (uint32_t) ARDOUR::Location::IsSkip},
-		{"IsSkipping", (uint32_t) ARDOUR::Location::IsSkipping},
-		{"IsClockOrigin", (uint32_t) ARDOUR::Location::IsClockOrigin},
-		{"IsXrun", (uint32_t) ARDOUR::Location::IsXrun},
-		{"IsCueMarker", (uint32_t) ARDOUR::Location::IsCueMarker},
-		{"IsSection", (uint32_t) ARDOUR::Location::IsSection},
-		{"IsScene", (uint32_t) ARDOUR::Location::IsScene},
-	};
-
-	bool matched = false;
-	size_t start = 0;
-	while (start < v.size ()) {
-		size_t comma = v.find (',', start);
-		if (comma == std::string::npos) {
-			comma = v.size ();
-		}
-
-		size_t token_begin = v.find_first_not_of (" \t", start);
-		size_t token_end = comma;
-		while (token_end > start && (v[token_end - 1] == ' ' || v[token_end - 1] == '\t')) {
-			--token_end;
-		}
-
-		if (token_begin != std::string::npos && token_begin < token_end) {
-			const std::string token = v.substr (token_begin, token_end - token_begin);
-			for (size_t i = 0; i < (sizeof (named_flags) / sizeof (named_flags[0])); ++i) {
-				if (token == named_flags[i].name) {
-					flags_out |= named_flags[i].bit;
-					matched = true;
-					break;
-				}
-			}
-		}
+		ss << "\"" << json_escape (token) << "\"";
 
 		start = comma + 1;
 	}
 
-	return matched;
-}
-
-static bool
-parse_location_samples (const XMLNode& node, samplepos_t& start_sample, samplepos_t& end_sample)
-{
-	if (node.get_property ("start", start_sample) && node.get_property ("end", end_sample)) {
-		return true;
-	}
-
-	Temporal::timepos_t start;
-	Temporal::timepos_t end;
-	if (!node.get_property ("start", start) || !node.get_property ("end", end)) {
-		return false;
-	}
-
-	start_sample = start.samples ();
-	end_sample = end.samples ();
-	return true;
+	ss << "]";
+	return ss.str ();
 }
 
 static std::string
@@ -625,21 +555,15 @@ markers_list_json (ARDOUR::Session& session)
 		return "{\"markers\":[]}";
 	}
 
-	std::unique_ptr<XMLNode> locations_state (&locations->get_state ());
-	if (!locations_state.get ()) {
-		return "{\"markers\":[]}";
-	}
-
 	struct MarkerSnapshot {
 		std::string name;
 		samplepos_t entry_start_sample;
 		samplepos_t entry_end_sample;
-		uint32_t flags;
+		ARDOUR::Location::Flags flags;
 		int32_t cue_id;
 		bool have_cue;
 		bool hidden;
 		std::string location_id;
-		bool have_location_id;
 		std::string location_name;
 		samplepos_t location_start_sample;
 		samplepos_t location_end_sample;
@@ -648,31 +572,22 @@ markers_list_json (ARDOUR::Session& session)
 	};
 
 	std::vector<MarkerSnapshot> markers;
-	const XMLNodeList children = locations_state->children ();
-
-	for (XMLNodeConstIterator it = children.begin (); it != children.end (); ++it) {
-		if (!(*it) || (*it)->name () != "Location") {
+	const ARDOUR::Locations::LocationList location_list = locations->list ();
+	for (ARDOUR::Locations::LocationList::const_iterator it = location_list.begin (); it != location_list.end (); ++it) {
+		ARDOUR::Location* loc = *it;
+		if (!loc) {
 			continue;
 		}
 
-		uint32_t flags = 0;
-		if (!parse_location_flags (*(*it), flags)) {
-			continue;
-		}
+		const ARDOUR::Location::Flags flags = loc->flags ();
+		const std::string name = loc->name ();
+		const samplepos_t start_sample = loc->start_sample ();
+		const samplepos_t end_sample = loc->end_sample ();
+		const std::string location_id = loc->id ().to_s ();
+		const bool have_cue = loc->is_cue_marker ();
+		const int32_t cue_id = have_cue ? loc->cue_id () : 0;
 
-		std::string name;
-		samplepos_t start_sample = 0;
-		samplepos_t end_sample = 0;
-		if (!(*it)->get_property ("name", name) || !parse_location_samples (*(*it), start_sample, end_sample)) {
-			continue;
-		}
-		std::string location_id;
-		const bool have_location_id = (*it)->get_property ("id", location_id);
-
-		int32_t cue_id = 0;
-		const bool have_cue = (*it)->get_property ("cue", cue_id);
-
-		if (flags & (uint32_t) ARDOUR::Location::IsSessionRange) {
+		if (loc->is_session_range ()) {
 			/* Match OSC behavior: expose session bounds as synthetic "start"/"end" markers. */
 			MarkerSnapshot start_marker;
 			start_marker.name = "start";
@@ -683,7 +598,6 @@ markers_list_json (ARDOUR::Session& session)
 			start_marker.have_cue = false;
 			start_marker.hidden = false;
 			start_marker.location_id = location_id;
-			start_marker.have_location_id = have_location_id;
 			start_marker.location_name = name;
 			start_marker.location_start_sample = start_sample;
 			start_marker.location_end_sample = end_sample;
@@ -700,7 +614,6 @@ markers_list_json (ARDOUR::Session& session)
 			end_marker.have_cue = false;
 			end_marker.hidden = false;
 			end_marker.location_id = location_id;
-			end_marker.have_location_id = have_location_id;
 			end_marker.location_name = name;
 			end_marker.location_start_sample = start_sample;
 			end_marker.location_end_sample = end_sample;
@@ -710,10 +623,7 @@ markers_list_json (ARDOUR::Session& session)
 			continue;
 		}
 
-		if (!(flags & ((uint32_t) ARDOUR::Location::IsMark |
-		               (uint32_t) ARDOUR::Location::IsRangeMarker |
-		               (uint32_t) ARDOUR::Location::IsAutoLoop |
-		               (uint32_t) ARDOUR::Location::IsAutoPunch))) {
+		if (!(loc->is_mark () || loc->is_range_marker () || loc->is_auto_loop () || loc->is_auto_punch ())) {
 			continue;
 		}
 
@@ -723,10 +633,9 @@ markers_list_json (ARDOUR::Session& session)
 		marker.entry_end_sample = end_sample;
 		marker.flags = flags;
 		marker.cue_id = cue_id;
-		marker.have_cue = have_cue && (flags & (uint32_t) ARDOUR::Location::IsCueMarker);
-		marker.hidden = (flags & (uint32_t) ARDOUR::Location::IsHidden) != 0;
+		marker.have_cue = have_cue;
+		marker.hidden = loc->is_hidden ();
 		marker.location_id = location_id;
-		marker.have_location_id = have_location_id;
 		marker.location_name = name;
 		marker.location_start_sample = start_sample;
 		marker.location_end_sample = end_sample;
@@ -756,18 +665,18 @@ markers_list_json (ARDOUR::Session& session)
 		}
 		first = false;
 
-		const bool is_mark = (marker.flags & (uint32_t) ARDOUR::Location::IsMark) != 0;
-		const bool is_cue = (marker.flags & (uint32_t) ARDOUR::Location::IsCueMarker) != 0;
-		const bool is_cd = (marker.flags & (uint32_t) ARDOUR::Location::IsCDMarker) != 0;
-		const bool is_xrun = (marker.flags & (uint32_t) ARDOUR::Location::IsXrun) != 0;
-		const bool is_section = (marker.flags & (uint32_t) ARDOUR::Location::IsSection) != 0;
-		const bool is_scene = (marker.flags & (uint32_t) ARDOUR::Location::IsScene) != 0;
-		const bool is_range_marker = (marker.flags & (uint32_t) ARDOUR::Location::IsRangeMarker) != 0;
-		const bool is_session_range = (marker.flags & (uint32_t) ARDOUR::Location::IsSessionRange) != 0;
-		const bool is_auto_loop = (marker.flags & (uint32_t) ARDOUR::Location::IsAutoLoop) != 0;
-		const bool is_auto_punch = (marker.flags & (uint32_t) ARDOUR::Location::IsAutoPunch) != 0;
-		const bool is_clock_origin = (marker.flags & (uint32_t) ARDOUR::Location::IsClockOrigin) != 0;
-		const bool is_skip = (marker.flags & (uint32_t) ARDOUR::Location::IsSkip) != 0;
+		const bool is_mark = (marker.flags & ARDOUR::Location::IsMark) != 0;
+		const bool is_cue = (marker.flags & ARDOUR::Location::IsCueMarker) != 0;
+		const bool is_cd = (marker.flags & ARDOUR::Location::IsCDMarker) != 0;
+		const bool is_xrun = (marker.flags & ARDOUR::Location::IsXrun) != 0;
+		const bool is_section = (marker.flags & ARDOUR::Location::IsSection) != 0;
+		const bool is_scene = (marker.flags & ARDOUR::Location::IsScene) != 0;
+		const bool is_range_marker = (marker.flags & ARDOUR::Location::IsRangeMarker) != 0;
+		const bool is_session_range = (marker.flags & ARDOUR::Location::IsSessionRange) != 0;
+		const bool is_auto_loop = (marker.flags & ARDOUR::Location::IsAutoLoop) != 0;
+		const bool is_auto_punch = (marker.flags & ARDOUR::Location::IsAutoPunch) != 0;
+		const bool is_clock_origin = (marker.flags & ARDOUR::Location::IsClockOrigin) != 0;
+		const bool is_skip = (marker.flags & ARDOUR::Location::IsSkip) != 0;
 		const bool is_range = is_session_range || is_range_marker || is_auto_loop || is_auto_punch || is_cd;
 		const samplepos_t entry_end_sample = std::max (marker.entry_start_sample, marker.entry_end_sample);
 		const int64_t distance_from_start = (int64_t) marker.entry_start_sample - (int64_t) marker.location_start_sample;
@@ -783,11 +692,7 @@ markers_list_json (ARDOUR::Session& session)
 		   << ",\"sortIndex\":" << i
 		   << ",\"isSynthetic\":" << (marker.synthetic ? "true" : "false");
 
-		if (marker.have_location_id) {
-			ss << ",\"locationId\":\"" << json_escape (marker.location_id) << "\"";
-		} else {
-			ss << ",\"locationId\":null";
-		}
+		ss << ",\"locationId\":\"" << json_escape (marker.location_id) << "\"";
 
 		ss << ",\"locationName\":\"" << json_escape (marker.location_name) << "\""
 		   << ",\"locationStartSample\":" << marker.location_start_sample
@@ -802,7 +707,7 @@ markers_list_json (ARDOUR::Session& session)
 		   << ",\"lengthSamples\":" << (entry_end_sample - marker.entry_start_sample)
 		   << ",\"isHidden\":" << (marker.hidden ? "true" : "false")
 		   << ",\"isRange\":" << (is_range ? "true" : "false")
-		   << ",\"flagBits\":" << marker.flags
+		   << ",\"flagBits\":" << (uint32_t) marker.flags
 		   << ",\"isMark\":" << (is_mark ? "true" : "false")
 		   << ",\"isCue\":" << (is_cue ? "true" : "false")
 		   << ",\"isCD\":" << (is_cd ? "true" : "false")
@@ -834,7 +739,7 @@ static std::string
 marker_added_json (const ARDOUR::Location& location, bool used_default_name, const std::string& requested_name)
 {
 	const samplepos_t sample = location.start_sample ();
-	const uint32_t flags = (uint32_t) location.flags ();
+	const ARDOUR::Location::Flags flags = location.flags ();
 	const std::string bbt = bbt_json_at_sample (sample);
 
 	std::ostringstream ss;
@@ -861,7 +766,7 @@ range_added_json (const ARDOUR::Location& location, bool used_default_name, cons
 {
 	const samplepos_t start_sample = location.start_sample ();
 	const samplepos_t end_sample = std::max (start_sample, location.end_sample ());
-	const uint32_t flags = (uint32_t) location.flags ();
+	const ARDOUR::Location::Flags flags = location.flags ();
 	const std::string start_bbt = bbt_json_at_sample (start_sample);
 	const std::string end_bbt = bbt_json_at_sample (end_sample);
 
@@ -891,10 +796,10 @@ special_range_json (const ARDOUR::Location& location, const std::string& mode)
 {
 	const samplepos_t start_sample = location.start_sample ();
 	const samplepos_t end_sample = std::max (start_sample, location.end_sample ());
-	const uint32_t flags = (uint32_t) location.flags ();
+	const ARDOUR::Location::Flags flags = location.flags ();
 	const std::string start_bbt = bbt_json_at_sample (start_sample);
 	const std::string end_bbt = bbt_json_at_sample (end_sample);
-	const bool is_hidden = (flags & (uint32_t) ARDOUR::Location::IsHidden) != 0;
+	const bool is_hidden = location.is_hidden ();
 
 	std::ostringstream ss;
 	ss << "{\"mode\":\"" << json_escape (mode) << "\""
@@ -946,7 +851,7 @@ marker_deleted_json (
 	const std::string& name,
 	samplepos_t start_sample,
 	samplepos_t end_sample,
-	uint32_t flags)
+	ARDOUR::Location::Flags flags)
 {
 	const samplepos_t safe_end_sample = std::max (start_sample, end_sample);
 	const std::string start_bbt = bbt_json_at_sample (start_sample);
@@ -972,7 +877,7 @@ marker_renamed_json (
 	const std::string& new_name,
 	samplepos_t start_sample,
 	samplepos_t end_sample,
-	uint32_t flags)
+	ARDOUR::Location::Flags flags)
 {
 	const samplepos_t safe_end_sample = std::max (start_sample, end_sample);
 	const std::string start_bbt = bbt_json_at_sample (start_sample);
@@ -990,6 +895,63 @@ marker_renamed_json (
 	   << ",\"types\":" << marker_type_json (flags)
 	   << "}";
 	return ss.str ();
+}
+
+static bool
+is_marker_or_range_location (const ARDOUR::Location& location)
+{
+	return location.is_mark () || location.is_range_marker ();
+}
+
+static ARDOUR::Location*
+resolve_marker_location (
+	ARDOUR::Locations& locations,
+	const std::string& location_id,
+	const std::string& name,
+	const boost::optional<int64_t>& sample_opt,
+	std::string& error)
+{
+	error.clear ();
+
+	if (!location_id.empty ()) {
+		ARDOUR::Location* by_id = locations.get_location_by_id (PBD::ID (location_id));
+		if (!by_id) {
+			error = "Marker locationId not found";
+			return 0;
+		}
+		if (!is_marker_or_range_location (*by_id)) {
+			error = "Location is not a marker/range";
+			return 0;
+		}
+		return by_id;
+	}
+
+	std::vector<ARDOUR::Location*> candidates;
+	const ARDOUR::Locations::LocationList list = locations.list ();
+	for (ARDOUR::Locations::LocationList::const_iterator it = list.begin (); it != list.end (); ++it) {
+		ARDOUR::Location* loc = *it;
+		if (!loc || !is_marker_or_range_location (*loc)) {
+			continue;
+		}
+		if (loc->name () != name) {
+			continue;
+		}
+		if (sample_opt && loc->start_sample () != (samplepos_t) *sample_opt) {
+			continue;
+		}
+		candidates.push_back (loc);
+	}
+
+	if (candidates.empty ()) {
+		error = "Marker not found by name/sample";
+		return 0;
+	}
+	if (candidates.size () > 1) {
+		error = "Ambiguous marker name; provide locationId or sample";
+		return 0;
+	}
+
+	return candidates[0];
 }
 
 static bool
@@ -4037,84 +3999,17 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						return jsonrpc_error (id, -32602, "Session locations unavailable");
 					}
 
-					ARDOUR::Location* target = 0;
-
-					if (!location_id.empty ()) {
-						target = locations->get_location_by_id (PBD::ID (location_id));
-						if (!target) {
-							return jsonrpc_error (id, -32602, "Marker locationId not found");
-						}
-					} else {
-						std::unique_ptr<XMLNode> locations_state (&locations->get_state ());
-						if (!locations_state.get ()) {
-							return jsonrpc_error (id, -32602, "Could not read session locations");
-						}
-
-						struct Candidate {
-							std::string id;
-							samplepos_t sample;
-						};
-
-						std::vector<Candidate> candidates;
-						const XMLNodeList children = locations_state->children ();
-
-						for (XMLNodeConstIterator it = children.begin (); it != children.end (); ++it) {
-							if (!(*it) || (*it)->name () != "Location") {
-								continue;
-							}
-
-							uint32_t flags = 0;
-							if (!parse_location_flags (*(*it), flags)) {
-								continue;
-							}
-							if (!(flags & ((uint32_t) ARDOUR::Location::IsMark | (uint32_t) ARDOUR::Location::IsRangeMarker))) {
-								continue;
-							}
-
-							std::string candidate_name;
-							std::string candidate_id;
-							samplepos_t start_sample = 0;
-							samplepos_t end_sample = 0;
-							if (!(*it)->get_property ("name", candidate_name) ||
-							    !(*it)->get_property ("id", candidate_id) ||
-							    !parse_location_samples (*(*it), start_sample, end_sample)) {
-								continue;
-							}
-							if (candidate_name != name) {
-								continue;
-							}
-							if (sample_opt && start_sample != (samplepos_t) *sample_opt) {
-								continue;
-							}
-
-							Candidate c;
-							c.id = candidate_id;
-							c.sample = start_sample;
-							candidates.push_back (c);
-						}
-
-						if (candidates.empty ()) {
-							return jsonrpc_error (id, -32602, "Marker not found by name/sample");
-						}
-						if (candidates.size () > 1) {
-							return jsonrpc_error (id, -32602, "Ambiguous marker name; provide locationId or sample");
-						}
-
-						target = locations->get_location_by_id (PBD::ID (candidates[0].id));
-						if (!target) {
-							return jsonrpc_error (id, -32602, "Marker disappeared before deletion");
-						}
+					std::string resolve_error;
+					ARDOUR::Location* target = resolve_marker_location (*locations, location_id, name, sample_opt, resolve_error);
+					if (!target) {
+						return jsonrpc_error (id, -32602, resolve_error);
 					}
-
-						if (!(target->is_mark () || target->is_range_marker ())) {
-							return jsonrpc_error (id, -32602, "Location is not a marker/range");
-						}
 
 						const std::string removed_id = target->id ().to_s ();
 						const std::string removed_name = target->name ();
 						const samplepos_t removed_start_sample = target->start_sample ();
 						const samplepos_t removed_end_sample = target->end_sample ();
-						const uint32_t removed_flags = (uint32_t) target->flags ();
+						const ARDOUR::Location::Flags removed_flags = target->flags ();
 
 					_session.begin_reversible_command ("delete marker");
 					XMLNode& before = locations->get_state ();
@@ -4152,84 +4047,17 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						return jsonrpc_error (id, -32602, "Session locations unavailable");
 					}
 
-					ARDOUR::Location* target = 0;
-
-					if (!location_id.empty ()) {
-						target = locations->get_location_by_id (PBD::ID (location_id));
-						if (!target) {
-							return jsonrpc_error (id, -32602, "Marker locationId not found");
-						}
-					} else {
-						std::unique_ptr<XMLNode> locations_state (&locations->get_state ());
-						if (!locations_state.get ()) {
-							return jsonrpc_error (id, -32602, "Could not read session locations");
-						}
-
-						struct Candidate {
-							std::string id;
-							samplepos_t sample;
-						};
-
-						std::vector<Candidate> candidates;
-						const XMLNodeList children = locations_state->children ();
-
-						for (XMLNodeConstIterator it = children.begin (); it != children.end (); ++it) {
-							if (!(*it) || (*it)->name () != "Location") {
-								continue;
-							}
-
-							uint32_t flags = 0;
-							if (!parse_location_flags (*(*it), flags)) {
-								continue;
-							}
-							if (!(flags & ((uint32_t) ARDOUR::Location::IsMark | (uint32_t) ARDOUR::Location::IsRangeMarker))) {
-								continue;
-							}
-
-							std::string candidate_name;
-							std::string candidate_id;
-							samplepos_t start_sample = 0;
-							samplepos_t end_sample = 0;
-							if (!(*it)->get_property ("name", candidate_name) ||
-							    !(*it)->get_property ("id", candidate_id) ||
-							    !parse_location_samples (*(*it), start_sample, end_sample)) {
-								continue;
-							}
-							if (candidate_name != name) {
-								continue;
-							}
-							if (sample_opt && start_sample != (samplepos_t) *sample_opt) {
-								continue;
-							}
-
-							Candidate c;
-							c.id = candidate_id;
-							c.sample = start_sample;
-							candidates.push_back (c);
-						}
-
-						if (candidates.empty ()) {
-							return jsonrpc_error (id, -32602, "Marker not found by name/sample");
-						}
-						if (candidates.size () > 1) {
-							return jsonrpc_error (id, -32602, "Ambiguous marker name; provide locationId or sample");
-						}
-
-						target = locations->get_location_by_id (PBD::ID (candidates[0].id));
-						if (!target) {
-							return jsonrpc_error (id, -32602, "Marker disappeared before rename");
-						}
-					}
-
-					if (!(target->is_mark () || target->is_range_marker ())) {
-						return jsonrpc_error (id, -32602, "Location is not a marker/range");
+					std::string resolve_error;
+					ARDOUR::Location* target = resolve_marker_location (*locations, location_id, name, sample_opt, resolve_error);
+					if (!target) {
+						return jsonrpc_error (id, -32602, resolve_error);
 					}
 
 					const std::string renamed_id = target->id ().to_s ();
 					const std::string old_name = target->name ();
 					const samplepos_t marker_start_sample = target->start_sample ();
 					const samplepos_t marker_end_sample = target->end_sample ();
-					const uint32_t marker_flags = (uint32_t) target->flags ();
+					const ARDOUR::Location::Flags marker_flags = target->flags ();
 
 					_session.begin_reversible_command ("rename marker");
 					XMLNode& before = locations->get_state ();
