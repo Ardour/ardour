@@ -441,6 +441,14 @@ style "base_frame"
 	bg[NORMAL] = @background
 }
 
+style "summary_frame"
+{
+    fg[NORMAL] = @darkest
+    bg[NORMAL] = @darkest
+    xthickness = 1
+    ythickness = 1
+}
+
 style "text_highlight_frame"
 {
 	fg[NORMAL] = shade (0.4, @texts)
@@ -1310,3 +1318,4 @@ widget "*LargeTextEntry" style:highest "large_text"
 widget "*BigTextEntry*" style:highest "big_text"
 
 widget "*ShadedEntry" style:highest "shaded_entry"
+widget "*SummaryFrame" style:highest "summary_frame"

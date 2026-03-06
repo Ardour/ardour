@@ -615,7 +615,12 @@ Editor::Editor ()
 
 	_summary_hbox.pack_start (*summary_left_spacer, false, false);
 	_summary_hbox.pack_start (*summary_arrows_left, false, false);
-	_summary_hbox.pack_start (*_summary, true, true);
+
+	Gtk::Frame* summary_frame = manage (new Gtk::Frame); // summary border
+	summary_frame->set_name("SummaryFrame");
+	summary_frame->add(*_summary);
+
+	_summary_hbox.pack_start (*summary_frame, true, true);
 	_summary_hbox.pack_start (*summary_arrows_right, false, false);
 
 	_summary_vbox.pack_start (_summary_hbox, true, true);

@@ -180,7 +180,8 @@ EditorSummary::render_background_image ()
 	if (N == 0) {
 		_track_height = 16;
 	} else {
-		_track_height = (double) get_height() / N;
+		// add 2 px to the total height to merge track borders with the summary's frame border
+		_track_height = (double) (get_height() + 2) / N;
 	}
 
 	/* render tracks and regions */
@@ -197,8 +198,8 @@ EditorSummary::render_background_image ()
 		if (_track_height > 4) {
 			Gtkmm2ext::set_source_rgba (cr, _track_color);
 			cairo_set_line_width (cr, _track_height - 1);
-			cairo_move_to (cr, 0, y + _track_height / 2);
-			cairo_line_to (cr, get_width(), y + _track_height / 2);
+			cairo_move_to (cr, 0, y + _track_height / 2 - 1);
+			cairo_line_to (cr, get_width(), y + _track_height / 2 - 1);
 			cairo_stroke (cr);
 		}
 
@@ -210,24 +211,12 @@ EditorSummary::render_background_image ()
 			s->foreach_regionview (sigc::bind (
 			                                   sigc::mem_fun (*this, &EditorSummary::render_region),
 			                                   cr,
-			                                   y + _track_height / 2
+			                                   y + _track_height / 2 - 1
 			                                  ));
 		}
 
 		y += _track_height;
 	}
-
-	/* top and bottom border */
-
-	cairo_set_line_width (cr, 1);
-	Gtkmm2ext::set_source_rgba (cr, _background_color);
-
-	cairo_move_to (cr, 0, 0.5);
-	cairo_line_to (cr, get_width(), 0.5);
-	cairo_stroke (cr);
-	cairo_move_to (cr, 0, get_height() - 0.5);
-	cairo_line_to (cr, get_width(), get_height() - 0.5);
-	cairo_stroke (cr);
 
 	/* start and end markers */
 
@@ -235,12 +224,12 @@ EditorSummary::render_background_image ()
 	Gtkmm2ext::set_source_rgba (cr, _marker_color);
 
 	const double p = (_session->current_start_sample() - _start) * _x_scale;
-	cairo_move_to (cr, p, 1);
-	cairo_line_to (cr, p, get_height() - 1);
+	cairo_move_to (cr, p, 0);
+	cairo_line_to (cr, p, get_height());
 
 	double const q = (_session->current_end_sample() - _start) * _x_scale;
-	cairo_move_to (cr, q, 1);
-	cairo_line_to (cr, q, get_height() - 1);
+	cairo_move_to (cr, q, 0);
+	cairo_line_to (cr, q, get_height());
 	cairo_stroke (cr);
 
 	cairo_destroy (cr);
@@ -299,7 +288,7 @@ EditorSummary::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle
 	cairo_fill (cr);
 
 	/* horiz zoom */
-	cairo_rectangle (cr, _view_rectangle_x.first + 0.5, 1.5, width - 1, get_height () - 3);
+	cairo_rectangle (cr, _view_rectangle_x.first + 0.5, 0.5, width - 1, get_height () - 1);
 	cairo_set_line_width (cr, 1);
 	cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(_viewrect_color), UINT_RGBA_G_FLT(_viewrect_color), UINT_RGBA_B_FLT(_viewrect_color), 0.5);
 	cairo_stroke (cr);
@@ -312,8 +301,8 @@ EditorSummary::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle
 	cairo_set_source_rgb (cr, r,g,b); // playhead color
 
 	const double ph= playhead_sample_to_position (_editor.playhead_cursor ()->current_sample());
-	cairo_move_to (cr, ph, 1);
-	cairo_line_to (cr, ph, get_height() - 1);
+	cairo_move_to (cr, ph, 0);
+	cairo_line_to (cr, ph, get_height());
 	cairo_stroke (cr);
 	cairo_pop_group_to_source (cr);
 	cairo_paint (cr);
