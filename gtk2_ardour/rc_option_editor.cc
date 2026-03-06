@@ -2945,7 +2945,6 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_toolbar_cuectrl)
 		     ));
 
-
 	add_option (_("Appearance/Application Bar"),
 	     new BoolOption (
 		     "show-toolbar-selclock",
@@ -3858,7 +3857,6 @@ These settings will only take effect after %1 is restarted.\n\
 
 
 	add_option (_("Transport"), bo);
-
 
 	ComboOption<LoopFadeChoice>* lca = new ComboOption<LoopFadeChoice> (
 		     "loop-fade-choice",
