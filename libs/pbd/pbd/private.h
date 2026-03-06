@@ -27,7 +27,7 @@ namespace PBD
 {
 
 template <class T>
-class LIBPBD_API Private
+class Private
 {
 public:
 	typedef void (*DestructorFunc) (void*);

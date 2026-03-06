@@ -104,7 +104,7 @@ private:
 	bool   _locked;
 };
 
-class Cond
+class LIBPBD_API Cond
 {
 public:
 	Cond ();
