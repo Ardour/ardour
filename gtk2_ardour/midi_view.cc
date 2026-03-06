@@ -235,6 +235,13 @@ MidiView::set_sensitive (bool yn)
 	for (auto & [model,gui] : _sys_exes) {
 		gui->item().set_ignore_events (!yn);
 	}
+
+	show_start (yn);
+	show_end (yn);
+
+	if (yn) {
+		_note_group->raise_to_top ();
+	}
 }
 
 void

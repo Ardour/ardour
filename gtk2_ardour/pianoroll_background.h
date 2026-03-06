@@ -50,7 +50,6 @@ class PianorollMidiBackground : public MidiViewBackground
 	void record_layer_check (std::shared_ptr<ARDOUR::Region>, samplepos_t);
 
 	void set_size (int w, int h);
-	void display_region (MidiView&);
 
 	ARDOUR::InstrumentInfo* instrument_info() const;
 

@@ -102,10 +102,15 @@ Pianoroll::Pianoroll (std::string const & name, bool with_transport)
 	set_mouse_mode (Editing::MouseContent, true);
 
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &Pianoroll::parameter_changed));
+
+	std::cerr << "NEW PR @ " << this << std::endl;
+	PBD::stacktrace (std::cerr, 19);
 }
 
 Pianoroll::~Pianoroll ()
 {
+	std::cerr << "DELETE PR @ " << this << std::endl;
+
 	for (auto & [region,view] : region_view_map) {
 		delete view;
 	}
@@ -712,7 +717,7 @@ Pianoroll::canvas_allocate (Gtk::Allocation alloc)
 
 		zoom_to_show (max_zoom_extent());
 		if (_region) {
-			bg->display_region (*_active_view);
+			/* XXXX */
 		}
 		zoom_in_allocate = false;
 	}
@@ -1521,6 +1526,24 @@ Pianoroll::add_region (std::shared_ptr<ARDOUR::Region> region, std::shared_ptr<A
 }
 
 void
+Pianoroll::remove_region (std::shared_ptr<ARDOUR::Region> region)
+{
+	auto rvm = region_view_map.find (region);
+	if (rvm == region_view_map.end()) {
+		return;
+	}
+
+	MidiView* mv (rvm->second);
+	region_view_map.erase (rvm);
+
+	if (_active_view == mv) {
+		set_region (nullptr);
+	}
+
+	delete mv;
+}
+
+void
 Pianoroll::rebuild_region_dropdown ()
 {
 	region_dropdown.clear_items ();
@@ -1593,6 +1616,16 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 	_active_view = rvm->second;
 	CueEditor::set_track (_active_view->midi_track());
 
+	if (_editing_policy == ActiveView) {
+		for (auto & [region,view] : region_view_map) {
+			view->set_sensitive ((view == _active_view));
+		}
+	} else {
+		for (auto & [region,view] : region_view_map) {
+			view->set_sensitive (true);
+		}
+	}
+
 	automation_connection = _active_view->AutomationStateChange.connect (sigc::mem_fun (*this, &Pianoroll::automation_state_changed));
 	_active_view->VisibleChannelChanged.connect (view_connections, invalidator (*this), std::bind (&Pianoroll::visible_channel_changed, this), gui_context());
 
@@ -1605,7 +1638,32 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 
 	zoom_to_show (max_zoom_extent());
 
-	bg->display_region (*_active_view);
+
+	uint8_t lowest_note;
+	uint8_t highest_note;
+
+	if (_editing_policy == ActiveView) {
+		std::shared_ptr<ARDOUR::SMFSource> smf (std::dynamic_pointer_cast<ARDOUR::SMFSource> (region->source()));
+		assert (smf);
+		lowest_note = smf->model()->lowest_note();
+		highest_note = smf->model()->highest_note();
+		std::cerr << "Note range from one: " << (int) lowest_note << " .. " << (int) highest_note << std::endl;
+	} else {
+		lowest_note = 127;
+		highest_note = 0;
+
+		for (auto & [region,view] : region_view_map) {
+			std::shared_ptr<ARDOUR::SMFSource> smf (std::dynamic_pointer_cast<ARDOUR::SMFSource> (region->source()));
+			assert (smf);
+			lowest_note = std::min (lowest_note, smf->model()->lowest_note());
+			highest_note = std::max (highest_note, smf->model()->highest_note());
+		}
+		std::cerr << "Note range from " << region_view_map.size() << ' ' << (int) lowest_note << " .. " << (int) highest_note << std::endl;
+	}
+
+
+	(void) bg->update_data_note_range (lowest_note, highest_note);
+	bg->apply_note_range (lowest_note, highest_note, true, MidiViewBackground::RangeCanMove (MidiViewBackground::CanMoveTop|MidiViewBackground::CanMoveBottom));
 
 	maybe_set_from_rsu ();
 

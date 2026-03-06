@@ -110,6 +110,7 @@ class Pianoroll : public CueEditor
 	std::shared_ptr<ARDOUR::MidiTrack> midi_track() const;
 
 	void add_region (std::shared_ptr<ARDOUR::Region>, std::shared_ptr<ARDOUR::MidiTrack>);
+	void remove_region (std::shared_ptr<ARDOUR::Region>);
 	void set_region (std::shared_ptr<ARDOUR::Region>);
 
 	double max_extents_scale() const { return 1.2; }
