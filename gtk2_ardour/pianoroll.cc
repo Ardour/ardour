@@ -1184,11 +1184,20 @@ Pianoroll::midi_action (void (MidiView::*method)())
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	if (!_active_view) {
-		return;
-	}
+	if (_editing_policy == ActiveView) {
 
-	(_active_view->*method) ();
+		if (!_active_view) {
+			return;
+		}
+
+		(_active_view->*method) ();
+
+	} else if (_editing_policy == AllViews) {
+
+		for (auto & [region,view] : region_view_map) {
+			(view->*method) ();
+		}
+	}
 }
 
 void
