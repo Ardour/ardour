@@ -767,7 +767,7 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 }
 
 bool
-EditorSummary::on_button_release_event (GdkEventButton*)
+EditorSummary::on_button_release_event (GdkEventButton* ev)
 {
 	bool const was_suspended = suspending_editor_updates ();
 
@@ -779,6 +779,8 @@ EditorSummary::on_button_release_event (GdkEventButton*)
 	if (was_suspended && _pending_editor_changed) {
 		set_editor (_pending_editor_x);
 	}
+
+	set_cursor (get_position (ev->x, ev->y));
 
 	return true;
 }
