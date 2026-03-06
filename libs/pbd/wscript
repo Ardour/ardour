@@ -83,6 +83,7 @@ libpbd_sources = [
     'timing.cc',
     'tlsf.cc',
     'transmitter.cc',
+    'thread_pool.cc',
     'undo.cc',
     'utf8_utils.cc',
     'uuid.cc',

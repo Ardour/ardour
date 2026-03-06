@@ -1,9 +1,5 @@
 /*
- * Copyright (C) 2006 Taybin Rutkin <taybin@taybin.com>
- * Copyright (C) 2008-2009 David Robillard <d@drobilla.net>
- * Copyright (C) 2008-2011 Carl Hetherington <carl@carlh.net>
- * Copyright (C) 1998-2015 Paul Davis <paul@linuxaudiosystems.com>
- * Copyright (C) 2014-2022 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2026 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
