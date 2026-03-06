@@ -1585,7 +1585,7 @@ PluginManager::vst2_plugin (string const& path, PluginType type, VST2Info const&
 	info->path = path;
 
 	/* what a joke freeware VST is */
-	if (!strcasecmp ("The Unnamed plugin", info->name.c_str())) {
+	if (!g_ascii_strcasecmp ("The Unnamed plugin", info->name.c_str())) {
 		info->name = PBD::basename_nosuffix (path);
 	}
 

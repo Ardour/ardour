@@ -18,10 +18,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef COMPILER_MSVC
-#include <strings.h>
-#endif
+#include <glib.h>
 #include <sndfile.h>
+
 #include "ardour/sndfile_helpers.h"
 #include "ardour/export_format_base.h"
 
@@ -69,9 +68,9 @@ sndfile_major_format(int format)
 
                         /* normalize a couple of names rather than use what libsndfile gives us */
 
-                        if (strncasecmp (format_info.name, "OGG", 3) == 0) {
+                        if (g_ascii_strncasecmp (format_info.name, "OGG", 3) == 0) {
                                 m[format_info.format & SF_FORMAT_TYPEMASK] = "Ogg";
-                        } else if (strncasecmp (format_info.name, "WAV", 3) == 0) {
+                        } else if (g_ascii_strncasecmp (format_info.name, "WAV", 3) == 0) {
                                 m[format_info.format & SF_FORMAT_TYPEMASK] = "WAV";
                         } else {
                                 m[format_info.format & SF_FORMAT_TYPEMASK] = format_info.name;

@@ -372,12 +372,12 @@ LuaScriptInfo::type2str (const ScriptType t) {
 LuaScriptInfo::ScriptType
 LuaScriptInfo::str2type (const std::string& str) {
 	const char* type = str.c_str();
-	if (!strcasecmp (type, "DSP")) {return LuaScriptInfo::DSP;}
-	if (!strcasecmp (type, "Session")) {return LuaScriptInfo::Session;}
-	if (!strcasecmp (type, "EditorHook")) {return LuaScriptInfo::EditorHook;}
-	if (!strcasecmp (type, "EditorAction")) {return LuaScriptInfo::EditorAction;}
-	if (!strcasecmp (type, "Snippet")) {return LuaScriptInfo::Snippet;}
-	if (!strcasecmp (type, "SessionInit")) {return LuaScriptInfo::SessionInit;}
+	if (!g_ascii_strcasecmp (type, "DSP")) {return LuaScriptInfo::DSP;}
+	if (!g_ascii_strcasecmp (type, "Session")) {return LuaScriptInfo::Session;}
+	if (!g_ascii_strcasecmp (type, "EditorHook")) {return LuaScriptInfo::EditorHook;}
+	if (!g_ascii_strcasecmp (type, "EditorAction")) {return LuaScriptInfo::EditorAction;}
+	if (!g_ascii_strcasecmp (type, "Snippet")) {return LuaScriptInfo::Snippet;}
+	if (!g_ascii_strcasecmp (type, "SessionInit")) {return LuaScriptInfo::SessionInit;}
 	return LuaScriptInfo::Invalid;
 }
 

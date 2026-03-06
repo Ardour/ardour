@@ -48,59 +48,59 @@ MIDIFunction::setup (GenericMidiControlProtocol& ui, const std::string& invokabl
 
 	_argument = arg;
 
-	if (strcasecmp (_invokable_name.c_str(), "transport-stop") == 0) {
+	if (g_ascii_strcasecmp (_invokable_name.c_str(), "transport-stop") == 0) {
 		_function = TransportStop;
-	} else if (strcasecmp (_invokable_name.c_str(), "transport-roll") == 0) {
+	} else if (g_ascii_strcasecmp (_invokable_name.c_str(), "transport-roll") == 0) {
 		_function = TransportRoll;
-	} else if (strcasecmp (_invokable_name.c_str(), "transport-zero") == 0) {
+	} else if (g_ascii_strcasecmp (_invokable_name.c_str(), "transport-zero") == 0) {
 		_function = TransportZero;
-	} else if (strcasecmp (_invokable_name.c_str(), "transport-start") == 0) {
+	} else if (g_ascii_strcasecmp (_invokable_name.c_str(), "transport-start") == 0) {
 		_function = TransportStart;
-	} else if (strcasecmp (_invokable_name.c_str(), "transport-end") == 0) {
+	} else if (g_ascii_strcasecmp (_invokable_name.c_str(), "transport-end") == 0) {
 		_function = TransportEnd;
-	} else if (strcasecmp (_invokable_name.c_str(), "loop-toggle") == 0) {
+	} else if (g_ascii_strcasecmp (_invokable_name.c_str(), "loop-toggle") == 0) {
 		_function = TransportLoopToggle;
-	} else if (strcasecmp (_invokable_name.c_str(), "toggle-rec-enable") == 0) {
+	} else if (g_ascii_strcasecmp (_invokable_name.c_str(), "toggle-rec-enable") == 0) {
 		_function = TransportRecordToggle;
-	} else if (strcasecmp (_invokable_name.c_str(), "rec-enable") == 0) {
+	} else if (g_ascii_strcasecmp (_invokable_name.c_str(), "rec-enable") == 0) {
 		_function = TransportRecordEnable;
-	} else if (strcasecmp (_invokable_name.c_str(), "rec-disable") == 0) {
+	} else if (g_ascii_strcasecmp (_invokable_name.c_str(), "rec-disable") == 0) {
 		_function = TransportRecordDisable;
-	} else if (strcasecmp (_invokable_name.c_str(), "next-bank") == 0) {
+	} else if (g_ascii_strcasecmp (_invokable_name.c_str(), "next-bank") == 0) {
 		_function = NextBank;
-	} else if (strcasecmp (_invokable_name.c_str(), "prev-bank") == 0) {
+	} else if (g_ascii_strcasecmp (_invokable_name.c_str(), "prev-bank") == 0) {
 		_function = PrevBank;
-	} else if (strcasecmp (_invokable_name.c_str(), "set-bank") == 0) {
+	} else if (g_ascii_strcasecmp (_invokable_name.c_str(), "set-bank") == 0) {
 		if (_argument.empty()) {
 			return -1;
 		}
 		_function = SetBank;
-	} else if (strcasecmp (_invokable_name.c_str(), "select") == 0 || strcasecmp (_invokable_name.c_str(), "select-set") == 0) {
+	} else if (g_ascii_strcasecmp (_invokable_name.c_str(), "select") == 0 || g_ascii_strcasecmp (_invokable_name.c_str(), "select-set") == 0) {
 		if (_argument.empty()) {
 			return -1;
 		}
 		_function = SelectSet;
-	} else if (strcasecmp (_invokable_name.c_str(), "select-remove") == 0) {
+	} else if (g_ascii_strcasecmp (_invokable_name.c_str(), "select-remove") == 0) {
 		if (_argument.empty()) {
 			return -1;
 		}
 		_function = SelectRemove;
-	} else if (strcasecmp (_invokable_name.c_str(), "select-add") == 0) {
+	} else if (g_ascii_strcasecmp (_invokable_name.c_str(), "select-add") == 0) {
 		if (_argument.empty()) {
 			return -1;
 		}
 		_function = SelectAdd;
-	} else if (strcasecmp (_invokable_name.c_str(), "select-toggle") == 0) {
+	} else if (g_ascii_strcasecmp (_invokable_name.c_str(), "select-toggle") == 0) {
 		if (_argument.empty()) {
 			return -1;
 		}
 		_function = SelectToggle;
-	} else if (strcasecmp (_invokable_name.c_str(), "track-set-solo") == 0) {
+	} else if (g_ascii_strcasecmp (_invokable_name.c_str(), "track-set-solo") == 0) {
 		if (_argument.empty()) {
 			return -1;
 		}
 		_function = TrackSetSolo;
-	} else if (strcasecmp (_invokable_name.c_str(), "track-set-mute") == 0) {
+	} else if (g_ascii_strcasecmp (_invokable_name.c_str(), "track-set-mute") == 0) {
 		if (_argument.empty()) {
 			return -1;
 		}

@@ -27,6 +27,7 @@
 #include <algorithm>
 #include <vector>
 #include <stdint.h>
+
 #include "ptformat/visibility.h"
 
 class LIBPTFORMAT_API PTFFormat {
@@ -55,8 +56,11 @@ public:
 		int64_t     length;
 
 		bool operator <(const struct wav_t& other) const {
-			return (strcasecmp(this->filename.c_str(),
-					other.filename.c_str()) < 0);
+			std::string a (this->filename);
+			std::string b (other.filename);
+			std::transform (a.begin(), a.end(), a.begin(), ::tolower);
+			std::transform (b.begin(), b.end(), b.begin(), ::tolower);
+			return a < b;
 		}
 
 		bool operator ==(const struct wav_t& other) const {
@@ -89,8 +93,11 @@ public:
 		}
 
 		bool operator <(const region_t& other) const {
-			return (strcasecmp(this->name.c_str(),
-					other.name.c_str()) < 0);
+			std::string a (this->name);
+			std::string b (other.name);
+			std::transform (a.begin(), a.end(), a.begin(), ::tolower);
+			std::transform (b.begin(), b.end(), b.begin(), ::tolower);
+			return a < b;
 		}
 		region_t (uint16_t idx = 0) : index (idx), startpos (0), sampleoffset (0), length (0) {}
 	};

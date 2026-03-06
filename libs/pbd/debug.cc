@@ -27,6 +27,7 @@
 #include <vector>
 #include <algorithm>
 
+#include <glib.h>
 #include <boost/tokenizer.hpp>
 
 #include "pbd/debug.h"
@@ -148,7 +149,7 @@ PBD::parse_debug_options (const char* str)
 		for (map<const char*,DebugBits>::iterator i = _debug_bit_map().begin(); i != _debug_bit_map().end(); ++i) {
 			const char* cstr = (*tok_iter).c_str();
 
-			if (strncasecmp (cstr, i->first, strlen (cstr)) == 0) {
+			if (g_ascii_strncasecmp (cstr, i->first, strlen (cstr)) == 0) {
 				debug_bits |= i->second;
 				cout << string_compose (X_("Debug flag '%1' set\n"), i->first);
 			}

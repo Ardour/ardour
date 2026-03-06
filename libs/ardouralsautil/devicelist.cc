@@ -306,7 +306,7 @@ ARDOUR::card_to_num(const char* device_name)
 	snd_ctl_t* ctl_handle;
 	int i = -1;
 
-	if (strncasecmp(device_name, "plughw:", 7) == 0) {
+	if (g_ascii_strncasecmp(device_name, "plughw:", 7) == 0) {
 		device_name += 4;
 	}
 	if (!(comma = strchr(device_name, ','))) {
