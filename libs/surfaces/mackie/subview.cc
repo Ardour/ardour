@@ -99,6 +99,7 @@ Subview::Subview(MackieControlProtocol& mcp, std::shared_ptr<ARDOUR::Stripable> 
 
 Subview::~Subview()
 {
+	init_strip_vectors();
 	reset_all_vpot_controls();
 }
 
