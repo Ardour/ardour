@@ -206,15 +206,23 @@ TriggerStrip::init ()
 }
 
 void
-TriggerStrip::box_rec_enable_change ()
+TriggerStrip::check_rec_enable_sensitivity ()
 {
-	if (!_route) {
+	RouteUI::check_rec_enable_sensitivity ();
+	if (!_route || !_route->triggerbox()) {
 		return;
 	}
 
-	if (!_route->triggerbox()) {
+	if (!_session->writable()) {
+		rec_toggle_button->set_sensitive (false);
 		return;
 	}
+
+	if (is_track () && track()->rec_enable_control()->get_value()) {
+		rec_toggle_button->set_sensitive (false);
+		return;
+	}
+	rec_toggle_button->set_sensitive (true);
 
 	if (_route->triggerbox()->record_enabled()) {
 		rec_toggle_button->set_active_state (Gtkmm2ext::ExplicitActive);
@@ -268,9 +276,6 @@ TriggerStrip::set_route (std::shared_ptr<Route> rt)
 	_route->input ()->changed.connect (*this, invalidator (*this), std::bind (&TriggerStrip::io_changed, this), gui_context ());
 	_route->output ()->changed.connect (*this, invalidator (*this), std::bind (&TriggerStrip::io_changed, this), gui_context ());
 	_route->io_changed.connect (route_connections, invalidator (*this), std::bind (&TriggerStrip::io_changed, this), gui_context ());
-
-	std::shared_ptr<TriggerBox> tb (_route->triggerbox());
-	tb->RecEnableChanged.connect (route_connections, invalidator (*this), std::bind (&TriggerStrip::box_rec_enable_change, this), gui_context());
 
 	if (_route->panner_shell ()) {
 		update_panner_choices ();

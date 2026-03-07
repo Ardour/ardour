@@ -79,6 +79,7 @@ protected:
 
 	/* route UI */
 	void set_button_names ();
+	void check_rec_enable_sensitivity ();
 #if 0
 	void route_rec_enable_changed ();
 	void blink_rec_display (bool onoff);
@@ -141,8 +142,6 @@ private:
 	std::shared_ptr<AutomationController> _gain_control;
 
 	Gtk::Menu* _route_ops_menu;
-
-	void box_rec_enable_change ();
 };
 
 #endif /* __ardour_trigger_strip__ */

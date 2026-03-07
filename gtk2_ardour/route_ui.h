@@ -247,11 +247,11 @@ protected:
 	virtual void create_sends (ARDOUR::Placement, bool);
 	virtual void create_selected_sends (ARDOUR::Placement, bool);
 	virtual void bus_send_display_changed (std::shared_ptr<ARDOUR::Route>);
+	virtual void check_rec_enable_sensitivity ();
 
 	bool mark_hidden (bool yn);
 	void setup_invert_buttons ();
 	void update_phase_invert_sensitivty ();
-	void check_rec_enable_sensitivity ();
 	void route_gui_changed (PBD::PropertyChange const&);
 
 	PatchChangeGridDialog* patch_change_dialog () const;

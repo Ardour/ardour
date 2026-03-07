@@ -449,6 +449,7 @@ RouteUI::set_route (std::shared_ptr<Route> rp)
 
 	if (_route->triggerbox ()) {
 		_route->triggerbox ()->EmptyStatusChanged.connect (route_connections, invalidator (*this), std::bind (&RouteUI::update_monitoring_display, this), gui_context());
+		_route->triggerbox ()->RecEnableChanged.connect (route_connections, invalidator (*this), std::bind (&RouteUI::check_rec_enable_sensitivity, this), gui_context());
 	}
 
 	mute_button->set_can_focus (false);
@@ -1478,6 +1479,7 @@ RouteUI::blink_rec_display (bool blinkOn)
 		}
 	}
 
+	// TODO only call when status changed? or not call it at all here?
 	check_rec_enable_sensitivity ();
 }
 
@@ -2024,12 +2026,14 @@ RouteUI::check_rec_enable_sensitivity ()
 
 	if (_session->transport_rolling() && rec_enable_button->active_state() && Config->get_disable_disarm_during_roll()) {
 		rec_enable_button->set_sensitive (false);
-	} else if (is_audio_track ()  && track()->freeze_state() == AudioTrack::Frozen) {
+	} else if (is_audio_track () && track()->freeze_state() == AudioTrack::Frozen) {
+		rec_enable_button->set_sensitive (false);
+	} else if (is_audio_track () && track()->triggerbox() && track()->triggerbox()->rec_enabled ()) {
 		rec_enable_button->set_sensitive (false);
 	} else {
 		rec_enable_button->set_sensitive (true);
 	}
-	if (_route && _route->rec_safe_control () && _route->rec_safe_control()->get_value()) {
+	if ((_route && _route->rec_safe_control () && _route->rec_safe_control()->get_value()) || !rec_enable_button->get_sensitive ()) {
 		rec_enable_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() | Gtkmm2ext::Insensitive));
 	} else {
 		rec_enable_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() & ~Gtkmm2ext::Insensitive));
