@@ -1,4 +1,3 @@
-#include <sys/time.h>
 #include "canvas/group.h"
 #include "canvas/canvas.h"
 #include "canvas/root_group.h"
@@ -40,21 +39,13 @@ int main ()
 	int tests[] = { 1, 2, 4, 8, 16, 32, 64, 128, 256 };
 
 	for (unsigned int i = 0; i < sizeof (tests) / sizeof (int); ++i) {
-		timeval start;
-		timeval stop;
+		int64_t start, stop;
 
-		gettimeofday (&start, 0);
+		start = g_get_monotonic_time ();
 		test (tests[i]);
-		gettimeofday (&stop, 0);
+		stop = g_get_monotonic_time ();
 
-		int sec = stop.tv_sec - start.tv_sec;
-		int usec = stop.tv_usec - start.tv_usec;
-		if (usec < 0) {
-			--sec;
-			usec += 1e6;
-		}
-
-		double seconds = sec + ((double) usec / 1e6);
+		double seconds = (start - stop) / 1e6;
 
 		cout << "Test " << tests[i] << ": " << seconds << "\n";
 	}

@@ -18,9 +18,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstdint>
 #include <iostream>
 #include <ydk/gdk.h>
 #include "canvas/debug.h"
+#include "glib.h"
 
 using namespace std;
 
@@ -33,8 +35,8 @@ PBD::DebugBits PBD::DEBUG::CanvasBox = PBD::new_debug_bit ("canvasbox");
 PBD::DebugBits PBD::DEBUG::CanvasSizeAllocate = PBD::new_debug_bit ("canvassizeallocate");
 PBD::DebugBits PBD::DEBUG::CanvasTable = PBD::new_debug_bit ("canvastable");
 
-struct timeval ArdourCanvas::epoch;
-map<string, struct timeval> ArdourCanvas::last_time;
+int64_t ArdourCanvas::epoch;
+map<string, int64_t> ArdourCanvas::last_time;
 int ArdourCanvas::render_count;
 int ArdourCanvas::render_depth;
 int ArdourCanvas::dump_depth;
@@ -42,23 +44,15 @@ int ArdourCanvas::dump_depth;
 void
 ArdourCanvas::set_epoch ()
 {
-	gettimeofday (&epoch, 0);
+	epoch = g_get_monotonic_time ();
 }
 
 void
 ArdourCanvas::checkpoint (string group, string message)
 {
-	struct timeval now;
-	gettimeofday (&now, 0);
+	int64_t now = g_get_monotonic_time () - epoch;
 
-	now.tv_sec -= epoch.tv_sec;
-	now.tv_usec -= epoch.tv_usec;
-	if (now.tv_usec < 0) {
-		now.tv_usec += 1e6;
-		--now.tv_sec;
-	}
-
-	map<string, struct timeval>::iterator last = last_time.find (group);
+	map<string, int64_t>::iterator last = last_time.find (group);
 
 	if (last != last_time.end ()) {
 #if 0

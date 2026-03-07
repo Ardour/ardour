@@ -1,4 +1,3 @@
-#include <sys/time.h>
 #include "pbd/compose.h"
 #include "canvas/types.h"
 #include "canvas/canvas.h"
@@ -40,24 +39,17 @@ Benchmark::set_iterations (int n)
 double
 Benchmark::run ()
 {
-	timeval start;
-	gettimeofday (&start, 0);
+	int64_t start, stop;
+
+	start = g_get_monotonic_time ();
 
 	for (int i = 0; i < _iterations; ++i) {
 		do_run (*_canvas);
 	}
 
-	timeval stop;
-	gettimeofday (&stop, 0);
+	stop = g_get_monotonic_time ();
 
 	finish (*_canvas);
 
-	int sec = stop.tv_sec - start.tv_sec;
-	int usec = stop.tv_usec - start.tv_usec;
-	if (usec < 0) {
-		--sec;
-		usec += 1e6;
-	}
-
-	return sec + ((double) usec / 1e6);
+	return (start - stop) / 1e6;
 }
