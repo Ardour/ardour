@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ardour\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-20 14:36-0600\n"
+"POT-Creation-Date: 2025-12-20 11:15+0100\n"
 "PO-Revision-Date: 2026-01-16 20:48+0100\n"
 "Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
 "Language-Team: Swedish <sv@li.org>\n"
@@ -19,15 +19,15 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 3.8\n"
 
-#: analyser.cc:127 audioregion.cc:1791
+#: analyser.cc:134 audioregion.cc:2232
 msgid "Transient Analysis failed for %1."
 msgstr "Övergångsanalys misslyckades för %1."
 
-#: analyser.cc:127
+#: analyser.cc:134
 msgid "Audio File Source"
 msgstr "Ljudfilskälla"
 
-#: analysis_graph.cc:136
+#: analysis_graph.cc:172
 msgid "%1 (%2..%3)"
 msgstr "%1 (%2..%3)"
 
@@ -101,7 +101,7 @@ msgstr "MIDI-enhetens in-/utmatningsfel"
 
 #: audio_backend.cc:63
 msgid "Sample format is not supported"
-msgstr "Exempelformat stöds inte"
+msgstr "Samplingsformat stöds inte"
 
 #: audio_backend.cc:65
 msgid "Sample rate is not supported"
@@ -175,8 +175,8 @@ msgstr "Minne fullt-fel"
 msgid "Could not reconnect to Audio/MIDI engine"
 msgstr "Kunde inte återansluta till ljud-/MIDI-motorn"
 
-#: audio_backend.cc:107 export_formats.cc:60 session.cc:6791
-#: transport_master.cc:489
+#: audio_backend.cc:107 export_formats.cc:60 session.cc:7582
+#: transport_master.cc:477
 msgid "None"
 msgstr "Ingen"
 
@@ -184,11 +184,11 @@ msgstr "Ingen"
 msgid "Default"
 msgstr "Standard"
 
-#: audio_library.cc:90
+#: audio_library.cc:95
 msgid "Could not open %1.  Audio Library not saved"
 msgstr "Kunde inte öppna %1.  Ljudbiblioteket har inte sparats"
 
-#: audio_playlist.cc:519
+#: audio_playlist.cc:566
 msgid ""
 "Legacy crossfade involved an incoming region not present in playlist \"%1\" "
 "- crossfade discarded"
@@ -196,7 +196,7 @@ msgstr ""
 "Äldre crossfade involverade en inkommande region som inte finns i spellistan "
 "\"%1\" – crossfade bortkastad"
 
-#: audio_playlist.cc:535
+#: audio_playlist.cc:582
 msgid ""
 "Legacy crossfade involved an outgoing region not present in playlist \"%1\" "
 "- crossfade discarded"
@@ -204,384 +204,308 @@ msgstr ""
 "Äldre övertoning involverade ett utgående område som inte finns i spellistan "
 "\"%1\" – övertoning bortkastad"
 
-#: audio_playlist_importer.cc:70
-msgid "Audio Playlists"
-msgstr "Ljudspellistor"
-
-#: audio_playlist_importer.cc:163
-msgid "region"
-msgstr "region"
-
-#: audio_playlist_importer.cc:165
-msgid "regions"
-msgstr "regioner"
-
-#: audio_playlist_importer.cc:176 audio_track_importer.cc:246
-msgid "A playlist with this name already exists, please rename it."
-msgstr "En spellista med detta namn finns redan, vänligen byt namn på den."
-
-#: audio_playlist_importer.cc:185
-msgid "badly-formed XML in imported playlist"
-msgstr "felaktigt formaterad XML i importerad spellista"
-
-#: audio_playlist_importer.cc:269
-msgid "Audio Playlists (unused)"
-msgstr "Ljudspellistor (oanvända)"
-
-#: audio_playlist_source.cc:169 audiosource.cc:1054 midi_playlist_source.cc:163
-#: midi_playlist_source.cc:171 midi_playlist_source.cc:178 midi_source.cc:410
-#: midi_source.cc:437 plugin_insert.cc:1447 rb_effect.cc:333 session.cc:5202
-#: session.cc:5207 session.cc:5236 session.cc:5241 session.cc:5336
-#: session_handle.cc:87 sndfilesource.cc:172
+#: audio_playlist_source.cc:156 audiosource.cc:1174 midi_source.cc:408
+#: midi_source.cc:435 plug_insert_base.cc:282 rb_effect.cc:329 session.cc:4943
+#: session.cc:5745 session.cc:5750 session.cc:5781 session.cc:5786
+#: session.cc:5885 session_handle.cc:139 sndfilesource.cc:179 sp_stretch.cc:304
+#: triggerbox.cc:1274
 msgid "programming error: %1"
 msgstr "programmeringsfel: %1"
 
-#: audio_region_importer.cc:77
-msgid "Audio Regions"
-msgstr "Ljudregioner"
-
-#: audio_region_importer.cc:147
-msgid "Length: "
-msgstr "Längd: "
-
-#: audio_region_importer.cc:149
-msgid ""
-"\n"
-"Position: "
-msgstr ""
-"\n"
-"Position: "
-
-#: audio_region_importer.cc:151
-msgid ""
-"\n"
-"Channels: "
-msgstr ""
-"\n"
-"Kanaler: "
-
-#: audio_track_importer.cc:70
-msgid "Audio Tracks"
-msgstr "Ljudspår"
-
-#: audio_track_importer.cc:255 audio_track_importer.cc:261
-msgid "badly-formed XML in imported track"
-msgstr "felaktigt formaterad XML i importerad spår"
-
-#: audio_track_importer.cc:291
-msgid "Error Importing Audio track %1"
-msgstr "Fel vid import av ljudspår %1"
-
 #: audioanalyser.cc:52
 msgid "cannot load VAMP plugin \"%1\""
-msgstr "kan inte ladda VAMP-plugin \"%1\""
+msgstr "kan inte ladda VAMP-insticksmodul \"%1\""
 
-#: audioanalyser.cc:72 lua_api.cc:768
+#: audioanalyser.cc:72 lua_api.cc:1044
 msgid "VAMP Plugin \"%1\" could not be loaded"
-msgstr "VAMP-plugin \"%1\" kunde inte laddas"
+msgstr "VAMP-insticksmodul \"%1\" kunde inte laddas"
 
-#: audioengine.cc:852
+#: audioengine.cc:929
 msgid "AudioEngine: cannot load module \"%1\" (%2)"
 msgstr "AudioEngine: kan inte ladda modulen \"%1\" (%2)"
 
-#: audioengine.cc:858
+#: audioengine.cc:935
 msgid "AudioEngine: backend at \"%1\" has no descriptor function."
 msgstr "AudioEngine: backend vid \"%1\" har ingen deskriptorfunktion."
 
-#: audioengine.cc:951
+#: audioengine.cc:1035
 msgid "Could not create backend for %1: %2"
 msgstr "Kunde inte skapa backend för %1: %2"
 
-#: audioengine.cc:1629
+#: audioengine.cc:1732
 msgid ""
 "programming error: port %1 could not be placed on the pending deletion "
 "queue\n"
 msgstr ""
 "programmeringsfel: port %1 kunde inte placeras i kön för väntande radering\n"
 
-#: audioregion.cc:1759
-msgid ""
-"You have requested an operation that requires audio analysis.\n"
-"\n"
-"You currently have \"auto-analyse-audio\" disabled, which means that "
-"transient data must be generated every time it is required.\n"
-"\n"
-"If you are doing work that will require transient data on a regular basis, "
-"you should probably enable \"auto-analyse-audio\" in Preferences > Audio > "
-"Regions, then quit %1 and restart.\n"
-"\n"
-"This dialog will not display again.  But you may notice a slight delay in "
-"this and future transient-detection operations.\n"
-msgstr ""
-"Du har begärt en åtgärd som kräver ljudanalys.\n"
-"\n"
-"Du har för närvarande inaktiverat \"auto-analyse-audio\", vilket innebär att "
-"transientdata måste genereras varje gång det krävs.\n"
-"\n"
-"Om du utför arbete som kräver transientdata regelbundet bör du aktivera "
-"\"auto-analyse-audio\" i Inställningar > Ljud > Regioner, sedan avsluta %1 "
-"och starta om.\n"
-"\n"
-"\n"
-"Denna dialogruta kommer inte att visas igen.  Men du kan märka en liten "
-"fördröjning i denna och framtida transientdetekteringsoperationer.\n"
-
-#: audioregion.cc:1791
+#: audioregion.cc:2232
 msgid "Audio Region"
 msgstr "Ljudregion"
 
-#: audiosource.cc:231
+#: audiosource.cc:267
 msgid "cannot rename peakfile for %1 from %2 to %3 (%4)"
-msgstr "kan inte byta namn på peakfile för %1 from %2 till %3 (%4)"
+msgstr "kan inte byta namn på toppfil för %1 från %2 till %3 (%4)"
 
-#: audiosource.cc:265
+#: audiosource.cc:301
 msgid "AudioSource: cannot stat peakfile \"%1\""
-msgstr "AudioSource: kan inte starta peakfile \"%1\""
+msgstr "AudioSource: kan inte starta toppfil \"%1\""
 
-#: audiosource.cc:371
+#: audiosource.cc:456
 msgid "Cannot open peakfile @ %1 for size check (%2)"
-msgstr "Kan inte öppna peakfile @ %1 f eller storlekskontroll (%2)"
+msgstr "Kan inte öppna toppfil @ %1 för storlekskontroll (%2)"
 
-#: audiosource.cc:392
+#: audiosource.cc:473
 msgid "peak file %1 is truncated from %2 to %3"
 msgstr "toppfilen %1 är avkortad från %2 till %3"
 
-#: audiosource.cc:397
+#: audiosource.cc:478
 msgid "Cannot open peakfile @ %1 for size check (%2) after rebuild"
-msgstr ""
-"Kan inte öppna peakfile @ %1 f eller storlekskontroll (%2) efter ombyggnad"
+msgstr "Kan inte öppna toppfil @ %1 för storlekskontroll (%2) efter ombyggnad"
 
-#: audiosource.cc:409
+#: audiosource.cc:490
 msgid "Cannot open peakfile @ %1 for reading (%2)"
-msgstr "Kan inte öppna peakfile @ %1 f eller läsa (%2)"
+msgstr "Kan inte öppna toppfil @ %1 för läsning (%2)"
 
-#: audiosource.cc:445
+#: audiosource.cc:526
 msgid "cannot read sample data for unscaled peak computation"
 msgstr "kan inte läsa provdata för beräkning av icke-skalad topp"
 
-#: audiosource.cc:480 audiosource.cc:575
+#: audiosource.cc:561 audiosource.cc:673
 msgid "map failed - could not create file mapping for peakfile %1."
-msgstr "kartan misslyckades – kunde inte skapa filmappning för peakfile %1."
+msgstr "kartan misslyckades – kunde inte skapa filkartläggning för toppfil %1."
 
-#: audiosource.cc:486 audiosource.cc:581
+#: audiosource.cc:567 audiosource.cc:679
 msgid "map failed - could not map peakfile %1."
-msgstr "kartläggningen misslyckades – kunde inte kartlägga peakfile %1."
+msgstr "kartläggningen misslyckades – kunde inte kartlägga toppfil %1."
 
-#: audiosource.cc:497 audiosource.cc:592
+#: audiosource.cc:578 audiosource.cc:690
 msgid "unmap failed - could not unmap peakfile %1."
-msgstr "avmarkering misslyckades – kunde inte avmarkera peakfile %1."
+msgstr "avkartläggning misslyckades – kunde inte avkartlägga toppfil %1."
 
-#: audiosource.cc:503 audiosource.cc:598
+#: audiosource.cc:584 audiosource.cc:696
 msgid "map failed - could not mmap peakfile %1."
-msgstr "kartan misslyckades – kunde inte mmap peakfile %1."
+msgstr "kartläggningen misslyckades – kunde inte mmap toppfil %1."
 
-#: audiosource.cc:687
+#: audiosource.cc:805
 msgid ""
 "AudioSource[%1]: peak read - cannot read %2 samples at offset %3 of %4 (%5)"
 msgstr ""
 "AudioSource[%1]: peak read - kan inte läsa %2 ssamplingar vid offset %3 of "
 "%4 (%5)"
 
-#: audiosource.cc:754
+#: audiosource.cc:872
 msgid "%1: could not write read raw data for peak computation (%2)"
 msgstr "%1: kunde inte skriva läsrawa data för toppberäkning (%2)"
 
-#: audiosource.cc:821
+#: audiosource.cc:939
 msgid "AudioSource: cannot open _peakpath (c) \"%1\" (%2)"
 msgstr "Ljudkälla: kan inte öppna _peakpath (c) \"%1\" (%2)"
 
-#: audiosource.cc:900 audiosource.cc:1024
+#: audiosource.cc:1020 audiosource.cc:1144
 msgid "%1: could not seek in peak file data (%2)"
 msgstr "%1: kunde inte söka i toppfildata (%2)"
 
-#: audiosource.cc:905 audiosource.cc:1033
+#: audiosource.cc:1025 audiosource.cc:1153
 msgid "%1: could not write peak file data (%2)"
 msgstr "%1: kunde inte skriva toppfildata (%2)"
 
-#: audiosource.cc:1066
+#: audiosource.cc:1186
 msgid "could not truncate peakfile %1 to %2 (error: %3)"
-msgstr "kunde inte avkorta peakfile %1 till %2 (fel: %3)"
+msgstr "kunde inte avkorta toppfil %1 till %2 (fel: %3)"
 
-#: auditioner.cc:120
+#: auditioner.cc:121
 msgid "Falling back to Reasonable Synth for Midi Audition"
 msgstr "Återgå till Reasonable Synth för Midi Audition"
 
-#: auditioner.cc:125
+#: auditioner.cc:126
 msgid "No synth for midi-audition found."
 msgstr "Ingen synt för midi-audition hittades."
 
-#: auditioner.cc:189
-msgid "no outputs available for auditioner - manual connection required"
-msgstr "inga utgångar tillgängliga för lyssnaren – manuell anslutning krävs"
-
-#: auditioner.cc:322 auditioner.cc:359
-msgid "Cannot setup auditioner processing flow for %1 channels"
-msgstr "Kan inte konfigurera auditioner-bearbetningsflödet för %1 c kanaler"
-
-#: auditioner.cc:351
+#: auditioner.cc:163
 msgid "Failed to load synth for MIDI-Audition."
 msgstr "Det gick inte att ladda synt för MIDI-Audition."
 
-#: auditioner.cc:367
+#: auditioner.cc:223
+msgid "no outputs available for auditioner - manual connection required"
+msgstr "inga utgångar tillgängliga för lyssnaren – manuell anslutning krävs"
+
+#: auditioner.cc:403
+msgid "Cannot setup auditioner processing flow for %1 channels"
+msgstr "Kan inte konfigurera auditioner-bearbetningsflödet för %1 c kanaler"
+
+#: auditioner.cc:438
 msgid "Auditioning of regions other than Audio or Midi is not supported."
 msgstr "Auditionering av andra regioner än Audio eller Midi stöds inte."
 
-#: auditioner.cc:389
+#: auditioner.cc:460
 msgid "Cannot audition empty file."
 msgstr "Det går inte att spela upp tomma filer."
 
-#: automatable.cc:103
+#: automatable.cc:110
 msgid "Automation node has no path property"
 msgstr "Automatiseringsnoden har ingen sökvägsegenskap"
 
-#: automatable.cc:124
+#: automatable.cc:131
 msgid "cannot open %2 to load automation data (%3)"
 msgstr "kan inte öppna %2 för att ladda automatiseringsdata (%3)"
 
-#: automatable.cc:156
+#: automatable.cc:159
 msgid "cannot load automation data from %2"
 msgstr "kan inte ladda automatiseringsdata från %2"
 
-#: automatable.cc:194 send.cc:103 session.cc:822
+#: automatable.cc:196 delivery.cc:213 session.cc:976
 msgid "Fader"
 msgstr "Volymreglage"
 
-#: automatable.cc:196
+#: automatable.cc:198 automatable.cc:200
 msgid "Send"
 msgstr "Skicka"
 
-#: automatable.cc:198
+#: automatable.cc:204
 msgid "Trim"
 msgstr "Trim"
 
-#: automatable.cc:200
+#: automatable.cc:208
 msgid "Mute"
 msgstr "Tyst"
 
-#: automatable.cc:202
+#: automatable.cc:210
 msgid "Azimuth"
 msgstr "Azimut"
 
-#: automatable.cc:204
+#: automatable.cc:212
 msgid "Width"
 msgstr "Bredd"
 
-#: automatable.cc:206
+#: automatable.cc:214 automatable.cc:220 surround_send.cc:397
 msgid "Elevation"
 msgstr "Höjd"
 
-#: automation_control.cc:326
+#: automatable.cc:216 surround_send.cc:393
+msgid "Left/Right"
+msgstr "Vänster/höger"
+
+#: automatable.cc:218 surround_send.cc:395
+msgid "Front/Back"
+msgstr "Fram/bak"
+
+#: automatable.cc:222 surround_send.cc:399
+msgid "Object Size"
+msgstr "Objektets storlek"
+
+#: automatable.cc:224 surround_send.cc:401
+msgid "Snap to Speaker"
+msgstr "Snäpp till högtalare"
+
+#: automatable.cc:226 surround_send.cc:403
+msgid "Binaural Render mode"
+msgstr "Binauralt renderingsläge"
+
+#: automatable.cc:236 velocity_control.cc:36
+msgid "Velocity"
+msgstr "Hastighet"
+
+#: automation_control.cc:338
 msgid "record %1 automation"
 msgstr "registrera %1 automatisering"
 
-#: automation_list.cc:452
+#: automation_list.cc:434
 msgid "automation list: cannot load coordinates from XML, all points ignored"
 msgstr ""
 "automatiseringslista: kan inte ladda koordinater från XML, alla punkter "
 "ignoreras"
 
-#: automation_list.cc:494
+#: automation_list.cc:481
 msgid ""
 "automation list: no x-coordinate stored for control point (point ignored)"
 msgstr ""
 "automatiseringslista: ingen x-koordinat lagrad för kontrollpunkt (punkt "
 "ignorerad)"
 
-#: automation_list.cc:500
+#: automation_list.cc:487
 msgid ""
 "automation list: no y-coordinate stored for control point (point ignored)"
 msgstr ""
 "automatiseringslista: ingen y-koordinat lagrad för kontrollpunkt (punkt "
 "ignorerad)"
 
-#: automation_list.cc:514
+#: automation_list.cc:501
 msgid ""
 "AutomationList: passed XML node called %1, not \"AutomationList\" - ignored"
 msgstr ""
 "AutomationList: passerade XML-nod med namnet %1, inte \"AutomationList\" – "
 "ignorerades"
 
-#: butler.cc:123
+#: butler.cc:144
 msgid "Session: could not create butler thread"
 msgstr "Session: kunde inte skapa butler-tråd"
 
-#: butler.cc:264 butler.cc:265
+#: butler.cc:196
+msgid "Cannot set I/O Priority for disk read/write thread"
+msgstr "Det går inte att ange I/O-prioritet för diskläsnings-/skrivtråd"
+
+#: butler.cc:307 butler.cc:309
 msgid "Butler read ahead failure on dstream %1"
 msgstr "Butler läste vidare fel på dstream %1"
 
-#: butler.cc:354 butler.cc:355 butler.cc:403 butler.cc:404
+#: butler.cc:402 butler.cc:404
 msgid "Butler write-behind failure on dstream %1"
 msgstr "Butler-skrivfel på dstream %1"
 
-#: control_protocol_manager.cc:133
-msgid "Control protocol %1 was already active."
-msgstr "Kontrollprotokoll %1 var redan aktivt."
+#: clip_library.cc:83
+msgid "Set Clip Library directory to '%1'"
+msgstr "Ställ in Clip Library-katalogen till \"%1"
 
-#: control_protocol_manager.cc:161
+#: clip_library.cc:98
+msgid "Clip Library"
+msgstr "Clip-bibliotek"
+
+#: control_protocol_manager.cc:232
 msgid "Control protocol support for %1 failed to activate"
 msgstr "Stöd för kontrollprotokoll för %1 f kunde inte aktiveras"
 
-#: control_protocol_manager.cc:224
+#: control_protocol_manager.cc:297
 msgid "control protocol name \"%1\" has no descriptor"
 msgstr "kontrollprotokollnamn \"%1\" har ingen beskrivning"
 
-#: control_protocol_manager.cc:231
+#: control_protocol_manager.cc:304
 msgid "control protocol name \"%1\" could not be initialized"
 msgstr "kontrollprotokollnamnet \"%1\" kunde inte initialiseras"
 
-#: control_protocol_manager.cc:321
-msgid "Instantiating mandatory control protocol %1"
-msgstr "Instansiering av obligatoriskt kontrollprotokoll %1"
-
-#: control_protocol_manager.cc:365
+#: control_protocol_manager.cc:421
 msgid "looking for control protocols in %1\n"
 msgstr "söker efter kontrollprotokoll i %1\n"
 
-#: control_protocol_manager.cc:389
+#: control_protocol_manager.cc:448
 msgid "Control protocol %1 not usable"
 msgstr "Kontrollprotokoll %1 kan inte användas"
 
-#: control_protocol_manager.cc:406
+#: control_protocol_manager.cc:465
 msgid "Control surface protocol discovered: \"%1\"\n"
 msgstr "Kontrollyta-protokoll upptäckt: \"%1\"\n"
 
-#: control_protocol_manager.cc:422
+#: control_protocol_manager.cc:481
 msgid "ControlProtocolManager: cannot load module \"%1\" (%2)"
 msgstr "ControlProtocolManager: kan inte ladda modulen \"%1\" (%2)"
 
-#: control_protocol_manager.cc:428
+#: control_protocol_manager.cc:487
 msgid "ControlProtocolManager: module \"%1\" has no descriptor function."
 msgstr "ControlProtocolManager: modulen \"%1\" har ingen deskriptorfunktion."
 
-#: control_protocol_manager.cc:578
-msgid "Control protocol \"%1\" has no descriptor"
-msgstr "Kontrollprotokollet \"%1\" har ingen beskrivning"
-
-#: convolver.cc:232
+#: convolver.cc:252
 msgid "Convolver: IR \"%1\" no usable audio-channels sound."
 msgstr "Convolver: IR \"%1\" inga användbara ljudkanaler."
 
-#: convolver.cc:237
+#: convolver.cc:257
 msgid "Convolver: IR \"%1\" file too long."
 msgstr "Convolver: IR-filen \"%1\" är för lång."
-
-#: cycle_timer.cc:41
-msgid "CycleTimer::get_mhz(): can't open /proc/cpuinfo"
-msgstr "CycleTimer::get_mhz(): kan inte öppna /proc/cpuinfo"
-
-#: cycle_timer.cc:53
-msgid "CycleTimer::get_mhz(): cannot locate cpu MHz in /proc/cpuinfo"
-msgstr "CycleTimer::get_mhz(): kan inte hitta CPU MHz i /proc/cpuinfo"
-
-#: cycle_timer.cc:76
-msgid "cannot locate cpu MHz in /proc/cpuinfo"
-msgstr "kan inte hitta CPU MHz i /proc/cpuinfo"
 
 #: data_type.cc:27
 msgid "audio"
 msgstr "ljud"
 
-#: data_type.cc:28 session.cc:2388
+#: data_type.cc:28 session.cc:2734 session.cc:2762
 msgid "MIDI"
 msgstr "MIDI"
 
@@ -589,63 +513,61 @@ msgstr "MIDI"
 msgid "unknown"
 msgstr "okänd"
 
-#: delivery.cc:126
+#: delivery.cc:145
 msgid "main outs"
 msgstr "huvudsakliga utgifter"
 
-#: delivery.cc:129 send.cc:78
+#: delivery.cc:148 send.cc:80
 msgid "listen"
 msgstr "lyssna"
 
-#: disk_reader.cc:729
+#: disk_reader.cc:82
+msgid "Player"
+msgstr "Spelare"
+
+#: disk_reader.cc:741
 msgid ""
 "DiskReader %1: when overwriting(1), cannot read %2 from playlist at sample %3"
 msgstr ""
 "DiskReader %1: vid överskrivning (1) kan inte läsa %2 from spellista vid "
 "prov %3"
 
-#: disk_reader.cc:738
+#: disk_reader.cc:763
 msgid ""
 "DiskReader %1: when overwriting(2), cannot read %2 from playlist at sample %3"
 msgstr ""
 "DiskReader %1: vid överskrivning (2) kan inte läsa %2 from spellista vid "
 "prov %3"
 
-#: disk_reader.cc:1043
+#: disk_reader.cc:1073
 msgid "DiskReader %1: cannot read %2 from playlist at sample %3"
 msgstr "DiskReader %1: kan inte läsa %2 from spellista vid prov %3"
 
-#: disk_reader.cc:1301
-msgid ""
-"DiskReader %1: when refilling, cannot read %2 from playlist at sample %3"
-msgstr ""
-"DiskReader %1: vid påfyllning kan inte läsa %2 from spellista vid prov %3"
+#: disk_writer.cc:95
+msgid "Recorder"
+msgstr "Inspelare"
 
-#: disk_reader.cc:1307
-msgid "DiskReader %1: when refilling, cannot write %2 into buffer"
-msgstr "DiskReader %1: vid påfyllning kan %2 inte skrivas till buffert"
-
-#: disk_writer.cc:869 disk_writer.cc:888
+#: disk_writer.cc:1016 disk_writer.cc:1035
 msgid "AudioDiskstream %1: cannot write to disk"
 msgstr "AudioDiskstream %1: kan inte skriva till disken"
 
-#: disk_writer.cc:934
+#: disk_writer.cc:1088
 msgid "MidiDiskstream %1: cannot write to disk"
 msgstr "MidiDiskstream %1: kan inte skriva till disken"
 
-#: disk_writer.cc:1014 disk_writer.cc:1040
+#: disk_writer.cc:1168 disk_writer.cc:1190
 msgid "%1:%2 new capture file not initialized correctly"
 msgstr "%1:%2 ny inspelningsfil initialiserad felaktigt"
 
-#: disk_writer.cc:1026
+#: disk_writer.cc:1176
 msgid "AudioDiskstream: channel %1 out of range"
 msgstr "AudioDiskstream: kanal %1 o utanför intervallet"
 
-#: disk_writer.cc:1080
+#: disk_writer.cc:1233
 msgid "AudioDiskstream \"%1\": cannot flush captured data to disk!"
 msgstr "AudioDiskstream \"%1\": kan inte spara inspelade data på disken!"
 
-#: export_channel.cc:158
+#: export_channel.cc:179 export_channel.cc:265
 msgid "Could not get port for export channel \"%1\", dropping the channel"
 msgstr "Kunde inte få port för exportkanal \"%1\", tappar kanalen"
 
@@ -653,23 +575,19 @@ msgstr "Kunde inte få port för exportkanal \"%1\", tappar kanalen"
 msgid "Export failed: %1"
 msgstr "Export misslyckades: %1"
 
-#: export_filename.cc:131
-msgid "Existing export folder for this session (%1) does not exist - ignored"
-msgstr "Befintlig exportmapp för denna session (%1) finns inte – ignoreras"
-
-#: export_filename.cc:274
+#: export_filename.cc:293
 msgid "No Time"
 msgstr "Ingen tid"
 
-#: export_filename.cc:283
+#: export_filename.cc:302
 msgid "Invalid time format"
 msgstr "Ogiltigt tidsformat"
 
-#: export_filename.cc:292
+#: export_filename.cc:311
 msgid "No Date"
 msgstr "Inget datum"
 
-#: export_filename.cc:307
+#: export_filename.cc:326
 msgid "Invalid date format"
 msgstr "Ogiltigt datumformat"
 
@@ -705,27 +623,31 @@ msgstr "Förlustkomprimering"
 msgid "Lossless compression"
 msgstr "Förlustfri komprimering"
 
-#: export_format_manager.cc:227 export_format_specification.cc:646
+#: export_format_manager.cc:237 export_format_specification.cc:734
 msgid "Session rate"
 msgstr "Sessionspris"
 
-#: export_format_specification.cc:598
+#: export_format_specification.cc:680
 msgid "normalize loudness"
 msgstr "normalisera ljudstyrkan"
 
-#: export_format_specification.cc:600
+#: export_format_specification.cc:682
+msgid "limit peak"
+msgstr "gränsvärde topp"
+
+#: export_format_specification.cc:685
 msgid "normalize peak"
 msgstr "normalisera topp"
 
-#: export_format_specification.cc:605
+#: export_format_specification.cc:690
 msgid "trim"
 msgstr "trim"
 
-#: export_format_specification.cc:607
+#: export_format_specification.cc:692
 msgid "trim start"
 msgstr "trim start"
 
-#: export_format_specification.cc:609
+#: export_format_specification.cc:694
 msgid "trim end"
 msgstr "trimma änden"
 
@@ -774,136 +696,148 @@ msgid "Vorbis sample format"
 msgstr "Vorbis-provformat"
 
 #: export_formats.cc:183
+msgid "OPUS codec"
+msgstr "OPUS-codec"
+
+#: export_formats.cc:185
+msgid "MPEG-2 Audio Layer III"
+msgstr "MPEG-2 Audio Layer III"
+
+#: export_formats.cc:187
 msgid "No sample format"
 msgstr "Inget provformat"
 
-#: export_handler.cc:483
+#: export_handler.cc:568
 msgid "File %1 uploaded to %2"
 msgstr "Fil %1 uuppladdad till %2"
 
-#: export_handler.cc:489
+#: export_handler.cc:574
 msgid ""
 "upload to Soundcloud failed. Perhaps your email or password are incorrect?\n"
 msgstr ""
 "uppladdningen till Soundcloud misslyckades. Kanske är din e-postadress eller "
 "ditt lösenord felaktigt?\n"
 
-#: export_handler.cc:627 export_handler.cc:630
+#: export_handler.cc:710 export_handler.cc:713 export_handler.cc:716
 msgid "an error occurred while writing a TOC/CUE file: %1"
 msgstr "ett fel uppstod vid skrivning av en TOC/CUE-fil: %1"
 
-#: export_handler.cc:920 export_handler.cc:978
+#: export_handler.cc:1006 export_handler.cc:1064
 msgid "Cannot convert %1 to Latin-1 text"
 msgstr "Kan inte konvertera %1 till Latin-1-text"
 
-#: export_profile_manager.cc:102
+#: export_profile_manager.cc:100
 msgid "Searching for export formats in %1"
 msgstr "Söker efter exportformat i %1"
 
-#: export_profile_manager.cc:108
+#: export_profile_manager.cc:106
 msgid "Unable to create export format directory %1: %2"
 msgstr "Det går inte att skapa exportformatkatalogen %1: %2"
 
-#: export_profile_manager.cc:276
+#: export_profile_manager.cc:278
 msgid "Unable to remove export preset %1: %2"
 msgstr "Det går inte att ta bort exportinställningen %1: %2"
 
-#: export_profile_manager.cc:365
+#: export_profile_manager.cc:366
 msgid "Selection"
 msgstr "Urval"
 
-#: export_profile_manager.cc:623
+#: export_profile_manager.cc:644
 msgid "Unable to rename export format %1 to %2: %3"
 msgstr "Det går inte att byta namn på exportformatet %1 till %2: %3"
 
-#: export_profile_manager.cc:654
+#: export_profile_manager.cc:674
 msgid "Unable to remove export profile %1: %2"
 msgstr "Det går inte att ta bort exportprofilen %1: %2"
 
-#: export_profile_manager.cc:689
+#: export_profile_manager.cc:709
 msgid "empty format"
 msgstr "tomt format"
 
-#: export_profile_manager.cc:770
+#: export_profile_manager.cc:792
 msgid "Cannot load export format from %1"
 msgstr "Kan inte ladda exportformat från %1"
 
-#: export_profile_manager.cc:776
+#: export_profile_manager.cc:798
 msgid "Cannot export format read from %1"
 msgstr "Kan inte exportera format som lästs från %1"
 
-#: export_profile_manager.cc:785
+#: export_profile_manager.cc:813
 msgid "Ignored format '%1': encoder is not available"
 msgstr "Ignorerat format '%1': kodaren är inte tillgänglig"
 
-#: export_profile_manager.cc:877
+#: export_profile_manager.cc:897
 msgid "No timespan has been selected!"
 msgstr "Ingen tidsperiod har valts!"
 
-#: export_profile_manager.cc:881
+#: export_profile_manager.cc:901
 msgid "No channels have been selected!"
 msgstr "Inga kanaler har valts!"
 
-#: export_profile_manager.cc:885
+#: export_profile_manager.cc:906
+msgid "Invalid export channel config!"
+msgstr "Ogiltig konfiguration av exportkanal!"
+
+#: export_profile_manager.cc:911
 msgid "Some channels are empty"
 msgstr "Vissa kanaler är tomma"
 
-#: export_profile_manager.cc:909
+#: export_profile_manager.cc:981
 msgid "Destination folder does not exist."
 msgstr "Målet finns inte."
 
-#: export_profile_manager.cc:928
+#: export_profile_manager.cc:999
 msgid "No format selected!"
 msgstr "Inget format valt!"
 
-#: export_profile_manager.cc:930
+#: export_profile_manager.cc:1001
 msgid "All channels are empty!"
 msgstr "Alla kanaler är tomma!"
 
-#: export_profile_manager.cc:932
+#: export_profile_manager.cc:1003
 msgid "One or more of the selected formats is not compatible with this system!"
 msgstr ""
 "Ett eller flera av de valda formaten är inte kompatibla med detta system!"
 
-#: export_profile_manager.cc:935
+#: export_profile_manager.cc:1005
 msgid ""
 "%1 supports only %2 channels, but you have %3 channels in your channel "
 "configuration"
 msgstr ""
 "%1 sstöder endast %2 ckanaler, men du har %3 ckanaler i din kanalinställning"
 
-#: file_source.cc:200 session_state.cc:3639
+#: file_source.cc:198 session_state.cc:4183
 msgid ""
 "there are already 1000 files with names like %1; versioning discontinued"
 msgstr "det finns redan 1000 filer med namn som %1; versionshantering avbruten"
 
-#: file_source.cc:209
+#: file_source.cc:207
 msgid "cannot rename file source from %1 to %2 (%3)"
 msgstr "det går inte att byta namn på filkällan från %1 till %2 (%3)"
 
-#: file_source.cc:250 file_source.cc:373
+#: file_source.cc:248 file_source.cc:371
 msgid "FileSource: search path not set"
 msgstr "FileSource: sökväg inte inställd"
 
-#: file_source.cc:433
+#: file_source.cc:431
 msgid ""
 "FileSource: \"%1\" is ambiguous when searching\n"
 "\t"
 msgstr "FileSource: \"%1\" är tvetydigt vid sökning "
 
-#: file_source.cc:440
+#: file_source.cc:438
 msgid "Filesource: cannot find required file (%1)"
 msgstr "Filkälla: kan inte hitta önskad fil (%1)"
 
-#: file_source.cc:485
+#: file_source.cc:483
 msgid "Filesource: cannot find required file (%1): %2"
 msgstr "Filkälla: kan inte hitta önskad fil (%1): %2"
 
-#: file_source.cc:493
+#: file_source.cc:491
 msgid "Filesource: cannot check for existing file (%1): %2"
 msgstr "Filkälla: kan inte kontrollera om filen (%1) finns: %2"
 
-#: file_source.cc:592
+#: file_source.cc:584
 msgid ""
 "Programming error! %1 tried to rename a file over another file! It's safe to "
 "continue working, but please report this to the developers."
@@ -911,15 +845,15 @@ msgstr ""
 "Programmeringsfel! %1 försökte byta namn på en fil över en annan fil! Det är "
 "säkert att fortsätta arbeta, men rapportera detta till utvecklarna."
 
-#: file_source.cc:599
+#: file_source.cc:591
 msgid "cannot rename file %1 to %2 (%3)"
 msgstr "kan inte byta namn på filen %1 till %2 (%3)"
 
-#: filesystem_paths.cc:116
+#: filesystem_paths.cc:117
 msgid "Cannot create Configuration directory %1 - cannot run"
 msgstr "Kan inte skapa konfigurationskatalogen %1 – kan inte köras"
 
-#: filesystem_paths.cc:121
+#: filesystem_paths.cc:122
 msgid ""
 "Configuration directory %1 already exists and is not a directory/folder - "
 "cannot run"
@@ -927,375 +861,401 @@ msgstr ""
 "Konfigurationskatalogen %1 finns redan och är inte en katalog/mapp – kan "
 "inte köras"
 
-#: filesystem_paths.cc:184
+#: filesystem_paths.cc:181
 msgid "Cannot create cache directory %1 - cannot run"
 msgstr "Kan inte skapa cache-katalogen %1 - kan inte köras"
 
-#: filesystem_paths.cc:189
+#: filesystem_paths.cc:186
 msgid ""
 "Cache directory %1 already exists and is not a directory/folder - cannot run"
 msgstr ""
 "Cache-katalogen %1 finns redan och är inte en katalog/mapp – kan inte köras"
 
-#: filesystem_paths.cc:207
+#: filesystem_paths.cc:204
 msgid "ARDOUR_DLL_PATH not set in environment - exiting\n"
 msgstr "ARDOUR_DLL_PATH är inte inställt i miljön – avslutar\n"
 
-#: filesystem_paths.cc:230
+#: filesystem_paths.cc:227
 msgid "Cannot determine %1 package directory"
 msgstr "Kan inte bestämma %1 paketkatalog"
 
-#: filesystem_paths.cc:275
+#: filesystem_paths.cc:272
 msgid "ARDOUR_CONFIG_PATH not set in environment\n"
 msgstr "ARDOUR_CONFIG_PATH är inte inställt i miljön\n"
 
-#: filesystem_paths.cc:296
+#: filesystem_paths.cc:293
 msgid "ARDOUR_DATA_PATH not set in environment\n"
 msgstr "ARDOUR_DATA_PATH är inte inställt i miljön\n"
 
-#: filter.cc:68
+#: filter.cc:69
 msgid "filter: error creating name for new file based on %1"
 msgstr "filter: fel vid skapande av namn för ny fil baserat på %1"
 
-#: filter.cc:93
+#: filter.cc:90
 msgid "filter: error creating new file %1 (%2)"
 msgstr "filter: fel vid skapande av ny fil %1 (%2)"
 
-#: find_session.cc:65
+#: find_session.cc:63
 msgid "cannot check session path %1 (%2)"
 msgstr "kan inte kontrollera sessionsvägen %1 (%2)"
 
-#: find_session.cc:91
+#: find_session.cc:89
 msgid "cannot check statefile %1 (%2)"
 msgstr "kan inte kontrollera statusfilen %1 (%2)"
 
-#: find_session.cc:130
+#: find_session.cc:128
 msgid "%1 is not a snapshot file"
 msgstr "%1 är inte en ögonblicksbildfil"
 
-#: find_session.cc:147
+#: find_session.cc:145
 msgid "cannot determine current working directory (%1)"
 msgstr "kan inte bestämma aktuell arbetskatalog (%1)"
 
-#: find_session.cc:164
+#: find_session.cc:162
 msgid "unknown file type for session %1"
 msgstr "okänd filtyp för session %1"
 
-#: find_session.cc:210 find_session.cc:269
+#: find_session.cc:208 find_session.cc:266
 msgid "Archive is empty"
 msgstr "Arkivet är tomt"
 
-#: find_session.cc:217 find_session.cc:271
+#: find_session.cc:215 find_session.cc:268
 msgid "Archive does not contain a session folder"
 msgstr "Arkivet innehåller inte någon sessionsmapp"
 
-#: find_session.cc:228 find_session.cc:273
+#: find_session.cc:226 find_session.cc:270
 msgid "Archive does not contain a valid session structure"
 msgstr "Arkivet innehåller inte en giltig sessionsstruktur"
 
-#: find_session.cc:235 find_session.cc:275
+#: find_session.cc:232 find_session.cc:272
 msgid "Archive does not contain a session file"
 msgstr "Arkivet innehåller ingen sessionsfil"
 
-#: find_session.cc:242
+#: find_session.cc:239
 msgid "Destination '%1' already exists."
 msgstr "Destinationen '%1' finns redan."
 
-#: find_session.cc:247
+#: find_session.cc:244
 msgid "Extracted session-archive to '%1'."
 msgstr "Extraherat sessionsarkiv till '%1'."
 
-#: find_session.cc:254 find_session.cc:277
+#: find_session.cc:251 find_session.cc:274
 msgid "Error reading file-archive"
 msgstr "Fel vid läsning av filarkiv"
 
-#: find_session.cc:258 find_session.cc:281
+#: find_session.cc:255 find_session.cc:276
 msgid "Error extracting file-archive"
 msgstr "Fel vid extrahering av filarkiv"
 
-#: find_session.cc:265
+#: find_session.cc:262
 msgid "No Error"
 msgstr "Inget fel"
 
-#: find_session.cc:267
+#: find_session.cc:264
 msgid "File extension is not %1"
 msgstr "Filändelsen är inte %1"
 
-#: find_session.cc:279
+#: find_session.cc:278
 msgid "Destination folder already exists."
 msgstr "Destinationsmapp finns redan."
 
-#: find_session.cc:286
+#: find_session.cc:283
 msgid "Unknown Error"
 msgstr "Okänd fel"
 
-#: globals.cc:278
+#: globals.cc:319
+msgid "Released CPU DMA latency request"
+msgstr "Utlöst CPU DMA-latensbegäran"
+
+#: globals.cc:350
+msgid "Set CPU DMA latency to %1 usec"
+msgstr "Ställ in CPU DMA-latens till %1 usec"
+
+#: globals.cc:382
 msgid "Could not set system open files limit to \"unlimited\""
 msgstr ""
 "Det gick inte att ställa in gränsen för öppna filer i systemet till "
 "\"obegränsad\"."
 
-#: globals.cc:280
+#: globals.cc:384
 msgid "Could not set system open files limit to %1"
 msgstr "Det gick inte att ställa in gränsen för öppna filer i systemet till %1"
 
-#: globals.cc:284 globals.cc:301
+#: globals.cc:388 globals.cc:405
 msgid "Your system is configured to limit %1 to %2 open files"
 msgstr "Ditt system är konfigurerat för att begränsa %1 till %2 o öppna filer"
 
-#: globals.cc:288
+#: globals.cc:392
 msgid "Could not get system open files limit (%1)"
 msgstr "Kunde inte öppna systemets filgräns (%1)"
 
-#: globals.cc:303
+#: globals.cc:407
 msgid "Could not set system open files limit. Current limit is %1 open files"
 msgstr ""
 "Det gick inte att ställa in gränsen för öppna filer i systemet. Den aktuella "
 "gränsen är %1 o öppna filer"
 
-#: globals.cc:510
+#: globals.cc:684
 msgid "Loading configuration"
 msgstr "Laddar konfiguration"
 
-#: globals.cc:592 route.cc:207 session.cc:1006
+#: globals.cc:769 route.cc:229 session.cc:1153
 msgid "Monitor"
 msgstr "Övervaka"
 
-#: globals.cc:593 session.cc:1267
+#: globals.cc:770 session.cc:1612
 msgid "Master"
 msgstr "Säkerhetsansvarig"
 
-#: globals.cc:595 midiport_manager.cc:71 port_manager.cc:1273
-#: port_manager.cc:1283
-msgid "Virtual Keyboard"
-msgstr "Virtuellt tangentbord"
+#: globals.cc:771 session.cc:1517 surround_send.cc:38 surround_send.cc:51
+msgid "Surround"
+msgstr "Surround"
 
-#: globals.cc:599
+#: globals.cc:781
 msgid "Control"
 msgstr "Kontroll"
 
-#: globals.cc:600
+#: globals.cc:782
 msgid "Mackie"
 msgstr "Mackie"
 
-#: globals.cc:601
+#: globals.cc:783
 msgid "FaderPort Recv"
 msgstr "FaderPort Recv"
 
-#: globals.cc:602
+#: globals.cc:784
 msgid "FaderPort Send"
 msgstr "FaderPort Skicka"
 
-#: globals.cc:603
+#: globals.cc:785
 msgid "FaderPort2 Recv"
 msgstr "FaderPort2 Recv"
 
-#: globals.cc:604
+#: globals.cc:786
 msgid "FaderPort2 Send"
 msgstr "FaderPort2 Skicka"
 
-#: globals.cc:605
+#: globals.cc:787
 msgid "FaderPort8 Recv"
 msgstr "FaderPort8 Recv"
 
-#: globals.cc:606
+#: globals.cc:788
 msgid "FaderPort8 Send"
 msgstr "FaderPort8 Skicka"
 
-#: globals.cc:607
+#: globals.cc:789
 msgid "FaderPort16 Recv"
 msgstr "FaderPort16 Recv"
 
-#: globals.cc:608
+#: globals.cc:790
 msgid "FaderPort16 Send"
 msgstr "FaderPort16 Skicka"
 
-#: graph.cc:599
+#: globals.cc:791
+msgid "Console1 Recv"
+msgstr "Konsol1 Recv"
+
+#: globals.cc:792
+msgid "Console1 Send"
+msgstr "Konsol1 Skicka"
+
+#: graph.cc:715
 msgid "Could not graph to file (%1)"
 msgstr "Kunde inte skapa diagram till fil (%1)"
 
-#: import.cc:163
+#: import.cc:173
 msgid "Cannot find new filename for imported file %1"
 msgstr "Kan inte hitta nytt filnamn för importerad fil %1"
 
-#: import.cc:183
+#: import.cc:193
 msgid "Could not find a source for %1 even though we are updating this file!"
 msgstr ""
 "Kunde inte hitta en källa för %1 e trots att vi uppdaterar den här filen!"
 
-#: import.cc:209
+#: import.cc:219
 msgid "Unable to create file %1 during import"
 msgstr "Det går inte att skapa filen %1 d under importen"
 
-#: import.cc:235
+#: import.cc:245
 msgid "Resampling %1 from %2kHz to %3kHz"
 msgstr "Omprovtagning %1 f från %2kHz till %3kHz"
 
-#: import.cc:241
+#: import.cc:251
 msgid "Copying %1"
 msgstr "Kopierar %1"
 
-#: import.cc:460
-msgid "Track %1 of %2 contained no usable MIDI data"
-msgstr "Spår %1 of %2 cinnehöll inga användbara MIDI-data"
+#: import.cc:461
+msgid "No usable MIDI data found for file %1 of %2"
+msgstr "Inga användbara MIDI-data hittades för fil %1 av %2"
 
-#: import.cc:470
+#: import.cc:465 import.cc:692
 msgid "MIDI file could not be written (best guess: %1)"
 msgstr "MIDI-filen kunde inte skrivas (bästa gissning: %1)"
 
-#: import.cc:518
+#: import.cc:763
+msgid "MIDI file has unsupported SMF format type %1"
+msgstr "MIDI-filen har SMF-formattyp %1 som inte stöds"
+
+#: import.cc:815
+msgid "deinterlace_midi_region: failed to create sources"
+msgstr "deinterlace_midi_region: misslyckades med att skapa källor"
+
+#: import.cc:819
+msgid "deinterlace_midi_region: error opening MIDI file for splitting"
+msgstr "deinterlace_midi_region: fel vid öppning av MIDI-fil för delning"
+
+#: import.cc:844
+msgid "(split-chans)"
+msgstr "(split-chans)"
+
+#: import.cc:907
 msgid "Import: cannot open input sound file \"%1\""
 msgstr "Import: kan inte öppna ljudfilen \"%1\""
 
-#: import.cc:547
+#: import.cc:977
 msgid "Import: error opening MIDI file"
 msgstr "Import: fel vid öppning av MIDI-fil"
 
-#: import.cc:554
+#: import.cc:984
 msgid "Import: file contains no channels."
 msgstr "Import: filen innehåller inga kanaler."
 
-#: import.cc:588
+#: import.cc:1018
 msgid "Loading MIDI file %1"
 msgstr "Laddar MIDI-fil %1"
 
-#: import.cc:649
+#: import.cc:1088
 msgid "Failed to remove some files after failed/cancelled import operation"
 msgstr "Det gick inte att ta bort vissa filer efter misslyckad/avbruten import"
 
-#: import_pt.cc:248
+#: import_pt.cc:238
 msgid "PT Import : MISSING `%1`, inserting ref to missing source"
 msgstr "PT Import: MISSING `%1`, infogar referens till saknad källa"
 
-#: import_pt.cc:250
+#: import_pt.cc:240
 msgid "PT Import : MISSING `%1`, please check Audio Files"
 msgstr "PT Import: Saknas `%1`, kontrollera ljudfilerna"
 
-#: import_pt.cc:264
+#: import_pt.cc:256
 msgid "Failed to find any audio for PT import"
 msgstr "Det gick inte att hitta något ljud för PT-import"
 
-#: import_pt.cc:267
+#: import_pt.cc:258
 msgid ""
 "Failed to load one or more of the audio files for PT import, see above list"
 msgstr ""
 "Det gick inte att ladda en eller flera ljudfiler för PT-import, se listan "
 "ovan."
 
-#: import_pt.cc:269
+#: import_pt.cc:260
 msgid "All audio files found for PT import!"
 msgstr "Alla ljudfiler som hittats för PT-import!"
-
-#: import_pt.cc:354
-msgid "PTImport: UINT_MAX routes? impossible!"
-msgstr "PTImport: UINT_MAX-rutter? Omöjligt!"
 
 #: instrument_info.cc:41 instrument_info.cc:74
 msgid "Unknown"
 msgstr "Okänd"
 
-#: internal_send.cc:431 internal_send.cc:432
+#: internal_send.cc:479 internal_send.cc:480
 msgid "%1 - cannot find any track/bus with the ID %2 to connect to"
 msgstr "%1 - kan inte hitta något spår/buss med ID %2 att ansluta till"
 
-#: io.cc:172
+#: io.cc:168
 msgid "IO: cannot disconnect port %1 from %2"
 msgstr "IO: kan inte koppla bort port %1 f från %2"
 
-#: io.cc:323 io.cc:429
+#: io.cc:318 io.cc:426
 msgid "IO: cannot register input port %1"
 msgstr "IO: kan inte registrera ingångsport %1"
 
-#: io.cc:328 io.cc:434
+#: io.cc:323 io.cc:431
 msgid "IO: cannot register output port %1"
 msgstr "IO: kan inte registrera utgångsport %1"
 
-#: io.cc:583 io.cc:655
+#: io.cc:559 io.cc:654
 msgid "incorrect XML node \"%1\" passed to IO object"
 msgstr "felaktig XML-nod \"%1\" överförd till IO-objekt"
 
-#: io.cc:715
+#: io.cc:686 io.cc:1452
 msgid "in"
 msgstr "i"
 
-#: io.cc:715
+#: io.cc:686 io.cc:1452
 msgid "out"
 msgstr "ut"
 
-#: io.cc:716
+#: io.cc:687
 msgid "input"
 msgstr "ingång"
 
-#: io.cc:716
+#: io.cc:687
 msgid "output"
 msgstr "utgång"
 
-#: io.cc:727
+#: io.cc:698
 msgid "Unknown bundle \"%1\" listed for %2 of %3"
 msgstr "Okänd bunt \"%1\" listad för %2 of %3"
 
-#: io.cc:788
+#: io.cc:759
 msgid "Bundle %1 was not available - \"%2\" used instead"
 msgstr "Paket %1 var inte tillgängligt – \"%2\" användes istället"
 
-#: io.cc:791
+#: io.cc:762
 msgid "No %1 bundles available as a replacement"
 msgstr "Inga %1 bpaket tillgängliga som ersättning"
 
-#: io.cc:895
+#: io.cc:866
 msgid "%1: cannot create I/O ports"
 msgstr "%1: kan inte skapa I/O-portar"
 
-#: io.cc:1023 io.cc:1124
+#: io.cc:898 io.cc:1039
 msgid "IO: badly formed string in XML node for inputs \"%1\""
 msgstr "IO: felaktigt formaterad sträng i XML-nod för inmatningar \"%1\""
 
-#: io.cc:1028 io.cc:1129
+#: io.cc:903 io.cc:1044
 msgid "bad input string in XML node \"%1\""
 msgstr "felaktig inmatningssträng i XML-noden \"%1\""
 
-#: io.cc:1067
+#: io.cc:942
 msgid "IO: badly formed string in XML node for outputs \"%1\""
 msgstr "IO: felaktigt formaterad sträng i XML-nod för utdata \"%1\""
 
-#: io.cc:1072
+#: io.cc:947
 msgid "IO: bad output string in XML node \"%1\""
 msgstr "IO: felaktig utdatasträng i XML-noden \"%1\""
 
-#: io.cc:1237 plugin.cc:292
-msgid "Out"
-msgstr "Ut"
+#: io.cc:1153 plugin.cc:338
+msgid "IO|Out"
+msgstr "IO|Ut"
 
-#: io.cc:1237 plugin.cc:290
-msgid "In"
-msgstr "I"
+#: io.cc:1153 plugin.cc:336
+msgid "IO|In"
+msgstr "IO|In"
 
-#: io.cc:1483
-#, c-format
-msgid "%s %u"
-msgstr "%s %u"
-
-#: io.cc:1529
-#, c-format
-msgid "%s in"
-msgstr "%s i"
-
-#: io.cc:1531
-#, c-format
-msgid "%s out"
-msgstr "%s ut"
-
-#: io.cc:1601 session_bundles.cc:143 session_bundles.cc:177
+#: io.cc:1526 session_bundles.cc:158 session_bundles.cc:200
 msgid "mono"
 msgstr "mono"
 
-#: io.cc:1603 session_bundles.cc:156 session_bundles.cc:191
+#: io.cc:1528 route.cc:312 session_bundles.cc:178 session_bundles.cc:221
+#: triggerbox.cc:162
 msgid "L"
 msgstr "L"
 
-#: io.cc:1603 session_bundles.cc:158 session_bundles.cc:193
+#: io.cc:1528 route.cc:312 session_bundles.cc:180 session_bundles.cc:223
+#: triggerbox.cc:168
 msgid "R"
 msgstr "R"
+
+#: io_plug.cc:87 io_plug.cc:419 io_plug.cc:424 io_plug.cc:429 io_plug.cc:434
+msgid "IO"
+msgstr ""
+
+#: io_plug.cc:87
+msgid "IO|Pre"
+msgstr "IO|Pre"
+
+#: io_plug.cc:87
+msgid "IO|Post"
+msgstr "IO|Post"
 
 #: io_processor.cc:279
 msgid "send "
@@ -1309,203 +1269,154 @@ msgstr "infoga "
 msgid "return "
 msgstr "återvända "
 
-#: ladspa_plugin.cc:100
+#: ladspa_plugin.cc:104
 msgid "LADSPA: Unable to open module: "
 msgstr "LADSPA: Det går inte att öppna modulen: "
 
-#: ladspa_plugin.cc:106
+#: ladspa_plugin.cc:110
 msgid "LADSPA: module has no descriptor function."
 msgstr "LADSPA: modulen har ingen deskriptorfunktion."
 
-#: ladspa_plugin.cc:113
+#: ladspa_plugin.cc:117
 msgid "LADSPA: plugin has gone away since discovery!"
-msgstr "LADSPA: plugin har försvunnit sedan upptäckten!"
+msgstr "LADSPA: insticksmodul har försvunnit sedan upptäckten!"
 
-#: ladspa_plugin.cc:120
+#: ladspa_plugin.cc:124
 msgid "LADSPA: \"%1\" cannot be used, since it cannot do inplace processing"
 msgstr ""
 "LADSPA: \"%1\" kan inte användas, eftersom det inte kan utföra inplace-"
 "bearbetning"
 
-#: ladspa_plugin.cc:315
+#: ladspa_plugin.cc:332
 msgid ""
 "illegal parameter number used with plugin \"%1\". This may indicate a change "
 "in the plugin design, and presets may be invalid"
 msgstr ""
-"olagligt parameternummer används med plugin \"%1\". Detta kan indikera en "
-"förändring i plugin-designen, och förinställningar kan vara ogiltiga"
+"olagligt parameternummer används med insticksmodul \"%1\". Detta kan "
+"indikera en förändring i insticksmodulsdesignen, och förinställningar kan "
+"vara ogiltiga"
 
-#: ladspa_plugin.cc:383 ladspa_plugin.cc:427
+#: ladspa_plugin.cc:400 ladspa_plugin.cc:444
 msgid "Bad node sent to LadspaPlugin::set_state"
 msgstr "Felaktig nod skickad till LadspaPlugin::set_state"
 
-#: ladspa_plugin.cc:397 ladspa_plugin.cc:440
+#: ladspa_plugin.cc:414 ladspa_plugin.cc:457
 msgid "LADSPA: no ladspa port number"
 msgstr "LADSPA: inget ladspa-portnummer"
 
-#: ladspa_plugin.cc:402 ladspa_plugin.cc:446
+#: ladspa_plugin.cc:419 ladspa_plugin.cc:463
 msgid "LADSPA: no ladspa port data"
 msgstr "LADSPA: inga ladspa-portdata"
 
-#: ladspa_plugin.cc:836
-msgid "Could not locate HOME.  Preset not removed."
-msgstr "Kunde inte hitta HOME. Förinställningen har inte tagits bort."
-
-#: ladspa_plugin.cc:875 ladspa_plugin.cc:881
+#: ladspa_plugin.cc:890
 msgid "Could not create %1.  Preset not saved. (%2)"
 msgstr "Kunde inte skapa %1. Förinställningen sparades inte. (%2)"
 
-#: ladspa_plugin.cc:888
+#: ladspa_plugin.cc:895
 msgid "Error saving presets file %1."
 msgstr "Fel vid sparande av förinställningsfil %1."
 
-#: ladspa_plugin.cc:930
-msgid "Could not locate HOME.  Preset not saved."
-msgstr "Kunde inte hitta HOME. Förinställningen sparades inte."
-
-#: location.cc:477
-msgid "You cannot put a CD marker at this position"
-msgstr "Du kan inte placera en CD-markör på denna position"
-
-#: location.cc:636
+#: location.cc:698
 msgid "incorrect XML node passed to Location::set_state"
 msgstr "felaktig XML-nod överförd till Location::set_state"
 
-#: location.cc:641
+#: location.cc:703
 msgid "XML node for Location has no ID information"
 msgstr "XML-noden för plats har ingen ID-information"
 
-#: location.cc:646
+#: location.cc:708
 msgid "XML node for Location has no name information"
 msgstr "XML-noden för plats har ingen namninformation"
 
-#: location.cc:657
+#: location.cc:722
 msgid "XML node for Location has no start information"
 msgstr "XML-noden för plats har ingen startinformation"
 
-#: location.cc:662
+#: location.cc:727
 msgid "XML node for Location has no end information"
 msgstr "XML-noden för plats har ingen slutinformation"
 
-#: location.cc:671
+#: location.cc:737
 msgid "XML node for Location has no flags information"
 msgstr "XML-noden för plats har ingen flagginformation"
 
-#: location.cc:907
+#: location.cc:982
 msgid "Locations: attempt to use unknown location as selected location"
 msgstr "Platser: försök att använda okänd plats som vald plats"
 
-#: location.cc:1101
+#: location.cc:1159
+msgid "mark"
+msgstr "märke"
+
+#: location.cc:1161 location.cc:1185
+msgid "range"
+msgstr "intervall"
+
+#: location.cc:1273
 msgid "incorrect XML mode passed to Locations::set_state"
 msgstr "felaktigt XML-läge överfört till Locations::set_state"
 
-#: location.cc:1114 session.cc:1601 session_state.cc:1441
+#: location.cc:1292 session.cc:1943 session_state.cc:1775
 msgid "session"
 msgstr "session"
 
-#: location.cc:1181
+#: location.cc:1358
 msgid "could not load location from session file - ignored"
 msgstr "kunde inte ladda plats från sessionsfilen - ignorerad"
 
-#: location_importer.cc:62
-msgid "Locations"
-msgstr "Platser"
-
-#: location_importer.cc:124
-msgid "Location: "
-msgstr "Plats: "
-
-#: location_importer.cc:126
-msgid ""
-"Range\n"
-"start: "
-msgstr "Områdesstart: "
-
-#: location_importer.cc:127
-msgid ""
-"\n"
-"end: "
-msgstr ""
-"\n"
-"slut: "
-
-#: location_importer.cc:147
-msgid ""
-"The location is the Punch range. It will be imported as a normal range.\n"
-"You may rename the imported location:"
-msgstr ""
-"Platsen är Punch-serien. Den importeras som en vanlig serie. Du kan byta "
-"namn på den importerade platsen:"
-
-#: location_importer.cc:158
-msgid ""
-"The location is a Loop range. It will be imported as a normal range.\n"
-"You may rename the imported location:"
-msgstr ""
-"Platsen är ett Loop-intervall. Det importeras som ett normalt intervall. Du "
-"kan byta namn på den importerade platsen:"
-
-#: location_importer.cc:169
-msgid ""
-"A location with that name already exists.\n"
-"You may rename the imported location:"
-msgstr ""
-"En plats med det namnet finns redan. Du kan byta namn på den importerade "
-"platsen:"
-
-#: ltc_file_reader.cc:155
+#: ltc_file_reader.cc:158
 msgid "LTCFileReader: cannot open file \"%1\""
 msgstr "LTCFileReader: kan inte öppna filen \"%1\""
 
-#: ltc_file_reader.cc:164
+#: ltc_file_reader.cc:167
 msgid "LTCFileReader: cannot open file \"%1\" (%3)"
 msgstr "LTCFileReader: kan inte öppna filen \"%1\" (%3)"
 
-#: ltc_file_reader.cc:168
+#: ltc_file_reader.cc:171
 msgid "LTCFileReader: \"%1\" is an empty audio file"
 msgstr "LTCFileReader: \"%1\" är en tom ljudfil"
 
-#: ltc_file_reader.cc:192
+#: ltc_file_reader.cc:195
 msgid "LTCFileReader:: invalid audio channel selected"
 msgstr "LTCFileReader:: ogiltig ljudkanal vald"
 
-#: ltc_slave.cc:650
+#: ltc_slave.cc:696
 msgid "flywheel"
 msgstr "svänghjul"
 
-#: lua_api.cc:96
+#: lua_api.cc:106
 msgid "Script with given name was not found\n"
 msgstr "Skript med angivet namn hittades inte\n"
 
-#: lua_api.cc:105
+#: lua_api.cc:115
 msgid "Failed to instantiate Lua Processor\n"
 msgstr "Det gick inte att instansiera Lua-processorn\n"
 
-#: luaproc.cc:837
+#: luaproc.cc:984
 msgid "Failed to load Lua script from session state."
 msgstr "Det gick inte att ladda Lua-skriptet från sessionsstatus."
 
-#: luaproc.cc:847
+#: luaproc.cc:994
 msgid "Session State for LuaProcessor did not include a Lua script."
 msgstr "Sessionstillståndet för LuaProcessor innehöll inte något Lua-skript."
 
-#: luaproc.cc:851
+#: luaproc.cc:998
 msgid "Invalid/incompatible Lua script found for LuaProcessor."
 msgstr "Ogiltigt/inkompatibelt Lua-skript hittades för LuaProcessor."
 
-#: luaproc.cc:871
+#: luaproc.cc:1018
 msgid "Bad node sent to LuaProc::set_state"
 msgstr "Felaktig nod skickad till LuaProc::set_state"
 
-#: luaproc.cc:883
+#: luaproc.cc:1030
 msgid "LuaProc: port has no symbol, ignored"
 msgstr "LuaProc: port har inget symbol, ignoreras"
 
-#: luaproc.cc:888
+#: luaproc.cc:1035
 msgid "LuaProc: port has no value, ignored"
 msgstr "LuaProc: port har inget värde, ignoreras"
 
-#: luaproc.cc:1106
+#: luaproc.cc:1252
 msgid "Unable to create LuaProc presets directory"
 msgstr "Det går inte att skapa katalogen LuaProc presets"
 
@@ -1517,21 +1428,25 @@ msgstr "Skriptet '%1' har ingen giltig beskrivning."
 msgid "Meter"
 msgstr "Meter"
 
-#: midi_model.cc:518
+#: midi_model.cc:583
 msgid "Change has no note, using note ID"
 msgstr "Ändringen har ingen anteckning, använder antecknings-ID"
 
-#: midi_model.cc:521
+#: midi_model.cc:586
 msgid "Change has no note or note ID"
 msgstr "Ändringen har ingen anteckning eller antecknings-ID"
 
-#: midi_model.cc:540
+#: midi_model.cc:605
 msgid "No NoteID found for note property change - ignored"
 msgstr "Ingen NoteID hittades för ändring av anteckningsegenskap – ignorerad"
 
-#: midi_model.cc:791
+#: midi_model.cc:856
 msgid "No SysExID found for sys-ex property change - ignored"
 msgstr "Ingen SysExID hittades för sys-ex-egenskapsändring – ignorerad"
+
+#: midi_model.cc:1841 midi_model.cc:1864 midi_model.cc:1875
+msgid "conform to tempo map"
+msgstr "anpassa sig till tempokarta"
 
 #: midi_patch_manager.cc:126
 msgid "Loading %1 MIDI patch from %2"
@@ -1557,27 +1472,27 @@ msgstr "Duplicerad MIDI-enhet `%1' i `%2' ignorerad"
 msgid "Removing MIDI patch file %1"
 msgstr "Tar bort MIDI-patchfil %1"
 
-#: midi_scene_changer.cc:312
+#: midi_scene_changer.cc:329
 msgid "Scene "
 msgstr "Scene "
 
-#: midi_source.cc:127
+#: midi_source.cc:124
 msgid "Missing parameter property on InterpolationStyle"
 msgstr "Saknad parameteregenskap på InterpolationStyle"
 
-#: midi_source.cc:147
+#: midi_source.cc:152
 msgid "Missing style property on InterpolationStyle"
 msgstr "Saknad stilegenskap på InterpolationStyle"
 
-#: midi_source.cc:156
+#: midi_source.cc:159
 msgid "Missing parameter property on AutomationState"
 msgstr "Saknad parameteregenskap i AutomationState"
 
-#: midi_source.cc:162
+#: midi_source.cc:174
 msgid "Missing state property on AutomationState"
 msgstr "Saknad statlig egendom på AutomationState"
 
-#: midi_stretch.cc:100
+#: midi_stretch.cc:84
 msgid "MIDI stretch created non-MIDI source"
 msgstr "MIDI-sträckning skapade icke-MIDI-källa"
 
@@ -1601,27 +1516,27 @@ msgstr "övervaka dimningsnivå"
 msgid "monitor solo boost level"
 msgstr "övervaka solo-boostnivå"
 
-#: monitor_processor.cc:538
+#: monitor_processor.cc:544
 msgid "cut control %1"
 msgstr "skärkontroll %1"
 
-#: monitor_processor.cc:539
+#: monitor_processor.cc:545
 msgid "dim control"
 msgstr "dimningskontroll"
 
-#: monitor_processor.cc:540
+#: monitor_processor.cc:546
 msgid "polarity control"
 msgstr "polaritetskontroll"
 
-#: monitor_processor.cc:541
+#: monitor_processor.cc:547
 msgid "solo control"
 msgstr "solokontroll"
 
-#: mp3filesource.cc:71
+#: mp3filesource.cc:72
 msgid "MPEG Layer %1 (%2 kbps)"
 msgstr "MPEG-lager %1 (%2 kbps)"
 
-#: mtc_slave.cc:387
+#: mtc_slave.cc:374
 msgid ""
 "Unknown rate/drop value %1 in incoming MTC stream, session values used "
 "instead"
@@ -1681,31 +1596,31 @@ msgstr "region kopia"
 msgid "fixed time region copy"
 msgstr "kopiering av fast tidsregion"
 
-#: pannable.cc:207
+#: pannable.cc:214
 msgid "Pannable given XML data for %1 - ignored"
 msgstr "Pannable given XML-data för %1 - ignorerad"
 
-#: panner_manager.cc:100
+#: panner_manager.cc:98
 msgid "looking for panners in %1\n"
 msgstr "söker panners i %1\n"
 
-#: panner_manager.cc:126
+#: panner_manager.cc:124
 msgid "Panner discovered: \"%1\" in %2\n"
 msgstr "Panner upptäcktes: \"%1\" i %2\n"
 
-#: panner_manager.cc:145
+#: panner_manager.cc:143
 msgid "PannerManager: cannot load module \"%1\" (%2)"
 msgstr "PannerManager: kan inte ladda modulen \"%1\" (%2)"
 
-#: panner_manager.cc:152
+#: panner_manager.cc:150
 msgid "PannerManager: module \"%1\" has no descriptor function."
 msgstr "PannerManager: modulen \"%1\" har ingen deskriptorfunktion."
 
-#: panner_manager.cc:253
+#: panner_manager.cc:251
 msgid "no panner discovered for in/out = %1/%2"
 msgstr "ingen panner upptäckt för in/ut = %1/%2"
 
-#: panner_shell.cc:127
+#: panner_shell.cc:126
 msgid ""
 "No panner found: check that panners are being discovered correctly during "
 "startup."
@@ -1713,91 +1628,133 @@ msgstr ""
 "Ingen panner hittades: kontrollera att panners upptäcks korrekt under "
 "uppstarten."
 
-#: panner_shell.cc:134
+#: panner_shell.cc:133
 msgid "select panner: %1\n"
 msgstr "välj panner: %1\n"
 
-#: panner_shell.cc:260
+#: panner_shell.cc:258
 msgid "Unknown panner plugin \"%1\" found in pan state - ignored"
-msgstr "Okänd panner-plugin \"%1\" hittades i pan-läge – ignorerades"
+msgstr ""
+"Okänd panoreringsinsticksmodul \"%1\" hittades i panoreringsstatus – "
+"ignorerades"
 
-#: panner_shell.cc:266
+#: panner_shell.cc:264
 msgid "panner plugin node has no type information!"
-msgstr "panner-plugin-noden har ingen typinformation!"
+msgstr "panoreringsinsticksmodulsnoden har ingen typinformation!"
 
-#: parameter_descriptor.cc:119
+#: parameter_descriptor.cc:127
+msgid "Off"
+msgstr "Av"
+
+#: parameter_descriptor.cc:128
+msgid "Near"
+msgstr "Nära"
+
+#: parameter_descriptor.cc:137 transport_master.cc:475
+msgid "All"
+msgstr "Alla"
+
+#: parameter_descriptor.cc:138
+msgid "No Back"
+msgstr "Ingen baksida"
+
+#: parameter_descriptor.cc:139
+msgid "No Sides"
+msgstr "Inga sidor"
+
+#: parameter_descriptor.cc:140
+msgid "Center Back"
+msgstr "Mitt bak"
+
+#: parameter_descriptor.cc:141
+msgid "Screen Only"
+msgstr "Endast skärm"
+
+#: parameter_descriptor.cc:142
+msgid "Surround Only"
+msgstr "Endast Surround"
+
+#: parameter_descriptor.cc:206
 msgid "Normal"
 msgstr "Normal"
 
-#: parameter_descriptor.cc:120
+#: parameter_descriptor.cc:207
 msgid "Invert"
 msgstr "Invertera"
 
-#: parameter_descriptor.cc:128
+#: parameter_descriptor.cc:215
 msgid "Auto"
 msgstr "Auto"
 
-#: parameter_descriptor.cc:129
+#: parameter_descriptor.cc:216
 msgid "Input"
 msgstr "Inmatning"
 
-#: parameter_descriptor.cc:130
+#: parameter_descriptor.cc:217
 msgid "Disk"
 msgstr "Hårddisk"
 
-#: parameter_descriptor.cc:259
+#: parameter_descriptor.cc:347
 msgid "Note|C"
 msgstr "Anmärkning|C"
 
-#: parameter_descriptor.cc:260
+#: parameter_descriptor.cc:348
 msgid "Note|C#"
 msgstr "Anmärkning|C#"
 
-#: parameter_descriptor.cc:261
+#: parameter_descriptor.cc:349
 msgid "Note|D"
 msgstr "Anmärkning|D"
 
-#: parameter_descriptor.cc:262
+#: parameter_descriptor.cc:350
 msgid "Note|D#"
 msgstr "Anmärkning|D#"
 
-#: parameter_descriptor.cc:263
+#: parameter_descriptor.cc:351
 msgid "Note|E"
 msgstr "Anmärkning|E"
 
-#: parameter_descriptor.cc:264
+#: parameter_descriptor.cc:352
 msgid "Note|F"
 msgstr "Anmärkning|F"
 
-#: parameter_descriptor.cc:265
+#: parameter_descriptor.cc:353
 msgid "Note|F#"
 msgstr "Anmärkning|F#"
 
-#: parameter_descriptor.cc:266
+#: parameter_descriptor.cc:354
 msgid "Note|G"
 msgstr "Anmärkning|G"
 
-#: parameter_descriptor.cc:267
+#: parameter_descriptor.cc:355
 msgid "Note|G#"
 msgstr "Anmärkning|G#"
 
-#: parameter_descriptor.cc:268
+#: parameter_descriptor.cc:356
 msgid "Note|A"
 msgstr "Anmärkning|A"
 
-#: parameter_descriptor.cc:269
+#: parameter_descriptor.cc:357
 msgid "Note|A#"
 msgstr "Anmärkning|A#"
 
-#: parameter_descriptor.cc:270
+#: parameter_descriptor.cc:358
 msgid "Note|B"
 msgstr "Anmärkning|B"
 
-#: playlist.cc:2327
+#: playlist.cc:994
+msgid ""
+"Playlist::partition_internal() with time domains mismatch %1 %2 (expected %3 "
+"time)"
+msgstr ""
+"Playlist::partition_internal() med tidsdomäner som inte stämmer överens %1 "
+"%2 (förväntad %3-tid)"
+
+#: playlist.cc:2347
 msgid "region state node has no ID, ignored"
 msgstr "region state node har inget ID, ignoreras"
 
-#: playlist.cc:2343
+#: playlist.cc:2362
 msgid "Playlist: cannot create region from XML"
 msgstr "Spellista: kan inte skapa region från XML"
 
@@ -1805,372 +1762,349 @@ msgstr "Spellista: kan inte skapa region från XML"
 msgid "No playlist ID in PlaylistSource XML!"
 msgstr "Inget spellist-ID i PlaylistSource XML!"
 
-#: playlist_source.cc:130
+#: playlist_source.cc:134
 msgid "Could not construct playlist for PlaylistSource from session data!"
 msgstr ""
 "Det gick inte att skapa en spellista för PlaylistSource från sessionsdata!"
 
-#: plugin.cc:132
-msgid "Trying to remove nonexistent preset."
-msgstr "Försöker ta bort en icke-existerande förinställning."
-
-#: plugin.cc:136
-msgid "Cannot remove plugin factory preset."
-msgstr "Kan inte ta bort plugin-fabriksinställningar."
-
-#: plugin.cc:154
-msgid "Preset with given name already exists."
-msgstr "Förinställning med angivet namn finns redan."
-
-#: plugin.cc:280
-msgid "Audio"
-msgstr "Ljud"
-
-#: plugin.cc:283
-msgid "Midi"
-msgstr "Midi"
-
-#: plugin.cc:286
-msgid "?"
-msgstr "?"
-
-#: plugin_insert.cc:525
-msgid "Plugin Enable"
-msgstr "Aktivera plugin"
-
-#: plugin_insert.cc:728
-msgid "PluginInsert: VST Bypass failed, falling back to host bypass."
-msgstr "PluginInsert: VST-bypass misslyckades, återgår till värd-bypass."
-
-#: plugin_insert.cc:1329
-msgid "programming error: "
-msgstr "programmeringsfel: "
-
-#: plugin_insert.cc:1890
-msgid "SC %1"
-msgstr "SC %1"
-
-#: plugin_insert.cc:2579
+#: plug_insert_base.cc:56
 msgid "XML node describing plugin is missing the `type' field"
-msgstr "XML-nod som beskriver plugin saknar fältet \"type\""
+msgstr "XML-nod som beskriver insticksmodul saknar fältet \"type\""
 
-#: plugin_insert.cc:2598
+#: plug_insert_base.cc:77
 msgid "unknown plugin type %1 in plugin insert state"
-msgstr "okänd plugin-typ %1 i plugin-insättningsläge"
+msgstr "okänd insticksmodulstyp %1 i insättningsläge för insticksmodul"
 
-#: plugin_insert.cc:2622
+#: plug_insert_base.cc:100
 msgid "Plugin has no unique ID field"
 msgstr "Plugin har inget unikt ID-fält"
 
-#: plugin_insert.cc:2672
+#: plug_insert_base.cc:159
 msgid ""
 "Found a reference to a plugin (\"%1\") that is unknown.\n"
 "Perhaps it was removed or moved since it was last used."
 msgstr ""
-"Hittade en referens till ett plugin (\"%1\") som är okänt. Det kan ha tagits "
-"bort eller flyttats sedan det senast användes."
+"Hittade en referens till en insticksmodul (\"%1\") som är okänd. Den kan ha "
+"tagits bort eller flyttats sedan den senast användes."
 
-#: plugin_insert.cc:2902
+#: plugin.cc:138
+msgid "Trying to remove nonexistent preset."
+msgstr "Försöker ta bort en icke-existerande förinställning."
+
+#: plugin.cc:142
+msgid "Cannot remove plugin factory preset."
+msgstr "Kan inte ta bort insticksmodulens fabriksinställningar."
+
+#: plugin.cc:326 session.cc:2730
+msgid "Audio"
+msgstr "Ljud"
+
+#: plugin.cc:329
+msgid "Midi"
+msgstr "Midi"
+
+#: plugin.cc:332
+msgid "?"
+msgstr "?"
+
+#: plugin_insert.cc:577
+msgid "Plugin Enable"
+msgstr "Aktivera insticksmodul"
+
+#: plugin_insert.cc:793
+msgid "PluginInsert: VST Bypass failed, falling back to host bypass."
+msgstr "PluginInsert: VST-bypass misslyckades, återgår till värd-bypass."
+
+#: plugin_insert.cc:1475
+msgid "programming error: "
+msgstr "programmeringsfel: "
+
+#: plugin_insert.cc:2033
+msgid "SC %1"
+msgstr "SC %1"
+
+#: plugin_insert.cc:2914
 msgid "PluginInsert: Auto: no ladspa port number"
 msgstr "PluginInsert: Auto: inget ladspa-portnummer"
 
-#: plugin_insert.cc:2907
+#: plugin_insert.cc:2919
 msgid "PluginInsert: Auto: port id out of range"
 msgstr "PluginInsert: Auto: port-id utanför intervallet"
 
-#: plugin_insert.cc:2919
+#: plugin_insert.cc:2931
 msgid "PluginInsert: automatable control %1 not found - ignored"
 msgstr "PluginInsert: automatiserbar kontroll %1 hittades inte – ignoreras"
 
-#: plugin_manager.cc:247
+#: plugin_manager.cc:332
 msgid "Discovering Plugins"
-msgstr "Upptäck plugins"
+msgstr "Upptäcker insticksmoduler"
 
-#: plugin_manager.cc:352
+#: plugin_manager.cc:473
 msgid "Scanning LADSPA Plugins"
-msgstr "Skanna LADSPA-plugins"
+msgstr "Skanna LADSPA-insticksmoduler"
 
-#: plugin_manager.cc:354
+#: plugin_manager.cc:475
 msgid "Scanning Lua DSP Processors"
 msgstr "Skanning av Lua DSP-processorer"
 
-#: plugin_manager.cc:357
+#: plugin_manager.cc:478
 msgid "Scanning LV2 Plugins"
-msgstr "Skanna LV2-plugins"
+msgstr "Skanna LV2-insticksmoduler"
 
-#: plugin_manager.cc:384
+#: plugin_manager.cc:490
 msgid "Scanning Windows VST Plugins"
-msgstr "Skanna Windows VST-plugins"
+msgstr "Skanna Windows VST-insticksmoduler"
 
-#: plugin_manager.cc:386
+#: plugin_manager.cc:492
 msgid "Discovering Windows VST Plugins"
-msgstr "Upptäck Windows VST-plugins"
+msgstr "Upptäcker Windows VST-insticksmoduler"
 
-#: plugin_manager.cc:395
+#: plugin_manager.cc:501
 msgid "Scanning Linux VST Plugins"
-msgstr "Skanna Linux VST-plugins"
+msgstr "Skanna Linux VST-insticksmoduler"
 
-#: plugin_manager.cc:397
+#: plugin_manager.cc:503
 msgid "Discovering Linux VST Plugins"
-msgstr "Upptäck Linux VST-plugins"
+msgstr "Upptäcker Linux VST-insticksmoduler"
 
-#: plugin_manager.cc:406
+#: plugin_manager.cc:512
 msgid "Scanning Mac VST Plugins"
-msgstr "Skanna Mac VST-plugins"
+msgstr "Skanna Mac VST-insticksmoduler"
 
-#: plugin_manager.cc:408
+#: plugin_manager.cc:514
 msgid "Discovering Mac VST Plugins"
-msgstr "Upptäck Mac VST-plugins"
+msgstr "Upptäcker Mac VST-insticksmoduler"
 
-#: plugin_manager.cc:425
-msgid "VST Blacklist: "
-msgstr "VST-svartlista: "
-
-#: plugin_manager.cc:427
-msgid "VST Blacklist:"
-msgstr "VST-svartlista:"
-
-#: plugin_manager.cc:437
+#: plugin_manager.cc:566
 msgid "Scanning AU Plugins"
-msgstr "Skanna AU-plugins"
+msgstr "Skanna AU-insticksmoduler"
 
-#: plugin_manager.cc:439
+#: plugin_manager.cc:568
 msgid "Discovering AU Plugins"
-msgstr "Upptäck AU-plugins"
+msgstr "Upptäcker AU-insticksmoduler"
 
-#: plugin_manager.cc:444
+#: plugin_manager.cc:604
 msgid "Plugin Scan Complete..."
 msgstr "Plugin-skanning slutförd..."
 
-#: plugin_manager.cc:449
+#: plugin_manager.cc:609
 msgid "Indexing Plugins..."
-msgstr "Indexeringsplugins..."
+msgstr "Indexerar insticksmoduler..."
 
-#: plugin_manager.cc:685
-msgid "LADSPA"
-msgstr "LADSPA"
+#: plugin_manager.cc:815 plugin_manager.cc:3297
+msgid "LADSPA (%1 / %2)"
+msgstr "LADSPA (%1 / %2)"
 
-#: plugin_manager.cc:743
-msgid "Could not parse rdf file: %1"
-msgstr "Det gick inte att analysera rdf-filen: %1"
+#: plugin_manager.cc:860
+msgid "Reading RDF %1"
+msgstr "Läser RDF %1"
 
-#: plugin_manager.cc:780
-msgid "LADSPA: cannot load module \"%1\" (%2)"
-msgstr "LADSPA: kan inte ladda modulen \"%1\" (%2)"
+#: plugin_manager.cc:944
+msgid "LADSPA ignored blacklisted unique-id %1."
+msgstr "LADSPA ignorerade svartlistat unikt id %1."
 
-#: plugin_manager.cc:787
-msgid "LADSPA: module \"%1\" has no descriptor function."
-msgstr "LADSPA: modulen \"%1\" har ingen deskriptorfunktion."
+#: plugin_manager.cc:1004
+msgid "Found LADSPA plugin, id: %1 name: %2, Inputs: %3, Outputs: %4"
+msgstr "Hittade LADSPA plugin, id: %1 namn: %2, Ingångar: %3, Utgångar: %4"
 
-#: plugin_manager.cc:1020
+#: plugin_manager.cc:1006
+msgid "LADSPA ignored plugin with duplicate id %1."
+msgstr "LADSPA ignorerade plugin med duplicerat id %1."
+
+#: plugin_manager.cc:1211
+msgid "Cannot launch AU scanner app '%1': %2"
+msgstr "Det går inte att starta AU Scanner-appen \"%1\": %2"
+
+#: plugin_manager.cc:1306
+msgid "Saved AUV2 plugin cache to %1"
+msgstr "Sparade AUV2 plugin cache till %1"
+
+#: plugin_manager.cc:1337 plugin_manager.cc:1683 plugin_manager.cc:2197
+msgid "Scan Failed."
+msgstr "Skanningen misslyckades."
+
+#: plugin_manager.cc:1367
+msgid "Cache file %1 ID mismatch '%2' vs '%3'"
+msgstr "Cache-fil %1 ID-missmatchning '%2' vs '%3'"
+
+#: plugin_manager.cc:1374
+msgid "Corrupt AUv2 cache file '%1'"
+msgstr "Korrupt AUv2-cachefil '%1'"
+
+#: plugin_manager.cc:1391 plugin_manager.cc:3267
+msgid "AUv2"
+msgstr "AUv2"
+
+#: plugin_manager.cc:1391
+msgid "Indexing"
+msgstr "Indexering"
+
+#: plugin_manager.cc:1412 plugin_manager.cc:3265
+msgid "AUv2 (%1 / %2)"
+msgstr "AUv2 (%1 / %2)"
+
+#: plugin_manager.cc:1449
+msgid "Cannot write to VST2 blacklist file '%1'"
+msgstr "Det går inte att skriva till VST2-blacklistfilen '%1'"
+
+#: plugin_manager.cc:1507 plugin_manager.cc:2268
+msgid "Cannot launch VST scanner app '%1': %2"
+msgstr "Det går inte att starta VST-skannerappen '%1': %2"
+
+#: plugin_manager.cc:1602
+msgid ""
+"Ignoring plugin '%1'. VST-ID conflicts with other plugin '%2' files: '%3' vs "
+"'%4'"
+msgstr ""
+"Ignorerar plugin '%1'. VST-ID konflikter med andra plugin '%2' filer: '%3' "
+"vs '%4'"
+
+#: plugin_manager.cc:1651
+msgid "Saved VST2 plugin cache to '%1'"
+msgstr "Sparade cache för VST2-plugin till '%1'"
+
+#: plugin_manager.cc:1706
+msgid "Invalid VST2 cache file '%1'"
+msgstr "Ogiltig VST2-cachefil '%1'"
+
+#: plugin_manager.cc:1716
+msgid "VST2 architecture mismatches '%1'"
+msgstr "VST2-arkitekturen stämmer inte överens med '%1'"
+
+#: plugin_manager.cc:1734
+msgid "Corrupt VST2 cache file '%1'"
+msgstr "Korrupt VST2-cache-fil '%1'"
+
+#: plugin_manager.cc:1780
 msgid "Disabled WindowsVST scan (safe mode)"
 msgstr "Inaktiverad WindowsVST-skanning (säkert läge)"
 
-#: plugin_manager.cc:1025
-msgid "--- Windows VST plugins Scan: %1"
-msgstr "--- Windows VST-plugins Skanning: %1"
+#: plugin_manager.cc:1793 plugin_manager.cc:1882 plugin_manager.cc:1942
+#: plugin_manager.cc:3278
+msgid "VST2 (%1 / %2)"
+msgstr "VST2 (%1 / %2)"
 
-#: plugin_manager.cc:1031
-msgid "VST"
-msgstr "VST"
-
-#: plugin_manager.cc:1036
-msgid "--- Windows VST plugins Scan Done"
-msgstr "--- Windows VST-plugins Skanning klar"
-
-#: plugin_manager.cc:1051
-msgid "cannot open dll"
-msgstr "kan inte öppna dll"
-
-#: plugin_manager.cc:1055
-msgid "invalid dll, file too small"
-msgstr "ogiltig dll, filen är för liten"
-
-#: plugin_manager.cc:1059
-msgid "not a dll"
-msgstr "inte en dll"
-
-#: plugin_manager.cc:1065
-msgid "cannot determine dll type"
-msgstr "kan inte bestämma dll-typ"
-
-#: plugin_manager.cc:1069
-msgid "cannot read dll PE header"
-msgstr "kan inte läsa dll PE-rubrik"
-
-#: plugin_manager.cc:1074
-msgid "invalid dll PE header"
-msgstr "ogiltig dll PE-rubrik"
-
-#: plugin_manager.cc:1081
-msgid "i386 (32-bit)"
-msgstr "i386 (32-bitars)"
-
-#: plugin_manager.cc:1084
-msgid "Itanium"
-msgstr "Itanium"
-
-#: plugin_manager.cc:1087
-msgid "x64 (64-bit)"
-msgstr "x64 (64-bitars)"
-
-#: plugin_manager.cc:1090
-msgid "Native Architecture"
-msgstr "Inhemsk arkitektur"
-
-#: plugin_manager.cc:1093
-msgid "Unknown Architecture"
-msgstr "Okänd arkitektur"
-
-#: plugin_manager.cc:1109
-msgid " *  %1 (cache only)"
-msgstr " * %1 (endast cache)"
-
-#: plugin_manager.cc:1111
-msgid " *  %1 - %2"
-msgstr " * %1 - %2"
-
-#: plugin_manager.cc:1125
-msgid " -> Cannot get Windows VST information, plugin ignored."
-msgstr " -> Kan inte hämta Windows VST-information, plugin ignoreras."
-
-#: plugin_manager.cc:1135
-msgid ""
-"VST plugin %1 does not support processReplacing, and cannot be used in %2 at "
-"this time"
-msgstr ""
-"VST-plugin %1 d stöder inte processReplacing och kan för närvarande inte "
-"användas i %2"
-
-#: plugin_manager.cc:1158
-msgid "Ignoring duplicate Windows VST plugin \"%1\""
-msgstr "Ignorerar dubblett av Windows VST-plugin \"%1\""
-
-#: plugin_manager.cc:1170
-msgid " -> OK (VST Plugin \"%1\" was added)."
-msgstr " -> OK (VST-plugin \"%1\" har lagts till)."
-
-#: plugin_manager.cc:1211
+#: plugin_manager.cc:1835
 msgid "Disabled MacVST scan (safe mode)"
 msgstr "Inaktiverad MacVST-skanning (säkert läge)"
 
-#: plugin_manager.cc:1231
-msgid "MacVST"
-msgstr "MacVST"
-
-#: plugin_manager.cc:1270
-msgid ""
-"Mac VST plugin %1 does not support processReplacing, and so cannot be used "
-"in %2 at this time"
-msgstr ""
-"Mac VST-plugin %1 d stöder inte processReplacing och kan därför inte "
-"användas i %2 för närvarande"
-
-#: plugin_manager.cc:1338
+#: plugin_manager.cc:1923
 msgid "Disabled LinuxVST scan (safe mode)"
 msgstr "Inaktiverad LinuxVST-skanning (säkert läge)"
 
-#: plugin_manager.cc:1351
-msgid "LXVST"
-msgstr "LXVST"
+#: plugin_manager.cc:2007
+msgid "Cannot write to VST3 blacklist file '%1'"
+msgstr "Det går inte att skriva till VST3-blacklistfilen '%1'"
 
-#: plugin_manager.cc:1377
-msgid ""
-"linuxVST plugin %1 does not support processReplacing, and so cannot be used "
-"in %2 at this time"
-msgstr ""
-"linuxVST-plugin %1 d stöder inte processReplacing och kan därför inte "
-"användas i %2 för tillfället"
+#: plugin_manager.cc:2093 plugin_manager.cc:3288
+msgid "VST3 (%1 / %2)"
+msgstr "VST3 (%1 / %2)"
 
-#: plugin_manager.cc:1542
+#: plugin_manager.cc:2171
+msgid "Saved VST3 plugin cache to '%1'"
+msgstr "Sparade cache för VST3-plugin till '%1'"
+
+#: plugin_manager.cc:2219
+msgid "Invalid VST3 cache file '%1'"
+msgstr "Ogiltig VST3-cachefil '%1'"
+
+#: plugin_manager.cc:2235
+msgid "Corrupt VST3 cache file '%1'"
+msgstr "Korrupt VST3-cache-fil '%1'"
+
+#: plugin_manager.cc:2434
 msgid "unknown plugin status type \"%1\" - all entries ignored"
-msgstr "okänd plugin-statustyp \"%1\" – alla poster ignoreras"
+msgstr "okänd insticksmodulsstatustyp \"%1\" – alla poster ignoreras"
 
-#: plugin_manager.cc:1562
+#: plugin_manager.cc:2456
 msgid "unknown plugin type \"%1\" - ignored"
-msgstr "okänd plugin-typ \"%1\" - ignorerad"
+msgstr "okänd insticksmodulstyp \"%1\" - ignorerad"
 
-#: plugin_manager.cc:1650
+#: plugin_manager.cc:2699
 msgid "Loading plugin order file %1"
-msgstr "Laddar plugin-orderfil %1"
+msgstr "Laddar insticksmodulsorderfil %1"
 
-#: plugin_manager.cc:1660
+#: plugin_manager.cc:2709
 msgid "Cannot parse Plugin Order info from %1"
-msgstr "Kan inte analysera plugin-orderinformation från %1"
+msgstr "Kan inte analysera insticksmodulsorderinformation från %1"
 
-#: plugin_manager.cc:1674
+#: plugin_manager.cc:2723
 msgid "Could not save Plugin Order info to %1"
-msgstr "Det gick inte att spara information om plugin-beställningen till %1"
+msgstr "Det gick inte att spara information om insticksmodulsordningen till %1"
 
-#: plugin_manager.cc:1711
+#: plugin_manager.cc:2794
 msgid "Could not save Plugin Tags info to %1"
-msgstr "Det gick inte att spara information om plugin-taggar till %1"
+msgstr "Det gick inte att spara information om insticksmodulstaggar till %1"
 
-#: plugin_manager.cc:1724
+#: plugin_manager.cc:2807
 msgid "Loading plugin meta data file %1"
-msgstr "Laddar plugin-metadatafil %1"
+msgstr "Laddar insticksmodulsmetadatafil %1"
 
-#: plugin_manager.cc:1731
+#: plugin_manager.cc:2814
 msgid "Cannot parse plugin tag info from %1"
-msgstr "Kan inte analysera plugin-tagginformation från %1"
+msgstr "Kan inte analysera insticksmodulstagginformation från %1"
 
-#: plugin_manager.cc:1808
+#: plugin_manager.cc:2892
 msgid "PluginManager::sanitize_tag could not tokenize string: "
 msgstr "PluginManager::sanitize_tag kunde inte tokenisera strängen: "
 
-#: plugin_manager.cc:1858
+#: plugin_manager.cc:2955
 msgid "PluginManager: Could not tokenize string: "
 msgstr "PluginManager: Det gick inte att tokenisera strängen: "
 
-#: port.cc:546
+#: plugin_manager.cc:3280
+msgid "VST2"
+msgstr "VST2"
+
+#: plugin_manager.cc:3290
+msgid "VST3"
+msgstr "VST3"
+
+#: plugin_manager.cc:3299
+msgid "LADSPA"
+msgstr "LADSPA"
+
+#: plugin_manager.cc:3415
+msgid "Plugin Scan Log '%1' contains invalid information."
+msgstr "Plugin Scan Log '%1' innehåller ogiltig information."
+
+#: port.cc:703
 msgid "could not reregister %1"
 msgstr "kunde inte registrera om %1"
 
-#: port_engine_shared.cc:50
+#: port_engine_shared.cc:55
 msgid "BackendPort::connect (): invalid (null) port"
 msgstr "BackendPort::connect (): ogiltig (null) port"
 
-#: port_engine_shared.cc:55
-msgid "BackendPort::connect (): wrong port-type"
-msgstr "BackendPort::connect (): fel porttyp"
-
-#: port_engine_shared.cc:60
-msgid "BackendPort::connect (): cannot inter-connect output ports."
-msgstr "BackendPort::connect (): kan inte koppla samman utgångsportar."
-
-#: port_engine_shared.cc:65
+#: port_engine_shared.cc:70
 msgid "BackendPort::connect (): cannot inter-connect input ports."
 msgstr "BackendPort::connect (): kan inte koppla samman ingångsportar."
 
-#: port_engine_shared.cc:70
+#: port_engine_shared.cc:75
 msgid "BackendPort::connect (): cannot self-connect ports."
 msgstr "BackendPort::connect (): kan inte själv ansluta portar."
 
-#: port_engine_shared.cc:76
+#: port_engine_shared.cc:81
 msgid "BackendPort::connect (): ports are already connected:"
 msgstr "BackendPort::connect (): portarna är redan anslutna:"
 
-#: port_engine_shared.cc:101
+#: port_engine_shared.cc:106
 msgid "BackendPort::disconnect (): invalid (null) port"
 msgstr "BackendPort::disconnect (): ogiltig (null) port"
 
-#: port_engine_shared.cc:106
+#: port_engine_shared.cc:111
 msgid "BackendPort::disconnect (): ports are not connected:"
 msgstr "BackendPort::disconnect (): portarna är inte anslutna:"
 
-#: port_engine_shared.cc:234
+#: port_engine_shared.cc:322
 msgid "BackendPort::port_is_physical (): invalid port."
 msgstr "BackendPort::port_is_physical (): ogiltig port."
 
-#: port_engine_shared.cc:320
+#: port_engine_shared.cc:404
 msgid "%1::register_port: Port already exists: (%2)"
 msgstr "%1::register_port: Porten finns redan: (%2)"
 
-#: port_engine_shared.cc:359
-msgid "%1::unregister_port: Failed to find port"
-msgstr "%1::unregister_port: Det gick inte att hitta porten"
-
-#: port_engine_shared.cc:416
+#: port_engine_shared.cc:512
 msgid ""
 "PortEngineSharedImpl: recovering from unclean shutdown, port registry is not "
 "empty."
@@ -2178,83 +2112,71 @@ msgstr ""
 "PortEngineSharedImpl: återställning efter orättvis avstängning, "
 "portregistret är inte tomt."
 
-#: port_engine_shared.cc:444
-msgid "%1::set_port_name: Invalid Port"
-msgstr "%1::set_port_name: Ogiltig port"
-
-#: port_engine_shared.cc:449
-msgid "%1::set_port_name: Port with given name already exists"
-msgstr "%1::set_port_name: Port med angivet namn finns redan"
-
-#: port_engine_shared.cc:474
+#: port_engine_shared.cc:585
 msgid "%1::get_port_name: invalid port"
 msgstr "%1::get_port_name: ogiltig port"
 
-#: port_engine_shared.cc:485
+#: port_engine_shared.cc:596
 msgid "%1::get_port_flags: invalid port"
 msgstr "%1::get_port_flags: ogiltig port"
 
-#: port_engine_shared.cc:495
+#: port_engine_shared.cc:606
 msgid "%1::get_port_property: invalid port"
 msgstr "%1::get_port_property: ogiltig port"
 
-#: port_engine_shared.cc:512
+#: port_engine_shared.cc:633
 msgid "%1::set_port_property: invalid port"
 msgstr "%1::set_port_property: ogiltig port"
 
-#: port_engine_shared.cc:558
+#: port_engine_shared.cc:679
 msgid "%1::connect: Invalid Source port: (%2)"
 msgstr "%1::connect: Ogiltig källport: (%2)"
 
-#: port_engine_shared.cc:562
+#: port_engine_shared.cc:683
 msgid "%1::connect: Invalid Destination port: (%2)"
 msgstr "%1::connect: Ogiltig destinationsport: (%2)"
 
-#: port_engine_shared.cc:578 port_engine_shared.cc:613
+#: port_engine_shared.cc:699 port_engine_shared.cc:734
 msgid "%1::disconnect: invalid port"
 msgstr "%1::disconnect: ogiltig port"
 
-#: port_engine_shared.cc:590
+#: port_engine_shared.cc:711
 msgid "%1::connect: Invalid Source Port Handle"
 msgstr "%1::connect: Ogiltigt källportshandtag"
 
-#: port_engine_shared.cc:597
+#: port_engine_shared.cc:718
 msgid "%1::connect: Invalid Destination Port: (%2)"
 msgstr "%1::connect: Ogiltig destinationsport: (%2)"
 
-#: port_engine_shared.cc:625
-msgid "%1::disconnect_all: invalid port"
-msgstr "%1::disconnect_all: ogiltig port"
-
-#: port_engine_shared.cc:640
+#: port_engine_shared.cc:746
 msgid "%1::disconnect_all: Invalid Port"
 msgstr "%1::disconnect_all: Ogiltig port"
 
-#: port_engine_shared.cc:653
+#: port_engine_shared.cc:774
 msgid "%1::connected_to: Invalid Port"
 msgstr "%1::connected_to: Ogiltig port"
 
-#: port_engine_shared.cc:666
+#: port_engine_shared.cc:787
 msgid "%1::physically_connected: Invalid Port"
 msgstr "%1::physically_connected: Ogiltig port"
 
-#: port_engine_shared.cc:678
+#: port_engine_shared.cc:799
 msgid "%1::get_connections: Invalid Port"
 msgstr "%1::get_connections: Ogiltig port"
 
-#: port_insert.cc:45 port_insert.cc:277
+#: port_insert.cc:46 port_insert.cc:367
 msgid "insert %1"
 msgstr "infoga %1"
 
-#: port_insert.cc:196
+#: port_insert.cc:254
 msgid "XML node describing port insert is missing the `type' field"
 msgstr "XML-nod som beskriver portinsats saknar fältet \"type\""
 
-#: port_insert.cc:201
+#: port_insert.cc:259
 msgid "non-port insert XML used for port plugin insert"
-msgstr "XML-insats utan port som används för portplugin-insats"
+msgstr "XML-insättning utan port som används för portinsticksmodulsinsättning"
 
-#: port_manager.cc:376
+#: port_manager.cc:611
 msgid ""
 "a port with the name \"%1\" already exists: check for duplicated track/bus "
 "names"
@@ -2262,7 +2184,7 @@ msgstr ""
 "en port med namnet \"%1\" finns redan: kontrollera om det finns dubbla spår-/"
 "bussnamn"
 
-#: port_manager.cc:378
+#: port_manager.cc:613
 msgid ""
 "No more ports are available. You will need to stop %1 and restart with more "
 "ports if you need this many tracks."
@@ -2270,39 +2192,27 @@ msgstr ""
 "Det finns inga fler portar tillgängliga. Du måste stoppa %1 och starta om "
 "med fler portar om du behöver så många spår."
 
-#: port_manager.cc:381
+#: port_manager.cc:616
 msgid "AudioEngine: cannot register port \"%1\": %2"
 msgstr "AudioEngine: kan inte registrera port \"%1\": %2"
 
-#: port_manager.cc:419
+#: port_manager.cc:655
 msgid "(unknown type)"
 msgstr "(okänd typ)"
 
-#: port_manager.cc:436
+#: port_manager.cc:672
 msgid "(unknown error)"
 msgstr "(okänt fel)"
 
-#: port_manager.cc:562
+#: port_manager.cc:798
 msgid "AudioEngine: cannot connect %1 (%2) to %3 (%4)"
 msgstr "AudioEngine: kan inte ansluta %1 (%2) till %3 (%4)"
 
-#: port_manager.cc:624 port_manager.cc:625
+#: port_manager.cc:860 port_manager.cc:861
 msgid "Re-establising port %1 failed"
 msgstr "Återupprättande av port %1 f misslyckades"
 
-#: port_manager.cc:1193
-msgid "Could not save MIDI port info to %1"
-msgstr "Det gick inte att spara MIDI-portinformationen till %1"
-
-#: port_manager.cc:1208
-msgid "Cannot load MIDI port info from %1"
-msgstr "Kan inte ladda MIDI-portinformation från %1"
-
-#: port_manager.cc:1228
-msgid "MIDI port info file %1 contains invalid information - please remove it."
-msgstr "MIDI-portinfo-fil %1 c innehåller ogiltig information – ta bort den."
-
-#: port_manager.cc:1396
+#: port_manager.cc:1941
 msgid "Ambiguous latency for port '%1' (%2, %3)"
 msgstr "Tvetydig latens för port '%1' (%2, %3)"
 
@@ -2314,19 +2224,19 @@ msgstr "Ingen %1-egenskapsflagga i element %2"
 msgid "No child node with active property"
 msgstr "Ingen underordnad nod med aktiv egenskap"
 
-#: rc_configuration.cc:101
+#: rc_configuration.cc:120
 msgid "Loading system configuration file %1"
 msgstr "Laddar systemkonfigurationsfil %1"
 
-#: rc_configuration.cc:105
+#: rc_configuration.cc:124
 msgid "%1: cannot read system configuration file \"%2\""
 msgstr "%1: kan inte läsa systemkonfigurationsfilen \"%2\""
 
-#: rc_configuration.cc:110
+#: rc_configuration.cc:129
 msgid "%1: system configuration file \"%2\" not loaded successfully."
 msgstr "%1: systemkonfigurationsfilen \"%2\" kunde inte laddas."
 
-#: rc_configuration.cc:114
+#: rc_configuration.cc:133
 msgid ""
 "Your system %1 configuration file is empty. This probably means that there "
 "was an error installing %1"
@@ -2334,33 +2244,33 @@ msgstr ""
 "Din systemkonfigurationsfil %1 c är tom. Detta betyder troligen att det "
 "uppstod ett fel vid installationen av %1"
 
-#: rc_configuration.cc:129
+#: rc_configuration.cc:148
 msgid "Loading user configuration file %1"
 msgstr "Laddar användarkonfigurationsfil %1"
 
-#: rc_configuration.cc:133
+#: rc_configuration.cc:152
 msgid "%1: cannot read configuration file \"%2\""
 msgstr "%1: kan inte läsa konfigurationsfilen \"%2\""
 
-#: rc_configuration.cc:138
+#: rc_configuration.cc:157
 msgid "%1: user configuration file \"%2\" not loaded successfully."
 msgstr "%1: användarkonfigurationsfilen \"%2\" kunde inte laddas."
 
-#: rc_configuration.cc:142
+#: rc_configuration.cc:161
 msgid "your %1 configuration file is empty. This is not normal."
 msgstr "din %1 konfigurationsfil är tom. Detta är inte normalt."
 
-#: rc_configuration.cc:158
+#: rc_configuration.cc:177
 msgid "Config file %1 not saved"
 msgstr "Konfigurationsfilen %1 har inte sparats"
 
-#: rc_configuration.cc:160 rc_configuration.cc:168
+#: rc_configuration.cc:179 rc_configuration.cc:187
 msgid "Could not remove temporary config file at path \"%1\" (%2)"
 msgstr ""
 "Det gick inte att ta bort den tillfälliga konfigurationsfilen på sökvägen "
 "\"%1\" (%2)"
 
-#: rc_configuration.cc:166
+#: rc_configuration.cc:185
 msgid "Could not rename temporary config file %1 to %2 (%3)"
 msgstr ""
 "Det gick inte att byta namn på den tillfälliga konfigurationsfilen %1 till "
@@ -2374,42 +2284,42 @@ msgstr "Kan inte öppna filen \"%1\": %2"
 msgid "Could not read file \"%1\"."
 msgstr "Det gick inte att läsa filen \"%1\"."
 
-#: recent_sessions.cc:59
+#: recent_sessions.cc:60
 msgid "cannot open recent session file %1 (%2)"
 msgstr "kan inte öppna den senaste sessionsfilen %1 (%2)"
 
-#: recent_sessions.cc:72 recent_sessions.cc:130
+#: recent_sessions.cc:73 recent_sessions.cc:131
 msgid "Error reading recent session file %1 (%2)"
 msgstr "Fel vid läsning av senaste sessionsfil %1 (%2)"
 
-#: recent_sessions.cc:117
+#: recent_sessions.cc:118
 msgid "Cannot open recent template file %1 (%2)"
 msgstr "Kan inte öppna den senaste mallfilen %1 (%2)"
 
-#: recent_sessions.cc:180
+#: recent_sessions.cc:181
 msgid "Error writing recent sessions file %1 (%2)"
 msgstr "Fel vid skrivning av fil med senaste sessioner %1 (%2)"
 
-#: recent_sessions.cc:215
+#: recent_sessions.cc:216
 msgid "Error writing saved template file %1 (%2)"
 msgstr "Fel vid skrivning av sparad mallfil %1 (%2)"
 
-#: region_factory.cc:83 region_factory.cc:122 region_factory.cc:161
-#: region_factory.cc:201
+#: region_factory.cc:82 region_factory.cc:119 region_factory.cc:156
+#: region_factory.cc:194
 msgid ""
 "programming error: RegionFactory::create() called with unknown Region type"
 msgstr ""
 "programmeringsfel: RegionFactory::create() anropad med okänd Region-typ"
 
-#: region_factory.cc:557
+#: region_factory.cc:540
 msgid "%1 compound-%2 (%3)"
 msgstr "%1 compound-%2 (%3)"
 
-#: region_factory.cc:559
+#: region_factory.cc:542
 msgid "%1 compound-%2.1 (%3)"
 msgstr "%1 compound-%2.1 (%3)"
 
-#: region_factory.cc:621
+#: region_factory.cc:600
 msgid "cannot create new name for region \"%1\""
 msgstr "det går inte att skapa ett nytt namn för regionen \"%1\"."
 
@@ -2425,159 +2335,147 @@ msgstr "Import: src_new() misslyckades: %1"
 msgid "return %1"
 msgstr "returnera %1"
 
-#: route.cc:949 route.cc:3174 track.cc:867
+#: route.cc:312
+msgid "LFE"
+msgstr "LFE"
+
+#: route.cc:313
+msgid "Lrs"
+msgstr "Lrs"
+
+#: route.cc:313
+msgid "Rrs"
+msgstr "Rrs"
+
+#: route.cc:313
+msgid "Lfh"
+msgstr "Lfh"
+
+#: route.cc:313
+msgid "Rfh"
+msgstr "Rfh"
+
+#: route.cc:313
+msgid "Lrh"
+msgstr "Lrh"
+
+#: route.cc:313
+msgid "Rrh"
+msgstr "Rrh"
+
+#: route.cc:314
+msgid "BinL"
+msgstr "BinL"
+
+#: route.cc:314
+msgid "BinR"
+msgstr "BinR"
+
+#: route.cc:1020 route.cc:3653 track.cc:1002
 msgid "unknown Processor type \"%1\"; ignored"
 msgstr "okänd processortyp \"%1\"; ignorerad"
 
-#: route.cc:971
+#: route.cc:1044
 msgid "processor could not be created. Ignored."
 msgstr "processorn kunde inte skapas. Ignorerad."
 
-#: route.cc:2602 route.cc:2808
+#: route.cc:2733 route.cc:2959
 msgid "Bad node sent to Route::set_state() [%1]"
 msgstr "Felaktig nod skickad till Route::set_state() [%1]"
 
-#: route.cc:2673
-msgid "Pannable state found for route (%1) without a panner!"
-msgstr "Pannbar status hittad för rutt (%1) utan panner!"
+#: route.cc:2804
+msgid "Panner state mismatches for track/bus (%1)."
+msgstr "Pannerstatus stämmer inte överens för spår/buss (%1)."
 
-#: route.cc:3673
+#: route.cc:4141
 msgid "Invalid Solo-Isolate propagation: from:%1 new:%2 - old:%3 = delta:%4"
 msgstr ""
 "Ogiltig Solo-Isolate-spridning: från:%1 nytt:%2 - gammalt:%3 = delta:%4"
 
-#: route.cc:4940
-msgid "Amp/Fader on Route '%1' went AWOL. Re-added."
-msgstr "Amp/Fader på rutt '%1' försvann. Tillagd igen."
+#: route.cc:5567
+msgid "Amp/Fader on track/bus '%1' was missing."
+msgstr "Amp/Fader på spår/buss '%1' saknades."
 
-#: route.cc:5789 route.cc:5800
-msgid "lo"
-msgstr "lo"
+#: route_group.cc:690
+msgid "So far only one subgroup per group is supported"
+msgstr "Än så länge stöds endast en undergrupp per grupp"
 
-#: route.cc:5790
-msgid "mid"
-msgstr "mitten"
-
-#: route.cc:5791 route.cc:5803
-msgid "hi"
-msgstr "hej"
-
-#: route.cc:5801
-msgid "lm"
-msgstr "lm"
-
-#: route.cc:5802
-msgid "hm"
-msgstr "hm"
-
-#: route.cc:5877
-msgid "Leveler"
-msgstr "Utjämnare"
-
-#: route.cc:5879
-msgid "Compressor"
-msgstr "Kompressor"
-
-#: route.cc:5881 route.cc:5883
-msgid "Limiter"
-msgstr "Begränsare"
-
-#: route.cc:5883
-msgid "Sidechain"
-msgstr "Sidokedja"
-
-#: route.cc:5886 route.cc:5888 route.cc:5905 route.cc:5907
-msgid "???"
-msgstr "???"
-
-#: route.cc:5898
-msgid "Attk"
-msgstr "Attk"
-
-#: route.cc:5900
-msgid "Ratio"
-msgstr "Förhållande"
-
-#: route.cc:5903
-msgid "Rels"
-msgstr "Rels"
-
-#: route_group.cc:542
-msgid "You cannot subgroup MIDI tracks at this time"
-msgstr "Du kan inte dela upp MIDI-spår i undergrupper just nu"
-
-#: route_group.cc:549
-msgid ""
-"You cannot subgroup tracks with different number of outputs at this time."
-msgstr ""
-"Du kan för närvarande inte dela upp spår med olika antal utgångar i "
-"undergrupper."
-
-#: rb_effect.cc:234 rb_effect.cc:271
+#: rb_effect.cc:232 rb_effect.cc:267 sp_stretch.cc:233
 msgid "tempoize: error reading data from %1 at %2 (wanted %3, got %4)"
 msgstr "tempoize: fel vid läsning av data från %1 vid %2 (önskade %3, fick %4)"
 
-#: rb_effect.cc:297 rb_effect.cc:326
+#: rb_effect.cc:293 rb_effect.cc:322 sp_stretch.cc:294
 msgid "error writing tempo-adjusted data to %1"
 msgstr "fel vid skrivning av tempojusterade data till %1"
 
-#: rt_tasklist.cc:94
-msgid "Cannot create thread for TaskList!"
-msgstr "Kan inte skapa tråd för TaskList!"
-
-#: send.cc:75
+#: send.cc:77
 msgid "aux %1"
 msgstr "aux %1"
 
-#: send.cc:80 send.cc:518
+#: send.cc:82 send.cc:546
 msgid "send %1"
 msgstr "skicka %1"
 
-#: send.cc:82
+#: send.cc:84
 msgid "foldback %1"
 msgstr "foldback %1"
 
-#: send.cc:84
+#: send.cc:86
 msgid "programming error: send created using role %1"
 msgstr "programmeringsfel: skickat med roll %1"
 
-#: session.cc:354
+#: session.cc:397
+msgid "Session initialization failed because Audio/MIDI engine is not running."
+msgstr ""
+"Sessionsinitialiseringen misslyckades eftersom Audio/MIDI-motorn inte körs."
+
+#: session.cc:411
 msgid "Session initialization failed"
 msgstr "Initialiseringen av sessionen misslyckades"
 
-#: session.cc:371
+#: session.cc:427
 msgid "Failed to load template/snapshot state"
 msgstr "Det gick inte att ladda mall/snapshot-status"
 
-#: session.cc:374
+#: session.cc:431
 msgid "Failed to parse template/snapshot state"
 msgstr "Det gick inte att analysera mall/snapshot-status"
 
-#: session.cc:394
+#: session.cc:452
 msgid "Failed to load state"
 msgstr "Det gick inte att ladda tillståndet"
 
-#: session.cc:404 session.cc:408 session.cc:411 session.cc:414 session.cc:417
+#: session.cc:465 session.cc:469 session.cc:472 session.cc:475 session.cc:478
+#: session.cc:481 session.cc:487
 msgid "Cannot initialize session/engine: %1"
 msgstr "Kan inte initiera session/motor: %1"
 
-#: session.cc:404
+#: session.cc:465
 msgid "Failed to create background threads."
 msgstr "Det gick inte att skapa bakgrundstrådar."
 
-#: session.cc:408
+#: session.cc:469
 msgid "Invalid TempoMap in session-file."
 msgstr "Ogiltig TempoMap i sessionsfilen."
 
-#: session.cc:411
+#: session.cc:472
 msgid "Invalid or corrupt session state."
 msgstr "Ogiltigt eller korrupt sessionsstatus."
 
-#: session.cc:414
+#: session.cc:475
 msgid "Port registration failed."
 msgstr "Portregistreringen misslyckades."
 
-#: session.cc:417
+#: session.cc:478
+msgid "Audio/MIDI Engine is not running or sample-rate mismatches."
+msgstr ""
+"Audio/MIDI-motorn körs inte eller samplingsfrekvensen stämmer inte överens."
+
+#: session.cc:481
+msgid "Required Plugin/Processor is missing."
+msgstr "Nödvändig plugin/processor saknas."
+
+#: session.cc:487
 msgid ""
 "Unexpected exception during session setup, possibly invalid audio/midi "
 "engine parameters. Please see stdout/stderr for details"
@@ -2585,74 +2483,75 @@ msgstr ""
 "Oväntat undantag under sessionsuppsättningen, eventuellt ogiltiga ljud-/midi-"
 "motorparametrar. Se stdout/stderr för mer information"
 
-#: session.cc:449
+#: session.cc:541
 msgid "Connect to engine"
 msgstr "Ansluter till ljudmotorn"
 
-#: session.cc:471
+#: session.cc:576
 msgid "Session loading complete"
 msgstr "Sessionen laddad"
 
-#: session.cc:530
+#: session.cc:629
 msgid "Set up LTC"
 msgstr "Konfigurera LTC"
 
-#: session.cc:532
+#: session.cc:631
 msgid "Set up Click"
 msgstr "Konfigurera Klicka"
 
-#: session.cc:534
+#: session.cc:633
 msgid "Set up standard connections"
 msgstr "Konfigurera standardanslutningar"
 
-#: session.cc:859
+#: session.cc:1015
 msgid "could not setup Click I/O"
 msgstr "kunde inte konfigurera Klicka på I/O"
 
-#: session.cc:920
-msgid "cannot connect master output %1 to %2"
-msgstr "kan inte ansluta masterutgång %1 till %2"
-
-#: session.cc:937
+#: session.cc:1106 session.cc:1419
 msgid "Cannot remove monitor section while the engine is offline."
 msgstr "Det går inte att ta bort monitorsektionen medan motorn är offline."
 
-#: session.cc:998
+#: session.cc:1145
 msgid "Cannot create monitor section while the engine is offline."
 msgstr "Det går inte att skapa en övervakningssektion när motorn är offline."
 
-#: session.cc:1019
+#: session.cc:1166
 msgid "Cannot create monitor section. 'Monitor' Port name is not unique."
 msgstr ""
 "Kan inte skapa övervakningssektion. Portnamnet \"Monitor\" är inte unikt."
 
-#: session.cc:1053 session.cc:1180
+#: session.cc:1200 session.cc:1347
 msgid "cannot connect control input %1 to %2"
 msgstr "kan inte ansluta styrsignal %1 till %2"
 
-#: session.cc:1073 session.cc:1199
+#: session.cc:1239 session.cc:1365
 msgid "The preferred I/O for the monitor bus (%1) cannot be found"
 msgstr "Den önskade I/O för monitorbussen (%1) kan inte hittas."
 
-#: session.cc:1104 session.cc:1230
+#: session.cc:1270 session.cc:1396
 msgid "cannot connect control output %1 to %2"
 msgstr "kan inte ansluta styrutgång %1 till %2"
 
-#: session.cc:1309
+#: session.cc:1513
+msgid "Some surround sound systems require a sample-rate of 48kHz or 96kHz."
+msgstr ""
+"Vissa surroundljudsystem kräver en samplingsfrekvens på 48kHz eller 96kHz."
+
+#: session.cc:1654
 msgid "cannot create Auditioner: no auditioning of regions possible"
 msgstr "kan inte skapa Auditioner: ingen auditionering av regioner möjlig"
 
-#: session.cc:1574
+#: session.cc:1916
 msgid "Session: you can't use that location for auto punch (start <= end)"
 msgstr ""
 "Session: du kan inte använda den platsen för automatisk stämpling (start <= "
 "slut)"
 
-#: session.cc:1595
+#: session.cc:1937
 msgid "Session: you can't use that location for session start/end)"
 msgstr "Session: du kan inte använda den platsen för sessionens start/slut)"
 
-#: session.cc:1629
+#: session.cc:1971
 msgid ""
 "You cannot use this location for auto-loop because it has zero or negative "
 "length"
@@ -2660,87 +2559,63 @@ msgstr ""
 "Du kan inte använda denna plats för automatisk loop eftersom den har noll "
 "eller negativ längd."
 
-#: session.cc:1821
+#: session.cc:2163
 msgid "programming error: session range removed!"
 msgstr "programmeringsfel: sessionsintervall borttaget!"
 
-#: session.cc:2092
-msgid "feedback loop setup between %1 and %2"
-msgstr "återkopplingsslinga mellan %1 och %2"
-
-#: session.cc:2357
-msgid "Audio "
-msgstr "Ljud "
-
-#: session.cc:2361
-msgid "MIDI "
-msgstr "MIDI "
-
-#: session.cc:2430
+#: session.cc:2806
 msgid "Session: could not create new midi track."
 msgstr "Session: kunde inte skapa nytt MIDI-spår."
 
-#: session.cc:2436
+#: session.cc:2812
 msgid ""
-"No more JACK ports are available. You will need to stop %1 and restart JACK "
-"with more ports if you need this many tracks."
+"A required port for MIDI I/O could not be created (%1).\n"
+"You may need to restart the Audio/MIDI engine to fix this."
 msgstr ""
-"Det finns inga fler JACK-portar tillgängliga. Du måste stoppa %1 och starta "
-"om JACK med fler portar om du behöver så många spår."
+"En port som krävs för MIDI I/O kunde inte skapas (%1).\\nDu kan behöva "
+"starta om Audio/MIDI-motorn för att åtgärda detta."
 
-#: session.cc:2484 session.cc:2487
+#: session.cc:2845 session.cc:2848
 msgid "Midi Bus"
 msgstr "Midi-buss"
 
-#: session.cc:2509
+#: session.cc:2870
 msgid "cannot configure new midi bus input"
 msgstr "kan inte konfigurera ny MIDI-bussingång"
 
-#: session.cc:2515
+#: session.cc:2876
 msgid "cannot configure new midi bus output"
 msgstr "kan inte konfigurera ny MIDI-bussutgång"
 
-#: session.cc:2529 session.cc:2809
-msgid "Session: could not create new audio route."
-msgstr "Session: kunde inte skapa ny ljudväg."
-
-#: session.cc:2703 session.cc:2711 session.cc:2785 session.cc:2793
+#: session.cc:3049 session.cc:3057 session.cc:3133 session.cc:3141
 msgid "cannot configure %1 in/%2 out configuration for new audio track"
 msgstr "kan inte konfigurera %1 in/%2 out-konfiguration för nytt ljudspår"
 
-#: session.cc:2727
+#: session.cc:3075
 msgid "Session: could not create new audio track."
 msgstr "Session: kunde inte skapa nytt ljudspår."
 
-#: session.cc:2760 session.cc:2763
+#: session.cc:3108 session.cc:3111
 msgid "Bus"
 msgstr "Buss"
 
-#: session.cc:2888 session.cc:2898
-msgid "Session: UINT_MAX routes? impossible!"
-msgstr "Session: UINT_MAX-rutter? Omöjligt!"
-
-#: session.cc:3033
+#: session.cc:3390
 msgid "Session: cannot create track/bus from template description"
 msgstr "Session: kan inte skapa spår/buss från mallbeskrivning"
 
-#: session.cc:3062
-msgid "Session: could not create new route from template"
-msgstr "Session: kunde inte skapa ny rutt från mall"
-
-#: session.cc:3097
+#: session.cc:3495
 msgid "Adding new tracks/busses failed"
 msgstr "Det gick inte att lägga till nya spår/bussar"
 
-#: session.cc:4675
+#: session.cc:5192
 msgid "Merging embedded file %1: name collision AND md5 hash collision!"
 msgstr "Sammanslagning av inbäddad fil %1: namnkonflikt OCH md5-hashkonflikt!"
 
-#: session.cc:4799
+#: session.cc:5315
 msgid "There are already %1 recordings for %2, which I consider too many."
 msgstr "Det finns redan %1 inspelningar för %2, vilket jag anser är för många."
 
-#: session.cc:4861
+#: session.cc:5376
 msgid ""
 "There are already many recordings for %1, resulting in a too long file-path "
 "%2."
@@ -2748,89 +2623,83 @@ msgstr ""
 "Det finns redan många inspelningar för %1, vilket resulterar i en för lång "
 "filväg %2."
 
-#: session.cc:5475
+#: session.cc:6049
 msgid "send ID %1 appears to be in use already"
 msgstr "skicka ID %1 verkar redan vara i bruk"
 
-#: session.cc:5487
+#: session.cc:6061
 msgid "aux send ID %1 appears to be in use already"
 msgstr "aux send ID %1 verkar redan vara i bruk"
 
-#: session.cc:5499
+#: session.cc:6085
 msgid "return ID %1 appears to be in use already"
 msgstr "retur-ID %1 verkar redan vara i bruk"
 
-#: session.cc:5511
+#: session.cc:6097
 msgid "insert ID %1 appears to be in use already"
 msgstr "infoga ID %1 verkar redan vara i bruk"
 
-#: session.cc:5659
+#: session.cc:6258
 msgid "Cannot write a range where end <= start (e.g. %1 <= %2)"
 msgstr "Kan inte skriva ett intervall där slut <= start (t.ex. %1 <= %2)"
 
-#: session.cc:5672
+#: session.cc:6271
 msgid "Cannot write a range with no data."
 msgstr "Det går inte att skriva ett intervall utan data."
 
-#: session.cc:5714
+#: session.cc:6310
 msgid "cannot create new file \"%1\" for %2"
 msgstr "kan inte skapa ny fil \"%1\" för %2"
 
-#: session_bundles.cc:137
-#, c-format
-msgid "out %s"
-msgstr "ut %s"
+#: session.cc:7988 session.cc:7989
+msgid "Virtual Keyboard"
+msgstr "Virtuellt tangentbord"
 
-#: session_bundles.cc:139
+#: session_bundles.cc:154
 #, c-format
 msgid "out %<PRIu32>"
 msgstr "ut %<PRIu32>"
 
-#: session_bundles.cc:154
+#: session_bundles.cc:175
 #, c-format
 msgid "out %<PRIu32>+%<PRIu32>"
 msgstr "ut %<PRIu32>+%<PRIu32>"
 
-#: session_bundles.cc:171
-#, c-format
-msgid "in %s"
-msgstr "i %s"
-
-#: session_bundles.cc:173
+#: session_bundles.cc:196
 #, c-format
 msgid "in %<PRIu32>"
 msgstr "i %<PRIu32>"
 
-#: session_bundles.cc:188
+#: session_bundles.cc:217
 #, c-format
 msgid "in %<PRIu32>+%<PRIu32>"
 msgstr "i %<PRIu32>+%<PRIu32>"
 
-#: session_click.cc:275
+#: session_click.cc:279
 msgid "cannot open click soundfile %1 (%2)"
 msgstr "kan inte öppna ljudfilen %1 (%2)"
 
-#: session_click.cc:288
+#: session_click.cc:292
 msgid "cannot read data from click soundfile"
 msgstr "kan inte läsa data från klickljudfilen"
 
-#: session_command.cc:85
+#: session_command.cc:88
 msgid "Tried to reconstitute a MementoCommand with no contents, failing. id=%1"
 msgstr ""
 "Försökte återställa ett MementoCommand utan innehåll, misslyckades. id=%1"
 
-#: session_command.cc:147
+#: session_command.cc:148
 msgid ""
 "Could not reconstitute MementoCommand from XMLNode. object type = %1 id = %2"
 msgstr ""
 "Det gick inte att återställa MementoCommand från XMLNode. objekttyp = %1 id "
 "= %2"
 
-#: session_command.cc:158
+#: session_command.cc:162
 msgid "Could get object ID and type name for StatefulDiffCommand from XMLNode."
 msgstr "Kan hämta objekt-ID och typnamn för StatefulDiffCommand från XMLNode."
 
-#: session_command.cc:181
+#: session_command.cc:185
 msgid ""
 "Could not reconstitute StatefulDiffCommand from XMLNode. object type = %1 id "
 "= %2"
@@ -2838,23 +2707,23 @@ msgstr ""
 "Det gick inte att återställa StatefulDiffCommand från XMLNode. objekttyp = "
 "%1 id = %2"
 
-#: session_configuration.cc:152
+#: session_configuration.cc:172
 msgid "%1: cannot part default session options \"%2\""
 msgstr "%1: kan inte dela standardinställningar för sessionen \"%2\""
 
-#: session_configuration.cc:158
+#: session_configuration.cc:178
 msgid "Invalid session default XML Root."
 msgstr "Ogiltig sessionsstandard XML-rot."
 
-#: session_configuration.cc:165
+#: session_configuration.cc:185
 msgid "Loaded custom session defaults."
 msgstr "Laddade anpassade sessionsstandardinställningar."
 
-#: session_configuration.cc:167
+#: session_configuration.cc:187
 msgid "Found no session defaults in XML file."
 msgstr "Hittade inga sessionsstandardvärden i XML-filen."
 
-#: session_configuration.cc:193
+#: session_configuration.cc:213
 msgid "Could not save session options"
 msgstr "Kunde inte spara sessionsalternativ"
 
@@ -2883,20 +2752,16 @@ msgstr ""
 "Sessionens utbytesmapp är skadad. Det finns mer än en mapp i '%1'. Ta bort "
 "extra undermappar för att minska risken för tvetydigheter i filnamnen."
 
-#: session_events.cc:233
+#: session_events.cc:249
 msgid "Session: cannot have two events of type %1 at the same sample (%2)."
 msgstr ""
 "Session: det kan inte finnas två händelser av typ %1 vid samma prov (%2)."
 
-#: session_export.cc:149
-msgid "Cannot prepare transport for export"
-msgstr "Kan inte förbereda transport för export"
-
-#: session_export.cc:168
+#: session_export.cc:182
 msgid "%1: cannot seek to %2 for export"
 msgstr "%1: kan inte söka till %2 f eller exportera"
 
-#: session_export.cc:265
+#: session_export.cc:285
 msgid "Export ended unexpectedly: %1"
 msgstr "Exporten avslutades oväntat: %1"
 
@@ -2908,172 +2773,172 @@ msgstr ""
 "LTC-kodare: ogiltig bildfrekvens – LTC-kodning är inaktiverad under resten "
 "av denna session."
 
-#: session_midi.cc:562
+#: session_midi.cc:603
 msgid "Session: cannot send quarter-frame MTC message (%1)"
 msgstr "Session: kan inte skicka MTC-meddelande med kvartersram (%1)"
 
-#: session_playlists.cc:132
+#: session_playlists.cc:136
 msgid "Session State: Unused playlist was listed as used."
 msgstr "Sessionsstatus: Oanvänd spellista listades som använd."
 
-#: session_playlists.cc:486 session_playlists.cc:506
+#: session_playlists.cc:538
 msgid "Session: cannot create Playlist from XML description."
 msgstr "Session: kan inte skapa spellista från XML-beskrivning."
 
-#: session_process.cc:201
+#: session_process.cc:228
 msgid "Session: error in no roll for %1"
 msgstr "Session: fel i ingen rullning för %1"
 
-#: session_process.cc:1000
+#: session_process.cc:1080
 msgid "Programming error: illegal event type in process_event (%1)"
 msgstr "Programmeringsfel: olaglig händelsetyp i process_event (%1)"
 
-#: session_state.cc:204
+#: session_state.cc:202
 msgid "solo cut control (dB)"
 msgstr "solo cut-kontroll (dB)"
 
-#: session_state.cc:225
+#: session_state.cc:222
 msgid "Set block size and sample rate"
 msgstr "Ställ in blockstorlek och samplingsfrekvens"
 
-#: session_state.cc:230
+#: session_state.cc:227
 msgid "Using configuration"
 msgstr "Använda konfiguration"
 
-#: session_state.cc:246
+#: session_state.cc:247
 msgid "Butler did not start"
 msgstr "Butler startade inte"
 
-#: session_state.cc:251
+#: session_state.cc:252
 msgid "MIDI I/O thread did not start"
 msgstr "MIDI I/O-tråden startade inte"
 
-#: session_state.cc:269 session_state.cc:391
-msgid "Unexpected exception during session setup: "
-msgstr "Oväntat undantag under sessionsuppsättning: "
-
-#: session_state.cc:272 session_state.cc:394
-msgid "Unknown exception during session setup"
-msgstr "Okänd undantag under sessionsupprättande"
-
-#: session_state.cc:298
+#: session_state.cc:290
 msgid "Could not set session state from XML"
 msgstr "Kunde inte ställa in sessionsstatus från XML"
 
-#: session_state.cc:302
+#: session_state.cc:294
 msgid "Session state: "
 msgstr "Sessionsstatus: "
 
-#: session_state.cc:398
+#: session_state.cc:389
+msgid "Unexpected exception during session setup: "
+msgstr "Oväntat undantag under sessionsuppsättning: "
+
+#: session_state.cc:392
+msgid "Unknown exception during session setup"
+msgstr "Okänd undantag under sessionsupprättande"
+
+#: session_state.cc:396
 msgid "Reset Remote Controls"
 msgstr "Återställ fjärrkontroller"
 
-#: session_state.cc:411 session_state.cc:441
+#: session_state.cc:410 session_state.cc:430
 msgid "Filling playback buffers"
 msgstr "Fylla uppspelningsbuffertar"
 
-#: session_state.cc:508
+#: session_state.cc:497
 msgid "Session: cannot create session peakfile folder \"%1\" (%2)"
-msgstr "Session: kan inte skapa sessionens peakfile-mapp \"%1\" (%2)"
+msgstr "Session: kan inte skapa sessionens toppfilsmapp \"%1\" (%2)"
 
-#: session_state.cc:515
+#: session_state.cc:504
 msgid "Session: cannot create session sounds dir \"%1\" (%2)"
 msgstr "Session: kan inte skapa sessionsljudkatalog \"%1\" (%2)"
 
-#: session_state.cc:522
+#: session_state.cc:511
 msgid "Session: cannot create session midi dir \"%1\" (%2)"
 msgstr "Session: kan inte skapa session midi dir \"%1\" (%2)"
 
-#: session_state.cc:529
+#: session_state.cc:518
 msgid "Session: cannot create session dead sounds folder \"%1\" (%2)"
 msgstr "Session: kan inte skapa session död ljudmapp \"%1\" (%2)"
 
-#: session_state.cc:536
+#: session_state.cc:525
 msgid "Session: cannot create session export folder \"%1\" (%2)"
 msgstr "Session: kan inte skapa sessionsexportmappen \"%1\" (%2)"
 
-#: session_state.cc:544
+#: session_state.cc:533
 msgid "Session: cannot create session backup folder \"%1\" (%2)"
 msgstr ""
 "Session: kan inte skapa säkerhetskopieringsmapp för sessionen \"%1\" (%2)"
 
-#: session_state.cc:552
+#: session_state.cc:541
 msgid "Session: cannot create session analysis folder \"%1\" (%2)"
 msgstr "Session: kan inte skapa sessionsanalysmappen \"%1\" (%2)"
 
-#: session_state.cc:559
+#: session_state.cc:548
 msgid "Session: cannot create session plugins folder \"%1\" (%2)"
-msgstr "Session: kan inte skapa mappen för sessionsplugins \"%1\" (%2)"
+msgstr "Session: kan inte skapa mappen för sessionsinsticksmoduler \"%1\" (%2)"
 
-#: session_state.cc:566
+#: session_state.cc:555
 msgid "Session: cannot create session externals folder \"%1\" (%2)"
 msgstr "Session: kan inte skapa sessionens externa mapp \"%1\" (%2)"
 
-#: session_state.cc:580
+#: session_state.cc:569
 msgid "Session: cannot create session folder \"%1\" (%2)"
 msgstr "Session: kan inte skapa sessionsmappen \"%1\" (%2)"
 
-#: session_state.cc:615
+#: session_state.cc:604
 msgid "Error reading session template file %1 (%2)"
 msgstr "Fel vid läsning av sessionsmallfilen %1 (%2)"
 
-#: session_state.cc:630
+#: session_state.cc:619
 msgid "Error writing session template file %1 (%2)"
 msgstr "Fel vid skrivning av sessionsmallfil %1 (%2)"
 
-#: session_state.cc:645
+#: session_state.cc:634
 msgid "Could not open %1 for writing session template"
 msgstr "Kunde inte öppna %1 f eller skriva sessionsmall"
 
-#: session_state.cc:652
+#: session_state.cc:641
 msgid "Could not open session template %1 for reading"
 msgstr "Kunde inte öppna sessionsmallen %1 f eller läsa"
 
-#: session_state.cc:702
+#: session_state.cc:691
 msgid "Could not remove pending capture state at path \"%1\" (%2)"
 msgstr ""
 "Det gick inte att ta bort väntande inspelningsstatus på sökvägen \"%1\" (%2)"
 
-#: session_state.cc:731
+#: session_state.cc:720
 msgid "could not rename snapshot %1 to %2 (%3)"
 msgstr "kunde inte byta namn på ögonblicksbild %1 till %2 (%3)"
 
-#: session_state.cc:759
+#: session_state.cc:748
 msgid "Could not remove session file at path \"%1\" (%2)"
 msgstr "Det gick inte att ta bort sessionsfilen på sökvägen \"%1\" (%2)"
 
-#: session_state.cc:883
+#: session_state.cc:881
 msgid "state could not be saved to %1"
 msgstr "det gick inte att spara till %1"
 
-#: session_state.cc:885 session_state.cc:900
+#: session_state.cc:883 session_state.cc:896
 msgid "Could not remove temporary session file at path \"%1\" (%2)"
 msgstr ""
 "Det gick inte att ta bort den tillfälliga sessionsfilen på sökvägen \"%1\" "
 "(%2)"
 
-#: session_state.cc:897
+#: session_state.cc:893
 msgid "could not rename temporary session file %1 to %2 (%3)"
 msgstr ""
 "det gick inte att byta namn på den tillfälliga sessionsfilen %1 till %2 (%3)"
 
-#: session_state.cc:926
+#: session_state.cc:922
 msgid "Could not save backup file at path \"%1\" (%2)"
 msgstr "Det gick inte att spara säkerhetskopian på sökvägen \"%1\" (%2)"
 
-#: session_state.cc:1002
+#: session_state.cc:1003
 msgid "%1: session file \"%2\" doesn't exist!"
 msgstr "%1: sessionsfilen \"%2\" finns inte!"
 
-#: session_state.cc:1014
+#: session_state.cc:1015
 msgid "Could not understand session file %1"
 msgstr "Kunde inte förstå sessionsfilen %1"
 
-#: session_state.cc:1023
+#: session_state.cc:1024
 msgid "Session file %1 is not a session"
 msgstr "Sessionsfilen %1 är inte en session"
 
-#: session_state.cc:1035
+#: session_state.cc:1036
 msgid ""
 "Incompatible Session Version. That session was created with a newer version "
 "of %1"
@@ -3081,122 +2946,86 @@ msgstr ""
 "Inkompatibel sessionsversion. Den sessionen skapades med en nyare version av "
 "%1"
 
-#: session_state.cc:1347
+#: session_state.cc:1948
 msgid "Session-Save: Failed to copy MIDI Source '%1' for snapshot"
 msgstr ""
 "Session-Save: Det gick inte att kopiera MIDI-källan '%1' för ögonblicksbilden"
 
-#: session_state.cc:1551
+#: session_state.cc:1998
 msgid "programming error: Session: incorrect XML node sent to set_state()"
 msgstr "programmeringsfel: Session: felaktig XML-nod skickad till set_state()"
 
-#: session_state.cc:1621
-msgid "Session: XML state has no options section"
-msgstr "Session: XML-status har inget alternativavsnitt"
+#: session_state.cc:2020
+msgid "Session: Load aborted due to sample-rate mismatch"
+msgstr "Session: Laddning avbruten på grund av felaktig samplingsfrekvens"
 
-#: session_state.cc:1626
-msgid "Session: XML state has no metadata section"
-msgstr "Session: XML-status har inget metadataavsnitt"
+#: session_state.cc:2209
+msgid "Session: failed to load active playlists"
+msgstr "Session: aktiva spellistor kunde inte laddas"
 
-#: session_state.cc:1637
-msgid "Session: XML state has no sources section"
-msgstr "Session: XML-status har ingen källsektion"
+#: session_state.cc:2222
+msgid "Session: failed to load region compound information"
+msgstr "Session: misslyckades med att ladda regionens sammansatta information"
 
-#: session_state.cc:1644
-msgid "Session: XML state has no Tempo Map section"
-msgstr "Session: XML-status har inget Tempo Map-avsnitt"
+#: session_state.cc:2299
+msgid "Created region '%1' for source '%2'"
+msgstr "Skapade region '%1' för källa '%2'"
 
-#: session_state.cc:1651
-msgid "Session: XML state has no locations section"
-msgstr "Session: XML-status har ingen platssektion"
+#: session_state.cc:2301
+msgid "Failed to create region representation for source '%1'"
+msgstr "Misslyckades med att skapa regionrepresentation för källan \"%1"
 
-#: session_state.cc:1664
-msgid "Session: XML state has no Regions section"
-msgstr "Session: XML-status har inget avsnitt för regioner"
-
-#: session_state.cc:1671
-msgid "Session: XML state has no playlists section"
-msgstr "Session: XML-status har inget avsnitt för spellistor"
-
-#: session_state.cc:1691
-msgid "Session: XML state has no bundles section"
-msgstr "Session: XML-status har inget avsnitt för buntar"
-
-#: session_state.cc:1720
-msgid "Session: XML state has no routes section"
-msgstr "Session: XML-status har ingen ruttsektion"
-
-#: session_state.cc:1738
-msgid "Session: XML state has no route groups section"
-msgstr "Session: XML-status har ingen ruttgruppssektion"
-
-#: session_state.cc:1747
-msgid "Session: XML state has no edit groups section"
-msgstr "Session: XML-status har ingen redigeringsgruppssektion"
-
-#: session_state.cc:1754
-msgid "Session: XML state has no mix groups section"
-msgstr "Session: XML-status har ingen mixgruppssektion"
-
-#: session_state.cc:1762
-msgid "Session: XML state has no click section"
-msgstr "Session: XML-status har ingen klicksektion"
-
-#: session_state.cc:1834
-msgid "Session: cannot create Route from XML description."
-msgstr "Session: kan inte skapa rutt från XML-beskrivning."
-
-#: session_state.cc:1838
+#: session_state.cc:2466
 msgid "Loaded track/bus %1"
 msgstr "Laddad spår/buss %1"
 
-#: session_state.cc:1843
+#: session_state.cc:2471
 msgid "Tracks/busses loaded;  Adding to Session"
 msgstr "Spår/bussar laddade; Lägg till i session"
 
-#: session_state.cc:1847
+#: session_state.cc:2485
 msgid "Finished adding tracks/busses"
 msgstr "Färdig med att lägga till spår/bussar"
 
-#: session_state.cc:1986
+#: session_state.cc:2629
 msgid "Could not find diskstream for diskstream-id: '%1', playlist: '%2'"
 msgstr "Kunde inte hitta diskstream för diskstream-id: '%1', spellista: '%2'"
 
-#: session_state.cc:2043
+#: session_state.cc:2688
 msgid "Session: cannot create Region from XML description."
 msgstr "Session: kan inte skapa region från XML-beskrivning."
 
-#: session_state.cc:2047
+#: session_state.cc:2692
 msgid "Can not load state for region '%1'"
 msgstr "Kan inte ladda status för region '%1'"
 
-#: session_state.cc:2083
+#: session_state.cc:2728
 msgid "Regions in compound description not found (ID's %1 and %2): ignored"
 msgstr ""
 "Regioner i sammansatt beskrivning hittades inte (ID %1 och %2): ignoreras"
 
-#: session_state.cc:2111
+#: session_state.cc:2756
 msgid "Nested source has no ID info in session file! (ignored)"
 msgstr ""
 "Den inbäddade källan har ingen ID-information i sessionsfilen! (ignoreras)"
 
-#: session_state.cc:2123
+#: session_state.cc:2768
 msgid "Cannot reconstruct nested source for region %1"
 msgstr "Kan inte rekonstruera kapslad källa för region %1"
 
-#: session_state.cc:2183
+#: session_state.cc:2828
 msgid "Session: XMLNode describing a AudioRegion is incomplete (no source)"
 msgstr ""
 "Session: XMLNode som beskriver en AudioRegion är ofullständig (ingen källa)"
 
-#: session_state.cc:2191 session_state.cc:2212 session_state.cc:2232
+#: session_state.cc:2836 session_state.cc:2857 session_state.cc:2877
 msgid ""
 "Session: XMLNode describing a AudioRegion references an unknown source id =%1"
 msgstr ""
 "Session: XMLNode som beskriver en AudioRegion refererar till ett okänt käll-"
 "id =%1"
 
-#: session_state.cc:2197 session_state.cc:2218 session_state.cc:2238
+#: session_state.cc:2842 session_state.cc:2863 session_state.cc:2883
 msgid ""
 "Session: XMLNode describing a AudioRegion references a non-audio source id "
 "=%1"
@@ -3204,7 +3033,7 @@ msgstr ""
 "Session: XMLNode som beskriver en AudioRegion refererar till en icke-"
 "ljudkälla id =%1"
 
-#: session_state.cc:2261
+#: session_state.cc:2906
 msgid ""
 "Session: XMLNode describing an AudioRegion is missing some master sources; "
 "ignored"
@@ -3212,30 +3041,30 @@ msgstr ""
 "Session: XMLNode som beskriver en AudioRegion saknar vissa huvudkällor; "
 "ignoreras"
 
-#: session_state.cc:2295
+#: session_state.cc:2940
 msgid "Session: XMLNode describing a MidiRegion is incomplete (no source)"
 msgstr ""
 "Session: XMLNode som beskriver en MidiRegion är ofullständig (ingen källa)"
 
-#: session_state.cc:2303
+#: session_state.cc:2948
 msgid ""
 "Session: XMLNode describing a MidiRegion references an unknown source id =%1"
 msgstr ""
 "Session: XMLNode som beskriver en MidiRegion refererar till ett okänt käll-"
 "id =%1"
 
-#: session_state.cc:2309
+#: session_state.cc:2954
 msgid ""
 "Session: XMLNode describing a MidiRegion references a non-midi source id =%1"
 msgstr ""
 "Session: XMLNode som beskriver en MidiRegion refererar till en icke-midi-"
 "källa id =%1"
 
-#: session_state.cc:2395
+#: session_state.cc:3040
 msgid "Session: cannot create Source from XML description."
 msgstr "Session: kan inte skapa källa från XML-beskrivning."
 
-#: session_state.cc:2424
+#: session_state.cc:3069
 msgid ""
 "An external MIDI file is missing. %1 cannot currently recover from missing "
 "external MIDI files"
@@ -3243,40 +3072,40 @@ msgstr ""
 "En extern MIDI-fil saknas. %1 ckan för närvarande inte återställa saknade "
 "externa MIDI-filer"
 
-#: session_state.cc:2517
+#: session_state.cc:3162
 msgid "Found a sound file that cannot be used by %1. Talk to the programmers."
 msgstr ""
 "Hittade en ljudfil som inte kan användas av %1. Kontakta programmerarna."
 
-#: session_state.cc:2538
+#: session_state.cc:3184
 msgid "Could not create templates directory \"%1\" (%2)"
 msgstr "Det gick inte att skapa mallkatalogen \"%1\" (%2)"
 
-#: session_state.cc:2549
+#: session_state.cc:3199
 msgid "Template \"%1\" already exists - new version not created"
 msgstr "Mallen \"%1\" finns redan – ny version skapas inte"
 
-#: session_state.cc:2555
+#: session_state.cc:3206
 msgid "Could not create directory for Session template\"%1\" (%2)"
 msgstr "Det gick inte att skapa katalogen för sessionsmallen \"%1\" (%2)"
 
-#: session_state.cc:2591
+#: session_state.cc:3242
 msgid "template not saved"
 msgstr "mallen har inte sparats"
 
-#: session_state.cc:2838
+#: session_state.cc:3489
 msgid "Unknown node \"%1\" found in Bundles list from session file"
 msgstr "Okänd nod \"%1\" hittades i listan över buntar från sessionsfilen"
 
-#: session_state.cc:3320
+#: session_state.cc:3868
 msgid "Cannot cleanup peak-files for read-only session."
 msgstr "Kan inte rensa peak-filer för skrivskyddade sessioner."
 
-#: session_state.cc:3324
+#: session_state.cc:3872
 msgid "Cannot cleanup peak-files while recording"
 msgstr "Kan inte rensa peak-filer under inspelning"
 
-#: session_state.cc:3347
+#: session_state.cc:3895
 msgid ""
 "Timeout waiting for peak-file creation to terminate before cleanup, please "
 "try again later."
@@ -3284,85 +3113,87 @@ msgstr ""
 "Timeout väntar på att skapandet av peak-filen ska avslutas innan rensning, "
 "försök igen senare."
 
-#: session_state.cc:3616
+#: session_state.cc:4160
 msgid "Session: cannot create dead file folder \"%1\" (%2)"
 msgstr "Session: kan inte skapa mappen för döda filer \"%1\" (%2)"
 
-#: session_state.cc:3649
+#: session_state.cc:4193
 msgid "cannot rename unused file source from %1 to %2 (%3)"
 msgstr ""
 "det går inte att byta namn på den oanvända filkällan från %1 till %2 (%3)"
 
-#: session_state.cc:3665
+#: session_state.cc:4209
 msgid "cannot remove peakfile %1 for %2 (%3)"
-msgstr "kan inte ta bort peakfile %1 f eller %2 (%3)"
+msgstr "kan inte ta bort toppfil %1 för %2 (%3)"
 
-#: session_state.cc:3844
+#: session_state.cc:4388
 msgid "could not backup old history file, current history not saved"
 msgstr ""
 "kunde inte säkerhetskopiera gammal historikfil, aktuell historik sparades "
 "inte"
 
-#: session_state.cc:3858
+#: session_state.cc:4402
 msgid "history could not be saved to %1"
 msgstr "historiken kunde inte sparas till %1"
 
-#: session_state.cc:3861
+#: session_state.cc:4405
 msgid "Could not remove history file at path \"%1\" (%2)"
 msgstr "Det gick inte att ta bort historikfilen på sökvägen \"%1\" (%2)"
 
-#: session_state.cc:3865
+#: session_state.cc:4409
 msgid "could not restore history file from backup %1 (%2)"
 msgstr ""
 "det gick inte att återställa historikfilen från säkerhetskopian %1 (%2)"
 
-#: session_state.cc:3890
+#: session_state.cc:4434
 msgid "%1: no history file \"%2\" for this session."
 msgstr "%1: ingen historikfil \"%2\" för denna session."
 
-#: session_state.cc:3896
+#: session_state.cc:4440
 msgid "Could not understand session history file \"%1\""
 msgstr "Kunde inte förstå sessionshistorikfilen \"%1\""
 
-#: session_state.cc:3946
+#: session_state.cc:4495
 msgid "Failed to downcast MidiSource for NoteDiffCommand"
 msgstr "Det gick inte att nedgradera MidiSource för NoteDiffCommand"
 
-#: session_state.cc:3957
+#: session_state.cc:4506
 msgid "Failed to downcast MidiSource for SysExDiffCommand"
 msgstr "Det gick inte att nedgradera MidiSource för SysExDiffCommand"
 
-#: session_state.cc:3968
+#: session_state.cc:4517
 msgid "Failed to downcast MidiSource for PatchChangeDiffCommand"
 msgstr "Det gick inte att nedgradera MidiSource för PatchChangeDiffCommand"
 
-#: session_state.cc:3976
+#: session_state.cc:4525
 msgid "Couldn't figure out how to make a Command out of a %1 XMLNode."
 msgstr "Kunde inte lista ut hur man skapar ett kommando från en %1 XMLNode."
 
-#: session_state.cc:4326
+#: session_state.cc:4533
+msgid "Error during loading undo history (%1). Undo history will be ignored"
+msgstr "Fel vid inläsning av ångerhistorik (%1). Ångringshistoriken ignoreras"
+
+#: session_state.cc:4924
 msgid "Cannot rename read-only session."
 msgstr "Det går inte att byta namn på en skrivskyddad session."
 
-#: session_state.cc:4330
+#: session_state.cc:4928
 msgid "Cannot rename session while recording"
 msgstr "Det går inte att byta namn på sessionen under inspelning"
 
-#: session_state.cc:4415 session_state.cc:4416 session_state.cc:4458
-#: session_state.cc:4462
+#: session_state.cc:5007 session_state.cc:5047
 msgid "renaming %s as %2 failed (%3)"
 msgstr "omdöpning av %s till %2 failed (%3)"
 
-#: session_state.cc:4478 session_state.cc:4479 session_state.cc:4493
-#: session_state.cc:4494
+#: session_state.cc:5061 session_state.cc:5073
 msgid "renaming %1 as %2 failed (%3)"
 msgstr "byter namn på %1 till %2 failed (%3)"
 
-#: session_state.cc:4870
+#: session_state.cc:5463
 msgid "Cannot create new session folder %1"
 msgstr "Det går inte att skapa en ny sessionsmapp %1"
 
-#: session_state.cc:4932 session_state.cc:5007
+#: session_state.cc:5525 session_state.cc:5600
 msgid ""
 "\n"
 "copying \"%1\" failed !"
@@ -3370,19 +3201,43 @@ msgstr ""
 "\n"
 "Kopieringen av \"%1\" misslyckades!"
 
-#: session_state.cc:5222
+#: session_state.cc:5821
 msgid "unknown reason"
 msgstr "okänd anledning"
 
-#: session_time.cc:230
+#: session_state.cc:5844
+msgid "Cannot archive session: invalid destination path/name"
+msgstr "Det går inte att arkivera sessionen: ogiltig destinationssökväg/namn"
+
+#: session_state.cc:5871
+msgid ""
+"Cannot archive: session media-search path does not include current session-"
+"path."
+msgstr ""
+"Kan inte arkivera: sökvägen för sessionens mediesökning innehåller inte "
+"sökvägen för den aktuella sessionen."
+
+#: session_state.cc:5893
+msgid "Session archive failed to create SessionDirectory `%1'"
+msgstr "Sessionarkivet lyckades inte skapa SessionDirectory `%1'"
+
+#: session_state.cc:6167
+msgid "Session archive failed to save state `%1'"
+msgstr "Sessionarkivet lyckades inte spara tillstånd `%1'"
+
+#: session_state.cc:6232
+msgid "Session archive failed write output: `%1'"
+msgstr "Session archive misslyckades med att skriva utdata: `%1'"
+
+#: session_time.cc:223
 msgid "Unknown transport state %1 in sync callback"
 msgstr "Okänd transportstatus %1 i synkroniseringsåterkoppling"
 
-#: session_transport.cc:172
+#: session_transport.cc:171
 msgid "Locate called for negative sample position - ignored"
 msgstr "Lokalisera begärd negativ provposition - ignorerad"
 
-#: session_transport.cc:478
+#: session_transport.cc:399
 msgid ""
 "Global varispeed cannot be supported while %1 is connected to JACK transport "
 "control"
@@ -3390,11 +3245,11 @@ msgstr ""
 "Global varispeed kan inte stödjas när %1 är ansluten till JACK-"
 "transportkontroll"
 
-#: session_transport.cc:987
+#: session_transport.cc:1070
 msgid "Cannot loop - no loop range defined"
 msgstr "Kan inte loopa - inget loopintervall definierat"
 
-#: session_transport.cc:1577
+#: session_transport.cc:1684
 msgid ""
 "Looping cannot be supported while %1 is using JACK transport.\n"
 "Recommend changing the configured options"
@@ -3406,134 +3261,50 @@ msgstr ""
 msgid "Master #%1 not found, assignment lost"
 msgstr "Master #%1 hittades inte, tilldelningen förlorad"
 
-#: slavable_automation_control.cc:387 slavable_automation_control.cc:460
+#: slavable_automation_control.cc:382 slavable_automation_control.cc:459
 msgid "Merge VCA automation into %1"
 msgstr "Sammanfoga VCA-automatisering till %1"
 
-#: smf_source.cc:361
+#: smf_source.cc:418
 msgid "Unable to read event prefix, corrupt MIDI ring"
 msgstr "Kan inte läsa händelseprefix, skadad MIDI-ring"
 
-#: smf_source.cc:374
+#: smf_source.cc:431
 msgid "Event has time and size but no body, corrupt MIDI ring"
 msgstr "Händelsen har tid och storlek men ingen kropp, korrupt MIDI-ring"
 
-#: smf_source.cc:380
+#: smf_source.cc:437
 msgid "Event time is before MIDI source position"
 msgstr "Händelsetiden är före MIDI-källans position"
 
-#: smf_source.cc:428
+#: smf_source.cc:504
 msgid ""
 "Skipping event with unordered beat time %1 < %2 (off by %3 beats, %4 ticks)"
 msgstr ""
 "Hoppar över händelse med oordnad takt %1 < %2 (avvikelse på %3 bslag, %4 "
 "tickar)"
 
-#: smf_source.cc:473
+#: smf_source.cc:552
 msgid "Skipping event with unordered sample time %1 < %2"
 msgstr "Hoppar över händelse med oordnad samplingsfrekvens %1 < %2"
 
-#: smf_source.cc:539
+#: smf_source.cc:626
 msgid "cannot open MIDI file %1 for write"
 msgstr "kan inte öppna MIDI-fil %1 f eller skriva"
 
-#: smf_source.cc:573
+#: smf_source.cc:669
 msgid "Exception while writing %1, file may be corrupt/unusable"
 msgstr "Undantag vid skrivning av %1, filen kan vara skadad/oanvändbar"
 
-#: sndfile_helpers.cc:35
-msgid "WAV"
-msgstr "WAV"
-
-#: sndfile_helpers.cc:36
-msgid "AIFF"
-msgstr "AIFF"
-
-#: sndfile_helpers.cc:37
-msgid "CAF"
-msgstr "CAF"
-
-#: sndfile_helpers.cc:38
-msgid "W64 (64-bit WAV)"
-msgstr "W64 (64-bitars WAV)"
-
-#: sndfile_helpers.cc:39
-msgid "FLAC"
-msgstr "FLAC"
-
-#: sndfile_helpers.cc:40
-msgid "Ogg/Vorbis"
-msgstr "Ogg/Vorbis"
-
-#: sndfile_helpers.cc:41
-msgid "raw (no header)"
-msgstr "rå (utan rubrik)"
-
-#: sndfile_helpers.cc:46
-msgid ".wav"
-msgstr ".wav"
-
-#: sndfile_helpers.cc:47
-msgid ".aiff"
-msgstr ".aiff"
-
-#: sndfile_helpers.cc:48
-msgid ".caf"
-msgstr ".caf"
-
-#: sndfile_helpers.cc:49
-msgid ".w64"
-msgstr ".w64"
-
-#: sndfile_helpers.cc:50
-msgid ".flac"
-msgstr ".flac"
-
-#: sndfile_helpers.cc:51
-msgid ".ogg"
-msgstr ".ogg"
-
-#: sndfile_helpers.cc:52
-msgid ".raw"
-msgstr ".raw"
-
-#: sndfile_helpers.cc:67
-msgid "Signed 16-bit PCM"
-msgstr "Signerad 16-bitars PCM"
-
-#: sndfile_helpers.cc:68
-msgid "Signed 24-bit PCM"
-msgstr "Signerad 24-bitars PCM"
-
-#: sndfile_helpers.cc:69
-msgid "Signed 32-bit PCM"
-msgstr "Signerad 32-bitars PCM"
-
-#: sndfile_helpers.cc:70
-msgid "Signed 8-bit PCM"
-msgstr "Signerad 8-bitars PCM"
-
-#: sndfile_helpers.cc:71
-msgid "32-bit float"
-msgstr "32-bitars flyttal"
-
-#: sndfile_helpers.cc:84
-msgid "Little-endian (Intel)"
-msgstr "Little-endian (Intel)"
-
-#: sndfile_helpers.cc:85
-msgid "Big-endian (PowerPC)"
-msgstr "Big-endian (PowerPC)"
-
-#: sndfilesource.cc:274
+#: sndfilesource.cc:281
 msgid "Cannot set flac compression level: %1"
 msgstr "Kan inte ställa in flac-komprimeringsnivå: %1"
 
-#: sndfilesource.cc:359
+#: sndfilesource.cc:378
 msgid "SndFileSource: cannot open file \"%1\" for %2"
 msgstr "SndFileSource: kan inte öppna filen \"%1\" för %2"
 
-#: sndfilesource.cc:377
+#: sndfilesource.cc:396
 msgid ""
 "SndFileSource: file only contains %1 channels; %2 is invalid as a channel "
 "number"
@@ -3541,11 +3312,11 @@ msgstr ""
 "SndFileSource: filen innehåller endast %1 ckanaler; %2 är ogiltigt som "
 "kanalnummer"
 
-#: sndfilesource.cc:392
+#: sndfilesource.cc:412
 msgid "Cannot mark RF64 audio file for automatic downgrade to WAV: %1"
 msgstr "Kan inte markera RF64-ljudfil för automatisk nedgradering till WAV: %1"
 
-#: sndfilesource.cc:444 sndfilesource.cc:692
+#: sndfilesource.cc:481 sndfilesource.cc:733
 msgid ""
 "cannot set broadcast info for audio file %1 (%2); dropping broadcast info "
 "for this file"
@@ -3553,56 +3324,56 @@ msgstr ""
 "kan inte ställa in sändningsinformation för ljudfilen %1 (%2); "
 "sändningsinformationen för denna fil tas bort"
 
-#: sndfilesource.cc:486
+#: sndfilesource.cc:523
 msgid "could not open file %1 for reading."
 msgstr "kunde inte öppna filen %1 f eller läsa."
 
-#: sndfilesource.cc:521
+#: sndfilesource.cc:559
 msgid "SndFileSource: could not seek to sample %1 within %2 (%3)"
 msgstr "SndFileSource: kunde inte söka efter provet %1 inom %2 (%3)"
 
-#: sndfilesource.cc:530
+#: sndfilesource.cc:569
 msgid ""
 "SndFileSource: @ %1 could not read %2 within %3 (%4) (len = %5, ret was %6)"
 msgstr ""
 "SndFileSource: @ %1 c kunde inte läsa %2 inom %3 (%4) (längd = %5, ret var "
 "%6)"
 
-#: sndfilesource.cc:580
+#: sndfilesource.cc:619
 msgid "attempt to write a non-writable audio file source (%1)"
 msgstr "försök att skriva en icke-skrivbar ljudfilskälla (%1)"
 
-#: sndfilesource.cc:585 utils.cc:517 utils.cc:545
+#: sndfilesource.cc:624 utils.cc:589 utils.cc:617
 msgid "programming error: %1 %2"
 msgstr "programmeringsfel: %1 %2"
 
-#: sndfilesource.cc:623 sndfilesource.cc:641
+#: sndfilesource.cc:664 sndfilesource.cc:682
 msgid "attempt to flush a non-writable audio file source (%1)"
 msgstr "försök att spola en icke-skrivbar ljudfilskälla (%1)"
 
-#: sndfilesource.cc:628
+#: sndfilesource.cc:669
 msgid "could not allocate file %1 to write header"
 msgstr "kunde inte tilldela filen %1 för att skriva rubrik"
 
-#: sndfilesource.cc:646
+#: sndfilesource.cc:687
 msgid "could not allocate file %1 to flush contents"
 msgstr "kunde inte allokera fil %1 för att tömma innehållet"
 
-#: sndfilesource.cc:658
+#: sndfilesource.cc:699
 msgid ""
 "attempt to store broadcast info in a non-writable audio file source (%1)"
 msgstr ""
 "försök att lagra sändningsinformation i en icke-skrivbar ljudfilskälla (%1)"
 
-#: sndfilesource.cc:663
+#: sndfilesource.cc:704
 msgid "attempt to set BWF info for an un-opened audio file source (%1)"
 msgstr "försök att ställa in BWF-information för en oöppnad ljudfilskälla (%1)"
 
-#: sndfilesource.cc:710
+#: sndfilesource.cc:751
 msgid "%1: cannot seek to %2 (libsndfile error: %3)"
 msgstr "%1: kan inte söka till %2 (libsndfile-fel: %3)"
 
-#: sndfilesource.cc:747
+#: sndfilesource.cc:788
 msgid "SndFileSource: cannot open file \"%1\" for reading"
 msgstr "SndFileSource: kan inte öppna filen \"%1\" för läsning"
 
@@ -3618,14 +3389,18 @@ msgstr "Rensade uppströms solo: %1 up:%2\n"
 msgid "Cleared downstream solo: %1 down:%2\n"
 msgstr "Rensat nedströms solo: %1 degen:%2\n"
 
-#: soundcloud_upload.cc:128
+#: soundcloud_upload.cc:131
 msgid ""
 "Upload to Soundcloud failed.  Perhaps your email or password are incorrect?\n"
 msgstr ""
 "Uppladdningen till Soundcloud misslyckades.  Kanske är din e-postadress "
 "eller ditt lösenord felaktigt?\n"
 
-#: source_factory.cc:376
+#: source.cc:265
+msgid "Segment descriptors not loaded for source %1"
+msgstr "Segmentbeskrivningar har inte laddats för källan %1"
+
+#: source_factory.cc:406
 msgid "Recovery attempted on a MIDI file - not implemented"
 msgstr "Återställning av MIDI-fil försökt – ej implementerat"
 
@@ -3633,9 +3408,29 @@ msgstr "Återställning av MIDI-fil försökt – ej implementerat"
 msgid "Speaker information is missing - speaker ignored"
 msgstr "Information om talaren saknas – talaren ignoreras"
 
-#: srcfilesource.cc:141
+#: srcfilesource.cc:140
 msgid "SrcFileSource: %1"
 msgstr "SrcFileSource: %1"
+
+#: surround_pannable.cc:48
+msgid "Center"
+msgstr "Centrum"
+
+#: surround_return.cc:77
+msgid "Binaural Renderer"
+msgstr "Binaural Renderer"
+
+#: surround_return.cc:106
+msgid "Required Atmos/Vapor Processor not found."
+msgstr "Atmos/Vapor-processorn som krävs hittades inte."
+
+#: surround_send.cc:387
+msgid "Panner|L"
+msgstr "Panner|L"
+
+#: surround_send.cc:387
+msgid "Panner|R"
+msgstr "Panner|R"
 
 #: template_utils.cc:117 template_utils.cc:172
 msgid "(unknown)"
@@ -3645,224 +3440,181 @@ msgstr "(okänd)"
 msgid "No Description"
 msgstr "Ingen beskrivning"
 
-#: tempo.cc:143
-msgid "TempoSection XML node has no \"movable\" property"
-msgstr "TempoSection XML-noden har ingen \"flyttbar\" egenskap"
-
-#: tempo.cc:178
-msgid "Legacy session detected. TempoSection XML node will be altered."
-msgstr "Äldre session upptäckt. TempoSection XML-noden kommer att ändras."
-
-#: tempo.cc:187
-msgid "TempoSection XML node has an illegal \"beats_per_minute\" value"
-msgstr "TempoSection XML-noden har ett olagligt värde för \"beats_per_minute\""
-
-#: tempo.cc:194
-msgid "TempoSection XML node has an illegal \"note-type\" value"
-msgstr "TempoSection XML-noden har ett olagligt \"note-type\"-värde"
-
-#: tempo.cc:208
-msgid "TempoSection XML node has an illegal \"end-beats-per-minute\" value"
-msgstr ""
-"TempoSection XML-noden har ett olagligt värde för \"end-beats-per-minute\""
-
-#: tempo.cc:228
-msgid "TempoSection XML node has no \"active\" property"
-msgstr "TempoSection XML-noden har ingen \"aktiv\" egenskap"
-
-#: tempo.cc:567
-msgid "Legacy session detected - MeterSection XML node will be altered."
-msgstr "Äldre session upptäckt – MeterSection XML-noden kommer att ändras."
-
-#: tempo.cc:570
-msgid "MeterSection XML node has an illegal \"start\" value"
-msgstr "MeterSection XML-noden har ett olagligt \"start\"-värde"
-
-#: tempo.cc:580
-msgid "MeterSection XML node has an illegal \"bbt\" value"
-msgstr "MeterSection XML-noden har ett olagligt \"bbt\"-värde"
-
-#: tempo.cc:584
-msgid "MeterSection XML node has no \"bbt\" property"
-msgstr "MeterSection XML-noden har ingen \"bbt\"-egenskap"
-
-#: tempo.cc:593
-msgid ""
-"MeterSection XML node has no \"beats-per-bar\" or \"divisions-per-bar\" "
-"property"
-msgstr ""
-"MeterSection XML-noden har ingen egenskap för \"slag per takt\" eller "
-"\"delningar per takt\""
-
-#: tempo.cc:599
-msgid "MeterSection XML node has an illegal \"divisions-per-bar\" value"
-msgstr ""
-"MeterSection XML-noden har ett ogiltigt värde för \"divisions-per-bar\""
-
-#: tempo.cc:604
-msgid "MeterSection XML node has no \"note-type\" property"
-msgstr "MeterSection XML-noden har ingen \"note-type\"-egenskap"
-
-#: tempo.cc:609
-msgid "MeterSection XML node has an illegal \"note-type\" value"
-msgstr "MeterSection XML-noden har ett olagligt \"note-type\"-värde"
-
-#: tempo.cc:908
-msgid ""
-"Meter changes can only be positioned on the first beat of a bar. Moving from "
-"%1 to %2"
-msgstr ""
-"Mätarändringar kan endast placeras på första taktslaget i en takt. Flytta "
-"från %1 till %2"
-
-#: tempo.cc:1298
-msgid "no tempo sections defined in tempo map - cannot change tempo @ %1"
-msgstr ""
-"inga tempopartier definierade i tempokartan – kan inte ändra tempo @ %1"
-
-#: tempo.cc:1328
-msgid "programming error: no meter section in tempo map!"
-msgstr "programmeringsfel: ingen meterdel i tempokartan!"
-
-#: tempo.cc:1346 tempo.cc:1369 tempo.cc:1390
-msgid "programming error: no tempo section in tempo map!"
-msgstr "programmeringsfel: ingen tempodel i tempokartan!"
-
-#: tempo.cc:2260
-msgid "tempo map was asked for BBT time at sample %1\n"
-msgstr "tempo-kartan begärdes för BBT-tid vid prov %1\n"
-
-#: tempo.cc:2368
-msgid "tempo map asked for sample time at bar < 1  (%1)\n"
-msgstr "tempokarta begärde provtid vid takt < 1  (%1)\n"
-
-#: tempo.cc:4639 tempo.cc:4653
-msgid "Tempo map: could not set new state, restoring old one."
-msgstr "Tempokarta: kunde inte ställa in nytt läge, återställer det gamla."
-
-#: tempo.cc:4695 tempo.cc:4696
-msgid "Multiple meter definitions found at %1"
-msgstr "Flera meterdefinitioner hittades på %1"
-
-#: tempo.cc:4701 tempo.cc:4702
-msgid "Multiple tempo definitions found at %1"
-msgstr "Flera tempodefinitioner hittades på %1"
-
-#: tempo_map_importer.cc:52
-msgid "Tempo map"
-msgstr "Tempokarta"
-
-#: tempo_map_importer.cc:60
-msgid "Tempo Map"
-msgstr "Tempokarta"
-
-#: tempo_map_importer.cc:80
-msgid "Tempo marks: "
-msgstr "Tempomärken: "
-
-#: tempo_map_importer.cc:80
-msgid ""
-"\n"
-"Meter marks: "
-msgstr ""
-"\n"
-"Mätarmärken: "
-
-#: tempo_map_importer.cc:89
-msgid ""
-"This will replace the current tempo map!\n"
-"Are you sure you want to do this?"
-msgstr ""
-"Detta kommer att ersätta den nuvarande tempokartan! Är du säker på att du "
-"vill göra detta?"
-
-#: track.cc:630
+#: track.cc:764
 msgid "DiskIOProcessor: \"%1\" isn't an playlist"
 msgstr "DiskIOProcessor: \"%1\" är inte en spellista"
 
-#: track.cc:677
+#: track.cc:835
 msgid "DiskIOProcessor %1: there is no existing playlist to make a copy of!"
 msgstr "DiskIOProcessor %1: det finns ingen befintlig spellista att kopiera!"
 
-#: track.cc:946
+#: track.cc:1116
 msgid "%1: could not create region for complete midi file"
 msgstr "%1: kunde inte skapa region för komplett midi-fil"
 
-#: track.cc:993
-msgid "MidiDiskstream: could not create region for captured midi!"
-msgstr "MidiDiskstream: kunde inte skapa region för inspelad midi!"
-
-#: track.cc:1046
+#: track.cc:1263
 msgid "%1: could not create region for complete audio file"
 msgstr "%1: kunde inte skapa region för komplett ljudfil"
 
-#: track.cc:1083
+#: track.cc:1310
 msgid "AudioDiskstream: could not create region for captured audio!"
 msgstr "AudioDiskstream: kunde inte skapa region för inspelat ljud!"
 
-#: transport_master.cc:392 transport_master.cc:393
+#: transport_master.cc:394 transport_master.cc:395
 msgid "Construction of transport master object of type %1 failed"
 msgstr "Byggnation av transportmasterobjekt av typ %1 failed"
 
-#: transport_master.cc:417 transport_master.cc:450
+#: transport_master.cc:419 transport_master.cc:452
 msgid "SyncSource|JACK"
 msgstr "SyncSource|JACK"
 
-#: transport_master.cc:424
+#: transport_master.cc:426
 msgid "SyncSource|MTC"
 msgstr "SyncSource|MTC"
 
-#: transport_master.cc:434
+#: transport_master.cc:436
 msgid "SyncSource|M-Clk"
 msgstr "Synkroniseringskälla|M-Clk"
 
-#: transport_master.cc:444
+#: transport_master.cc:446
 msgid "SyncSource|LTC"
 msgstr "SyncSource|LTC"
 
-#: transport_master.cc:487
-msgid "All"
-msgstr "Alla"
-
-#: transport_master.cc:491
+#: transport_master.cc:479
 msgid "Start/Stop"
 msgstr "Start/Stopp"
 
-#: transport_master.cc:493
+#: transport_master.cc:481
 msgid "Speed"
 msgstr "Hastighet"
 
-#: transport_master.cc:495
+#: transport_master.cc:483
 msgid "Locate"
 msgstr "Leta upp"
 
-#: transport_master.cc:497
+#: transport_master.cc:485
 msgid "Complex"
 msgstr "Komplex"
 
-#: transport_master_manager.cc:136
+#: transport_master_manager.cc:138
 msgid "programming error:%1"
 msgstr "programmeringsfel:%1"
 
-#: transport_master_manager.cc:347
+#: transport_master_manager.cc:356
 msgid "Transport master adjusted framerate from %1 to %2."
 msgstr "Transportmästaren justerade bildfrekvensen från %1 till %2."
 
-#: transport_master_manager.cc:396
+#: transport_master_manager.cc:405
 msgid "There is already a transport master named \"%1\" - not duplicated"
 msgstr "Det finns redan en transportmaster med namnet \"%1\" – dupliceras inte"
 
-#: transport_master_manager.cc:713
+#: transport_master_manager.cc:739
 msgid "Cannot initialize transport master manager"
 msgstr "Kan inte initialisera transportmasterhanteraren"
 
-#: unknown_processor.cc:87
-msgid "Using plugin-stub with unknown i/o configuration for: "
-msgstr "Användning av plugin-stub med okänd I/O-konfiguration för: "
+#: triggerbox.cc:151
+msgid "A"
+msgstr ""
 
-#: unknown_processor.cc:108
+#: triggerbox.cc:152
+msgid "B"
+msgstr ""
+
+#: triggerbox.cc:155
+msgid "E"
+msgstr ""
+
+#: triggerbox.cc:156
+msgid "F"
+msgstr ""
+
+#: triggerbox.cc:157
+msgid "G"
+msgstr ""
+
+#: triggerbox.cc:158
+msgid "H"
+msgstr ""
+
+#: triggerbox.cc:160
+msgid "J"
+msgstr ""
+
+#: triggerbox.cc:161
+msgid "K"
+msgstr ""
+
+#: triggerbox.cc:163
+msgid "M"
+msgstr ""
+
+#: triggerbox.cc:164
+msgid "N"
+msgstr ""
+
+#: triggerbox.cc:165
+msgid "O"
+msgstr ""
+
+#: triggerbox.cc:166
+msgid "P"
+msgstr ""
+
+#: triggerbox.cc:167
+msgid "Q"
+msgstr ""
+
+#: triggerbox.cc:169
+msgid "S"
+msgstr ""
+
+#: triggerbox.cc:170
+msgid "T"
+msgstr ""
+
+#: triggerbox.cc:171
+msgid "U"
+msgstr ""
+
+#: triggerbox.cc:172
+msgid "V"
+msgstr ""
+
+#: triggerbox.cc:173
+msgid "W"
+msgstr ""
+
+#: triggerbox.cc:174
+msgid "X"
+msgstr ""
+
+#: triggerbox.cc:175
+msgid "Y"
+msgstr ""
+
+#: triggerbox.cc:176
+msgid "Z"
+msgstr ""
+
+#: triggerbox.cc:2037
+msgid "Could not configure rubberband stretcher"
+msgstr "Kunde inte konfigurera gummibandsbår"
+
+#: triggerbox.cc:3657
+msgid "TriggerBox"
+msgstr "TriggerBox"
+
+#: triggerbox.cc:4443
+msgid "Cannot use %1 files in %2 slots"
+msgstr "Det går inte att använda %1-filer i %2-platser"
+
+#: unknown_processor.cc:132
+msgid "Using plugin-stub with unknown i/o configuration for: "
+msgstr "Användning av insticksmodulsstubb med okänd I/O-konfiguration för: "
+
+#: unknown_processor.cc:153
 msgid "Using plugin-stub with mismatching i/o configuration for: "
-msgstr "Användning av plugin-stub med felaktig I/O-konfiguration för: "
+msgstr "Användning av insticksmodulsstubb med felaktig I/O-konfiguration för: "
 
 #: user_bundle.cc:48
 msgid "Node for Bundle has no \"name\" property"
@@ -3885,31 +3637,35 @@ msgstr "Nod för kanal har ingen \"typ\"-egenskap"
 msgid "Node for Port has no \"name\" property"
 msgstr "Nod för port har ingen \"namn\"-egenskap"
 
-#: utils.cc:419 utils.cc:448
-msgid "Splice"
-msgstr "Skarv"
+#: utils.cc:242
+msgid "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+msgstr "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-#: utils.cc:421 utils.cc:438
+#: utils.cc:465 utils.cc:489
 msgid "Slide"
 msgstr "Glid"
 
-#: utils.cc:423 utils.cc:444
+#: utils.cc:467 utils.cc:485
 msgid "Ripple"
 msgstr "Krusning"
 
-#: utils.cc:425 utils.cc:441
+#: utils.cc:469 utils.cc:482
 msgid "Lock"
 msgstr "Lås"
 
-#: utils.cc:428
+#: utils.cc:472
 msgid "programming error: unknown edit mode string \"%1\""
 msgstr "programmeringsfel: okänd redigeringslägessträng \"%1\""
 
-#: utils.cc:584
+#: utils.cc:500 utils.cc:513
+msgid "RippleInterview"
+msgstr "RippleIntervju"
+
+#: utils.cc:662
 msgid "programming error: unknown native header format: %1"
 msgstr "programmeringsfel: okänt inbyggt rubrikformat: %1"
 
-#: utils.cc:599
+#: utils.cc:690
 msgid "cannot open directory %1 (%2)"
 msgstr "kan inte öppna katalogen %1 (%2)"
 
@@ -3922,10 +3678,479 @@ msgstr "VCA %n"
 msgid "VCA %1 : %2"
 msgstr "VCA %1 : %2"
 
-#: vca.cc:217
+#: vca.cc:220
 msgid "Master assignment ignored to prevent recursion"
 msgstr "Huvuduppgift ignorerad för att förhindra rekursion"
 
-#: vca_manager.cc:206
+#: vca_manager.cc:207
 msgid "Cannot set state of a VCA"
 msgstr "Kan inte ställa in status för en VCA"
+
+#: zeroconf.cc:70
+msgid "ZeroConf registered: %1 %2 %3"
+msgstr "ZeroConf registrerad: %1 %2 %3"
+
+#: zeroconf.cc:141
+msgid "ardour-avahi tool was not found."
+msgstr "ardour-avahi-verktyget hittades inte."
+
+#~ msgid "Audio Playlists"
+#~ msgstr "Ljudspellistor"
+
+#~ msgid "region"
+#~ msgstr "region"
+
+#~ msgid "regions"
+#~ msgstr "regioner"
+
+#~ msgid "A playlist with this name already exists, please rename it."
+#~ msgstr "En spellista med detta namn finns redan, vänligen byt namn på den."
+
+#~ msgid "badly-formed XML in imported playlist"
+#~ msgstr "felaktigt formaterad XML i importerad spellista"
+
+#~ msgid "Audio Playlists (unused)"
+#~ msgstr "Ljudspellistor (oanvända)"
+
+#~ msgid "Audio Regions"
+#~ msgstr "Ljudregioner"
+
+#~ msgid "Length: "
+#~ msgstr "Längd: "
+
+#~ msgid ""
+#~ "\n"
+#~ "Position: "
+#~ msgstr ""
+#~ "\n"
+#~ "Position: "
+
+#~ msgid ""
+#~ "\n"
+#~ "Channels: "
+#~ msgstr ""
+#~ "\n"
+#~ "Kanaler: "
+
+#~ msgid "Audio Tracks"
+#~ msgstr "Ljudspår"
+
+#~ msgid "badly-formed XML in imported track"
+#~ msgstr "felaktigt formaterad XML i importerad spår"
+
+#~ msgid "Error Importing Audio track %1"
+#~ msgstr "Fel vid import av ljudspår %1"
+
+#~ msgid "Control protocol %1 was already active."
+#~ msgstr "Kontrollprotokoll %1 var redan aktivt."
+
+#~ msgid "Instantiating mandatory control protocol %1"
+#~ msgstr "Instansiering av obligatoriskt kontrollprotokoll %1"
+
+#~ msgid "Control protocol \"%1\" has no descriptor"
+#~ msgstr "Kontrollprotokollet \"%1\" har ingen beskrivning"
+
+#~ msgid "CycleTimer::get_mhz(): can't open /proc/cpuinfo"
+#~ msgstr "CycleTimer::get_mhz(): kan inte öppna /proc/cpuinfo"
+
+#~ msgid "CycleTimer::get_mhz(): cannot locate cpu MHz in /proc/cpuinfo"
+#~ msgstr "CycleTimer::get_mhz(): kan inte hitta CPU MHz i /proc/cpuinfo"
+
+#~ msgid "cannot locate cpu MHz in /proc/cpuinfo"
+#~ msgstr "kan inte hitta CPU MHz i /proc/cpuinfo"
+
+#~ msgid "PTImport: UINT_MAX routes? impossible!"
+#~ msgstr "PTImport: UINT_MAX-rutter? Omöjligt!"
+
+#~ msgid "Out"
+#~ msgstr "Ut"
+
+#, c-format
+#~ msgid "%s %u"
+#~ msgstr "%s %u"
+
+#, c-format
+#~ msgid "%s in"
+#~ msgstr "%s i"
+
+#, c-format
+#~ msgid "%s out"
+#~ msgstr "%s ut"
+
+#~ msgid "Could not locate HOME.  Preset not saved."
+#~ msgstr "Kunde inte hitta HOME. Förinställningen sparades inte."
+
+#~ msgid "You cannot put a CD marker at this position"
+#~ msgstr "Du kan inte placera en CD-markör på denna position"
+
+#~ msgid "Locations"
+#~ msgstr "Platser"
+
+#~ msgid "Location: "
+#~ msgstr "Plats: "
+
+#~ msgid ""
+#~ "Range\n"
+#~ "start: "
+#~ msgstr "Områdesstart: "
+
+#~ msgid ""
+#~ "\n"
+#~ "end: "
+#~ msgstr ""
+#~ "\n"
+#~ "slut: "
+
+#~ msgid ""
+#~ "The location is the Punch range. It will be imported as a normal range.\n"
+#~ "You may rename the imported location:"
+#~ msgstr ""
+#~ "Platsen är Punch-serien. Den importeras som en vanlig serie. Du kan byta "
+#~ "namn på den importerade platsen:"
+
+#~ msgid ""
+#~ "The location is a Loop range. It will be imported as a normal range.\n"
+#~ "You may rename the imported location:"
+#~ msgstr ""
+#~ "Platsen är ett Loop-intervall. Det importeras som ett normalt intervall. "
+#~ "Du kan byta namn på den importerade platsen:"
+
+#~ msgid ""
+#~ "A location with that name already exists.\n"
+#~ "You may rename the imported location:"
+#~ msgstr ""
+#~ "En plats med det namnet finns redan. Du kan byta namn på den importerade "
+#~ "platsen:"
+
+#~ msgid "VST Blacklist: "
+#~ msgstr "VST-svartlista: "
+
+#~ msgid "VST Blacklist:"
+#~ msgstr "VST-svartlista:"
+
+#~ msgid "--- Windows VST plugins Scan: %1"
+#~ msgstr "--- Windows VST-insticksmoduler Skanning: %1"
+
+#~ msgid "VST"
+#~ msgstr "VST"
+
+#~ msgid "--- Windows VST plugins Scan Done"
+#~ msgstr "--- Windows VST-insticksmoduler Skanning klar"
+
+#~ msgid "cannot open dll"
+#~ msgstr "kan inte öppna dll"
+
+#~ msgid "invalid dll, file too small"
+#~ msgstr "ogiltig dll, filen är för liten"
+
+#~ msgid "not a dll"
+#~ msgstr "inte en dll"
+
+#~ msgid "cannot determine dll type"
+#~ msgstr "kan inte bestämma dll-typ"
+
+#~ msgid "cannot read dll PE header"
+#~ msgstr "kan inte läsa dll PE-rubrik"
+
+#~ msgid "invalid dll PE header"
+#~ msgstr "ogiltig dll PE-rubrik"
+
+#~ msgid "i386 (32-bit)"
+#~ msgstr "i386 (32-bitars)"
+
+#~ msgid "Itanium"
+#~ msgstr "Itanium"
+
+#~ msgid "x64 (64-bit)"
+#~ msgstr "x64 (64-bitars)"
+
+#~ msgid "Native Architecture"
+#~ msgstr "Inhemsk arkitektur"
+
+#~ msgid "Unknown Architecture"
+#~ msgstr "Okänd arkitektur"
+
+#~ msgid " *  %1 (cache only)"
+#~ msgstr " * %1 (endast cache)"
+
+#~ msgid " *  %1 - %2"
+#~ msgstr " * %1 - %2"
+
+#~ msgid " -> Cannot get Windows VST information, plugin ignored."
+#~ msgstr ""
+#~ " -> Kan inte hämta Windows VST-information, insticksmodul ignoreras."
+
+#~ msgid "Ignoring duplicate Windows VST plugin \"%1\""
+#~ msgstr "Ignorerar dubblett av Windows VST-insticksmodul \"%1\""
+
+#~ msgid " -> OK (VST Plugin \"%1\" was added)."
+#~ msgstr " -> OK (VST-insticksmodul \"%1\" har lagts till)."
+
+#~ msgid "MacVST"
+#~ msgstr "MacVST"
+
+#~ msgid ""
+#~ "Mac VST plugin %1 does not support processReplacing, and so cannot be "
+#~ "used in %2 at this time"
+#~ msgstr ""
+#~ "Mac VST-insticksmodul %1 stöder inte processReplacing och kan därför inte "
+#~ "användas i %2 för närvarande"
+
+#~ msgid "LXVST"
+#~ msgstr "LXVST"
+
+#~ msgid ""
+#~ "linuxVST plugin %1 does not support processReplacing, and so cannot be "
+#~ "used in %2 at this time"
+#~ msgstr ""
+#~ "linuxVST-insticksmodul %1 stöder inte processReplacing och kan därför "
+#~ "inte användas i %2 för tillfället"
+
+#~ msgid "%1::disconnect_all: invalid port"
+#~ msgstr "%1::disconnect_all: ogiltig port"
+
+#~ msgid "Pannable state found for route (%1) without a panner!"
+#~ msgstr "Pannbar status hittad för rutt (%1) utan panner!"
+
+#~ msgid "Amp/Fader on Route '%1' went AWOL. Re-added."
+#~ msgstr "Amp/Fader på rutt '%1' försvann. Tillagd igen."
+
+#~ msgid "lo"
+#~ msgstr "lo"
+
+#~ msgid "mid"
+#~ msgstr "mitten"
+
+#~ msgid "hi"
+#~ msgstr "hej"
+
+#~ msgid "lm"
+#~ msgstr "lm"
+
+#~ msgid "hm"
+#~ msgstr "hm"
+
+#~ msgid "Leveler"
+#~ msgstr "Utjämnare"
+
+#~ msgid "Compressor"
+#~ msgstr "Kompressor"
+
+#~ msgid "Limiter"
+#~ msgstr "Begränsare"
+
+#~ msgid "Sidechain"
+#~ msgstr "Sidokedja"
+
+#~ msgid "???"
+#~ msgstr "???"
+
+#~ msgid "Attk"
+#~ msgstr "Attk"
+
+#~ msgid "Ratio"
+#~ msgstr "Förhållande"
+
+#~ msgid "Rels"
+#~ msgstr "Rels"
+
+#~ msgid "You cannot subgroup MIDI tracks at this time"
+#~ msgstr "Du kan inte dela upp MIDI-spår i undergrupper just nu"
+
+#~ msgid "Cannot create thread for TaskList!"
+#~ msgstr "Kan inte skapa tråd för TaskList!"
+
+#~ msgid "feedback loop setup between %1 and %2"
+#~ msgstr "återkopplingsslinga mellan %1 och %2"
+
+#~ msgid "Audio "
+#~ msgstr "Ljud "
+
+#~ msgid "MIDI "
+#~ msgstr "MIDI "
+
+#~ msgid ""
+#~ "No more JACK ports are available. You will need to stop %1 and restart "
+#~ "JACK with more ports if you need this many tracks."
+#~ msgstr ""
+#~ "Det finns inga fler JACK-portar tillgängliga. Du måste stoppa %1 och "
+#~ "starta om JACK med fler portar om du behöver så många spår."
+
+#~ msgid "Session: UINT_MAX routes? impossible!"
+#~ msgstr "Session: UINT_MAX-rutter? Omöjligt!"
+
+#~ msgid "Cannot prepare transport for export"
+#~ msgstr "Kan inte förbereda transport för export"
+
+#~ msgid "Session: cannot create Route from XML description."
+#~ msgstr "Session: kan inte skapa rutt från XML-beskrivning."
+
+#~ msgid "WAV"
+#~ msgstr "WAV"
+
+#~ msgid "AIFF"
+#~ msgstr "AIFF"
+
+#~ msgid "CAF"
+#~ msgstr "CAF"
+
+#~ msgid "W64 (64-bit WAV)"
+#~ msgstr "W64 (64-bitars WAV)"
+
+#~ msgid "FLAC"
+#~ msgstr "FLAC"
+
+#~ msgid "Ogg/Vorbis"
+#~ msgstr "Ogg/Vorbis"
+
+#~ msgid "raw (no header)"
+#~ msgstr "rå (utan rubrik)"
+
+#~ msgid ".wav"
+#~ msgstr ".wav"
+
+#~ msgid ".aiff"
+#~ msgstr ".aiff"
+
+#~ msgid ".caf"
+#~ msgstr ".caf"
+
+#~ msgid ".w64"
+#~ msgstr ".w64"
+
+#~ msgid ".flac"
+#~ msgstr ".flac"
+
+#~ msgid ".ogg"
+#~ msgstr ".ogg"
+
+#~ msgid ".raw"
+#~ msgstr ".raw"
+
+#~ msgid "Signed 16-bit PCM"
+#~ msgstr "Signerad 16-bitars PCM"
+
+#~ msgid "Signed 24-bit PCM"
+#~ msgstr "Signerad 24-bitars PCM"
+
+#~ msgid "Signed 32-bit PCM"
+#~ msgstr "Signerad 32-bitars PCM"
+
+#~ msgid "Signed 8-bit PCM"
+#~ msgstr "Signerad 8-bitars PCM"
+
+#~ msgid "32-bit float"
+#~ msgstr "32-bitars flyttal"
+
+#~ msgid "Little-endian (Intel)"
+#~ msgstr "Little-endian (Intel)"
+
+#~ msgid "Big-endian (PowerPC)"
+#~ msgstr "Big-endian (PowerPC)"
+
+#~ msgid "TempoSection XML node has no \"movable\" property"
+#~ msgstr "TempoSection XML-noden har ingen \"flyttbar\" egenskap"
+
+#~ msgid "Legacy session detected. TempoSection XML node will be altered."
+#~ msgstr "Äldre session upptäckt. TempoSection XML-noden kommer att ändras."
+
+#~ msgid "TempoSection XML node has an illegal \"beats_per_minute\" value"
+#~ msgstr ""
+#~ "TempoSection XML-noden har ett olagligt värde för \"beats_per_minute\""
+
+#~ msgid "TempoSection XML node has an illegal \"note-type\" value"
+#~ msgstr "TempoSection XML-noden har ett olagligt \"note-type\"-värde"
+
+#~ msgid "TempoSection XML node has an illegal \"end-beats-per-minute\" value"
+#~ msgstr ""
+#~ "TempoSection XML-noden har ett olagligt värde för \"end-beats-per-minute\""
+
+#~ msgid "TempoSection XML node has no \"active\" property"
+#~ msgstr "TempoSection XML-noden har ingen \"aktiv\" egenskap"
+
+#~ msgid "Legacy session detected - MeterSection XML node will be altered."
+#~ msgstr "Äldre session upptäckt – MeterSection XML-noden kommer att ändras."
+
+#~ msgid "MeterSection XML node has an illegal \"start\" value"
+#~ msgstr "MeterSection XML-noden har ett olagligt \"start\"-värde"
+
+#~ msgid "MeterSection XML node has an illegal \"bbt\" value"
+#~ msgstr "MeterSection XML-noden har ett olagligt \"bbt\"-värde"
+
+#~ msgid "MeterSection XML node has no \"bbt\" property"
+#~ msgstr "MeterSection XML-noden har ingen \"bbt\"-egenskap"
+
+#~ msgid ""
+#~ "MeterSection XML node has no \"beats-per-bar\" or \"divisions-per-bar\" "
+#~ "property"
+#~ msgstr ""
+#~ "MeterSection XML-noden har ingen egenskap för \"slag per takt\" eller "
+#~ "\"delningar per takt\""
+
+#~ msgid "MeterSection XML node has an illegal \"divisions-per-bar\" value"
+#~ msgstr ""
+#~ "MeterSection XML-noden har ett ogiltigt värde för \"divisions-per-bar\""
+
+#~ msgid "MeterSection XML node has no \"note-type\" property"
+#~ msgstr "MeterSection XML-noden har ingen \"note-type\"-egenskap"
+
+#~ msgid "MeterSection XML node has an illegal \"note-type\" value"
+#~ msgstr "MeterSection XML-noden har ett olagligt \"note-type\"-värde"
+
+#~ msgid ""
+#~ "Meter changes can only be positioned on the first beat of a bar. Moving "
+#~ "from %1 to %2"
+#~ msgstr ""
+#~ "Mätarändringar kan endast placeras på första taktslaget i en takt. Flytta "
+#~ "från %1 till %2"
+
+#~ msgid "no tempo sections defined in tempo map - cannot change tempo @ %1"
+#~ msgstr ""
+#~ "inga tempopartier definierade i tempokartan – kan inte ändra tempo @ %1"
+
+#~ msgid "programming error: no meter section in tempo map!"
+#~ msgstr "programmeringsfel: ingen meterdel i tempokartan!"
+
+#~ msgid "programming error: no tempo section in tempo map!"
+#~ msgstr "programmeringsfel: ingen tempodel i tempokartan!"
+
+#~ msgid "tempo map was asked for BBT time at sample %1\n"
+#~ msgstr "tempo-kartan begärdes för BBT-tid vid prov %1\n"
+
+#~ msgid "tempo map asked for sample time at bar < 1  (%1)\n"
+#~ msgstr "tempokarta begärde provtid vid takt < 1  (%1)\n"
+
+#~ msgid "Tempo map: could not set new state, restoring old one."
+#~ msgstr "Tempokarta: kunde inte ställa in nytt läge, återställer det gamla."
+
+#~ msgid "Multiple meter definitions found at %1"
+#~ msgstr "Flera meterdefinitioner hittades på %1"
+
+#~ msgid "Multiple tempo definitions found at %1"
+#~ msgstr "Flera tempodefinitioner hittades på %1"
+
+#~ msgid "Tempo Map"
+#~ msgstr "Tempokarta"
+
+#~ msgid "Tempo marks: "
+#~ msgstr "Tempomärken: "
+
+#~ msgid ""
+#~ "\n"
+#~ "Meter marks: "
+#~ msgstr ""
+#~ "\n"
+#~ "Mätarmärken: "
+
+#~ msgid ""
+#~ "This will replace the current tempo map!\n"
+#~ "Are you sure you want to do this?"
+#~ msgstr ""
+#~ "Detta kommer att ersätta den nuvarande tempokartan! Är du säker på att du "
+#~ "vill göra detta?"
+
+#~ msgid "MidiDiskstream: could not create region for captured midi!"
+#~ msgstr "MidiDiskstream: kunde inte skapa region för inspelad midi!"
+
+#~ msgid "Splice"
+#~ msgstr "Skarv"
