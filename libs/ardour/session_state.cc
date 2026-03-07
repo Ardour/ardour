@@ -4499,21 +4499,33 @@ Session::restore_history (string snapshot_name)
 			XMLNode *t = *it;
 
 			std::string name;
+			std::string timestamp;
+
 			int64_t tv_sec;
 			int64_t tv_usec;
+			Glib::DateTime dt;
 
-			if (!t->get_property ("name", name) || !t->get_property ("tv-sec", tv_sec) ||
-			    !t->get_property ("tv-usec", tv_usec)) {
+			if (!t->get_property ("name", name)) {
+				continue;
+			}
+
+			/* new since 9.3 timestamp */
+			if (t->get_property ("timestamp", timestamp)) {
+				dt = Glib::DateTime::create_from_iso8601 (timestamp);
+			} else if (t->get_property ("tv-sec", tv_sec) && t->get_property ("tv-usec", tv_usec)) {
+#if 0 // glibmm >= 2.80
+				dt.create_from_utc_usec (tv_sec * 1e6 + tv_usec);
+#else
+				dt = Glib::DateTime::create_now_utc (tv_sec);
+				dt.add_seconds (tv_usec / 1e6);
+#endif
+			} else {
 				continue;
 			}
 
 			UndoTransaction* ut = new UndoTransaction ();
 			ut->set_name (name);
-
-			struct timeval tv;
-			tv.tv_sec = tv_sec;
-			tv.tv_usec = tv_usec;
-			ut->set_timestamp(tv);
+			ut->set_timestamp (dt);
 
 			for (XMLNodeConstIterator child_it  = t->children().begin();
 			     child_it != t->children().end(); child_it++)

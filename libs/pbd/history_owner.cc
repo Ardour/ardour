@@ -129,8 +129,6 @@ HistoryOwner::commit_reversible_command (Command *cmd)
 		return;
 	}
 
-	struct timeval now;
-
 	if (cmd) {
 		DEBUG_TRACE (DEBUG::UndoHistory,
 		    string_compose ("%3 Current Undo Transaction %1, adding command: %2\n",
@@ -165,8 +163,7 @@ HistoryOwner::commit_reversible_command (Command *cmd)
 		return;
 	}
 
-	gettimeofday (&now, 0);
-	_current_trans->set_timestamp (now);
+	_current_trans->set_timestamp (g_date_time_new_now_local ());
 
 	DEBUG_TRACE (DEBUG::UndoHistory,
 	             string_compose ("%2 Commit Reversible Command, add to history %1\n",

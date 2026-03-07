@@ -26,21 +26,10 @@
 #include <map>
 #include <string>
 
+#include <glibmm/datetime.h>
+
 #include <sigc++/bind.h>
 #include <sigc++/slot.h>
-
-#ifndef COMPILER_MSVC
-#include <sys/time.h>
-#else
-#ifndef WAF_BUILD
-#include <ardourext/misc.h>
-#else
-struct timeval {
-    long tv_sec;
-    long tv_usec;
-};
-#endif
-#endif
 
 #include "pbd/command.h"
 #include "pbd/libpbd_visibility.h"
@@ -74,20 +63,25 @@ public:
 
 	XMLNode& get_state () const;
 
-	void set_timestamp (struct timeval& t)
+	void set_timestamp (GDateTime* t)
 	{
-		_timestamp = t;
+		_timestamp = Glib::DateTime (t);
 	}
 
-	const struct timeval& timestamp () const
+	void set_timestamp (Glib::DateTime const& t)
+	{
+		_timestamp = Glib::DateTime (t);
+	}
+
+	Glib::DateTime const& timestamp () const
 	{
 		return _timestamp;
 	}
 
 private:
 	std::list<PBD::Command*> actions;
-	struct timeval      _timestamp;
-	bool                _clearing;
+	Glib::DateTime          _timestamp;
+	bool                    _clearing;
 
 	void about_to_explicitly_delete ();
 };

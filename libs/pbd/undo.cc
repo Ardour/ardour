@@ -33,9 +33,9 @@ using namespace sigc;
 using namespace PBD;
 
 UndoTransaction::UndoTransaction ()
-	: _clearing (false)
+	: _timestamp (g_date_time_new_now_local ())
+	, _clearing (false)
 {
-	gettimeofday (&_timestamp, 0);
 }
 
 UndoTransaction::UndoTransaction (const UndoTransaction& rhs)
@@ -144,8 +144,14 @@ XMLNode&
 UndoTransaction::get_state () const
 {
 	XMLNode* node = new XMLNode ("UndoTransaction");
-	node->set_property ("tv-sec", (int64_t)_timestamp.tv_sec);
-	node->set_property ("tv-usec", (int64_t)_timestamp.tv_usec);
+
+	/* iso8601 compatible */
+	if (_timestamp.get_utc_offset () == 0) {
+		node->set_property ("timestamp", _timestamp.format ("%FT%H:%M:%S.%fZ"));
+	} else {
+		node->set_property ("timestamp", _timestamp.format ("%FT%H:%M:%S.%f%:::z"));
+	}
+
 	node->set_property ("name", _name);
 
 	list<Command*>::const_iterator it;
