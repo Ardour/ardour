@@ -13500,7 +13500,7 @@ msgid ""
 msgstr ""
 "Cliquer pour jouer une note, cliquer-glisser pour jouer une série de notes\n"
 "%1-clic pour sélectionner ou étendre la sélection à toutes les notes de "
-"cette hauteur\n"
+"cette hauteur"
 
 #: pianoroll.cc:286
 msgid "Expression"
