@@ -35,6 +35,11 @@
 #include <CoreFoundation/CoreFoundation.h>
 #endif /* __APPLE__ */
 
+#if defined(COMPILER_MSVC) && defined(WAF_BUILD)
+#include <basetsd.h>
+typedef SSIZE_T ssize_t;
+#endif
+
 #include "ardour/ardour.h"
 #include "ardour/data_type.h"
 #include "ardour/dB.h"

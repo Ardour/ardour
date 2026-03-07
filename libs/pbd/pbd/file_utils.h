@@ -29,6 +29,11 @@
 #include "pbd/libpbd_visibility.h"
 #include "pbd/search_path.h"
 
+#if defined(COMPILER_MSVC) && defined(WAF_BUILD)
+#include <basetsd.h>
+typedef SSIZE_T ssize_t; //Defining here for both file_utils.cc and file_archive.cc
+#endif
+           
 namespace PBD {
 
 /**
