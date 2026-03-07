@@ -61,6 +61,9 @@
 #include <io.h> // Microsoft's nearest equivalent to <unistd.h>
 #ifndef WAF_BUILD
 #include <ardourext/misc.h>
+#else
+#define PATH_MAX _MAX_PATH
+#define W_OK 2
 #endif
 #endif
 
