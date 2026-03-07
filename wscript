@@ -91,7 +91,7 @@ compiler_flags_dictionaries= {
         'mconsole': ['-mconsole'],
     },
     'msvc' : {
-        'debuggable' : ['/DDEBUG', '/Od', '/Z7', '/MDd', '/Gd', '/EHsc'],
+        'debuggable' : ['/DDEBUG', '/Od', '/Z7', '/MDd', '/Gd', '/EHsc', '/JMC'],
         'linker-debuggable' : ['/DEBUG', '/INCREMENTAL' ],
         'nondebuggable' : ['/DNDEBUG', '/Ob1', '/MD', '/Gd', '/EHsc'],
         'profile' : ['/Oy-'],
@@ -485,7 +485,7 @@ int main() { return 0; }''',
     conf.env['compiler_flags_dict'] = flags_dict
 
     if compiler_name == 'msvc':
-        compiler_flags.extend(['/nologo', '/FS', '/bigobj', '/JMC', '/FC',
+        compiler_flags.extend(['/nologo', '/FS', '/bigobj', '/FC',
                                '/diagnostics:column', '/Zc:__cplusplus'])
         linker_flags.extend(['/guard:cf'])
 
@@ -579,7 +579,7 @@ int main() { return 0; }''',
             # C++17 removes 'unary_function' and 'binary_function' this breaks older boost versions
             # prior to boost 1.81.0
             cxx_flags.append('-D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION')
-        else:
+        elif compiler_name != 'msvc':
             cxx_flags.append('-DBOOST_NO_AUTO_PTR')
 
     if (is_clang and platform == "darwin"):
@@ -963,7 +963,6 @@ def configure(conf):
         conf.load('clang_compilation_database')
 
     if Options.options.dist_target == 'msvc':
-        conf.env['MSVC_VERSIONS'] = ['msvc 10.0', 'msvc 9.0', 'msvc 8.0', 'msvc 7.1', 'msvc 7.0', 'msvc 6.0', ]
         conf.env['MSVC_TARGETS'] = ['x64']
         conf.load('msvc')
 
@@ -1270,6 +1269,10 @@ int main () { return 0; }
         conf.env.append_value('CFLAGS', '-DCOMPILER_MSVC')
         conf.env.append_value('CXXFLAGS', '-DPLATFORM_WINDOWS')
         conf.env.append_value('CXXFLAGS', '-DCOMPILER_MSVC')
+        conf.env.append_value('CFLAGS', '-D_USE_MATH_DEFINES')
+        conf.env.append_value('CXXFLAGS', '-D_USE_MATH_DEFINES')
+        conf.env.append_value('CFLAGS', '-I' + os.getcwd() + '\\msvc_waf_headers')
+        conf.env.append_value('CXXFLAGS', '-I' + os.getcwd() + '\\msvc_waf_headers')
         # work around GdkDrawable BitBlt performance issue on windows
         # see http://gareus.org/wiki/ardour_windows_gdk_and_cairo
         conf.env.append_value('CFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
