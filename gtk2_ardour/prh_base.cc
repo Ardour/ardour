@@ -182,7 +182,7 @@ PianoRollHeaderBase::render (ArdourCanvas::Rect const & self, ArdourCanvas::Rect
 	//Reduce the frequency of Pango layout resizing
 	//if (int(_old_context_note_height) != int(context_note_height)) {
 	//Set Pango layout keyboard c's size
-	_font_descript.set_absolute_size (context_note_height * 0.5 * Pango::SCALE);
+	_font_descript.set_absolute_size (min(16.0 * Pango::SCALE, max(10.0 * Pango::SCALE, (int)context_note_height * 0.5 * Pango::SCALE)));
 	_layout->set_font_description(_font_descript);
 
 	//change mode of midnam display
