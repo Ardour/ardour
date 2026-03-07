@@ -4015,6 +4015,11 @@ TriggerBox::rec_enabled() const
 void
 TriggerBox::set_record_enabled (bool yn)
 {
+	AudioTrack const * trk = static_cast<AudioTrack*> (_owner);
+	if (yn && trk && trk->rec_enable_control()->get_value ()) {
+		return;
+	}
+
 	_record_state = yn ? Enabled : Disabled;
 
 	if (_record_state == Disabled) {
