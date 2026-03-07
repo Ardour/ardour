@@ -46,8 +46,6 @@
 
 #include "LuaBridge/LuaBridge.h"
 
-#include "widgets/tooltips.h"
-
 #include "actions.h"
 #include "ardour_ui.h"
 #include "control_point.h"
@@ -192,18 +190,18 @@ Editor::register_actions ()
 
 	show_editor_list_action = ActionManager::register_toggle_action (editor_actions, "show-editor-list", _("Show Editor List"), sigc::mem_fun (*this, &Tabbable::att_right_button_toggled));
 	ActionManager::session_sensitive_actions.push_back (show_editor_list_action);
+	show_editor_list_action->set_tooltip (_("Show/Hide Right Panel"));
 	right_attachment_button.set_related_action (show_editor_list_action);
-	ArdourWidgets::set_tooltip (right_attachment_button, _("Show/Hide Right Panel"));
 
 	show_editor_mixer_action = ActionManager::register_toggle_action (editor_actions, "show-editor-mixer", _("Show Editor Mixer"), sigc::mem_fun (*this, &Tabbable::att_left_button_toggled));
 	ActionManager::session_sensitive_actions.push_back (show_editor_mixer_action);
+	show_editor_mixer_action->set_tooltip (_("Show/Hide Left Panel"));
 	left_attachment_button.set_related_action (show_editor_mixer_action);
-	ArdourWidgets::set_tooltip (left_attachment_button, _("Show/Hide Left Panel"));
 
 	show_editor_props_action = ActionManager::register_toggle_action (editor_actions, "show-editor-props", _("Show Editor Properties Box"), sigc::mem_fun (*this, &Tabbable::att_bottom_button_toggled));
 	ActionManager::session_sensitive_actions.push_back (show_editor_props_action);
+	show_editor_props_action->set_tooltip (_("Show/Hide Bottom Panel"));
 	bottom_attachment_button.set_related_action (show_editor_props_action);
-	ArdourWidgets::set_tooltip (bottom_attachment_button, _("Show/Hide Bottom Panel"));
 
 	reg_sens (editor_actions, "playhead-to-next-region-boundary", _("Playhead to Next Region Boundary"), sigc::bind (sigc::mem_fun(*this, &Editor::cursor_to_next_region_boundary), true));
 	reg_sens (editor_actions, "playhead-to-next-region-boundary-noselection", _("Playhead to Next Region Boundary (No Track Selection)"), sigc::bind (sigc::mem_fun(*this, &Editor::cursor_to_next_region_boundary), false));
