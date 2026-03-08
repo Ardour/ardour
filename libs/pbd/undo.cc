@@ -146,11 +146,20 @@ UndoTransaction::get_state () const
 	XMLNode* node = new XMLNode ("UndoTransaction");
 
 	/* iso8601 compatible */
+#ifdef PLATFORM_WINDOWS
+	/* no microsecond support '%f' causes the string to be empty */
+	if (_timestamp.get_utc_offset () == 0) {
+		node->set_property ("timestamp", _timestamp.format ("%FT%H:%M:%SZ"));
+	} else {
+		node->set_property ("timestamp", _timestamp.format ("%FT%H:%M:%S%:::z"));
+	}
+#else
 	if (_timestamp.get_utc_offset () == 0) {
 		node->set_property ("timestamp", _timestamp.format ("%FT%H:%M:%S.%fZ"));
 	} else {
 		node->set_property ("timestamp", _timestamp.format ("%FT%H:%M:%S.%f%:::z"));
 	}
+#endif
 
 	node->set_property ("name", _name);
 
