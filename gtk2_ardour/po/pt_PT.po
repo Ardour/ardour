@@ -341,7 +341,7 @@ msgid ""
 "\tChristophe Combelles <ccomb@free.fr>\n"
 "\tMartin Blanchard\n"
 "\tRomain Arnaud <roming22@gmail.com>\n"
-"\tOlivier Humbert <trebmuh@tuxfamily.org>\n"
+"\tOlivier Humbert <trebmuh@librazik.org>\n"
 "\tFrédéric Rech <fred_rech@laposte.net>\n"
 msgstr ""
 
