@@ -467,7 +467,7 @@ PianoRollHeaderBase::render_scroomer (Cairo::RefPtr<Cairo::Context> cr) const
 		cr->line_to (_scroomer_size - 1.f, scroomer_top + 2.);
 		cr->stroke ();
 		cr->line_to (_scroomer_size - 1.f, scroomer_bottom - 2.);
-		cr->line_to (2.f, scroomer_bottom - 2.);
+		cr->line_to (1.f, scroomer_bottom - 2.);
 		cr->stroke ();
 		cr->restore ();
 	}
