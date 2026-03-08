@@ -4511,12 +4511,16 @@ Session::restore_history (string snapshot_name)
 
 			/* new since 9.3 timestamp */
 			if (t->get_property ("timestamp", timestamp)) {
+#if 0 // glibmm >= 2.62
 				dt = Glib::DateTime::create_from_iso8601 (timestamp);
+#else
+				dt = Glib::DateTime (g_date_time_new_from_iso8601 (timestamp.c_str(), NULL));
+#endif
 			} else if (t->get_property ("tv-sec", tv_sec) && t->get_property ("tv-usec", tv_usec)) {
 #if 0 // glibmm >= 2.80
 				dt.create_from_utc_usec (tv_sec * 1e6 + tv_usec);
 #else
-				dt = Glib::DateTime::create_now_utc (tv_sec);
+				dt = Glib::DateTime::create_now_local (tv_sec);
 				dt.add_seconds (tv_usec / 1e6);
 #endif
 			} else {
