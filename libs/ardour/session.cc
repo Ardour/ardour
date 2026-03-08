@@ -115,6 +115,7 @@
 #include "ardour/selection.h"
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
+#include "ardour/session_metadata.h"
 #include "ardour/session_playlists.h"
 #include "ardour/session_route.h"
 #include "ardour/smf_source.h"
@@ -405,6 +406,8 @@ Session::Session (AudioEngine &eng,
 	if (_is_new) {
 
 		Stateful::loading_state_version = CURRENT_SESSION_FILE_VERSION;
+
+		SessionMetadata::Metadata()->clear ();
 
 		if (create (mix_template, bus_profile, unnamed)) {
 			destroy ();
