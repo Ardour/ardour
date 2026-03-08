@@ -2,7 +2,7 @@
 #
 #
 # Romain Arnaud <roming22@gmail.com>, 2011.
-# Olivier Humbert <trebmuh@tuxfamily.org>, 2016.
+# Olivier Humbert <trebmuh@librazik.org>, 2016.
 # stratojaune <fred_rech@laposte.net>, 2020.
 # Julien Taverna <jujudusud@gmail.com>, 2022.
 msgid ""
