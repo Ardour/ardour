@@ -238,7 +238,7 @@ static const char* translators[] = {
 \n\tChristophe Combelles <ccomb@free.fr>\
 \n\tMartin Blanchard\
 \n\tRomain Arnaud <roming22@gmail.com>\
-\n\tOlivier Humbert <trebmuh@tuxfamily.org>\
+\n\tOlivier Humbert <trebmuh@librazik.org>\
 \n\tFrédéric Rech <fred_rech@laposte.net>\
 \n\tJulien Taverna <jujudusud@gmail.com>\
 \n\tNicolas Faure <sub26nico@laposte.net>\n"),
