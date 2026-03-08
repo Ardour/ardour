@@ -106,6 +106,20 @@ SessionMetadata::~SessionMetadata ()
 
 }
 
+void
+SessionMetadata::clear (bool clear_user)
+{
+	for (auto& it : map) {
+		it.second = "";
+	}
+	if (!clear_user) {
+		return;
+	}
+	for (auto& it : user_map) {
+		it.second = "";
+	}
+}
+
 XMLNode *
 SessionMetadata::get_xml (const string & name) const
 {

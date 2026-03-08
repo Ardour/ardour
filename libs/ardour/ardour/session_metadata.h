@@ -45,6 +45,8 @@ class LIBARDOUR_API SessionMetadata : public PBD::StatefulDestructible
 	SessionMetadata ();
 	~SessionMetadata ();
 
+	void clear (bool clear_user = false);
+
 	/*** Accessing ***/
 	std::string description () const;
 
