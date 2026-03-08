@@ -458,7 +458,7 @@ PianoRollHeaderBase::render_scroomer (Cairo::RefPtr<Cairo::Context> cr) const
 	cr->line_to (1.f, scroomer_top);
 	cr->fill();
 
-	if (entered) {
+	if (entered || _scroomer_drag) {
 		cr->save ();
 		c = HSV (save_color).lighter (0.9).color();
 		set_source_rgba (cr, c);
