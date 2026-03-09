@@ -129,8 +129,17 @@ Use the JSON tools for fast note generation and round-trip editing:
 
 - `midi_note/import_json`: bulk insert or layer many notes in one call.
 - `midi_note/get_json`: export region notes in the same JSON shape for reuse or editing.
-- Drum mode (`is_drum_mode: true`) imports per-hit notes as zero-length events (note-on and note-off at the same timestamp).
-- Non-drum mode uses normal note durations from on/off pairs.
+- Event timing is region-relative:
+  - `bar: 1`, `b: 1` = first beat of the region.
+  - `bar` is not absolute session bar; it is relative to region start.
+- Beat and tick fields:
+  - `b` is beat number in the bar and may be fractional. Example: `b: 1.5` is an off-beat 8th note in 4/4.
+  - `t` is additional tick offset inside the beat, using `ticks_per_quarter`.
+- Drum mode behavior:
+  - `is_drum_mode: true`: `note_off` events are optional; you can provide drum hits as `note_on` only.
+  - Imported hits are written as zero-length notes (note-on and note-off at the same timestamp).
+- Non-drum mode behavior:
+  - Use normal `note_on` + `note_off` timing pairs for sustained notes/chords.
 
 ## Prompt Cookbook
 
