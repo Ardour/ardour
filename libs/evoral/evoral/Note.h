@@ -36,7 +36,7 @@ namespace Evoral {
  * Currently a note is defined as (on event, length, off event).
  */
 template<typename Time>
-#ifdef COMPILER_MSVC
+#ifndef WAF_BUILD
 class LIBEVORAL_LOCAL Note {
 #else
 class LIBEVORAL_TEMPLATE_API Note {
@@ -125,7 +125,7 @@ template<typename Time>
 
 } // namespace Evoral
 
-#ifdef COMPILER_MSVC
+#ifndef WAF_BUILD
 #include "../src/Note.impl"
 #endif
 
