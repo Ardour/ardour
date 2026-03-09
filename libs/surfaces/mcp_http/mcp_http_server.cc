@@ -1852,7 +1852,12 @@ db_to_gain_with_floor (double db)
 static double
 normalized_db_value (double db)
 {
-	return db_is_silence_floor (db) ? -193.0 : db;
+	if (db_is_silence_floor (db)) {
+		return -193.0;
+	}
+
+	/* Avoid scientific-notation near-zero noise in JSON output. */
+	return (std::fabs (db) < 1e-6) ? 0.0 : db;
 }
 
 static std::string
