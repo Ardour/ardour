@@ -138,6 +138,56 @@ canonical_tool_name (std::string tool_name)
 }
 
 static bool
+is_decimal_pbd_id_string (const std::string& s)
+{
+	if (s.empty ()) {
+		return false;
+	}
+
+	for (std::string::const_iterator i = s.begin (); i != s.end (); ++i) {
+		if (!std::isdigit ((unsigned char) *i)) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+static ARDOUR::Location*
+location_by_mcp_id (ARDOUR::Locations& locations, const std::string& id)
+{
+	/* Defensive guard:
+	 * PBD::ID(string) does not fail-closed on parse errors, so reject
+	 * non-decimal MCP IDs before constructing an ID object.
+	 */
+	if (!is_decimal_pbd_id_string (id)) {
+		return 0;
+	}
+
+	return locations.get_location_by_id (PBD::ID (id));
+}
+
+static std::shared_ptr<ARDOUR::Region>
+region_by_mcp_id (const std::string& id)
+{
+	if (!is_decimal_pbd_id_string (id)) {
+		return std::shared_ptr<ARDOUR::Region> ();
+	}
+
+	return ARDOUR::RegionFactory::region_by_id (PBD::ID (id));
+}
+
+static std::shared_ptr<ARDOUR::Route>
+route_by_mcp_id (ARDOUR::Session& session, const std::string& id)
+{
+	if (!is_decimal_pbd_id_string (id)) {
+		return std::shared_ptr<ARDOUR::Route> ();
+	}
+
+	return session.route_by_id (PBD::ID (id));
+}
+
+static bool
 is_number_literal (const std::string& s)
 {
 	if (s.empty ()) {
@@ -914,7 +964,7 @@ resolve_marker_location (
 	error.clear ();
 
 	if (!location_id.empty ()) {
-		ARDOUR::Location* by_id = locations.get_location_by_id (PBD::ID (location_id));
+		ARDOUR::Location* by_id = location_by_mcp_id (locations, location_id);
 		if (!by_id) {
 			error = "Marker locationId not found";
 			return 0;
@@ -1053,7 +1103,7 @@ resolve_region_argument_or_selected_at_playhead (
 
 	const std::string region_id = root.get<std::string> (args_path + ".regionId", "");
 	if (!region_id.empty ()) {
-		region = ARDOUR::RegionFactory::region_by_id (PBD::ID (region_id));
+		region = region_by_mcp_id (region_id);
 		if (!region) {
 			error = "regionId not found";
 			return false;
@@ -4110,7 +4160,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 
 					if (insert_mode != "end") {
 						if (!relative_to_id.empty ()) {
-							relative_route = _session.route_by_id (PBD::ID (relative_to_id));
+							relative_route = route_by_mcp_id (_session, relative_to_id);
 							if (!relative_route) {
 								return jsonrpc_error (id, -32602, "relativeToId route not found");
 							}
@@ -4254,7 +4304,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						return jsonrpc_error (id, -32602, "Missing trackId");
 					}
 
-					const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (track_id));
+					const std::shared_ptr<ARDOUR::Route> route = route_by_mcp_id (_session, track_id);
 					const std::shared_ptr<ARDOUR::Track> track = std::dynamic_pointer_cast<ARDOUR::Track> (route);
 					const std::shared_ptr<ARDOUR::MidiTrack> midi_track = std::dynamic_pointer_cast<ARDOUR::MidiTrack> (track);
 					if (!midi_track) {
@@ -4408,7 +4458,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 							return jsonrpc_error (id, -32602, "Provide exactly one position: regionBeat, sample, or bar+beat");
 						}
 
-						const std::shared_ptr<ARDOUR::Region> region = ARDOUR::RegionFactory::region_by_id (PBD::ID (region_id));
+						const std::shared_ptr<ARDOUR::Region> region = region_by_mcp_id (region_id);
 						const std::shared_ptr<ARDOUR::MidiRegion> midi_region = std::dynamic_pointer_cast<ARDOUR::MidiRegion> (region);
 						if (!midi_region) {
 							return jsonrpc_error (id, -32602, "regionId is not a MIDI region");
@@ -4501,7 +4551,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 							return jsonrpc_error (id, -32602, "Missing regionId");
 						}
 
-						const std::shared_ptr<ARDOUR::Region> region = ARDOUR::RegionFactory::region_by_id (PBD::ID (region_id));
+						const std::shared_ptr<ARDOUR::Region> region = region_by_mcp_id (region_id);
 						if (!region) {
 							return jsonrpc_error (id, -32602, "regionId not found");
 						}
@@ -4549,7 +4599,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 							return jsonrpc_error (id, -32602, "Missing regionId");
 						}
 
-						const std::shared_ptr<ARDOUR::Region> region = ARDOUR::RegionFactory::region_by_id (PBD::ID (region_id));
+						const std::shared_ptr<ARDOUR::Region> region = region_by_mcp_id (region_id);
 						if (!region) {
 							return jsonrpc_error (id, -32602, "regionId not found");
 						}
@@ -4915,13 +4965,13 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						std::shared_ptr<ARDOUR::Region> target_region;
 
 						if (!region_id.empty ()) {
-							target_region = ARDOUR::RegionFactory::region_by_id (PBD::ID (region_id));
+							target_region = region_by_mcp_id (region_id);
 							if (!target_region) {
 								return jsonrpc_error (id, -32602, "regionId not found");
 							}
 
 							if (!track_id_arg.empty ()) {
-								std::shared_ptr<ARDOUR::Route> r = _session.route_by_id (PBD::ID (track_id_arg));
+								std::shared_ptr<ARDOUR::Route> r = route_by_mcp_id (_session, track_id_arg);
 								target_track = std::dynamic_pointer_cast<ARDOUR::Track> (r);
 							}
 						} else {
@@ -4929,7 +4979,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 								return jsonrpc_error (id, -32602, "Provide regionId, or trackId with range endpoints");
 							}
 
-							std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (track_id_arg));
+							std::shared_ptr<ARDOUR::Route> route = route_by_mcp_id (_session, track_id_arg);
 							target_track = std::dynamic_pointer_cast<ARDOUR::Track> (route);
 							const std::shared_ptr<ARDOUR::MidiTrack> midi_track = std::dynamic_pointer_cast<ARDOUR::MidiTrack> (target_track);
 							if (!midi_track) {
@@ -5104,7 +5154,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 							return jsonrpc_error (id, -32602, "Invalid timeSignature (expected format N/D)");
 						}
 
-						const std::shared_ptr<ARDOUR::Region> region = ARDOUR::RegionFactory::region_by_id (PBD::ID (region_id));
+						const std::shared_ptr<ARDOUR::Region> region = region_by_mcp_id (region_id);
 						if (!region) {
 							return jsonrpc_error (id, -32602, "regionId not found");
 						}
@@ -5294,7 +5344,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 					return jsonrpc_error (id, -32602, "Missing track id");
 				}
 
-				const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
+				const std::shared_ptr<ARDOUR::Route> route = route_by_mcp_id (_session, route_id);
 				if (!route) {
 					return jsonrpc_error (id, -32602, "Route not found");
 				}
@@ -5313,7 +5363,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						return jsonrpc_error (id, -32602, "Missing track id");
 					}
 
-					const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
+					const std::shared_ptr<ARDOUR::Route> route = route_by_mcp_id (_session, route_id);
 					if (!route) {
 						return jsonrpc_error (id, -32602, "Route not found");
 					}
@@ -5911,7 +5961,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						std::shared_ptr<ARDOUR::Track> target_track;
 						std::shared_ptr<ARDOUR::Playlist> target_playlist = source_playlist;
 						if (!target_track_id.empty ()) {
-							const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (target_track_id));
+							const std::shared_ptr<ARDOUR::Route> route = route_by_mcp_id (_session, target_track_id);
 							target_track = std::dynamic_pointer_cast<ARDOUR::Track> (route);
 							if (!target_track) {
 								return jsonrpc_error (id, -32602, "trackId is not a track");
@@ -6113,7 +6163,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						std::shared_ptr<ARDOUR::Track> target_track;
 						std::shared_ptr<ARDOUR::Playlist> target_playlist = source_playlist;
 						if (!target_track_id.empty ()) {
-							const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (target_track_id));
+							const std::shared_ptr<ARDOUR::Route> route = route_by_mcp_id (_session, target_track_id);
 							target_track = std::dynamic_pointer_cast<ARDOUR::Track> (route);
 							if (!target_track) {
 								return jsonrpc_error (id, -32602, "trackId is not a track");
@@ -6422,7 +6472,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						return jsonrpc_error (id, -32602, "Invalid position (expected >= 0)");
 					}
 
-					const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
+					const std::shared_ptr<ARDOUR::Route> route = route_by_mcp_id (_session, route_id);
 					if (!route) {
 						return jsonrpc_error (id, -32602, "Route not found");
 					}
@@ -6500,7 +6550,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						return jsonrpc_error (id, -32602, "Invalid pluginIndex (expected >= 0)");
 					}
 
-					const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
+					const std::shared_ptr<ARDOUR::Route> route = route_by_mcp_id (_session, route_id);
 					if (!route) {
 						return jsonrpc_error (id, -32602, "Route not found");
 					}
@@ -6549,7 +6599,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						return jsonrpc_error (id, -32602, "Invalid controlId (expected >= 0)");
 					}
 
-					const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
+					const std::shared_ptr<ARDOUR::Route> route = route_by_mcp_id (_session, route_id);
 					if (!route) {
 						return jsonrpc_error (id, -32602, "Route not found");
 					}
@@ -6667,7 +6717,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						return jsonrpc_error (id, -32602, "Missing enabled boolean");
 					}
 
-					const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
+					const std::shared_ptr<ARDOUR::Route> route = route_by_mcp_id (_session, route_id);
 					if (!route) {
 						return jsonrpc_error (id, -32602, "Route not found");
 					}
@@ -6716,7 +6766,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						return jsonrpc_error (id, -32602, "Invalid pluginIndex (expected >= 0)");
 					}
 
-					const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
+					const std::shared_ptr<ARDOUR::Route> route = route_by_mcp_id (_session, route_id);
 					if (!route) {
 						return jsonrpc_error (id, -32602, "Route not found");
 					}
@@ -6763,7 +6813,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						return jsonrpc_error (id, -32602, "Invalid fromIndex/toIndex (expected >= 0)");
 					}
 
-					const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
+					const std::shared_ptr<ARDOUR::Route> route = route_by_mcp_id (_session, route_id);
 					if (!route) {
 						return jsonrpc_error (id, -32602, "Route not found");
 					}
@@ -6861,7 +6911,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						return jsonrpc_error (id, -32602, "Missing postFader boolean");
 					}
 
-					const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
+					const std::shared_ptr<ARDOUR::Route> route = route_by_mcp_id (_session, route_id);
 					if (!route) {
 						return jsonrpc_error (id, -32602, "Route not found");
 					}
@@ -6980,7 +7030,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 					return jsonrpc_error (id, -32602, "Missing track id");
 				}
 
-				const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
+				const std::shared_ptr<ARDOUR::Route> route = route_by_mcp_id (_session, route_id);
 				if (!route || !route->is_track ()) {
 					return jsonrpc_error (id, -32602, "Track not found");
 				}
@@ -7003,7 +7053,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						return jsonrpc_error (id, -32602, "Missing route id");
 					}
 
-					const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
+					const std::shared_ptr<ARDOUR::Route> route = route_by_mcp_id (_session, route_id);
 					if (!route) {
 						return jsonrpc_error (id, -32602, "Route not found");
 					}
@@ -7028,7 +7078,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						return jsonrpc_error (id, -32602, "Missing newName");
 					}
 
-					const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
+					const std::shared_ptr<ARDOUR::Route> route = route_by_mcp_id (_session, route_id);
 					if (!route) {
 						return jsonrpc_error (id, -32602, "Route not found");
 					}
@@ -7062,7 +7112,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						return jsonrpc_error (id, -32602, "Missing boolean value");
 					}
 
-					const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
+					const std::shared_ptr<ARDOUR::Route> route = route_by_mcp_id (_session, route_id);
 					if (!route) {
 						return jsonrpc_error (id, -32602, "Route not found");
 					}
@@ -7090,7 +7140,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						return jsonrpc_error (id, -32602, "Missing boolean value");
 					}
 
-					const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
+					const std::shared_ptr<ARDOUR::Route> route = route_by_mcp_id (_session, route_id);
 					if (!route) {
 						return jsonrpc_error (id, -32602, "Route not found");
 					}
@@ -7121,7 +7171,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						return jsonrpc_error (id, -32602, "Missing boolean value");
 					}
 
-					const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
+					const std::shared_ptr<ARDOUR::Route> route = route_by_mcp_id (_session, route_id);
 					const std::shared_ptr<ARDOUR::Track> track = std::dynamic_pointer_cast<ARDOUR::Track> (route);
 					if (!track) {
 						return jsonrpc_error (id, -32602, "Track not found");
@@ -7150,7 +7200,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						return jsonrpc_error (id, -32602, "Missing boolean value");
 					}
 
-					const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
+					const std::shared_ptr<ARDOUR::Route> route = route_by_mcp_id (_session, route_id);
 					const std::shared_ptr<ARDOUR::Track> track = std::dynamic_pointer_cast<ARDOUR::Track> (route);
 					if (!track) {
 						return jsonrpc_error (id, -32602, "Track not found");
@@ -7179,7 +7229,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						return jsonrpc_error (id, -32602, "Invalid pan position (expected 0.0 to 1.0)");
 					}
 
-					const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
+					const std::shared_ptr<ARDOUR::Route> route = route_by_mcp_id (_session, route_id);
 					if (!route) {
 						return jsonrpc_error (id, -32602, "Route not found");
 					}
@@ -7216,7 +7266,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						return jsonrpc_error (id, -32602, "Provide only one of: position or db");
 					}
 
-					const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
+					const std::shared_ptr<ARDOUR::Route> route = route_by_mcp_id (_session, route_id);
 					if (!route) {
 						return jsonrpc_error (id, -32602, "Route not found");
 					}
@@ -7286,8 +7336,8 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						return jsonrpc_error (id, -32602, "Invalid dB value (expected -193.0 to +6.0 dB; use -193.0 for silence)");
 					}
 
-					const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
-					const std::shared_ptr<ARDOUR::Route> target_route = _session.route_by_id (PBD::ID (target_id));
+					const std::shared_ptr<ARDOUR::Route> route = route_by_mcp_id (_session, route_id);
+					const std::shared_ptr<ARDOUR::Route> target_route = route_by_mcp_id (_session, target_id);
 					if (!route) {
 						return jsonrpc_error (id, -32602, "Source route not found");
 					}
@@ -7384,7 +7434,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						return jsonrpc_error (id, -32602, "Missing postFader boolean");
 					}
 
-					const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
+					const std::shared_ptr<ARDOUR::Route> route = route_by_mcp_id (_session, route_id);
 					if (!route) {
 						return jsonrpc_error (id, -32602, "Route not found");
 					}
@@ -7413,7 +7463,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						return jsonrpc_error (id, -32602, "Invalid sendIndex (expected >= 0)");
 					}
 
-					const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
+					const std::shared_ptr<ARDOUR::Route> route = route_by_mcp_id (_session, route_id);
 					if (!route) {
 						return jsonrpc_error (id, -32602, "Route not found");
 					}
@@ -7486,7 +7536,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 				return jsonrpc_error (id, -32602, "Provide only one of: position or db");
 			}
 
-			const std::shared_ptr<ARDOUR::Route> route = _session.route_by_id (PBD::ID (route_id));
+			const std::shared_ptr<ARDOUR::Route> route = route_by_mcp_id (_session, route_id);
 			if (!route || !route->is_track ()) {
 				return jsonrpc_error (id, -32602, "Track not found");
 			}
