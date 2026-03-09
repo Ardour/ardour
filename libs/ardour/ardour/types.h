@@ -285,7 +285,8 @@ enum ChannelMode {
 enum ColorMode {
 	MeterColors = 0,
 	ChannelColors,
-	TrackColor
+	TrackColor,
+	PitchColors,
 };
 
 enum SnapPref {
