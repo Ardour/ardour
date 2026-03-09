@@ -1868,7 +1868,7 @@ track_fader_json (const std::shared_ptr<ARDOUR::Route>& route)
 	double db = -193.0;
 
 	if (gain && gain->get_value () > 0.0) {
-		db = fast_coefficient_to_dB (gain->get_value ());
+		db = accurate_coefficient_to_dB (gain->get_value ());
 		if (!std::isfinite (db)) {
 			db = -193.0;
 		}
@@ -1900,7 +1900,7 @@ send_list_json (const std::shared_ptr<ARDOUR::Route>& route)
 		const double position = gain ? gain->internal_to_interface (gain->get_value ()) : 0.0;
 		double db = -193.0;
 		if (gain && gain->get_value () > 0.0) {
-			db = fast_coefficient_to_dB (gain->get_value ());
+			db = accurate_coefficient_to_dB (gain->get_value ());
 			if (!std::isfinite (db)) {
 				db = -193.0;
 			}
@@ -1944,7 +1944,7 @@ send_level_json (const std::shared_ptr<ARDOUR::Route>& route, uint32_t send_inde
 	double db = -193.0;
 
 	if (gain && gain->get_value () > 0.0) {
-		db = fast_coefficient_to_dB (gain->get_value ());
+		db = accurate_coefficient_to_dB (gain->get_value ());
 		if (!std::isfinite (db)) {
 			db = -193.0;
 		}
@@ -2627,7 +2627,7 @@ track_info_json (const std::shared_ptr<ARDOUR::Route>& route)
 	if (gain) {
 		double db = -193.0;
 		if (gain->get_value () > 0.0) {
-			db = fast_coefficient_to_dB (gain->get_value ());
+				db = accurate_coefficient_to_dB (gain->get_value ());
 			if (!std::isfinite (db)) {
 				db = -193.0;
 			}
