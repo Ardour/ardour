@@ -38,6 +38,11 @@ typedef long ssize_t;
 #endif
 #endif
 
+#if defined(COMPILER_MSVC) && defined(WAF_BUILD)
+#include <basetsd.h>
+typedef SSIZE_T ssize_t;
+#endif
+
 using namespace std;
 using namespace MIDI;
 using namespace PBD;
