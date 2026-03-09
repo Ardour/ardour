@@ -187,7 +187,7 @@ class Pianoroll : public CueEditor
 	void escape ();
 	void session_going_away ();
 
-	void set_color_scheme (int);
+	void set_color_mode (ARDOUR::ColorMode);
 
  private:
 	ArdourCanvas::Ruler*     bbt_ruler;
@@ -195,6 +195,7 @@ class Pianoroll : public CueEditor
 	ArdourCanvas::Rectangle* meter_bar;
 	ArdourCanvas::PianoRollHeader* prh;
 	EditingPolicy _editing_policy;
+	ARDOUR::ColorMode _color_mode;
 
 	ArdourWidgets::ArdourDropdown region_dropdown;
 	void rebuild_region_dropdown ();

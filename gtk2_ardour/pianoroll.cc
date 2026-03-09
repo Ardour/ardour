@@ -73,6 +73,7 @@ Pianoroll::Pianoroll (std::string const & name, bool with_transport)
 	: CueEditor (name, with_transport)
 	, prh (nullptr)
 	, _editing_policy (ActiveView)
+	, _color_mode (ARDOUR::ChannelColors)
 	, layered_automation (true)
 	, bg (nullptr)
 	, _active_view (nullptr)
@@ -90,10 +91,11 @@ Pianoroll::Pianoroll (std::string const & name, bool with_transport)
 	policy_dropdown.add_menu_elem (MenuElem (_("Active Region"), sigc::bind (sigc::mem_fun (*this, &Pianoroll::set_editing_policy), ActiveView)));
 	policy_dropdown.set_active (1);
 
-	colors_dropdown.add_menu_elem (MenuElem (_("Velocity"), sigc::bind (sigc::mem_fun (*this, &Pianoroll::set_color_scheme), MidiView::ColorByVelocity)));
-	colors_dropdown.add_menu_elem (MenuElem (_("Pitch"), sigc::bind (sigc::mem_fun (*this, &Pianoroll::set_color_scheme), MidiView::ColorByPitch)));
-	colors_dropdown.add_menu_elem (MenuElem (_("Channel"), sigc::bind (sigc::mem_fun (*this, &Pianoroll::set_color_scheme), MidiView::ColorByChannel)));
-	colors_dropdown.add_menu_elem (MenuElem (_("Region"), sigc::bind (sigc::mem_fun (*this, &Pianoroll::set_color_scheme), MidiView::ColorByRegion)));
+	/* Ordering must match enum declaration order */
+	colors_dropdown.add_menu_elem (MenuElem (_("Velocity"), sigc::bind (sigc::mem_fun (*this, &Pianoroll::set_color_mode), ARDOUR::MeterColors)));
+	colors_dropdown.add_menu_elem (MenuElem (_("Channel"), sigc::bind (sigc::mem_fun (*this, &Pianoroll::set_color_mode), ARDOUR::ChannelColors)));
+	colors_dropdown.add_menu_elem (MenuElem (_("Region"), sigc::bind (sigc::mem_fun (*this, &Pianoroll::set_color_mode), ARDOUR::TrackColor)));
+	colors_dropdown.add_menu_elem (MenuElem (_("Pitch"), sigc::bind (sigc::mem_fun (*this, &Pianoroll::set_color_mode), ARDOUR::PitchColors)));
 	colors_dropdown.set_active (1);
 	ArdourWidgets::set_tooltip (colors_dropdown, _("Color Scheme for MIDI events"));
 
@@ -417,10 +419,22 @@ Pianoroll::pack_outer (Gtk::Box& box)
 }
 
 void
-Pianoroll::set_color_scheme (int cs)
+Pianoroll::set_color_mode (ARDOUR::ColorMode cm)
 {
+	std::cerr << "color mode set to " << cm << " current " << _color_mode << std::endl;
+	if (_color_mode == cm) {
+		return;
+	}
+
+	_color_mode = cm;
+	colors_dropdown.set_active ((int) cm);
+
+	if (bg) {
+		bg->set_color_mode (cm);
+	}
+
 	for (auto & [region,view] : region_view_map) {
-		view->set_color_scheme ((MidiView::ColorScheme) cs);
+		view->color_handler ();
 	}
 }
 
@@ -534,6 +548,7 @@ Pianoroll::build_canvas ()
 	CANVAS_DEBUG_NAME (data_group, "cue data group");
 
 	bg = new PianorollMidiBackground (data_group, *this);
+	bg->set_color_mode (_color_mode);
 	_canvas_viewport.signal_size_allocate().connect (sigc::mem_fun(*this, &Pianoroll::canvas_allocate), false);
 
 	// used as rubberband rect

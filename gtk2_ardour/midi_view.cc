@@ -129,7 +129,6 @@ MidiView::MidiView (std::shared_ptr<MidiTrack> mt,
 	, selection_drag (nullptr)
 	, draw_drag (nullptr)
 	, _visible_channel (-1)
-	, _color_scheme (ColorByVelocity)
 	, _optimization_iterator (_events.end())
 	, _list_editor (nullptr)
 	, _no_sound_notes (false)
@@ -169,7 +168,6 @@ MidiView::MidiView (MidiView const & other)
 	, selection_drag (nullptr)
 	, draw_drag (nullptr)
 	, _visible_channel (-1)
-	, _color_scheme (ColorByVelocity)
 	, _optimization_iterator (_events.end())
 	, _list_editor (0)
 	, _no_sound_notes (false)
@@ -244,13 +242,6 @@ MidiView::set_sensitive (bool yn)
 	if (yn) {
 		_note_group->raise_to_top ();
 	}
-}
-
-void
-MidiView::set_color_scheme (ColorScheme cs)
-{
-	_color_scheme = cs;
-	/* XXX do something to recolor everything */
 }
 
 void
@@ -1463,7 +1454,7 @@ MidiView::view_changed()
 bool
 MidiView::note_editable (NoteBase const * ev) const
 {
-	return (ev != _ghost_note) && ((_visible_channel < 0) || (ev->note()->channel() == _visible_channel));
+	return ev->item()->ignore_events() || ((ev != _ghost_note) && ((_visible_channel < 0) || (ev->note()->channel() == _visible_channel)));
 }
 
 void
@@ -1958,8 +1949,7 @@ MidiView::update_sustained (Note* ev)
 void
 MidiView::color_note (NoteBase* ev, int channel)
 {
-	// Update color in case velocity has changed
-	uint32_t base_color = ev->base_color();
+	uint32_t base_color = NoteBase::base_color (ev->note()->note(), ev->note()->velocity(), ChannelColors, 0, channel, ev->selected());
 
 	if (!note_editable (ev)) {
 		base_color = Gtkmm2ext::change_alpha (base_color, 0.15);

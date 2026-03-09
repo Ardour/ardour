@@ -306,7 +306,7 @@ VelocityDisplay::drag_lolli (ArdourCanvas::Lollipop* l, GdkEventMotion* ev)
 			   (yet), we have to use the static method to compute
 			   the color.
 			*/
-			lolli->set_fill_color (NoteBase::base_color (newvel, bg.color_mode(), bg.region_color(), x->event->note()->channel(), true));
+			lolli->set_fill_color (NoteBase::base_color (s->note()->note(), newvel, bg.color_mode(), bg.region_color(), x->event->note()->channel(), true));
 
 			if (l == lolli) {
 				/* This is the value we will display */

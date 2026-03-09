@@ -365,6 +365,7 @@ StreamView::apply_color (uint32_t color, ColorTarget target)
 
 	switch (target) {
 	case RegionColor:
+		std::cerr << this << " reg color set to " << color << std::endl;
 		_region_color = color;
 		for (i = region_views.begin(); i != region_views.end(); ++i) {
 			(*i)->set_color (_region_color);
@@ -372,6 +373,7 @@ StreamView::apply_color (uint32_t color, ColorTarget target)
 		break;
 
 	case StreamBaseColor:
+		std::cerr << this << " streambase color set to " << color << std::endl;
 		stream_base_color = color;
 		canvas_rect->set_fill_color (stream_base_color);
 		break;

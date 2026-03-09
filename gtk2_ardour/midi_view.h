@@ -83,14 +83,6 @@ class Drag;
 class MidiView : public virtual sigc::trackable, public LineMerger
 {
   public:
-	enum ColorScheme {
-		ColorByVelocity,
-		ColorByPitch,
-		ColorByChannel,
-		ColorByTrack,
-		ColorByRegion,
-	};
-
 	typedef Evoral::Note<Temporal::Beats> NoteType;
 	typedef Evoral::Sequence<Temporal::Beats>::Notes Notes;
 
@@ -106,9 +98,6 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	void init (bool wfd);
 
 	void set_sensitive (bool);
-
-	void set_color_scheme (ColorScheme);
-	ColorScheme color_scheme () const { return _color_scheme; }
 
 	virtual void set_samples_per_pixel (double) {};
 
@@ -548,7 +537,6 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	Drag*                                 selection_drag;
 	Drag*                                 draw_drag;
 	int                                  _visible_channel;
-	ColorScheme                          _color_scheme;
 
 	/** Currently selected NoteBase objects */
 	Selection _selection;

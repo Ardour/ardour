@@ -52,6 +52,12 @@ const uint32_t NoteBase::midi_channel_colors[16] = {
 	  0x832dd3ff,  0xa92dd3ff,  0xd32dbfff,  0xd32d67ff
 	};
 
+std::vector<uint32_t> NoteBase::pitch_colors = { 
+	  0xd32d2dff,  0xd36b2dff,  0xd3972dff,  0xd3d12dff,
+	  0xa0d32dff,  0x7dd32dff,  0x2dd45eff,  0x2dd3c4ff,
+	  0x2da5d3ff,  0x2d6fd3ff,  0x432dd3ff,  0x662dd3ff,
+};
+
 bool             NoteBase::_color_init = false;
 Gtkmm2ext::Color NoteBase::_selected_col = 0;
 Gtkmm2ext::SVAModifier NoteBase::color_modifier;
@@ -181,32 +187,39 @@ NoteBase::set_selected(bool selected)
 uint32_t
 NoteBase::base_color ()
 {
-	return base_color (_note->velocity(), _view.midi_context().color_mode(), _view.midi_context().region_color(), _note->channel(), selected());
+	return base_color (_note->note(), _note->velocity(), _view.midi_context().color_mode(), _view.midi_context().region_color(), _note->channel(), selected());
 }
 
 uint32_t
-NoteBase::base_color (int velocity, ARDOUR::ColorMode color_mode, Gtkmm2ext::Color default_color, int channel, bool selected)
+NoteBase::base_color (int pitch, int velocity, ARDOUR::ColorMode color_mode, Gtkmm2ext::Color default_color, int channel, bool selected)
 {
 	using namespace ARDOUR;
 
 	const uint8_t min_opacity = 15;
 	uint8_t       opacity = std::max(min_opacity, uint8_t(velocity + velocity));
+	size_t        region_color;
 
 	switch (color_mode) {
 	case TrackColor:
-	{
-		const uint32_t region_color = default_color;
+		region_color = default_color;
 		return UINT_INTERPOLATE (UINT_RGBA_CHANGE_A (region_color, opacity), _selected_col, 0.5);
-	}
 
 	case ChannelColors:
+		channel = channel % (sizeof (midi_channel_colors) / sizeof (midi_channel_colors[0]));
 		return UINT_INTERPOLATE (UINT_RGBA_CHANGE_A (NoteBase::midi_channel_colors[channel], opacity), _selected_col, 0.5);
+
+	case PitchColors:
+		pitch = pitch % pitch_colors.size();
+		return UINT_INTERPOLATE (UINT_RGBA_CHANGE_A (NoteBase::pitch_colors[pitch], opacity), _selected_col, 0.5);
+
+	case MeterColors:
+		return meter_style_fill_color(velocity, selected);
 
 	default:
 		if (UIConfiguration::instance().get_use_note_color_for_velocity()) {
 			return meter_style_fill_color(velocity, selected);
 		} else {
-			const uint32_t region_color = default_color;
+			region_color = default_color;
 			return UINT_INTERPOLATE (UINT_RGBA_CHANGE_A (region_color, opacity), _selected_col, 0.5);
 		}
 	};

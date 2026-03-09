@@ -21,6 +21,7 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
 #include "temporal/beats.h"
 #include "canvas/types.h"
@@ -86,7 +87,7 @@ class NoteBase : public sigc::trackable
 	virtual void move_event(double dx, double dy) = 0;
 
 	uint32_t base_color();
-	static uint32_t base_color (int velocity, ARDOUR::ColorMode color_mode, Gtkmm2ext::Color, int channel, bool selected);
+	static uint32_t base_color (int pitch, int velocity, ARDOUR::ColorMode color_mode, Gtkmm2ext::Color, int channel, bool selected);
 
 	void show_velocity();
 	void hide_velocity();
@@ -116,6 +117,7 @@ class NoteBase : public sigc::trackable
 	static void set_colors ();
 
 	static Gtkmm2ext::Color meter_style_fill_color(uint8_t vel, bool selected);
+	static Gtkmm2ext::Color selected_color() { return _selected_col; }
 
 	/// calculate outline colors from fill colors of notes
 	inline static uint32_t calculate_outline(uint32_t color, bool showing_selection = false) {
@@ -128,6 +130,7 @@ class NoteBase : public sigc::trackable
 
 	/// hue circle divided into 16 equal-looking parts, courtesy Thorsten Wilms
 	static const uint32_t midi_channel_colors[16];
+	static std::vector<uint32_t> pitch_colors;
 
 	bool mouse_near_ends () const;
 	virtual bool big_enough_to_trim () const;

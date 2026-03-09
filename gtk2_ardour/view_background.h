@@ -23,6 +23,7 @@
 #ifndef __gtk2_ardour_view_background_h__
 #define __gtk2_ardour_view_background_h__
 
+#include <iostream>
 #include <cstdint>
 
 #include "gtkmm2ext/colors.h"
