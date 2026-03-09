@@ -21,7 +21,7 @@
 #include <iostream>
 #include <limits>
 #include <glib.h>
-#ifndef COMPILER_MSVC
+#ifdef WAF_BUILD
 #include "evoral/Note.h"
 #endif
 
