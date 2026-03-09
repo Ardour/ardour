@@ -129,10 +129,15 @@ typedef gintptr  intptr_t;
 
 #endif
 
-#if defined(WIN32) &&  HAVE_WINDOWS_H
+#if (defined(WIN32) && HAVE_WINDOWS_H) || (defined(COMPILER_MSVC) && defined(WAF_BUILD))
 //#include <winsock2.h>
 //#include <ws2tcpip.h>	/* Provides also socklen_t */
+
+#ifdef WIN32_LEAN_AND_MEAN
+#include <winsock2.h>
+#else
 #include <windows.h>
+#endif
 
 /* WIN32 special defines */
 #define STDIN_FILENO 0
