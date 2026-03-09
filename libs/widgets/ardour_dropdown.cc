@@ -84,12 +84,14 @@ void
 ArdourDropdown::set_active (int c)
 {
 	int n = c;
-	for (auto& i : _menu.items()) {
+	for (auto & item : _menu.items()) {
 		if (0 == n--) {
-			_menu.set_active (c);
-			_menu.activate_item (i);
-			set_text (i.get_label());
-			StateChanged ();
+			if (&item != _menu.get_active()) {
+				_menu.set_active (c);
+				_menu.activate_item (item);
+				set_text (item.get_label());
+				StateChanged ();
+			}
 			break;
 		}
 	}
