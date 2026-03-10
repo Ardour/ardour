@@ -19,6 +19,8 @@
  */
 
 #include <algorithm>
+#include <sstream>
+
 #include <boost/algorithm/string.hpp>
 
 #include "pbd/control_math.h"
@@ -331,16 +333,20 @@ ParameterDescriptor::update_steps()
 }
 
 std::string
-ParameterDescriptor::midi_note_name (const uint8_t b, bool translate)
+ParameterDescriptor::midi_note_name (const uint8_t b, bool translate, bool with_octave, bool with_enharmonics)
 {
-	char buf[16];
 	if (b > 127) {
+		char buf[16];
 		snprintf(buf, sizeof(buf), "%d", b);
 		return buf;
 	}
 
 	static const char* en_notes[] = {
 		"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"
+	};
+
+	static const char* en_enharmonics[] = {
+		"", "Db", "", "Eb", "", "", "Gb", "", "Ab", "", "Bb", ""
 	};
 
 	static const char* notes[] = {
@@ -355,14 +361,36 @@ ParameterDescriptor::midi_note_name (const uint8_t b, bool translate)
 		S_("Note|G#"),
 		S_("Note|A"),
 		S_("Note|A#"),
-		S_("Note|B")
+		S_("Note|B"),
+	};
+	static const char * enharmonics[] = {
+		"",
+		S_("Note|Db"), "",
+		S_("Note|Eb"), "", "",
+		S_("Note|Gb"), "",
+		S_("Note|Ab"), "",
+		S_("Note|Bb"), ""
 	};
 
+
 	/* MIDI note 0 is in octave -1 (in scientific pitch notation) */
-	const int octave = b / 12 - 1;
 	const size_t p = b % 12;
-	snprintf (buf, sizeof (buf), "%s%d", translate ? notes[p] : en_notes[p], octave);
-	return buf;
+	std::stringstream ss;
+
+	ss << (translate ? notes[p] : en_notes[p]);
+	if (with_enharmonics) {
+		char const * enh = (translate ? enharmonics[p] : en_enharmonics[p]);
+		if (enh[0]) {
+			ss << '/' << enh;
+		}
+	}
+
+	if (with_octave) {
+		const int octave = b / 12 - 1;
+		ss << octave;
+	}
+
+	return ss.str();
 }
 
 std::string
