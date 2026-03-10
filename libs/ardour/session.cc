@@ -181,6 +181,7 @@ PBD::Signal<void()> Session::FeedbackDetected;
 PBD::Signal<void()> Session::SuccessfulGraphSort;
 PBD::Signal<void(std::string,std::string)> Session::VersionMismatch;
 PBD::Signal<void()> Session::AfterConnect;
+PBD::Signal<void()> Session::RouteTemplatesChanged;
 
 const samplecnt_t Session::bounce_chunk_size = 8192;
 static void clean_up_session_event (SessionEvent* ev) { delete ev; }

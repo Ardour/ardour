@@ -645,6 +645,8 @@ public:
 	void set_nsm_state (bool state) { _under_nsm_control = state; }
 	bool save_default_options ();
 
+	static PBD::Signal<void()> RouteTemplatesChanged;
+
 	PBD::Signal<void(std::string)> StateSaved;
 	PBD::Signal<void()> StateReady;
 

@@ -5007,9 +5007,13 @@ Route::save_as_template (const string& path, const string& name, const string& d
 	tree.set_root (&node);
 
 	/* return zero on success, non-zero otherwise */
-	return !tree.write (path.c_str());
-}
+	int rv = !tree.write (path.c_str());
 
+	if (rv == 0) {
+		Session::RouteTemplatesChanged (); /* EMIT SIGNAL */
+	}
+	return rv;
+}
 
 bool
 Route::set_name (const string& str)
