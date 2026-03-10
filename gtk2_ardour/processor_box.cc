@@ -1934,6 +1934,7 @@ static std::list<Gtk::TargetEntry> drop_targets()
 	tmp.push_back (Gtk::TargetEntry ("x-ardour/processor", Gtk::TARGET_SAME_APP)); // from processor-box to processor-box
 	tmp.push_back (Gtk::TargetEntry ("x-ardour/plugin.info", Gtk::TARGET_SAME_APP)); // from plugin-manager
 	tmp.push_back (Gtk::TargetEntry ("x-ardour/plugin.favorite", Gtk::TARGET_SAME_APP)); // from sidebar
+	tmp.push_back (Gtk::TargetEntry ("x-ardour/route.template", Gtk::TARGET_SAME_APP)); // from sidebar
 	return tmp;
 }
 
@@ -2139,6 +2140,23 @@ ProcessorBox::_drop_plugin (Gtk::SelectionData const &data, Route::ProcessorList
 }
 
 void
+ProcessorBox::_drop_strip_template (Gtk::SelectionData const &data)
+{
+	std::string path = data.get_data_as_string ();
+	XMLTree tree;
+	if (!tree.read (path)) {
+		error << string_compose (_("Could not understand state file \"%1\""), path) << endmsg;
+		return;
+	}
+	if (tree.root()->name() != X_("Route") ) {
+		error << string_compose (_("Invalid route template file \"%1\""), path) << endmsg;
+		return;
+	}
+
+	_route->import_state (*tree.root(), false);
+}
+
+void
 ProcessorBox::plugin_drop (Gtk::SelectionData const &data, ProcessorEntry* position, Glib::RefPtr<Gdk::DragContext> const & context)
 {
 	if (!_session) {
@@ -2153,6 +2171,10 @@ ProcessorBox::plugin_drop (Gtk::SelectionData const &data, ProcessorEntry* posit
 	}
 	else if (data.get_target() == "x-ardour/plugin.favorite") {
 		_drop_plugin_preset (data, pl);
+	}
+	else if (data.get_target() == "x-ardour/route.template") {
+		_drop_strip_template (data);
+		return;
 	}
 	else {
 		return;

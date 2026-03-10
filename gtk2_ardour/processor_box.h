@@ -522,6 +522,7 @@ private:
 
 	void _drop_plugin_preset (Gtk::SelectionData const &, ARDOUR::Route::ProcessorList &);
 	void _drop_plugin (Gtk::SelectionData const &, ARDOUR::Route::ProcessorList &);
+	void _drop_strip_template (Gtk::SelectionData const &);
 
 	void plugin_drop (Gtk::SelectionData const &, ProcessorEntry* position, Glib::RefPtr<Gdk::DragContext> const & context);
 	void object_drop (Gtkmm2ext::DnDVBox<ProcessorEntry> *, ProcessorEntry *, Glib::RefPtr<Gdk::DragContext> const &);
