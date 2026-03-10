@@ -314,4 +314,7 @@ class Pianoroll : public CueEditor
 
 	Gtk::Menu* get_single_region_context_menu ();
 	MidiViews midiviews_from_region_selection (RegionSelection const &) const;
+
+	void setup_colors ();
+	void update_pitch_colors ();
 };

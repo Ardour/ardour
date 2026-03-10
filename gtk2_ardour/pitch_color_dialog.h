@@ -19,21 +19,29 @@
 
 #pragma once
 
+#include "ytkmm/adjustment.h"
 #include "ytkmm/colorselection.h"
+
 #include "ardour_dialog.h"
+
+namespace Gtk {
+	class ColorButton;
+}
 
 class PitchColorDialog : public ArdourDialog
 {
 public:
 	PitchColorDialog();
+	sigc::signal<void> ColorsChanged;
 
 private:
 	Gtk::ColorSelection color_dialog;
 	std::vector<uint32_t> colors;
-	Gtk::VBox pitch_vpacker;
-	int pitch_cycle;
+	Gtk::VBox* pitch_vpacker;
+	Gtk::Adjustment cycle_adjust;
 
 	void refill ();
+	void color_chosen (int n, Gtk::ColorButton*);
 };
 
 

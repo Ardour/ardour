@@ -210,7 +210,7 @@ NoteBase::base_color (int pitch, int velocity, ARDOUR::ColorMode color_mode, Gtk
 
 	case PitchColors:
 		pitch = pitch % pitch_colors.size();
-		return UINT_INTERPOLATE (UINT_RGBA_CHANGE_A (NoteBase::pitch_colors[pitch], opacity), _selected_col, 0.5);
+		return NoteBase::pitch_colors[pitch];
 
 	case MeterColors:
 		return meter_style_fill_color(velocity, selected);

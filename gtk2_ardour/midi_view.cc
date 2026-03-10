@@ -4769,6 +4769,7 @@ MidiView::maybe_select_by_position (GdkEventButton* ev, double /*x*/, double y)
 void
 MidiView::color_handler ()
 {
+	std::cerr << "MV @ " << this << " color handler\n";
 	_patch_change_outline = UIConfiguration::instance().color ("midi patch change outline");
 	_patch_change_fill = UIConfiguration::instance().color_mod ("midi patch change fill", "midi patch change fill");
 

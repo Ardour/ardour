@@ -52,6 +52,7 @@
 #include "pianoroll_background.h"
 #include "pianoroll.h"
 #include "pianoroll_midi_view.h"
+#include "pitch_color_dialog.h"
 #include "note_base.h"
 #include "prh.h"
 #include "timers.h"
@@ -96,6 +97,7 @@ Pianoroll::Pianoroll (std::string const & name, bool with_transport)
 	colors_dropdown.add_menu_elem (MenuElem (_("Channel"), sigc::bind (sigc::mem_fun (*this, &Pianoroll::set_color_mode), ARDOUR::ChannelColors)));
 	colors_dropdown.add_menu_elem (MenuElem (_("Region"), sigc::bind (sigc::mem_fun (*this, &Pianoroll::set_color_mode), ARDOUR::TrackColor)));
 	colors_dropdown.add_menu_elem (MenuElem (_("Pitch"), sigc::bind (sigc::mem_fun (*this, &Pianoroll::set_color_mode), ARDOUR::PitchColors)));
+	colors_dropdown.add_menu_elem (MenuElem (_("Setup"), sigc::mem_fun (*this, &Pianoroll::setup_colors)));
 	colors_dropdown.set_active (1);
 	ArdourWidgets::set_tooltip (colors_dropdown, _("Color Scheme for MIDI events"));
 
@@ -131,6 +133,25 @@ Pianoroll::~Pianoroll ()
 	drop_grid (); // unparent gridlines before deleting _canvas_viewport
 
 	delete bg;
+}
+
+void
+Pianoroll::setup_colors ()
+{
+	PitchColorDialog pcd;
+
+	pcd.ColorsChanged.connect ([this]() { update_pitch_colors(); });
+
+	pcd.present ();
+	pcd.run();
+}
+
+void
+Pianoroll::update_pitch_colors ()
+{
+	for (auto & [region,view] : region_view_map) {
+		view->color_handler ();
+	}
 }
 
 void

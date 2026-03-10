@@ -217,6 +217,7 @@ gtk2_ardour_sources = [
         'pianoroll_midi_view.cc',
         'pianoroll_window.cc',
         'pingback.cc',
+        'pitch_color_dialog.cc',
         'playlist_selector.cc',
         'plugin_display.cc',
         'plugin_eq_gui.cc',
