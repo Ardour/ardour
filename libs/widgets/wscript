@@ -38,7 +38,6 @@ widgets_sources = [
         'paths_dialog.cc',
         'popup.cc',
         'prompter.cc',
-        'scroomer.cc',
         'searchbar.cc',
         'slider_controller.cc',
         'stateful_button.cc',
