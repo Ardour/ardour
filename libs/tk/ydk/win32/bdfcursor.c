@@ -120,7 +120,7 @@ gchar *fname;
 		return -1;
 	}
 
-	if (fgets(line, sizeof(line), f) && strncasecmp("STARTFONT ", line, 10))
+	if (fgets(line, sizeof(line), f) && g_ascii_strncasecmp("STARTFONT ", line, 10))
 	{
 		printf("!BDF font file\n");
 		fclose(f);
@@ -132,18 +132,18 @@ gchar *fname;
 	{
 		if (!startchar)
 		{
-			if (!strncasecmp("STARTCHAR ", line, 10))
+			if (!g_ascii_strncasecmp("STARTCHAR ", line, 10))
 			{
 				startchar = TRUE;
 				charname = g_strndup(p + 10,
 					strcspn(p+10, "\r\n"));
 			}
-			else if (!strncasecmp("FONTBOUNDINGBOX ", line, 16))
+			else if (!g_ascii_strncasecmp("FONTBOUNDINGBOX ", line, 16))
 				sscanf(p+16, "%d %d %d %d", &dw, &dh, &dx, &dy);
 		}
 		else
 		{
-			if (!strncasecmp("ENDCHAR", line, 7))
+			if (!g_ascii_strncasecmp("ENDCHAR", line, 7))
 			{
 				font_info_t *nfi;
 
@@ -183,18 +183,18 @@ gchar *fname;
 				if (debug)
 					printf(" %*s*/\n/* %*s", dw-w, "", dw+dx, "");
 			}
-			else if (!strncasecmp("BBX ", line, 4))
+			else if (!g_ascii_strncasecmp("BBX ", line, 4))
 			{
 				sscanf(p+4, "%d %d %d %d", &w, &h, &x, &y);
 				if (debug)
 					printf("/* %s: */\n/* %*s", charname, dw+dx, "");
 			}
-			else if (!strncasecmp("ENCODING ", line, 9))
+			else if (!g_ascii_strncasecmp("ENCODING ", line, 9))
 			{
 				if (sscanf(p+9, "%d %d", &tmp, &id) != 2)
 					id = tmp;
 			}
-			else if (!strncasecmp("BITMAP", line, 6))
+			else if (!g_ascii_strncasecmp("BITMAP", line, 6))
 			{
 				py = y - dy;
 				startbitmap = TRUE;
@@ -204,7 +204,7 @@ gchar *fname;
 		}
 	}
 
-	if (strncasecmp("ENDFONT", line, 7))
+	if (g_ascii_strncasecmp("ENDFONT", line, 7))
 		rv = -1;
 
 	fclose(f);
