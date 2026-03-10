@@ -1292,7 +1292,7 @@ Session::import_route_state (const string& path, std::map<PBD::ID, PBD::ID> cons
 	 */
 	XMLTree tree;
 	if (!tree.read (path)) {
-		error << string_compose (_("Could not understand state file \"%1\""),_path) << endmsg;
+		error << string_compose (_("Could not understand state file \"%1\""), path) << endmsg;
 		return -1;
 	}
 	if (tree.root()->name() != X_("RouteState") && tree.root()->name() != X_("Session")) { // XXX
