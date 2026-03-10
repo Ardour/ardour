@@ -1387,9 +1387,10 @@ Session::import_route_state (const string& path, std::map<PBD::ID, PBD::ID> cons
 				static const int special_pi = PresentationInfo::Mixbus | PresentationInfo::VBMAny;
 #endif
 
-				/* special case, new track from special routes */
+				/* special case, new bus from special routes */
 				if (!r && 0 != (pi.flags () & special_pi)) {
-					auto rl = new_audio_track (1, 2, 0, 1, "", PresentationInfo::max_order, Normal, true, false);
+					auto rl = new_audio_route (2, 2, 0, 1, "", PresentationInfo::AudioBus, PresentationInfo::max_order);
+
 					assert (rl.size () < 2);
 					if (rl.size () > 0) {
 						r = rl.front ();
