@@ -48,6 +48,7 @@
 #include "ardour/directory_names.h"
 #include "ardour/filename_extensions.h"
 #include "ardour/filesystem_paths.h"
+#include "ardour/session.h"
 #include "ardour/template_utils.h"
 
 #include "progress_reporter.h"
@@ -82,6 +83,8 @@ protected:
 	virtual void row_selection_changed ();
 
 	virtual void delete_selected_template () = 0;
+	virtual void save_template_desc ();
+
 	bool adjust_plugin_paths (XMLNode* node, const std::string& name, const std::string& new_name) const;
 
 	struct SessionTemplateColumns : public Gtk::TreeModel::ColumnRecord {
@@ -120,7 +123,6 @@ private:
 
 	virtual void get_templates (vector<TemplateInfo>& templates) const = 0;
 	virtual void rename_template (Gtk::TreeModel::iterator& item, const Glib::ustring& new_name) = 0;
-	virtual void save_template_desc ();
 
 	void export_all_templates ();
 	void import_template_set ();
@@ -178,6 +180,7 @@ public:
 private:
 	void rename_template (Gtk::TreeModel::iterator& item, const Glib::ustring& new_name);
 	void delete_selected_template ();
+	void save_template_desc ();
 
 	std::string templates_dir () const;
 	virtual std::string templates_dir_basename () const;
@@ -936,6 +939,7 @@ RouteTemplateManager::rename_template (TreeModel::iterator& item, const Glib::us
 
 	item->set_value (_template_columns.name, string (new_name));
 	item->set_value (_template_columns.path, new_filepath);
+	Session::RouteTemplatesChanged (); /* EMIT SIGNAL */
 }
 
 void
@@ -956,6 +960,15 @@ RouteTemplateManager::delete_selected_template ()
 
 	_template_model->erase (_current_selection);
 	row_selection_changed ();
+
+	Session::RouteTemplatesChanged (); /* EMIT SIGNAL */
+}
+
+void
+RouteTemplateManager::save_template_desc ()
+{
+	TemplateManager::save_template_desc ();
+	Session::RouteTemplatesChanged (); /* EMIT SIGNAL */
 }
 
 string
