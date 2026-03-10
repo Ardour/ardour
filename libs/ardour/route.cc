@@ -3352,7 +3352,12 @@ Route::import_state (const XMLNode& node, bool use_pbd_ids, bool processor_only)
 			} else if (control_name == _phase_control->name()) {
 				std::string str;
 				if (child->get_property (X_("phase-invert"), str)) {
-					_phase_control->set_phase_invert (boost::dynamic_bitset<> (str));
+					boost::dynamic_bitset<> bs (str);
+					/* polarity processor is only reconfigured later */
+					if (_phase_control->size () > bs.size ()) {
+						bs.resize (_phase_control->size ());
+					}
+					_phase_control->set_phase_invert (bs);
 				}
 			}
 		} else if (child->name() == MuteMaster::xml_node_name) {
