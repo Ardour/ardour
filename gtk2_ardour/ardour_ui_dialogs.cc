@@ -127,6 +127,7 @@ ARDOUR_UI::set_session (Session *s)
 
 	update_path_label ();
 	update_sample_rate ();
+	session_latency_updated (true);
 
 	if (!_session) {
 		/* Session option editor cannot exist across change-of-session */

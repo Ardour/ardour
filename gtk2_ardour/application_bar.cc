@@ -777,6 +777,7 @@ ApplicationBar::set_session (Session *s)
 	}
 
 	map_transport_state ();
+	session_latency_updated (true);
 
 	if (!_session) {
 		_point_zero_something_second_connection.disconnect();
@@ -801,13 +802,12 @@ ApplicationBar::set_session (Session *s)
 	_session->SoloActive.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ApplicationBar::soloing_changed, this, _1), gui_context());
 	_session->AuditionActive.connect (_session_connections, MISSING_INVALIDATOR, std::bind (&ApplicationBar::auditioning_changed, this, _1), gui_context());
 
-	//initialize all session and global config settings
+	/*initialize all session and global config settings */
+
 	std::function<void (std::string)> pc (std::bind (&ApplicationBar::parameter_changed, this, _1));
 	_session->config.map_parameters (pc);
 	UIConfiguration::instance().map_parameters (pc);
 
-	/* initialize */
-	session_latency_updated (true);
 
 	_solo_alert_button.set_active (_session->soloing () || _session->listening ());
 
