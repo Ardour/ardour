@@ -189,13 +189,14 @@ def build(bld):
         obj.export_includes += ['quartz']
     elif bld.env['build_target'] == 'mingw' or bld.env['build_target'] == 'msvc':
         obj.source   = libydk_sources + libydk_win32_sources
-        obj.cflags   += ['-mms-bitfields', '-Wl,--export-all-symbols']
+        if bld.env['build_target'] == 'mingw':
+            obj.cflags   += ['-mms-bitfields', '-Wl,--export-all-symbols']
+            obj.linkflags = ['-Wl,--export-all-symbols']
         obj.uselib   += ' GIO-WINDOWS'
         obj.defines         += [ 'INSIDE_GDK_WIN32', 'DLL_EXPORT', 'PIC' ]
         obj.includes        += ['win32', 'win32/ydk']
         obj.export_includes += ['win32']
-        obj.linkflags = ['-Wl,--export-all-symbols']
-        obj.ldflags          = '-limm32 -lole32 -lgdi32 -lcomdlg32 -lwinspool -lcomctl32 -luuid'
+        obj.lib              = ['imm32', 'ole32', 'gdi32', 'comdlg32', 'winspool', 'comctl32', 'uuid']
     else:
         obj.source    = libydk_sources + libydk_x11_sources
         obj.uselib   += ' GIO-UNIX X11 XEXT XINERAMA RANDR DL'
