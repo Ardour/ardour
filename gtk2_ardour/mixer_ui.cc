@@ -3494,10 +3494,10 @@ Mixer_UI::plugin_row_button_press (GdkEventButton *ev)
 				selection->unselect_all();
 				selection->select(path);
 			}
-		}
-		ARDOUR::PluginPresetPtr ppp = selected_plugin();
-		if (ppp) {
-			popup_note_context_menu (ev);
+			ARDOUR::PluginPresetPtr ppp = selected_plugin();
+			if (ppp) {
+				popup_note_context_menu (ev);
+			}
 		}
 	}
 	return false;
