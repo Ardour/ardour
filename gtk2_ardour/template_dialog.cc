@@ -211,7 +211,7 @@ private:
 	bool adjust_xml_tree (XMLTree& tree, const std::string& old_name, const std::string& new_name) const;
 };
 
-TemplateDialog::TemplateDialog ()
+TemplateDialog::TemplateDialog (int page)
 	: ArdourDialog ("Manage Templates")
 {
 	Notebook* nb = manage (new Notebook);
@@ -233,6 +233,8 @@ TemplateDialog::TemplateDialog ()
 	session_tm->init ();
 	route_tm->init ();
 	strip_tm->init ();
+
+	nb->set_current_page (page);
 
 	session_tm->TemplatesImported.connect (*this, invalidator (*this), std::bind (&RouteTemplateManager::init, route_tm), gui_context ());
 	route_tm->TemplatesImported.connect (*this, invalidator (*this), std::bind (&SessionTemplateManager::init, session_tm), gui_context ());

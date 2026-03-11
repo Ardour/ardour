@@ -25,7 +25,7 @@ class TemplateDialog : public ArdourDialog,
 		       public PBD::ScopedConnectionList
 {
 public:
-	TemplateDialog ();
+	TemplateDialog (int page = 0);
 	~TemplateDialog () {}
 };
 
