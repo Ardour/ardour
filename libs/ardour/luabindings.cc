@@ -20,6 +20,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#if defined(COMPILER_MSVC) && defined(WAF_BUILD)
+#define NOMINMAX
+#define LIBARDOUR_DLL_EXPORTS
+/* Both defines are needed to avoid errors, regardless of WIN32_LEAN_AND_MEAN. */
+#endif
+
 #include <glibmm.h>
 
 #include "pbd/cpus.h"
