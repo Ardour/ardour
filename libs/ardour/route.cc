@@ -3359,6 +3359,12 @@ Route::import_state (const XMLNode& node, bool use_pbd_ids, bool processor_only)
 					}
 					_phase_control->set_phase_invert (bs);
 				}
+			} else if (_monitoring_control && control_name == _monitoring_control->name()) {
+				/* Note: we cannot use MonitorChoice, because `REGISTER_BITS (_MonitorChoice);`
+				 * always has 'MonitorCue' (3) set when the value is not 0. Use Slavable's value: */
+				if (child->get_property (X_("value"), value)) {
+					_session.set_control (_monitoring_control, value, Controllable::NoGroup);
+				}
 			}
 		} else if (child->name() == MuteMaster::xml_node_name) {
 			std::string mute_point;
