@@ -220,7 +220,7 @@ TemplateDialog::TemplateDialog ()
 	nb->append_page (*session_tm, _("Session Templates"));
 
 	RouteTemplateManager* route_tm = manage (new RouteTemplateManager);
-	nb->append_page (*route_tm, _("Track Templates"));
+	nb->append_page (*route_tm, _("Track/Bus Templates"));
 
 	StripStateManager* strip_tm = manage (new StripStateManager);
 	nb->append_page (*strip_tm, _("Global Strip Templates"));
