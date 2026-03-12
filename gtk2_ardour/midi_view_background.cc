@@ -96,14 +96,20 @@ MidiViewBackground::note_height () const
 	double error = abs(round(n) * contents_note_range() - contents_height());
 
 	if (error < n / 4) {
-		/* if can round note height to an integer value without changing the layout
-		 * too much (maximum half of a note added or removed at the bottom end)
+		/* if we can round note height to an integer value without changing the layout
+		 * too much (maximum quarter of a note added or removed at the bottom end)
 		 * then we use this value instead to avoid antialising caused by fractionnal coords
 		 */
 		return round(n);
 	} else {
 		return n;
 	}
+}
+
+bool
+MidiViewBackground::note_visible (uint8_t note) const
+{
+	return lowest_note() <= note && note <= highest_note();
 }
 
 uint8_t

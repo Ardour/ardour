@@ -97,6 +97,7 @@ class MidiViewBackground : public virtual ViewBackground
 	double note_height() const;
 	int note_to_y (uint8_t note) const;
 	uint8_t y_to_note (int y) const;
+	bool note_visible(uint8_t note) const;
 
 	uint8_t contents_note_range() const {
 		return highest_note() - lowest_note() + 1;

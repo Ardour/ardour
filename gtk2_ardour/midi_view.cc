@@ -1822,8 +1822,7 @@ MidiView::note_in_region_range (const std::shared_ptr<NoteType> note, bool& visi
 	const std::shared_ptr<ARDOUR::MidiRegion> midi_reg = midi_region();
 
 	const bool outside = !note_in_region_time_range (note);
-	const int y = _midi_context.note_to_y (note->note());
-	visible =  (y >= 0) && (y + _midi_context.note_height() / 2 <= _midi_context.contents_height());
+	visible = _midi_context.note_visible(note->note());
 
 	return !outside;
 }
@@ -4843,8 +4842,7 @@ MidiView::clip_data_recorded (samplecnt_t total_duration)
 
 			}
 
-			const int y = _midi_context.note_to_y (note->note());
-			bool visible = (y >= 0) && (y + _midi_context.note_height() / 2 <= _midi_context.contents_height());
+			bool visible = _midi_context.note_visible(note->note());
 
 			NoteBase* nb = add_note (note, visible);
 			nb->item()->set_fill_color (UIConfiguration::instance().color ("recording note"));
@@ -4947,8 +4945,7 @@ MidiView::data_recorded (std::weak_ptr<MidiSource> w)
 
 			}
 
-			const int y = _midi_context.note_to_y (note->note());
-			bool visible = (y >= 0) && (y + _midi_context.note_height() / 2 <= _midi_context.contents_height());
+			bool visible = _midi_context.note_visible(note->note());
 
 			NoteBase* nb = add_note (note, visible);
 			nb->item()->set_fill_color (UIConfiguration::instance().color ("recording note"));
