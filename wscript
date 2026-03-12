@@ -824,8 +824,9 @@ def create_resource_file(name):
 # Waf stages
 
 def options(opt):
-    opt.load('compiler_c')
-    opt.load('compiler_cxx')
+    if Options.options.dist_target != 'msvc': #Loading msvc does this, so skip loading it here.
+        opt.load('compiler_c')
+        opt.load('compiler_cxx')
     autowaf.set_options(opt, debug_by_default=True)
     opt.add_option('--program-name', type='string', action='store', default='Ardour', dest='program_name',
                     help='The user-visible name of the program being built')
@@ -965,6 +966,8 @@ def configure(conf):
     if Options.options.dist_target == 'msvc':
         conf.env['MSVC_TARGETS'] = ['x64']
         conf.load('msvc')
+        conf.find_program('llvm-nm', var = 'llvm_nm')
+        conf.load('gendef', tooldir = 'tools')
 
     if Options.options.debug and not Options.options.keepflags:
         # Nuke user CFLAGS/CXXFLAGS if debug is set (they likely contain -O3, NDEBUG, etc)
@@ -1271,8 +1274,6 @@ int main () { return 0; }
         conf.env.append_value('CXXFLAGS', '-DCOMPILER_MSVC')
         conf.env.append_value('CFLAGS', '-D_USE_MATH_DEFINES')
         conf.env.append_value('CXXFLAGS', '-D_USE_MATH_DEFINES')
-        conf.env.append_value('CFLAGS', '-I' + os.getcwd() + '\\msvc_waf_headers')
-        conf.env.append_value('CXXFLAGS', '-I' + os.getcwd() + '\\msvc_waf_headers')
         # work around GdkDrawable BitBlt performance issue on windows
         # see http://gareus.org/wiki/ardour_windows_gdk_and_cairo
         conf.env.append_value('CFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
@@ -1625,7 +1626,7 @@ def build(bld):
         bld.recurse('libs/appleutility')
     elif re.search ("openbsd", sys.platform) is not None:
         pass
-    elif bld.env['build_target'] != 'mingw':
+    elif bld.env['build_target'] not in ('mingw', 'msvc'):
         bld.recurse('tools/sanity_check')
 
         obj              = bld(features = 'subst')
@@ -1636,6 +1637,10 @@ def build(bld):
 
     for i in children:
         bld.recurse(i)
+
+    if bld.env['build_target'] == 'msvc': #For using .def generator
+        for name in ['libydk-pixbuf', 'libydk', 'libytk']:
+            bld.get_tgen_by_name(name).features.append('gendef')
 
     if bld.is_defined ('BEATBOX'):
         bld.recurse('tools/bb')
