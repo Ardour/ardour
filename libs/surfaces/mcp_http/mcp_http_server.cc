@@ -27,9 +27,11 @@
 #include <iomanip>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <sstream>
 #include <thread>
 #include <vector>
+#include <condition_variable>
 
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -80,6 +82,41 @@ namespace pt = boost::property_tree;
 using namespace ArdourSurface;
 
 namespace {
+
+class ScopedInstrumentPromptDisable {
+public:
+	ScopedInstrumentPromptDisable ()
+		: _config (ARDOUR::Config)
+		, _ask_replace (false)
+		, _ask_setup (false)
+		, _active (false)
+	{
+		if (!_config) {
+			return;
+		}
+
+		_ask_replace = _config->get_ask_replace_instrument ();
+		_ask_setup = _config->get_ask_setup_instrument ();
+		_config->set_ask_replace_instrument (false);
+		_config->set_ask_setup_instrument (false);
+		_active = true;
+	}
+
+	~ScopedInstrumentPromptDisable ()
+	{
+		if (!_active || !_config) {
+			return;
+		}
+		_config->set_ask_replace_instrument (_ask_replace);
+		_config->set_ask_setup_instrument (_ask_setup);
+	}
+
+private:
+	ARDOUR::RCConfiguration* _config;
+	bool _ask_replace;
+	bool _ask_setup;
+	bool _active;
+};
 
 static std::string
 json_escape (const std::string& s)
@@ -6490,26 +6527,79 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 						return jsonrpc_error (id, -32602, resolve_error.empty () ? "Could not resolve plugin" : resolve_error);
 					}
 
-					const ARDOUR::PluginPtr plugin = info->load (_session);
-					if (!plugin) {
-						return jsonrpc_error (id, -32000, "Failed to load plugin");
-					}
+					std::shared_ptr<ARDOUR::Processor> processor;
+					std::string add_error;
+					bool add_ok = false;
+					const bool activation_allowed = enabled_opt ? *enabled_opt : ARDOUR::Config->get_new_plugins_active ();
 
-					std::shared_ptr<ARDOUR::Processor> processor (new ARDOUR::PluginInsert (_session, *route, plugin));
-					if (enabled_opt) {
-						processor->enable (*enabled_opt);
-					} else if (ARDOUR::Config->get_new_plugins_active ()) {
-						processor->enable (true);
-					}
+					auto perform_add = [&] () {
+						const ARDOUR::PluginPtr plugin = info->load (_session);
+						if (!plugin) {
+							add_error = "Failed to load plugin";
+							return;
+						}
 
-					int rc = 0;
-					if (position_opt) {
-						rc = route->add_processor (processor, route->before_processor_for_index ((int) *position_opt));
+						processor.reset (new ARDOUR::PluginInsert (_session, *route, plugin));
+						ARDOUR::Route::ProcessorStreams err;
+
+						/* Suppress interactive instrument setup prompts so Route::PluginSetup does
+						 * not invoke GUI dialog code while handling MCP requests.
+						 */
+						ScopedInstrumentPromptDisable suppress_prompts;
+
+						int rc = 0;
+						if (position_opt) {
+							rc = route->add_processor (processor, route->before_processor_for_index ((int) *position_opt), &err, activation_allowed);
+						} else {
+							rc = route->add_processor (processor, ARDOUR::PreFader, &err, activation_allowed);
+						}
+						if (rc != 0) {
+							add_error = "Failed to add plugin to route";
+							processor.reset ();
+							return;
+						}
+
+						/* Explicitly honor enabled=false requests after insertion. */
+						if (enabled_opt && !*enabled_opt) {
+							processor->enable (false);
+						}
+
+						add_ok = true;
+					};
+
+#ifdef __APPLE__
+					/* Some macOS plugins (Qt/Cocoa) require construction on the main/UI event loop.
+					 * Keep behavior unchanged on other platforms for now.
+					 */
+					if (_event_loop) {
+						std::mutex add_mutex;
+						std::condition_variable add_cv;
+						bool add_done = false;
+
+						const bool queued = _event_loop->call_slot (MISSING_INVALIDATOR, [&] () {
+							perform_add ();
+							{
+								std::lock_guard<std::mutex> lk (add_mutex);
+								add_done = true;
+							}
+							add_cv.notify_one ();
+						});
+
+						if (queued) {
+							std::unique_lock<std::mutex> lk (add_mutex);
+							add_cv.wait (lk, [&] { return add_done; });
+						} else {
+							perform_add ();
+						}
 					} else {
-						rc = route->add_processor (processor, ARDOUR::PreFader);
+						perform_add ();
 					}
-					if (rc != 0) {
-						return jsonrpc_error (id, -32000, "Failed to add plugin to route");
+#else
+					perform_add ();
+#endif
+
+					if (!add_ok || !processor) {
+						return jsonrpc_error (id, -32000, add_error.empty () ? "Failed to add plugin to route" : add_error);
 					}
 
 					int inserted_index = -1;
