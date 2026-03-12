@@ -2639,11 +2639,12 @@ track_info_json (const std::shared_ptr<ARDOUR::Route>& route)
 		ss << ",\"fader\":null";
 	}
 
-	if (pan) {
-		ss << ",\"pan\":{\"position\":" << pan->internal_to_interface (pan->get_value ()) << "}";
-	} else {
-		ss << ",\"pan\":null";
-	}
+		if (pan) {
+			ss << ",\"pan\":{\"position\":" << pan->internal_to_interface (pan->get_value ())
+			   << ",\"convention\":\"0.0=right, 0.5=center, 1.0=left\"}";
+		} else {
+			ss << ",\"pan\":null";
+		}
 
 	ss << ",\"mute\":";
 	if (mute) {
@@ -3234,7 +3235,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"type\":{\"type\":\"string\",\"enum\":[\"audio\",\"midi\"]},\"count\":{\"type\":\"integer\",\"minimum\":1},\"name\":{\"type\":\"string\"},\"inputChannels\":{\"type\":\"integer\",\"minimum\":1},\"outputChannels\":{\"type\":\"integer\",\"minimum\":1},\"strictIo\":{\"type\":\"boolean\"},\"insert\":{\"type\":\"string\",\"enum\":[\"end\",\"before\",\"after\"]},\"relativeToId\":{\"type\":\"string\"}},\"additionalProperties\":false}},"
 				"{\"name\":\"buses_add\",\"title\":\"Add Bus\",\"description\":\"Add one or more buses (audio or MIDI). insert can be end/before/after; when before/after and relativeToId is omitted, selected route is used if available.\","
 				"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"type\":{\"type\":\"string\",\"enum\":[\"audio\",\"midi\"]},\"count\":{\"type\":\"integer\",\"minimum\":1},\"name\":{\"type\":\"string\"},\"inputChannels\":{\"type\":\"integer\",\"minimum\":1},\"outputChannels\":{\"type\":\"integer\",\"minimum\":1},\"strictIo\":{\"type\":\"boolean\"},\"insert\":{\"type\":\"string\",\"enum\":[\"end\",\"before\",\"after\"]},\"relativeToId\":{\"type\":\"string\"}},\"additionalProperties\":false}},"
-						"{\"name\":\"track_get_info\",\"title\":\"Get Route Info\",\"description\":\"Get one route info (fader, pan, rec, mute, solo, sends, plugins).\","
+					"{\"name\":\"track_get_info\",\"title\":\"Get Route Info\",\"description\":\"Get one route info (fader, pan, rec, mute, solo, sends, plugins). Pan uses Ardour convention: 0.0=right, 0.5=center, 1.0=left.\","
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"}},\"required\":[\"id\"],\"additionalProperties\":false},\"outputSchema\":{\"type\":\"object\",\"required\":[\"id\",\"name\",\"type\"],\"properties\":{\"id\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"type\":{\"type\":\"string\"},\"sends\":{\"type\":\"array\"},\"plugins\":{\"type\":\"array\"}},\"additionalProperties\":true}},"
 						"{\"name\":\"track_get_regions\",\"title\":\"Get Track Regions\",\"description\":\"List regions in one track playlist. includeHidden=true includes hidden regions.\","
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"includeHidden\":{\"type\":\"boolean\"}},\"required\":[\"id\"],\"additionalProperties\":false},\"outputSchema\":{\"type\":\"object\",\"required\":[\"id\",\"regions\"],\"properties\":{\"id\":{\"type\":\"string\"},\"regions\":{\"type\":\"array\"}},\"additionalProperties\":true}},"
@@ -3282,7 +3283,7 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"value\":{\"type\":\"boolean\"}},\"required\":[\"id\",\"value\"],\"additionalProperties\":false}},"
 					"{\"name\":\"track_set_rec_safe\",\"title\":\"Set Record Safe\",\"description\":\"Set track record-safe state.\","
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"value\":{\"type\":\"boolean\"}},\"required\":[\"id\",\"value\"],\"additionalProperties\":false}},"
-					"{\"name\":\"track_set_pan\",\"title\":\"Set Pan\",\"description\":\"Set route pan position (0.0 to 1.0).\","
+					"{\"name\":\"track_set_pan\",\"title\":\"Set Pan\",\"description\":\"Set route pan position (Ardour convention: 0.0=right, 0.5=center, 1.0=left).\","
 					"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"position\":{\"type\":\"number\",\"minimum\":0,\"maximum\":1}},\"required\":[\"id\",\"position\"],\"additionalProperties\":false}},"
 						"{\"name\":\"track_set_send_level\",\"title\":\"Set Send Level\",\"description\":\"Set route send level by send index using normalized position (0.0 to 1.0) or dB. For dB mode, valid range is -193.0 to +6.0, and -193.0 is silence floor.\","
 						"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"sendIndex\":{\"type\":\"integer\",\"minimum\":0},\"position\":{\"type\":\"number\",\"minimum\":0,\"maximum\":1},\"db\":{\"type\":\"number\",\"minimum\":-193.0,\"maximum\":6.0}},\"required\":[\"id\",\"sendIndex\"],\"oneOf\":[{\"required\":[\"position\"]},{\"required\":[\"db\"]}],\"additionalProperties\":false}},"
