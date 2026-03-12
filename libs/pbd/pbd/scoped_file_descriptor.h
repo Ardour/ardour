@@ -22,6 +22,10 @@
 #include <unistd.h>
 #endif
 
+#if defined(COMPILER_MSVC) && defined (WAF_BUILD)
+#include <io.h>
+#endif
+
 namespace PBD {
 
 struct ScopedFileDescriptor {
