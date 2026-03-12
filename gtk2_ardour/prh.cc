@@ -58,10 +58,10 @@ PianoRollHeader::PianoRollHeader (Item* parent, MidiViewBackground& bg)
 
 	alloc_layouts (_canvas->get_pango_context());
 
-	/* draw vertical lines on both sides of the rectangle */
+	/* draw vertical lines on the right side of the rectangle */
 	set_fill (false);
 	set_outline_color (0x000000ff); /* XXX theme me */
-	set_outline_what (Rectangle::What (Rectangle::LEFT|Rectangle::RIGHT));
+	set_outline_what (Rectangle::What (Rectangle::RIGHT));
 
 	_midi_context.HeightChanged.connect (height_connection, MISSING_INVALIDATOR, std::bind (&PianoRollHeader::resize, this), gui_context());
 	resize ();
