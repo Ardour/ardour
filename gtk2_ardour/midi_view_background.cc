@@ -139,8 +139,12 @@ MidiViewBackground::setup_note_lines()
 
 	ArdourCanvas::RectSet::ResetRAII lr (*_note_lines);
 
-	if (contents_height() < 10 || note_height() < 2) {
-		/* context is too small for note lines, or there are too many */
+	if (contents_height() < 128) {
+		/* context is too small for note lines, or there are too many
+		 * 128 = minimum height for the pianoroll header to be visible
+		 * (KEYBOARD_MIN_HEIGHT minus margin in midi_time_axis.cc)
+		 * TODO: not hardcoded height ?
+		 */
 		return;
 	}
 
