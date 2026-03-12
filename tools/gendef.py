@@ -3,8 +3,6 @@ import subprocess
 from waflib.Task import Task
 from waflib.TaskGen import feature, after_method
 
-# inside your loop:
-
 class nm_def(Task):
     p = re.compile(r'^\s*([0-9a-fA-F]+)\s+([A-Za-z])\s+(\S+)')  # Parse llvm-nm output (grouped as address, symbol-type letter, symbol-name)
     s = re.compile(r'(?!__?imp_)[^?]*$|\?(?!\?_(?:[GE]|C@_))')  # Filters C/C++ symbols
@@ -36,4 +34,5 @@ def add_def(self):
     d = self.path.find_or_declare(f'{self.target}.def') # Find/Declare the .def output path in the build directory
     self.create_task('nm_def', obj_files, d)            # Create the task
     lt.dep_nodes.append(d)                              # Tell the linker to wait for the .def file before linking
+
     lt.env.append_unique('LINKFLAGS', [f'/DEF:{d.abspath()}','/DLL']) # Pass the .def file to the linker, with /DLL.
