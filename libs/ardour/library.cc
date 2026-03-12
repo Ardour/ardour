@@ -16,6 +16,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#if defined(COMPILER_MSVC) && defined(WAF_BUILD)
+#include <winsock2.h>
+#endif
+
 #include <glib/gstdio.h>
 
 #include <glibmm/fileutils.h>
