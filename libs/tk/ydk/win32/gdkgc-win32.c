@@ -38,6 +38,10 @@
 #include "gdkregion-generic.h"
 #include "gdkprivate-win32.h"
 
+#ifdef WIN32_LEAN_AND_MEAN
+#include <mmsystem.h> //For DIBINDEX 
+#endif
+
 static void gdk_win32_gc_get_values (GdkGC           *gc,
 				     GdkGCValues     *values);
 static void gdk_win32_gc_set_values (GdkGC           *gc,
