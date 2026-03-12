@@ -483,6 +483,11 @@ Pianoroll::build_canvas ()
 	data_group = new ArdourCanvas::Container (hv_scroll_group);
 	CANVAS_DEBUG_NAME (data_group, "cue data group");
 
+	// add a background color to match the main editor pianoroll look
+	ArdourCanvas::Rectangle* bg_rect = new ArdourCanvas::Rectangle (data_group, ArdourCanvas::Rect (0., 0., ArdourCanvas::COORD_MAX,  ArdourCanvas::COORD_MAX));
+	bg_rect->set_fill_color(UIConfiguration::instance().color_mod ("midi track base", "midi track base"));
+	bg_rect->set_outline(false);
+
 	bg = new PianorollMidiBackground (data_group, *this);
 	_canvas_viewport.signal_size_allocate().connect (sigc::mem_fun(*this, &Pianoroll::canvas_allocate), false);
 
