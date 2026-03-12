@@ -89,10 +89,28 @@ MidiViewBackground::set_color_mode (ARDOUR::ColorMode cm)
 	_color_mode = cm;
 }
 
+double
+MidiViewBackground::note_height () const
+{
+	double n = (double) contents_height() / contents_note_range();
+	double error = abs(round(n) * contents_note_range() - contents_height());
+
+	if (error < n / 4) {
+		/* if can round note height to an integer value without changing the layout
+		 * too much (maximum half of a note added or removed at the bottom end)
+		 * then we use this value instead to avoid antialising caused by fractionnal coords
+		 */
+		return round(n);
+	} else {
+		return n;
+	}
+}
+
 uint8_t
 MidiViewBackground::y_to_note (int y) const
 {
-	int const n = highest_note() - (floor ((double) y / note_height()));
+
+	int const n = highest_note() - floor((double) (y + 1) / note_height());
 
 	if (n < 0) {
 		return 0;
@@ -100,10 +118,14 @@ MidiViewBackground::y_to_note (int y) const
 		return 127;
 	}
 
-	/* min due to rounding and/or off-by-one errors */
-	return min ((uint8_t) n, highest_note());
+	return (uint8_t) n;
 }
 
+int
+MidiViewBackground::note_to_y (uint8_t note) const
+{
+	return (highest_note() - note) * note_height();
+}
 
 
 void
@@ -116,7 +138,7 @@ MidiViewBackground::update_contents_height ()
 }
 
 void
-MidiViewBackground::get_note_positions (std::vector<int>& numbers, std::vector<int>& pos, std::vector<int>& heights) const
+MidiViewBackground::get_note_positions (std::vector<int>& numbers, std::vector<double>& pos, std::vector<double>& heights) const
 {
 	for (auto const & r : _note_lines->rects()) {
 		numbers.push_back (r.index);
@@ -148,20 +170,19 @@ MidiViewBackground::setup_note_lines()
 		return;
 	}
 
-	/* do this is order of highest ... lowest since that matches the
-	 * coordinate system in which y=0 is at the top
-	 */
+	double h = note_height();
+	double y;
 
-	int h = note_height();
-	double y = 0;
-
-	for (int i = highest_note(); i >= lowest_note(); --i) {
+	for (int i = highest_note(); i >= lowest_note(); i--) {
 
 		if (i > 127) {
 			continue;
 		}
 
 		/* add a thicker line/bar which covers the entire vertical height of this note. */
+
+		y = note_to_y (i);
+		if (y >= contents_height()) break;
 
 		switch (i % 12) {
 		case 1:
@@ -181,21 +202,9 @@ MidiViewBackground::setup_note_lines()
 			break;
 		}
 
-		/* There's no clipping region trivially available for the note
-		 * lines, so make sure the last line doesn't draw "too tall"
-		 */
-
-		if (y + h > contents_height()) {
-			h = contents_height() - y;
-		}
 
 		_note_lines->add_rect (i, ArdourCanvas::Rect (0., y, ArdourCanvas::COORD_MAX, y + h), color);
 
-		y += h;
-
-		if (y >= contents_height()) {
-			break;
-		}
 	}
 }
 
@@ -244,18 +253,18 @@ MidiViewBackground::maybe_extend_note_range (uint8_t note_num)
 }
 
 bool
-MidiViewBackground::maybe_apply_note_range (uint8_t lowest, uint8_t highest, bool to_children, RangeCanMove can_move)
+MidiViewBackground::maybe_apply_note_range (uint8_t lowest, uint8_t highest, bool to_children)
 {
 	if (note_range_set && _lowest_note <= lowest && _highest_note >= highest) {
 		/* already large enough */
 		return false;
 	}
 
-	return apply_note_range (lowest, highest, to_children, can_move);
+	return apply_note_range (lowest, highest, to_children);
 }
 
 bool
-MidiViewBackground::apply_note_range (uint8_t lowest, uint8_t highest, bool to_children, RangeCanMove can_move)
+MidiViewBackground::apply_note_range (uint8_t lowest, uint8_t highest, bool to_children)
 {
 	if (contents_height() == 0) {
 		return false;
@@ -283,58 +292,6 @@ MidiViewBackground::apply_note_range (uint8_t lowest, uint8_t highest, bool to_c
 
 	if (note_range_set && !changed) {
 		return false;
-	}
-
-	float uiscale = UIConfiguration::instance().get_ui_scale();
-
-	int range = _highest_note - _lowest_note;
-	int apparent_note_height = (int) ceil ((double) contents_height() / range);
-	int nh = std::min ((int) (UIConfiguration::instance().get_max_note_height() * uiscale), apparent_note_height);
-	int additional_notes = 0;
-
-	if (nh < 1) {
-		/* range does not fit, so center on the data range */
-		nh = 1;
-		range = _data_note_max - _data_note_min;
-		int center = _data_note_min + (range /2);
-		highest = center + ((contents_height() / nh) / 2);
-		lowest = center - ((contents_height() / nh) / 2);
-	}
-
-	if (note_range_set) {
-		/* how many notes do we need to add or remove to adequately
-		 * fill contents_height() with note lines?
-		 */
-		additional_notes = (int) ceil ((contents_height() - (nh * range)) / (double) nh);
-	}
-
-	/* distribute additional notes to higher and lower ranges, clamp at 0 and 127 */
-	if (additional_notes > 0) {
-		for (int i = 0; i < additional_notes; i++){
-
-			if ((can_move & CanMoveTop) || (i % 2 && _highest_note < 127)) {
-				_highest_note++;
-			} else if ((can_move & CanMoveBottom) && (i % 2)) {
-				_lowest_note--;
-			} else if ((can_move & CanMoveBottom) && (_lowest_note > 0)) {
-				_lowest_note--;
-			} else if (can_move & CanMoveTop) {
-				_highest_note++;
-			}
-		}
-	} else if (additional_notes < 0) {
-		for (int i = 0; i < -additional_notes; i++){
-
-			if ((can_move & CanMoveTop) && (i % 2 && _highest_note < 127)) {
-				_highest_note--;
-			} else if ((can_move & CanMoveBottom) && (i % 2)) {
-				_lowest_note++;
-			} else if ((can_move & CanMoveBottom) && (_lowest_note > 0)) {
-				_lowest_note++;
-			} else if ((can_move & CanMoveTop)) {
-				_highest_note--;
-			}
-		}
 	}
 
 	note_range_adjustment.set_page_size (_highest_note - _lowest_note);

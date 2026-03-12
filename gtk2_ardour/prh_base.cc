@@ -171,7 +171,7 @@ PianoRollHeaderBase::render (ArdourCanvas::Rect const & self, ArdourCanvas::Rect
 	}
 
 	//Set Pango layout midnam size
-	_font_descript_midnam.set_absolute_size (max(8.0 * 0.7 * Pango::SCALE, (int)context_note_height * 0.7 * Pango::SCALE));
+	_font_descript_midnam.set_absolute_size (min(15.0 * Pango::SCALE, max(7.0 * Pango::SCALE, (int)context_note_height * 0.7 * Pango::SCALE)));
 
 	_midnam_layout->set_font_description(_font_descript_midnam);
 
@@ -180,13 +180,6 @@ PianoRollHeaderBase::render (ArdourCanvas::Rect const & self, ArdourCanvas::Rect
 	if (lowest > 127) {
 		lowest = 0;
 	}
-
-	/* fill the entire rect with the color for non-highlighted white notes.
-	 * then we won't have to draw the background for those notes,
-	 * and would only have to draw the background for the one highlighted white note*/
-	//cr->rectangle(rect.x, rect.y, rect.width, rect.height);
-	//r->set_source_rgb(1, 0,0);
-	//cr->fill();
 
 	cr->set_line_width (1.0f);
 
@@ -197,8 +190,8 @@ PianoRollHeaderBase::render (ArdourCanvas::Rect const & self, ArdourCanvas::Rect
 	Gtkmm2ext::Color textc           = UIConfiguration::instance().color (X_("gtk_foreground"));
 
 	std::vector<int> numbers;
-	std::vector<int> positions;
-	std::vector<int> heights;
+	std::vector<double> positions;
+	std::vector<double> heights;
 
 	_midi_context.get_note_positions (numbers, positions, heights);
 
@@ -238,14 +231,20 @@ PianoRollHeaderBase::render (ArdourCanvas::Rect const & self, ArdourCanvas::Rect
 		for (std::vector<int>::size_type n = 0; n < numbers.size(); ++n) {
 
 			int size_x, size_y;
-			int y = positions[n];
+			double y = positions[n];
+			double h = heights[n];
+
+			/* Ignore separators */
+			if (h == 1.) continue;
+
+
 			NoteName const & note (note_names[numbers[n]]);
 
 			_midnam_layout->set_text (note.name);
+			pango_layout_get_pixel_size (_midnam_layout->gobj (), &size_x, &size_y);
 
 			set_source_rgba (cr, textc);
-			cr->move_to (2.f, y);
-
+			cr->move_to (4.f,  y + context_note_height / 2 - size_y / 2);
 			if (!_mini_map_display) {
 				_midnam_layout->show_in_cairo_context (cr);
 			} else {
@@ -255,9 +254,10 @@ PianoRollHeaderBase::render (ArdourCanvas::Rect const & self, ArdourCanvas::Rect
 				if (!note.from_midnam) {
 					set_source_rgba (cr, textc);
 				}
-				pango_layout_get_pixel_size (_midnam_layout->gobj (), &size_x, &size_y);
-				cr->rectangle (2.f, y + (context_note_height * 0.5), size_x, context_note_height * 0.2);
-				cr->fill ();
+				cr->move_to (4.f, y + h / 2);
+				cr->line_to (4.f + size_x, y + h / 2);
+				cr->set_line_width (context_note_height * 0.2);
+				cr->stroke ();
 			}
 		}
 
@@ -331,15 +331,17 @@ PianoRollHeaderBase::render (ArdourCanvas::Rect const & self, ArdourCanvas::Rect
 
 		}
 
-		Gtkmm2ext::set_source_rgba (cr, bg);
 
 		double x = _scroomer_size;
 		double y = positions[n];
+		double h = heights[n];
 
+
+		Gtkmm2ext::set_source_rgba (cr, bg);
 		cr->rectangle (x, y, kbd_width, heights[n]);
 		cr->fill ();
 
-		if ((oct_rel == 4 || oct_rel == 11) && y > 0) {
+		if ((oct_rel == 4 || oct_rel == 11) && y > 0 && h > 3) {
 			/* draw black separators between B/C and E/F */
 			Gtkmm2ext::set_source_rgba (cr, black);
 			cr->set_line_width (1.0);
@@ -360,13 +362,7 @@ PianoRollHeaderBase::render (ArdourCanvas::Rect const & self, ArdourCanvas::Rect
 	   so that the top of the C is shown to maintain visual context
 	 */
 
-	int bc_height, c_height, c_width;
-
-	_big_c_layout->set_text ("C1");
-	_layout->set_text ("C1");
-
-	pango_layout_get_pixel_size (_big_c_layout->gobj(), &c_width, &bc_height);
-	pango_layout_get_pixel_size (_layout->gobj(), &c_width, &c_height);
+	int c_height, c_width;
 
 	for (std::vector<int>::size_type n = 0; n < numbers.size(); ++n) {
 
@@ -386,20 +382,22 @@ PianoRollHeaderBase::render (ArdourCanvas::Rect const & self, ArdourCanvas::Rect
 				str << 'G' << cn;
 			}
 
-			if (h > 12.){
+			if (context_note_height > 12.){
 				/* Cn text shown in keys */
 				set_source_rgba (cr, black);
 				_layout->set_text (str.str());
-				cr->move_to (x + kbd_width / 2 - c_width / 2, y + context_note_height / 2 - c_height / 2);
+
+				pango_layout_get_pixel_size (_layout->gobj(), &c_width, &c_height);
+
+				cr->move_to (x + kbd_width / 2 - c_width / 2, y + h / 2 - c_height / 2);
 				_layout->show_in_cairo_context (cr);
 			} else {
 				/* Cn text shown to left of keys */
 				set_source_rgba (cr, textc);
 				_big_c_layout->set_text (str.str());
-				/* XXX magic number alert - negative offset to
-				 * get left of the keys
-				 */
-				cr->move_to (x - 18, y);
+
+				pango_layout_get_pixel_size (_big_c_layout->gobj(), &c_width, &c_height);
+				 cr->move_to (x - c_width - 4, y + h / 2 - c_height / 2);
 				_big_c_layout->show_in_cairo_context (cr);
 			}
 		}
@@ -420,13 +418,6 @@ PianoRollHeaderBase::render_scroomer (Cairo::RefPtr<Cairo::Context> cr) const
 	if (entered) {
 		c = HSV (c).lighter (0.25).color();
 	}
-
-	double x = 0.;
-	double y = 0.;
-	draw_transform (x, y);
-
-	cr->save ();
-	cr->translate (x, y);
 
 	set_source_rgba (cr, c);
 	cr->move_to (1.f, scroomer_top);
@@ -449,8 +440,6 @@ PianoRollHeaderBase::render_scroomer (Cairo::RefPtr<Cairo::Context> cr) const
 		cr->stroke ();
 		cr->restore ();
 	}
-
-	cr->restore ();
 }
 
 void
@@ -507,10 +496,6 @@ PianoRollHeaderBase::motion_handler (GdkEventMotion* ev)
 		double scroomer_top = max (1.0, (1.0 - ((_adj.get_value()+_adj.get_page_size()) / 127.0)) * height());
 		double scroomer_bottom = (1.0 - (_adj.get_value () / 127.0)) * height();
 		double edge = 5. * UIConfiguration::instance().get_ui_scale();
-		double ignore;
-
-		draw_transform (ignore, scroomer_top);
-		draw_transform (ignore, scroomer_bottom);
 
 		if (ev->y > scroomer_top - edge && ev->y < scroomer_top + edge){
 			if (_scroomer_state != TOP) {
@@ -556,7 +541,6 @@ PianoRollHeaderBase::motion_handler (GdkEventMotion* ev)
 				idle_lower      = _adj.get_value();
 				idle_upper      = real_val_at_pointer;
 				_saved_top_val  = idle_upper;
-				idle_range_move = MidiViewBackground::CanMoveTop;
 				if (!scroomer_drag_connection.connected()) {
 					scroomer_drag_connection = Glib::signal_idle().connect (sigc::mem_fun (*this, &PianoRollHeaderBase::idle_apply_range));
 					scroomer_did_drag = true;
@@ -573,7 +557,6 @@ PianoRollHeaderBase::motion_handler (GdkEventMotion* ev)
 				idle_upper        = _adj.get_value() + _adj.get_page_size();
 				idle_lower        = real_val_at_pointer;
 				_saved_bottom_val = idle_lower;
-				idle_range_move   = MidiViewBackground::CanMoveBottom;
 				if (!scroomer_drag_connection.connected()) {
 					scroomer_drag_connection = Glib::signal_idle().connect (sigc::mem_fun (*this, &PianoRollHeaderBase::idle_apply_range));
 					scroomer_did_drag = true;
@@ -642,7 +625,7 @@ PianoRollHeaderBase::motion_handler (GdkEventMotion* ev)
 bool
 PianoRollHeaderBase::idle_apply_range ()
 {
-	_midi_context.apply_note_range (idle_lower, idle_upper, true, idle_range_move);
+	_midi_context.apply_note_range (idle_lower, idle_upper, true);
 	scroomer_drag_connection.disconnect ();
 	return false;
 }

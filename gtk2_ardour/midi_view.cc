@@ -877,7 +877,7 @@ MidiView::create_note_at (timepos_t const & source_relative_start, double y, Tem
 
 	Temporal::Beats t = source_relative_start.beats();
 
-	const int  note     = y_to_note(y);
+	const int  note        = y_to_note(y);
 	const uint8_t chan     = get_channel_for_add (t);
 	const uint8_t velocity = get_velocity_for_add (t);
 
@@ -1823,7 +1823,7 @@ MidiView::note_in_region_range (const std::shared_ptr<NoteType> note, bool& visi
 
 	const bool outside = !note_in_region_time_range (note);
 	const int y = _midi_context.note_to_y (note->note());
-	visible =  (y >= 0) && (y <= _midi_context.contents_height());
+	visible =  (y >= 0) && (y + _midi_context.note_height() / 2 <= _midi_context.contents_height());
 
 	return !outside;
 }
@@ -4844,7 +4844,7 @@ MidiView::clip_data_recorded (samplecnt_t total_duration)
 			}
 
 			const int y = _midi_context.note_to_y (note->note());
-			bool visible =  (y >= 0) && (y <= _midi_context.contents_height());
+			bool visible = (y >= 0) && (y + _midi_context.note_height() / 2 <= _midi_context.contents_height());
 
 			NoteBase* nb = add_note (note, visible);
 			nb->item()->set_fill_color (UIConfiguration::instance().color ("recording note"));
@@ -4948,7 +4948,7 @@ MidiView::data_recorded (std::weak_ptr<MidiSource> w)
 			}
 
 			const int y = _midi_context.note_to_y (note->note());
-			bool visible =  (y >= 0) && (y <= _midi_context.contents_height());
+			bool visible = (y >= 0) && (y + _midi_context.note_height() / 2 <= _midi_context.contents_height());
 
 			NoteBase* nb = add_note (note, visible);
 			nb->item()->set_fill_color (UIConfiguration::instance().color ("recording note"));

@@ -151,6 +151,5 @@ class PianoRollHeaderBase : virtual public sigc::trackable {
 	bool idle_apply_range ();
 	double idle_lower;
 	double idle_upper;
-	MidiViewBackground::RangeCanMove idle_range_move;
 	sigc::connection scroomer_drag_connection;
 };

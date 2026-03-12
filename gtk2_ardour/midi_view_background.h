@@ -94,29 +94,18 @@ class MidiViewBackground : public virtual ViewBackground
 
 	void maybe_extend_note_range (uint8_t note_num);
 
-	int note_height() const {
-		return (int) ceil ((double) contents_height() / contents_note_range());
-	}
-
-	int note_to_y (uint8_t note) const {
-		return (highest_note() - note) * note_height();
-	}
-
+	double note_height() const;
+	int note_to_y (uint8_t note) const;
 	uint8_t y_to_note (int y) const;
 
 	uint8_t contents_note_range() const {
-		return highest_note() - lowest_note();
+		return highest_note() - lowest_note() + 1;
 	}
 
 	sigc::signal<void> NoteRangeChanged;
 
-	enum RangeCanMove {
-		CanMoveTop = 0x1,
-		CanMoveBottom = 0x2
-	};
-
-	bool apply_note_range (uint8_t lowest, uint8_t highest, bool to_children, RangeCanMove = RangeCanMove (CanMoveTop|CanMoveBottom));
-	bool maybe_apply_note_range (uint8_t lowest, uint8_t highest, bool to_children, RangeCanMove = RangeCanMove (CanMoveTop|CanMoveBottom));
+	bool apply_note_range (uint8_t lowest, uint8_t highest, bool to_children);
+	bool maybe_apply_note_range (uint8_t lowest, uint8_t highest, bool to_children);
 
 	bool scroll (GdkEventScroll* ev);
 
@@ -132,7 +121,7 @@ class MidiViewBackground : public virtual ViewBackground
 
 	virtual ARDOUR::InstrumentInfo* instrument_info() const = 0;
 
-	void get_note_positions (std::vector<int>& numbers, std::vector<int>& pos, std::vector<int>& heights) const;
+	void get_note_positions (std::vector<int>& numbers, std::vector<double>& pos, std::vector<double>& heights) const;
 
 	EditingContext& editing_context() const { return _editing_context; }
 
