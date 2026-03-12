@@ -118,6 +118,8 @@ class MidiViewBackground : public virtual ViewBackground
 	bool apply_note_range (uint8_t lowest, uint8_t highest, bool to_children, RangeCanMove = RangeCanMove (CanMoveTop|CanMoveBottom));
 	bool maybe_apply_note_range (uint8_t lowest, uint8_t highest, bool to_children, RangeCanMove = RangeCanMove (CanMoveTop|CanMoveBottom));
 
+	bool scroll (GdkEventScroll* ev);
+
 	/** @return y position, or -1 if hidden */
 	virtual int y_position () const { return 0; }
 

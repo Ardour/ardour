@@ -25,12 +25,14 @@
 #include "canvas/debug.h"
 #include "canvas/rect_set.h"
 
+#include "keyboard.h"
 #include "midi_view_background.h"
 #include "ui_config.h"
 
 #include "pbd/i18n.h"
 
 using namespace std;
+using Gtkmm2ext::Keyboard;
 
 MidiViewBackground::MidiViewBackground (ArdourCanvas::Item* parent, EditingContext& ec)
 	: note_range_adjustment (0.0f, 0.0f, 0.0f)
@@ -345,6 +347,50 @@ MidiViewBackground::apply_note_range (uint8_t lowest, uint8_t highest, bool to_c
 	NoteRangeChanged(); /* EMIT SIGNAL*/
 
 	return true;
+}
+
+bool
+MidiViewBackground::scroll(GdkEventScroll* ev)
+{
+
+	const bool zoom = Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier);
+	const bool zoom_expand = Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier|Keyboard::PrimaryModifier);
+	int highest = highest_note();
+	int lowest = lowest_note();
+
+	switch (ev->direction) {
+	case GDK_SCROLL_UP:
+		if (zoom_expand) {
+			// Expand up
+			apply_note_range (max(0, lowest), min(127, highest + 1), true);
+		} else if (zoom) {
+			// Zoom in
+			apply_note_range (max(0, lowest + 1), min(127, highest - 1), true);
+		} else {
+			// Move up
+			if (highest_note() >= 127) break;
+			apply_note_range (max(0, lowest + 1), min(127, highest + 1), true);
+		}
+		break;
+	case GDK_SCROLL_DOWN:
+			if (zoom_expand) {
+				// Expand down
+				apply_note_range (max(0, lowest - 1), min(127, highest), true);
+			} else if (zoom) {
+				// Zoom out
+				apply_note_range (max(0, lowest - 1), min(127, highest + 1), true);
+			} else {
+				// Move down
+				if (lowest_note() <= 0) break;
+				apply_note_range (max(0, lowest - 1), min(127, highest - 1), true);
+			}
+		break;
+	default:
+		return false;
+	}
+
+	return true;
+
 }
 
 void

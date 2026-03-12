@@ -417,43 +417,10 @@ MidiRegionView::scroll (GdkEventScroll* ev)
 	}
 
 	if (_selection.empty() || !UIConfiguration::instance().get_scroll_velocity_editing()) {
-
-		const int step = 1;
-		const bool zoom = Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier);
-		const bool just_one_edge = Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier|Keyboard::PrimaryModifier);
-
-		switch (ev->direction) {
-		case GDK_SCROLL_UP:
-			if (just_one_edge) {
-				/* make higher notes visible aka expand higher pitch range */
-				midi_stream_view()->apply_note_range (midi_stream_view()->lowest_note(), min (127, midi_stream_view()->highest_note() + step), true);
-			} else if (zoom) {
-				/* zoom out to show more higher and lower pitches */
-				midi_stream_view()->apply_note_range (max (0, midi_stream_view()->lowest_note() - step), min (127, midi_stream_view()->highest_note() + step), true);
-			} else {
-				/* scroll towards higher pitches */
-				midi_stream_view()->apply_note_range (max (0, midi_stream_view()->lowest_note() + step), min (127, midi_stream_view()->highest_note() + step), true);
-			}
-			return true;
-
-		case GDK_SCROLL_DOWN:
-			if (just_one_edge) {
-				/* make lower notes visible aka expand lower pitch range */
-				midi_stream_view()->apply_note_range (max (0, midi_stream_view()->lowest_note() - step), midi_stream_view()->highest_note(), true);
-			} else if (zoom) {
-				/* zoom in to show less higher and lower pitches */
-				midi_stream_view()->apply_note_range (min (127, midi_stream_view()->lowest_note() + step), max (0, midi_stream_view()->highest_note() - step), true);
-			} else {
-				/* scroll towards lower pitches */
-				midi_stream_view()->apply_note_range (min (127, midi_stream_view()->lowest_note() - step), max (0, midi_stream_view()->highest_note() - step), true);
-			}
-			return true;
-
-		default:
-			break;
-		}
-
-		return false;
+        /* pass scroll event to midi context for vertial move/zoom */
+        if (_midi_context.scroll(ev)) {
+             return true;
+        }
 	}
 
 	hide_verbose_cursor ();

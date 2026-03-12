@@ -710,52 +710,26 @@ MidiView::scroll (GdkEventScroll* ev)
 	}
 
 	if (_selection.empty()) {
-		const int step = 1;
-		const bool zoom = Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier);
-		const bool just_one_edge = Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier|Keyboard::PrimaryModifier);
 
 		switch (ev->direction) {
 		case GDK_SCROLL_UP:
-			if (just_one_edge) {
-				/* make higher notes visible aka expand higher pitch range */
-				set_note_range (_midi_context.lowest_note(), min (127, _midi_context.highest_note() + step));
-			} else if (zoom) {
-				/* zoom out to show more higher and lower pitches */
-				set_note_range (max (0, _midi_context.lowest_note() - step), min (127, _midi_context.highest_note() + step));
-			} else {
-				/* scroll towards higher pitches */
-				set_note_range (max (0, _midi_context.lowest_note() + step), min (127, _midi_context.highest_note() + step));
-			}
-			return true;
-
 		case GDK_SCROLL_DOWN:
-			if (just_one_edge) {
-				/* make lower notes visible aka expand lower pitch range */
-				set_note_range (max (0, _midi_context.lowest_note() - step), _midi_context.highest_note());
-			} else if (zoom) {
-				/* zoom in to show less higher and lower pitches */
-				set_note_range (min (127, _midi_context.lowest_note() + step), max (0, _midi_context.highest_note() - step));
-			} else {
-				/* scroll towards lower pitches */
-				set_note_range (min (127, _midi_context.lowest_note() - step), max (0, _midi_context.highest_note() - step));
-			}
-			return true;
-
+            /* pass scroll event to midi context for vertial move/zoom */
+            if (_midi_context.scroll(ev)) {
+                 return true;
+            }
 		case GDK_SCROLL_LEFT:
 			_editing_context.set_horizontal_position (_editing_context.horizontal_position() - 20.0);
 			return true;
 			break;
-
 		case GDK_SCROLL_RIGHT:
 			_editing_context.set_horizontal_position (_editing_context.horizontal_position() + 20.0);
 			return true;
 			break;
-
 		default:
-			break;
+			return false;
 		}
 
-		return false;
 	}
 
 	hide_verbose_cursor ();

@@ -134,32 +134,10 @@ PianoRollHeaderBase::scroll_handler (GdkEventScroll* ev)
 {
 	bool in_scroomer = ev->x < _scroomer_size;
 
-	int note_range = _adj.get_page_size ();
-	int note_lower = _adj.get_value ();
-
-	if(ev->state == GDK_SHIFT_MASK){
-		switch (ev->direction) {
-		case GDK_SCROLL_UP: //ZOOM IN
-			_midi_context.apply_note_range (min(note_lower + 1, 127), max(note_lower + note_range - 1,0), true);
-			break;
-		case GDK_SCROLL_DOWN: //ZOOM OUT
-			_midi_context.apply_note_range (max(note_lower - 1,0), min(note_lower + note_range + 1, 127), true);
-			break;
-		default:
-			return false;
-		}
-	}else{
-		switch (ev->direction) {
-		case GDK_SCROLL_UP:
-			_adj.set_value (min (note_lower + 1, 127 - note_range));
-			break;
-		case GDK_SCROLL_DOWN:
-			_adj.set_value (note_lower - 1.0);
-			break;
-		default:
-			return false;
-		}
-	}
+	/* pass scroll event to midi context for vertial move/zoom */
+	if (_midi_context.scroll(ev)) {
+		 return true;
+	 }
 
 	if (!in_scroomer) {
 		set_note_highlight (_midi_context.y_to_note (event_y_to_y (ev->y)));
