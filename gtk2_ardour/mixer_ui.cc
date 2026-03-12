@@ -2692,10 +2692,6 @@ Mixer_UI::set_state (const XMLNode& node, int version)
 		_sidebar_pager2.set_index (index);
 	}
 
-	if (node.get_property (X_("mixer-sidebar-btn2"), index)) {
-		_sidebar_pager2.set_index (index);
-	}
-
 	if (node.get_property (X_("mixer-plugin-list"), index) && index <= PLM_SearchAll) {
 		plugin_list_mode = (PluginListMode)index;
 	}
