@@ -18,7 +18,9 @@
  * Boston, MA  02110-1301  USA
  */
 
+#ifdef COMPILER_MSVC
 #include <sys/time.h>
+#endif
 
 #ifndef timersub
 # define timersub(a, b, result)                      \
