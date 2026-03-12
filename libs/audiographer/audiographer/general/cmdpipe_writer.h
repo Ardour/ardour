@@ -15,6 +15,10 @@
 #include "ardour/system_exec.h"
 #include "ardour/export_failed.h"
 
+#if defined(COMPILER_MSVC) && defined(WAF_BUILD)
+#include <io.h> //for write, close
+#endif
+
 namespace AudioGrapher
 {
 
