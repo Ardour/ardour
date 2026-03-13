@@ -125,7 +125,7 @@ private:
  * The class maintains a lock-protected "dead wood" list of old value of
  * *managed_object (i.e. shared_ptr<T>). The list is cleaned up every time we call
  * write_copy(). If the list is the last instance of a shared_ptr<T> that
- * references the object (determined by shared_ptr::unique()) then we
+ * references the object (determined by shared_ptr::use_count()) then we
  * erase it from the list, thus deleting the object it points to.  This is lazy
  * destruction - the SerializedRCUManager assumes that there will sufficient
  * calls to write_copy() to ensure that we do not inadvertently leave objects
@@ -161,7 +161,7 @@ public:
 		typename std::list<std::shared_ptr<T> >::iterator i;
 
 		for (i = _dead_wood.begin (); i != _dead_wood.end ();) {
-			if ((*i).unique ()) {
+			if (1 == (*i).use_count ()) {
 				i = _dead_wood.erase (i);
 			} else {
 				++i;
@@ -224,11 +224,11 @@ public:
 			 * if we are the only user, then it is safe to drop it here.
 			 */
 
-			if (!_current_write_old->unique ()) {
+			if (1 != _current_write_old->use_count ()) {
 				_dead_wood.push_back (*_current_write_old);
 			}
 #else
-			/* above ->unique() condition is subject to a race condition.
+			/* above use_count() condition is subject to a race condition.
 			 *
 			 * Particulalry with JACK2 graph-order callbacks arriving
 			 * concurrently to processing, which can lead to heap-use-after-free
@@ -304,7 +304,7 @@ public:
 
 	~RCUWriter ()
 	{
-		if (_copy.unique ()) {
+		if (1 == _copy.use_count ()) {
 			/* As intended, our copy is the only reference
 			   to the object pointed to by _copy. Update
 			   the manager with the (presumed) modified
