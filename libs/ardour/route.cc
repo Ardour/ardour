@@ -1065,6 +1065,10 @@ Route::add_processors (const ProcessorList& others, std::shared_ptr<Processor> b
 	ProcessorList::iterator loc;
 	std::shared_ptr <PluginInsert> fanout;
 
+	if (_disk_writer && _disk_writer->record_enabled () && _session.actively_recording()) {
+		return -1;
+	}
+
 	if (_pending_process_reorder.load () || _pending_listen_change.load ()) {
 		/* we need to flush any pending re-order changes */
 		PBD::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
@@ -1487,6 +1491,10 @@ Route::is_internal_processor (std::shared_ptr<Processor> p) const
 int
 Route::remove_processor (std::shared_ptr<Processor> processor, ProcessorStreams* err, bool need_process_lock)
 {
+	if (need_process_lock && _disk_writer && _disk_writer->record_enabled () && _session.actively_recording ()) {
+		return -1;
+	}
+
 	// TODO once the export point can be configured properly, do something smarter here
 	if (processor == _capturing_processor) {
 		PBD::Mutex::Lock lx (AudioEngine::instance()->process_lock (), PBD::Mutex::NotLock);
@@ -1695,6 +1703,10 @@ int
 Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* err)
 {
 	ProcessorList deleted;
+
+	if (_disk_writer && _disk_writer->record_enabled () && _session.actively_recording ()) {
+		return -1;
+	}
 
 	if (!_session.engine().running()) {
 		return 1;
