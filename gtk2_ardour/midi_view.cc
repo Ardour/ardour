@@ -4312,42 +4312,7 @@ MidiView::selection_as_cut_buffer () const
 void
 MidiView::duplicate_selection ()
 {
-	if (!_midi_region) {
-		return;
-	}
-
-	if (_selection.empty()) {
-		return;
-	}
-
-	_editing_context.begin_reversible_command (_("duplicate notes"));
-
-	/* find last selection position */
-	timepos_t dup_pos = timepos_t (Temporal::BeatTime);
-
-	for (Selection::const_iterator s = _selection.begin(); s != _selection.end(); ++s) {
-		dup_pos = std::max (dup_pos, _midi_region->source_beats_to_absolute_time ((*s)->note()->end_time()));
-	}
-
-	/* Use a local Selection object that will not affect the global
-	 * selection. Possible ::paste() should accept a different kind of
-	 * object but that would conflict with the Editor API.
-	 */
-
-	::Selection local_selection (dynamic_cast<PublicEditor*> (&_editing_context), false);
-	MidiNoteSelection note_selection;
-
-	note_selection.push_back (selection_as_cut_buffer());
-
-	local_selection.set (note_selection);
-
-	PasteContext ctxt (0, 1, ItemCounts(), false);
-	bool commit = paste (dup_pos, local_selection, ctxt);
-	if (commit) {
-		_editing_context.commit_reversible_command ();
-	} else {
-		_editing_context.abort_reversible_command ();
-	}
+	_duplicate_notes(1);
 }
 
 /** undo commands were initiated at the 'action' level. ::paste and ::paste_internal should implement subcommands */
