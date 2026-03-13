@@ -1819,7 +1819,7 @@ Locations::find_all_between (timepos_t const & start, timepos_t const & end, Loc
 	PBD::RWLock::ReaderLock lm (_lock);
 	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
 		if ((flags == 0 || (*i)->matches (flags)) &&
-		    ((*i)->start() >= start && (*i)->end() < end)) {
+		    (timepos_t((*i)->start_sample()) >= start && timepos_t((*i)->end_sample()) < end)) {
 			ll.push_back (*i);
 		}
 	}
