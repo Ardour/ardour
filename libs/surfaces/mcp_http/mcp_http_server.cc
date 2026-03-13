@@ -7633,8 +7633,8 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 			}
 
 			const std::shared_ptr<ARDOUR::Route> route = route_by_mcp_id (_session, route_id);
-			if (!route || !route->is_track ()) {
-				return jsonrpc_error (id, -32602, "Track not found");
+			if (!route) {
+				return jsonrpc_error (id, -32602, "Route not found");
 			}
 
 			std::shared_ptr<ARDOUR::AutomationControl> gain = route->gain_control ();
