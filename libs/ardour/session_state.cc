@@ -1355,7 +1355,7 @@ Session::import_route_state (const string& path, std::map<PBD::ID, PBD::ID> cons
 		for (auto const rxml : xroutes->children()) {
 
 			if (progress) {
-				progress->set_progress (completed++ / (float)required_tasks);
+				progress->set_progress (completed / (float)required_tasks);
 				if (progress->cancelled ()) {
 					break;
 				}
@@ -1372,6 +1372,13 @@ Session::import_route_state (const string& path, std::map<PBD::ID, PBD::ID> cons
 			for (auto [dst, src] : idmap) {
 				if (src != id) {
 					continue;
+				}
+
+				if (progress) {
+					progress->set_progress (completed++ / (float)required_tasks);
+					if (progress->cancelled ()) {
+						break;
+					}
 				}
 
 				XMLNode* pnode = rxml->child (PresentationInfo::state_node_name.c_str ());
