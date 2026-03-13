@@ -54,7 +54,6 @@
 #include "pbd/memento_command.h"
 #include "pbd/unknown_type.h"
 #include "pbd/unwind.h"
-#include "pbd/timersub.h"
 
 #include <glibmm/datetime.h> /*for playlist group_id */
 #include <glibmm/miscutils.h>
