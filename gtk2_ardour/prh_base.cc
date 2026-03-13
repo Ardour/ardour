@@ -803,11 +803,11 @@ PianoRollHeaderBase::note_range_changed ()
 void
 PianoRollHeaderBase::invalidate_note_range (int lowest, int highest)
 {
-	lowest = max ((int) _midi_context.lowest_note(), lowest - 1);
-	highest = min ((int) _midi_context.highest_note(), highest + 2);
+	lowest = max ((int) _midi_context.lowest_note(), lowest);
+	highest = min ((int) _midi_context.highest_note(), highest);
 
-	double y = _midi_context.note_to_y (highest);
-	double h = _midi_context.note_to_y (lowest - 1) - y;
+	double y = _midi_context.note_to_y (highest) - 1;
+	double h = _midi_context.note_to_y (lowest) + _midi_context.note_height() + 2;
 
 	redraw (0, y, width(), h);
 }
