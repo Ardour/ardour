@@ -233,28 +233,12 @@ MidiViewBackground::set_note_visibility_range_style (VisibleNoteRange r)
 void
 MidiViewBackground::maybe_extend_note_range (uint8_t note_num)
 {
-
-	bool changed = false;
-
-	if (_visibility_note_range == FullRange) {
-		return;
-	}
-
 	if (note_range_set) {
-
-		if (_lowest_note > _data_note_min) {
-			changed = true;
+		if (note_num > _highest_note) {
+			apply_note_range (_lowest_note, note_num, true);
+		} else if (note_num < _lowest_note) {
+			apply_note_range (note_num, _highest_note, true);
 		}
-
-		if (_highest_note < _data_note_max) {
-			changed = true;
-		}
-	} else {
-		changed = true;
-	}
-
-	if (changed) {
-		apply_note_range (_data_note_min, _data_note_max, true);
 	}
 }
 

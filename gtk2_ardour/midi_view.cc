@@ -3154,10 +3154,8 @@ MidiView::note_dropped (NoteBase *, timecnt_t const & d_qn, int8_t dnote, bool c
 	_editing_context.commit_reversible_command ();
 
 	// care about notes being moved beyond the upper/lower bounds on the canvas
-	if (lowest_note_in_selection  < _midi_context.lowest_note() ||
-	    highest_note_in_selection > _midi_context.highest_note()) {
-		_midi_context.set_note_visibility_range_style (MidiStreamView::ContentsRange);
-	}
+	_midi_context.maybe_extend_note_range (lowest_note_in_selection);
+	_midi_context.maybe_extend_note_range (highest_note_in_selection);
 }
 
 /** @param x Pixel relative to the region position.
@@ -3963,10 +3961,8 @@ MidiView::transpose (bool up, bool fine, bool allow_smush)
 
 	apply_note_diff ();
 
-	if (lowest < _midi_context.lowest_note() || highest > _midi_context.highest_note()) {
-		_midi_context.maybe_extend_note_range (lowest);
-		_midi_context.maybe_extend_note_range (highest);
-	}
+	_midi_context.maybe_extend_note_range (lowest);
+	_midi_context.maybe_extend_note_range (highest);
 
 	if (!_no_sound_notes && UIConfiguration::instance().get_sound_midi_notes()) {
 		if (_selection.size() == 1) {
