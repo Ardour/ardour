@@ -120,12 +120,6 @@ PortAudioBackend::name () const
 }
 
 bool
-PortAudioBackend::is_realtime () const
-{
-	return true;
-}
-
-bool
 PortAudioBackend::requires_driver_selection() const
 {
 	// we could do this but implementation would need changing
@@ -429,7 +423,7 @@ PortAudioBackend::enumerate_midi_options () const
 {
 	if (_midi_options.empty()) {
 		_midi_options.push_back (winmme_driver_name);
-		_midi_options.push_back (get_standard_device_name(DeviceNone));
+		_midi_options.push_back (get_none_device_name ());
 	}
 	return _midi_options;
 }
@@ -437,7 +431,7 @@ PortAudioBackend::enumerate_midi_options () const
 int
 PortAudioBackend::set_midi_option (const std::string& opt)
 {
-	if (opt != get_standard_device_name(DeviceNone) && opt != winmme_driver_name) {
+	if (opt != get_none_device_name () && opt != winmme_driver_name) {
 		return -1;
 	}
 	DEBUG_MIDI (string_compose ("Setting midi option to %1\n", opt));
@@ -1219,7 +1213,7 @@ PortAudioBackend::register_system_audio_ports()
 int
 PortAudioBackend::register_system_midi_ports (std::string const& device)
 {
-	if (_midi_driver_option == get_standard_device_name(DeviceNone)) {
+	if (_midi_driver_option == get_none_device_name ()) {
 		DEBUG_MIDI("No MIDI backend selected, not system midi ports available\n");
 		return 0;
 	}
@@ -1798,7 +1792,7 @@ PortAudioBackend::process_port_connection_changes ()
 static std::shared_ptr<PortAudioBackend> _instance;
 
 static std::shared_ptr<AudioBackend> backend_factory (AudioEngine& e);
-static int instantiate (const std::string& arg1, const std::string& /* arg2 */);
+static int instantiate (const std::string& client_name, const std::string& /* session_id */);
 static int deinstantiate ();
 static bool already_configured ();
 static bool available ();
@@ -1822,9 +1816,9 @@ backend_factory (AudioEngine& e)
 }
 
 static int
-instantiate (const std::string& arg1, const std::string& /* arg2 */)
+instantiate (const std::string& client_name, const std::string& /* session_id */)
 {
-	s_instance_name = arg1;
+	s_instance_name = client_name;
 	return 0;
 }
 
