@@ -36,7 +36,6 @@
 
 #include "pbd/error.h"
 #include "pbd/pthread_utils.h"
-#include "pbd/timersub.h"
 
 #include "temporal/time.h"
 
