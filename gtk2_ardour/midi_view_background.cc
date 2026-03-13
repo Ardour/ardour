@@ -118,10 +118,10 @@ MidiViewBackground::y_to_note (int y) const
 
 	int const n = highest_note() - floor((double) (y + 1) / note_height());
 
-	if (n < 0) {
-		return 0;
-	} else if (n > 127) {
-		return 127;
+	if (n < lowest_note()) {
+		return lowest_note();
+	} else if (n > highest_note()) {
+		return highest_note();
 	}
 
 	return (uint8_t) n;

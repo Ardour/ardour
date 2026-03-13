@@ -6268,7 +6268,7 @@ NoteDrag::total_dy () const
 
 	/* clamp y to the view-relative vertical boundaries of the view */
 	int o = _view->midi_context().y_position ();
-	int y = std::max (0, (std::min ((int) current_pointer_y(), o + _view->midi_context().contents_height() - _view->note_height())));
+	int y = std::max (o, (std::min ((int) current_pointer_y(), o + _view->midi_context().contents_height())));
 
 	/* and work out delta */
 	return _view->y_to_note (y - o) - _view->y_to_note (grab_y () - o);
