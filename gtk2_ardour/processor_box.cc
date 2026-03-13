@@ -2848,10 +2848,17 @@ ProcessorBox::use_plugins (const SelectedPlugins& plugins)
 
 		Route::ProcessorStreams err_streams;
 
-		if (_route->add_processor_by_index (processor, _placement, &err_streams, Config->get_new_plugins_active ())) {
-			weird_plugin_dialog (**p, err_streams);
-			return true;
+		int rv =_route->add_processor_by_index (processor, _placement, &err_streams, Config->get_new_plugins_active ());
+
+		if (rv == -1) {
+			MessageDialog am (_("Cannot add plugin while recording"));
+			am.run ();
 			// XXX SHAREDPTR delete plugin here .. do we even need to care?
+			return true;
+		} else if (rv != 0) {
+			weird_plugin_dialog (**p, err_streams);
+			// XXX SHAREDPTR delete plugin here .. do we even need to care?
+			return true;
 		} else if (plugins.size() == 1 && UIConfiguration::instance().get_open_gui_after_adding_plugin()) {
 			if (processor->what_can_be_automated ().size () == 0) {
 				; /* plugin without controls, don't show ui */
