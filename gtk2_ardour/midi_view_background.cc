@@ -316,6 +316,7 @@ MidiViewBackground::scroll(GdkEventScroll* ev)
 			apply_note_range (max(0, lowest), min(127, highest + 1), true);
 		} else if (zoom) {
 			// Zoom in
+			if (contents_note_range() <= 12) break;
 			apply_note_range (max(0, lowest + 1), min(127, highest - 1), true);
 		} else {
 			// Move up
