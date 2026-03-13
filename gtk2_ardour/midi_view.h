@@ -625,7 +625,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	virtual double height() const;
 
 	virtual int contents_height() const { return height() - 2; }
-	inline int note_height() const { return contents_height() / _midi_context.contents_note_range(); }
+	inline double note_height() const { return _midi_context.note_height(); }
 
 	int note_to_y (uint8_t note) const { return _midi_context.note_to_y (note); }
 	uint8_t y_to_note (int y) const { return _midi_context.y_to_note (y); }
