@@ -72,10 +72,14 @@ protected:
 	};
 	typedef typename RequestBuffer::rw_vector RequestBufferVector;
 
-#if defined(COMPILER_MINGW) && defined(__PTW32_VERSION)
+#if (defined(COMPILER_MINGW) && defined(__PTW32_VERSION)) || (defined WAF_BUILD && defined COMPILER_MSVC)
 	struct pthread_cmp
 	{
-		bool operator() (const ptw32_handle_t& thread1, const ptw32_handle_t& thread2)
+#if defined WAF_BUILD && defined COMPILER_MSVC
+		bool operator() (const pthread_t& thread1, const pthread_t& thread2) const
+#else
+		bool operator() (const ptw32_handle_t& thread1, const ptw32_handle_t& thread2) const
+#endif
 		{
 			return thread1.p < thread2.p;
 		}
