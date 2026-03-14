@@ -361,6 +361,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	void show_end (bool yn);
 
 	virtual bool midi_canvas_group_event(GdkEvent* ev);
+	virtual bool note_group_event(GdkEvent* ev);
 
 	int visible_channel() const { return _visible_channel; }
 	void set_visible_channel (int, bool clear_selection = true);

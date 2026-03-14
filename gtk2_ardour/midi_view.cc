@@ -198,11 +198,13 @@ MidiView::init (std::shared_ptr<MidiTrack> mt)
 	_patch_change_fill = UIConfiguration::instance().color_mod ("midi patch change fill", "midi patch change fill");
 
 	_note_group->raise_to_top();
+
+	_note_group->Event.connect (sigc::mem_fun (*this, &MidiView::note_group_event));
+
 	EditingContext::DropDownKeys.connect (sigc::mem_fun (*this, &MidiView::drop_down_keys));
 	_midi_context.NoteRangeChanged.connect (sigc::mem_fun (*this, &MidiView::view_changed));
 	_midi_context.NoteModeChanged.connect (sigc::mem_fun (*this, &MidiView::note_mode_changed));
 }
-
 
 MidiView::~MidiView ()
 {
@@ -478,18 +480,9 @@ MidiView::midi_canvas_group_event (GdkEvent* ev)
 
 	switch (ev->type) {
 	case GDK_ENTER_NOTIFY:
-		_last_event_x = ev->crossing.x;
-		_last_event_y = ev->crossing.y;
-		enter_notify (&ev->crossing);
-		// set entered_regionview (among other things)
-		return true;
-
 	case GDK_LEAVE_NOTIFY:
-		_last_event_x = ev->crossing.x;
-		_last_event_y = ev->crossing.y;
-		leave_notify (&ev->crossing);
-		// reset entered_regionview (among other things)
-		return true;
+		/* we care only about note group enter/leave, which is handled by ::note_group_event () */
+		break;
 
 	case GDK_SCROLL:
 		if (scroll (&ev->scroll)) {
@@ -519,6 +512,25 @@ MidiView::midi_canvas_group_event (GdkEvent* ev)
 		break;
 	}
 
+	return false;
+}
+
+bool
+MidiView::note_group_event (GdkEvent* ev)
+{
+	switch (ev->type) {
+	case GDK_ENTER_NOTIFY:
+		_last_event_x = ev->crossing.x;
+		_last_event_y = ev->crossing.y;
+		enter_notify (&ev->crossing);
+		break;
+
+	case GDK_LEAVE_NOTIFY:
+		_last_event_x = ev->crossing.x;
+		_last_event_y = ev->crossing.y;
+		leave_notify (&ev->crossing);
+		break;
+	}
 	return false;
 }
 
