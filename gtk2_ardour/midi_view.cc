@@ -748,7 +748,6 @@ MidiView::motion (GdkEventMotion* ev)
 	return false;
 }
 
-
 bool
 MidiView::scroll (GdkEventScroll* ev)
 {
