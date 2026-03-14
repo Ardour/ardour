@@ -98,8 +98,8 @@ PianorollMidiView::PianorollMidiView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 	 * events for the current_item.
 	 */
 
-	event_rect->Event.connect (sigc::mem_fun (*this, &PianorollMidiView::midi_canvas_group_event));
-	parent.Event.connect (sigc::mem_fun (*this, &PianorollMidiView::midi_canvas_group_event));
+	event_rect->Event.connect ([this] (GdkEvent* ev) { return midi_canvas_group_event (ev); });
+	parent.Event.connect ([this] (GdkEvent* ev) { return midi_canvas_group_event (ev); });
 
 	_note_group->raise_to_top ();
 
@@ -145,14 +145,7 @@ PianorollMidiView::midi_canvas_group_event (GdkEvent* ev)
 	/* Let MidiView do its thing */
 
 	if (MidiView::midi_canvas_group_event (ev)) {
-
-		switch (ev->type) {
-		case GDK_ENTER_NOTIFY:
-		case GDK_LEAVE_NOTIFY:
-			break;
-		default:
-			return true;
-		}
+		return true;
 	}
 
 	return _editing_context.canvas_bg_event (ev, event_rect);
