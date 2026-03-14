@@ -642,14 +642,25 @@ GtkCanvas::pick_current_item (Duple const & point, int state)
 
 		if (within_items.front() == _current_item) {
 			/* uppermost item at point is already _current_item */
-			DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("CURRENT ITEM remains %1/%2\n", _current_item->whatami(), _current_item->name));
+			DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("CURRENT ITEM remains %1\n", _current_item->whoami()));
 			return;
 		}
 
 		_new_current_item = const_cast<Item*> (within_items.front());
 
 		if (_new_current_item != _current_item) {
+#ifndef NDEBUG
+			if (_current_item) {
+				DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("CHOSE NEW ITEM, deliver event  %1 was %2\n", _new_current_item->whoami(), _current_item->whoami()));
+			} else {
+				DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("CHOSE NEW ITEM, deliver event  %1 was null\n", _new_current_item->whoami()));
+			}
+#endif
 			deliver_enter_leave (point, state);
+		} else {
+#ifndef NDEBUG
+			DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("CHOSE NEW ITEM somehow it remains %1/%2\n", _current_item->whatami(), _current_item->name));
+#endif
 		}
 	}
 
@@ -856,6 +867,13 @@ GtkCanvas::deliver_enter_leave (Duple const & point, int state)
 	}
 
 	_current_item = _new_current_item;
+#ifndef NDEBUG
+	if (_current_item) {
+		DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("... set current item to %1\n", _current_item->whoami()));
+	} else {
+		DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, "... current item set to null\n");
+	}
+#endif
 }
 
 
