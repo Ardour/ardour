@@ -1207,14 +1207,18 @@ Pianoroll::button_release_dispatch (GdkEventButton* ev)
 void
 Pianoroll::motion_track (GdkEventMotion* event)
 {
-	if (xcursor) {
-		double timebars = n_timebars * timebar_height;
-		xcursor->set_position (ArdourCanvas::Duple (event->x, event->y));
-	}
+	assert (xcursor);
+	/* when events arrive in the canvas, they are adjusted to canvas
+	   coordinates by using the "best" scrollgroup, which will always be
+	   the HV scroll group. Reverse this transformation to get back to
+	   window coordinates. Canvas::canvas_to_window() doesn't do
+	   specifically this transformation, for various reasons.
+	*/
+	xcursor->set_position (ArdourCanvas::Duple (event->x, event->y).translate (-hv_scroll_group->scroll_offset()));
 }
 
 bool
-Pianoroll::motion_handler (ArdourCanvas::Item*, GdkEvent* event, bool from_autoscroll)
+Pianoroll::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, bool from_autoscroll)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
