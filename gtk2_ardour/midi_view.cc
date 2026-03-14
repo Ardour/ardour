@@ -2998,17 +2998,23 @@ MidiView::move_copies (timecnt_t const & dx_qn, double dy, double cumulative_dy)
 			to_play.push_back (n->note());
 		}
 
-		timepos_t const note_time_qn = _midi_region->source_beats_to_absolute_time (n->note()->time());
 		double_t dx = 0;
 
+		Temporal::Beats note_time_qn;
+		if (!_on_timeline) {
+			note_time_qn = n->note()->time ();
+		} else {
+			note_time_qn = _midi_region->source_beats_to_absolute_beats (n->note()->time());
+		}
+
 		if (_midi_context.note_mode() == Sustained) {
-			dx = _editing_context.time_to_pixel_unrounded (timepos_t (note_time_qn) + dx_qn)
-				- n->item()->item_to_canvas (ArdourCanvas::Duple (n->x0(), 0)).x;
+			dx = _editing_context.time_to_pixel_unrounded (timepos_t (note_time_qn + dx_qn.beats()));
+			dx -= _editing_context.canvas_to_timeline (n->item()->item_to_canvas (ArdourCanvas::Duple (n->x0(), 0)).x);
 		} else {
 			Hit* hit = dynamic_cast<Hit*>(n);
 			if (hit) {
-				dx = _editing_context.time_to_pixel_unrounded (timepos_t (note_time_qn) + dx_qn)
-					- n->item()->item_to_canvas (ArdourCanvas::Duple (((hit->x0() + hit->x1()) / 2.0) - hit->position().x, 0)).x;
+				dx = _editing_context.time_to_pixel_unrounded (timepos_t (note_time_qn + dx_qn.beats()));
+				dx -= _editing_context.canvas_to_timeline (n->item()->item_to_canvas (ArdourCanvas::Duple (((hit->x0() + hit->x1()) / 2.0) - hit->position().x, 0)).x);
 			}
 		}
 
@@ -3016,7 +3022,8 @@ MidiView::move_copies (timecnt_t const & dx_qn, double dy, double cumulative_dy)
 
 		if (_midi_context.note_mode() == Sustained) {
 			Note* sus = dynamic_cast<Note*> (*i);
-			double const len_dx = _editing_context.time_to_pixel_unrounded (timepos_t (note_time_qn) + dx_qn + timecnt_t (n->note()->length()));
+			double len_dx = _editing_context.time_to_pixel_unrounded (timepos_t (note_time_qn) + dx_qn + timecnt_t (n->note()->length()));
+			len_dx = _editing_context.timeline_to_canvas (len_dx);
 
 			sus->set_x1 (n->item()->canvas_to_item (ArdourCanvas::Duple (len_dx, 0)).x);
 		}
