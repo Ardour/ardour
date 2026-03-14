@@ -123,6 +123,9 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	virtual void stop_canvas_autoscroll () = 0;
 	virtual bool autoscroll_active() const = 0;
 
+	/** Return true if the editing context is in FL-style draw+delete mode */
+	virtual bool fl_mode() const { return false; }
+
 	void scroll_left_step ();
 	void scroll_right_step ();
 	void scroll_left_half_page ();
