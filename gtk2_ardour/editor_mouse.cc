@@ -376,7 +376,15 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 
 			if ((item_type != RegionItem && event->button.button != 2)
 			    /* for selection of control points prior to delete (shift-right click) */
-			    && !(item_type == ControlPointItem && event->button.button == 3 && event->type == GDK_BUTTON_PRESS)) {
+			    && !(item_type == ControlPointItem && event->button.button == 3 && event->type == GDK_BUTTON_PRESS)
+			    /* allow delete (shift-right click) to reach fade items */
+			    && !(Keyboard::is_delete_event (&event->button)
+			         && (item_type == FadeInItem || item_type == FadeInHandleItem
+			             || item_type == FadeInTrimHandleItem
+			             || item_type == FadeOutItem || item_type == FadeOutHandleItem
+			             || item_type == FadeOutTrimHandleItem
+			             || item_type == StartCrossFadeItem
+			             || item_type == EndCrossFadeItem))) {
 				return;
 			}
 		}
@@ -1547,6 +1555,19 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 
 		case RegionItem:
+			if (eff == MouseObject) {
+				remove_clicked_region ();
+			}
+			break;
+
+		case FadeInItem:
+		case FadeInHandleItem:
+		case FadeInTrimHandleItem:
+		case FadeOutItem:
+		case FadeOutHandleItem:
+		case FadeOutTrimHandleItem:
+		case StartCrossFadeItem:
+		case EndCrossFadeItem:
 			if (eff == MouseObject) {
 				remove_clicked_region ();
 			}
