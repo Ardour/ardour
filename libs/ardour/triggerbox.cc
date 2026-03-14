@@ -1169,7 +1169,7 @@ Trigger::compute_next_transition (samplepos_t start_sample, Temporal::Beats cons
 	BBT_Offset q (_start_quantization);
 
 	/* Clips don't stop on their own quantize; in Live they stop on the Global Quantize setting; we will choose 1 bar (Live's default) for now */
-#warning when Global Quantize is implemented, use that instead of '1 bar' here
+#pragma GCC warning "when Global Quantize is implemented, use that instead of '1 bar' here"
 	if (_state == WaitingToStop) {
 
 		q = BBT_Offset(1,0,0);
