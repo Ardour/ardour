@@ -4461,12 +4461,29 @@ Editor::cut_copy_points (Editing::CutCopyOp op, timepos_t const & earliest_time)
 
 		/* Add all selected points to the relevant copy ControlLists */
 
+		bool earliest_set = false;
 		for (auto & selected_point : selection->points) {
 			std::shared_ptr<AutomationList>    al = selected_point->line().the_list();
 			AutomationList::const_iterator ctrl_evt = selected_point->model ();
 
 			lists[al].copy->fast_simple_add ((*ctrl_evt)->when, (*ctrl_evt)->value);
-			earliest = std::min (earliest, (*ctrl_evt)->when);
+
+			/* Track the leftmost (earliest) selected point so that the copy
+			 * buffer can be normalised to zero-relative offsets below.
+			 * We cannot rely on the earliest_time parameter as a sentinel:
+			 * callers pass timepos_t(AudioTime) == 0 samples, which is
+			 * always less-than-or-equal to any real event position, so
+			 * std::min would always keep 0 and shift_earlier(0) would be
+			 * a no-op -- leaving the raw model-space positions in the copy
+			 * buffer.  On paste those positions would be added to the paste
+			 * target, placing automation far to the right of where the user
+			 * intended.  Instead, seed earliest from the first real event. */
+			if (!earliest_set) {
+				earliest     = (*ctrl_evt)->when;
+				earliest_set = true;
+			} else {
+				earliest = std::min (earliest, (*ctrl_evt)->when);
+			}
 		}
 
 		for (Lists::iterator i = lists.begin(); i != lists.end(); ++i) {
