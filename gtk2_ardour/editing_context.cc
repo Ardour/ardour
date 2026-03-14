@@ -972,7 +972,7 @@ EditingContext::draw_channel_chosen (int c)
 	if (c == DRAW_CHAN_AUTO) {
 		ract = draw_channel_actions[DRAW_CHAN_AUTO];
 	} else {
-		ract = draw_channel_actions[std::max (std::min (c, 5), 0)];
+		ract = draw_channel_actions[std::max (std::min (c, 15), 0)];
 	}
 
 	if (!ract->get_active()) {
