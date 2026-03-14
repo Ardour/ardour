@@ -1533,29 +1533,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 	/* delete events get handled here */
 
-	Editing::MouseMode eff = effective_mouse_mode ();
-
-	/* In smart mode, fade handles are always in the upper half of the region,
-	 * so effective_mouse_mode() returns MouseRange for them even though
-	 * interacting with a fade is inherently an object-mode operation.
-	 * Mirror the same override used in button_press_handler so that
-	 * shift-right-click on a fade item correctly reaches the delete handler. */
-	if (get_smart_mode ()) {
-		switch (item_type) {
-		case FadeInItem:
-		case FadeInHandleItem:
-		case FadeInTrimHandleItem:
-		case FadeOutItem:
-		case FadeOutHandleItem:
-		case FadeOutTrimHandleItem:
-		case StartCrossFadeItem:
-		case EndCrossFadeItem:
-			eff = MouseObject;
-			break;
-		default:
-			break;
-		}
-	}
+	Editing::MouseMode const eff = effective_mouse_mode ();
 
 	if (!_drags->active () && Keyboard::is_delete_event (&event->button)) {
 
@@ -1589,6 +1567,11 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case FadeOutHandleItem:
 		case FadeOutTrimHandleItem:
 		case StartCrossFadeItem:
+			if (eff == MouseObject) {
+				remove_clicked_region ();
+			}
+			break;
+			
 		case EndCrossFadeItem:
 			if (eff == MouseObject) {
 				remove_clicked_region ();
