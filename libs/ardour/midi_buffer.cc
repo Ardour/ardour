@@ -31,6 +31,11 @@
 #include "ardour/midi_buffer.h"
 #include "ardour/port.h"
 
+#if defined(COMPILER_MSVC) && defined(WAF_BUILD)
+#include <basetsd.h>
+typedef SSIZE_T ssize_t;
+#endif
+
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
