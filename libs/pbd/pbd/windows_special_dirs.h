@@ -26,6 +26,10 @@
 
 #include "pbd/libpbd_visibility.h"
 
+#ifndef PATH_MAX
+#define PATH_MAX _MAX_PATH
+#endif
+
 namespace PBD {
 
 /**

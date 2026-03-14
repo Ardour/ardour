@@ -38,6 +38,10 @@
 #if defined(COMPILER_MSVC) && defined(WAF_BUILD)
 #include <basetsd.h>
 typedef SSIZE_T ssize_t;
+
+#ifndef PATH_MAX
+#define PATH_MAX _MAX_PATH
+#endif
 #endif
 
 #include "ardour/ardour.h"
