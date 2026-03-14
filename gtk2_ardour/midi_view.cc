@@ -3505,7 +3505,18 @@ MidiView::finish_resizing (NoteBase* primary, bool at_front, double delta_x, boo
 		Temporal::Beats src_beats;
 
 		if (!_on_timeline) {
-			src_beats = timepos_t (_editing_context.pixel_to_sample (current_x)).beats();
+			/* Pianoroll (not on timeline): apply snap here too, so that
+			 * the finished resize matches the snap preview shown during drag.
+			 */
+			timepos_t snapped_x;
+			if (with_snap) {
+				snapped_x = snap_pixel_to_time (current_x, ensure_snap);
+			} else {
+				snapped_x = timepos_t (_editing_context.pixel_to_sample (current_x));
+			}
+			Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
+			const timepos_t abs_beats (tmap->quarters_at (snapped_x));
+			src_beats = abs_beats.beats();
 		} else {
 
 			/* Convert the new x position to a position within the source */
