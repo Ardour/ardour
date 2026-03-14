@@ -17,6 +17,11 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
+#if defined(COMPILER_MSVC) && defined(WAF_BUILD)
+#include <winsock2.h>
+#endif
+
 #include "ardour/debug.h"
 #include "ardour/soundcloud_upload.h"
 

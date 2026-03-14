@@ -28,7 +28,12 @@
 #include "pbd/libpbd_visibility.h"
 
 #ifdef PLATFORM_WINDOWS
+
+#if defined(COMPILER_MSVC) && defined (WAF_BUILD)
+#include <winsock2.h>
+#else
 #include <windows.h>
+#endif
 #endif // PLATFORM_WINDOWS
 
 

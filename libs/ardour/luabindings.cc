@@ -21,9 +21,11 @@
  */
 
 #if defined(COMPILER_MSVC) && defined(WAF_BUILD)
+/* Both defines are needed to avoid errors, regardless of WIN32_LEAN_AND_MEAN. */
 #define NOMINMAX
 #define LIBARDOUR_DLL_EXPORTS
-/* Both defines are needed to avoid errors, regardless of WIN32_LEAN_AND_MEAN. */
+
+#include <winsock2.h>
 #endif
 
 #include <glibmm.h>
