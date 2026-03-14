@@ -17,6 +17,7 @@
  */
 
 #include "ardour/location.h"
+#include "ardour/rc_configuration.h"
 #include "ardour/session.h"
 
 #include "actions.h"
@@ -115,7 +116,13 @@ TransportControlProvider::TransportControllable::get_value () const
 		}
 		return 0.0;
 	case AutoLoop:
-		return ((_session->get_play_loop() && _session->transport_rolling())? 1.0 : 0.0);
+		/* In loop-is-mode, the button reflects the armed state regardless
+		   of whether transport is rolling. When not in loop-is-mode the old
+		   behaviour (only lit while actively looping) is preserved. */
+		if (ARDOUR::Config->get_loop_is_mode()) {
+			return (_session->get_play_loop() ? 1.0 : 0.0);
+		}
+		return ((_session->get_play_loop() && _session->transport_rolling()) ? 1.0 : 0.0);
 	case PlaySelection:
 		return ((_session->transport_rolling() && _session->get_play_range()) ? 1.0 : 0.0);
 	case RecordEnable:
