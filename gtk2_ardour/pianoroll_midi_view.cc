@@ -575,17 +575,11 @@ PianorollMidiView::unset_active_automation ()
 		return;
 	}
 
-	CueAutomationMap::size_type visible = 0;
-
 	for (auto & [param,ads] : automation_map) {
 		if (ads.line) {
 			ads.line->set_sensitive (false);
 		} else {
 			ads.velocity_display->set_sensitive (false);
-		}
-
-		if (ads.visible) {
-			visible++;
 		}
 	}
 
