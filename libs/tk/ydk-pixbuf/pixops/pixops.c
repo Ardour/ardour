@@ -1192,7 +1192,16 @@ make_filter_table (PixopsFilter *filter)
   int i_offset, j_offset;
   int n_x = filter->x.n;
   int n_y = filter->y.n;
-  int *weights = g_new (int, SUBSAMPLE * SUBSAMPLE * n_x * n_y);
+  gsize n_weights;
+  int *weights;
+
+  n_weights = SUBSAMPLE * SUBSAMPLE * n_x * n_y;
+  if (n_weights / (SUBSAMPLE * SUBSAMPLE * n_x) != n_y)
+    return NULL; /* overflow, bail */
+
+  weights = g_try_new (int, n_weights);
+  if (!weights)
+    return NULL; /* overflow, bail */
 
   for (i_offset=0; i_offset < SUBSAMPLE; i_offset++)
     for (j_offset=0; j_offset < SUBSAMPLE; j_offset++)
@@ -1267,8 +1276,11 @@ pixops_process (guchar         *dest_buf,
   if (x_step == 0 || y_step == 0)
     return; /* overflow, bail out */
 
-  line_bufs = g_new (guchar *, filter->y.n);
   filter_weights = make_filter_table (filter);
+  if (!filter_weights)
+    return; /* overflow, bail out */
+
+  line_bufs = g_new (guchar *, filter->y.n);
 
   check_shift = check_size ? get_check_shift (check_size) : 0;
 
@@ -1388,7 +1400,7 @@ tile_make_weights (PixopsFilterDimension *dim,
 		   double                 scale)
 {
   int n = ceil (1 / scale + 1);
-  double *pixel_weights = g_new (double, SUBSAMPLE * n);
+  double *pixel_weights = g_malloc_n (sizeof (double) * SUBSAMPLE, n);
   int offset;
   int i;
 
@@ -1446,7 +1458,7 @@ bilinear_magnify_make_weights (PixopsFilterDimension *dim,
     }
 
   dim->n = n;
-  dim->weights = g_new (double, SUBSAMPLE * n);
+  dim->weights = g_malloc_n (sizeof (double) * SUBSAMPLE, n);
 
   pixel_weights = dim->weights;
 
@@ -1537,7 +1549,7 @@ bilinear_box_make_weights (PixopsFilterDimension *dim,
 			   double                 scale)
 {
   int n = ceil (1/scale + 3.0);
-  double *pixel_weights = g_new (double, SUBSAMPLE * n);
+  double *pixel_weights = g_malloc_n (sizeof (double) * SUBSAMPLE, n);
   double w;
   int offset, i;
 
