@@ -50,6 +50,7 @@ namespace ArdourWidgets {
 	class MetaButton;
 }
 
+class CrossCursor;
 class PianorollMidiView;
 class PianorollMidiBackground;
 
@@ -188,6 +189,7 @@ class Pianoroll : public CueEditor
 	void session_going_away ();
 
 	void set_color_mode (ARDOUR::ColorMode);
+	void motion_track (GdkEventMotion*);
 
  private:
 	ArdourCanvas::Ruler*     bbt_ruler;
@@ -317,4 +319,6 @@ class Pianoroll : public CueEditor
 
 	void setup_colors ();
 	void update_pitch_colors ();
+
+	CrossCursor* xcursor;
 };

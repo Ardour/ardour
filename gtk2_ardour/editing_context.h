@@ -521,6 +521,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	};
 
 	virtual Gtk::Menu* get_single_region_context_menu ();
+	virtual void motion_track (GdkEventMotion*) {}
 
   protected:
 	std::string _name;

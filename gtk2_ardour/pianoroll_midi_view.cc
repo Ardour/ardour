@@ -122,6 +122,10 @@ PianorollMidiView::~PianorollMidiView ()
 bool
 PianorollMidiView::automation_group_event (GdkEvent* ev)
 {
+	if (ev->type == GDK_MOTION_NOTIFY) {
+		_editing_context.motion_track (&ev->motion);
+	}
+
 	if (!active_automation) {
 		/* Eat the event to prevent the parent seeing it */
 		return true;
@@ -133,6 +137,10 @@ bool
 PianorollMidiView::midi_canvas_group_event (GdkEvent* ev)
 {
 	EC_LOCAL_TEMPO_SCOPE_ARG (_editing_context);
+
+	if (ev->type == GDK_MOTION_NOTIFY) {
+		_editing_context.motion_track (&ev->motion);
+	}
 
 	/* Let MidiView do its thing */
 

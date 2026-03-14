@@ -42,6 +42,7 @@
 #include "widgets/tooltips.h"
 
 #include "ardour_ui.h"
+#include "cross_cursor.h"
 #include "editing_convert.h"
 #include "editor_cursors.h"
 #include "editor_drag.h"
@@ -80,6 +81,7 @@ Pianoroll::Pianoroll (std::string const & name, bool with_transport)
 	, _active_view (nullptr)
 	, bbt_metric (*this)
 	, ignore_channel_changes (false)
+	, xcursor (nullptr)
 {
 	autoscroll_vertical_allowed = false;
 
@@ -133,6 +135,7 @@ Pianoroll::~Pianoroll ()
 	drop_grid (); // unparent gridlines before deleting _canvas_viewport
 
 	delete bg;
+	delete xcursor;
 }
 
 void
@@ -765,6 +768,14 @@ Pianoroll::canvas_allocate (Gtk::Allocation alloc)
 	cursor_scroll_group->set_position (ArdourCanvas::Duple (_timeline_origin, timebar_height * n_timebars));
 	h_scroll_group->set_position (Duple (_timeline_origin, 0.));
 
+	if (!xcursor) {
+		xcursor = new CrossCursor (_canvas.root());
+		xcursor->set_line_width (5);
+		xcursor->set_outline_color (0xffffffcd);
+	}
+
+	xcursor->set_extents (_visible_canvas_width, _visible_canvas_height);
+
 	if (zoom_in_allocate) {
 
 		zoom_to_show (max_zoom_extent());
@@ -1193,10 +1204,21 @@ Pianoroll::button_release_dispatch (GdkEventButton* ev)
 	return button_bindings->activate (b, Gtkmm2ext::Bindings::Release);
 }
 
+void
+Pianoroll::motion_track (GdkEventMotion* event)
+{
+	if (xcursor) {
+		double timebars = n_timebars * timebar_height;
+		xcursor->set_position (ArdourCanvas::Duple (event->x, event->y));
+	}
+}
+
 bool
 Pianoroll::motion_handler (ArdourCanvas::Item*, GdkEvent* event, bool from_autoscroll)
 {
 	EC_LOCAL_TEMPO_SCOPE;
+
+	motion_track (&event->motion);
 
 	if (_drags->active ()) {
 		//drags change the snapped_cursor location, because we are snapping the thing being dragged, not the actual mouse cursor
