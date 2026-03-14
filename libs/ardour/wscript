@@ -412,11 +412,12 @@ def build(bld):
                         'zita-resampler',
                         'zita-convolver',
                         ]
-    if bld.env['build_target'] != 'mingw':
+    if bld.env['build_target'] not in ['mingw', 'msvc']:
         obj.uselib += ['DL']
-    elif sys.platform == "win32":
+    elif bld.env['build_target'] == 'mingw':
         obj.cxxflags += ['-Og']
-
+    else: # MSVC
+        obj.defines +=  ['NOMINMAX', '_WINSOCKAPI_']
 
     if bld.is_defined('USE_EXTERNAL_LIBS'):
         obj.uselib.extend(['VAMPSDK', 'LIBLTC', 'LIBFLUIDSYNTH'])
