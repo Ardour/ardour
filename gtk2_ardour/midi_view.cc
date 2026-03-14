@@ -530,6 +530,9 @@ MidiView::note_group_event (GdkEvent* ev)
 		_last_event_y = ev->crossing.y;
 		leave_notify (&ev->crossing);
 		break;
+
+	default:
+		break;
 	}
 	return false;
 }
