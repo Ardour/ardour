@@ -22,22 +22,19 @@
 
 using namespace ArdourCanvas;
 
-CrossCursor::CrossCursor (Canvas* canvas)
-	: _line_width (1)
-	, _width (2)
-	, _height (2)
-	, _vline (canvas)
-	, _hline (canvas)
-{
-}
-
 CrossCursor::CrossCursor (Item* parent)
 	: _line_width (1)
 	, _width (2)
 	, _height (2)
-	, _vline (parent)
-	, _hline (parent)
+	, _vline1 (parent)
+	, _vline2 (parent)
+	, _hline1 (parent)
+	, _hline2 (parent)
 {
+	_vline1.set_ignore_events (true);
+	_vline2.set_ignore_events (true);
+	_hline1.set_ignore_events (true);
+	_hline2.set_ignore_events (true);
 }
 
 void
@@ -46,49 +43,32 @@ CrossCursor::set_extents (double w, double h)
 	_width = w;
 	_height = h;
 
-	_vline.set_y1 (_vline.y0() + _height);
-	_hline.set_x1 (_vline.x0() + _width);
+	_vline1.set_y1 (_vline1.y0() + _height);
+	_vline2.set_y1 (_vline2.y0() + _height);
+	_hline1.set_x1 (_hline1.x0() + _width);
+	_hline2.set_x1 (_hline2.x0() + _width);
 }
 
 void
 CrossCursor::set_position (Duple const & pos)
 {
-	_vline.set (Duple (pos.x, 0), Duple (pos.x + _line_width, _height));
-	_hline.set (Duple (0, pos.y), Duple (_width, pos.y + _line_width));
-}
-
-void
-CrossCursor::set_fill_color (Gtkmm2ext::Color col)
-{
-	_vline.set_fill_color (col);
-	_hline.set_fill_color (col);
+	_vline1.set (Duple (pos.x, 0), Duple (pos.x, _height));
+	_vline2.set (Duple (pos.x + _line_width, 0), Duple (pos.x + _line_width, _height));
+	_hline1.set (Duple (0, pos.y), Duple (_width, pos.y));
+	_hline2.set (Duple (0, pos.y + _line_width), Duple (_width, pos.y + _line_width));
 }
 
 void
 CrossCursor::set_outline_color (Gtkmm2ext::Color col)
 {
-	_vline.set_outline_color (col);
-	_hline.set_outline_color (col);
+	_vline1.set_outline_color (col);
+	_vline2.set_outline_color (col);
+	_hline1.set_outline_color (col);
+	_hline2.set_outline_color (col);
 }
 
 void
 CrossCursor::set_line_width (double w)
 {
 	_line_width = w;
-	_vline.set_x1 (_vline.x0() + _line_width);
-	_hline.set_y1 (_vline.y0() + _line_width);
-}
-
-void
-CrossCursor::set_fill (bool yn)
-{
-	_vline.set_fill (yn);
-	_hline.set_fill (yn);
-}
-
-void
-CrossCursor::set_outline (bool yn)
-{
-	_vline.set_outline (yn);
-	_hline.set_outline (yn);
 }

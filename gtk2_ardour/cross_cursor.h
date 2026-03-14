@@ -19,6 +19,8 @@
 #pragma once
 
 #include "canvas/types.h"
+#include "canvas/line.h"
+
 #include "gtkmm2ext/colors.h"
 
 namespace ArdourCanvas {
@@ -30,7 +32,6 @@ class Line;
 class CrossCursor
 {
   public:
-	CrossCursor (ArdourCanvas::Canvas*);
 	CrossCursor (ArdourCanvas::Item*);
 
 	void set_extents (double w, double h);
@@ -38,15 +39,14 @@ class CrossCursor
 	ArdourCanvas::Duple position() const;
 	void set_position (ArdourCanvas::Duple const &);
 	void set_line_width (double);
-	void set_fill_color (Gtkmm2ext::Color);
 	void set_outline_color (Gtkmm2ext::Color);
-	void set_fill (bool);
-	void set_outline (bool);
 
   private:
 	double _line_width;
 	double _width;
 	double _height;
-	ArdourCanvas::Line _vline;
-	ArdourCanvas::Line _hline;
+	ArdourCanvas::Line _vline1;
+	ArdourCanvas::Line _vline2;
+	ArdourCanvas::Line _hline1;
+	ArdourCanvas::Line _hline2;
 };
