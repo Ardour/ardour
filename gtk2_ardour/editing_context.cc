@@ -2501,6 +2501,19 @@ EditingContext::set_common_editing_state (XMLNode const & node)
 		}
 		reset_x_origin (lf_pos);
 	}
+
+	int v;
+	if (node.get_property ("draw-velocity", v)) {
+		if (draw_velocity_actions.find (v) != draw_velocity_actions.end()) {
+			draw_velocity_actions[v]->set_active (true);
+		}
+	}
+
+	if (node.get_property ("draw-channel", v)) {
+		if (draw_channel_actions.find (v) != draw_channel_actions.end()) {
+			draw_channel_actions[v]->set_active (true);
+		}
+	}
 }
 
 void
@@ -2516,6 +2529,8 @@ EditingContext::get_common_editing_state (XMLNode& node) const
 	node.set_property ("pre-internal-grid-type", pre_internal_grid_type);
 	node.set_property ("pre-internal-snap-mode", pre_internal_snap_mode);
 	node.set_property ("left-frame", _leftmost_sample);
+	node.set_property ("draw-velocity", draw_velocity ());
+	node.set_property ("draw-channel", draw_channel ());
 }
 
 bool
