@@ -115,7 +115,6 @@ Item::Item (Item* parent, Duple const& p)
 Item::~Item ()
 {
 	DEBUG_TRACE (DEBUG::CanvasItems, string_compose ("DEL canvas item %1 %2\n", this, whoami()));
-	PBD::stacktrace (std::cerr, 19);
 
 	if (_parent) {
 		_parent->remove (this);
