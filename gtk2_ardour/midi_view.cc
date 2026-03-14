@@ -3504,33 +3504,22 @@ MidiView::finish_resizing (NoteBase* primary, bool at_front, double delta_x, boo
 
 		Temporal::Beats src_beats;
 
-		if (!_on_timeline) {
-			/* Pianoroll (not on timeline): apply snap here too, so that
-			 * the finished resize matches the snap preview shown during drag.
-			 */
-			timepos_t snapped_x;
-			if (with_snap) {
-				snapped_x = snap_pixel_to_time (current_x, ensure_snap);
-			} else {
-				snapped_x = timepos_t (_editing_context.pixel_to_sample (current_x));
-			}
-			Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
-			const timepos_t abs_beats (tmap->quarters_at (snapped_x));
-			src_beats = abs_beats.beats();
+		/* Convert the new x position to source beats.
+		 * For both pianoroll and timeline views: snap the pixel offset,
+		 * add the region position to get an absolute time, then convert
+		 * to source-relative beats.  (The pianoroll previously called
+		 * tmap->quarters_at() on a region-relative timecnt_t, which
+		 * treated the relative offset as an absolute session time and
+		 * snapped to the wrong bar grid.) */
+		timecnt_t current_time;
+
+		if (with_snap) {
+			current_time = snap_pixel_to_time (current_x, ensure_snap);
 		} else {
-
-			/* Convert the new x position to a position within the source */
-
-			timecnt_t current_time;
-
-			if (with_snap) {
-				current_time = snap_pixel_to_time (current_x, ensure_snap);
-			} else {
-				current_time = timecnt_t (_editing_context.pixel_to_sample (current_x));
-			}
-
-			src_beats = _midi_region->absolute_time_to_source_beats (_midi_region->position() + current_time);
+			current_time = timecnt_t (_editing_context.pixel_to_sample (current_x));
 		}
+
+		src_beats = _midi_region->absolute_time_to_source_beats (_midi_region->position() + current_time);
 
 		if (at_front && src_beats < canvas_note->note()->end_time()) {
 			note_diff_add_change (canvas_note, MidiModel::NoteDiffCommand::StartTime, src_beats - (snap_delta_beats * sign));
