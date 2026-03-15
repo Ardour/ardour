@@ -271,7 +271,7 @@ TimeFXDialog::get_time_fraction () const
 		return duration_ratio;
 	}
 
-	return Temporal::ratio_t (duration_adjustment.get_value(), 100);
+	return Temporal::ratio_t (duration_adjustment.get_value() * 1000.0, 100000);
 }
 
 float
@@ -309,7 +309,7 @@ TimeFXDialog::duration_adjustment_changed ()
 	}
 
 	PBD::Unwinder<bool> uw (ignore_clock_change, true);
-	timecnt_t dur = original_length.scale (Temporal::ratio_t (duration_adjustment.get_value(), 100.0));
+	timecnt_t dur = original_length.scale (Temporal::ratio_t (duration_adjustment.get_value() * 1000.0, 100000.0));
 
 	duration_clock->set_duration (dur);
 }
