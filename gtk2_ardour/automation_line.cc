@@ -1309,7 +1309,7 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 			continue;
 		}
 
-		if ((*ai)->when >= _offset + _maximum_time) {
+		if ((*ai)->when > _offset + _maximum_time) {
 			following = ai;
 			break;
 		}
