@@ -167,6 +167,9 @@ class LIBTEMPORAL_API Range {
 	timepos_t start() const { return _start; }
 	timepos_t end() const   { return _end; }
 
+	timepos_t& start() { return _start; }
+	timepos_t& end()   { return _end; }
+
 	bool operator== (Range const & other) const {
 		return other._start == _start && other._end == _end;
 	}

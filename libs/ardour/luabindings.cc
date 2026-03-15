@@ -991,9 +991,9 @@ LuaBindings::common (lua_State* L)
 
 		.beginClass <Temporal::Range> ("Range")
 		.addConstructor <void (*) (Temporal::timepos_t, Temporal::timepos_t)> ()
-		.addFunction ("start", &Temporal::Range::start)
+		.addFunction ("start", static_cast<timepos_t (Temporal::Range::*)() const>(&Temporal::Range::start))
 		/* "end is a reserved Lua word */
-		.addFunction ("_end", &Temporal::Range::end)
+		.addFunction ("_end", static_cast<timepos_t (Temporal::Range::*)() const>(&Temporal::Range::end))
 		.endClass ()
 
 		.deriveWSPtrClass <Evoral::Sequence<Temporal::Beats>, Evoral::ControlSet> ("Sequence")
@@ -1171,8 +1171,8 @@ LuaBindings::common (lua_State* L)
 		.addConstructor <void (*) (Temporal::timepos_t, Temporal::timepos_t, uint32_t)> ()
 		.addFunction ("length", &TimelineRange::length)
 		.addFunction ("equal", &TimelineRange::equal)
-		.addFunction ("start", &TimelineRange::start)
-		.addFunction ("_end", &TimelineRange::end) // XXX "end" is a lua reserved word
+		.addFunction ("start", static_cast<timepos_t (TimelineRange::*)() const>(&TimelineRange::start))
+		.addFunction ("_end", static_cast<timepos_t (TimelineRange::*)() const>(&TimelineRange::end)) // XXX "end" is a lua reserved word
 		.addData ("id", &TimelineRange::id)
 		.endClass ()
 
