@@ -3240,6 +3240,17 @@ MidiView::start() const
 double
 MidiView::snap_to_pixel(double x, bool ensure_snap)
 {
+	if (!_on_timeline) {
+		/* Pianoroll: pixel 0 == beat 0 in the local tempo map.
+		 * Snap the local-space sample position directly; do not add
+		 * the region's session-absolute offset (snap_pixel_to_time
+		 * does that via snap_relative_time_to_relative_time), which
+		 * would mis-align the snap grid by the clip's fractional beat
+		 * position whenever the clip is not on a beat boundary. */
+		timepos_t pos (_editing_context.pixel_to_sample (x));
+		_editing_context.snap_to (pos, Temporal::RoundNearest, SnapToAny_Visual, ensure_snap);
+		return (double) _editing_context.sample_to_pixel (pos.samples());
+	}
 	return (double) _editing_context.sample_to_pixel (snap_pixel_to_time(x, ensure_snap).samples());
 }
 
@@ -3386,10 +3397,25 @@ MidiView::update_resizing (NoteBase* primary, bool at_front, double delta_x, boo
 
 			timepos_t snapped_x;
 
-			if (with_snap) {
-				snapped_x = snap_pixel_to_time (current_x, ensure_snap); /* units depend on snap settings */
+			if (!_on_timeline) {
+				/* In the pianoroll, pixel 0 == sample 0 == beat 0 in
+				 * the clip-local tempo map.  We must snap the raw
+				 * pixel position directly in that local space without
+				 * adding the region's session-absolute offset, because
+				 * adding it would shift the snap grid by the fractional
+				 * beat offset of the clip's start position, causing
+				 * snapping to land on wrong beats whenever the clip is
+				 * not placed on a beat boundary. */
+				snapped_x = timepos_t (_editing_context.pixel_to_sample (current_x));
+				if (with_snap) {
+					_editing_context.snap_to (snapped_x, Temporal::RoundNearest, SnapToAny_Visual, ensure_snap);
+				}
 			} else {
-				snapped_x = timepos_t (_editing_context.pixel_to_sample (current_x)); /* probably samples */
+				if (with_snap) {
+					snapped_x = snap_pixel_to_time (current_x, ensure_snap); /* units depend on snap settings */
+				} else {
+					snapped_x = timepos_t (_editing_context.pixel_to_sample (current_x)); /* probably samples */
+				}
 			}
 
 			Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
@@ -3448,6 +3474,17 @@ MidiView::finish_resizing (NoteBase* primary, bool at_front, double delta_x, boo
 		return;
 	}
 
+	/* Swap in the editing context's local tempo map for the duration of
+	 * this function.  The pianoroll uses a clip-relative tempo map
+	 * (beat 0 = sample 0) so that all tmap->quarters_at() and
+	 * sample<->beat conversions operate in pianoroll space.  Without
+	 * this scope the global session tempo map would be active and note
+	 * positions would snap to wrong absolute bar positions on the
+	 * timeline.  This mirrors the implicit scoping that update_resizing()
+	 * relies on through its callees (snap_pixel_to_time →
+	 * snap_relative_time_to_relative_time). */
+	EC_LOCAL_TEMPO_SCOPE_ARG (_editing_context);
+
 	_note_diff_command = _model->new_note_diff_command (_("resize notes"));  /* we are a subcommand, so we don't want to use start_note_diff() which begins a new command */
 
 	/* XX why doesn't snap_pixel_to_sample() handle this properly? */
@@ -3504,21 +3541,35 @@ MidiView::finish_resizing (NoteBase* primary, bool at_front, double delta_x, boo
 
 		Temporal::Beats src_beats;
 
+		timepos_t snapped_x;
+
 		if (!_on_timeline) {
-			src_beats = timepos_t (_editing_context.pixel_to_sample (current_x)).beats();
-		} else {
-
-			/* Convert the new x position to a position within the source */
-
-			timecnt_t current_time;
-
+			/* In the pianoroll, pixel 0 == sample 0 == beat 0 in the
+			 * clip-local tempo map.  Snap the raw pixel position
+			 * directly in local space — do NOT add the region's
+			 * session-absolute offset via snap_pixel_to_time(), as
+			 * that would shift the snap grid by the fractional beat
+			 * offset of the clip's placement, causing wrong snapping
+			 * whenever the clip does not start on a beat boundary. */
+			snapped_x = timepos_t (_editing_context.pixel_to_sample (current_x));
 			if (with_snap) {
-				current_time = snap_pixel_to_time (current_x, ensure_snap);
-			} else {
-				current_time = timecnt_t (_editing_context.pixel_to_sample (current_x));
+				_editing_context.snap_to (snapped_x, Temporal::RoundNearest, SnapToAny_Visual, ensure_snap);
 			}
+		} else {
+			if (with_snap) {
+				snapped_x = snap_pixel_to_time (current_x, ensure_snap);
+			} else {
+				snapped_x = timepos_t (_editing_context.pixel_to_sample (current_x));
+			}
+		}
 
-			src_beats = _midi_region->absolute_time_to_source_beats (_midi_region->position() + current_time);
+		Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
+		const timepos_t abs_beats (tmap->quarters_at (snapped_x));
+
+		if (!_on_timeline) {
+			src_beats = abs_beats.beats ();
+		} else {
+			src_beats = _midi_region->absolute_time_to_source_beats (abs_beats);
 		}
 
 		if (at_front && src_beats < canvas_note->note()->end_time()) {
