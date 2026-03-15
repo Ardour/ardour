@@ -1,0 +1,25 @@
+#!/usr/bin/env python
+import os
+
+def options(opt):
+    pass
+
+def configure(conf):
+    pass
+
+def build(bld):
+    obj = bld(features = 'cxx cxxshlib')
+    obj.source = '''
+            interface.cc
+            mcp_http.cc
+            mcp_http_gui.cc
+            mcp_http_server.cc
+    '''
+    obj.defines      = [ 'PACKAGE="ardour_mcp_http"' ]
+    obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
+    obj.includes     = ['.', './mcp_http']
+    obj.name         = 'libardour_mcp_http'
+    obj.target       = 'ardour_mcp_http'
+    obj.uselib       = 'GLIBMM GIOMM PANGOMM XML WEBSOCKETS OPENSSL'
+    obj.use          = 'libardour libardour_cp libgtkmm2ext libpbd libytkmm'
+    obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
