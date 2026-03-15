@@ -1724,7 +1724,6 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 		assert (smf);
 		lowest_note = smf->model()->lowest_note();
 		highest_note = smf->model()->highest_note();
-		std::cerr << "Note range from one: " << (int) lowest_note << " .. " << (int) highest_note << std::endl;
 	} else {
 		lowest_note = 127;
 		highest_note = 0;
@@ -1735,9 +1734,7 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 			lowest_note = std::min (lowest_note, smf->model()->lowest_note());
 			highest_note = std::max (highest_note, smf->model()->highest_note());
 		}
-		std::cerr << "Note range from " << region_view_map.size() << ' ' << (int) lowest_note << " .. " << (int) highest_note << std::endl;
 	}
-
 
 	(void) bg->update_data_note_range (lowest_note, highest_note);
 	bg->apply_note_range (lowest_note, highest_note, true, MidiViewBackground::RangeCanMove (MidiViewBackground::CanMoveTop|MidiViewBackground::CanMoveBottom));
