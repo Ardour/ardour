@@ -142,6 +142,8 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner
 	virtual void shift_contents (Temporal::timepos_t const &, bool model_too) {}
 	virtual Temporal::timepos_t source_to_timeline (Temporal::timepos_t const & source_pos) const { return source_pos; }
 
+	void set_horizontal_position (double);
+
   protected:
 	ArdourCanvas::GtkCanvasViewport _canvas_viewport;
 	ArdourCanvas::GtkCanvas& _canvas;
@@ -266,7 +268,7 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner
 	virtual void unset_trigger ();
 
 	RegionUISettings region_ui_settings;
-	void maybe_set_from_rsu ();
+	bool maybe_set_from_rsu ();
 	virtual void set_from_rsu (RegionUISettings&);
 
 	void metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>&, samplepos_t, samplepos_t, gint);

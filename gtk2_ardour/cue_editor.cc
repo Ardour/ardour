@@ -1454,7 +1454,7 @@ CueEditor::unset_trigger ()
 	unset_region ();
 }
 
-void
+bool
 CueEditor::maybe_set_from_rsu ()
 {
 	EC_LOCAL_TEMPO_SCOPE;
@@ -1462,7 +1462,10 @@ CueEditor::maybe_set_from_rsu ()
 	RegionUISettingsManager::iterator rsu = ARDOUR_UI::instance()->region_ui_settings_manager.find (_region->id());
 	if (rsu != ARDOUR_UI::instance()->region_ui_settings_manager.end()) {
 		set_from_rsu (rsu->second);
+		return true;
 	}
+
+	return false;
 }
 
 void
@@ -2094,4 +2097,13 @@ CueEditor::set_end (Temporal::timepos_t const & p)
 	r->trim_end (_region->source_position() + p);
 	add_command (new PBD::StatefulDiffCommand (r));
 	commit_reversible_command ();
+}
+
+void
+CueEditor::set_horizontal_position (double pos)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	EditingContext::set_horizontal_position (pos);
+	instant_save ();
 }

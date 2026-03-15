@@ -436,7 +436,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 
 	bool typed_event (ArdourCanvas::Item*, GdkEvent*, ItemType);
 
-	void set_horizontal_position (double);
+	virtual void set_horizontal_position (double);
 	double horizontal_position () const;
 
 	virtual samplecnt_t current_page_samples() const = 0;

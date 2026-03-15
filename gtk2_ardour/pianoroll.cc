@@ -778,7 +778,9 @@ Pianoroll::canvas_allocate (Gtk::Allocation alloc)
 
 	if (zoom_in_allocate) {
 
-		zoom_to_show (max_zoom_extent());
+		if (!maybe_set_from_rsu()) {
+			zoom_to_show (max_zoom_extent());
+		}
 		if (_region) {
 			/* XXXX */
 		}
@@ -845,6 +847,8 @@ Pianoroll::set_samples_per_pixel (samplecnt_t spp)
 	horizontal_adjustment.set_page_size (current_page_samples()/ samples_per_pixel / 10);
 	horizontal_adjustment.set_page_increment (current_page_samples()/ samples_per_pixel / 20);
 	horizontal_adjustment.set_step_increment (current_page_samples() / samples_per_pixel / 100);
+
+	instant_save ();
 }
 
 samplecnt_t
@@ -1712,11 +1716,6 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 
 	set_visible_channel (_active_view->pick_visible_channel());
 
-	/* Compute zoom level to show entire source plus some margin if possible */
-
-	zoom_to_show (max_zoom_extent());
-
-
 	uint8_t lowest_note;
 	uint8_t highest_note;
 
@@ -1743,7 +1742,10 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 	(void) bg->update_data_note_range (lowest_note, highest_note);
 	bg->apply_note_range (lowest_note, highest_note, true, MidiViewBackground::RangeCanMove (MidiViewBackground::CanMoveTop|MidiViewBackground::CanMoveBottom));
 
-	maybe_set_from_rsu ();
+	if (!maybe_set_from_rsu ()) {
+		/* Compute zoom level to show entire source plus some margin if possible */
+		zoom_to_show (max_zoom_extent());
+	}
 
 	if (r->source()->empty()) {
 		std::shared_ptr<MidiTrack> mt (std::dynamic_pointer_cast<ARDOUR::MidiTrack> (_track));
