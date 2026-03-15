@@ -1077,15 +1077,12 @@ def configure(conf):
         #conf.env.append_value('LINKFLAGS_OSX', "-sysroot /Developer/SDKs/MacOSX10.4u.sdk")
         #conf.env.append_value('LINKFLAGS_OSX', "-sysroot /Developer/SDKs/MacOSX10.4u.sdk")
 
-        conf.env.append_value('CXXFLAGS_OSX', "-msse")
-        conf.env.append_value('CFLAGS_OSX', "-msse")
-        conf.env.append_value('CXXFLAGS_OSX', "-msse2")
-        conf.env.append_value('CFLAGS_OSX', "-msse2")
-        #
-        #       TODO: The previous sse flags NEED to be based
-        #       off processor type.  Need to add in a check
-        #       for that.
-        #
+        if not Options.options.arm64 and PLATFORM.uname()[4] not in ['arm64', 'aarch64']:
+            conf.env.append_value('CXXFLAGS_OSX', "-msse")
+            conf.env.append_value('CFLAGS_OSX', "-msse")
+            conf.env.append_value('CXXFLAGS_OSX', "-msse2")
+            conf.env.append_value('CFLAGS_OSX', "-msse2")
+
         conf.env.append_value('LINKFLAGS_OSX', ['-framework', 'AppKit'])
         conf.env.append_value('LINKFLAGS_OSX', ['-framework', 'CoreAudio'])
         conf.env.append_value('LINKFLAGS_OSX', ['-framework', 'CoreAudioKit'])
