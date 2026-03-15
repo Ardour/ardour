@@ -1963,7 +1963,8 @@ MidiView::update_sustained (Note* ev)
 void
 MidiView::color_note (NoteBase* ev, int channel)
 {
-	uint32_t base_color = NoteBase::base_color (ev->note()->note(), ev->note()->velocity(), ChannelColors, 0, channel, ev->selected());
+	uint32_t base_color = NoteBase::base_color (ev->note()->note(), ev->note()->velocity(),
+	                                            _midi_context.color_mode(), 0, channel, ev->selected());
 
 	if (!note_editable (ev)) {
 		base_color = Gtkmm2ext::change_alpha (base_color, 0.15);
