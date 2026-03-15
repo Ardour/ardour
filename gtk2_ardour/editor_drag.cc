@@ -1994,8 +1994,8 @@ RegionMoveDrag::finished_no_copy (
 
 		/* compute full extent of regions that we're going to insert */
 
-		if (rv->region ()->position () < extent_min) {
-			extent_min = rv->region ()->position ();
+		if (where < extent_min) {
+			extent_min = where;
 		}
 
 		if (changed_tracks) {
