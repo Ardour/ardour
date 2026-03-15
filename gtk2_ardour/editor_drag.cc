@@ -1987,6 +1987,7 @@ RegionMoveDrag::finished_no_copy (
 
 		if (changed_position && !_x_constrained) {
 			where = rv->region ()->position ().earlier (drag_delta);
+			where.set_time_domain (_last_position.time_domain ());
 		} else {
 			where = rv->region ()->position ();
 		}
