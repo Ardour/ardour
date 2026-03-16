@@ -798,18 +798,24 @@ SMF::load_markers ()
 					name = "Cue Point:";
 					allow_empty = true;
 					break;
-				case 0x01: // "Text:"
-					[[fallthrough]];
-				case 0x02: // "Copyright:"
-					[[fallthrough]];
-				case 0x03: // "Sequence/Track Name:"
-					[[fallthrough]];
-				case 0x04: // "Instrument:"
-					[[fallthrough]];
-				case 0x08: // "Program Name:"
-					[[fallthrough]];
-				case 0x09: // "Device (Port) Name:"
-					[[fallthrough]];
+				case 0x01:
+					name = "Text:";
+					break;
+				case 0x02:
+					name = "Copyright:";
+					break;
+				case 0x03:
+					name = "Track Name:";
+					break;
+				case 0x04:
+					name = "Instrument:";
+					break;
+				case 0x08:
+					name = "Program Name:";
+					break;
+				case 0x09:
+					name = "Device Name:";
+					break;
 				default:
 					continue;
 			}
