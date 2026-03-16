@@ -611,6 +611,12 @@ SMFSource::get_state () const
 {
 	XMLNode& node = MidiSource::get_state();
 	node.set_property (X_("origin"), _origin);
+	if (!_smf_track_name.empty()) {
+		node.set_property (X_("smf-track-name"), _smf_track_name);
+	}
+	if (!_smf_instrument_name.empty()) {
+		node.set_property (X_("smf-instrument-name"), _smf_instrument_name);
+	}
 	return node;
 }
 
@@ -627,6 +633,16 @@ SMFSource::set_state (const XMLNode& node, int version)
 
 	if (FileSource::set_state (node, version)) {
 		return -1;
+	}
+
+	{
+		std::string str;
+		if (node.get_property (X_("smf-track-name"), str)) {
+			_smf_track_name = str;
+		}
+		if (node.get_property (X_("smf-instrument-name"), str)) {
+			_smf_instrument_name = str;
+		}
 	}
 
 	return 0;
@@ -764,6 +780,15 @@ SMFSource::load_model_unlocked (bool force_reload)
 	// TODO simplify event allocation
 	std::list< std::pair< Evoral::Event<Temporal::Beats>*, gint > > eventlist;
 
+	/* Capture track-level metadata populated by libsmf from 0x03/0x04 meta events */
+	{
+		std::vector<std::string> tnames, inames;
+		track_names (tnames);
+		instrument_names (inames);
+		_smf_track_name      = tnames.empty()  ? "" : tnames.front();
+		_smf_instrument_name = inames.empty()  ? "" : inames.front();
+	}
+
 	for (unsigned i = 1; i <= num_tracks(); ++i) {
 		if (seek_to_track(i)) {
 			continue;
@@ -777,9 +802,28 @@ SMFSource::load_model_unlocked (bool force_reload)
 			time += delta_t;
 
 			if (ret == 0) {
-				/* meta-event : did we get an event ID ?  */
+				/* meta-event : did we get an Ardour note ID ?  */
 				if (event_id >= 0) {
 					have_event_id = true;
+				}
+				/* Route text meta events (types 0x01-0x09: Text, Copyright,
+				   Track Name, Instrument Name, Lyric, Marker, Cue Point,
+				   Program Name, Device Name) into the model so they survive
+				   the load -> save -> reload cycle.
+				   All other meta types are skipped here:
+				    0x51/0x58/0x59 are handled by the TempoMap,
+				    0x2F (End of Track) is structural,
+				    0x7F (Sequencer-Specific) carries Ardour note IDs.
+				*/
+				if (size >= 2 && buf[1] >= 0x01 && buf[1] <= 0x09) {
+					const Temporal::Beats event_time = Temporal::Beats::ticks_at_rate (time, ppqn());
+					eventlist.push_back (make_pair (
+						new Evoral::Event<Temporal::Beats> (
+							Evoral::MIDI_EVENT, event_time,
+							size, buf, true),
+						Evoral::next_event_id()));
+					scratch_size = std::max (size, scratch_size);
+					size = scratch_size;
 				}
 				continue;
 			}
