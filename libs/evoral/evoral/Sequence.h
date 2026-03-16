@@ -116,7 +116,7 @@ public:
 	const TypeMap& type_map() const { return _type_map; }
 
 	inline size_t n_notes() const { return _notes.size(); }
-	inline bool   empty()   const { return _notes.empty() && _sysexes.empty() && _patch_changes.empty() && ControlSet::controls_empty(); }
+	inline bool   empty()   const { return _notes.empty() && _sysexes.empty() && _meta_events.empty() && _patch_changes.empty() && ControlSet::controls_empty(); }
 
 	inline static bool note_time_comparator(const std::shared_ptr< const Note<Time> >& a,
 	                                        const std::shared_ptr< const Note<Time> >& b) {
@@ -208,6 +208,10 @@ public:
 	inline       SysExes& sysexes()       { return _sysexes; }
 	inline const SysExes& sysexes() const { return _sysexes; }
 
+	typedef std::multiset<SysExPtr, EarlierSysExComparator> MetaEvents;
+	inline       MetaEvents& meta_events()       { return _meta_events; }
+	inline const MetaEvents& meta_events() const { return _meta_events; }
+
 	typedef std::shared_ptr<PatchChange<Time> > PatchChangePtr;
 	typedef std::shared_ptr<const PatchChange<Time> > constPatchChangePtr;
 
@@ -258,7 +262,7 @@ public:
 		void set_event();
 
 		typedef std::vector<ControlIterator> ControlIterators;
-		enum MIDIMessageType { NIL, NOTE_ON, NOTE_OFF, CONTROL, SYSEX, PATCH_CHANGE };
+		enum MIDIMessageType { NIL, NOTE_ON, NOTE_OFF, CONTROL, SYSEX, META_EVENT, PATCH_CHANGE };
 
 		const Sequence<Time>*                 _seq;
 		std::shared_ptr< Event<Time> >      _event;
@@ -272,6 +276,7 @@ public:
 		typename Sequence::ReadLock           _lock;
 		typename Notes::const_iterator        _note_iter;
 		typename SysExes::const_iterator      _sysex_iter;
+		typename MetaEvents::const_iterator   _meta_event_iter;
 		typename PatchChanges::const_iterator _patch_change_iter;
 		ControlIterators                      _control_iters;
 		ControlIterators::iterator            _control_iter;
@@ -353,6 +358,7 @@ private:
 	void append_note_off_unlocked(const Event<Time>& event);
 	void append_control_unlocked(const Parameter& param, Time time, double value, Evoral::event_id_t);
 	void append_sysex_unlocked(const Event<Time>& ev, Evoral::event_id_t);
+	void append_meta_event_unlocked(const Event<Time>& ev, Evoral::event_id_t);
 	void append_patch_change_unlocked(const PatchChange<Time>&, Evoral::event_id_t);
 
 	void get_notes_by_pitch (Notes&, NoteOperator, uint8_t val, int chan_mask = 0) const;
@@ -363,6 +369,7 @@ private:
 	Notes        _notes;       // notes indexed by time
 	Pitches      _pitches[16]; // notes indexed by channel+pitch
 	SysExes      _sysexes;
+	MetaEvents   _meta_events;
 	PatchChanges _patch_changes;
 
 	typedef std::multiset<NotePtr, EarlierNoteComparator> WriteNotes;

@@ -258,6 +258,12 @@ MidiSource::midi_read (const ReaderLock&                  lm,
 
 			/* in range */
 
+			/* Meta events (0xFF) are model-only metadata; never send them
+			   to MIDI output or the RT buffer. */
+			if (i->is_smf_meta_event()) {
+				continue;
+			}
+
 			timepos_t seb = timepos_t (session_event_beats);
 			samplepos_t time_samples = seb.samples();
 
