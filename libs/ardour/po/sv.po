@@ -52,6 +52,8 @@ msgid ""
 "Failed to open audio device\n"
 "(Typically caused by hardware parameter settings)"
 msgstr ""
+"Det gick inte att öppna ljudenheten\n"
+"(Orsakas vanligtvis av inställningar för hårdvaruparametrar)"
 "Det gick inte att öppna ljudenheten (orsakas vanligtvis av inställningar för "
 "hårdvaruparametrar)"
 
@@ -237,6 +239,7 @@ msgid ""
 "programming error: port %1 could not be placed on the pending deletion "
 "queue\n"
 msgstr ""
+"programmeringsfel: port %1 kunde inte placeras i kön för väntande radering\n"
 "programmeringsfel: port %1 kunde inte placeras i kön för väntande radering\n"
 
 #: audioregion.cc:2232
@@ -1247,7 +1250,7 @@ msgstr "R"
 
 #: io_plug.cc:87 io_plug.cc:419 io_plug.cc:424 io_plug.cc:429 io_plug.cc:434
 msgid "IO"
-msgstr ""
+msgstr "IO"
 
 #: io_plug.cc:87
 msgid "IO|Pre"
@@ -3514,87 +3517,87 @@ msgstr "Kan inte initialisera transportmasterhanteraren"
 
 #: triggerbox.cc:151
 msgid "A"
-msgstr ""
+msgstr "A"
 
 #: triggerbox.cc:152
 msgid "B"
-msgstr ""
+msgstr "B"
 
 #: triggerbox.cc:155
 msgid "E"
-msgstr ""
+msgstr "E"
 
 #: triggerbox.cc:156
 msgid "F"
-msgstr ""
+msgstr "F"
 
 #: triggerbox.cc:157
 msgid "G"
-msgstr ""
+msgstr "G"
 
 #: triggerbox.cc:158
 msgid "H"
-msgstr ""
+msgstr "H"
 
 #: triggerbox.cc:160
 msgid "J"
-msgstr ""
+msgstr "J"
 
 #: triggerbox.cc:161
 msgid "K"
-msgstr ""
+msgstr "K"
 
 #: triggerbox.cc:163
 msgid "M"
-msgstr ""
+msgstr "M"
 
 #: triggerbox.cc:164
 msgid "N"
-msgstr ""
+msgstr "N"
 
 #: triggerbox.cc:165
 msgid "O"
-msgstr ""
+msgstr "O"
 
 #: triggerbox.cc:166
 msgid "P"
-msgstr ""
+msgstr "P"
 
 #: triggerbox.cc:167
 msgid "Q"
-msgstr ""
+msgstr "Q"
 
 #: triggerbox.cc:169
 msgid "S"
-msgstr ""
+msgstr "S"
 
 #: triggerbox.cc:170
 msgid "T"
-msgstr ""
+msgstr "T"
 
 #: triggerbox.cc:171
 msgid "U"
-msgstr ""
+msgstr "U"
 
 #: triggerbox.cc:172
 msgid "V"
-msgstr ""
+msgstr "V"
 
 #: triggerbox.cc:173
 msgid "W"
-msgstr ""
+msgstr "W"
 
 #: triggerbox.cc:174
 msgid "X"
-msgstr ""
+msgstr "X"
 
 #: triggerbox.cc:175
 msgid "Y"
-msgstr ""
+msgstr "Y"
 
 #: triggerbox.cc:176
 msgid "Z"
-msgstr ""
+msgstr "Z"
 
 #: triggerbox.cc:2037
 msgid "Could not configure rubberband stretcher"

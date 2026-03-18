@@ -3052,7 +3052,7 @@ msgstr ""
 
 #: ardour_ui_startup.cc:537
 msgid "%1: Unrecoverable Error"
-msgstr ""
+msgstr "%1: Oåterkalleligt fel"
 
 #: ardour_ui_startup.cc:737 new_user_wizard.cc:344
 msgid "%1 is ready for use"
@@ -3281,11 +3281,11 @@ msgstr "BPM:"
 
 #: audio_trigger_properties_box.cc:83
 msgid "/2"
-msgstr ""
+msgstr "/2"
 
 #: audio_trigger_properties_box.cc:86
 msgid "x2"
-msgstr ""
+msgstr "x2"
 
 #: audio_trigger_properties_box.cc:119 add_video_dialog.cc:159
 msgid "Start:"
@@ -10904,6 +10904,8 @@ msgid ""
 "%1 is a digital audio workstation, used for multitrack recording, nonlinear, "
 "nondestructive editing and much more."
 msgstr ""
+"%1 är en digital ljudarbetsstation som används för flerspårinspelning, "
+"olinjär, oförstörande redigering och mycket mer."
 
 #: opts.cc:70
 msgid "Options:\n"
@@ -14635,11 +14637,11 @@ msgstr "Begränsa samtidiga RTA-spektra"
 
 #: rc_option_editor.cc:4922
 msgid "8"
-msgstr ""
+msgstr "8"
 
 #: rc_option_editor.cc:4923
 msgid "12"
-msgstr ""
+msgstr "12"
 
 #: rc_option_editor.cc:4924
 msgid "16 (fast CPUs)"
@@ -14689,7 +14691,7 @@ msgstr "Lägst (förhindrar CPU-sömntillstånd)"
 
 #: rc_option_editor.cc:4996
 msgid "%1 usec"
-msgstr ""
+msgstr "%1 usek"
 
 #: rc_option_editor.cc:4999
 msgid ""
@@ -16793,7 +16795,7 @@ msgstr "Öppna den mapp där filerna exporteras"
 
 #: simple_export_dialog.cc:205
 msgid "%1 - %2"
-msgstr ""
+msgstr "%1 - %2"
 
 #: simple_export_dialog.cc:282
 msgid "Error: ADM BWF files timecode cannot be past 24h."
@@ -17938,11 +17940,11 @@ msgstr "Redigera sökväg för provbibliotek"
 
 #: trigger_clip_picker.cc:374
 msgid "%1 Bundled Content"
-msgstr ""
+msgstr "%1 medföljandeinnehåll"
 
 #: trigger_clip_picker.cc:521
 msgid "%1 (%2 Tracks, only the first track will be used)"
-msgstr ""
+msgstr "%1 (%2 spår, endast första spåret kommer att användas)"
 
 #: trigger_clip_picker.cc:527
 msgid ", with pgms"
