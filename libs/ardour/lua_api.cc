@@ -1184,6 +1184,28 @@ LuaAPI::patch_change_list (std::shared_ptr<MidiModel> mm)
 	return patch_change_ptr_list;
 }
 
+std::list<std::shared_ptr<Evoral::Event<Temporal::Beats> > >
+LuaAPI::meta_event_list (std::shared_ptr<MidiModel> mm)
+{
+	typedef std::shared_ptr<Evoral::Event<Temporal::Beats> > EventPtr;
+
+	std::list<EventPtr> event_ptr_list;
+
+	for (auto const& i : mm->meta_events ()) {
+		event_ptr_list.push_back (i);
+	}
+	return event_ptr_list;
+}
+
+std::string
+LuaAPI::event_buffer (std::shared_ptr<Evoral::Event<Temporal::Beats> > ev)
+{
+	if (!ev || ev->size () == 0) {
+		return std::string ();
+	}
+	return std::string (reinterpret_cast<const char*> (ev->buffer ()), ev->size ());
+}
+
 /* ****************************************************************************/
 
 const samplecnt_t LuaAPI::Rubberband::_bufsize = 256;
