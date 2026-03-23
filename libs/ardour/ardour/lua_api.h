@@ -435,6 +435,13 @@ namespace ARDOUR { namespace LuaAPI {
 	std::list<std::shared_ptr< Evoral::PatchChange<Temporal::Beats> > >
 		patch_change_list (std::shared_ptr<ARDOUR::MidiModel>);
 
+	std::list<std::shared_ptr< Evoral::Event<Temporal::Beats> > >
+		meta_event_list (std::shared_ptr<ARDOUR::MidiModel>);
+
+	/** Return the raw buffer of an EventPtr as a Lua binary string.
+	 *  This makes the meta-event (or sysex) payload accessible from Lua,
+	 *  working around the commented-out EventPtr.buffer() binding. */
+	std::string event_buffer (std::shared_ptr<Evoral::Event<Temporal::Beats> >);
 
 } } /* namespace */
 
