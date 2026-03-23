@@ -506,10 +506,17 @@ function factory () return function ()
   end
 
   -- Format the file-parsed meta-event section for one MIDI file.
-  local function format_file_section (label, path)
-    local out = "======================================================\n"
-             .. label .. "\n"
-             .. "File   : " .. path .. "\n"
+  -- If header_label is provided, a separator banner and file path are
+  -- printed first (used for standalone "External file" output).
+  -- If omitted, only the "File :" line and meta events are shown
+  -- (used when appending to an existing region section).
+  local function format_file_section (path, header_label)
+    local out = ""
+    if header_label then
+      out = out .. "======================================================\n"
+               .. header_label .. "\n"
+    end
+    out = out .. "File   : " .. path .. "\n"
     local events, ppqn = safe_parse (path)
     if events == nil then
       return out .. "  Error: " .. (ppqn or "?") .. "\n\n"
@@ -530,7 +537,7 @@ function factory () return function ()
   ---------------------------------------------------------------------------
   -- Format model-based meta events for one MIDI region
   ---------------------------------------------------------------------------
-  -- This uses the Lua API added in Phase 1/4:
+  -- This uses the Lua API functions:
   --   ARDOUR.LuaAPI.meta_event_list(model) → list of EventPtr
   --   ARDOUR.LuaAPI.event_buffer(event)    → raw buffer as Lua string
   --
@@ -642,7 +649,7 @@ function factory () return function ()
 
   -- Extra file first (if supplied).
   if extra_path then
-    output = output .. format_file_section ("External file", extra_path)
+    output = output .. format_file_section (extra_path, "External file")
   end
 
   -- Session regions.
@@ -650,20 +657,13 @@ function factory () return function ()
     local mr   = r:to_midiregion ()
     local path = region_paths[r:name ()]
 
-    if not path then
-      output = output
-        .. "======================================================\n"
-        .. "Region : " .. r:name () .. "\n"
-        .. "  (source file not found in session XML)\n\n"
-      goto continue
-    end
+    local section = "======================================================\n"
+                 .. "Region : " .. r:name () .. "\n"
 
-    -- Start with the raw-file section (parses all meta events from disk).
-    local section = format_file_section ("Region : " .. r:name (), path)
-
-    -- Augment with model-based info: note count and patch changes.
-    -- These come from Ardour's in-memory MidiModel, not from re-parsing
-    -- the file — so they reflect any edits made in the session.
+    -- Model-based info is always available (it lives in memory, not on
+    -- disk), so we show it regardless of whether the file path is known.
+    -- This ensures the script is useful immediately after import, before
+    -- the session has been saved.
     local mm         = mr:midi_source (0):model ()
     local note_count = 0
     for _ in ARDOUR.LuaAPI.note_list (mm):iter () do
@@ -673,32 +673,39 @@ function factory () return function ()
     local pc_count   = 0
     for _ in patch_list:iter () do pc_count = pc_count + 1 end
 
-    local model_line = string.format (
+    section = section .. string.format (
       "Notes  : %d  |  Patch changes: %d\n", note_count, pc_count)
 
-    -- Insert the model summary line right after the "PPQN" line.
-    section = section:gsub ("(PPQN.-\n)", "%1" .. model_line, 1)
-
-    -- Add patch change details if any.
+    -- Patch change details (from the model).
     if pc_count > 0 then
-      local pc_text = "\n-- Patch Changes (from Ardour model) --\n"
+      section = section .. "\n-- Patch Changes (from Ardour model) --\n"
       for pc in patch_list:iter () do
         local t = pc:time ()
-        pc_text = pc_text .. string.format (
+        section = section .. string.format (
           "  beat %d + %d  ->  Bank %d, Program %d\n",
           t:get_beats (), t:get_ticks (), pc:bank (), pc:program ())
       end
-      section = section:gsub ("(\n%-%- Meta Events)", pc_text .. "%1", 1)
     end
 
-    -- Add model-based meta events (text types that survived import).
-    local model_meta_text, model_meta_count = format_model_meta_events (mr)
-    section = section:gsub ("(\n%-%- Meta Events %(from raw)",
-      model_meta_text .. "%1", 1)
+    -- Model-based meta events (text types 0x01–0x09 that survived import).
+    local model_meta_text = format_model_meta_events (mr)
+    section = section .. model_meta_text
 
-    output = output .. section
+    -- Raw SMF file section: only available when we can resolve the file
+    -- path from the session XML.  Before the first save, the session XML
+    -- on disk is stale and won't contain newly imported regions.
+    section = section
+      .. "\n(Note: SMF file content reflects the last save;"
+      .. " save the session to update.)\n"
+    if path then
+      section = section .. format_file_section (path)
+    else
+      section = section
+        .. "\n-- Meta Events (from raw SMF file) --\n"
+        .. "  (file path not yet in session XML — save session first)\n"
+    end
 
-    ::continue::
+    output = output .. section .. "\n"
   end
 
   ---------------------------------------------------------------------------
