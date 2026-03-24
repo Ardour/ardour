@@ -814,17 +814,8 @@ SMFSource::load_model_unlocked (bool force_reload)
 				    0x51/0x58/0x59 are handled by the TempoMap,
 				    0x2F (End of Track) is structural,
 				    0x7F (Sequencer-Specific) carries Ardour note IDs.
-
-				   read_event() sets size to the actual event data
-				   length for non-0x7F meta events.  For 0x7F events
-				   (Ardour note IDs, unknown sequencer-specific), it
-				   does NOT update size, so we must guard with
-				   buf[0] == 0xFF to avoid using stale buffer data
-				   with an inflated scratch_size.
 				*/
 				if (size >= 2 && buf[0] == 0xFF && buf[1] >= 0x01 && buf[1] <= 0x09) {
-					/* size here is the actual event length set by
-					   read_event(), not the scratch buffer capacity */
 					const Temporal::Beats event_time = Temporal::Beats::ticks_at_rate (time, ppqn());
 					eventlist.push_back (make_pair (
 						new Evoral::Event<Temporal::Beats> (

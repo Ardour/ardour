@@ -358,16 +358,9 @@ SMF::read_event(uint32_t* delta_t, uint32_t* bufsize, uint8_t** buf, event_id_t*
 
 						if (smf_extract_vlq (&event->midi_buffer[4+lenlen], event->midi_buffer_length-(4+lenlen), &id, &idlen) == 0) {
 							*note_id = id;
-							return 0;
 						}
 					}
 				}
-
-				/* We do not return sequencer-specific events
-				 * that are not known to us.
-				 */
-
-				return 0;
 			}
 
 			is_meta = true;
