@@ -815,7 +815,7 @@ SMFSource::load_model_unlocked (bool force_reload)
 				    0x2F (End of Track) is structural,
 				    0x7F (Sequencer-Specific) carries Ardour note IDs.
 				*/
-				if (size >= 2 && buf[1] >= 0x01 && buf[1] <= 0x09) {
+				if (size >= 2 && buf[0] == 0xFF && buf[1] >= 0x01 && buf[1] <= 0x09) {
 					const Temporal::Beats event_time = Temporal::Beats::ticks_at_rate (time, ppqn());
 					eventlist.push_back (make_pair (
 						new Evoral::Event<Temporal::Beats> (

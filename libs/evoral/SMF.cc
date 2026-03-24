@@ -433,6 +433,8 @@ SMF::is_meta (uint8_t const* buf, uint32_t size)
 		case 0x05: /* lyric */
 		case 0x06: /* marker */
 		case 0x07: /* cue point */
+		case 0x08: /* program name (RP-019) */
+		case 0x09: /* device name (RP-019) */
 		case 0x20: /* channel prefix */
 		case 0x2f: /* end of track */
 		case 0x51: /* set tempo */
