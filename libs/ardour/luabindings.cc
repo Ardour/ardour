@@ -1645,6 +1645,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("get_capture_channel_mode", &MidiTrack::get_capture_channel_mode)
 		.addFunction ("get_playback_channel_mask", &MidiTrack::get_capture_channel_mode)
 		.addFunction ("get_capture_channel_mask", &MidiTrack::get_capture_channel_mask)
+		.addFunction ("restore_controls", &MidiTrack::restore_controls)
 		.endClass ()
 
 		.beginWSPtrClass <AudioReadable> ("Readable")
