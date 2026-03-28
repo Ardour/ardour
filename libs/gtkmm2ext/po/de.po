@@ -1,13 +1,13 @@
 # Copyright (C) YEAR "Paul Davis"
 # This file is distributed under the same license as the PACKAGE package.
 #
-# Edgar Aichinger <edgar.aichinger@aon.at>, 2013, 2015, 2016, 2017, 2020, 2022.
+# SPDX-FileCopyrightText: 2013, 2015, 2016, 2017, 2020, 2022, 2026 Edgar Aichinger <edgar.aichinger@aon.at>
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-23 12:33+0200\n"
-"PO-Revision-Date: 2022-08-23 16:59+0200\n"
+"POT-Creation-Date: 2026-03-17 19:18+0100\n"
+"PO-Revision-Date: 2026-03-28 10:42+0100\n"
 "Last-Translator: Edgar Aichinger <edgar.aichinger@aon.at>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de\n"
@@ -15,9 +15,9 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 22.08.0\n"
+"X-Generator: Lokalize 25.12.3\n"
 
-#: actions.cc:215
+#: actions.cc:219
 msgid "Unknown action name: %1/%2"
 msgstr "Unbekannter Aktionsname: %1/%2"
 
@@ -49,23 +49,23 @@ msgstr "RegionList"
 msgid "ProcessorMenu"
 msgstr "ProcessorMenu"
 
-#: bindings.cc:502
+#: bindings.cc:519
 msgid "Escape"
 msgstr "Escape"
 
-#: bindings.cc:852 bindings.cc:854
+#: bindings.cc:951 bindings.cc:953
 msgid "Window"
 msgstr "Fenster"
 
-#: bindings.cc:852
+#: bindings.cc:951
 msgid " (Categorized)"
 msgstr " (Kategorisiert)"
 
-#: bindings.cc:854
+#: bindings.cc:953
 msgid " (Alphabetical)"
 msgstr "(Alphabetisch)"
 
-#: bindings.cc:870
+#: bindings.cc:969
 msgid "Uncategorized"
 msgstr "Unkategorisiert"
 
@@ -77,11 +77,11 @@ msgstr "Die Datei mit den Cursor-Hotspot-Infos %1 hat einen Fehler in Zeile %2"
 msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 msgstr "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
-#: gtk_ui.cc:125
+#: gtk_ui.cc:135
 msgid "Log"
 msgstr "Log"
 
-#: gtk_ui.cc:414
+#: gtk_ui.cc:432
 msgid ""
 "\n"
 "\n"
@@ -91,11 +91,11 @@ msgstr ""
 "\n"
 "Kurzbefehl: "
 
-#: gtk_ui.cc:723
+#: gtk_ui.cc:724
 msgid "Press To Exit"
 msgstr "Zum Beenden drücken"
 
-#: gtk_ui.cc:759
+#: gtk_ui.cc:761
 msgid "I'm sorry %1, I can't do that"
 msgstr "Leider kann ich das nicht tun, %1"
 
@@ -151,25 +151,33 @@ msgstr "Mittelklick"
 msgid "Win"
 msgstr "Win"
 
-#: keyboard.cc:287 keyboard.cc:771
+#: keyboard.cc:204
+msgid "CapsLock"
+msgstr "CapsLock"
+
+#: keyboard.cc:210
+msgid "Lock"
+msgstr "Lock"
+
+#: keyboard.cc:301 keyboard.cc:785
 msgid "Unknown"
 msgstr "Unbekannt"
 
-#: keyboard.cc:781
+#: keyboard.cc:795
 msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr ""
 "Die Tastenkürzel-Datei \"%1\" konnte nicht gefunden werden oder enthält "
 "Fehler."
 
-#: keyboard.cc:807
+#: keyboard.cc:821
 msgid "Keyboard binding found without a name"
 msgstr "Tastenzuordnung ohne Namen gefunden"
 
-#: keyboard.cc:839
+#: keyboard.cc:853
 msgid "Cannot save key bindings to %1"
 msgstr "Kann Tastenzuordnungen nicht nach %1 sichern"
 
-#: keyboard.cc:854
+#: keyboard.cc:868
 msgid "Cannot rename your own keybinding file (%1)"
 msgstr "Kann Ihre eigene Tastaturkürzeldatei nicht umbenennen (%1)"
 
