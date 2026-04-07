@@ -577,6 +577,10 @@ bool
 MidiView::button_press (GdkEventButton* ev)
 {
 	if (Keyboard::is_context_menu_event (ev)) {
+		/* In FL mode, suppress all right-click context menus */
+		if (_editing_context.fl_mode()) {
+			return true;
+		}
 		return show_context_menu (ev);
 	}
 
@@ -588,6 +592,18 @@ MidiView::button_press (GdkEventButton* ev)
 	int held_note = -1;
 
 	if (m == MouseDraw || (m == MouseContent && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier()))) {
+
+		/* FL mode + Ctrl: rubberband select instead of draw/create */
+		if (_editing_context.fl_mode() && Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier)) {
+			selection_drag = new MidiRubberbandSelectDrag (_editing_context, this);
+			selection_drag->set_bounding_item (_editing_context.get_trackview_group());
+			_editing_context.drags()->set (selection_drag, (GdkEvent *) ev);
+			if (!Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
+				clear_selection_internal ();
+				_mouse_changed_selection = true;
+			}
+			return true;
+		}
 
 		_editing_context.set_canvas_cursor (_editing_context.cursors()->midi_pencil);
 

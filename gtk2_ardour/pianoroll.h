@@ -105,6 +105,7 @@ class Pianoroll : public CueEditor
 	void set_samples_per_pixel (samplecnt_t);
 
 	void set_mouse_mode (Editing::MouseMode, bool force = false);
+	void mouse_mode_chosen (Editing::MouseMode);
 
 	void midi_action (void (MidiView::*method)());
 
@@ -182,6 +183,15 @@ class Pianoroll : public CueEditor
 	ArdourWidgets::ArdourButton* layered_automation_button;
 	bool layered_automation;
 	void layered_automation_button_clicked();
+
+	/* FL-mode: draw + right-click-delete + Ctrl-drag-select */
+	ArdourWidgets::ArdourButton* fl_mode_button;
+	bool _fl_mode;
+	Editing::MouseMode _pre_fl_mode;  /* mode to restore when FL is turned off */
+	void toggle_fl_mode ();
+  public:
+	bool fl_mode () const override { return _fl_mode; }
+  private:
 
 	ControllerControls* velocity_button;
 	ControllerControls* bender_button;
