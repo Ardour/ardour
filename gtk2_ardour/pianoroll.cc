@@ -54,6 +54,7 @@
 #include "pianoroll_midi_view.h"
 #include "note_base.h"
 #include "prh.h"
+#include "public_editor.h"
 #include "timers.h"
 #include "ui_config.h"
 #include "verbose_cursor.h"
@@ -1541,6 +1542,14 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 		if (mt) {
 			note_mode_actions[mt->note_mode()]->set_active (true);
 		}
+	}
+
+	/* If the session is currently in loop mode, update the loop range
+	 * to cover the newly-selected region so the user doesn't have to
+	 * manually re-set the loop every time they switch clips.
+	 */
+	if (_session && _session->get_play_loop()) {
+		PublicEditor::instance().set_loop_range (r->position(), r->end(), _("loop region"));
 	}
 }
 
