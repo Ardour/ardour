@@ -415,10 +415,9 @@ MidiRegionView::scroll (GdkEventScroll* ev)
 		return false;
 	}
 
-	if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-		/* XXX: bit of a hack; allow PrimaryModifier scroll
-		 * through so that it still works for navigation and zoom.
-		 */
+	if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier) ||
+	    Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollHorizontalModifier)) {
+		/* Let primary-modifier and shift-only scroll propagate to editor-level handlers. */
 		return false;
 	}
 
