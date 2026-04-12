@@ -3764,22 +3764,21 @@ MidiView::finish_resizing (NoteBase* primary, bool at_front, double delta_x, boo
 		/* and then to beats */
 
 		Temporal::Beats src_beats;
+		timepos_t snapped_x;
+
+		if (with_snap) {
+			snapped_x = snap_pixel_to_time (current_x, ensure_snap); /* units depend on snap settings */
+		} else {
+			snapped_x = timepos_t (_editing_context.pixel_to_sample (current_x)); /* probably samples */
+		}
+
+		Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
+		const timepos_t abs_beats (tmap->quarters_at (snapped_x));
 
 		if (!_on_timeline) {
-			src_beats = timepos_t (_editing_context.pixel_to_sample (current_x)).beats();
+			src_beats = abs_beats.beats();
 		} else {
-
-			/* Convert the new x position to a position within the source */
-
-			timecnt_t current_time;
-
-			if (with_snap) {
-				current_time = snap_pixel_to_time (current_x, ensure_snap);
-			} else {
-				current_time = timecnt_t (_editing_context.pixel_to_sample (current_x));
-			}
-
-			src_beats = _midi_region->absolute_time_to_source_beats (_midi_region->position() + current_time);
+			src_beats = _midi_region->absolute_time_to_source_beats (abs_beats);
 		}
 
 		if (at_front && src_beats < canvas_note->note()->end_time()) {
