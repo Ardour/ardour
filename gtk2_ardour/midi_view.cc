@@ -3257,17 +3257,23 @@ MidiView::move_copies (timecnt_t const & dx_qn, double dy, double cumulative_dy)
 			to_play.push_back (n->note());
 		}
 
-		timepos_t const note_time_qn = _midi_region->source_beats_to_absolute_time (n->note()->time());
-		double_t dx = 0;
+		Temporal::Beats note_time_qn;
+		double dx = 0.0;
+
+		if (!_on_timeline) {
+			note_time_qn = n->note()->time ();
+		} else {
+			note_time_qn = _midi_region->source_beats_to_absolute_beats (n->note()->time());
+		}
 
 		if (_midi_context.note_mode() == Sustained) {
-			dx = _editing_context.time_to_pixel_unrounded (timepos_t (note_time_qn) + dx_qn)
-				- n->item()->item_to_canvas (ArdourCanvas::Duple (n->x0(), 0)).x;
+			dx = _editing_context.time_to_pixel_unrounded (timepos_t (note_time_qn + dx_qn.beats()));
+			dx -= _editing_context.canvas_to_timeline (n->item()->item_to_canvas (ArdourCanvas::Duple (n->x0(), 0)).x);
 		} else {
 			Hit* hit = dynamic_cast<Hit*>(n);
 			if (hit) {
-				dx = _editing_context.time_to_pixel_unrounded (timepos_t (note_time_qn) + dx_qn)
-					- n->item()->item_to_canvas (ArdourCanvas::Duple (((hit->x0() + hit->x1()) / 2.0) - hit->position().x, 0)).x;
+				dx = _editing_context.time_to_pixel_unrounded (timepos_t (note_time_qn + dx_qn.beats()));
+				dx -= _editing_context.canvas_to_timeline (n->item()->item_to_canvas (ArdourCanvas::Duple (((hit->x0() + hit->x1()) / 2.0) - hit->position().x, 0)).x);
 			}
 		}
 
@@ -3275,8 +3281,8 @@ MidiView::move_copies (timecnt_t const & dx_qn, double dy, double cumulative_dy)
 
 		if (_midi_context.note_mode() == Sustained) {
 			Note* sus = dynamic_cast<Note*> (*i);
-			double const len_dx = _editing_context.time_to_pixel_unrounded (timepos_t (note_time_qn) + dx_qn + timecnt_t (n->note()->length()));
-
+			double len_dx = _editing_context.time_to_pixel_unrounded (timepos_t (note_time_qn) + dx_qn + timecnt_t (n->note()->length()));
+			len_dx = _editing_context.timeline_to_canvas (len_dx);
 			sus->set_x1 (n->item()->canvas_to_item (ArdourCanvas::Duple (len_dx, 0)).x);
 		}
 	}
@@ -3459,7 +3465,8 @@ MidiView::snap_pixel_to_time (double x, bool ensure_snap)
 	if (!_midi_region) {
 		return timecnt_t (Beats (0,0));
 	}
-	return _editing_context.snap_relative_time_to_relative_time (_midi_region->position(), timecnt_t (_editing_context.pixel_to_sample (x)), ensure_snap);
+	timepos_t origin = _on_timeline ? _midi_region->position() : timepos_t (Temporal::Beats());
+	return _editing_context.snap_relative_time_to_relative_time (origin, timecnt_t (_editing_context.pixel_to_sample (x)), ensure_snap);
 }
 
 /** @param p a position relative to the left edge of the MidiView, which could
@@ -3645,22 +3652,20 @@ MidiView::update_resizing (NoteBase* primary, bool at_front, double delta_x, boo
 				sign = -1;
 			}
 
-			timepos_t snapped_x;
+			timecnt_t snapped_time;
 
 			if (with_snap) {
-				snapped_x = snap_pixel_to_time (current_x, ensure_snap); /* units depend on snap settings */
+				snapped_time = snap_pixel_to_time (current_x, ensure_snap); /* units depend on snap settings */
 			} else {
-				snapped_x = timepos_t (_editing_context.pixel_to_sample (current_x)); /* probably samples */
+				snapped_time = timecnt_t (_editing_context.pixel_to_sample (current_x));
 			}
 
-			Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
-			const timepos_t abs_beats (tmap->quarters_at (snapped_x));
 			Temporal::Beats src_beats;
 
 			if (!_on_timeline) {
-				src_beats = abs_beats.beats();
+				src_beats = snapped_time.beats();
 			} else {
-				src_beats = _midi_region->absolute_time_to_source_beats (abs_beats);
+				src_beats = _midi_region->absolute_time_to_source_beats (_midi_region->position() + snapped_time);
 			}
 
 			Temporal::Beats len;
@@ -3689,7 +3694,11 @@ MidiView::update_resizing (NoteBase* primary, bool at_front, double delta_x, boo
 			show_verbose_cursor (buf, 0, 0);
 
 			cursor_set = true;
-			_editing_context.set_snapped_cursor_position (snapped_x + midi_region()->position());
+			if (!_on_timeline) {
+				_editing_context.set_snapped_cursor_position (timepos_t (snapped_time));
+			} else {
+				_editing_context.set_snapped_cursor_position (_midi_region->position() + snapped_time);
+			}
 		}
 	}
 }
@@ -3764,21 +3773,18 @@ MidiView::finish_resizing (NoteBase* primary, bool at_front, double delta_x, boo
 		/* and then to beats */
 
 		Temporal::Beats src_beats;
-		timepos_t snapped_x;
+		timecnt_t snapped_time;
 
 		if (with_snap) {
-			snapped_x = snap_pixel_to_time (current_x, ensure_snap); /* units depend on snap settings */
+			snapped_time = snap_pixel_to_time (current_x, ensure_snap); /* units depend on snap settings */
 		} else {
-			snapped_x = timepos_t (_editing_context.pixel_to_sample (current_x)); /* probably samples */
+			snapped_time = timecnt_t (_editing_context.pixel_to_sample (current_x));
 		}
 
-		Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
-		const timepos_t abs_beats (tmap->quarters_at (snapped_x));
-
 		if (!_on_timeline) {
-			src_beats = abs_beats.beats();
+			src_beats = snapped_time.beats();
 		} else {
-			src_beats = _midi_region->absolute_time_to_source_beats (abs_beats);
+			src_beats = _midi_region->absolute_time_to_source_beats (_midi_region->position() + snapped_time);
 		}
 
 		if (at_front && src_beats < canvas_note->note()->end_time()) {
