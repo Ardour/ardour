@@ -949,8 +949,19 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			 */
 
 			control_ui->combo = new ArdourDropdown();
+			std::vector<std::pair<std::string, float> > sorted_scale_points;
 			for (ARDOUR::ScalePoints::const_iterator i = control_ui->scale_points->begin();
 			     i != control_ui->scale_points->end();
+			     ++i) {
+				sorted_scale_points.push_back (std::make_pair (i->first, i->second));
+			}
+			std::sort (sorted_scale_points.begin (), sorted_scale_points.end (),
+			           [] (std::pair<std::string, float> const& a, std::pair<std::string, float> const& b) {
+				           return a.second < b.second;
+			           });
+
+			for (std::vector<std::pair<std::string, float> >::const_iterator i = sorted_scale_points.begin();
+			     i != sorted_scale_points.end();
 			     ++i) {
 				control_ui->combo->add_menu_elem(Menu_Helpers::MenuElem(
 						i->first,

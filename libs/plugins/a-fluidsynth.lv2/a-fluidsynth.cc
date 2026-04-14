@@ -85,6 +85,8 @@ enum {
 	FS_CHR_DEPTH,
 	FS_CHR_LEVEL,
 	FS_CHR_TYPE,
+	FS_VEL_RAND_AMOUNT,
+	FS_VEL_RAND_TIGHTNESS,
 	FS_PORT_ENABLE,
 	FS_PORT_LAST
 };
@@ -92,6 +94,13 @@ enum {
 enum {
 	CMD_APPLY = 0,
 	CMD_FREE  = 1,
+};
+
+enum {
+	VEL_RAND_WIDE = 0,
+	VEL_RAND_MEDIUM,
+	VEL_RAND_TIGHT,
+	VEL_RAND_VERY_TIGHT
 };
 
 struct BankProgram {
@@ -179,6 +188,7 @@ typedef struct {
 	BankProgram program_state[16];
 
 	fluid_midi_event_t* fmidi_event;
+	uint32_t            rng_state;
 
 } AFluidSynth;
 
@@ -304,6 +314,74 @@ db_to_coeff (float db)
 		return 10;
 	}
 	return powf (10.f, .05f * db);
+}
+
+static inline uint32_t
+afs_rand (AFluidSynth* self)
+{
+	uint32_t x = self->rng_state;
+	if (x == 0) {
+		x = 0x12345678u;
+	}
+	x ^= x << 13;
+	x ^= x >> 17;
+	x ^= x << 5;
+	self->rng_state = x;
+	return x;
+}
+
+static inline float
+afs_rand_uniform (AFluidSynth* self)
+{
+	return (afs_rand (self) & 0x00ffffffu) / 16777216.f;
+}
+
+static inline float
+afs_rand_normal (AFluidSynth* self)
+{
+	/* Box-Muller transform with simple guards against log(0). */
+	float u1 = afs_rand_uniform (self);
+	float u2 = afs_rand_uniform (self);
+	if (u1 <= 0.f) {
+		u1 = 1.f / 16777216.f;
+	}
+	return sqrtf (-2.f * logf (u1)) * cosf (2.f * (float)M_PI * u2);
+}
+
+static inline int
+randomize_velocity (AFluidSynth* self, int velocity)
+{
+	if (velocity <= 0) {
+		return velocity;
+	}
+
+	int width = std::max (1, std::min (63, (int)rintf (*self->p_ports[FS_VEL_RAND_AMOUNT])));
+	if (width == 1) {
+		return velocity;
+	}
+
+	const int lower = width / 2;
+	const int upper = width - 1 - lower;
+
+	float sigma_divisor = 2.0f;
+	switch (std::max (0, std::min (3, (int)rintf (*self->p_ports[FS_VEL_RAND_TIGHTNESS])))) {
+		case VEL_RAND_WIDE:
+			sigma_divisor = 1.25f;
+			break;
+		case VEL_RAND_MEDIUM:
+			sigma_divisor = 1.67f;
+			break;
+		case VEL_RAND_TIGHT:
+			sigma_divisor = 3.33f;
+			break;
+		case VEL_RAND_VERY_TIGHT:
+			sigma_divisor = 10.0f;
+			break;
+	}
+
+	int delta = (int)rintf (afs_rand_normal (self) * ((float)(width - 1) / sigma_divisor));
+	delta = std::min (upper, std::max (-lower, delta));
+	return std::min (127, std::max (1, velocity + delta));
 }
 
 static void
@@ -498,6 +576,7 @@ instantiate (const LV2_Descriptor*     descriptor,
 	self->reinit_in_progress = false;
 	self->queue_reinit       = false;
 	self->queue_retune       = false;
+	self->rng_state          = 0xa5f17c3du;
 	for (int chn = 0; chn < 16; ++chn) {
 		self->program_state[chn].program = -1;
 		self->program_state[chn].user_set = false;
@@ -686,7 +765,11 @@ run (LV2_Handle instance, uint32_t n_samples)
 					fluid_midi_event_set_value (self->fmidi_event, 0);
 					fluid_midi_event_set_pitch (self->fmidi_event, ((data[2] & 0x7f) << 7) | (data[1] & 0x7f));
 				} else {
-					fluid_midi_event_set_value (self->fmidi_event, data[2]);
+					int value = data[2];
+					if (0x90 /* NOTE_ON */ == fluid_midi_event_get_type (self->fmidi_event)) {
+						value = randomize_velocity (self, value);
+					}
+					fluid_midi_event_set_value (self->fmidi_event, value);
 				}
 				if (0xb0 /* CC */ == fluid_midi_event_get_type (self->fmidi_event)) {
 					int chn = fluid_midi_event_get_channel (self->fmidi_event);
