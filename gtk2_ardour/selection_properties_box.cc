@@ -274,7 +274,11 @@ SelectionPropertiesBox::selection_changed ()
 #endif
 			}
 
-			rv->RegionViewGoingAway.connect_same_thread (_region_connection, std::bind (&SelectionPropertiesBox::delete_region_editor, this));
+			rv->RegionViewGoingAway.connect_same_thread (_region_connection, [this, rv] (RegionView* going_away) {
+				if (going_away == rv) {
+					delete_region_editor ();
+				}
+			});
 		}
 
 		show_similar_midi_regions (rs);
