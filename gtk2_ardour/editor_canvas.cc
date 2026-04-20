@@ -58,6 +58,7 @@
 #include "editor_group_tabs.h"
 #include "editor_section_box.h"
 #include "editor_summary.h"
+#include "editor_vsummary.h"
 #include "video_timeline.h"
 #include "keyboard.h"
 #include "editor_cursors.h"
@@ -1001,6 +1002,7 @@ Editor::tie_vertical_scrolling ()
 	if (pending_visual_change.idle_handler_id < 0) {
 		_region_peak_cursor->hide ();
 		_summary->set_overlays_dirty ();
+		_vsummary->set_overlays_dirty();
 	}
 	_group_tabs->set_offset (vertical_adjustment.get_value ());
 	controls_layout.queue_draw ();

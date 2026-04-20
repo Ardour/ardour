@@ -126,6 +126,7 @@
 #include "editor_snapshots.h"
 #include "editor_sources.h"
 #include "editor_summary.h"
+#include "editor_vsummary.h"
 #include "enums_convert.h"
 #include "export_report.h"
 #include "global_port_matrix.h"
@@ -287,7 +288,7 @@ Editor::Editor ()
 	, videotl_group (nullptr)
 	, videotl_bar_height (4)
 	, _region_boundary_cache_dirty (true)
-	, edit_packer (4, 4, true)
+	, edit_packer (5, 4, true)
 	, unused_adjustment (0.0, 0.0, 10.0, 400.0)
 	, controls_layout (unused_adjustment, vertical_adjustment)
 	, _scroll_callbacks (0)
@@ -367,6 +368,7 @@ Editor::Editor ()
 	, _pending_locate_request (false)
 	, _pending_initial_locate (false)
 	, _summary (nullptr)
+	, _vsummary (nullptr)
 	, _group_tabs (nullptr)
 	, _last_motion_y (0)
 	, layering_order_editor (nullptr)
@@ -444,6 +446,8 @@ Editor::Editor ()
 
 	_summary = new EditorSummary (*this);
 
+	_vsummary = new EditorVSummary (*this);
+
 	TempoMap::MapChanged.connect (tempo_map_connection, invalidator (*this), std::bind (&Editor::tempo_map_changed, this), gui_context());
 
 	selection->TimeChanged.connect (sigc::mem_fun(*this, &Editor::time_selection_changed));
@@ -479,6 +483,7 @@ Editor::Editor ()
 	controls_layout.signal_scroll_event().connect (sigc::mem_fun(*this, &Editor::control_layout_scroll), false);
 
 	_group_tabs->signal_scroll_event().connect (sigc::mem_fun(*this, &Editor::control_layout_scroll), false);
+	_vsummary->signal_scroll_event().connect (sigc::mem_fun(*this, &Editor::control_layout_scroll), false);
 
 	set_canvas_cursor (nullptr);
 
@@ -513,6 +518,15 @@ Editor::Editor ()
 
 	/* labels for the time bars */
 	edit_packer.attach (time_bars_event_box,     1, 3, 0, 1,    FILL,        SHRINK,      5, 0);
+
+	/* vertical summary */
+	Gtk::Frame* vsummary_frame = manage (new Gtk::Frame); // vsummary border
+	vsummary_frame->set_name("SummaryFrame");
+	vsummary_frame->add(*_vsummary);
+	edit_packer.attach (*vsummary_frame,         4, 5, 1, 2,    FILL,        FILL|EXPAND, 0, 0);
+	_vsummary->set_size_request(20, -1);
+
+
 	/* track controls */
 	edit_packer.attach (*_group_tabs,            1, 2, 1, 2,    FILL,        FILL|EXPAND, 0, 0);
 	edit_packer.attach (controls_layout,         2, 3, 1, 2,    FILL,        FILL|EXPAND, 0, 0);
@@ -1273,6 +1287,7 @@ Editor::set_session (Session *t)
 	_application_bar.set_session (_session);
 	nudge_clock->set_session (_session);
 	_summary->set_session (_session);
+	_vsummary->set_session (_session);
 	_group_tabs->set_session (_session);
 	_route_groups->set_session (_session);
 	_regions->set_session (_session);
@@ -4009,6 +4024,7 @@ Editor::visual_changer (const VisualChange& vc)
 
 	_region_peak_cursor->hide ();
 	_summary->set_overlays_dirty ();
+	_vsummary->set_overlays_dirty();
 }
 
 void
@@ -5098,6 +5114,7 @@ Editor::redisplay_track_views ()
 	}
 
 	_summary->set_background_dirty();
+	_vsummary->set_background_dirty();
 	_group_tabs->set_dirty ();
 
 	return false;

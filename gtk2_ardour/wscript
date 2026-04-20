@@ -113,6 +113,7 @@ gtk2_ardour_sources = [
         'editor_summary.cc',
         'editor_tempodisplay.cc',
         'editor_timefx.cc',
+        'editor_vsummary.cc',
         'engine_dialog.cc',
         'enums.cc',
         'export_analysis_graphs.cc',
