@@ -342,6 +342,7 @@ public:
 
 	bool scroll_up_one_track (bool skip_child_views = false);
 	bool scroll_down_one_track (bool skip_child_views = false);
+	bool scroll_to_track_at_y (double y, bool skip_child_views = false);
 
 	void select_topmost_track ();
 
