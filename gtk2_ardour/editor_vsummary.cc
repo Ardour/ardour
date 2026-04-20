@@ -28,17 +28,11 @@
 
 #include <ydk/gdk.h>
 
-#include <ytkmm/menu.h>
-#include <ytkmm/menuitem.h>
-
 #include "context_menu_helper.h"
-#include "streamview.h"
 #include "editor_vsummary.h"
 #include "gui_thread.h"
 #include "editor.h"
-#include "region_view.h"
 #include "rgb_macros.h"
-#include "keyboard.h"
 #include "editor_routes.h"
 #include "editor_cursors.h"
 #include "mouse_cursors.h"
@@ -46,11 +40,8 @@
 #include "vca_time_axis.h"
 #include "ui_config.h"
 
-#include "pbd/i18n.h"
-
 using namespace std;
 using namespace ARDOUR;
-using Gtkmm2ext::Keyboard;
 
 /** Construct an EditorVSummary.
  *  @param e Editor to represent.
@@ -173,16 +164,14 @@ EditorVSummary::render_background_image ()
 
 	for (TrackViewList::const_iterator i = _editor.track_views.begin(); i != _editor.track_views.end(); ++i) {
 
+		if ((*i)->hidden()) {
+			continue;
+		}
+
 		audio = dynamic_cast<AudioTimeAxisView*>(*i);
 		midi = dynamic_cast<MidiTimeAxisView*>(*i);
 		route = dynamic_cast<RouteTimeAxisView*>(*i);
 		vca = dynamic_cast<VCATimeAxisView*>(*i);
-
-
-		if ((!vca || vca->hidden()) && (!route || route->hidden())) {
-			continue;
-		}
-
 
 		group = vca ? nullptr : route->route_group();
 
