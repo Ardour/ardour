@@ -7,6 +7,7 @@
  * Copyright (C) 2014-2016 Nick Mainsbridge <mainsbridge@gmail.com>
  * Copyright (C) 2015-2016 Tim Mayberry <mojofunk@gmail.com>
  * Copyright (C) 2017-2019 Ben Loftis <ben@harrisonconsoles.com>
+ * Copyright (C) 2026-2026 Jean-Emmanuel Doucet <jean-emmanuel.doucet@groolot.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,7 +77,7 @@ EditorVSummary::~EditorVSummary ()
 void
 EditorVSummary::parameter_changed (string p)
 {
-	// TODO delete
+	// TODO use_route_colors
 	// if (p == "color-regions-using-track-color") {
 	// 	set_background_dirty ();
 	// }
@@ -189,6 +190,7 @@ EditorVSummary::render_background_image ()
 
 		/* Route color */
 
+		// TODO config for use_route_colors
 		bool use_route_colors = true;
 		double alpha;
 		if (use_route_colors) {

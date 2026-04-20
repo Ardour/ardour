@@ -3,6 +3,7 @@
  * Copyright (C) 2009-2017 Paul Davis <paul@linuxaudiosystems.com>
  * Copyright (C) 2012-2017 Robin Gareus <robin@gareus.org>
  * Copyright (C) 2017-2019 Ben Loftis <ben@harrisonconsoles.com>
+ * Copyright (C) 2026-2026 Jean-Emmanuel Doucet <jean-emmanuel.doucet@groolot.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,8 +37,7 @@ class Editor;
 class RegionView;
 class RouteTimeAxisView;
 
-/** Class to provide a visual summary of the contents of an editor window; represents
- *  the whole session as a set of lines, one per region view.
+/** Class to provide a visual summary of the tracks and groups in the editor window
  */
 class EditorVSummary : public CairoWidget, public EditorComponent, public ARDOUR::SessionHandlePtr, public PBD::ScopedConnectionList
 {
