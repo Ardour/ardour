@@ -138,7 +138,7 @@ EditorVSummary::render_background_image ()
 
 	cairo_push_group (cr);
 
-	double y = 0;
+	double y = -1; /* merge first item's top border with vsummary_frame border */
 	double track_height = 0;
 	Gdk::Color track_color;
 	Gdk::Color group_color;
