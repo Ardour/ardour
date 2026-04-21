@@ -151,13 +151,11 @@ EditorVSummary::render_background_image ()
 
 
 	for (TrackViewList::const_reverse_iterator i = _editor.track_views.crbegin(); i != _editor.track_views.crend(); ++i) {
-		vca = dynamic_cast<VCATimeAxisView*>(*i);
-		route = dynamic_cast<RouteTimeAxisView*>(*i);
-		if ((!vca || vca->hidden()) && (!route || route->hidden())) {
+		if ((*i)->hidden()) {
 			continue;
 		}
-		/* The editor's scrollable height depends on the last track's height, store it now */
-		_editor_scroll_height = _editor._full_canvas_height + _editor.visible_canvas_height() - _editor.ruler_separator->position().y - (*i)->effective_height();
+		/* The editor's scrollable height depends on the last track's height (automation tracks excluded), store it now */
+		_editor_scroll_height = _editor._full_canvas_height + _editor.visible_canvas_height() - _editor.ruler_separator->position().y - (*i)->current_height();
 		break;
 	}
 
