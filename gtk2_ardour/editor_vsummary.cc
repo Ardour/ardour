@@ -236,6 +236,21 @@ EditorVSummary::render_background_image ()
 		y += track_height;
 	}
 
+	/* Last group separator */
+
+	if (group) {
+		Gtkmm2ext::set_source_rgba (cr, _background_color);
+		cairo_set_line_width (cr, 1);
+		cairo_move_to (cr, 0, y);
+		cairo_line_to (cr, 4, y);
+		cairo_stroke (cr);
+	}
+
+	/* Background global alpha
+	 * Painting group lines with full opacity allows merging them easily
+	 * but we don't want the vertical summary to stand out to much
+	 */
+
 	cairo_pop_group_to_source (cr);
 	cairo_paint_with_alpha (cr, 0.75);
 
