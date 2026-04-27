@@ -70,7 +70,7 @@ delete_mackie_protocol (ControlProtocol* cp)
 static std::map<std::string, std::vector<std::string>>
 enumerate_mackie_protocol ()
 {
-	return MackieControlProtocol::get_manufacturers();
+	return MackieControlProtocol::enumerate();
 }
 
 static ControlProtocolDescriptor mackie_descriptor = {

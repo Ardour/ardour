@@ -759,6 +759,89 @@ GenericMidiControlProtocol::get_feedback () const
 	return do_feedback;
 }
 
+std::map<std::string, std::vector<std::string>>
+GenericMidiControlProtocol::enumerate ()
+{
+	vector<string> midi_maps;
+	Searchpath spath (system_midi_map_search_path());
+	spath += user_midi_map_directory ();
+	std::list<MapInfo> map_inf;
+	std::map<std::string, std::vector<std::string>> devices;
+
+	find_files_matching_filter (midi_maps, spath, midi_map_filter, 0, false, true);
+
+	if (midi_maps.empty()) {
+		cerr << "No MIDI maps found using " << spath.to_string() << endl;
+		return devices;
+	}
+
+	for (vector<string>::iterator i = midi_maps.begin(); i != midi_maps.end(); ++i) {
+		string fullpath = *i;
+
+		XMLTree tree;
+
+		if (!tree.read (fullpath.c_str())) {
+			continue;
+		}
+
+		MapInfo mi;
+
+		std::string str;
+		if (!tree.root()->get_property ("name", str)) {
+			continue;
+		}
+
+		mi.name = str;
+		mi.path = fullpath;
+
+		map_inf.push_back (mi);
+	}
+
+	for (const auto& info : map_inf) {
+		string xmlpath = info.path;
+		DEBUG_TRACE (DEBUG::GenericMidi, "Get manufacturers: Reading midi map\n");
+		XMLTree state_tree;
+
+		if (!state_tree.read (info.path.c_str())) {
+			error << string_compose(_("Could not understand MIDI bindings file %1"), xmlpath) << endmsg;
+			return devices;
+		}
+
+		XMLNode* root = state_tree.root();
+
+		if (root->name() != X_("ArdourMIDIBindings")) {
+			error << string_compose (_("MIDI Bindings file %1 is not really a MIDI bindings file"), xmlpath) << endmsg;
+			return devices;
+		}
+
+		const XMLProperty* prop;
+
+		if ((prop = root->property ("version")) == 0) {
+			return devices;
+		}
+
+		const XMLNodeList& children (root->children());
+		XMLNodeConstIterator citer;
+
+		MIDIControllable* mc;
+
+		DEBUG_TRACE (DEBUG::GenericMidi, "Getting manufacturers\n");
+		string manufacturer;
+		string name;
+		if (root->get_property ("manufacturer", manufacturer)) {
+			if ((root->get_property ("name", name))) {
+				if (devices.find(manufacturer) != devices.end()) {
+					devices[manufacturer].push_back(name);
+				} else {
+					devices.insert({manufacturer, {name}});
+				}
+			}
+		}
+	}
+
+	return devices;
+}
+
 int
 GenericMidiControlProtocol::load_bindings (const string& xmlpath)
 {

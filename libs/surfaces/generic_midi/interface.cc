@@ -52,7 +52,7 @@ delete_generic_midi_protocol (ControlProtocol* cp)
 static std::map<std::string, std::vector<std::string>>
 enumerate_generic_midi_protocol ()
 {
-	return GenericMidiControlProtocol::get_manufacturers();
+	return GenericMidiControlProtocol::enumerate();
 }
 
 // Field names commented out by JE - 06-01-2010

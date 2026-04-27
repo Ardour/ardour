@@ -485,6 +485,25 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 	return 0;
 }
 
+std::map<std::string, std::vector<std::string>>
+MackieControlProtocol::enumerate ()
+{
+	std::map<std::string, std::vector<std::string>>	devices;
+	DeviceInfo::reload_device_info();
+
+	for (const auto& device : DeviceInfo::device_info) {
+		if (!device.second.manufacturer().empty()) {
+			if (devices.find(device.second.manufacturer()) != devices.end()) {
+				devices[device.second.manufacturer()].push_back(device.second.name());
+			} else {
+				devices.insert({device.second.manufacturer(), {device.second.name()}});
+			}
+		}
+	}
+
+	return devices;
+}
+
 int
 MackieControlProtocol::set_active (bool yn)
 {

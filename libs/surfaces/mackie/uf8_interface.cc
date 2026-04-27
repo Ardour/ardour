@@ -74,7 +74,7 @@ delete_uf8_protocol (ControlProtocol* cp)
 static std::map<std::string, std::vector<std::string>>
 enumerate_uf8_protocol ()
 {
-	return MackieControlProtocol::get_manufacturers();
+	return MackieControlProtocol::enumerate();
 }
 
 // Field names commented out by JE - 06-01-2010

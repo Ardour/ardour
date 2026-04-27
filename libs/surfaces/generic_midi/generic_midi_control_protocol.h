@@ -93,6 +93,7 @@ public:
 	void* get_gui () const;
 	void  tear_down_gui ();
 
+	static std::map<std::string, std::vector<std::string>> enumerate ();
 	int load_bindings (const std::string&);
 	void drop_bindings ();
 	void drop_all ();
