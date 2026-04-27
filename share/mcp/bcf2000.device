@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MackieProtocolDevice>
-  <Name value="Behringer BCF2000"/>
+  <Name value="BCF2000"/>
+  <Manufacturer value="Behringer"/>
   <Strips value="8"/>
   <MasterFader value="yes"/>
   <TimecodeDisplay value="no"/>

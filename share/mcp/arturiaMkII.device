@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MackieProtocolDevice>
-  <Name value="Arturia MkII"/>
+  <Name value="MkII"/>
+  <Manufacturer value="Arturia"/>
   <Strips value="8"/>
   <TimecodeDisplay value="no"/>
   <TwoCharacterDisplay value="no"/>

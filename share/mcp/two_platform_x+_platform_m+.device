@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MackieProtocolDevice>
-  <Name value="iCON Platform M+ with two Platform X+'s on left"/>
+  <Name value="Platform M+ with two Platform X+'s on left"/>
+  <Manufacturer value="iCON"/>
   <Strips value="8"/>
   <Extenders value="2"/>
   <MasterPosition value="3"/>

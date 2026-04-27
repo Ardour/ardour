@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MackieProtocolDevice>
-  <Name value="iCON QCon Pro G2 + Pro G2 XS on right"/>
+  <Name value="QCon Pro G2 + Pro G2 XS on right"/>
+  <Manufacturer value="iCON"/>
   <Strips value="8"/>
   <Extenders value="1"/>
   <MasterPosition value="1"/>

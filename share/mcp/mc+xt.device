@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MackieProtocolDevice>
   <Name value="Mackie Control with One Extender"/>
+  <Manufacturer value="Mackie"/>
   <Strips value="8"/>
   <MasterFader value="yes"/>
   <TimecodeDisplay value="yes"/>

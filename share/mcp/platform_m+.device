@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MackieProtocolDevice>
-  <Name value="iCON Platform M+"/>
+  <Name value="Platform M+"/>
+  <Manufacturer value="iCON"/>
   <Strips value="8"/>
   <MasterFader value="yes"/>
   <TimecodeDisplay value="no"/>

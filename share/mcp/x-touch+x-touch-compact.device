@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MackieProtocolDevice>
-  <Name value="Behringer X-Touch + X-Touch Compact"/>
+  <Name value="X-Touch + X-Touch Compact"/>
+  <Manufacturer value="Behringer"/>
   <DeviceType value="MCU"/>
   <Strips value="8"/>
   <MasterFader value="yes"/>

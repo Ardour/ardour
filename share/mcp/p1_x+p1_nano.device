@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MackieProtocolDevice>
-  <Name value="iCON P1-NANO with P1-X on left"/>
+  <Name value="P1-NANO with P1-X on left"/>
+  <Manufacturer value="iCON"/>
   <Strips value="8"/>
   <Extenders value="1"/>
   <MasterPosition value="2"/>

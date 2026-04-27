@@ -1,5 +1,6 @@
 <MackieProtocolDevice>
-  <Name value="Steinberg CMC series"/>
+  <Name value="CMC series"/>
+  <Manufacturer value="Steinberg"/>
   <Strips value="1"/>
   <Extenders value="0"/>
   <MasterPosition value="0"/>
