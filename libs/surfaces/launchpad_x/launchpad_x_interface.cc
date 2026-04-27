@@ -45,7 +45,7 @@ new_lpx (Session* s, void* config)
 		/* do not set active here - wait for set_state() */
 	}
 	catch (std::exception & e) {
-		error << "Error instantiating LaunchPad X support: " << e.what() << endmsg;
+		error << "Error instantiating Launchpad X support: " << e.what() << endmsg;
 		delete lpx;
 		lpx = nullptr;
 	}
@@ -62,7 +62,7 @@ delete_lpx (ControlProtocol* cp)
 	}
 	catch ( std::exception & e )
 	{
-		std::cout << "Exception caught trying to finalize LaunchPad X support: " << e.what() << std::endl;
+		std::cout << "Exception caught trying to finalize Launchpad X support: " << e.what() << std::endl;
 	}
 }
 
@@ -80,7 +80,7 @@ enumerate_lpx ()
 }
 
 static ControlProtocolDescriptor lpx_descriptor = {
-	/* name       */ "Novation LaunchPad X",
+	/* name       */ "Novation Launchpad X",
 	/* id         */ "uri://ardour.org/surfaces/lpx:0",
 	/* module     */ 0,
 	/* available  */ 0,

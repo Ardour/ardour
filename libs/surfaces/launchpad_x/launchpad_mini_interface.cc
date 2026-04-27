@@ -46,7 +46,7 @@ new_lpmini (Session* s, void* config)
 		/* do not set active here - wait for set_state() */
 	}
 	catch (std::exception & e) {
-		error << "Error instantiating LaunchPad Mini support: " << e.what() << endmsg;
+		error << "Error instantiating Launchpad Mini support: " << e.what() << endmsg;
 		delete lpm;
 		lpm = nullptr;
 	}
@@ -63,7 +63,7 @@ delete_lpmini (ControlProtocol* cp)
 	}
 	catch ( std::exception & e )
 	{
-		std::cout << "Exception caught trying to finalize LaunchPad Mini support: " << e.what() << std::endl;
+		std::cout << "Exception caught trying to finalize Launchpad Mini support: " << e.what() << std::endl;
 	}
 }
 
@@ -81,7 +81,7 @@ enumerate_lpmini ()
 }
 
 static ControlProtocolDescriptor lpmini_descriptor = {
-	/* name       */ "Novation LaunchPad Mini",
+	/* name       */ "Novation Launchpad Mini",
 	/* id         */ "uri://ardour.org/surfaces/lpmini:0",
 	/* module     */ 0,
 	/* available  */ 0,

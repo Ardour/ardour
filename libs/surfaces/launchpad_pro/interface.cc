@@ -39,7 +39,7 @@ new_lppro (Session* s, void* config)
 		/* do not set active here - wait for set_state() */
 	}
 	catch (std::exception & e) {
-		error << "Error instantiating LaunchPad Pro support: " << e.what() << endmsg;
+		error << "Error instantiating Launchpad Pro support: " << e.what() << endmsg;
 		delete p2;
 		p2 = 0;
 	}
@@ -56,7 +56,7 @@ delete_lppro (ControlProtocol* cp)
 	}
 	catch ( std::exception & e )
 	{
-		std::cout << "Exception caught trying to finalize LaunchPad Pro support: " << e.what() << std::endl;
+		std::cout << "Exception caught trying to finalize Launchpad Pro support: " << e.what() << std::endl;
 	}
 }
 
@@ -74,7 +74,7 @@ enumerate_lppro ()
 }
 
 static ControlProtocolDescriptor lppro_descriptor = {
-	/* name       */ "Novation LaunchPad Pro",
+	/* name       */ "Novation Launchpad Pro",
 	/* id         */ "uri://ardour.org/surfaces/lppro:0",
 	/* module     */ 0,
 	/* available  */ LaunchPadPro::available,
