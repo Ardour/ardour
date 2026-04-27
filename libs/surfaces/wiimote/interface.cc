@@ -28,7 +28,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 static ControlProtocol*
-new_wiimote_protocol (Session* s)
+new_wiimote_protocol (Session* s, void* config)
 {
 	WiimoteControlProtocol* wmcp = new WiimoteControlProtocol (*s);
 	wmcp->set_active (true);
@@ -41,6 +41,12 @@ delete_wiimote_protocol (ControlProtocol* cp)
 	delete cp;
 }
 
+static std::map<std::string, std::vector<std::string>>
+enumerate_wiimote_protocol ()
+{
+	return {{"Nintendo", {"Wiimote"}}};
+}
+
 static ControlProtocolDescriptor wiimote_descriptor = {
 	/* name       */ "Wiimote",
 	/* id         */ "uri://ardour.org/surfaces/wiimote:0",
@@ -50,6 +56,7 @@ static ControlProtocolDescriptor wiimote_descriptor = {
 	/* match usb  */ 0,
 	/* initialize */ new_wiimote_protocol,
 	/* destroy    */ delete_wiimote_protocol,
+	/* enumerate  */ enumerate_wiimote_protocol,
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &wiimote_descriptor; }

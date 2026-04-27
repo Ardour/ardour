@@ -39,7 +39,7 @@ using namespace ArdourSurface::MACKIE_NAMESPACE;
 #define PROTOCOL_NAME ("SSL 360: UF8 UF1")
 
 static ControlProtocol*
-new_uf8_protocol (Session* s)
+new_uf8_protocol (Session* s, void* config)
 {
 	MackieControlProtocol* mcp = 0;
 
@@ -71,6 +71,12 @@ delete_uf8_protocol (ControlProtocol* cp)
 	}
 }
 
+static std::map<std::string, std::vector<std::string>>
+enumerate_uf8_protocol ()
+{
+	return MackieControlProtocol::get_manufacturers();
+}
+
 // Field names commented out by JE - 06-01-2010
 static ControlProtocolDescriptor uf8_descriptor = {
 	/* name       */ PROTOCOL_NAME,
@@ -81,6 +87,7 @@ static ControlProtocolDescriptor uf8_descriptor = {
 	/* match usb  */ 0,
 	/* initialize */ new_uf8_protocol,
 	/* destroy    */ delete_uf8_protocol,
+	/* enumerate  */ enumerate_uf8_protocol,
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &uf8_descriptor; }

@@ -25,7 +25,7 @@ using namespace ARDOUR;
 using namespace ArdourSurface;
 
 static ControlProtocol*
-new_console1 (Session* s)
+new_console1 (Session* s, void* config)
 {
 	Console1* console1 = 0;
 
@@ -46,6 +46,12 @@ delete_console1 (ControlProtocol* cp)
 	delete cp;
 }
 
+static std::map<std::string, std::vector<std::string>>
+enumerate_console1 ()
+{
+	return {{"Softube", {"Console1"}}};
+}
+
 static ControlProtocolDescriptor console1_descriptor = {
 	/* name :              */   "Softube Console1",
 	/* id :                */   "uri://ardour.org/surfaces/console1:0",
@@ -55,6 +61,7 @@ static ControlProtocolDescriptor console1_descriptor = {
 	/* match usb           */   0,
 	/* initialize :        */   new_console1,
 	/* destroy :           */   delete_console1,
+	/* enumerate :         */   enumerate_console1,
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &console1_descriptor; }

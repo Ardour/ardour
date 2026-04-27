@@ -25,7 +25,7 @@ using namespace ARDOUR;
 using namespace ArdourSurface::FP_NAMESPACE;
 
 static ControlProtocol*
-new_faderport16_midi_protocol (Session* s)
+new_faderport16_midi_protocol (Session* s, void* config)
 {
 	FaderPort8* fp;
 
@@ -56,6 +56,12 @@ probe_faderport16_midi_protocol ()
 	return FaderPort8::probe (i, o);
 }
 
+static std::map<std::string, std::vector<std::string>>
+enumerate_faderport16_midi_protocol ()
+{
+	return {{"PreSonus", {"FaderPort16"}}};
+}
+
 static ControlProtocolDescriptor faderport16_midi_descriptor = {
 	/* name       */ "PreSonus FaderPort16",
 	/* id         */ "uri://ardour.org/surfaces/faderport16:0",
@@ -65,6 +71,7 @@ static ControlProtocolDescriptor faderport16_midi_descriptor = {
 	/* match usb  */ 0,
 	/* initialize */ new_faderport16_midi_protocol,
 	/* destroy    */ delete_faderport16_midi_protocol,
+	/* enumerate  */ enumerate_faderport16_midi_protocol,
 };
 
 extern "C" ARDOURSURFACE_API

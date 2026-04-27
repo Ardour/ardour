@@ -36,7 +36,7 @@ using namespace PBD;
 using namespace ArdourSurface::LAUNCHPAD_NAMESPACE;
 
 static ControlProtocol*
-new_lk4 (Session* s)
+new_lk4 (Session* s, void* config)
 {
 	LaunchKey4 * lk4 = nullptr;
 
@@ -73,6 +73,11 @@ probe_lk4_midi_protocol ()
 	return LaunchKey4::probe (i, o);
 }
 
+static std::map<std::string, std::vector<std::string>>
+enumerate_lk4 ()
+{
+	return {{"Novation", {"Launchkey 4"}}};
+}
 
 static ControlProtocolDescriptor lk4_descriptor = {
 #ifdef LAUNCHPAD_MINI
@@ -88,6 +93,7 @@ static ControlProtocolDescriptor lk4_descriptor = {
 	/* match usb  */ 0, // LaunchKey4::match_usb,
 	/* initialize */ new_lk4,
 	/* destroy    */ delete_lk4,
+	/* enumerate  */ enumerate_lk4,
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &lk4_descriptor; }

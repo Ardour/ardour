@@ -37,7 +37,7 @@ using namespace ArdourSurface;
 using namespace ArdourSurface::LAUNCHPAD_NAMESPACE;
 
 static ControlProtocol*
-new_lpmini (Session* s)
+new_lpmini (Session* s, void* config)
 {
 	LaunchPadX * lpm = nullptr;
 
@@ -74,6 +74,12 @@ probe_lpmini_midi_protocol ()
 	return LaunchPadX::probe (i, o);
 }
 
+static std::map<std::string, std::vector<std::string>>
+enumerate_lpmini ()
+{
+	return {{"Novation", {"Launchpad Mini"}}};
+}
+
 static ControlProtocolDescriptor lpmini_descriptor = {
 	/* name       */ "Novation LaunchPad Mini",
 	/* id         */ "uri://ardour.org/surfaces/lpmini:0",
@@ -83,6 +89,7 @@ static ControlProtocolDescriptor lpmini_descriptor = {
 	/* match usb  */ 0, // LaunchPadX::match_usb,
 	/* initialize */ new_lpmini,
 	/* destroy    */ delete_lpmini,
+	/* enumerate  */ enumerate_lpmini,
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &lpmini_descriptor; }

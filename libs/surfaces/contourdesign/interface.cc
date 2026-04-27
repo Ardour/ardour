@@ -35,7 +35,7 @@ using namespace PBD;
 using namespace ArdourSurface;
 
 static ControlProtocol*
-new_contourdesign_protocol (Session* s)
+new_contourdesign_protocol (Session* s, void* config)
 {
 	ContourDesignControlProtocol* wmcp = new ContourDesignControlProtocol (*s);
 	wmcp->set_active (true);
@@ -48,6 +48,11 @@ delete_contourdesign_protocol (ControlProtocol* cp)
 	delete cp;
 }
 
+static std::map<std::string, std::vector<std::string>>
+enumerate_contourdesign_protocol ()
+{
+	return {{"Contour Design", {"ShuttlePRO v1", "ShuttlePRO v2", "ShuttleXpress"}}};
+}
 
 static ControlProtocolDescriptor contourdesign_descriptor = {
 	/* name       */ "ContourDesign",
@@ -58,6 +63,7 @@ static ControlProtocolDescriptor contourdesign_descriptor = {
 	/* match usb  */ ContourDesignControlProtocol::match_usb,
 	/* initialize */ new_contourdesign_protocol,
 	/* destroy    */ delete_contourdesign_protocol,
+	/* enumerate  */ enumerate_contourdesign_protocol,
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &contourdesign_descriptor; }

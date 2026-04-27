@@ -28,7 +28,7 @@ using namespace PBD;
 using namespace ArdourSurface;
 
 static ControlProtocol*
-new_maschine2 (Session* s)
+new_maschine2 (Session* s, void* config)
 {
 	Maschine2* m2 = 0;
 
@@ -51,6 +51,12 @@ delete_maschine2 (ControlProtocol* cp)
 	delete cp;
 }
 
+static std::map<std::string, std::vector<std::string>>
+enumerate_maschine2 ()
+{
+	return {{"Native Instruments", {"Maschine 2"}}};
+}
+
 static ControlProtocolDescriptor maschine2_descriptor = {
 	/* name       */ "NI Maschine2",
 	/* id         */ "uri://ardour.org/surfaces/maschine2:0",
@@ -60,6 +66,7 @@ static ControlProtocolDescriptor maschine2_descriptor = {
 	/* match usb  */ 0,
 	/* initialize */ new_maschine2,
 	/* destroy    */ delete_maschine2,
+	/* enumerate  */ enumerate_maschine2,
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &maschine2_descriptor; }

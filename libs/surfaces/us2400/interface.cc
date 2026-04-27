@@ -32,7 +32,7 @@ using namespace ArdourSurface;
 using namespace US2400;
 
 static ControlProtocol*
-new_us2400_protocol (Session* s)
+new_us2400_protocol (Session* s, void* config)
 {
 	US2400Protocol* mcp = 0;
 
@@ -62,6 +62,12 @@ delete_us2400_protocol (ControlProtocol* cp)
 	}
 }
 
+static std::map<std::string, std::vector<std::string>>
+enumerate_us2400_protocol ()
+{
+	return {{"Tascam", {"US-2400"}}};
+}
+
 static ControlProtocolDescriptor us2400_descriptor = {
 	/* name       */ "Tascam US-2400",
 	/* id         */ "uri://ardour.org/surfaces/us2400:0",
@@ -71,6 +77,7 @@ static ControlProtocolDescriptor us2400_descriptor = {
 	/* match usb  */ 0,
 	/* initialize */ new_us2400_protocol,
 	/* destroy    */ delete_us2400_protocol,
+	/* enumerate  */ enumerate_us2400_protocol,
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &us2400_descriptor; }

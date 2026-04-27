@@ -37,7 +37,7 @@ using namespace ArdourSurface::MACKIE_NAMESPACE;
 #define PROTOCOL_NAME ("Mackie")
 
 static ControlProtocol*
-new_mackie_protocol (Session* s)
+new_mackie_protocol (Session* s, void* config)
 {
 	MackieControlProtocol* mcp = 0;
 
@@ -67,6 +67,12 @@ delete_mackie_protocol (ControlProtocol* cp)
 	}
 }
 
+static std::map<std::string, std::vector<std::string>>
+enumerate_mackie_protocol ()
+{
+	return MackieControlProtocol::get_manufacturers();
+}
+
 static ControlProtocolDescriptor mackie_descriptor = {
 	/* name       */ PROTOCOL_NAME,
 	/* id         */ "uri://ardour.org/surfaces/mackie:0",
@@ -76,6 +82,7 @@ static ControlProtocolDescriptor mackie_descriptor = {
 	/* match usb  */ 0,
 	/* initialize */ new_mackie_protocol,
 	/* destroy    */ delete_mackie_protocol,
+	/* enumerate  */ enumerate_mackie_protocol,
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &mackie_descriptor; }

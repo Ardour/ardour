@@ -26,7 +26,7 @@ using namespace ARDOUR;
 using namespace ArdourSurface;
 
 static ControlProtocol*
-new_faderport_midi_protocol (Session* s)
+new_faderport_midi_protocol (Session* s, void* config)
 {
 	FaderPort* fp;
 
@@ -50,6 +50,12 @@ delete_faderport_midi_protocol (ControlProtocol* cp)
 	delete cp;
 }
 
+static std::map<std::string, std::vector<std::string>>
+enumerate_faderport_midi_protocol ()
+{
+	return {{"PreSonus", {"FaderPort"}}};
+}
+
 static ControlProtocolDescriptor faderport_midi_descriptor = {
 	/* name       */ "PreSonus FaderPort",
 	/* id         */ "uri://ardour.org/surfaces/faderport:0",
@@ -59,6 +65,7 @@ static ControlProtocolDescriptor faderport_midi_descriptor = {
 	/* match usb  */ 0,
 	/* initialize */ new_faderport_midi_protocol,
 	/* destroy    */ delete_faderport_midi_protocol,
+	/* enumerate  */ enumerate_faderport_midi_protocol,
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &faderport_midi_descriptor; }

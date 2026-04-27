@@ -30,7 +30,7 @@ using namespace PBD;
 using namespace ArdourSurface;
 
 static ControlProtocol*
-new_push2 (Session* s)
+new_push2 (Session* s, void* config)
 {
 	Push2 * p2 = 0;
 
@@ -67,6 +67,11 @@ probe_push2_midi_protocol ()
 	return Push2::probe (i, o);
 }
 
+static std::map<std::string, std::vector<std::string>>
+enumerate_push2 ()
+{
+	return {{"Ableton", {"Push 2"}}};
+}
 
 static ControlProtocolDescriptor push2_descriptor = {
 	/* name       */ "Ableton Push 2",
@@ -77,6 +82,7 @@ static ControlProtocolDescriptor push2_descriptor = {
 	/* match usb  */ 0, // Push2::match_usb,
 	/* initialize */ new_push2,
 	/* destroy    */ delete_push2,
+	/* enumerate  */ enumerate_push2,
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &push2_descriptor; }
