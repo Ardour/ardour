@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ArdourMIDIBindings version="1.0.0" name="Donner StarryPad">
+<ArdourMIDIBindings version="1.0.0" name="StarryPad" manufacturer="Donner">
 
 <!-- Created 2023-07-14 by Albert Gräf. The Donner StarryPad is a cheap and
      cheerful 4x4 drum pad controller sold by Donner with some transport

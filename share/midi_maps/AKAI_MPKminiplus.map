@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ArdourMIDIBindings version="1.0.0" name="AKAI MPK miniplus">
+<ArdourMIDIBindings version="1.0.0" name="MPK miniplus" manufacturer="Akai">
 
 <!-- Created 2023-07-12 by Albert Gräf. This assumes the default factory
      settings, otherwise you may have to adjust the controller numbers. The

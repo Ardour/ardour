@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ArdourMIDIBindings version="1.0.0" name="Roland A-30">
+<ArdourMIDIBindings version="1.0.0" name="A-30" manufacturer="Roland">
 
 <!-- Standard Start/Stop commands.  Should work with many more MIDI devices. -->
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ArdourMIDIBindings version="1.0.0" name="Novation Impulse 61">
+<ArdourMIDIBindings version="1.0.0" name="Impulse 61" manufacturer="Novation">
 
 <!-- 2013-09-04 Alexandre Prokoudine: Map file creation -->
 <!-- This mapping relies on the Basic MIDI preset in the Impulse 61. -->

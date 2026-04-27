@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ArdourMIDIBindings version="1.0.0" name="Korg nanoKONTROL w/Master">
+<ArdourMIDIBindings version="1.0.0" name="nanoKONTROL w/Master" manufacturer="Korg">
 
 
 <!-- 2012-6-25 James Roberts: Map file creation -->

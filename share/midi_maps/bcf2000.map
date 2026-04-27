@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ArdourMIDIBindings version="1.0.0" name="Behringer BCF2000 Factory Preset 2">
+<ArdourMIDIBindings version="1.0.0" name="BCF2000 Factory Preset 2" manufacturer="Behringer">
 <!-- 2010-03-29 Sylvain Robitaille                                  -->
 
 <!-- Set the BCF2000 to factory preset number 2, and this will bind -->

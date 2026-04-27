@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ArdourMIDIBindings version="1.0.0" name="M-Audio Oxygen61 V3 by samtuke">
+<ArdourMIDIBindings version="1.0.0" name="Oxygen61 V3 by samtuke" manufacturer="M-Audio">
 
   <!-- NOTE: This map uses 'P.10' (program 10) on the keyboard, which is the direct link program. Make sure you have set your program to 10 to use it with this map -->
 

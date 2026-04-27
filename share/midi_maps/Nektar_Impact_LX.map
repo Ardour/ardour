@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ArdourMIDIBindings version="1.0.0" name="Nektar Impact LX">
+<ArdourMIDIBindings version="1.0.0" name="Impact LX" manufacturer="Nektar">
 
 <!--
 Ardour MIDI Binding Map for the Nektar Impact LX series of controllers (mainly LX-49 & LX-61)

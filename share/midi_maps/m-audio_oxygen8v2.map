@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ArdourMIDIBindings version="1.0.0" name="M-Audio Oxygen8 V2">
+<ArdourMIDIBindings version="1.0.0" name="Oxygen8 V2" manufacturer="M-Audio">
   <DeviceInfo bank-size="8"/>
   <Binding channel="1" ctl="20" function="loop-toggle"/>
   <Binding channel="1" ctl="21" action="Transport/Rewind"/>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ArdourMIDIBindings version="1.0.0" name="AKAI MPK61">
+<ArdourMIDIBindings version="1.0.0" name="MPK61" manufacturer="Akai">
 
 <!-- MMC MIDI Mapping for Akai MPK61 -->
 <!-- Intended to be used with the MPK61 'Generic' MIDI/MMC (Preset 18) -->

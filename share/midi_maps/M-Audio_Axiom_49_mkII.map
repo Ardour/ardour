@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ArdourMIDIBindings version="1.0.0" name="M-Audio Axiom 49 MkII">
+<ArdourMIDIBindings version="1.0.0" name="Axiom 49 MkII" manufacturer="M-Audio">
 
 <!-- 2015-04-25 Edgar Aichinger: initial version for Axiom 61 -->
 <!-- 2024-10-14 Francois-Xavier Thomas: adaptation for Axiom 49 MkII -->

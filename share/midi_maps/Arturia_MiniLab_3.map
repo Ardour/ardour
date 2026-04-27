@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ArdourMIDIBindings version="1.0.0" name="Arturia MiniLab 3">
+<ArdourMIDIBindings version="1.0.0" name="MiniLab 3" manufacturer="Arturia">
 <!-- 2024-01-19 Alexandre Prokoudine: Map file creation -->
 <!-- 2024-09-10 Alexandre Prokoudine: Update the map file -->
 

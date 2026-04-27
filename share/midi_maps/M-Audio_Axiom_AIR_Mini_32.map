@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ArdourMIDIBindings version="1.0.0" name="M-Audio Axiom AIR Mini 32">
+<ArdourMIDIBindings version="1.0.0" name="Axiom AIR Mini 32" manufacturer="M-Audio">
   <!-- 01-29-2018 Shawn Doherty-->
   <!-- Ardour Midi Map Template-->
 

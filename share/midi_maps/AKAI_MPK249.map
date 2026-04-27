@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ArdourMIDIBindings version="1.0.0" name="AKAI MPK249">
+<ArdourMIDIBindings version="1.0.0" name="MPK249" manufacturer="Akai">
 
 <!-- MMC MIDI Mapping for Akai MPK249 -->
 <!-- Intended to be used with the MPK249 'Generic' MIDI/MMC (Preset 18) -->

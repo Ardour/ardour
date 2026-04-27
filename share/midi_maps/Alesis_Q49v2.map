@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 2022-1-4 Vincent Tassy: Map file creation -->
-<ArdourMIDIBindings version="1.0.0" name="Alesis Q49 MKII">
+<ArdourMIDIBindings version="1.0.0" name="Q49 MKII" manufacturer="Alesis">
 
   <Binding channel="1" ctl="118" function="transport-stop"/>
   <Binding channel="1" ctl="119" function="transport-roll"/>

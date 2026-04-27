@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ArdourMIDIBindings version="1.0.0" name="Arturia Keylab 49/61/88 mk2 (MCU/Analog Lab mode)">
+<ArdourMIDIBindings version="1.0.0" name="Keylab 49/61/88 mk2 (MCU/Analog Lab mode)" manufacturer="Arturia">
 <!-- MCU MIDI Mapping for Arturia Keylab 49/61/88 mk2 in "Analog Lab" mode. -->
 
 <!--

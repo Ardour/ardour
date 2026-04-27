@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ArdourMIDIBindings version="1.1.0" name="Korg nanoKONTROL2 With Master">
+<ArdourMIDIBindings version="1.1.0" name="nanoKONTROL2 With Master" manufacturer="Korg">
 
 <!-- This NanoKontrol2 map have some special feature. I use 7 channel for the tracks		-->
 <!-- and the Nº 8 for the master fader, for that reason, the "bank-size" is set to 7.		-->

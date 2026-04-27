@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ArdourMIDIBindings version="1.0.0" name="AKAI MPD32 by samtuke">
+<ArdourMIDIBindings version="1.0.0" name="MPD32 by samtuke" manufacturer="Akai">
 
   <!-- NOTE: This map uses 'Cubase' (Preset 3) on the MPD -->
 

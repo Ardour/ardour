@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ArdourMIDIBindings version="1.0.0" name="Novation Impulse 49">
+<ArdourMIDIBindings version="1.0.0" name="Impulse 49" manufacturer="Novation">
 
 <!-- This mapping relies on the Basic MIDI preset in the Impulse 49. -->
 

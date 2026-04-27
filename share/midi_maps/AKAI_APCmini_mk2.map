@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ArdourMIDIBindings version="1.0.0" name="AKAI APC mini mk2">
+<ArdourMIDIBindings version="1.0.0" name="APC mini mk2" manufacturer="Akai">
 
 <!-- Created 2023-07-12 by Albert Gräf. This is for the mk2 version of the
      controller. -->

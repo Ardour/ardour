@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ArdourMIDIBindings version="1.0.0" name="Nektar Panorama">
+<ArdourMIDIBindings version="1.0.0" name="Panorama" manufacturer="Nektar">
 
 
   <DeviceInfo bank-size="8"/>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ArdourMIDIBindings version="1.0.0" name="M-Audio Oxygen 49">
+<ArdourMIDIBindings version="1.0.0" name="Oxygen 49" manufacturer="M-Audio">
 <!-- 2015 05 26 Erik Deroo: Map file creation -->
 <!-- Auto-map should be ON -->
 

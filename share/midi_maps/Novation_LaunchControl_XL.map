@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ArdourMIDIBindings version="1.0.0" name="Novation Launch Control XL">
+<ArdourMIDIBindings version="1.0.0" name="Launch Control XL" manufacturer="Novation">
 <!-- 2014-10-04 Alois Cochard (alois.cochard@gmail.com)            -->
 
 <DeviceInfo bank-size="8" motorised="yes"/>

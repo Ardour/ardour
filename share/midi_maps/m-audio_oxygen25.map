@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ArdourMIDIBindings version="1.0.0" name="M-Audio Oxygen25 (factory default)">
+<ArdourMIDIBindings version="1.0.0" name="Oxygen25 (factory default)" manufacturer="M-Audio">
   <Binding msg="bf 71 7f"         function="loop-toggle"/>
   <Binding msg="bf 72 7f"         action="Transport/Rewind"/>
   <Binding msg="bf 73 7f"         action="Transport/Forward"/>

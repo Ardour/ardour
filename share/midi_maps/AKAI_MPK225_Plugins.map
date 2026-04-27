@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ArdourMIDIBindings version="1.0.0" name="Akai MPK 225 (Eq mode) : preset 6">
+<ArdourMIDIBindings version="1.0.0" name="MPK 225 (Eq mode) : preset 6" manufacturer="Akai">
 <DeviceInfo bank-size="8"/>
 
 <!-- NOTE : use preset 6 to enable these -->

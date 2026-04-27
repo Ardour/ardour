@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ArdourMIDIBindings version="1.0.0" name="M-Audio Oxygen25 (3rd Gen)">
+<ArdourMIDIBindings version="1.0.0" name="Oxygen25 (3rd Gen)" manufacturer="M-Audio">
   <Binding channel="16" ctl="113" function="loop-toggle"/>
   <Binding channel="16" ctl="114" function="transport-start"/>
   <Binding channel="16" ctl="115" function="transport-end"/>

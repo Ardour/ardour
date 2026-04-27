@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ArdourMIDIBindings version="1.0.0" name="Yamaha KX25 Transport Controls">
+<ArdourMIDIBindings version="1.0.0" name="KX25 Transport Controls" manufacturer="Yamaha">
 
 <!-- Map file created at 09-09-2013 by Gerard Aberkrom -->
 

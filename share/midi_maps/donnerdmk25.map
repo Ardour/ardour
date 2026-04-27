@@ -46,7 +46,7 @@ Finally:
 - Press the key labelled "enter" to save (high C)
 
 -->
-<ArdourMIDIBindings version="1.0.0" name="Donner DMK25 SpacLine">
+<ArdourMIDIBindings version="1.0.0" name="DMK25 SpacLine" manufacturer="Donner">
 	<Binding channel="1" ctl="18" function="transport-stop"/>
 	<Binding channel="1" ctl="19" function="transport-roll"/>
 	<Binding channel="1" ctl="16" function="transport-start"/>

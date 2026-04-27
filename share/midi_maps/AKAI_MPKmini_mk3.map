@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ArdourMIDIBindings version="1.0.0" name="AKAI MPK mini mk3">
+<ArdourMIDIBindings version="1.0.0" name="MPK mini mk3" manufacturer="Akai">
 
 <!-- MMC MIDI Mapping for Akai MPK mini mk3 -->
 <!-- 2024-08-23  Peter Zenk (peter.zenk@gmail.com) -->

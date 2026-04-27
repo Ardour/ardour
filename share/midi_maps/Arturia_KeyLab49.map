@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ArdourMIDIBindings version="1.0.0" name="Arturia KeyLab 49">
+<ArdourMIDIBindings version="1.0.0" name="KeyLab 49" manufacturer="Arturia">
 <!-- Works with device's factory settings. Transport control is available through MMC. -->
 
   <DeviceInfo bank-size="8"/>

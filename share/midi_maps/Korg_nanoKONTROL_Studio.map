@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ArdourMIDIBindings version="1.0.0" name="Korg nanoKONTROL Studio">
+<ArdourMIDIBindings version="1.0.0" name="nanoKONTROL Studio" manufacturer="Korg">
 
 <!-- 2017-03-09 Robert Schneider (robert.schneider@aramar.de) -->
 <!-- Put the following lines into a text file and issue

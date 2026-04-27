@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ArdourMIDIBindings version="1.0.0" name="WiiMote via midikb">
+<ArdourMIDIBindings version="1.0.0" name="WiiMote via midikb" manufacturer="Nintendo">
 
 <!-- OvenWerks June 27 2015 -->
 <!-- This tries to do what the old WiiMote setup in Ardour did -->

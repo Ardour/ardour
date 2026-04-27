@@ -2,7 +2,7 @@
 
 <!-- Where a control's mapping to an Ardour function is unclear, it has been commented out for future implementation -->
 
-<ArdourMIDIBindings version="1.0.0" name="Roland SI-24">
+<ArdourMIDIBindings version="1.0.0" name="SI-24" manufacturer="Roland">
 	<DeviceInfo bank-size="12"/>
 
 	<!--	faders	-->
