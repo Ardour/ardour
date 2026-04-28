@@ -2610,6 +2610,9 @@ EngineControl::get_buffer_size () const
 		fprintf (stderr, "Find a trout and repeatedly slap the nearest C++ developer who throws exceptions without catching them.\n");
 		fprintf (stderr, "Ardour will likely crash now, giving you time to get the trout.\n");
 		fprintf (stderr, "the buffer size combo said [%s]\n", txt.c_str());
+		fprintf (stderr, "If you're using CJK locales with translations enabled, you might need to handle CJK ambiguous width characters by appending a modifier to `LANG`.\n");
+		fprintf (stderr, "See https://cygwin.com/cygwin-ug-net/setup-locale.html\n");
+		fprintf (stderr, "Your `LANG` is [%s]\n", std::getenv("LANG"));
 		throw exception ();
 	}
 
