@@ -149,12 +149,15 @@ EditorVSummary::render_background_image ()
 	std::shared_ptr<RouteGroup> prev_group = nullptr;
 	std::shared_ptr<RouteGroup> group = nullptr;
 
-
+	/* The editor's scrollable height depends on the last track's height
+	 * (automation tracks excluded), store it now.
+	 * It's actually not true when there's only one or zero TAV visible but we
+	 * clamp the view rect's height so that's not a problem.
+	 */
 	for (TrackViewList::const_reverse_iterator i = _editor.track_views.crbegin(); i != _editor.track_views.crend(); ++i) {
 		if ((*i)->hidden()) {
 			continue;
 		}
-		/* The editor's scrollable height depends on the last track's height (automation tracks excluded), store it now */
 		_editor_scroll_height = _editor._full_canvas_height + _editor.visible_canvas_height() - _editor.ruler_separator->position().y - (*i)->current_height();
 		break;
 	}
@@ -290,12 +293,12 @@ EditorVSummary::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangl
 		get_editor (&_view_rectangle);
 	}
 
-	int32_t height = _view_rectangle.second - _view_rectangle.first;
+	int height = min((int)(_view_rectangle.second - _view_rectangle.first), get_height() - 1);
 	cairo_rectangle (cr, 0, _view_rectangle.first, get_width(), height);
 	Gtkmm2ext::set_source_rgba (cr, _viewrect_color);
 	cairo_fill (cr);
 
-	cairo_rectangle (cr, 0.5, (int) (_view_rectangle.first) + 0.5, get_width () - 1, (int)height);
+	cairo_rectangle (cr, 0.5, (int) (_view_rectangle.first) + 0.5, get_width () - 1, height);
 	cairo_set_line_width (cr, 1);
 	cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(_viewrect_color), UINT_RGBA_G_FLT(_viewrect_color), UINT_RGBA_B_FLT(_viewrect_color), 0.5);
 	cairo_stroke (cr);
