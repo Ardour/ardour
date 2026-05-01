@@ -101,8 +101,6 @@
 #include "step_editor.h"
 #include "note_base.h"
 
-#include "ardour/midi_track.h"
-
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
