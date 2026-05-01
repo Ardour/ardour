@@ -1762,25 +1762,7 @@ MidiTimeAxisView::get_preferred_midi_channel () const
 	}
 
 	uint16_t const chn_mask = midi_track()->get_playback_channel_mask();
-	int chn_cnt = 0;
-	uint8_t channel = 0;
-
-	/* pick the highest selected channel, unless all channels are selected,
-	 * which is interpreted to mean channel 1 (zero)
-	 */
-
-	for (uint16_t i = 0; i < 16; ++i) {
-		if (chn_mask & (1<<i)) {
-			channel = i;
-			chn_cnt++;
-		}
-	}
-
-	if (chn_cnt == 16) {
-		channel = 0;
-	}
-
-	return channel;
+	return get_preferred_midi_channel_from_chn_mask (chn_mask);
 }
 
 void
