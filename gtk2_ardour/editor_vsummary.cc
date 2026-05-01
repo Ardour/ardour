@@ -363,15 +363,9 @@ EditorVSummary::on_button_press_event (GdkEventButton* ev)
 	if (ev->y < _view_rectangle.first || ev->y > _view_rectangle.second) {
 		/* center view rect on mouse */
 		int target_y = ev->y - (_view_rectangle.second - _view_rectangle.first) / 2;
-		double h = _view_rectangle.second - _view_rectangle.first;
-		if (target_y < 0) {
-			target_y = 0;
-		} else if (target_y + h > get_height()) {
-			target_y = get_height() - h;
-		}
 		set_editor(target_y);
 		/* set drag reference with new view rect coordinate */
-		_offset_y = target_y - ev->y;
+		_offset_y = editor_y_to_summary(_last_editor_y) - ev->y;
 	} else {
 		/* set drag reference with current view rect coordinate */
 		_offset_y = _view_rectangle.first - ev->y;
@@ -421,7 +415,7 @@ EditorVSummary::set_editor (double y)
 	if (y < 0) {
 		y = 0;
 	} else if (y + h > get_height()) {
-		y = get_height() - h;
+		y = get_height() - h + 1;
 	}
 
 	double editor_y = y / get_height() * _editor_scroll_height;
