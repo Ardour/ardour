@@ -671,6 +671,8 @@ Editor::register_actions ()
 
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleSummary"), _("Show Summary"), sigc::mem_fun (*this, &Editor::set_summary));
 
+	ActionManager::register_toggle_action (editor_actions, X_("ToggleVerticalSummary"), _("Show Vertical Summary"), sigc::mem_fun (*this, &Editor::set_vsummary));
+
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleGroupTabs"), _("Show Group Tabs"), sigc::mem_fun (*this, &Editor::set_group_tabs));
 
 	ActionManager::register_action (editor_actions, X_("toggle-midi-input-active"), _("Toggle MIDI Input Active for Editor-Selected Tracks/Busses"),
@@ -951,6 +953,13 @@ Editor::set_summary ()
 {
 	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("ToggleSummary"));
 	_session->config.set_show_summary (tact->get_active ());
+}
+
+void
+Editor::set_vsummary ()
+{
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("ToggleVerticalSummary"));
+	_session->config.set_show_vsummary (tact->get_active ());
 }
 
 void
@@ -1237,6 +1246,19 @@ Editor::parameter_changed (std::string p)
 		if (tact->get_active () != s) {
 			tact->set_active (s);
 		}
+	} else if (p == "show-vertical-summary") {
+
+	   bool const s = _session->config.get_show_vsummary ();
+	   if (s) {
+		   _vsummary_frame.show ();
+	   } else {
+		   _vsummary_frame.hide ();
+	   }
+
+	   Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("ToggleVerticalSummary"));
+	   if (tact->get_active () != s) {
+		   tact->set_active (s);
+	   }
 	} else if (p == "show-group-tabs") {
 
 		bool const s = _session ? _session->config.get_show_group_tabs () : true;

@@ -321,6 +321,7 @@ public:
 
 	void toggle_zero_line_visibility ();
 	void set_summary ();
+	void set_vsummary ();
 	void set_group_tabs ();
 
 	/* returns the left-most and right-most time that the gui should allow the user to scroll to */
@@ -584,7 +585,6 @@ private:
 	void add_notebook_page (std::string const&, std::string const&, Gtk::Widget&);
 
 	ArdourWidgets::VPane editor_summary_pane;
-	ArdourWidgets::HPane editor_vsummary_pane;
 
 	Gtk::EventBox meter_base;
 	Gtk::EventBox marker_base;
@@ -2154,6 +2154,7 @@ private:
 	Gtk::VBox _summary_vbox;
 	EditorSummary* _summary;
 
+	Gtk::Frame _vsummary_frame;
 	EditorVSummary* _vsummary;
 
 	void region_view_added (RegionView*);

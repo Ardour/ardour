@@ -661,6 +661,7 @@
       <menuitem action='show-editor-props'/>
 
       <menuitem action='ToggleSummary'/>
+      <menuitem action='ToggleVerticalSummary'/>
       <menuitem action='ToggleGroupTabs'/>
       <menuitem action='show-marker-lines'/>
 

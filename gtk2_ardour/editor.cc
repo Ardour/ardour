@@ -518,20 +518,16 @@ Editor::Editor ()
 
 	/* labels for the time bars */
 	edit_packer.attach (time_bars_event_box,     1, 3, 0, 1,    FILL,        SHRINK,      5, 0);
-
-	/* vertical summary */
-	Gtk::Frame* vsummary_frame = manage (new Gtk::Frame); // vsummary border
-	vsummary_frame->set_name("SummaryFrame");
-	vsummary_frame->add(*_vsummary);
-	edit_packer.attach (*vsummary_frame,         4, 5, 1, 2,    FILL,        FILL|EXPAND, 0, 0);
-	_vsummary->set_size_request(20, -1);
-
-
 	/* track controls */
 	edit_packer.attach (*_group_tabs,            1, 2, 1, 2,    FILL,        FILL|EXPAND, 0, 0);
 	edit_packer.attach (controls_layout,         2, 3, 1, 2,    FILL,        FILL|EXPAND, 0, 0);
 	/* canvas */
 	edit_packer.attach (*_track_canvas_viewport, 3, 4, 0, 2,    FILL|EXPAND, FILL|EXPAND, 0, 0);
+	/* vertical summary */
+	_vsummary_frame.set_name("SummaryFrame");
+	_vsummary_frame.add(*_vsummary);
+	edit_packer.attach (_vsummary_frame,         4, 5, 1, 2,    FILL,        FILL|EXPAND, 0, 0);
+	_vsummary->set_size_request(20, -1);
 
 	PresentationInfo::Change.connect (*this, MISSING_INVALIDATOR, std::bind (&Editor::presentation_info_changed, this, _1), gui_context());
 
