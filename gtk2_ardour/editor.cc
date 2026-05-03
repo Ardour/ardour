@@ -527,7 +527,7 @@ Editor::Editor ()
 	_vsummary_frame.set_name("SummaryFrame");
 	_vsummary_frame.add(*_vsummary);
 	edit_packer.attach (_vsummary_frame,         4, 5, 1, 2,    FILL,        FILL|EXPAND, 0, 0);
-	_vsummary->set_size_request(20, -1);
+	_vsummary->set_size_request(20 * UIConfiguration::instance().get_ui_scale(), -1);
 
 	PresentationInfo::Change.connect (*this, MISSING_INVALIDATOR, std::bind (&Editor::presentation_info_changed, this, _1), gui_context());
 
