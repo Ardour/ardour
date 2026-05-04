@@ -118,37 +118,6 @@ gdk_window_impl_quartz_get_context (GdkDrawable *drawable,
   CGContextSaveGState (cg_context);
   CGContextSetAllowsAntialiasing (cg_context, antialias);
 
-  /* We'll emulate the clipping caused by double buffering here */
-  if (window_impl->begin_paint_count != 0)
-    {
-      CGRect rect;
-      CGRect *cg_rects;
-      GdkRectangle *rects;
-      gint n_rects, i;
-
-      gdk_region_get_rectangles (window_impl->paint_clip_region,
-                                 &rects, &n_rects);
-
-      if (n_rects == 1)
-        cg_rects = &rect;
-      else
-        cg_rects = g_new (CGRect, n_rects);
-
-      for (i = 0; i < n_rects; i++)
-        {
-          cg_rects[i].origin.x = rects[i].x;
-          cg_rects[i].origin.y = rects[i].y;
-          cg_rects[i].size.width = rects[i].width;
-          cg_rects[i].size.height = rects[i].height;
-        }
-
-      CGContextClipToRects (cg_context, cg_rects, n_rects);
-
-      g_free (rects);
-      if (cg_rects != &rect)
-        g_free (cg_rects);
-    }
-
   return cg_context;
 }
 
@@ -201,9 +170,6 @@ gdk_window_impl_quartz_finalize (GObject *object)
   GdkWindowObject *private = (GdkWindowObject*) window;
 
   check_grab_destroy (window);
-
-  if (impl->paint_clip_region)
-    gdk_region_destroy (impl->paint_clip_region);
 
   if (impl->transient_for)
     g_object_unref (impl->transient_for);
