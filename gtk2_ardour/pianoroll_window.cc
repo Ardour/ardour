@@ -81,6 +81,12 @@ PianorollWindow::replace_region (std::shared_ptr<MidiTrack> track, std::shared_p
 	pianoroll->replace_region (region, track);
 }
 
+void
+PianorollWindow::remove_regions ()
+{
+	pianoroll->remove_regions ();
+}
+
 bool
 PianorollWindow::on_key_press_event (GdkEventKey* ev)
 {

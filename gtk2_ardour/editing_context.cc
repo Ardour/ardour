@@ -614,10 +614,10 @@ EditingContext::register_midi_actions (Bindings* midi_bindings, std::string cons
 
 	/* two versions to allow same action for Delete and Backspace */
 
-	ActionManager::register_action (_midi_actions, X_("clear-selection"), _("Clear Note Selection"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiRegionView::clear_note_selection));
-	ActionManager::register_action (_midi_actions, X_("invert-selection"), _("Invert Note Selection"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiRegionView::invert_selection));
-	ActionManager::register_action (_midi_actions, X_("extend-selection"), _("Extend Note Selection"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiRegionView::extend_selection));
-	ActionManager::register_action (_midi_actions, X_("duplicate-selection"), _("Duplicate Note Selection"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiRegionView::duplicate_selection));
+	ActionManager::register_action (_midi_actions, X_("clear-selection"), _("Clear Note Selection"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::clear_selection));
+	ActionManager::register_action (_midi_actions, X_("invert-selection"), _("Invert Note Selection"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::invert_selection));
+	ActionManager::register_action (_midi_actions, X_("extend-selection"), _("Extend Note Selection"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::extend_selection));
+	ActionManager::register_action (_midi_actions, X_("duplicate-selection"), _("Duplicate Note Selection"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiView::duplicate_selection));
 
 	/* Intervals */
 
@@ -1566,7 +1566,8 @@ EditingContext::follow_playhead() const
 		return false;
 	}
 
-	return follow_playhead_action->get_active ();
+	/* Prevent follow playhead during the drag to be nice to the user */
+	return follow_playhead_action->get_active () && !_drags->active ();
 }
 
 double
@@ -4138,6 +4139,8 @@ EditingContext::set_minsec_ruler_scale (samplepos_t lower, samplepos_t upper)
 void
 EditingContext::scroll_left_step ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	samplepos_t xdelta = (current_page_samples() / 8);
 
 	if (_leftmost_sample > xdelta) {
@@ -4151,6 +4154,8 @@ EditingContext::scroll_left_step ()
 void
 EditingContext::scroll_right_step ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	samplepos_t xdelta = (current_page_samples() / 8);
 
 	if (max_samplepos - xdelta > _leftmost_sample) {
@@ -4163,6 +4168,8 @@ EditingContext::scroll_right_step ()
 void
 EditingContext::scroll_left_half_page ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	samplepos_t xdelta = (current_page_samples() / 2);
 	if (_leftmost_sample > xdelta) {
 		reset_x_origin (_leftmost_sample - xdelta);
@@ -4174,6 +4181,8 @@ EditingContext::scroll_left_half_page ()
 void
 EditingContext::scroll_right_half_page ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	samplepos_t xdelta = (current_page_samples() / 2);
 	if (max_samplepos - xdelta > _leftmost_sample) {
 		reset_x_origin (_leftmost_sample + xdelta);
@@ -4191,9 +4200,13 @@ EditingContext::get_single_region_context_menu ()
 void
 EditingContext::region_selection_changed ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!pianoroll_window || selection->regions.empty()) {
 		return;
 	}
+
+	pianoroll_window->remove_regions ();
 
 	std::vector<MidiRegionView*> midi_region_views;
 	std::set<Temporal::Beats> positions;
@@ -4263,6 +4276,8 @@ EditingContext::region_selection_changed ()
 void
 EditingContext::pianoroll_edit ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (!pianoroll_window) {
 		pianoroll_window = new PianorollWindow (_("Pianoroll Window"), *_session);
 		pianoroll_window->signal_delete_event().connect (sigc::bind (sigc::ptr_fun (ARDOUR_UI_UTILS::just_hide_it), pianoroll_window));

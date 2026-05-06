@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nn\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-19 22:00+0100\n"
+"POT-Creation-Date: 2026-05-05 15:38+0200\n"
 "PO-Revision-Date: 2009-01-22 11:03+0100\n"
 "Last-Translator: Åsmund Skjæveland <aasmunds@ulrik.uio.no>\n"
 "Language-Team: Norwegian Nynorsk <i18n-nn@lister.ping.uio.no>\n"
@@ -116,7 +116,7 @@ msgstr ""
 "Vel fargen du vil ha frå den ytre ringen. Vel styrken på denne fargen frå "
 "det indre triangelet."
 
-#: gtkcolorsel.c:382
+#: gtkcolorsel.c:393
 msgid ""
 "Click the eyedropper, then click a color anywhere on your screen to select "
 "that color."
@@ -124,70 +124,70 @@ msgstr ""
 "Klikk på dråpeteljaren, og klikk så på ein farge kor som helst på skjermen "
 "for å velja den fargen."
 
-#: gtkcolorsel.c:391
+#: gtkcolorsel.c:403
 msgid "_Hue:"
 msgstr "_Glød:"
 
-#: gtkcolorsel.c:392
+#: gtkcolorsel.c:404
 msgid "Position on the color wheel."
 msgstr "Plassering på fargehjulet."
 
-#: gtkcolorsel.c:394
+#: gtkcolorsel.c:406
 msgid "_Saturation:"
 msgstr "_Metning:"
 
-#: gtkcolorsel.c:395
+#: gtkcolorsel.c:407
 msgid "\"Deepness\" of the color."
 msgstr "Djupna i fargen"
 
-#: gtkcolorsel.c:396
+#: gtkcolorsel.c:408
 msgid "_Value:"
 msgstr "_Verdi:"
 
-#: gtkcolorsel.c:397
+#: gtkcolorsel.c:409
 msgid "Brightness of the color."
 msgstr "Kor lys fargen er."
 
-#: gtkcolorsel.c:398
+#: gtkcolorsel.c:410
 msgid "_Red:"
 msgstr "_Raud:"
 
-#: gtkcolorsel.c:399
+#: gtkcolorsel.c:411
 msgid "Amount of red light in the color."
 msgstr "Kor mykje raudt lys det er i fargen."
 
-#: gtkcolorsel.c:400
+#: gtkcolorsel.c:412
 msgid "_Green:"
 msgstr "_Grøn:"
 
 # gtk/gtkcolorsel.c:1820
-#: gtkcolorsel.c:401
+#: gtkcolorsel.c:413
 msgid "Amount of green light in the color."
 msgstr "Kor mykje grønt lys det er i fargen."
 
-#: gtkcolorsel.c:402
+#: gtkcolorsel.c:414
 msgid "_Blue:"
 msgstr "_Blå:"
 
-#: gtkcolorsel.c:403
+#: gtkcolorsel.c:415
 msgid "Amount of blue light in the color."
 msgstr "Kor mykje blått lys det er i fargen."
 
 #
-#: gtkcolorsel.c:406
+#: gtkcolorsel.c:418
 msgid "Op_acity:"
 msgstr "_Ugjennomsiktighet:"
 
-#: gtkcolorsel.c:413 gtkcolorsel.c:423
+#: gtkcolorsel.c:425 gtkcolorsel.c:435
 msgid "Transparency of the color."
 msgstr "Kor klar den valde fargen er."
 
 #
-#: gtkcolorsel.c:430
+#: gtkcolorsel.c:442
 msgid "Color _name:"
 msgstr "Farge_namn:"
 
-#: gtkcolorsel.c:444
+#: gtkcolorsel.c:456
 msgid ""
 "You can enter an HTML-style hexadecimal color value, or simply a color name "
 "such as 'orange' in this entry."
@@ -196,16 +196,16 @@ msgstr ""
 "fargenamn som t.d. «oransje»."
 
 #
-#: gtkcolorsel.c:474
+#: gtkcolorsel.c:486
 msgid "_Palette:"
 msgstr "_Palett:"
 
 #
-#: gtkcolorsel.c:503
+#: gtkcolorsel.c:515
 msgid "Color Wheel"
 msgstr "Fargehjul"
 
-#: gtkcolorsel.c:962
+#: gtkcolorsel.c:974
 msgid ""
 "The previously-selected color, for comparison to the color you're selecting "
 "now. You can drag this color to a palette entry, or select this color as "
@@ -215,7 +215,7 @@ msgstr ""
 "Du kan dra denne fargen til ei palettoppføring, eller velja denne fargen som "
 "noverande ved å dra han til den andre fargeprøven."
 
-#: gtkcolorsel.c:965
+#: gtkcolorsel.c:977
 msgid ""
 "The color you've chosen. You can drag this color to a palette entry to save "
 "it for use in the future."
@@ -223,21 +223,21 @@ msgstr ""
 "Fargen du har vald. Du kan dra denne fargen til ei palettoppføring for å "
 "lagra han til seinare bruk."
 
-#: gtkcolorsel.c:970
+#: gtkcolorsel.c:982
 msgid ""
 "The previously-selected color, for comparison to the color you're selecting "
 "now."
 msgstr ""
 
-#: gtkcolorsel.c:973
+#: gtkcolorsel.c:985
 msgid "The color you've chosen."
 msgstr ""
 
-#: gtkcolorsel.c:1389
+#: gtkcolorsel.c:1401
 msgid "_Save color here"
 msgstr "_Lagra fargen her"
 
-#: gtkcolorsel.c:1593
+#: gtkcolorsel.c:1605
 msgid ""
 "Click this palette entry to make it the current color. To change this entry, "
 "drag a color swatch here or right-click it and select \"Save color here.\""
@@ -266,7 +266,7 @@ msgstr "Caps Lock er på"
 msgid "Select a File"
 msgstr ""
 
-#: gtkfilechooserbutton.c:65 gtkfilechooserdefault.c:1851
+#: gtkfilechooserbutton.c:65 gtkfilechooserdefault.c:1853
 msgid "Desktop"
 msgstr "Skrivebord"
 
@@ -285,27 +285,27 @@ msgid "Type name of new folder"
 msgstr "Skriv namnet på den nye mappa"
 
 #
-#: gtkfilechooserdefault.c:956
+#: gtkfilechooserdefault.c:958
 msgid "Could not retrieve information about the file"
 msgstr "Kunne ikkje henta informasjon om fila"
 
 #
-#: gtkfilechooserdefault.c:967
+#: gtkfilechooserdefault.c:969
 msgid "Could not add a bookmark"
 msgstr "Kunne ikkje leggja til bokmerke"
 
 #
-#: gtkfilechooserdefault.c:978
+#: gtkfilechooserdefault.c:980
 msgid "Could not remove bookmark"
 msgstr "Kunne ikkje fjerna bokmerke"
 
 #
-#: gtkfilechooserdefault.c:989
+#: gtkfilechooserdefault.c:991
 msgid "The folder could not be created"
 msgstr "Mappa kunne ikkje opprettas"
 
 #
-#: gtkfilechooserdefault.c:1002
+#: gtkfilechooserdefault.c:1004
 msgid ""
 "The folder could not be created, as a file with the same name already "
 "exists.  Try using a different name for the folder, or rename the file first."
@@ -313,225 +313,225 @@ msgstr ""
 "Kunne ikkje oppretta mappa på grunn av at det allereie finst ei fil med det "
 "same namnet. Bruk eit anna namn for mappa eller gi eit nytt namn til fila."
 
-#: gtkfilechooserdefault.c:1016
+#: gtkfilechooserdefault.c:1018
 msgid "You need to choose a valid filename."
 msgstr ""
 
-#: gtkfilechooserdefault.c:1019
+#: gtkfilechooserdefault.c:1021
 #, c-format
 msgid "Cannot create a file under %s as it is not a folder"
 msgstr ""
 
-#: gtkfilechooserdefault.c:1031
+#: gtkfilechooserdefault.c:1033
 msgid ""
 "You may only select folders.  The item that you selected is not a folder; "
 "try using a different item."
 msgstr ""
 
 #
-#: gtkfilechooserdefault.c:1041
+#: gtkfilechooserdefault.c:1043
 msgid "Invalid file name"
 msgstr "Ugyldig filnamn"
 
 #
-#: gtkfilechooserdefault.c:1051
+#: gtkfilechooserdefault.c:1053
 msgid "The folder contents could not be displayed"
 msgstr "Mappeinholdet kunne ikkje vert viste"
 
-#: gtkfilechooserdefault.c:1584
+#: gtkfilechooserdefault.c:1586
 #, c-format
 msgid "%1$s on %2$s"
 msgstr "%1$s på %2$s"
 
 #
-#: gtkfilechooserdefault.c:1733
+#: gtkfilechooserdefault.c:1735
 msgid "Search"
 msgstr "Søk"
 
 #
-#: gtkfilechooserdefault.c:1757 gtkfilechooserdefault.c:4872
+#: gtkfilechooserdefault.c:1759 gtkfilechooserdefault.c:4877
 msgid "Recently Used"
 msgstr "Sist brukt"
 
 #
-#: gtkfilechooserdefault.c:2387
+#: gtkfilechooserdefault.c:2389
 msgid "Select which types of files are shown"
 msgstr "Vel kva filtypar som skal vert viste"
 
-#: gtkfilechooserdefault.c:2746
+#: gtkfilechooserdefault.c:2748
 #, c-format
 msgid "Add the folder '%s' to the bookmarks"
 msgstr "Legg til mappe «%s» i bokmerke"
 
-#: gtkfilechooserdefault.c:2790
+#: gtkfilechooserdefault.c:2792
 msgid "Add the current folder to the bookmarks"
 msgstr "Legg til aktiv mappe i bokmerke"
 
-#: gtkfilechooserdefault.c:2792
+#: gtkfilechooserdefault.c:2794
 msgid "Add the selected folders to the bookmarks"
 msgstr "Legg til valde mapper i bokmerke"
 
-#: gtkfilechooserdefault.c:2837
+#: gtkfilechooserdefault.c:2839
 #, c-format
 msgid "Remove the bookmark '%s'"
 msgstr "Fjern bokmerke «%s»"
 
-#: gtkfilechooserdefault.c:2839
+#: gtkfilechooserdefault.c:2841
 #, c-format
 msgid "Bookmark '%s' cannot be removed"
 msgstr ""
 
 #
-#: gtkfilechooserdefault.c:2846 gtkfilechooserdefault.c:3740
+#: gtkfilechooserdefault.c:2848 gtkfilechooserdefault.c:3742
 msgid "Remove the selected bookmark"
 msgstr "Fjern vald bokmerke"
 
 #
-#: gtkfilechooserdefault.c:3421
+#: gtkfilechooserdefault.c:3423
 msgid "Remove"
 msgstr "Fjern"
 
 #
-#: gtkfilechooserdefault.c:3430
+#: gtkfilechooserdefault.c:3432
 msgid "Rename..."
 msgstr "Gje nytt namn …"
 
 #
-#: gtkfilechooserdefault.c:3597
+#: gtkfilechooserdefault.c:3599
 msgid "Places"
 msgstr "Stader"
 
 #
-#: gtkfilechooserdefault.c:3654
+#: gtkfilechooserdefault.c:3656
 msgid "_Places"
 msgstr "_Stader"
 
 #
-#: gtkfilechooserdefault.c:3728
+#: gtkfilechooserdefault.c:3730
 msgid "Add the selected folder to the Bookmarks"
 msgstr "Legg til vald mappe i bokmerke"
 
 #
-#: gtkfilechooserdefault.c:3872
+#: gtkfilechooserdefault.c:3874
 msgid "Could not select file"
 msgstr "Kunne ikkje velja fil"
 
 #
-#: gtkfilechooserdefault.c:4045
+#: gtkfilechooserdefault.c:4047
 msgid "_Add to Bookmarks"
 msgstr "L_egg til i bokmerke"
 
 #
-#: gtkfilechooserdefault.c:4058
+#: gtkfilechooserdefault.c:4060
 msgid "Show _Hidden Files"
 msgstr "Vis sk_julte filer"
 
-#: gtkfilechooserdefault.c:4065
+#: gtkfilechooserdefault.c:4067
 msgid "Show _Size Column"
 msgstr "Vis _storleikskolonne"
 
-#: gtkfilechooserdefault.c:4289
+#: gtkfilechooserdefault.c:4291
 msgid "Files"
 msgstr "Filer"
 
-#: gtkfilechooserdefault.c:4340
+#: gtkfilechooserdefault.c:4342
 msgid "Name"
 msgstr "Namn"
 
-#: gtkfilechooserdefault.c:4363
+#: gtkfilechooserdefault.c:4365
 msgid "Size"
 msgstr "Storleik"
 
-#: gtkfilechooserdefault.c:4377
+#: gtkfilechooserdefault.c:4379
 msgid "Modified"
 msgstr "Endra"
 
-#: gtkfilechooserdefault.c:4470
+#: gtkfilechooserdefault.c:4475
 msgid "_Name:"
 msgstr "_Namn:"
 
 #
-#: gtkfilechooserdefault.c:4710
+#: gtkfilechooserdefault.c:4715
 msgid "Type a file name"
 msgstr "Skriv eit filnamn"
 
-#: gtkfilechooserdefault.c:4757 gtkfilechooserdefault.c:4768
+#: gtkfilechooserdefault.c:4762 gtkfilechooserdefault.c:4773
 msgid "Please select a folder below"
 msgstr ""
 
-#: gtkfilechooserdefault.c:4763
+#: gtkfilechooserdefault.c:4768
 msgid "Please type a file name"
 msgstr ""
 
 #
-#: gtkfilechooserdefault.c:4834
+#: gtkfilechooserdefault.c:4839
 msgid "Create Fo_lder"
 msgstr "Opprett _mappe"
 
 #
-#: gtkfilechooserdefault.c:4882
+#: gtkfilechooserdefault.c:4887
 #, fuzzy
 msgid "Search:"
 msgstr "Søk"
 
 #
-#: gtkfilechooserdefault.c:4933
+#: gtkfilechooserdefault.c:4938
 msgid "_Location:"
 msgstr "_Stad:"
 
-#: gtkfilechooserdefault.c:5383
+#: gtkfilechooserdefault.c:5388
 msgid "Save in _folder:"
 msgstr "Lagra i _mappe:"
 
-#: gtkfilechooserdefault.c:5385
+#: gtkfilechooserdefault.c:5390
 msgid "Create in _folder:"
 msgstr "Lag i _mappe:"
 
-#: gtkfilechooserdefault.c:6479
+#: gtkfilechooserdefault.c:6484
 #, fuzzy, c-format
 msgid "Could not read the contents of %s"
 msgstr "Klarte ikkje oppretta straum: %s"
 
-#: gtkfilechooserdefault.c:6483
+#: gtkfilechooserdefault.c:6488
 #, fuzzy
 msgid "Could not read the contents of the folder"
 msgstr "Kunne ikkje finne rotmappa"
 
-#: gtkfilechooserdefault.c:6576 gtkfilechooserdefault.c:6644
-#: gtkfilechooserdefault.c:6829
+#: gtkfilechooserdefault.c:6581 gtkfilechooserdefault.c:6649
+#: gtkfilechooserdefault.c:6834
 msgid "Unknown"
 msgstr "Ukjent"
 
 #
-#: gtkfilechooserdefault.c:6591
+#: gtkfilechooserdefault.c:6596
 msgid "%H:%M"
 msgstr "%H:%M"
 
 #
-#: gtkfilechooserdefault.c:6593
+#: gtkfilechooserdefault.c:6598
 msgid "Yesterday at %H:%M"
 msgstr "I går kl. %H:%M"
 
-#: gtkfilechooserdefault.c:7301
+#: gtkfilechooserdefault.c:7306
 msgid "Cannot change to folder because it is not local"
 msgstr "Kan ikkje gå til mappa fordi den ikkje er lokal."
 
-#: gtkfilechooserdefault.c:7898 gtkfilechooserdefault.c:7919
+#: gtkfilechooserdefault.c:7903 gtkfilechooserdefault.c:7924
 #, c-format
 msgid "Shortcut %s already exists"
 msgstr "Snarveg %s finst allereie"
 
-#: gtkfilechooserdefault.c:8009
+#: gtkfilechooserdefault.c:8014
 #, c-format
 msgid "Shortcut %s does not exist"
 msgstr "Snarveg %s finst ikkje"
 
-#: gtkfilechooserdefault.c:8250
+#: gtkfilechooserdefault.c:8255
 #, c-format
 msgid "A file named \"%s\" already exists.  Do you want to replace it?"
 msgstr "Ein fil med namn «%s» finst allereie. Vil du byta den ut?"
 
-#: gtkfilechooserdefault.c:8253
+#: gtkfilechooserdefault.c:8258
 #, c-format
 msgid ""
 "The file already exists in \"%s\".  Replacing it will overwrite its contents."
@@ -540,17 +540,17 @@ msgstr ""
 "innhaldet."
 
 #
-#: gtkfilechooserdefault.c:8258
+#: gtkfilechooserdefault.c:8263
 msgid "_Replace"
 msgstr "E_rstatt"
 
 #
-#: gtkfilechooserdefault.c:9066
+#: gtkfilechooserdefault.c:9136
 msgid "Could not start the search process"
 msgstr "Kunne ikkje starta søkjeprosessen"
 
 #
-#: gtkfilechooserdefault.c:9067
+#: gtkfilechooserdefault.c:9137
 msgid ""
 "The program was not able to create a connection to the indexer daemon.  "
 "Please make sure it is running."
@@ -559,11 +559,11 @@ msgstr ""
 "Sjekk at denne køyrer."
 
 #
-#: gtkfilechooserdefault.c:9081
+#: gtkfilechooserdefault.c:9151
 msgid "Could not send the search request"
 msgstr "Kunne ikkje sende søkjeforespørselen"
 
-#: gtkfilechooserdefault.c:9682
+#: gtkfilechooserdefault.c:9752
 #, c-format
 msgid "Could not mount %s"
 msgstr "Kunne ikkje montere %s"
@@ -665,51 +665,51 @@ msgid "Invalid URI"
 msgstr "Ugyldig URI"
 
 #
-#: gtkmain.c:454
+#: gtkmain.c:412
 msgid "Load additional GTK+ modules"
 msgstr "Last tilleggsmodular for GTK+"
 
 #
-#: gtkmain.c:455
+#: gtkmain.c:413
 msgid "MODULES"
 msgstr "MODULAR"
 
 #
-#: gtkmain.c:457
+#: gtkmain.c:415
 msgid "Make all warnings fatal"
 msgstr "La alle advarsler vera fatale"
 
 #
-#: gtkmain.c:460
+#: gtkmain.c:418
 msgid "GTK+ debugging flags to set"
 msgstr "Feilsøkingsflagg som skal setjes for GTK+"
 
 #
-#: gtkmain.c:461 gtkmain.c:464
+#: gtkmain.c:419 gtkmain.c:422
 msgid "FLAGS"
 msgstr "FLAGG"
 
 #
-#: gtkmain.c:463
+#: gtkmain.c:421
 msgid "GTK+ debugging flags to unset"
 msgstr "Feilsøkingsflagg som skal fjernes for GTK+"
 
-#: gtkmain.c:755
+#: gtkmain.c:698
 msgid "default:LTR"
 msgstr "default:LTR"
 
-#: gtkmain.c:820
+#: gtkmain.c:763
 #, c-format
 msgid "Cannot open display: %s"
 msgstr "Klarte ikkje opna display: %s"
 
 #
-#: gtkmain.c:857
+#: gtkmain.c:800
 msgid "GTK+ Options"
 msgstr "Alternativ for GTK+"
 
 #
-#: gtkmain.c:857
+#: gtkmain.c:800
 msgid "Show GTK+ Options"
 msgstr "Vis alternativ for GTK+"
 
@@ -782,12 +782,12 @@ msgstr "Ned stig"
 msgid "File System Root"
 msgstr "Filsystemrot"
 
-#: gtkrc.c:2906
+#: gtkrc.c:2670
 #, c-format
 msgid "Unable to find include file: \"%s\""
 msgstr "Klarte ikkje finna fila som skal inkluderast: «%s»"
 
-#: gtkrc.c:3536 gtkrc.c:3539
+#: gtkrc.c:3300 gtkrc.c:3303
 #, c-format
 msgid "Unable to locate image file in pixmap_path: \"%s\""
 msgstr "Klarte ikkje finna biletefila i pixmap_path: «%s»"
@@ -863,9 +863,9 @@ msgstr "Opna «%s»"
 msgid "Unknown item"
 msgstr "Ukjend oppføring"
 
-#: gtkrecentmanager.c:1182 gtkrecentmanager.c:1195 gtkrecentmanager.c:1332
-#: gtkrecentmanager.c:1342 gtkrecentmanager.c:1395 gtkrecentmanager.c:1404
-#: gtkrecentmanager.c:1419
+#: gtkrecentmanager.c:1073 gtkrecentmanager.c:1086 gtkrecentmanager.c:1223
+#: gtkrecentmanager.c:1233 gtkrecentmanager.c:1286 gtkrecentmanager.c:1295
+#: gtkrecentmanager.c:1310
 #, c-format
 msgid "Unable to find an item with URI '%s'"
 msgstr "Klarte ikkje finna ei oppføring med URI «%s»"
@@ -873,6 +873,471 @@ msgstr "Klarte ikkje finna ei oppføring med URI «%s»"
 #: gtkspinner.c:459
 msgid "Provides visual indication of progress"
 msgstr ""
+
+#: gtkstock.c:315
+msgctxt "Stock label"
+msgid "Information"
+msgstr "Informasjon"
+
+#: gtkstock.c:316
+msgctxt "Stock label"
+msgid "Warning"
+msgstr "Åtvaring"
+
+#: gtkstock.c:317
+msgctxt "Stock label"
+msgid "Error"
+msgstr "Feil"
+
+#: gtkstock.c:318
+msgctxt "Stock label"
+msgid "Question"
+msgstr "Spørsmål"
+
+#: gtkstock.c:323
+msgctxt "Stock label"
+msgid "_About"
+msgstr "_Om"
+
+#: gtkstock.c:324
+msgctxt "Stock label"
+msgid "_Add"
+msgstr "_Legg til"
+
+#: gtkstock.c:325
+msgctxt "Stock label"
+msgid "_Apply"
+msgstr "_Bruk"
+
+#: gtkstock.c:326
+msgctxt "Stock label"
+msgid "_Bold"
+msgstr "_Feit"
+
+#: gtkstock.c:327
+msgctxt "Stock label"
+msgid "_Cancel"
+msgstr "A_vbryt"
+
+#: gtkstock.c:328
+msgctxt "Stock label"
+msgid "_CD-Rom"
+msgstr "_CD-ROM"
+
+#: gtkstock.c:329
+msgctxt "Stock label"
+msgid "_Clear"
+msgstr "_Tøm"
+
+#: gtkstock.c:330
+msgctxt "Stock label"
+msgid "_Close"
+msgstr "L_ukk"
+
+#: gtkstock.c:331
+msgctxt "Stock label"
+msgid "C_onnect"
+msgstr "Ko_pla til"
+
+#: gtkstock.c:332
+msgctxt "Stock label"
+msgid "_Convert"
+msgstr "_Konvertér"
+
+#: gtkstock.c:333
+msgctxt "Stock label"
+msgid "_Copy"
+msgstr "_Kopier"
+
+#: gtkstock.c:334
+msgctxt "Stock label"
+msgid "Cu_t"
+msgstr "Klipp u_t"
+
+#: gtkstock.c:335
+msgctxt "Stock label"
+msgid "_Delete"
+msgstr "_Slett"
+
+#: gtkstock.c:336
+msgctxt "Stock label"
+msgid "_Discard"
+msgstr "_Forkast"
+
+#: gtkstock.c:337
+msgctxt "Stock label"
+msgid "_Disconnect"
+msgstr "Kopla _frå"
+
+#: gtkstock.c:338
+msgctxt "Stock label"
+msgid "_Execute"
+msgstr "_Køyr"
+
+#: gtkstock.c:339
+msgctxt "Stock label"
+msgid "_Edit"
+msgstr "R_ediger"
+
+#: gtkstock.c:340
+msgctxt "Stock label"
+msgid "_Find"
+msgstr "_Finn"
+
+#: gtkstock.c:341
+msgctxt "Stock label"
+msgid "Find and _Replace"
+msgstr "Finn og e_rstatt"
+
+#: gtkstock.c:342
+msgctxt "Stock label"
+msgid "_Floppy"
+msgstr "_Diskett"
+
+#: gtkstock.c:343
+msgctxt "Stock label"
+msgid "_Fullscreen"
+msgstr "_Fullskjerm"
+
+#: gtkstock.c:344
+msgctxt "Stock label"
+msgid "_Leave Fullscreen"
+msgstr "For_lat fullskjerm"
+
+#: gtkstock.c:346
+msgctxt "Stock label, navigation"
+msgid "_Bottom"
+msgstr "_Botn"
+
+#: gtkstock.c:348
+msgctxt "Stock label, navigation"
+msgid "_First"
+msgstr "_Fyrste"
+
+#: gtkstock.c:350
+msgctxt "Stock label, navigation"
+msgid "_Last"
+msgstr "_Siste"
+
+#: gtkstock.c:352
+msgctxt "Stock label, navigation"
+msgid "_Top"
+msgstr "_Topp"
+
+#: gtkstock.c:354
+msgctxt "Stock label, navigation"
+msgid "_Back"
+msgstr "Til_bake"
+
+#: gtkstock.c:356
+msgctxt "Stock label, navigation"
+msgid "_Down"
+msgstr "Ne_d"
+
+#: gtkstock.c:358
+msgctxt "Stock label, navigation"
+msgid "_Forward"
+msgstr "_Framover"
+
+#: gtkstock.c:360
+msgctxt "Stock label, navigation"
+msgid "_Up"
+msgstr "_Opp"
+
+#: gtkstock.c:361
+msgctxt "Stock label"
+msgid "_Harddisk"
+msgstr "_Harddisk"
+
+#: gtkstock.c:362
+msgctxt "Stock label"
+msgid "_Help"
+msgstr "_Hjelp"
+
+#: gtkstock.c:363
+msgctxt "Stock label"
+msgid "_Home"
+msgstr "_Heim"
+
+#: gtkstock.c:364
+msgctxt "Stock label"
+msgid "Increase Indent"
+msgstr "Auk innrykk"
+
+#: gtkstock.c:365
+msgctxt "Stock label"
+msgid "Decrease Indent"
+msgstr "Minsk innrykk"
+
+#: gtkstock.c:366
+msgctxt "Stock label"
+msgid "_Index"
+msgstr "_Indeks"
+
+#: gtkstock.c:367
+msgctxt "Stock label"
+msgid "_Information"
+msgstr "_Informasjon"
+
+#: gtkstock.c:368
+msgctxt "Stock label"
+msgid "_Italic"
+msgstr "_Kursiv"
+
+#: gtkstock.c:369
+msgctxt "Stock label"
+msgid "_Jump to"
+msgstr "_Hopp til"
+
+#: gtkstock.c:371
+msgctxt "Stock label"
+msgid "_Center"
+msgstr "_Sentrer"
+
+#: gtkstock.c:373
+msgctxt "Stock label"
+msgid "_Fill"
+msgstr "_Fyll"
+
+#: gtkstock.c:375
+msgctxt "Stock label"
+msgid "_Left"
+msgstr "_Venstre"
+
+#: gtkstock.c:377
+msgctxt "Stock label"
+msgid "_Right"
+msgstr "_Høgre"
+
+#: gtkstock.c:380
+msgctxt "Stock label, media"
+msgid "_Forward"
+msgstr "_Framover"
+
+#: gtkstock.c:382
+msgctxt "Stock label, media"
+msgid "_Next"
+msgstr "_Neste"
+
+#: gtkstock.c:384
+msgctxt "Stock label, media"
+msgid "P_ause"
+msgstr "P_ause"
+
+#: gtkstock.c:386
+msgctxt "Stock label, media"
+msgid "_Play"
+msgstr "_Spel"
+
+#: gtkstock.c:388
+msgctxt "Stock label, media"
+msgid "Pre_vious"
+msgstr "_Førre"
+
+#: gtkstock.c:390
+msgctxt "Stock label, media"
+msgid "_Record"
+msgstr "_Ta opp"
+
+#: gtkstock.c:392
+msgctxt "Stock label, media"
+msgid "R_ewind"
+msgstr "Spol tilbak_e"
+
+#: gtkstock.c:394
+msgctxt "Stock label, media"
+msgid "_Stop"
+msgstr "_Stopp"
+
+#: gtkstock.c:395
+msgctxt "Stock label"
+msgid "_Network"
+msgstr "_Nettverk"
+
+#: gtkstock.c:396
+msgctxt "Stock label"
+msgid "_New"
+msgstr "_Ny"
+
+#: gtkstock.c:397
+msgctxt "Stock label"
+msgid "_No"
+msgstr "_Nei"
+
+#: gtkstock.c:398
+msgctxt "Stock label"
+msgid "_OK"
+msgstr "_OK"
+
+#: gtkstock.c:399
+msgctxt "Stock label"
+msgid "_Open"
+msgstr "_Opna"
+
+#: gtkstock.c:401
+msgctxt "Stock label"
+msgid "Landscape"
+msgstr "Landskap"
+
+#: gtkstock.c:403
+msgctxt "Stock label"
+msgid "Portrait"
+msgstr "Portrett"
+
+#: gtkstock.c:405
+msgctxt "Stock label"
+msgid "Reverse landscape"
+msgstr "Omvendt landskap"
+
+#: gtkstock.c:407
+msgctxt "Stock label"
+msgid "Reverse portrait"
+msgstr "Omvendt portrett"
+
+#: gtkstock.c:408
+msgctxt "Stock label"
+msgid "Page Set_up"
+msgstr "Sideoppse_tt"
+
+#: gtkstock.c:409
+msgctxt "Stock label"
+msgid "_Paste"
+msgstr "_Lim inn"
+
+#: gtkstock.c:410
+msgctxt "Stock label"
+msgid "_Preferences"
+msgstr "_Innstillingar"
+
+#: gtkstock.c:411
+msgctxt "Stock label"
+msgid "_Print"
+msgstr "S_kriv ut"
+
+#: gtkstock.c:412
+msgctxt "Stock label"
+msgid "Print Pre_view"
+msgstr "_Førehandsvising av utskrift"
+
+#: gtkstock.c:413
+msgctxt "Stock label"
+msgid "_Properties"
+msgstr "_Eigenskapar"
+
+#: gtkstock.c:414
+msgctxt "Stock label"
+msgid "_Quit"
+msgstr "_Avslutt"
+
+#: gtkstock.c:415
+msgctxt "Stock label"
+msgid "_Redo"
+msgstr "Gje_r om"
+
+#: gtkstock.c:416
+msgctxt "Stock label"
+msgid "_Refresh"
+msgstr "Oppf_risk"
+
+#: gtkstock.c:417
+msgctxt "Stock label"
+msgid "_Remove"
+msgstr "Fje_rn"
+
+#: gtkstock.c:418
+msgctxt "Stock label"
+msgid "_Revert"
+msgstr "_Gå tilbake"
+
+#: gtkstock.c:419
+msgctxt "Stock label"
+msgid "_Save"
+msgstr "_Lagra"
+
+#: gtkstock.c:420
+msgctxt "Stock label"
+msgid "Save _As"
+msgstr "_Lagra som"
+
+#: gtkstock.c:421
+msgctxt "Stock label"
+msgid "Select _All"
+msgstr "Merk _alt"
+
+#: gtkstock.c:422
+msgctxt "Stock label"
+msgid "_Color"
+msgstr "_Farge"
+
+#: gtkstock.c:423
+msgctxt "Stock label"
+msgid "_Font"
+msgstr "Skri_fttype"
+
+#: gtkstock.c:425
+msgctxt "Stock label"
+msgid "_Ascending"
+msgstr "_Aukande"
+
+#: gtkstock.c:427
+msgctxt "Stock label"
+msgid "_Descending"
+msgstr "_Minkande"
+
+#: gtkstock.c:428
+msgctxt "Stock label"
+msgid "_Spell Check"
+msgstr "_Stavekontroll"
+
+#: gtkstock.c:429
+msgctxt "Stock label"
+msgid "_Stop"
+msgstr "_Stopp"
+
+#: gtkstock.c:431
+msgctxt "Stock label"
+msgid "_Strikethrough"
+msgstr "_Gjennomstrek"
+
+#: gtkstock.c:432
+msgctxt "Stock label"
+msgid "_Undelete"
+msgstr "_Angra slett"
+
+#: gtkstock.c:434
+msgctxt "Stock label"
+msgid "_Underline"
+msgstr "_Understrek"
+
+#: gtkstock.c:435
+msgctxt "Stock label"
+msgid "_Undo"
+msgstr "_Angra"
+
+#: gtkstock.c:436
+msgctxt "Stock label"
+msgid "_Yes"
+msgstr "_Ja"
+
+#: gtkstock.c:438
+msgctxt "Stock label"
+msgid "_Normal Size"
+msgstr "_Vanleg storleik"
+
+#: gtkstock.c:440
+msgctxt "Stock label"
+msgid "Best _Fit"
+msgstr "Beste _tilpassing"
+
+#: gtkstock.c:441
+msgctxt "Stock label"
+msgid "Zoom _In"
+msgstr "For_størr"
+
+#: gtkstock.c:442
+msgctxt "Stock label"
+msgid "Zoom _Out"
+msgstr "For_minsk"
 
 #: gtktextbufferrichtext.c:652
 #, c-format
@@ -1048,7 +1513,7 @@ msgstr "Uventa startmerke «%s» på linje %d, teikn %d"
 msgid "Unexpected character data on line %d char %d"
 msgstr "Uventa teikndata på linje %d teikn %d"
 
-#: gtkuimanager.c:2427
+#: gtkuimanager.c:2444
 msgid "Empty"
 msgstr "Tom"
 
@@ -2781,378 +3246,6 @@ msgstr "Tom"
 #~ msgctxt "throbbing progress animation widget"
 #~ msgid "Spinner"
 #~ msgstr "Super"
-
-#~ msgctxt "Stock label"
-#~ msgid "Information"
-#~ msgstr "Informasjon"
-
-#~ msgctxt "Stock label"
-#~ msgid "Warning"
-#~ msgstr "Åtvaring"
-
-#~ msgctxt "Stock label"
-#~ msgid "Error"
-#~ msgstr "Feil"
-
-#~ msgctxt "Stock label"
-#~ msgid "Question"
-#~ msgstr "Spørsmål"
-
-#~ msgctxt "Stock label"
-#~ msgid "_About"
-#~ msgstr "_Om"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Add"
-#~ msgstr "_Legg til"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Apply"
-#~ msgstr "_Bruk"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Bold"
-#~ msgstr "_Feit"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Cancel"
-#~ msgstr "A_vbryt"
-
-#~ msgctxt "Stock label"
-#~ msgid "_CD-Rom"
-#~ msgstr "_CD-ROM"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Clear"
-#~ msgstr "_Tøm"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Close"
-#~ msgstr "L_ukk"
-
-#~ msgctxt "Stock label"
-#~ msgid "C_onnect"
-#~ msgstr "Ko_pla til"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Convert"
-#~ msgstr "_Konvertér"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Copy"
-#~ msgstr "_Kopier"
-
-#~ msgctxt "Stock label"
-#~ msgid "Cu_t"
-#~ msgstr "Klipp u_t"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Delete"
-#~ msgstr "_Slett"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Discard"
-#~ msgstr "_Forkast"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Disconnect"
-#~ msgstr "Kopla _frå"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Execute"
-#~ msgstr "_Køyr"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Edit"
-#~ msgstr "R_ediger"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Find"
-#~ msgstr "_Finn"
-
-#~ msgctxt "Stock label"
-#~ msgid "Find and _Replace"
-#~ msgstr "Finn og e_rstatt"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Floppy"
-#~ msgstr "_Diskett"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Fullscreen"
-#~ msgstr "_Fullskjerm"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Leave Fullscreen"
-#~ msgstr "For_lat fullskjerm"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_Bottom"
-#~ msgstr "_Botn"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_First"
-#~ msgstr "_Fyrste"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_Last"
-#~ msgstr "_Siste"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_Top"
-#~ msgstr "_Topp"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_Back"
-#~ msgstr "Til_bake"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_Down"
-#~ msgstr "Ne_d"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_Forward"
-#~ msgstr "_Framover"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_Up"
-#~ msgstr "_Opp"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Harddisk"
-#~ msgstr "_Harddisk"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Help"
-#~ msgstr "_Hjelp"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Home"
-#~ msgstr "_Heim"
-
-#~ msgctxt "Stock label"
-#~ msgid "Increase Indent"
-#~ msgstr "Auk innrykk"
-
-#~ msgctxt "Stock label"
-#~ msgid "Decrease Indent"
-#~ msgstr "Minsk innrykk"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Index"
-#~ msgstr "_Indeks"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Information"
-#~ msgstr "_Informasjon"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Italic"
-#~ msgstr "_Kursiv"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Jump to"
-#~ msgstr "_Hopp til"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Center"
-#~ msgstr "_Sentrer"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Fill"
-#~ msgstr "_Fyll"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Left"
-#~ msgstr "_Venstre"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Right"
-#~ msgstr "_Høgre"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "_Forward"
-#~ msgstr "_Framover"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "_Next"
-#~ msgstr "_Neste"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "P_ause"
-#~ msgstr "P_ause"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "_Play"
-#~ msgstr "_Spel"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "Pre_vious"
-#~ msgstr "_Førre"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "_Record"
-#~ msgstr "_Ta opp"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "R_ewind"
-#~ msgstr "Spol tilbak_e"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "_Stop"
-#~ msgstr "_Stopp"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Network"
-#~ msgstr "_Nettverk"
-
-#~ msgctxt "Stock label"
-#~ msgid "_New"
-#~ msgstr "_Ny"
-
-#~ msgctxt "Stock label"
-#~ msgid "_No"
-#~ msgstr "_Nei"
-
-#~ msgctxt "Stock label"
-#~ msgid "_OK"
-#~ msgstr "_OK"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Open"
-#~ msgstr "_Opna"
-
-#~ msgctxt "Stock label"
-#~ msgid "Landscape"
-#~ msgstr "Landskap"
-
-#~ msgctxt "Stock label"
-#~ msgid "Portrait"
-#~ msgstr "Portrett"
-
-#~ msgctxt "Stock label"
-#~ msgid "Reverse landscape"
-#~ msgstr "Omvendt landskap"
-
-#~ msgctxt "Stock label"
-#~ msgid "Reverse portrait"
-#~ msgstr "Omvendt portrett"
-
-#~ msgctxt "Stock label"
-#~ msgid "Page Set_up"
-#~ msgstr "Sideoppse_tt"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Paste"
-#~ msgstr "_Lim inn"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Preferences"
-#~ msgstr "_Innstillingar"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Print"
-#~ msgstr "S_kriv ut"
-
-#~ msgctxt "Stock label"
-#~ msgid "Print Pre_view"
-#~ msgstr "_Førehandsvising av utskrift"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Properties"
-#~ msgstr "_Eigenskapar"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Quit"
-#~ msgstr "_Avslutt"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Redo"
-#~ msgstr "Gje_r om"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Refresh"
-#~ msgstr "Oppf_risk"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Remove"
-#~ msgstr "Fje_rn"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Revert"
-#~ msgstr "_Gå tilbake"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Save"
-#~ msgstr "_Lagra"
-
-#~ msgctxt "Stock label"
-#~ msgid "Save _As"
-#~ msgstr "_Lagra som"
-
-#~ msgctxt "Stock label"
-#~ msgid "Select _All"
-#~ msgstr "Merk _alt"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Color"
-#~ msgstr "_Farge"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Font"
-#~ msgstr "Skri_fttype"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Ascending"
-#~ msgstr "_Aukande"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Descending"
-#~ msgstr "_Minkande"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Spell Check"
-#~ msgstr "_Stavekontroll"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Stop"
-#~ msgstr "_Stopp"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Strikethrough"
-#~ msgstr "_Gjennomstrek"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Undelete"
-#~ msgstr "_Angra slett"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Underline"
-#~ msgstr "_Understrek"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Undo"
-#~ msgstr "_Angra"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Yes"
-#~ msgstr "_Ja"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Normal Size"
-#~ msgstr "_Vanleg storleik"
-
-#~ msgctxt "Stock label"
-#~ msgid "Best _Fit"
-#~ msgstr "Beste _tilpassing"
-
-#~ msgctxt "Stock label"
-#~ msgid "Zoom _In"
-#~ msgstr "For_størr"
-
-#~ msgctxt "Stock label"
-#~ msgid "Zoom _Out"
-#~ msgstr "For_minsk"
 
 #, c-format
 #~ msgid "<%s> element has invalid id \"%s\""

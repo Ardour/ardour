@@ -560,9 +560,11 @@ Pianoroll::build_canvas ()
 	sw->add (*midi_inspector);
 	sw->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
-	Gtk::Requisition req;
-	midi_inspector->size_request (req);
-	sw->set_size_request (req.width, -1);
+	UIConfiguration::instance().DPIReset.connect ([sw]() { sw->queue_resize(); });
+
+//	Gtk::Requisition req;
+//	midi_inspector->size_request (req);
+//	sw->set_size_request (req.width, -1);
 
 	_hpacker.pack_start (*sw, false, false);
 	_hpacker.reorder_child (*sw, 0);
@@ -807,9 +809,10 @@ Evoral::Parameter
 Pianoroll::automation_by_y (double y)
 {
 	ArdourCanvas::Duple d (0., y);
+	double timebars = n_timebars * timebar_height;
 
 	for (auto & [param,lane] : automation_lanes) {
-		ArdourCanvas::Rect r (lane->group->get().translate (lane->group->position()));
+		ArdourCanvas::Rect r (lane->group->get().translate (lane->group->position()).translate (ArdourCanvas::Duple (0, timebars)));
 		if (r.contains (d)) {
 			return param;
 		}
@@ -1745,6 +1748,22 @@ Pianoroll::add_region (std::shared_ptr<ARDOUR::Region> region, std::shared_ptr<A
 }
 
 void
+Pianoroll::remove_regions ()
+{
+	std::vector<MidiView*> mvs;
+	for (auto & [region,view] : region_view_map) {
+		mvs.push_back (view);
+	}
+
+	region_view_map.clear ();
+	set_region (nullptr);
+
+	for (auto & mv : mvs) {
+		delete mv;
+	}
+}
+
+void
 Pianoroll::remove_region (std::shared_ptr<ARDOUR::Region> region)
 {
 	auto rvm = region_view_map.find (region);
@@ -1820,6 +1839,7 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 	view_connections.drop_connections ();
 	_update_connection.disconnect ();
 	selection_connection.disconnect ();
+	midi_inspector->set_region (_session, nullptr);
 
 	if (!region) {
 		return;
@@ -1890,6 +1910,7 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 	}
 
 	region_dropdown.set_active (region->name());
+	midi_inspector->set_region (_session, _active_view->midi_region());
 }
 
 void
@@ -2271,11 +2292,17 @@ Pianoroll::select_all_within (Temporal::timepos_t const & start, Temporal::timep
 
 	AutomationLane* lane (nullptr);
 	Evoral::Parameter param (NullAutomation);
-	ArdourCanvas::Duple d (0., y0);
+	ArdourCanvas::Duple top (0., y0);
+	ArdourCanvas::Duple bottom (0., y1);
 
 	for (auto & [p,l] : automation_lanes) {
 		ArdourCanvas::Rect r (l->group->get().translate (l->group->position()));
-		if (r.contains (d)) {
+		if (r.contains (top)) {
+			lane = l;
+			param = p;
+			break;
+		}
+		if (r.contains (bottom)) {
 			lane = l;
 			param = p;
 			break;

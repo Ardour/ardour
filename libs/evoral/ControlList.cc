@@ -252,6 +252,12 @@ ControlList::clear ()
 		}
 		_events.clear ();
 		unlocked_invalidate_insert_iterator ();
+		_search_cache.left = timepos_t::max (time_domain());
+		_search_cache.first = _events.end();
+		insert_position = timepos_t::max (time_domain());
+		_lookup_cache.left = timepos_t::max (time_domain());
+		_lookup_cache.range.first = _events.end();
+		_lookup_cache.range.second = _events.end();
 		mark_dirty ();
 	}
 

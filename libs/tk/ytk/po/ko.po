@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk+\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-19 21:59+0100\n"
+"POT-Creation-Date: 2026-05-05 15:38+0200\n"
 "PO-Revision-Date: 2010-09-10 01:54+0900\n"
 "Last-Translator: Changwoo Ryu <cwryu@debian.org>\n"
 "Language-Team: Gnome Korea <gnome-kr@googlegroups.com>\n"
@@ -103,74 +103,74 @@ msgstr ""
 "외부 고리에서 원하는 색을 선택하십시오. 내부 삼각형에서 그 색의 어둡기나 밝기"
 "를 선택하십시오."
 
-#: gtkcolorsel.c:382
+#: gtkcolorsel.c:393
 msgid ""
 "Click the eyedropper, then click a color anywhere on your screen to select "
 "that color."
 msgstr ""
 "점안기를 클릭하고, 화면의 어디든 선택하고 싶은 색을 골라서 클릭하십시오."
 
-#: gtkcolorsel.c:391
+#: gtkcolorsel.c:403
 msgid "_Hue:"
 msgstr "색상(_H):"
 
-#: gtkcolorsel.c:392
+#: gtkcolorsel.c:404
 msgid "Position on the color wheel."
 msgstr "색 동그라미의 위치."
 
-#: gtkcolorsel.c:394
+#: gtkcolorsel.c:406
 msgid "_Saturation:"
 msgstr "채도(_S):"
 
-#: gtkcolorsel.c:395
+#: gtkcolorsel.c:407
 msgid "\"Deepness\" of the color."
 msgstr "색의 \"깊이\"."
 
-#: gtkcolorsel.c:396
+#: gtkcolorsel.c:408
 msgid "_Value:"
 msgstr "값(_V):"
 
-#: gtkcolorsel.c:397
+#: gtkcolorsel.c:409
 msgid "Brightness of the color."
 msgstr "색의 밝기."
 
-#: gtkcolorsel.c:398
+#: gtkcolorsel.c:410
 msgid "_Red:"
 msgstr "빨강(_R):"
 
-#: gtkcolorsel.c:399
+#: gtkcolorsel.c:411
 msgid "Amount of red light in the color."
 msgstr "색에서 빨강 빛의 양."
 
-#: gtkcolorsel.c:400
+#: gtkcolorsel.c:412
 msgid "_Green:"
 msgstr "초록(_G):"
 
-#: gtkcolorsel.c:401
+#: gtkcolorsel.c:413
 msgid "Amount of green light in the color."
 msgstr "색에서 초록 빛의 양."
 
-#: gtkcolorsel.c:402
+#: gtkcolorsel.c:414
 msgid "_Blue:"
 msgstr "파랑(_B):"
 
-#: gtkcolorsel.c:403
+#: gtkcolorsel.c:415
 msgid "Amount of blue light in the color."
 msgstr "색에서 파랑 빛의 양."
 
-#: gtkcolorsel.c:406
+#: gtkcolorsel.c:418
 msgid "Op_acity:"
 msgstr "투명도(_A):"
 
-#: gtkcolorsel.c:413 gtkcolorsel.c:423
+#: gtkcolorsel.c:425 gtkcolorsel.c:435
 msgid "Transparency of the color."
 msgstr "색의 투명한 정도."
 
-#: gtkcolorsel.c:430
+#: gtkcolorsel.c:442
 msgid "Color _name:"
 msgstr "색 이름(_N):"
 
-#: gtkcolorsel.c:444
+#: gtkcolorsel.c:456
 msgid ""
 "You can enter an HTML-style hexadecimal color value, or simply a color name "
 "such as 'orange' in this entry."
@@ -178,17 +178,17 @@ msgstr ""
 "이 항목에 HTML 방식의 16진수 색 값을 입력하거나, 간단히 'orange'처럼 색 이름"
 "을 입력할 수 있습니다."
 
-#: gtkcolorsel.c:474
+#: gtkcolorsel.c:486
 msgid "_Palette:"
 msgstr "색상표(_P):"
 
-#: gtkcolorsel.c:503
+#: gtkcolorsel.c:515
 msgid "Color Wheel"
 msgstr "색상환"
 
 # palette => 색상표 
 # swatch => 견본
-#: gtkcolorsel.c:962
+#: gtkcolorsel.c:974
 msgid ""
 "The previously-selected color, for comparison to the color you're selecting "
 "now. You can drag this color to a palette entry, or select this color as "
@@ -197,7 +197,7 @@ msgstr ""
 "이전에 선택한 색. 현재 선택하려는 색과 비교하는 데 쓰입니다. 이 색을 색상표 "
 "항목에 드래그하거나, 다른 색 견본에 드래그해서 이 색을 선택할 수 있습니다."
 
-#: gtkcolorsel.c:965
+#: gtkcolorsel.c:977
 msgid ""
 "The color you've chosen. You can drag this color to a palette entry to save "
 "it for use in the future."
@@ -205,21 +205,21 @@ msgstr ""
 "선택한 색. 이 색을 색상표 항목으로 드래그해서 저장한 다음 나중에 사용할 수 있"
 "습니다."
 
-#: gtkcolorsel.c:970
+#: gtkcolorsel.c:982
 msgid ""
 "The previously-selected color, for comparison to the color you're selecting "
 "now."
 msgstr "이전에 선택했던 색, 현재 선택하고 있는 색과 비교하는 용도."
 
-#: gtkcolorsel.c:973
+#: gtkcolorsel.c:985
 msgid "The color you've chosen."
 msgstr "선택한 색."
 
-#: gtkcolorsel.c:1389
+#: gtkcolorsel.c:1401
 msgid "_Save color here"
 msgstr "색 여기에 저장(_S)"
 
-#: gtkcolorsel.c:1593
+#: gtkcolorsel.c:1605
 msgid ""
 "Click this palette entry to make it the current color. To change this entry, "
 "drag a color swatch here or right-click it and select \"Save color here.\""
@@ -247,7 +247,7 @@ msgstr "Caps Lock이 켜져 있습니다"
 msgid "Select a File"
 msgstr ""
 
-#: gtkfilechooserbutton.c:65 gtkfilechooserdefault.c:1851
+#: gtkfilechooserbutton.c:65 gtkfilechooserdefault.c:1853
 msgid "Desktop"
 msgstr "바탕 화면"
 
@@ -263,23 +263,23 @@ msgstr "기타..."
 msgid "Type name of new folder"
 msgstr "새 폴더의 이름을 넣으십시오"
 
-#: gtkfilechooserdefault.c:956
+#: gtkfilechooserdefault.c:958
 msgid "Could not retrieve information about the file"
 msgstr "파일에 대한 정보를 가져오지 못했습니다"
 
-#: gtkfilechooserdefault.c:967
+#: gtkfilechooserdefault.c:969
 msgid "Could not add a bookmark"
 msgstr "책갈피를 추가하지 못했습니다"
 
-#: gtkfilechooserdefault.c:978
+#: gtkfilechooserdefault.c:980
 msgid "Could not remove bookmark"
 msgstr "책갈피를 지울 수 없습니다"
 
-#: gtkfilechooserdefault.c:989
+#: gtkfilechooserdefault.c:991
 msgid "The folder could not be created"
 msgstr "폴더를 만들 수 없습니다"
 
-#: gtkfilechooserdefault.c:1002
+#: gtkfilechooserdefault.c:1004
 msgid ""
 "The folder could not be created, as a file with the same name already "
 "exists.  Try using a different name for the folder, or rename the file first."
@@ -287,229 +287,229 @@ msgstr ""
 "폴더를 만들 수 없습니다.  같은 이름의 파일이 이미 있습니다.  폴더 이름으로 다"
 "른 이름을 사용하거나, 먼저 기존 파일의 이름을 바꾸십시오."
 
-#: gtkfilechooserdefault.c:1016
+#: gtkfilechooserdefault.c:1018
 msgid "You need to choose a valid filename."
 msgstr ""
 
-#: gtkfilechooserdefault.c:1019
+#: gtkfilechooserdefault.c:1021
 #, c-format
 msgid "Cannot create a file under %s as it is not a folder"
 msgstr ""
 
-#: gtkfilechooserdefault.c:1031
+#: gtkfilechooserdefault.c:1033
 msgid ""
 "You may only select folders.  The item that you selected is not a folder; "
 "try using a different item."
 msgstr ""
 
-#: gtkfilechooserdefault.c:1041
+#: gtkfilechooserdefault.c:1043
 msgid "Invalid file name"
 msgstr "잘못된 파일 이름"
 
-#: gtkfilechooserdefault.c:1051
+#: gtkfilechooserdefault.c:1053
 msgid "The folder contents could not be displayed"
 msgstr "폴더 내용을 표시할 수 없습니다"
 
-#: gtkfilechooserdefault.c:1584
+#: gtkfilechooserdefault.c:1586
 #, c-format
 msgid "%1$s on %2$s"
 msgstr "%s %s"
 
-#: gtkfilechooserdefault.c:1733
+#: gtkfilechooserdefault.c:1735
 msgid "Search"
 msgstr "검색"
 
-#: gtkfilechooserdefault.c:1757 gtkfilechooserdefault.c:4872
+#: gtkfilechooserdefault.c:1759 gtkfilechooserdefault.c:4877
 msgid "Recently Used"
 msgstr "최근 사용"
 
-#: gtkfilechooserdefault.c:2387
+#: gtkfilechooserdefault.c:2389
 msgid "Select which types of files are shown"
 msgstr "어떤 종류의 파일을 표시할 지 선택합니다"
 
-#: gtkfilechooserdefault.c:2746
+#: gtkfilechooserdefault.c:2748
 #, c-format
 msgid "Add the folder '%s' to the bookmarks"
 msgstr "'%s' 폴더를 책갈피에 더합니다"
 
-#: gtkfilechooserdefault.c:2790
+#: gtkfilechooserdefault.c:2792
 msgid "Add the current folder to the bookmarks"
 msgstr "현재 폴더를 책갈피에 더합니다"
 
-#: gtkfilechooserdefault.c:2792
+#: gtkfilechooserdefault.c:2794
 msgid "Add the selected folders to the bookmarks"
 msgstr "선택한 폴더를 책갈피에 더합니다"
 
-#: gtkfilechooserdefault.c:2837
+#: gtkfilechooserdefault.c:2839
 #, c-format
 msgid "Remove the bookmark '%s'"
 msgstr "'%s' 책갈피를 지웁니다"
 
-#: gtkfilechooserdefault.c:2839
+#: gtkfilechooserdefault.c:2841
 #, c-format
 msgid "Bookmark '%s' cannot be removed"
 msgstr "'%s' 책갈피를 제거할 수 없습니다"
 
-#: gtkfilechooserdefault.c:2846 gtkfilechooserdefault.c:3740
+#: gtkfilechooserdefault.c:2848 gtkfilechooserdefault.c:3742
 msgid "Remove the selected bookmark"
 msgstr "선택한 북마크를 지웁니다"
 
-#: gtkfilechooserdefault.c:3421
+#: gtkfilechooserdefault.c:3423
 msgid "Remove"
 msgstr "제거"
 
-#: gtkfilechooserdefault.c:3430
+#: gtkfilechooserdefault.c:3432
 msgid "Rename..."
 msgstr "이름 바꾸기..."
 
-#: gtkfilechooserdefault.c:3597
+#: gtkfilechooserdefault.c:3599
 msgid "Places"
 msgstr "위치"
 
-#: gtkfilechooserdefault.c:3654
+#: gtkfilechooserdefault.c:3656
 msgid "_Places"
 msgstr "위치(_P)"
 
-#: gtkfilechooserdefault.c:3728
+#: gtkfilechooserdefault.c:3730
 msgid "Add the selected folder to the Bookmarks"
 msgstr "선택한 폴더를 책갈피에 추가합니다"
 
-#: gtkfilechooserdefault.c:3872
+#: gtkfilechooserdefault.c:3874
 msgid "Could not select file"
 msgstr "파일을 선택할 수 없습니다"
 
-#: gtkfilechooserdefault.c:4045
+#: gtkfilechooserdefault.c:4047
 msgid "_Add to Bookmarks"
 msgstr "책갈피에 추가(_A)"
 
-#: gtkfilechooserdefault.c:4058
+#: gtkfilechooserdefault.c:4060
 msgid "Show _Hidden Files"
 msgstr "숨긴 파일 표시(_H)"
 
-#: gtkfilechooserdefault.c:4065
+#: gtkfilechooserdefault.c:4067
 msgid "Show _Size Column"
 msgstr "크기 열 표시(_S)"
 
-#: gtkfilechooserdefault.c:4289
+#: gtkfilechooserdefault.c:4291
 msgid "Files"
 msgstr "파일"
 
-#: gtkfilechooserdefault.c:4340
+#: gtkfilechooserdefault.c:4342
 msgid "Name"
 msgstr "이름"
 
-#: gtkfilechooserdefault.c:4363
+#: gtkfilechooserdefault.c:4365
 msgid "Size"
 msgstr "크기"
 
-#: gtkfilechooserdefault.c:4377
+#: gtkfilechooserdefault.c:4379
 msgid "Modified"
 msgstr "수정"
 
-#: gtkfilechooserdefault.c:4470
+#: gtkfilechooserdefault.c:4475
 msgid "_Name:"
 msgstr "이름(_N):"
 
-#: gtkfilechooserdefault.c:4710
+#: gtkfilechooserdefault.c:4715
 msgid "Type a file name"
 msgstr "파일 이름을 입력하십시오"
 
-#: gtkfilechooserdefault.c:4757 gtkfilechooserdefault.c:4768
+#: gtkfilechooserdefault.c:4762 gtkfilechooserdefault.c:4773
 msgid "Please select a folder below"
 msgstr ""
 
-#: gtkfilechooserdefault.c:4763
+#: gtkfilechooserdefault.c:4768
 msgid "Please type a file name"
 msgstr ""
 
-#: gtkfilechooserdefault.c:4834
+#: gtkfilechooserdefault.c:4839
 msgid "Create Fo_lder"
 msgstr "폴더 만들기(_L)"
 
-#: gtkfilechooserdefault.c:4882
+#: gtkfilechooserdefault.c:4887
 msgid "Search:"
 msgstr "검색:"
 
-#: gtkfilechooserdefault.c:4933
+#: gtkfilechooserdefault.c:4938
 msgid "_Location:"
 msgstr "위치(_L):"
 
-#: gtkfilechooserdefault.c:5383
+#: gtkfilechooserdefault.c:5388
 msgid "Save in _folder:"
 msgstr "폴더에 저장(_F):"
 
-#: gtkfilechooserdefault.c:5385
+#: gtkfilechooserdefault.c:5390
 msgid "Create in _folder:"
 msgstr "폴더에 만들기(_F):"
 
-#: gtkfilechooserdefault.c:6479
+#: gtkfilechooserdefault.c:6484
 #, c-format
 msgid "Could not read the contents of %s"
 msgstr "%s의 내용을 읽을 수 없습니다"
 
-#: gtkfilechooserdefault.c:6483
+#: gtkfilechooserdefault.c:6488
 msgid "Could not read the contents of the folder"
 msgstr "폴더의 내용을 읽을 수 없습니다"
 
-#: gtkfilechooserdefault.c:6576 gtkfilechooserdefault.c:6644
-#: gtkfilechooserdefault.c:6829
+#: gtkfilechooserdefault.c:6581 gtkfilechooserdefault.c:6649
+#: gtkfilechooserdefault.c:6834
 msgid "Unknown"
 msgstr "알 수 없음"
 
-#: gtkfilechooserdefault.c:6591
+#: gtkfilechooserdefault.c:6596
 msgid "%H:%M"
 msgstr "%H:%M"
 
-#: gtkfilechooserdefault.c:6593
+#: gtkfilechooserdefault.c:6598
 msgid "Yesterday at %H:%M"
 msgstr "어제 %H:%M"
 
-#: gtkfilechooserdefault.c:7301
+#: gtkfilechooserdefault.c:7306
 msgid "Cannot change to folder because it is not local"
 msgstr "로컬 폴더가 아니므로 폴더로 이동할 수 없습니다"
 
-#: gtkfilechooserdefault.c:7898 gtkfilechooserdefault.c:7919
+#: gtkfilechooserdefault.c:7903 gtkfilechooserdefault.c:7924
 #, c-format
 msgid "Shortcut %s already exists"
 msgstr "%s 바로 가기가 이미 있습니다"
 
-#: gtkfilechooserdefault.c:8009
+#: gtkfilechooserdefault.c:8014
 #, c-format
 msgid "Shortcut %s does not exist"
 msgstr "%s 바로 가기가 없습니다"
 
-#: gtkfilechooserdefault.c:8250
+#: gtkfilechooserdefault.c:8255
 #, c-format
 msgid "A file named \"%s\" already exists.  Do you want to replace it?"
 msgstr "이름이 \"%s\"인 파일이 이미 있습니다.  이 파일을 바꾸시겠습니까?"
 
-#: gtkfilechooserdefault.c:8253
+#: gtkfilechooserdefault.c:8258
 #, c-format
 msgid ""
 "The file already exists in \"%s\".  Replacing it will overwrite its contents."
 msgstr ""
 "\"%s\" 안에 파일이 이미 있습니다.  파일을 바꾸면 그 내용을 덮어 쓰게 됩니다."
 
-#: gtkfilechooserdefault.c:8258
+#: gtkfilechooserdefault.c:8263
 msgid "_Replace"
 msgstr "바꾸기(_R)"
 
-#: gtkfilechooserdefault.c:9066
+#: gtkfilechooserdefault.c:9136
 msgid "Could not start the search process"
 msgstr "검색 작업을 시작할 수 없습니다"
 
-#: gtkfilechooserdefault.c:9067
+#: gtkfilechooserdefault.c:9137
 msgid ""
 "The program was not able to create a connection to the indexer daemon.  "
 "Please make sure it is running."
 msgstr ""
 "프로그램이 인덱스 데몬에 연결할 수 없습니다. 데몬이 실행 중인지 확인하십시오."
 
-#: gtkfilechooserdefault.c:9081
+#: gtkfilechooserdefault.c:9151
 msgid "Could not send the search request"
 msgstr "검색 요청을 보낼 수 없습니다"
 
-#: gtkfilechooserdefault.c:9682
+#: gtkfilechooserdefault.c:9752
 #, c-format
 msgid "Could not mount %s"
 msgstr "%s을(를) 마운트할 수 없습니다"
@@ -607,44 +607,44 @@ msgstr "URL 복사"
 msgid "Invalid URI"
 msgstr "올바르지 않은 URI"
 
-#: gtkmain.c:454
+#: gtkmain.c:412
 msgid "Load additional GTK+ modules"
 msgstr "GTK+ 모듈을 추가로 읽어들입니다"
 
-#: gtkmain.c:455
+#: gtkmain.c:413
 msgid "MODULES"
 msgstr "<모듈>"
 
-#: gtkmain.c:457
+#: gtkmain.c:415
 msgid "Make all warnings fatal"
 msgstr "모든 경고를 치명적인 것으로 간주합니다"
 
-#: gtkmain.c:460
+#: gtkmain.c:418
 msgid "GTK+ debugging flags to set"
 msgstr "설정할 GTK+ 디버깅 플래그"
 
-#: gtkmain.c:461 gtkmain.c:464
+#: gtkmain.c:419 gtkmain.c:422
 msgid "FLAGS"
 msgstr "<플래그>"
 
-#: gtkmain.c:463
+#: gtkmain.c:421
 msgid "GTK+ debugging flags to unset"
 msgstr "설정 해제할 GTK+ 디버깅 플래그"
 
-#: gtkmain.c:755
+#: gtkmain.c:698
 msgid "default:LTR"
 msgstr "default:LTR"
 
-#: gtkmain.c:820
+#: gtkmain.c:763
 #, c-format
 msgid "Cannot open display: %s"
 msgstr "디스플레이를 열 수 없습니다: %s"
 
-#: gtkmain.c:857
+#: gtkmain.c:800
 msgid "GTK+ Options"
 msgstr "GTK+ 옵션"
 
-#: gtkmain.c:857
+#: gtkmain.c:800
 msgid "Show GTK+ Options"
 msgstr "GTK+ 옵션 표시"
 
@@ -714,12 +714,12 @@ msgstr "아래 경로"
 msgid "File System Root"
 msgstr "파일 시스템 루트"
 
-#: gtkrc.c:2906
+#: gtkrc.c:2670
 #, c-format
 msgid "Unable to find include file: \"%s\""
 msgstr "include 파일을 찾을 수 없습니다: \"%s\""
 
-#: gtkrc.c:3536 gtkrc.c:3539
+#: gtkrc.c:3300 gtkrc.c:3303
 #, c-format
 msgid "Unable to locate image file in pixmap_path: \"%s\""
 msgstr "그림 파일을 pixmap_path에서 찾을 수 없음: \"%s\""
@@ -785,9 +785,9 @@ msgstr "'%s' 열기"
 msgid "Unknown item"
 msgstr "알 수 없는 항목"
 
-#: gtkrecentmanager.c:1182 gtkrecentmanager.c:1195 gtkrecentmanager.c:1332
-#: gtkrecentmanager.c:1342 gtkrecentmanager.c:1395 gtkrecentmanager.c:1404
-#: gtkrecentmanager.c:1419
+#: gtkrecentmanager.c:1073 gtkrecentmanager.c:1086 gtkrecentmanager.c:1223
+#: gtkrecentmanager.c:1233 gtkrecentmanager.c:1286 gtkrecentmanager.c:1295
+#: gtkrecentmanager.c:1310
 #, c-format
 msgid "Unable to find an item with URI '%s'"
 msgstr "'%s' URI로 항목을 찾을 수 없습니다"
@@ -795,6 +795,471 @@ msgstr "'%s' URI로 항목을 찾을 수 없습니다"
 #: gtkspinner.c:459
 msgid "Provides visual indication of progress"
 msgstr "진행 상황을 볼 수 있게 표시합니다"
+
+#: gtkstock.c:315
+msgctxt "Stock label"
+msgid "Information"
+msgstr "정보"
+
+#: gtkstock.c:316
+msgctxt "Stock label"
+msgid "Warning"
+msgstr "경고"
+
+#: gtkstock.c:317
+msgctxt "Stock label"
+msgid "Error"
+msgstr "오류"
+
+#: gtkstock.c:318
+msgctxt "Stock label"
+msgid "Question"
+msgstr "물음"
+
+#: gtkstock.c:323
+msgctxt "Stock label"
+msgid "_About"
+msgstr "정보(_A)"
+
+#: gtkstock.c:324
+msgctxt "Stock label"
+msgid "_Add"
+msgstr "추가(_A)"
+
+#: gtkstock.c:325
+msgctxt "Stock label"
+msgid "_Apply"
+msgstr "적용(_A)"
+
+#: gtkstock.c:326
+msgctxt "Stock label"
+msgid "_Bold"
+msgstr "굵게(_B)"
+
+#: gtkstock.c:327
+msgctxt "Stock label"
+msgid "_Cancel"
+msgstr "취소(_C)"
+
+#: gtkstock.c:328
+msgctxt "Stock label"
+msgid "_CD-Rom"
+msgstr "CD-ROM(_C)"
+
+#: gtkstock.c:329
+msgctxt "Stock label"
+msgid "_Clear"
+msgstr "지우기(_C)"
+
+#: gtkstock.c:330
+msgctxt "Stock label"
+msgid "_Close"
+msgstr "닫기(_C)"
+
+#: gtkstock.c:331
+msgctxt "Stock label"
+msgid "C_onnect"
+msgstr "연결(_O)"
+
+#: gtkstock.c:332
+msgctxt "Stock label"
+msgid "_Convert"
+msgstr "변환(_C)"
+
+#: gtkstock.c:333
+msgctxt "Stock label"
+msgid "_Copy"
+msgstr "복사(_C)"
+
+#: gtkstock.c:334
+msgctxt "Stock label"
+msgid "Cu_t"
+msgstr "잘라내기(_T)"
+
+#: gtkstock.c:335
+msgctxt "Stock label"
+msgid "_Delete"
+msgstr "삭제(_D)"
+
+#: gtkstock.c:336
+msgctxt "Stock label"
+msgid "_Discard"
+msgstr "버리기(_D)"
+
+#: gtkstock.c:337
+msgctxt "Stock label"
+msgid "_Disconnect"
+msgstr "연결 끊기(_D)"
+
+#: gtkstock.c:338
+msgctxt "Stock label"
+msgid "_Execute"
+msgstr "실행(_E)"
+
+#: gtkstock.c:339
+msgctxt "Stock label"
+msgid "_Edit"
+msgstr "편집(_E)"
+
+#: gtkstock.c:340
+msgctxt "Stock label"
+msgid "_Find"
+msgstr "찾기(_F)"
+
+#: gtkstock.c:341
+msgctxt "Stock label"
+msgid "Find and _Replace"
+msgstr "찾아서 바꾸기(_R)"
+
+#: gtkstock.c:342
+msgctxt "Stock label"
+msgid "_Floppy"
+msgstr "플로피(_F)"
+
+#: gtkstock.c:343
+msgctxt "Stock label"
+msgid "_Fullscreen"
+msgstr "전체 화면(_F)"
+
+#: gtkstock.c:344
+msgctxt "Stock label"
+msgid "_Leave Fullscreen"
+msgstr "전체 화면 나가기(_L)"
+
+#: gtkstock.c:346
+msgctxt "Stock label, navigation"
+msgid "_Bottom"
+msgstr "맨 아래(_B)"
+
+#: gtkstock.c:348
+msgctxt "Stock label, navigation"
+msgid "_First"
+msgstr "처음(_F)"
+
+#: gtkstock.c:350
+msgctxt "Stock label, navigation"
+msgid "_Last"
+msgstr "마지막(_L)"
+
+#: gtkstock.c:352
+msgctxt "Stock label, navigation"
+msgid "_Top"
+msgstr "맨 위(_T)"
+
+#: gtkstock.c:354
+msgctxt "Stock label, navigation"
+msgid "_Back"
+msgstr "뒤로(_B)"
+
+#: gtkstock.c:356
+msgctxt "Stock label, navigation"
+msgid "_Down"
+msgstr "아래로(_D)"
+
+#: gtkstock.c:358
+msgctxt "Stock label, navigation"
+msgid "_Forward"
+msgstr "앞으로(_F)"
+
+#: gtkstock.c:360
+msgctxt "Stock label, navigation"
+msgid "_Up"
+msgstr "위로(_U)"
+
+#: gtkstock.c:361
+msgctxt "Stock label"
+msgid "_Harddisk"
+msgstr "하드디스크(_H)"
+
+#: gtkstock.c:362
+msgctxt "Stock label"
+msgid "_Help"
+msgstr "도움말(_H)"
+
+#: gtkstock.c:363
+msgctxt "Stock label"
+msgid "_Home"
+msgstr "홈(_H)"
+
+#: gtkstock.c:364
+msgctxt "Stock label"
+msgid "Increase Indent"
+msgstr "들여 쓰기 늘리기"
+
+#: gtkstock.c:365
+msgctxt "Stock label"
+msgid "Decrease Indent"
+msgstr "들여 쓰기 줄이기"
+
+#: gtkstock.c:366
+msgctxt "Stock label"
+msgid "_Index"
+msgstr "색인(_I)"
+
+#: gtkstock.c:367
+msgctxt "Stock label"
+msgid "_Information"
+msgstr "정보(_I)"
+
+#: gtkstock.c:368
+msgctxt "Stock label"
+msgid "_Italic"
+msgstr "기울이기(_I)"
+
+#: gtkstock.c:369
+msgctxt "Stock label"
+msgid "_Jump to"
+msgstr "이동(_J)"
+
+#: gtkstock.c:371
+msgctxt "Stock label"
+msgid "_Center"
+msgstr "가운데(_C)"
+
+#: gtkstock.c:373
+msgctxt "Stock label"
+msgid "_Fill"
+msgstr "채우기(_F)"
+
+#: gtkstock.c:375
+msgctxt "Stock label"
+msgid "_Left"
+msgstr "왼쪽(_L)"
+
+#: gtkstock.c:377
+msgctxt "Stock label"
+msgid "_Right"
+msgstr "오른쪽(_R)"
+
+#: gtkstock.c:380
+msgctxt "Stock label, media"
+msgid "_Forward"
+msgstr "빨리 감기(_F)"
+
+#: gtkstock.c:382
+msgctxt "Stock label, media"
+msgid "_Next"
+msgstr "다음(_N)"
+
+#: gtkstock.c:384
+msgctxt "Stock label, media"
+msgid "P_ause"
+msgstr "일시 중지(_A)"
+
+#: gtkstock.c:386
+msgctxt "Stock label, media"
+msgid "_Play"
+msgstr "재생(_P)"
+
+#: gtkstock.c:388
+msgctxt "Stock label, media"
+msgid "Pre_vious"
+msgstr "이전(_V)"
+
+#: gtkstock.c:390
+msgctxt "Stock label, media"
+msgid "_Record"
+msgstr "녹음/녹화(_R)"
+
+#: gtkstock.c:392
+msgctxt "Stock label, media"
+msgid "R_ewind"
+msgstr "되감기(_E)"
+
+#: gtkstock.c:394
+msgctxt "Stock label, media"
+msgid "_Stop"
+msgstr "중지(_S)"
+
+#: gtkstock.c:395
+msgctxt "Stock label"
+msgid "_Network"
+msgstr "네트워크(_N)"
+
+#: gtkstock.c:396
+msgctxt "Stock label"
+msgid "_New"
+msgstr "새로 만들기(_N)"
+
+#: gtkstock.c:397
+msgctxt "Stock label"
+msgid "_No"
+msgstr "아니오(_N)"
+
+#: gtkstock.c:398
+msgctxt "Stock label"
+msgid "_OK"
+msgstr "확인(_O)"
+
+#: gtkstock.c:399
+msgctxt "Stock label"
+msgid "_Open"
+msgstr "열기(_O)"
+
+#: gtkstock.c:401
+msgctxt "Stock label"
+msgid "Landscape"
+msgstr "가로 방향"
+
+#: gtkstock.c:403
+msgctxt "Stock label"
+msgid "Portrait"
+msgstr "세로 방향"
+
+#: gtkstock.c:405
+msgctxt "Stock label"
+msgid "Reverse landscape"
+msgstr "뒤집힌 가로 방향"
+
+#: gtkstock.c:407
+msgctxt "Stock label"
+msgid "Reverse portrait"
+msgstr "뒤집힌 세로 방향"
+
+#: gtkstock.c:408
+msgctxt "Stock label"
+msgid "Page Set_up"
+msgstr "페이지 설정(_U)"
+
+#: gtkstock.c:409
+msgctxt "Stock label"
+msgid "_Paste"
+msgstr "붙여넣기(_P)"
+
+#: gtkstock.c:410
+msgctxt "Stock label"
+msgid "_Preferences"
+msgstr "기본 설정(_P)"
+
+#: gtkstock.c:411
+msgctxt "Stock label"
+msgid "_Print"
+msgstr "인쇄(_P)"
+
+#: gtkstock.c:412
+msgctxt "Stock label"
+msgid "Print Pre_view"
+msgstr "인쇄 미리 보기(_V)"
+
+#: gtkstock.c:413
+msgctxt "Stock label"
+msgid "_Properties"
+msgstr "속성(_P)"
+
+#: gtkstock.c:414
+msgctxt "Stock label"
+msgid "_Quit"
+msgstr "끝내기(_Q)"
+
+#: gtkstock.c:415
+msgctxt "Stock label"
+msgid "_Redo"
+msgstr "다시 실행(_R)"
+
+#: gtkstock.c:416
+msgctxt "Stock label"
+msgid "_Refresh"
+msgstr "새로 고침(_R)"
+
+#: gtkstock.c:417
+msgctxt "Stock label"
+msgid "_Remove"
+msgstr "제거(_R)"
+
+#: gtkstock.c:418
+msgctxt "Stock label"
+msgid "_Revert"
+msgstr "되돌리기(_R)"
+
+#: gtkstock.c:419
+msgctxt "Stock label"
+msgid "_Save"
+msgstr "저장(_S)"
+
+#: gtkstock.c:420
+msgctxt "Stock label"
+msgid "Save _As"
+msgstr "다른 이름으로 저장(_A)"
+
+#: gtkstock.c:421
+msgctxt "Stock label"
+msgid "Select _All"
+msgstr "모두 선택(_A)"
+
+#: gtkstock.c:422
+msgctxt "Stock label"
+msgid "_Color"
+msgstr "색(_C)"
+
+#: gtkstock.c:423
+msgctxt "Stock label"
+msgid "_Font"
+msgstr "글꼴(_F)"
+
+#: gtkstock.c:425
+msgctxt "Stock label"
+msgid "_Ascending"
+msgstr "오름차순(_A)"
+
+#: gtkstock.c:427
+msgctxt "Stock label"
+msgid "_Descending"
+msgstr "내림차순(_D)"
+
+#: gtkstock.c:428
+msgctxt "Stock label"
+msgid "_Spell Check"
+msgstr "맞춤법 검사(_S)"
+
+#: gtkstock.c:429
+msgctxt "Stock label"
+msgid "_Stop"
+msgstr "중지(_S)"
+
+#: gtkstock.c:431
+msgctxt "Stock label"
+msgid "_Strikethrough"
+msgstr "취소선(_S)"
+
+#: gtkstock.c:432
+msgctxt "Stock label"
+msgid "_Undelete"
+msgstr "삭제 취소(_U)"
+
+#: gtkstock.c:434
+msgctxt "Stock label"
+msgid "_Underline"
+msgstr "밑줄(_U)"
+
+#: gtkstock.c:435
+msgctxt "Stock label"
+msgid "_Undo"
+msgstr "입력 취소(_U)"
+
+#: gtkstock.c:436
+msgctxt "Stock label"
+msgid "_Yes"
+msgstr "예(_Y)"
+
+#: gtkstock.c:438
+msgctxt "Stock label"
+msgid "_Normal Size"
+msgstr "보통 크기(_N)"
+
+#: gtkstock.c:440
+msgctxt "Stock label"
+msgid "Best _Fit"
+msgstr "화면에 맞추기(_F)"
+
+#: gtkstock.c:441
+msgctxt "Stock label"
+msgid "Zoom _In"
+msgstr "확대(_I)"
+
+#: gtkstock.c:442
+msgctxt "Stock label"
+msgid "Zoom _Out"
+msgstr "축소(_O)"
 
 #: gtktextbufferrichtext.c:652
 #, c-format
@@ -969,7 +1434,7 @@ msgstr "갑작스런 시작 태그 '%s' (%d번째 줄 문자 %d)"
 msgid "Unexpected character data on line %d char %d"
 msgstr "갑작스런 문자 데이터 (%d번째 줄 문자 %d)"
 
-#: gtkuimanager.c:2427
+#: gtkuimanager.c:2444
 msgid "Empty"
 msgstr "비었음"
 
@@ -1952,378 +2417,6 @@ msgstr "비었음"
 #~ msgctxt "throbbing progress animation widget"
 #~ msgid "Spinner"
 #~ msgstr "스피너"
-
-#~ msgctxt "Stock label"
-#~ msgid "Information"
-#~ msgstr "정보"
-
-#~ msgctxt "Stock label"
-#~ msgid "Warning"
-#~ msgstr "경고"
-
-#~ msgctxt "Stock label"
-#~ msgid "Error"
-#~ msgstr "오류"
-
-#~ msgctxt "Stock label"
-#~ msgid "Question"
-#~ msgstr "물음"
-
-#~ msgctxt "Stock label"
-#~ msgid "_About"
-#~ msgstr "정보(_A)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Add"
-#~ msgstr "추가(_A)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Apply"
-#~ msgstr "적용(_A)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Bold"
-#~ msgstr "굵게(_B)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Cancel"
-#~ msgstr "취소(_C)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_CD-Rom"
-#~ msgstr "CD-ROM(_C)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Clear"
-#~ msgstr "지우기(_C)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Close"
-#~ msgstr "닫기(_C)"
-
-#~ msgctxt "Stock label"
-#~ msgid "C_onnect"
-#~ msgstr "연결(_O)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Convert"
-#~ msgstr "변환(_C)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Copy"
-#~ msgstr "복사(_C)"
-
-#~ msgctxt "Stock label"
-#~ msgid "Cu_t"
-#~ msgstr "잘라내기(_T)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Delete"
-#~ msgstr "삭제(_D)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Discard"
-#~ msgstr "버리기(_D)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Disconnect"
-#~ msgstr "연결 끊기(_D)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Execute"
-#~ msgstr "실행(_E)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Edit"
-#~ msgstr "편집(_E)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Find"
-#~ msgstr "찾기(_F)"
-
-#~ msgctxt "Stock label"
-#~ msgid "Find and _Replace"
-#~ msgstr "찾아서 바꾸기(_R)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Floppy"
-#~ msgstr "플로피(_F)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Fullscreen"
-#~ msgstr "전체 화면(_F)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Leave Fullscreen"
-#~ msgstr "전체 화면 나가기(_L)"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_Bottom"
-#~ msgstr "맨 아래(_B)"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_First"
-#~ msgstr "처음(_F)"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_Last"
-#~ msgstr "마지막(_L)"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_Top"
-#~ msgstr "맨 위(_T)"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_Back"
-#~ msgstr "뒤로(_B)"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_Down"
-#~ msgstr "아래로(_D)"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_Forward"
-#~ msgstr "앞으로(_F)"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_Up"
-#~ msgstr "위로(_U)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Harddisk"
-#~ msgstr "하드디스크(_H)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Help"
-#~ msgstr "도움말(_H)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Home"
-#~ msgstr "홈(_H)"
-
-#~ msgctxt "Stock label"
-#~ msgid "Increase Indent"
-#~ msgstr "들여 쓰기 늘리기"
-
-#~ msgctxt "Stock label"
-#~ msgid "Decrease Indent"
-#~ msgstr "들여 쓰기 줄이기"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Index"
-#~ msgstr "색인(_I)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Information"
-#~ msgstr "정보(_I)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Italic"
-#~ msgstr "기울이기(_I)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Jump to"
-#~ msgstr "이동(_J)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Center"
-#~ msgstr "가운데(_C)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Fill"
-#~ msgstr "채우기(_F)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Left"
-#~ msgstr "왼쪽(_L)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Right"
-#~ msgstr "오른쪽(_R)"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "_Forward"
-#~ msgstr "빨리 감기(_F)"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "_Next"
-#~ msgstr "다음(_N)"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "P_ause"
-#~ msgstr "일시 중지(_A)"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "_Play"
-#~ msgstr "재생(_P)"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "Pre_vious"
-#~ msgstr "이전(_V)"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "_Record"
-#~ msgstr "녹음/녹화(_R)"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "R_ewind"
-#~ msgstr "되감기(_E)"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "_Stop"
-#~ msgstr "중지(_S)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Network"
-#~ msgstr "네트워크(_N)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_New"
-#~ msgstr "새로 만들기(_N)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_No"
-#~ msgstr "아니오(_N)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_OK"
-#~ msgstr "확인(_O)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Open"
-#~ msgstr "열기(_O)"
-
-#~ msgctxt "Stock label"
-#~ msgid "Landscape"
-#~ msgstr "가로 방향"
-
-#~ msgctxt "Stock label"
-#~ msgid "Portrait"
-#~ msgstr "세로 방향"
-
-#~ msgctxt "Stock label"
-#~ msgid "Reverse landscape"
-#~ msgstr "뒤집힌 가로 방향"
-
-#~ msgctxt "Stock label"
-#~ msgid "Reverse portrait"
-#~ msgstr "뒤집힌 세로 방향"
-
-#~ msgctxt "Stock label"
-#~ msgid "Page Set_up"
-#~ msgstr "페이지 설정(_U)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Paste"
-#~ msgstr "붙여넣기(_P)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Preferences"
-#~ msgstr "기본 설정(_P)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Print"
-#~ msgstr "인쇄(_P)"
-
-#~ msgctxt "Stock label"
-#~ msgid "Print Pre_view"
-#~ msgstr "인쇄 미리 보기(_V)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Properties"
-#~ msgstr "속성(_P)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Quit"
-#~ msgstr "끝내기(_Q)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Redo"
-#~ msgstr "다시 실행(_R)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Refresh"
-#~ msgstr "새로 고침(_R)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Remove"
-#~ msgstr "제거(_R)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Revert"
-#~ msgstr "되돌리기(_R)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Save"
-#~ msgstr "저장(_S)"
-
-#~ msgctxt "Stock label"
-#~ msgid "Save _As"
-#~ msgstr "다른 이름으로 저장(_A)"
-
-#~ msgctxt "Stock label"
-#~ msgid "Select _All"
-#~ msgstr "모두 선택(_A)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Color"
-#~ msgstr "색(_C)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Font"
-#~ msgstr "글꼴(_F)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Ascending"
-#~ msgstr "오름차순(_A)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Descending"
-#~ msgstr "내림차순(_D)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Spell Check"
-#~ msgstr "맞춤법 검사(_S)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Stop"
-#~ msgstr "중지(_S)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Strikethrough"
-#~ msgstr "취소선(_S)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Undelete"
-#~ msgstr "삭제 취소(_U)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Underline"
-#~ msgstr "밑줄(_U)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Undo"
-#~ msgstr "입력 취소(_U)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Yes"
-#~ msgstr "예(_Y)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Normal Size"
-#~ msgstr "보통 크기(_N)"
-
-#~ msgctxt "Stock label"
-#~ msgid "Best _Fit"
-#~ msgstr "화면에 맞추기(_F)"
-
-#~ msgctxt "Stock label"
-#~ msgid "Zoom _In"
-#~ msgstr "확대(_I)"
-
-#~ msgctxt "Stock label"
-#~ msgid "Zoom _Out"
-#~ msgstr "축소(_O)"
 
 #~ msgid "--- No Tip ---"
 #~ msgstr "--- 팁 없음 ---"

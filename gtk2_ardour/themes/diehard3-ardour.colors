@@ -31,6 +31,14 @@
     <Color name="neutral:foreground2" value="a3a3a3ff"/>
     <Color name="neutral:foregroundest" value="ffffffff"/>
     <Color name="neutral:midground" value="b2b5b8ff"/>
+    <Color name="pianoroll: insensitive bender line" value="96b2df84"/>
+    <Color name="pianoroll: insensitive expression line" value="dfc59684"/>
+    <Color name="pianoroll: insensitive modulation line" value="afdf9684"/>
+    <Color name="pianoroll: insensitive pressure line" value="96dfc984"/>
+    <Color name="pianoroll: user1 line" value="df96b084"/>
+    <Color name="pianoroll: user2 line" value="bc96df84"/>
+    <Color name="pianoroll: user3 line" value="9699df84"/>
+    <Color name="pianoroll: velocity" value="ff9408ff"/>
     <Color name="theme:bg" value="0d151dff"/>
     <Color name="theme:bg1" value="0d151dff"/>
     <Color name="theme:bg2" value="172533ff"/>
@@ -47,14 +55,6 @@
     <Color name="widget:green darker" value="666666ff"/>
     <Color name="widget:orange" value="9f440dff"/>
     <Color name="widget:ruddy" value="7a340adc"/>
-    <Color name="pianoroll: velocity" value="ff9408ff"/>
-    <Color name="pianoroll: insensitive bender line" value="96b2df84"/>
-    <Color name="pianoroll: insensitive pressure line" value="96dfc984"/>
-    <Color name="pianoroll: insensitive modulation line" value="afdf9684"/>
-    <Color name="pianoroll: insensitive expression line" value="dfc59684"/>
-    <Color name="pianoroll: user1 line" value="df96b084"/>
-    <Color name="pianoroll: user2 line" value="bc96df84"/>
-    <Color name="pianoroll: user3 line" value="9699df84"/>
     <Color name="widget:yellow" value="eddc3dff"/> <!-- VU meter outline -->
   </Colors>
   <ColorAliases>
@@ -67,8 +67,8 @@
     <ColorAlias name="audio bus base" alias="widget:blue"/>
     <ColorAlias name="audio master bus base" alias="neutral:background"/>
     <ColorAlias name="audio track base" alias="neutral:background"/>
-    <ColorAlias name="automation line insensitive" alias="neutral:foreground2"/>
     <ColorAlias name="automation line" alias="alert:green"/>
+    <ColorAlias name="automation line insensitive" alias="neutral:foreground2"/>
     <ColorAlias name="automation track outline" alias="theme:bg1"/>
     <ColorAlias name="big clock active: background" alias="neutral:backgroundest"/>
     <ColorAlias name="big clock active: cursor" alias="theme:contrasting alt"/>
@@ -98,10 +98,10 @@
     <ColorAlias name="crossfade editor point outline" alias="alert:blue"/>
     <ColorAlias name="crossfade editor wave" alias="neutral:foregroundest"/>
     <ColorAlias name="crossfade line" alias="neutral:backgroundest"/>
-    <ColorAlias name="cue editor start rect fill" alias="neutral:midground"/>
-    <ColorAlias name="cue editor start rect outline" alias="alert:orange"/>
     <ColorAlias name="cue editor end rect fill" alias="neutral:midground"/>
     <ColorAlias name="cue editor end rect outline" alias="alert:orange"/>
+    <ColorAlias name="cue editor start rect fill" alias="neutral:midground"/>
+    <ColorAlias name="cue editor start rect outline" alias="alert:orange"/>
     <ColorAlias name="edit point" alias="alert:blue"/>
     <ColorAlias name="entered automation line" alias="widget:orange"/>
     <ColorAlias name="entered gain line" alias="widget:orange"/>
@@ -138,7 +138,6 @@
     <ColorAlias name="grid line micro" alias="neutral:midground"/>
     <ColorAlias name="grid line minor" alias="neutral:foreground2"/>
     <ColorAlias name="group tab base" alias="theme:bg2"/>
-    <ColorAlias name="gtk_arm" alias="alert:red"/>
     <ColorAlias name="gtk_audio_bus" alias="neutral:background2"/>
     <ColorAlias name="gtk_audio_track" alias="neutral:backgroundest"/>
     <ColorAlias name="gtk_automation_track_header" alias="theme:bg"/>
@@ -163,17 +162,8 @@
     <ColorAlias name="gtk_lightest" alias="neutral:foregroundest"/>
     <ColorAlias name="gtk_midi_channel_selector" alias="widget:blue"/>
     <ColorAlias name="gtk_midi_track" alias="widget:green darker"/>
-    <ColorAlias name="gtk_monitor" alias="alert:orange"/>
     <ColorAlias name="gtk_mono" alias="neutral:foreground"/>
     <ColorAlias name="gtk_mute" alias="alert:yellow"/>
-    <ColorAlias name="gtk_not_so_bright_indicator" alias="theme:contrasting"/>
-    <ColorAlias name="gtk_processor_fader" alias="widget:gray"/>
-    <ColorAlias name="gtk_processor_fader_frame" alias="neutral:midground"/>
-    <ColorAlias name="gtk_processor_frame_selected" alias="theme:contrasting"/>
-    <ColorAlias name="gtk_processor_postfader" alias="widget:green"/>
-    <ColorAlias name="gtk_processor_postfader_frame" alias="widget:green"/>
-    <ColorAlias name="gtk_processor_prefader" alias="widget:ruddy"/>
-    <ColorAlias name="gtk_processor_prefader_frame" alias="widget:ruddy"/>
     <ColorAlias name="gtk_scrollbar_slider" alias="neutral:midground"/>
     <ColorAlias name="gtk_send_bg" alias="theme:bg1"/>
     <ColorAlias name="gtk_send_fg" alias="widget:blue"/>
@@ -182,7 +172,6 @@
     <ColorAlias name="gtk_texts" alias="neutral:foreground"/>
     <ColorAlias name="gtk_track_header_inactive" alias="theme:bg"/>
     <ColorAlias name="gtk_track_header_selected" alias="widget:ruddy"/>
-    <ColorAlias name="image track" alias="neutral:foreground2"/>
     <ColorAlias name="inactive crossfade" alias="theme:contrasting"/>
     <ColorAlias name="inactive fade handle" alias="neutral:foreground2"/>
     <ColorAlias name="inactive group tab" alias="theme:bg"/>
@@ -192,27 +181,22 @@
     <ColorAlias name="latency button: fill" alias="widget:bg"/>
     <ColorAlias name="latency button: fill active" alias="alert:ruddy"/>
     <ColorAlias name="latency button: led active" alias="alert:ruddy"/>
+    <ColorAlias name="location arrangement marker" alias="theme:contrasting alt"/>
     <ColorAlias name="location cd marker" alias="alert:cyan"/>
     <ColorAlias name="location loop" alias="alert:green"/>
     <ColorAlias name="location marker" alias="theme:contrasting clock"/>
     <ColorAlias name="location punch" alias="alert:ruddy"/>
     <ColorAlias name="location range" alias="alert:green"/>
     <ColorAlias name="location session" alias="alert:green"/>
-    <ColorAlias name="location arrangement marker" alias="theme:contrasting alt"/>
     <ColorAlias name="lock button: fill active" alias="widget:bg"/>
     <ColorAlias name="lock button: led active" alias="alert:red"/>
     <ColorAlias name="lua action button: fill" alias="widget:bg"/>
-    <ColorAlias name="mapping bar" alias="neutral:background2"/>
     <ColorAlias name="marker bar" alias="neutral:background2"/>
     <ColorAlias name="marker bar separator" alias="theme:bg2"/>
-    <ColorAlias name="marker drag line" alias="theme:contrasting clock"/>
     <ColorAlias name="marker label" alias="neutral:backgroundest"/>
-    <ColorAlias name="marker track" alias="neutral:foreground2"/>
     <ColorAlias name="master monitor section button active: fill" alias="widget:ruddy"/>
     <ColorAlias name="master monitor section button active: fill active" alias="alert:yellow"/>
     <ColorAlias name="master monitor section button normal: fill active" alias="widget:bg"/>
-    <ColorAlias name="measure line bar" alias="neutral:foregroundest"/>
-    <ColorAlias name="measure line beat" alias="widget:blue"/>
     <ColorAlias name="meter background bottom" alias="neutral:background2"/>
     <ColorAlias name="meter background top" alias="theme:bg"/>
     <ColorAlias name="meter bar" alias="theme:bg1"/>
@@ -253,23 +237,17 @@
     <ColorAlias name="midi meter color8" alias="midi meter 56"/>
     <ColorAlias name="midi meter color9" alias="midi meter 56"/>
     <ColorAlias name="midi note inactive channel" alias="neutral:backgroundest"/>
-    <ColorAlias name="midi note max" alias="theme:contrasting"/>
-    <ColorAlias name="midi note mid" alias="alert:orange"/>
-    <ColorAlias name="midi note min" alias="alert:yellow"/>
     <ColorAlias name="midi note selected" alias="neutral:background"/>
     <ColorAlias name="midi note selected outline" alias="neutral:foregroundest"/>
     <ColorAlias name="midi note velocity text" alias="theme:contrasting"/>
     <ColorAlias name="midi patch change fill" alias="theme:contrasting selection"/>
     <ColorAlias name="midi patch change outline" alias="neutral:foreground"/>
-    <ColorAlias name="midi select rect outline" alias="alert:red"/>
     <ColorAlias name="midi sysex fill" alias="theme:contrasting"/>
     <ColorAlias name="midi sysex outline" alias="theme:contrasting alt"/>
     <ColorAlias name="midi track base" alias="neutral:background2"/>
     <ColorAlias name="mixer strip button: fill" alias="widget:bg"/>
     <ColorAlias name="mixer strip button: fill active" alias="alert:orange"/>
     <ColorAlias name="mixer strip button: led active" alias="alert:green"/>
-    <ColorAlias name="mixer strip name button: fill active" alias="theme:bg2"/>
-    <ColorAlias name="mixer strip name button: led active" alias="alert:green"/>
     <ColorAlias name="monitor button: fill" alias="widget:bg"/>
     <ColorAlias name="monitor button: fill active" alias="alert:orange"/>
     <ColorAlias name="monitor button: led active" alias="alert:ruddy"/>
@@ -304,8 +282,6 @@
     <ColorAlias name="mute button: fill" alias="widget:bg"/>
     <ColorAlias name="mute button: fill active" alias="alert:yellow"/>
     <ColorAlias name="mute button: led active" alias="alert:yellow"/>
-    <ColorAlias name="name highlight fill" alias="alert:blue"/>
-    <ColorAlias name="name highlight outline" alias="theme:bg1"/>
     <ColorAlias name="nudge button: fill" alias="widget:bg"/>
     <ColorAlias name="nudge button: fill active" alias="widget:bg"/>
     <ColorAlias name="nudge button: led active" alias="alert:green"/>
@@ -315,16 +291,19 @@
     <ColorAlias name="nudge clock: text" alias="theme:contrasting clock"/>
     <ColorAlias name="page switch button: fill" alias="widget:bg"/>
     <ColorAlias name="page switch button: fill active" alias="alert:green"/>
+    <ColorAlias name="pan knob" alias="widget:bg"/>
+    <ColorAlias name="pan knob: arc end" alias="widget:orange"/>
+    <ColorAlias name="pan knob: arc start" alias="widget:orange"/>
     <ColorAlias name="patch change button unnamed: fill" alias="neutral:background2"/>
     <ColorAlias name="patch change button unnamed: fill active" alias="widget:blue"/>
     <ColorAlias name="patch change button: fill" alias="widget:bg"/>
     <ColorAlias name="patch change button: fill active" alias="widget:blue"/>
+    <ColorAlias name="piano key black" alias="neutral:background2"/>
+    <ColorAlias name="piano key highlight" alias="alert:ruddy"/>
+    <ColorAlias name="piano key white" alias="neutral:foreground2"/>
     <ColorAlias name="piano roll black" alias="theme:contrasting selection"/>
     <ColorAlias name="piano roll black outline" alias="neutral:foreground2"/>
     <ColorAlias name="piano roll white" alias="neutral:foreground2"/>
-    <ColorAlias name="piano key black" alias="neutral:background2"/>
-    <ColorAlias name="piano key white" alias="neutral:foreground2"/>
-    <ColorAlias name="piano key highlight" alias="alert:ruddy"/>
     <ColorAlias name="pinrouting custom: led active" alias="alert:ruddy"/>
     <ColorAlias name="pinrouting sidechain: led active" alias="alert:green"/>
     <ColorAlias name="play head" alias="theme:contrasting"/>
@@ -372,19 +351,17 @@
     <ColorAlias name="range marker bar" alias="neutral:background2"/>
     <ColorAlias name="record enable button: fill active" alias="alert:ruddy"/>
     <ColorAlias name="record enable button: led active" alias="alert:red"/>
-    <ColorAlias name="recording rect" alias="alert:ruddy"/>
     <ColorAlias name="recording note" alias="neutral:foregroundest"/>
+    <ColorAlias name="recording rect" alias="alert:ruddy"/>
     <ColorAlias name="recording waveform fill" alias="neutral:foregroundest"/>
     <ColorAlias name="recording waveform outline" alias="neutral:background2"/>
     <ColorAlias name="region automation line" alias="alert:blue"/>
-    <ColorAlias name="region list automatic" alias="theme:contrasting less"/>
     <ColorAlias name="region list missing source" alias="alert:red"/>
     <ColorAlias name="region list whole file" alias="neutral:foreground"/>
     <ColorAlias name="region mark" alias="theme:contrasting alt"/>
     <ColorAlias name="route button: fill" alias="widget:bg"/>
     <ColorAlias name="route button: fill active" alias="theme:bg2"/>
     <ColorAlias name="route button: led active" alias="alert:green"/>
-    <ColorAlias name="route rec button: led active" alias="alert:red"/>
     <ColorAlias name="rta freeze button: fill" alias="widget:bg"/>
     <ColorAlias name="rta freeze button: fill active" alias="alert:yellow"/>
     <ColorAlias name="rubber band rect" alias="neutral:foreground2"/>
@@ -408,7 +385,6 @@
     <ColorAlias name="secondary delta clock: cursor" alias="theme:contrasting alt"/>
     <ColorAlias name="secondary delta clock: edited text" alias="theme:contrasting alt"/>
     <ColorAlias name="secondary delta clock: text" alias="theme:contrasting alt"/>
-    <ColorAlias name="selected midi note frame" alias="alert:ruddy"/>
     <ColorAlias name="selected region base" alias="alert:ruddy"/>
     <ColorAlias name="selected time axis frame" alias="alert:ruddy"/>
     <ColorAlias name="selected waveform fill" alias="alert:orange"/>
@@ -426,8 +402,6 @@
     <ColorAlias name="send pan" alias="theme:contrasting alt"/>
     <ColorAlias name="shuttle" alias="widget:bg"/>
     <ColorAlias name="shuttle bg" alias="neutral:backgroundest"/>
-    <ColorAlias name="vari button: fill" alias="widget:bg"/>
-    <ColorAlias name="vari button: fill active" alias="alert:ruddy"/>
     <ColorAlias name="silence" alias="theme:contrasting alt"/>
     <ColorAlias name="silence text" alias="neutral:foreground"/>
     <ColorAlias name="solo button: fill" alias="widget:bg"/>
@@ -471,10 +445,10 @@
     <ColorAlias name="time axis view item base" alias="widget:gray"/>
     <ColorAlias name="time stretch fill" alias="theme:contrasting less"/>
     <ColorAlias name="time stretch outline" alias="widget:gray"/>
+    <ColorAlias name="track separator" alias="neutral:backgroundest"/>
     <ColorAlias name="tracknumber label: fill" alias="theme:bg"/>
     <ColorAlias name="tracknumber label: fill active" alias="neutral:background2"/>
     <ColorAlias name="tracknumber label: led active" alias="alert:red"/>
-    <ColorAlias name="track separator" alias="neutral:backgroundest"/>
     <ColorAlias name="transport active option button: fill" alias="widget:bg"/>
     <ColorAlias name="transport active option button: fill active" alias="alert:green"/>
     <ColorAlias name="transport active option button: led active" alias="alert:green"/>
@@ -489,9 +463,7 @@
     <ColorAlias name="transport delta clock: cursor" alias="theme:contrasting alt"/>
     <ColorAlias name="transport delta clock: edited text" alias="theme:contrasting alt"/>
     <ColorAlias name="transport delta clock: text" alias="theme:contrasting alt"/>
-    <ColorAlias name="transport drag rect" alias="neutral:midground"/>
     <ColorAlias name="transport loop rect" alias="alert:green"/>
-    <ColorAlias name="transport marker bar" alias="neutral:background2"/>
     <ColorAlias name="transport option button: fill" alias="widget:bg"/>
     <ColorAlias name="transport option button: fill active" alias="alert:greenish"/>
     <ColorAlias name="transport option button: led active" alias="alert:green"/>
@@ -504,12 +476,10 @@
     <ColorAlias name="trim knob" alias="widget:bg"/>
     <ColorAlias name="trim knob: arc end" alias="widget:blue"/>
     <ColorAlias name="trim knob: arc start" alias="widget:blue"/>
-    <ColorAlias name="pan knob" alias="widget:bg"/>
-    <ColorAlias name="pan knob: arc end" alias="widget:orange"/>
-    <ColorAlias name="pan knob: arc start" alias="widget:orange"/>
+    <ColorAlias name="vari button: fill" alias="widget:bg"/>
+    <ColorAlias name="vari button: fill active" alias="alert:ruddy"/>
     <ColorAlias name="vca assign button: fill" alias="widget:bg"/>
     <ColorAlias name="verbose canvas cursor" alias="theme:contrasting clock"/>
-    <ColorAlias name="video timeline bar" alias="neutral:background"/>
     <ColorAlias name="waveform fill" alias="neutral:foreground"/>
     <ColorAlias name="waveform outline" alias="neutral:backgroundest"/>
     <ColorAlias name="zero line" alias="theme:bg"/>

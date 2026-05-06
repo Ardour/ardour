@@ -14,7 +14,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk+\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-19 21:59+0100\n"
+"POT-Creation-Date: 2026-05-05 15:38+0200\n"
 "PO-Revision-Date: 2010-09-16 15:45+0000\n"
 "Last-Translator: Aron Xu <happyaron.xu@gmail.com>\n"
 "Language-Team: Chinese (simplified) <i18n-zh@googlegroups.com>\n"
@@ -107,88 +107,88 @@ msgid ""
 "lightness of that color using the inner triangle."
 msgstr "在外围环中选择您要的颜色。在内部三角形中选择该颜色的明暗度。"
 
-#: gtkcolorsel.c:382
+#: gtkcolorsel.c:393
 msgid ""
 "Click the eyedropper, then click a color anywhere on your screen to select "
 "that color."
 msgstr "单击滴管，然后点屏幕任何一处来选取该位置的颜色。"
 
-#: gtkcolorsel.c:391
+#: gtkcolorsel.c:403
 msgid "_Hue:"
 msgstr "色调(_H)："
 
-#: gtkcolorsel.c:392
+#: gtkcolorsel.c:404
 msgid "Position on the color wheel."
 msgstr "在色相环中的位置。"
 
-#: gtkcolorsel.c:394
+#: gtkcolorsel.c:406
 msgid "_Saturation:"
 msgstr "饱和度(_S)："
 
-#: gtkcolorsel.c:395
+#: gtkcolorsel.c:407
 msgid "\"Deepness\" of the color."
 msgstr "颜色的“深度”。"
 
-#: gtkcolorsel.c:396
+#: gtkcolorsel.c:408
 msgid "_Value:"
 msgstr "值(_V)："
 
-#: gtkcolorsel.c:397
+#: gtkcolorsel.c:409
 msgid "Brightness of the color."
 msgstr "颜色的亮度。"
 
-#: gtkcolorsel.c:398
+#: gtkcolorsel.c:410
 msgid "_Red:"
 msgstr "红(_R)："
 
-#: gtkcolorsel.c:399
+#: gtkcolorsel.c:411
 msgid "Amount of red light in the color."
 msgstr "颜色中的红色分量。"
 
-#: gtkcolorsel.c:400
+#: gtkcolorsel.c:412
 msgid "_Green:"
 msgstr "绿(_G)："
 
-#: gtkcolorsel.c:401
+#: gtkcolorsel.c:413
 msgid "Amount of green light in the color."
 msgstr "颜色中的绿色分量。"
 
-#: gtkcolorsel.c:402
+#: gtkcolorsel.c:414
 msgid "_Blue:"
 msgstr "蓝(_B)："
 
-#: gtkcolorsel.c:403
+#: gtkcolorsel.c:415
 msgid "Amount of blue light in the color."
 msgstr "颜色中的蓝色分量。"
 
-#: gtkcolorsel.c:406
+#: gtkcolorsel.c:418
 msgid "Op_acity:"
 msgstr "透明度(_A)："
 
-#: gtkcolorsel.c:413 gtkcolorsel.c:423
+#: gtkcolorsel.c:425 gtkcolorsel.c:435
 msgid "Transparency of the color."
 msgstr "颜色的透明度。"
 
-#: gtkcolorsel.c:430
+#: gtkcolorsel.c:442
 msgid "Color _name:"
 msgstr "颜色名称(_N)："
 
-#: gtkcolorsel.c:444
+#: gtkcolorsel.c:456
 msgid ""
 "You can enter an HTML-style hexadecimal color value, or simply a color name "
 "such as 'orange' in this entry."
 msgstr ""
 "您可以在此栏输入 HTML 风格的十六进制颜色值，或是像“orange”这样的颜色名称。"
 
-#: gtkcolorsel.c:474
+#: gtkcolorsel.c:486
 msgid "_Palette:"
 msgstr "调色板(_P)："
 
-#: gtkcolorsel.c:503
+#: gtkcolorsel.c:515
 msgid "Color Wheel"
 msgstr "色相环"
 
-#: gtkcolorsel.c:962
+#: gtkcolorsel.c:974
 msgid ""
 "The previously-selected color, for comparison to the color you're selecting "
 "now. You can drag this color to a palette entry, or select this color as "
@@ -197,27 +197,27 @@ msgstr ""
 "先前选中的颜色，相对于您正选中的颜色。您可以拖动此颜色到调色板，或拖动此颜色"
 "到下一个颜色样品格内以作为当前选中颜色。"
 
-#: gtkcolorsel.c:965
+#: gtkcolorsel.c:977
 msgid ""
 "The color you've chosen. You can drag this color to a palette entry to save "
 "it for use in the future."
 msgstr "您选择的颜色。您可以拖动此颜色到调色板并将之保存供以后使用。"
 
-#: gtkcolorsel.c:970
+#: gtkcolorsel.c:982
 msgid ""
 "The previously-selected color, for comparison to the color you're selecting "
 "now."
 msgstr "之前选择的颜色，用来与您正在选的颜色作比对。"
 
-#: gtkcolorsel.c:973
+#: gtkcolorsel.c:985
 msgid "The color you've chosen."
 msgstr "您所选择的颜色。"
 
-#: gtkcolorsel.c:1389
+#: gtkcolorsel.c:1401
 msgid "_Save color here"
 msgstr "在此保存颜色(_S)"
 
-#: gtkcolorsel.c:1593
+#: gtkcolorsel.c:1605
 msgid ""
 "Click this palette entry to make it the current color. To change this entry, "
 "drag a color swatch here or right-click it and select \"Save color here.\""
@@ -246,7 +246,7 @@ msgstr "大写锁已打开"
 msgid "Select a File"
 msgstr "选择文件"
 
-#: gtkfilechooserbutton.c:65 gtkfilechooserdefault.c:1851
+#: gtkfilechooserbutton.c:65 gtkfilechooserdefault.c:1853
 msgid "Desktop"
 msgstr "桌面"
 
@@ -262,23 +262,23 @@ msgstr "其它..."
 msgid "Type name of new folder"
 msgstr "输入新建文件夹的名称"
 
-#: gtkfilechooserdefault.c:956
+#: gtkfilechooserdefault.c:958
 msgid "Could not retrieve information about the file"
 msgstr "无法获取关于文件的信息"
 
-#: gtkfilechooserdefault.c:967
+#: gtkfilechooserdefault.c:969
 msgid "Could not add a bookmark"
 msgstr "无法添加书签"
 
-#: gtkfilechooserdefault.c:978
+#: gtkfilechooserdefault.c:980
 msgid "Could not remove bookmark"
 msgstr "无法删除书签"
 
-#: gtkfilechooserdefault.c:989
+#: gtkfilechooserdefault.c:991
 msgid "The folder could not be created"
 msgstr "无法创建文件夹"
 
-#: gtkfilechooserdefault.c:1002
+#: gtkfilechooserdefault.c:1004
 msgid ""
 "The folder could not be created, as a file with the same name already "
 "exists.  Try using a different name for the folder, or rename the file first."
@@ -286,228 +286,228 @@ msgstr ""
 "无法创建文件夹，因为已经存在同名文件。请试着为文件夹使用不同的名称，或者先重"
 "命名文件。"
 
-#: gtkfilechooserdefault.c:1016
+#: gtkfilechooserdefault.c:1018
 msgid "You need to choose a valid filename."
 msgstr ""
 
-#: gtkfilechooserdefault.c:1019
+#: gtkfilechooserdefault.c:1021
 #, c-format
 msgid "Cannot create a file under %s as it is not a folder"
 msgstr ""
 
-#: gtkfilechooserdefault.c:1031
+#: gtkfilechooserdefault.c:1033
 msgid ""
 "You may only select folders.  The item that you selected is not a folder; "
 "try using a different item."
 msgstr ""
 
-#: gtkfilechooserdefault.c:1041
+#: gtkfilechooserdefault.c:1043
 msgid "Invalid file name"
 msgstr "无效的文件名"
 
-#: gtkfilechooserdefault.c:1051
+#: gtkfilechooserdefault.c:1053
 msgid "The folder contents could not be displayed"
 msgstr "无法显示文件夹内容"
 
-#: gtkfilechooserdefault.c:1584
+#: gtkfilechooserdefault.c:1586
 #, c-format
 msgid "%1$s on %2$s"
 msgstr "%2$s 上的 %1$s"
 
-#: gtkfilechooserdefault.c:1733
+#: gtkfilechooserdefault.c:1735
 msgid "Search"
 msgstr "搜索"
 
-#: gtkfilechooserdefault.c:1757 gtkfilechooserdefault.c:4872
+#: gtkfilechooserdefault.c:1759 gtkfilechooserdefault.c:4877
 msgid "Recently Used"
 msgstr "最近使用的"
 
-#: gtkfilechooserdefault.c:2387
+#: gtkfilechooserdefault.c:2389
 msgid "Select which types of files are shown"
 msgstr "选择要显示的文件类型"
 
-#: gtkfilechooserdefault.c:2746
+#: gtkfilechooserdefault.c:2748
 #, c-format
 msgid "Add the folder '%s' to the bookmarks"
 msgstr "将文件夹“%s”添加到书签"
 
-#: gtkfilechooserdefault.c:2790
+#: gtkfilechooserdefault.c:2792
 msgid "Add the current folder to the bookmarks"
 msgstr "将当前文件夹添加到书签"
 
-#: gtkfilechooserdefault.c:2792
+#: gtkfilechooserdefault.c:2794
 msgid "Add the selected folders to the bookmarks"
 msgstr "将选中文件夹添加到书签"
 
-#: gtkfilechooserdefault.c:2837
+#: gtkfilechooserdefault.c:2839
 #, c-format
 msgid "Remove the bookmark '%s'"
 msgstr "删除书签“%s”"
 
-#: gtkfilechooserdefault.c:2839
+#: gtkfilechooserdefault.c:2841
 #, c-format
 msgid "Bookmark '%s' cannot be removed"
 msgstr "无法删除书签“%s”"
 
-#: gtkfilechooserdefault.c:2846 gtkfilechooserdefault.c:3740
+#: gtkfilechooserdefault.c:2848 gtkfilechooserdefault.c:3742
 msgid "Remove the selected bookmark"
 msgstr "删除选中的书签"
 
-#: gtkfilechooserdefault.c:3421
+#: gtkfilechooserdefault.c:3423
 msgid "Remove"
 msgstr "删除"
 
-#: gtkfilechooserdefault.c:3430
+#: gtkfilechooserdefault.c:3432
 msgid "Rename..."
 msgstr "重命名..."
 
-#: gtkfilechooserdefault.c:3597
+#: gtkfilechooserdefault.c:3599
 msgid "Places"
 msgstr "位置"
 
-#: gtkfilechooserdefault.c:3654
+#: gtkfilechooserdefault.c:3656
 msgid "_Places"
 msgstr "位置(_R)"
 
-#: gtkfilechooserdefault.c:3728
+#: gtkfilechooserdefault.c:3730
 msgid "Add the selected folder to the Bookmarks"
 msgstr "将选中的文件夹添加到书签"
 
-#: gtkfilechooserdefault.c:3872
+#: gtkfilechooserdefault.c:3874
 msgid "Could not select file"
 msgstr "无法选择文件"
 
-#: gtkfilechooserdefault.c:4045
+#: gtkfilechooserdefault.c:4047
 msgid "_Add to Bookmarks"
 msgstr "添加到书签(_A)"
 
-#: gtkfilechooserdefault.c:4058
+#: gtkfilechooserdefault.c:4060
 msgid "Show _Hidden Files"
 msgstr "显示隐藏文件(_H)"
 
-#: gtkfilechooserdefault.c:4065
+#: gtkfilechooserdefault.c:4067
 msgid "Show _Size Column"
 msgstr "显示大小列(_S)"
 
-#: gtkfilechooserdefault.c:4289
+#: gtkfilechooserdefault.c:4291
 msgid "Files"
 msgstr "文件"
 
-#: gtkfilechooserdefault.c:4340
+#: gtkfilechooserdefault.c:4342
 msgid "Name"
 msgstr "名称"
 
-#: gtkfilechooserdefault.c:4363
+#: gtkfilechooserdefault.c:4365
 msgid "Size"
 msgstr "大小"
 
-#: gtkfilechooserdefault.c:4377
+#: gtkfilechooserdefault.c:4379
 msgid "Modified"
 msgstr "修改日期"
 
-#: gtkfilechooserdefault.c:4470
+#: gtkfilechooserdefault.c:4475
 msgid "_Name:"
 msgstr "名称(_N)："
 
-#: gtkfilechooserdefault.c:4710
+#: gtkfilechooserdefault.c:4715
 msgid "Type a file name"
 msgstr "输入文件名"
 
-#: gtkfilechooserdefault.c:4757 gtkfilechooserdefault.c:4768
+#: gtkfilechooserdefault.c:4762 gtkfilechooserdefault.c:4773
 msgid "Please select a folder below"
 msgstr ""
 
-#: gtkfilechooserdefault.c:4763
+#: gtkfilechooserdefault.c:4768
 #, fuzzy
 msgid "Please type a file name"
 msgstr "输入文件名"
 
-#: gtkfilechooserdefault.c:4834
+#: gtkfilechooserdefault.c:4839
 msgid "Create Fo_lder"
 msgstr "创建文件夹(_L)"
 
-#: gtkfilechooserdefault.c:4882
+#: gtkfilechooserdefault.c:4887
 msgid "Search:"
 msgstr "搜索："
 
-#: gtkfilechooserdefault.c:4933
+#: gtkfilechooserdefault.c:4938
 msgid "_Location:"
 msgstr "位置(_L)："
 
-#: gtkfilechooserdefault.c:5383
+#: gtkfilechooserdefault.c:5388
 msgid "Save in _folder:"
 msgstr "保存于文件夹(_F)："
 
-#: gtkfilechooserdefault.c:5385
+#: gtkfilechooserdefault.c:5390
 msgid "Create in _folder:"
 msgstr "创建于文件夹(_F)："
 
-#: gtkfilechooserdefault.c:6479
+#: gtkfilechooserdefault.c:6484
 #, c-format
 msgid "Could not read the contents of %s"
 msgstr "无法读取 %s 的内容"
 
-#: gtkfilechooserdefault.c:6483
+#: gtkfilechooserdefault.c:6488
 msgid "Could not read the contents of the folder"
 msgstr "无法读取文件夹内容"
 
-#: gtkfilechooserdefault.c:6576 gtkfilechooserdefault.c:6644
-#: gtkfilechooserdefault.c:6829
+#: gtkfilechooserdefault.c:6581 gtkfilechooserdefault.c:6649
+#: gtkfilechooserdefault.c:6834
 msgid "Unknown"
 msgstr "未知"
 
-#: gtkfilechooserdefault.c:6591
+#: gtkfilechooserdefault.c:6596
 msgid "%H:%M"
 msgstr "%H:%M"
 
-#: gtkfilechooserdefault.c:6593
+#: gtkfilechooserdefault.c:6598
 msgid "Yesterday at %H:%M"
 msgstr "昨天于 %H:%M"
 
-#: gtkfilechooserdefault.c:7301
+#: gtkfilechooserdefault.c:7306
 msgid "Cannot change to folder because it is not local"
 msgstr "无法更改为文件夹，因为该文件夹并非本地"
 
-#: gtkfilechooserdefault.c:7898 gtkfilechooserdefault.c:7919
+#: gtkfilechooserdefault.c:7903 gtkfilechooserdefault.c:7924
 #, c-format
 msgid "Shortcut %s already exists"
 msgstr "快捷方式 %s 已经存在"
 
-#: gtkfilechooserdefault.c:8009
+#: gtkfilechooserdefault.c:8014
 #, c-format
 msgid "Shortcut %s does not exist"
 msgstr "快捷方式 %s 不存在"
 
-#: gtkfilechooserdefault.c:8250
+#: gtkfilechooserdefault.c:8255
 #, c-format
 msgid "A file named \"%s\" already exists.  Do you want to replace it?"
 msgstr "已经存在名为“%s”的文件。您是否想要替换？"
 
-#: gtkfilechooserdefault.c:8253
+#: gtkfilechooserdefault.c:8258
 #, c-format
 msgid ""
 "The file already exists in \"%s\".  Replacing it will overwrite its contents."
 msgstr "文件已经在“%s”中存在了。替换该文件将覆盖其中的内容。"
 
-#: gtkfilechooserdefault.c:8258
+#: gtkfilechooserdefault.c:8263
 msgid "_Replace"
 msgstr "替换(_R)"
 
-#: gtkfilechooserdefault.c:9066
+#: gtkfilechooserdefault.c:9136
 msgid "Could not start the search process"
 msgstr "无法开启搜索进程"
 
-#: gtkfilechooserdefault.c:9067
+#: gtkfilechooserdefault.c:9137
 msgid ""
 "The program was not able to create a connection to the indexer daemon.  "
 "Please make sure it is running."
 msgstr "程序无法连接到索引守护进程。请确保它在运行。"
 
-#: gtkfilechooserdefault.c:9081
+#: gtkfilechooserdefault.c:9151
 msgid "Could not send the search request"
 msgstr "无法发送搜索请求"
 
-#: gtkfilechooserdefault.c:9682
+#: gtkfilechooserdefault.c:9752
 #, c-format
 msgid "Could not mount %s"
 msgstr "无法挂载 %s"
@@ -603,44 +603,44 @@ msgstr "复制 URL"
 msgid "Invalid URI"
 msgstr "无效的 URI"
 
-#: gtkmain.c:454
+#: gtkmain.c:412
 msgid "Load additional GTK+ modules"
 msgstr "装入额外的 GTK+ 模块"
 
-#: gtkmain.c:455
+#: gtkmain.c:413
 msgid "MODULES"
 msgstr "模块"
 
-#: gtkmain.c:457
+#: gtkmain.c:415
 msgid "Make all warnings fatal"
 msgstr "将警告变为严重"
 
-#: gtkmain.c:460
+#: gtkmain.c:418
 msgid "GTK+ debugging flags to set"
 msgstr "要设置的 GTK+ 调试标志"
 
-#: gtkmain.c:461 gtkmain.c:464
+#: gtkmain.c:419 gtkmain.c:422
 msgid "FLAGS"
 msgstr "标志"
 
-#: gtkmain.c:463
+#: gtkmain.c:421
 msgid "GTK+ debugging flags to unset"
 msgstr "要取消的 GTK+ 调试标志"
 
-#: gtkmain.c:755
+#: gtkmain.c:698
 msgid "default:LTR"
 msgstr "default:LTR"
 
-#: gtkmain.c:820
+#: gtkmain.c:763
 #, c-format
 msgid "Cannot open display: %s"
 msgstr "无法打开显示：%s"
 
-#: gtkmain.c:857
+#: gtkmain.c:800
 msgid "GTK+ Options"
 msgstr "GTK+ 选项"
 
-#: gtkmain.c:857
+#: gtkmain.c:800
 msgid "Show GTK+ Options"
 msgstr "显示 GTK+ 选项"
 
@@ -710,12 +710,12 @@ msgstr "下一层路径"
 msgid "File System Root"
 msgstr "根文件系统"
 
-#: gtkrc.c:2906
+#: gtkrc.c:2670
 #, c-format
 msgid "Unable to find include file: \"%s\""
 msgstr "找不到包含文件：“%s”"
 
-#: gtkrc.c:3536 gtkrc.c:3539
+#: gtkrc.c:3300 gtkrc.c:3303
 #, c-format
 msgid "Unable to locate image file in pixmap_path: \"%s\""
 msgstr "无法在像素图路径中找到图像文件：“%s”"
@@ -781,9 +781,9 @@ msgstr "打开“%s”"
 msgid "Unknown item"
 msgstr "未知项"
 
-#: gtkrecentmanager.c:1182 gtkrecentmanager.c:1195 gtkrecentmanager.c:1332
-#: gtkrecentmanager.c:1342 gtkrecentmanager.c:1395 gtkrecentmanager.c:1404
-#: gtkrecentmanager.c:1419
+#: gtkrecentmanager.c:1073 gtkrecentmanager.c:1086 gtkrecentmanager.c:1223
+#: gtkrecentmanager.c:1233 gtkrecentmanager.c:1286 gtkrecentmanager.c:1295
+#: gtkrecentmanager.c:1310
 #, c-format
 msgid "Unable to find an item with URI '%s'"
 msgstr "找不到 URI 为“%s”的一项"
@@ -791,6 +791,471 @@ msgstr "找不到 URI 为“%s”的一项"
 #: gtkspinner.c:459
 msgid "Provides visual indication of progress"
 msgstr "提供进度的视觉表示"
+
+#: gtkstock.c:315
+msgctxt "Stock label"
+msgid "Information"
+msgstr "信息"
+
+#: gtkstock.c:316
+msgctxt "Stock label"
+msgid "Warning"
+msgstr "警告"
+
+#: gtkstock.c:317
+msgctxt "Stock label"
+msgid "Error"
+msgstr "错误"
+
+#: gtkstock.c:318
+msgctxt "Stock label"
+msgid "Question"
+msgstr "问题"
+
+#: gtkstock.c:323
+msgctxt "Stock label"
+msgid "_About"
+msgstr "关于(_A)"
+
+#: gtkstock.c:324
+msgctxt "Stock label"
+msgid "_Add"
+msgstr "添加(_A)"
+
+#: gtkstock.c:325
+msgctxt "Stock label"
+msgid "_Apply"
+msgstr "应用(_A)"
+
+#: gtkstock.c:326
+msgctxt "Stock label"
+msgid "_Bold"
+msgstr "粗体(_B)"
+
+#: gtkstock.c:327
+msgctxt "Stock label"
+msgid "_Cancel"
+msgstr "取消(_C)"
+
+#: gtkstock.c:328
+msgctxt "Stock label"
+msgid "_CD-Rom"
+msgstr "_CD-ROM"
+
+#: gtkstock.c:329
+msgctxt "Stock label"
+msgid "_Clear"
+msgstr "清除(_C)"
+
+#: gtkstock.c:330
+msgctxt "Stock label"
+msgid "_Close"
+msgstr "关闭(_C)"
+
+#: gtkstock.c:331
+msgctxt "Stock label"
+msgid "C_onnect"
+msgstr "连接(_O)"
+
+#: gtkstock.c:332
+msgctxt "Stock label"
+msgid "_Convert"
+msgstr "转换(_C)"
+
+#: gtkstock.c:333
+msgctxt "Stock label"
+msgid "_Copy"
+msgstr "复制(_C)"
+
+#: gtkstock.c:334
+msgctxt "Stock label"
+msgid "Cu_t"
+msgstr "剪切(_T)"
+
+#: gtkstock.c:335
+msgctxt "Stock label"
+msgid "_Delete"
+msgstr "删除(_D)"
+
+#: gtkstock.c:336
+msgctxt "Stock label"
+msgid "_Discard"
+msgstr "放弃(_D)"
+
+#: gtkstock.c:337
+msgctxt "Stock label"
+msgid "_Disconnect"
+msgstr "断开连接(_D)"
+
+#: gtkstock.c:338
+msgctxt "Stock label"
+msgid "_Execute"
+msgstr "执行(_E)"
+
+#: gtkstock.c:339
+msgctxt "Stock label"
+msgid "_Edit"
+msgstr "编辑(_E)"
+
+#: gtkstock.c:340
+msgctxt "Stock label"
+msgid "_Find"
+msgstr "查找(_F)"
+
+#: gtkstock.c:341
+msgctxt "Stock label"
+msgid "Find and _Replace"
+msgstr "查找并替换(_R)"
+
+#: gtkstock.c:342
+msgctxt "Stock label"
+msgid "_Floppy"
+msgstr "软盘(_F)"
+
+#: gtkstock.c:343
+msgctxt "Stock label"
+msgid "_Fullscreen"
+msgstr "全屏(_F)"
+
+#: gtkstock.c:344
+msgctxt "Stock label"
+msgid "_Leave Fullscreen"
+msgstr "离开全屏(_L)"
+
+#: gtkstock.c:346
+msgctxt "Stock label, navigation"
+msgid "_Bottom"
+msgstr "到底部(_B)"
+
+#: gtkstock.c:348
+msgctxt "Stock label, navigation"
+msgid "_First"
+msgstr "到第一页(_F)"
+
+#: gtkstock.c:350
+msgctxt "Stock label, navigation"
+msgid "_Last"
+msgstr "到最后一页(_L)"
+
+#: gtkstock.c:352
+msgctxt "Stock label, navigation"
+msgid "_Top"
+msgstr "到顶部(_T)"
+
+#: gtkstock.c:354
+msgctxt "Stock label, navigation"
+msgid "_Back"
+msgstr "后退(_B)"
+
+#: gtkstock.c:356
+msgctxt "Stock label, navigation"
+msgid "_Down"
+msgstr "向下(_D)"
+
+#: gtkstock.c:358
+msgctxt "Stock label, navigation"
+msgid "_Forward"
+msgstr "前进(_F)"
+
+#: gtkstock.c:360
+msgctxt "Stock label, navigation"
+msgid "_Up"
+msgstr "向上(_U)"
+
+#: gtkstock.c:361
+msgctxt "Stock label"
+msgid "_Harddisk"
+msgstr "硬盘(_H)"
+
+#: gtkstock.c:362
+msgctxt "Stock label"
+msgid "_Help"
+msgstr "帮助(_H)"
+
+#: gtkstock.c:363
+msgctxt "Stock label"
+msgid "_Home"
+msgstr "主文件夹(_H)"
+
+#: gtkstock.c:364
+msgctxt "Stock label"
+msgid "Increase Indent"
+msgstr "增加缩进"
+
+#: gtkstock.c:365
+msgctxt "Stock label"
+msgid "Decrease Indent"
+msgstr "减少缩进"
+
+#: gtkstock.c:366
+msgctxt "Stock label"
+msgid "_Index"
+msgstr "索引(_I)"
+
+#: gtkstock.c:367
+msgctxt "Stock label"
+msgid "_Information"
+msgstr "信息(_I)"
+
+#: gtkstock.c:368
+msgctxt "Stock label"
+msgid "_Italic"
+msgstr "斜体(_I)"
+
+#: gtkstock.c:369
+msgctxt "Stock label"
+msgid "_Jump to"
+msgstr "跳至(_J)"
+
+#: gtkstock.c:371
+msgctxt "Stock label"
+msgid "_Center"
+msgstr "居中(_C)"
+
+#: gtkstock.c:373
+msgctxt "Stock label"
+msgid "_Fill"
+msgstr "两端对齐(_F)"
+
+#: gtkstock.c:375
+msgctxt "Stock label"
+msgid "_Left"
+msgstr "左对齐(_L)"
+
+#: gtkstock.c:377
+msgctxt "Stock label"
+msgid "_Right"
+msgstr "右对齐(_R)"
+
+#: gtkstock.c:380
+msgctxt "Stock label, media"
+msgid "_Forward"
+msgstr "前进(_F)"
+
+#: gtkstock.c:382
+msgctxt "Stock label, media"
+msgid "_Next"
+msgstr "下首(_N)"
+
+#: gtkstock.c:384
+msgctxt "Stock label, media"
+msgid "P_ause"
+msgstr "暂停(_A)"
+
+#: gtkstock.c:386
+msgctxt "Stock label, media"
+msgid "_Play"
+msgstr "播放(_P)"
+
+#: gtkstock.c:388
+msgctxt "Stock label, media"
+msgid "Pre_vious"
+msgstr "上首(_V)"
+
+#: gtkstock.c:390
+msgctxt "Stock label, media"
+msgid "_Record"
+msgstr "录制(_R)"
+
+#: gtkstock.c:392
+msgctxt "Stock label, media"
+msgid "R_ewind"
+msgstr "快退(_E)"
+
+#: gtkstock.c:394
+msgctxt "Stock label, media"
+msgid "_Stop"
+msgstr "停止(_S)"
+
+#: gtkstock.c:395
+msgctxt "Stock label"
+msgid "_Network"
+msgstr "网络(_N)"
+
+#: gtkstock.c:396
+msgctxt "Stock label"
+msgid "_New"
+msgstr "新建(_N)"
+
+#: gtkstock.c:397
+msgctxt "Stock label"
+msgid "_No"
+msgstr "否(_N)"
+
+#: gtkstock.c:398
+msgctxt "Stock label"
+msgid "_OK"
+msgstr "确定(_O)"
+
+#: gtkstock.c:399
+msgctxt "Stock label"
+msgid "_Open"
+msgstr "打开(_O)"
+
+#: gtkstock.c:401
+msgctxt "Stock label"
+msgid "Landscape"
+msgstr "横向"
+
+#: gtkstock.c:403
+msgctxt "Stock label"
+msgid "Portrait"
+msgstr "纵向"
+
+#: gtkstock.c:405
+msgctxt "Stock label"
+msgid "Reverse landscape"
+msgstr "横向翻转"
+
+#: gtkstock.c:407
+msgctxt "Stock label"
+msgid "Reverse portrait"
+msgstr "纵向翻转"
+
+#: gtkstock.c:408
+msgctxt "Stock label"
+msgid "Page Set_up"
+msgstr "页面设置(_U)"
+
+#: gtkstock.c:409
+msgctxt "Stock label"
+msgid "_Paste"
+msgstr "粘贴(_P)"
+
+#: gtkstock.c:410
+msgctxt "Stock label"
+msgid "_Preferences"
+msgstr "首选项(_P)"
+
+#: gtkstock.c:411
+msgctxt "Stock label"
+msgid "_Print"
+msgstr "打印(_P)"
+
+#: gtkstock.c:412
+msgctxt "Stock label"
+msgid "Print Pre_view"
+msgstr "打印预览(_V)"
+
+#: gtkstock.c:413
+msgctxt "Stock label"
+msgid "_Properties"
+msgstr "属性(_P)"
+
+#: gtkstock.c:414
+msgctxt "Stock label"
+msgid "_Quit"
+msgstr "退出(_Q)"
+
+#: gtkstock.c:415
+msgctxt "Stock label"
+msgid "_Redo"
+msgstr "重做(_R)"
+
+#: gtkstock.c:416
+msgctxt "Stock label"
+msgid "_Refresh"
+msgstr "刷新(_R)"
+
+#: gtkstock.c:417
+msgctxt "Stock label"
+msgid "_Remove"
+msgstr "删除(_R)"
+
+#: gtkstock.c:418
+msgctxt "Stock label"
+msgid "_Revert"
+msgstr "还原(_R)"
+
+#: gtkstock.c:419
+msgctxt "Stock label"
+msgid "_Save"
+msgstr "保存(_S)"
+
+#: gtkstock.c:420
+msgctxt "Stock label"
+msgid "Save _As"
+msgstr "另存为(_A)"
+
+#: gtkstock.c:421
+msgctxt "Stock label"
+msgid "Select _All"
+msgstr "全选(_A)"
+
+#: gtkstock.c:422
+msgctxt "Stock label"
+msgid "_Color"
+msgstr "颜色(_C)"
+
+#: gtkstock.c:423
+msgctxt "Stock label"
+msgid "_Font"
+msgstr "字体(_F)"
+
+#: gtkstock.c:425
+msgctxt "Stock label"
+msgid "_Ascending"
+msgstr "升序(_A)"
+
+#: gtkstock.c:427
+msgctxt "Stock label"
+msgid "_Descending"
+msgstr "降序(_D)"
+
+#: gtkstock.c:428
+msgctxt "Stock label"
+msgid "_Spell Check"
+msgstr "拼写检查(_S)"
+
+#: gtkstock.c:429
+msgctxt "Stock label"
+msgid "_Stop"
+msgstr "停止(_S)"
+
+#: gtkstock.c:431
+msgctxt "Stock label"
+msgid "_Strikethrough"
+msgstr "删除线(_S)"
+
+#: gtkstock.c:432
+msgctxt "Stock label"
+msgid "_Undelete"
+msgstr "取消删除(_U)"
+
+#: gtkstock.c:434
+msgctxt "Stock label"
+msgid "_Underline"
+msgstr "下划线(_U)"
+
+#: gtkstock.c:435
+msgctxt "Stock label"
+msgid "_Undo"
+msgstr "撤消(_U)"
+
+#: gtkstock.c:436
+msgctxt "Stock label"
+msgid "_Yes"
+msgstr "是(_Y)"
+
+#: gtkstock.c:438
+msgctxt "Stock label"
+msgid "_Normal Size"
+msgstr "普通大小(_N)"
+
+#: gtkstock.c:440
+msgctxt "Stock label"
+msgid "Best _Fit"
+msgstr "最适合(_F)"
+
+#: gtkstock.c:441
+msgctxt "Stock label"
+msgid "Zoom _In"
+msgstr "放大(_I)"
+
+#: gtkstock.c:442
+msgctxt "Stock label"
+msgid "Zoom _Out"
+msgstr "缩小(_O)"
 
 #: gtktextbufferrichtext.c:652
 #, c-format
@@ -961,7 +1426,7 @@ msgstr "在第%2$d行第%3$d个字符处有未预期的开始标签“%1$s”"
 msgid "Unexpected character data on line %d char %d"
 msgstr "在第%d行第%d个字符处有未预期的字符"
 
-#: gtkuimanager.c:2427
+#: gtkuimanager.c:2444
 msgid "Empty"
 msgstr "空"
 
@@ -1901,378 +2366,6 @@ msgstr "空"
 #~ msgctxt "throbbing progress animation widget"
 #~ msgid "Spinner"
 #~ msgstr "自旋动画(Spinner)"
-
-#~ msgctxt "Stock label"
-#~ msgid "Information"
-#~ msgstr "信息"
-
-#~ msgctxt "Stock label"
-#~ msgid "Warning"
-#~ msgstr "警告"
-
-#~ msgctxt "Stock label"
-#~ msgid "Error"
-#~ msgstr "错误"
-
-#~ msgctxt "Stock label"
-#~ msgid "Question"
-#~ msgstr "问题"
-
-#~ msgctxt "Stock label"
-#~ msgid "_About"
-#~ msgstr "关于(_A)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Add"
-#~ msgstr "添加(_A)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Apply"
-#~ msgstr "应用(_A)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Bold"
-#~ msgstr "粗体(_B)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Cancel"
-#~ msgstr "取消(_C)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_CD-Rom"
-#~ msgstr "_CD-ROM"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Clear"
-#~ msgstr "清除(_C)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Close"
-#~ msgstr "关闭(_C)"
-
-#~ msgctxt "Stock label"
-#~ msgid "C_onnect"
-#~ msgstr "连接(_O)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Convert"
-#~ msgstr "转换(_C)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Copy"
-#~ msgstr "复制(_C)"
-
-#~ msgctxt "Stock label"
-#~ msgid "Cu_t"
-#~ msgstr "剪切(_T)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Delete"
-#~ msgstr "删除(_D)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Discard"
-#~ msgstr "放弃(_D)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Disconnect"
-#~ msgstr "断开连接(_D)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Execute"
-#~ msgstr "执行(_E)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Edit"
-#~ msgstr "编辑(_E)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Find"
-#~ msgstr "查找(_F)"
-
-#~ msgctxt "Stock label"
-#~ msgid "Find and _Replace"
-#~ msgstr "查找并替换(_R)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Floppy"
-#~ msgstr "软盘(_F)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Fullscreen"
-#~ msgstr "全屏(_F)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Leave Fullscreen"
-#~ msgstr "离开全屏(_L)"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_Bottom"
-#~ msgstr "到底部(_B)"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_First"
-#~ msgstr "到第一页(_F)"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_Last"
-#~ msgstr "到最后一页(_L)"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_Top"
-#~ msgstr "到顶部(_T)"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_Back"
-#~ msgstr "后退(_B)"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_Down"
-#~ msgstr "向下(_D)"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_Forward"
-#~ msgstr "前进(_F)"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_Up"
-#~ msgstr "向上(_U)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Harddisk"
-#~ msgstr "硬盘(_H)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Help"
-#~ msgstr "帮助(_H)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Home"
-#~ msgstr "主文件夹(_H)"
-
-#~ msgctxt "Stock label"
-#~ msgid "Increase Indent"
-#~ msgstr "增加缩进"
-
-#~ msgctxt "Stock label"
-#~ msgid "Decrease Indent"
-#~ msgstr "减少缩进"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Index"
-#~ msgstr "索引(_I)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Information"
-#~ msgstr "信息(_I)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Italic"
-#~ msgstr "斜体(_I)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Jump to"
-#~ msgstr "跳至(_J)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Center"
-#~ msgstr "居中(_C)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Fill"
-#~ msgstr "两端对齐(_F)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Left"
-#~ msgstr "左对齐(_L)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Right"
-#~ msgstr "右对齐(_R)"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "_Forward"
-#~ msgstr "前进(_F)"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "_Next"
-#~ msgstr "下首(_N)"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "P_ause"
-#~ msgstr "暂停(_A)"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "_Play"
-#~ msgstr "播放(_P)"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "Pre_vious"
-#~ msgstr "上首(_V)"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "_Record"
-#~ msgstr "录制(_R)"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "R_ewind"
-#~ msgstr "快退(_E)"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "_Stop"
-#~ msgstr "停止(_S)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Network"
-#~ msgstr "网络(_N)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_New"
-#~ msgstr "新建(_N)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_No"
-#~ msgstr "否(_N)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_OK"
-#~ msgstr "确定(_O)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Open"
-#~ msgstr "打开(_O)"
-
-#~ msgctxt "Stock label"
-#~ msgid "Landscape"
-#~ msgstr "横向"
-
-#~ msgctxt "Stock label"
-#~ msgid "Portrait"
-#~ msgstr "纵向"
-
-#~ msgctxt "Stock label"
-#~ msgid "Reverse landscape"
-#~ msgstr "横向翻转"
-
-#~ msgctxt "Stock label"
-#~ msgid "Reverse portrait"
-#~ msgstr "纵向翻转"
-
-#~ msgctxt "Stock label"
-#~ msgid "Page Set_up"
-#~ msgstr "页面设置(_U)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Paste"
-#~ msgstr "粘贴(_P)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Preferences"
-#~ msgstr "首选项(_P)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Print"
-#~ msgstr "打印(_P)"
-
-#~ msgctxt "Stock label"
-#~ msgid "Print Pre_view"
-#~ msgstr "打印预览(_V)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Properties"
-#~ msgstr "属性(_P)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Quit"
-#~ msgstr "退出(_Q)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Redo"
-#~ msgstr "重做(_R)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Refresh"
-#~ msgstr "刷新(_R)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Remove"
-#~ msgstr "删除(_R)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Revert"
-#~ msgstr "还原(_R)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Save"
-#~ msgstr "保存(_S)"
-
-#~ msgctxt "Stock label"
-#~ msgid "Save _As"
-#~ msgstr "另存为(_A)"
-
-#~ msgctxt "Stock label"
-#~ msgid "Select _All"
-#~ msgstr "全选(_A)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Color"
-#~ msgstr "颜色(_C)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Font"
-#~ msgstr "字体(_F)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Ascending"
-#~ msgstr "升序(_A)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Descending"
-#~ msgstr "降序(_D)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Spell Check"
-#~ msgstr "拼写检查(_S)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Stop"
-#~ msgstr "停止(_S)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Strikethrough"
-#~ msgstr "删除线(_S)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Undelete"
-#~ msgstr "取消删除(_U)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Underline"
-#~ msgstr "下划线(_U)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Undo"
-#~ msgstr "撤消(_U)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Yes"
-#~ msgstr "是(_Y)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Normal Size"
-#~ msgstr "普通大小(_N)"
-
-#~ msgctxt "Stock label"
-#~ msgid "Best _Fit"
-#~ msgstr "最适合(_F)"
-
-#~ msgctxt "Stock label"
-#~ msgid "Zoom _In"
-#~ msgstr "放大(_I)"
-
-#~ msgctxt "Stock label"
-#~ msgid "Zoom _Out"
-#~ msgstr "缩小(_O)"
 
 #~ msgid "--- No Tip ---"
 #~ msgstr "--- 无提示 ---"

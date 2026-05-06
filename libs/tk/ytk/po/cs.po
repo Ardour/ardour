@@ -16,7 +16,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk+\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-26 15:25+0100\n"
+"POT-Creation-Date: 2026-05-05 15:38+0200\n"
 "PO-Revision-Date: 2024-01-13 14:45+0100\n"
 "Last-Translator: Martin Vlk <martin@vlkk.cz>\n"
 "Language-Team: Czech <translation-team-cs@lists.sourceforge.net>\n"
@@ -804,6 +804,471 @@ msgstr "Nelze nalézt položku s URI \"%s\""
 #: gtkspinner.c:459
 msgid "Provides visual indication of progress"
 msgstr "Poskytuje vizuální indikaci průběhu"
+
+#: gtkstock.c:315
+msgctxt "Stock label"
+msgid "Information"
+msgstr ""
+
+#: gtkstock.c:316
+msgctxt "Stock label"
+msgid "Warning"
+msgstr ""
+
+#: gtkstock.c:317
+msgctxt "Stock label"
+msgid "Error"
+msgstr ""
+
+#: gtkstock.c:318
+msgctxt "Stock label"
+msgid "Question"
+msgstr ""
+
+#: gtkstock.c:323
+msgctxt "Stock label"
+msgid "_About"
+msgstr ""
+
+#: gtkstock.c:324
+msgctxt "Stock label"
+msgid "_Add"
+msgstr ""
+
+#: gtkstock.c:325
+msgctxt "Stock label"
+msgid "_Apply"
+msgstr ""
+
+#: gtkstock.c:326
+msgctxt "Stock label"
+msgid "_Bold"
+msgstr ""
+
+#: gtkstock.c:327
+msgctxt "Stock label"
+msgid "_Cancel"
+msgstr ""
+
+#: gtkstock.c:328
+msgctxt "Stock label"
+msgid "_CD-Rom"
+msgstr ""
+
+#: gtkstock.c:329
+msgctxt "Stock label"
+msgid "_Clear"
+msgstr ""
+
+#: gtkstock.c:330
+msgctxt "Stock label"
+msgid "_Close"
+msgstr ""
+
+#: gtkstock.c:331
+msgctxt "Stock label"
+msgid "C_onnect"
+msgstr ""
+
+#: gtkstock.c:332
+msgctxt "Stock label"
+msgid "_Convert"
+msgstr ""
+
+#: gtkstock.c:333
+msgctxt "Stock label"
+msgid "_Copy"
+msgstr ""
+
+#: gtkstock.c:334
+msgctxt "Stock label"
+msgid "Cu_t"
+msgstr ""
+
+#: gtkstock.c:335
+msgctxt "Stock label"
+msgid "_Delete"
+msgstr ""
+
+#: gtkstock.c:336
+msgctxt "Stock label"
+msgid "_Discard"
+msgstr ""
+
+#: gtkstock.c:337
+msgctxt "Stock label"
+msgid "_Disconnect"
+msgstr ""
+
+#: gtkstock.c:338
+msgctxt "Stock label"
+msgid "_Execute"
+msgstr ""
+
+#: gtkstock.c:339
+msgctxt "Stock label"
+msgid "_Edit"
+msgstr ""
+
+#: gtkstock.c:340
+msgctxt "Stock label"
+msgid "_Find"
+msgstr ""
+
+#: gtkstock.c:341
+msgctxt "Stock label"
+msgid "Find and _Replace"
+msgstr ""
+
+#: gtkstock.c:342
+msgctxt "Stock label"
+msgid "_Floppy"
+msgstr ""
+
+#: gtkstock.c:343
+msgctxt "Stock label"
+msgid "_Fullscreen"
+msgstr ""
+
+#: gtkstock.c:344
+msgctxt "Stock label"
+msgid "_Leave Fullscreen"
+msgstr ""
+
+#: gtkstock.c:346
+msgctxt "Stock label, navigation"
+msgid "_Bottom"
+msgstr ""
+
+#: gtkstock.c:348
+msgctxt "Stock label, navigation"
+msgid "_First"
+msgstr ""
+
+#: gtkstock.c:350
+msgctxt "Stock label, navigation"
+msgid "_Last"
+msgstr ""
+
+#: gtkstock.c:352
+msgctxt "Stock label, navigation"
+msgid "_Top"
+msgstr ""
+
+#: gtkstock.c:354
+msgctxt "Stock label, navigation"
+msgid "_Back"
+msgstr ""
+
+#: gtkstock.c:356
+msgctxt "Stock label, navigation"
+msgid "_Down"
+msgstr ""
+
+#: gtkstock.c:358
+msgctxt "Stock label, navigation"
+msgid "_Forward"
+msgstr ""
+
+#: gtkstock.c:360
+msgctxt "Stock label, navigation"
+msgid "_Up"
+msgstr ""
+
+#: gtkstock.c:361
+msgctxt "Stock label"
+msgid "_Harddisk"
+msgstr ""
+
+#: gtkstock.c:362
+msgctxt "Stock label"
+msgid "_Help"
+msgstr ""
+
+#: gtkstock.c:363
+msgctxt "Stock label"
+msgid "_Home"
+msgstr ""
+
+#: gtkstock.c:364
+msgctxt "Stock label"
+msgid "Increase Indent"
+msgstr ""
+
+#: gtkstock.c:365
+msgctxt "Stock label"
+msgid "Decrease Indent"
+msgstr ""
+
+#: gtkstock.c:366
+msgctxt "Stock label"
+msgid "_Index"
+msgstr ""
+
+#: gtkstock.c:367
+msgctxt "Stock label"
+msgid "_Information"
+msgstr ""
+
+#: gtkstock.c:368
+msgctxt "Stock label"
+msgid "_Italic"
+msgstr ""
+
+#: gtkstock.c:369
+msgctxt "Stock label"
+msgid "_Jump to"
+msgstr ""
+
+#: gtkstock.c:371
+msgctxt "Stock label"
+msgid "_Center"
+msgstr ""
+
+#: gtkstock.c:373
+msgctxt "Stock label"
+msgid "_Fill"
+msgstr ""
+
+#: gtkstock.c:375
+msgctxt "Stock label"
+msgid "_Left"
+msgstr ""
+
+#: gtkstock.c:377
+msgctxt "Stock label"
+msgid "_Right"
+msgstr ""
+
+#: gtkstock.c:380
+msgctxt "Stock label, media"
+msgid "_Forward"
+msgstr ""
+
+#: gtkstock.c:382
+msgctxt "Stock label, media"
+msgid "_Next"
+msgstr ""
+
+#: gtkstock.c:384
+msgctxt "Stock label, media"
+msgid "P_ause"
+msgstr ""
+
+#: gtkstock.c:386
+msgctxt "Stock label, media"
+msgid "_Play"
+msgstr ""
+
+#: gtkstock.c:388
+msgctxt "Stock label, media"
+msgid "Pre_vious"
+msgstr ""
+
+#: gtkstock.c:390
+msgctxt "Stock label, media"
+msgid "_Record"
+msgstr ""
+
+#: gtkstock.c:392
+msgctxt "Stock label, media"
+msgid "R_ewind"
+msgstr ""
+
+#: gtkstock.c:394
+msgctxt "Stock label, media"
+msgid "_Stop"
+msgstr ""
+
+#: gtkstock.c:395
+msgctxt "Stock label"
+msgid "_Network"
+msgstr ""
+
+#: gtkstock.c:396
+msgctxt "Stock label"
+msgid "_New"
+msgstr ""
+
+#: gtkstock.c:397
+msgctxt "Stock label"
+msgid "_No"
+msgstr ""
+
+#: gtkstock.c:398
+msgctxt "Stock label"
+msgid "_OK"
+msgstr ""
+
+#: gtkstock.c:399
+msgctxt "Stock label"
+msgid "_Open"
+msgstr ""
+
+#: gtkstock.c:401
+msgctxt "Stock label"
+msgid "Landscape"
+msgstr ""
+
+#: gtkstock.c:403
+msgctxt "Stock label"
+msgid "Portrait"
+msgstr ""
+
+#: gtkstock.c:405
+msgctxt "Stock label"
+msgid "Reverse landscape"
+msgstr ""
+
+#: gtkstock.c:407
+msgctxt "Stock label"
+msgid "Reverse portrait"
+msgstr ""
+
+#: gtkstock.c:408
+msgctxt "Stock label"
+msgid "Page Set_up"
+msgstr ""
+
+#: gtkstock.c:409
+msgctxt "Stock label"
+msgid "_Paste"
+msgstr ""
+
+#: gtkstock.c:410
+msgctxt "Stock label"
+msgid "_Preferences"
+msgstr ""
+
+#: gtkstock.c:411
+msgctxt "Stock label"
+msgid "_Print"
+msgstr ""
+
+#: gtkstock.c:412
+msgctxt "Stock label"
+msgid "Print Pre_view"
+msgstr ""
+
+#: gtkstock.c:413
+msgctxt "Stock label"
+msgid "_Properties"
+msgstr ""
+
+#: gtkstock.c:414
+msgctxt "Stock label"
+msgid "_Quit"
+msgstr ""
+
+#: gtkstock.c:415
+msgctxt "Stock label"
+msgid "_Redo"
+msgstr ""
+
+#: gtkstock.c:416
+msgctxt "Stock label"
+msgid "_Refresh"
+msgstr ""
+
+#: gtkstock.c:417
+msgctxt "Stock label"
+msgid "_Remove"
+msgstr ""
+
+#: gtkstock.c:418
+msgctxt "Stock label"
+msgid "_Revert"
+msgstr ""
+
+#: gtkstock.c:419
+msgctxt "Stock label"
+msgid "_Save"
+msgstr ""
+
+#: gtkstock.c:420
+msgctxt "Stock label"
+msgid "Save _As"
+msgstr ""
+
+#: gtkstock.c:421
+msgctxt "Stock label"
+msgid "Select _All"
+msgstr ""
+
+#: gtkstock.c:422
+msgctxt "Stock label"
+msgid "_Color"
+msgstr ""
+
+#: gtkstock.c:423
+msgctxt "Stock label"
+msgid "_Font"
+msgstr ""
+
+#: gtkstock.c:425
+msgctxt "Stock label"
+msgid "_Ascending"
+msgstr ""
+
+#: gtkstock.c:427
+msgctxt "Stock label"
+msgid "_Descending"
+msgstr ""
+
+#: gtkstock.c:428
+msgctxt "Stock label"
+msgid "_Spell Check"
+msgstr ""
+
+#: gtkstock.c:429
+msgctxt "Stock label"
+msgid "_Stop"
+msgstr ""
+
+#: gtkstock.c:431
+msgctxt "Stock label"
+msgid "_Strikethrough"
+msgstr ""
+
+#: gtkstock.c:432
+msgctxt "Stock label"
+msgid "_Undelete"
+msgstr ""
+
+#: gtkstock.c:434
+msgctxt "Stock label"
+msgid "_Underline"
+msgstr ""
+
+#: gtkstock.c:435
+msgctxt "Stock label"
+msgid "_Undo"
+msgstr ""
+
+#: gtkstock.c:436
+msgctxt "Stock label"
+msgid "_Yes"
+msgstr ""
+
+#: gtkstock.c:438
+msgctxt "Stock label"
+msgid "_Normal Size"
+msgstr ""
+
+#: gtkstock.c:440
+msgctxt "Stock label"
+msgid "Best _Fit"
+msgstr ""
+
+#: gtkstock.c:441
+msgctxt "Stock label"
+msgid "Zoom _In"
+msgstr ""
+
+#: gtkstock.c:442
+msgctxt "Stock label"
+msgid "Zoom _Out"
+msgstr ""
 
 #: gtktextbufferrichtext.c:652
 #, c-format

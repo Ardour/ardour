@@ -11,8 +11,8 @@
 
 ARDOURSRC=`pwd`
 cd /tmp
-curl https://waf.io/waf-2.0.23.tar.bz2 | tar xj
-cd waf-2.0.23
+curl https://waf.io/waf-2.0.26.tar.bz2 | tar xj
+cd waf-2.0.26
 
 patch -p1 < $ARDOURSRC/tools/patches/waf-str.patch
 

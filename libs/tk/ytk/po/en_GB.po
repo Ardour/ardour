@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk+\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-19 21:59+0100\n"
+"POT-Creation-Date: 2026-05-05 15:38+0200\n"
 "PO-Revision-Date: 2011-01-07 23:07+0100\n"
 "Last-Translator: Bruce Cowan <bruce@bcowan.me.uk>\n"
 "Language-Team: British English <en@li.org>\n"
@@ -106,7 +106,7 @@ msgstr ""
 "Select the colour you want from the outer ring. Select the darkness or "
 "lightness of that colour using the inner triangle."
 
-#: gtkcolorsel.c:382
+#: gtkcolorsel.c:393
 msgid ""
 "Click the eyedropper, then click a color anywhere on your screen to select "
 "that color."
@@ -114,67 +114,67 @@ msgstr ""
 "Click the eyedropper, then click a colour anywhere on your screen to select "
 "that colour."
 
-#: gtkcolorsel.c:391
+#: gtkcolorsel.c:403
 msgid "_Hue:"
 msgstr "_Hue:"
 
-#: gtkcolorsel.c:392
+#: gtkcolorsel.c:404
 msgid "Position on the color wheel."
 msgstr "Position on the colour wheel."
 
-#: gtkcolorsel.c:394
+#: gtkcolorsel.c:406
 msgid "_Saturation:"
 msgstr "_Saturation:"
 
-#: gtkcolorsel.c:395
+#: gtkcolorsel.c:407
 msgid "\"Deepness\" of the color."
 msgstr "\"Deepness\" of the colour."
 
-#: gtkcolorsel.c:396
+#: gtkcolorsel.c:408
 msgid "_Value:"
 msgstr "_Value:"
 
-#: gtkcolorsel.c:397
+#: gtkcolorsel.c:409
 msgid "Brightness of the color."
 msgstr "Brightness of the colour."
 
-#: gtkcolorsel.c:398
+#: gtkcolorsel.c:410
 msgid "_Red:"
 msgstr "_Red:"
 
-#: gtkcolorsel.c:399
+#: gtkcolorsel.c:411
 msgid "Amount of red light in the color."
 msgstr "Amount of red light in the colour."
 
-#: gtkcolorsel.c:400
+#: gtkcolorsel.c:412
 msgid "_Green:"
 msgstr "_Green:"
 
-#: gtkcolorsel.c:401
+#: gtkcolorsel.c:413
 msgid "Amount of green light in the color."
 msgstr "Amount of green light in the colour."
 
-#: gtkcolorsel.c:402
+#: gtkcolorsel.c:414
 msgid "_Blue:"
 msgstr "_Blue:"
 
-#: gtkcolorsel.c:403
+#: gtkcolorsel.c:415
 msgid "Amount of blue light in the color."
 msgstr "Amount of blue light in the colour."
 
-#: gtkcolorsel.c:406
+#: gtkcolorsel.c:418
 msgid "Op_acity:"
 msgstr "Op_acity:"
 
-#: gtkcolorsel.c:413 gtkcolorsel.c:423
+#: gtkcolorsel.c:425 gtkcolorsel.c:435
 msgid "Transparency of the color."
 msgstr "Transparency of the colour."
 
-#: gtkcolorsel.c:430
+#: gtkcolorsel.c:442
 msgid "Color _name:"
 msgstr "Colour _name:"
 
-#: gtkcolorsel.c:444
+#: gtkcolorsel.c:456
 msgid ""
 "You can enter an HTML-style hexadecimal color value, or simply a color name "
 "such as 'orange' in this entry."
@@ -182,15 +182,15 @@ msgstr ""
 "You can enter an HTML-style hexadecimal colour value, or simply a colour "
 "name such as 'orange' in this entry."
 
-#: gtkcolorsel.c:474
+#: gtkcolorsel.c:486
 msgid "_Palette:"
 msgstr "_Palette:"
 
-#: gtkcolorsel.c:503
+#: gtkcolorsel.c:515
 msgid "Color Wheel"
 msgstr "Colour Wheel"
 
-#: gtkcolorsel.c:962
+#: gtkcolorsel.c:974
 msgid ""
 "The previously-selected color, for comparison to the color you're selecting "
 "now. You can drag this color to a palette entry, or select this color as "
@@ -200,7 +200,7 @@ msgstr ""
 "selecting now. You can drag this colour to a palette entry, or select this "
 "colour as current by dragging it to the other colour swatch alongside."
 
-#: gtkcolorsel.c:965
+#: gtkcolorsel.c:977
 msgid ""
 "The color you've chosen. You can drag this color to a palette entry to save "
 "it for use in the future."
@@ -208,7 +208,7 @@ msgstr ""
 "The colour you've chosen. You can drag this colour to a palette entry to "
 "save it for use in the future."
 
-#: gtkcolorsel.c:970
+#: gtkcolorsel.c:982
 msgid ""
 "The previously-selected color, for comparison to the color you're selecting "
 "now."
@@ -216,15 +216,15 @@ msgstr ""
 "The previously-selected colour, for comparison to the colour you're "
 "selecting now."
 
-#: gtkcolorsel.c:973
+#: gtkcolorsel.c:985
 msgid "The color you've chosen."
 msgstr "The colour you've chosen."
 
-#: gtkcolorsel.c:1389
+#: gtkcolorsel.c:1401
 msgid "_Save color here"
 msgstr "_Save colour here"
 
-#: gtkcolorsel.c:1593
+#: gtkcolorsel.c:1605
 msgid ""
 "Click this palette entry to make it the current color. To change this entry, "
 "drag a color swatch here or right-click it and select \"Save color here.\""
@@ -253,7 +253,7 @@ msgstr "Caps Lock is on"
 msgid "Select a File"
 msgstr ""
 
-#: gtkfilechooserbutton.c:65 gtkfilechooserdefault.c:1851
+#: gtkfilechooserbutton.c:65 gtkfilechooserdefault.c:1853
 msgid "Desktop"
 msgstr "Desktop"
 
@@ -269,23 +269,23 @@ msgstr "Other…"
 msgid "Type name of new folder"
 msgstr "Type name of new folder"
 
-#: gtkfilechooserdefault.c:956
+#: gtkfilechooserdefault.c:958
 msgid "Could not retrieve information about the file"
 msgstr "Could not retrieve information about the file"
 
-#: gtkfilechooserdefault.c:967
+#: gtkfilechooserdefault.c:969
 msgid "Could not add a bookmark"
 msgstr "Could not add a bookmark"
 
-#: gtkfilechooserdefault.c:978
+#: gtkfilechooserdefault.c:980
 msgid "Could not remove bookmark"
 msgstr "Could not remove bookmark"
 
-#: gtkfilechooserdefault.c:989
+#: gtkfilechooserdefault.c:991
 msgid "The folder could not be created"
 msgstr "The folder could not be created"
 
-#: gtkfilechooserdefault.c:1002
+#: gtkfilechooserdefault.c:1004
 msgid ""
 "The folder could not be created, as a file with the same name already "
 "exists.  Try using a different name for the folder, or rename the file first."
@@ -293,16 +293,16 @@ msgstr ""
 "The folder could not be created, as a file with the same name already "
 "exists.  Try using a different name for the folder, or rename the file first."
 
-#: gtkfilechooserdefault.c:1016
+#: gtkfilechooserdefault.c:1018
 msgid "You need to choose a valid filename."
 msgstr ""
 
-#: gtkfilechooserdefault.c:1019
+#: gtkfilechooserdefault.c:1021
 #, c-format
 msgid "Cannot create a file under %s as it is not a folder"
 msgstr ""
 
-#: gtkfilechooserdefault.c:1031
+#: gtkfilechooserdefault.c:1033
 msgid ""
 "You may only select folders.  The item that you selected is not a folder; "
 "try using a different item."
@@ -310,203 +310,203 @@ msgstr ""
 "You may only select folders.  The item that you selected is not a folder; "
 "try using a different item."
 
-#: gtkfilechooserdefault.c:1041
+#: gtkfilechooserdefault.c:1043
 msgid "Invalid file name"
 msgstr "Invalid file name"
 
-#: gtkfilechooserdefault.c:1051
+#: gtkfilechooserdefault.c:1053
 msgid "The folder contents could not be displayed"
 msgstr "The folder contents could not be displayed"
 
-#: gtkfilechooserdefault.c:1584
+#: gtkfilechooserdefault.c:1586
 #, c-format
 msgid "%1$s on %2$s"
 msgstr "%1$s on %2$s"
 
-#: gtkfilechooserdefault.c:1733
+#: gtkfilechooserdefault.c:1735
 msgid "Search"
 msgstr "Search"
 
-#: gtkfilechooserdefault.c:1757 gtkfilechooserdefault.c:4872
+#: gtkfilechooserdefault.c:1759 gtkfilechooserdefault.c:4877
 msgid "Recently Used"
 msgstr "Recently Used"
 
-#: gtkfilechooserdefault.c:2387
+#: gtkfilechooserdefault.c:2389
 msgid "Select which types of files are shown"
 msgstr "Select which types of files are shown"
 
-#: gtkfilechooserdefault.c:2746
+#: gtkfilechooserdefault.c:2748
 #, c-format
 msgid "Add the folder '%s' to the bookmarks"
 msgstr "Add the folder '%s' to the bookmarks"
 
-#: gtkfilechooserdefault.c:2790
+#: gtkfilechooserdefault.c:2792
 msgid "Add the current folder to the bookmarks"
 msgstr "Add the current folder to the bookmarks"
 
-#: gtkfilechooserdefault.c:2792
+#: gtkfilechooserdefault.c:2794
 msgid "Add the selected folders to the bookmarks"
 msgstr "Add the selected folders to the bookmarks"
 
-#: gtkfilechooserdefault.c:2837
+#: gtkfilechooserdefault.c:2839
 #, c-format
 msgid "Remove the bookmark '%s'"
 msgstr "Remove the bookmark '%s'"
 
-#: gtkfilechooserdefault.c:2839
+#: gtkfilechooserdefault.c:2841
 #, c-format
 msgid "Bookmark '%s' cannot be removed"
 msgstr "Bookmark '%s' cannot be removed"
 
-#: gtkfilechooserdefault.c:2846 gtkfilechooserdefault.c:3740
+#: gtkfilechooserdefault.c:2848 gtkfilechooserdefault.c:3742
 msgid "Remove the selected bookmark"
 msgstr "Remove the selected bookmark"
 
-#: gtkfilechooserdefault.c:3421
+#: gtkfilechooserdefault.c:3423
 msgid "Remove"
 msgstr "Remove"
 
-#: gtkfilechooserdefault.c:3430
+#: gtkfilechooserdefault.c:3432
 msgid "Rename..."
 msgstr "Rename…"
 
-#: gtkfilechooserdefault.c:3597
+#: gtkfilechooserdefault.c:3599
 msgid "Places"
 msgstr "Places"
 
-#: gtkfilechooserdefault.c:3654
+#: gtkfilechooserdefault.c:3656
 msgid "_Places"
 msgstr "_Places"
 
-#: gtkfilechooserdefault.c:3728
+#: gtkfilechooserdefault.c:3730
 msgid "Add the selected folder to the Bookmarks"
 msgstr "Add the selected folder to the Bookmarks"
 
-#: gtkfilechooserdefault.c:3872
+#: gtkfilechooserdefault.c:3874
 msgid "Could not select file"
 msgstr "Could not select file"
 
-#: gtkfilechooserdefault.c:4045
+#: gtkfilechooserdefault.c:4047
 msgid "_Add to Bookmarks"
 msgstr "_Add to Bookmarks"
 
-#: gtkfilechooserdefault.c:4058
+#: gtkfilechooserdefault.c:4060
 msgid "Show _Hidden Files"
 msgstr "Show _Hidden Files"
 
-#: gtkfilechooserdefault.c:4065
+#: gtkfilechooserdefault.c:4067
 msgid "Show _Size Column"
 msgstr "Show _Size Column"
 
-#: gtkfilechooserdefault.c:4289
+#: gtkfilechooserdefault.c:4291
 msgid "Files"
 msgstr "Files"
 
-#: gtkfilechooserdefault.c:4340
+#: gtkfilechooserdefault.c:4342
 msgid "Name"
 msgstr "Name"
 
-#: gtkfilechooserdefault.c:4363
+#: gtkfilechooserdefault.c:4365
 msgid "Size"
 msgstr "Size"
 
-#: gtkfilechooserdefault.c:4377
+#: gtkfilechooserdefault.c:4379
 msgid "Modified"
 msgstr "Modified"
 
-#: gtkfilechooserdefault.c:4470
+#: gtkfilechooserdefault.c:4475
 msgid "_Name:"
 msgstr "_Name:"
 
-#: gtkfilechooserdefault.c:4710
+#: gtkfilechooserdefault.c:4715
 msgid "Type a file name"
 msgstr "Type a file name"
 
-#: gtkfilechooserdefault.c:4757 gtkfilechooserdefault.c:4768
+#: gtkfilechooserdefault.c:4762 gtkfilechooserdefault.c:4773
 msgid "Please select a folder below"
 msgstr ""
 
-#: gtkfilechooserdefault.c:4763
+#: gtkfilechooserdefault.c:4768
 msgid "Please type a file name"
 msgstr ""
 
-#: gtkfilechooserdefault.c:4834
+#: gtkfilechooserdefault.c:4839
 msgid "Create Fo_lder"
 msgstr "Create Fo_lder"
 
-#: gtkfilechooserdefault.c:4882
+#: gtkfilechooserdefault.c:4887
 msgid "Search:"
 msgstr "Search:"
 
-#: gtkfilechooserdefault.c:4933
+#: gtkfilechooserdefault.c:4938
 msgid "_Location:"
 msgstr "_Location:"
 
-#: gtkfilechooserdefault.c:5383
+#: gtkfilechooserdefault.c:5388
 msgid "Save in _folder:"
 msgstr "Save in _folder:"
 
-#: gtkfilechooserdefault.c:5385
+#: gtkfilechooserdefault.c:5390
 msgid "Create in _folder:"
 msgstr "Create in _folder:"
 
-#: gtkfilechooserdefault.c:6479
+#: gtkfilechooserdefault.c:6484
 #, c-format
 msgid "Could not read the contents of %s"
 msgstr "Could not read the contents of %s"
 
-#: gtkfilechooserdefault.c:6483
+#: gtkfilechooserdefault.c:6488
 msgid "Could not read the contents of the folder"
 msgstr "Could not read the contents of the folder"
 
-#: gtkfilechooserdefault.c:6576 gtkfilechooserdefault.c:6644
-#: gtkfilechooserdefault.c:6829
+#: gtkfilechooserdefault.c:6581 gtkfilechooserdefault.c:6649
+#: gtkfilechooserdefault.c:6834
 msgid "Unknown"
 msgstr "Unknown"
 
-#: gtkfilechooserdefault.c:6591
+#: gtkfilechooserdefault.c:6596
 msgid "%H:%M"
 msgstr "%H:%M"
 
-#: gtkfilechooserdefault.c:6593
+#: gtkfilechooserdefault.c:6598
 msgid "Yesterday at %H:%M"
 msgstr "Yesterday at %H:%M"
 
-#: gtkfilechooserdefault.c:7301
+#: gtkfilechooserdefault.c:7306
 msgid "Cannot change to folder because it is not local"
 msgstr "Cannot change to folder because it is not local"
 
-#: gtkfilechooserdefault.c:7898 gtkfilechooserdefault.c:7919
+#: gtkfilechooserdefault.c:7903 gtkfilechooserdefault.c:7924
 #, c-format
 msgid "Shortcut %s already exists"
 msgstr "Shortcut %s already exists"
 
-#: gtkfilechooserdefault.c:8009
+#: gtkfilechooserdefault.c:8014
 #, c-format
 msgid "Shortcut %s does not exist"
 msgstr "Shortcut %s does not exist"
 
-#: gtkfilechooserdefault.c:8250
+#: gtkfilechooserdefault.c:8255
 #, c-format
 msgid "A file named \"%s\" already exists.  Do you want to replace it?"
 msgstr "A file named \"%s\" already exists.  Do you want to replace it?"
 
-#: gtkfilechooserdefault.c:8253
+#: gtkfilechooserdefault.c:8258
 #, c-format
 msgid ""
 "The file already exists in \"%s\".  Replacing it will overwrite its contents."
 msgstr ""
 "The file already exists in \"%s\".  Replacing it will overwrite its contents."
 
-#: gtkfilechooserdefault.c:8258
+#: gtkfilechooserdefault.c:8263
 msgid "_Replace"
 msgstr "_Replace"
 
-#: gtkfilechooserdefault.c:9066
+#: gtkfilechooserdefault.c:9136
 msgid "Could not start the search process"
 msgstr "Could not start the search process"
 
-#: gtkfilechooserdefault.c:9067
+#: gtkfilechooserdefault.c:9137
 msgid ""
 "The program was not able to create a connection to the indexer daemon.  "
 "Please make sure it is running."
@@ -514,11 +514,11 @@ msgstr ""
 "The program was not able to create a connection to the indexer daemon.  "
 "Please make sure it is running."
 
-#: gtkfilechooserdefault.c:9081
+#: gtkfilechooserdefault.c:9151
 msgid "Could not send the search request"
 msgstr "Could not send the search request"
 
-#: gtkfilechooserdefault.c:9682
+#: gtkfilechooserdefault.c:9752
 #, c-format
 msgid "Could not mount %s"
 msgstr "Could not mount %s"
@@ -615,44 +615,44 @@ msgstr "Copy URL"
 msgid "Invalid URI"
 msgstr "Invalid URI"
 
-#: gtkmain.c:454
+#: gtkmain.c:412
 msgid "Load additional GTK+ modules"
 msgstr "Load additional GTK+ modules"
 
-#: gtkmain.c:455
+#: gtkmain.c:413
 msgid "MODULES"
 msgstr "MODULES"
 
-#: gtkmain.c:457
+#: gtkmain.c:415
 msgid "Make all warnings fatal"
 msgstr "Make all warnings fatal"
 
-#: gtkmain.c:460
+#: gtkmain.c:418
 msgid "GTK+ debugging flags to set"
 msgstr "GTK+ debugging flags to set"
 
-#: gtkmain.c:461 gtkmain.c:464
+#: gtkmain.c:419 gtkmain.c:422
 msgid "FLAGS"
 msgstr "FLAGS"
 
-#: gtkmain.c:463
+#: gtkmain.c:421
 msgid "GTK+ debugging flags to unset"
 msgstr "GTK+ debugging flags to unset"
 
-#: gtkmain.c:755
+#: gtkmain.c:698
 msgid "default:LTR"
 msgstr "default:LTR"
 
-#: gtkmain.c:820
+#: gtkmain.c:763
 #, c-format
 msgid "Cannot open display: %s"
 msgstr "Cannot open display: %s"
 
-#: gtkmain.c:857
+#: gtkmain.c:800
 msgid "GTK+ Options"
 msgstr "GTK+ Options"
 
-#: gtkmain.c:857
+#: gtkmain.c:800
 msgid "Show GTK+ Options"
 msgstr "Show GTK+ Options"
 
@@ -722,12 +722,12 @@ msgstr "Down Path"
 msgid "File System Root"
 msgstr "File System Root"
 
-#: gtkrc.c:2906
+#: gtkrc.c:2670
 #, c-format
 msgid "Unable to find include file: \"%s\""
 msgstr "Unable to find include file: \"%s\""
 
-#: gtkrc.c:3536 gtkrc.c:3539
+#: gtkrc.c:3300 gtkrc.c:3303
 #, c-format
 msgid "Unable to locate image file in pixmap_path: \"%s\""
 msgstr "Unable to locate image file in pixmap_path: \"%s\""
@@ -793,9 +793,9 @@ msgstr "Open '%s'"
 msgid "Unknown item"
 msgstr "Unknown item"
 
-#: gtkrecentmanager.c:1182 gtkrecentmanager.c:1195 gtkrecentmanager.c:1332
-#: gtkrecentmanager.c:1342 gtkrecentmanager.c:1395 gtkrecentmanager.c:1404
-#: gtkrecentmanager.c:1419
+#: gtkrecentmanager.c:1073 gtkrecentmanager.c:1086 gtkrecentmanager.c:1223
+#: gtkrecentmanager.c:1233 gtkrecentmanager.c:1286 gtkrecentmanager.c:1295
+#: gtkrecentmanager.c:1310
 #, c-format
 msgid "Unable to find an item with URI '%s'"
 msgstr "Unable to find an item with URI '%s'"
@@ -803,6 +803,471 @@ msgstr "Unable to find an item with URI '%s'"
 #: gtkspinner.c:459
 msgid "Provides visual indication of progress"
 msgstr "Provides visual indication of progress"
+
+#: gtkstock.c:315
+msgctxt "Stock label"
+msgid "Information"
+msgstr "Information"
+
+#: gtkstock.c:316
+msgctxt "Stock label"
+msgid "Warning"
+msgstr "Warning"
+
+#: gtkstock.c:317
+msgctxt "Stock label"
+msgid "Error"
+msgstr "Error"
+
+#: gtkstock.c:318
+msgctxt "Stock label"
+msgid "Question"
+msgstr "Question"
+
+#: gtkstock.c:323
+msgctxt "Stock label"
+msgid "_About"
+msgstr "_About"
+
+#: gtkstock.c:324
+msgctxt "Stock label"
+msgid "_Add"
+msgstr "_Add"
+
+#: gtkstock.c:325
+msgctxt "Stock label"
+msgid "_Apply"
+msgstr "_Apply"
+
+#: gtkstock.c:326
+msgctxt "Stock label"
+msgid "_Bold"
+msgstr "_Bold"
+
+#: gtkstock.c:327
+msgctxt "Stock label"
+msgid "_Cancel"
+msgstr "_Cancel"
+
+#: gtkstock.c:328
+msgctxt "Stock label"
+msgid "_CD-Rom"
+msgstr "_CD-ROM"
+
+#: gtkstock.c:329
+msgctxt "Stock label"
+msgid "_Clear"
+msgstr "_Clear"
+
+#: gtkstock.c:330
+msgctxt "Stock label"
+msgid "_Close"
+msgstr "_Close"
+
+#: gtkstock.c:331
+msgctxt "Stock label"
+msgid "C_onnect"
+msgstr "C_onnect"
+
+#: gtkstock.c:332
+msgctxt "Stock label"
+msgid "_Convert"
+msgstr "_Convert"
+
+#: gtkstock.c:333
+msgctxt "Stock label"
+msgid "_Copy"
+msgstr "_Copy"
+
+#: gtkstock.c:334
+msgctxt "Stock label"
+msgid "Cu_t"
+msgstr "Cu_t"
+
+#: gtkstock.c:335
+msgctxt "Stock label"
+msgid "_Delete"
+msgstr "_Delete"
+
+#: gtkstock.c:336
+msgctxt "Stock label"
+msgid "_Discard"
+msgstr "_Discard"
+
+#: gtkstock.c:337
+msgctxt "Stock label"
+msgid "_Disconnect"
+msgstr "_Disconnect"
+
+#: gtkstock.c:338
+msgctxt "Stock label"
+msgid "_Execute"
+msgstr "_Execute"
+
+#: gtkstock.c:339
+msgctxt "Stock label"
+msgid "_Edit"
+msgstr "_Edit"
+
+#: gtkstock.c:340
+msgctxt "Stock label"
+msgid "_Find"
+msgstr "_Find"
+
+#: gtkstock.c:341
+msgctxt "Stock label"
+msgid "Find and _Replace"
+msgstr "Find and _Replace"
+
+#: gtkstock.c:342
+msgctxt "Stock label"
+msgid "_Floppy"
+msgstr "_Floppy"
+
+#: gtkstock.c:343
+msgctxt "Stock label"
+msgid "_Fullscreen"
+msgstr "_Fullscreen"
+
+#: gtkstock.c:344
+msgctxt "Stock label"
+msgid "_Leave Fullscreen"
+msgstr "_Leave Fullscreen"
+
+#: gtkstock.c:346
+msgctxt "Stock label, navigation"
+msgid "_Bottom"
+msgstr "_Bottom"
+
+#: gtkstock.c:348
+msgctxt "Stock label, navigation"
+msgid "_First"
+msgstr "_First"
+
+#: gtkstock.c:350
+msgctxt "Stock label, navigation"
+msgid "_Last"
+msgstr "_Last"
+
+#: gtkstock.c:352
+msgctxt "Stock label, navigation"
+msgid "_Top"
+msgstr "_Top"
+
+#: gtkstock.c:354
+msgctxt "Stock label, navigation"
+msgid "_Back"
+msgstr "_Back"
+
+#: gtkstock.c:356
+msgctxt "Stock label, navigation"
+msgid "_Down"
+msgstr "_Down"
+
+#: gtkstock.c:358
+msgctxt "Stock label, navigation"
+msgid "_Forward"
+msgstr "_Forward"
+
+#: gtkstock.c:360
+msgctxt "Stock label, navigation"
+msgid "_Up"
+msgstr "_Up"
+
+#: gtkstock.c:361
+msgctxt "Stock label"
+msgid "_Harddisk"
+msgstr "_Hard disk"
+
+#: gtkstock.c:362
+msgctxt "Stock label"
+msgid "_Help"
+msgstr "_Help"
+
+#: gtkstock.c:363
+msgctxt "Stock label"
+msgid "_Home"
+msgstr "_Home"
+
+#: gtkstock.c:364
+msgctxt "Stock label"
+msgid "Increase Indent"
+msgstr "Increase Indent"
+
+#: gtkstock.c:365
+msgctxt "Stock label"
+msgid "Decrease Indent"
+msgstr "Decrease Indent"
+
+#: gtkstock.c:366
+msgctxt "Stock label"
+msgid "_Index"
+msgstr "_Index"
+
+#: gtkstock.c:367
+msgctxt "Stock label"
+msgid "_Information"
+msgstr "_Information"
+
+#: gtkstock.c:368
+msgctxt "Stock label"
+msgid "_Italic"
+msgstr "_Italic"
+
+#: gtkstock.c:369
+msgctxt "Stock label"
+msgid "_Jump to"
+msgstr "_Jump to"
+
+#: gtkstock.c:371
+msgctxt "Stock label"
+msgid "_Center"
+msgstr "_Centre"
+
+#: gtkstock.c:373
+msgctxt "Stock label"
+msgid "_Fill"
+msgstr "_Fill"
+
+#: gtkstock.c:375
+msgctxt "Stock label"
+msgid "_Left"
+msgstr "_Left"
+
+#: gtkstock.c:377
+msgctxt "Stock label"
+msgid "_Right"
+msgstr "_Right"
+
+#: gtkstock.c:380
+msgctxt "Stock label, media"
+msgid "_Forward"
+msgstr "_Forward"
+
+#: gtkstock.c:382
+msgctxt "Stock label, media"
+msgid "_Next"
+msgstr "_Next"
+
+#: gtkstock.c:384
+msgctxt "Stock label, media"
+msgid "P_ause"
+msgstr "P_ause"
+
+#: gtkstock.c:386
+msgctxt "Stock label, media"
+msgid "_Play"
+msgstr "_Play"
+
+#: gtkstock.c:388
+msgctxt "Stock label, media"
+msgid "Pre_vious"
+msgstr "Pre_vious"
+
+#: gtkstock.c:390
+msgctxt "Stock label, media"
+msgid "_Record"
+msgstr "_Record"
+
+#: gtkstock.c:392
+msgctxt "Stock label, media"
+msgid "R_ewind"
+msgstr "R_ewind"
+
+#: gtkstock.c:394
+msgctxt "Stock label, media"
+msgid "_Stop"
+msgstr "_Stop"
+
+#: gtkstock.c:395
+msgctxt "Stock label"
+msgid "_Network"
+msgstr "_Network"
+
+#: gtkstock.c:396
+msgctxt "Stock label"
+msgid "_New"
+msgstr "_New"
+
+#: gtkstock.c:397
+msgctxt "Stock label"
+msgid "_No"
+msgstr "_No"
+
+#: gtkstock.c:398
+msgctxt "Stock label"
+msgid "_OK"
+msgstr "_OK"
+
+#: gtkstock.c:399
+msgctxt "Stock label"
+msgid "_Open"
+msgstr "_Open"
+
+#: gtkstock.c:401
+msgctxt "Stock label"
+msgid "Landscape"
+msgstr "Landscape"
+
+#: gtkstock.c:403
+msgctxt "Stock label"
+msgid "Portrait"
+msgstr "Portrait"
+
+#: gtkstock.c:405
+msgctxt "Stock label"
+msgid "Reverse landscape"
+msgstr "Reverse landscape"
+
+#: gtkstock.c:407
+msgctxt "Stock label"
+msgid "Reverse portrait"
+msgstr "Reverse portrait"
+
+#: gtkstock.c:408
+msgctxt "Stock label"
+msgid "Page Set_up"
+msgstr "Page Set_up"
+
+#: gtkstock.c:409
+msgctxt "Stock label"
+msgid "_Paste"
+msgstr "_Paste"
+
+#: gtkstock.c:410
+msgctxt "Stock label"
+msgid "_Preferences"
+msgstr "_Preferences"
+
+#: gtkstock.c:411
+msgctxt "Stock label"
+msgid "_Print"
+msgstr "_Print"
+
+#: gtkstock.c:412
+msgctxt "Stock label"
+msgid "Print Pre_view"
+msgstr "Print Pre_view"
+
+#: gtkstock.c:413
+msgctxt "Stock label"
+msgid "_Properties"
+msgstr "_Properties"
+
+#: gtkstock.c:414
+msgctxt "Stock label"
+msgid "_Quit"
+msgstr "_Quit"
+
+#: gtkstock.c:415
+msgctxt "Stock label"
+msgid "_Redo"
+msgstr "_Redo"
+
+#: gtkstock.c:416
+msgctxt "Stock label"
+msgid "_Refresh"
+msgstr "_Refresh"
+
+#: gtkstock.c:417
+msgctxt "Stock label"
+msgid "_Remove"
+msgstr "_Remove"
+
+#: gtkstock.c:418
+msgctxt "Stock label"
+msgid "_Revert"
+msgstr "_Revert"
+
+#: gtkstock.c:419
+msgctxt "Stock label"
+msgid "_Save"
+msgstr "_Save"
+
+#: gtkstock.c:420
+msgctxt "Stock label"
+msgid "Save _As"
+msgstr "Save _As"
+
+#: gtkstock.c:421
+msgctxt "Stock label"
+msgid "Select _All"
+msgstr "Select _All"
+
+#: gtkstock.c:422
+msgctxt "Stock label"
+msgid "_Color"
+msgstr "_Colour"
+
+#: gtkstock.c:423
+msgctxt "Stock label"
+msgid "_Font"
+msgstr "_Font"
+
+#: gtkstock.c:425
+msgctxt "Stock label"
+msgid "_Ascending"
+msgstr "_Ascending"
+
+#: gtkstock.c:427
+msgctxt "Stock label"
+msgid "_Descending"
+msgstr "_Descending"
+
+#: gtkstock.c:428
+msgctxt "Stock label"
+msgid "_Spell Check"
+msgstr "_Spell Check"
+
+#: gtkstock.c:429
+msgctxt "Stock label"
+msgid "_Stop"
+msgstr "_Stop"
+
+#: gtkstock.c:431
+msgctxt "Stock label"
+msgid "_Strikethrough"
+msgstr "_Strikethrough"
+
+#: gtkstock.c:432
+msgctxt "Stock label"
+msgid "_Undelete"
+msgstr "_Undelete"
+
+#: gtkstock.c:434
+msgctxt "Stock label"
+msgid "_Underline"
+msgstr "_Underline"
+
+#: gtkstock.c:435
+msgctxt "Stock label"
+msgid "_Undo"
+msgstr "_Undo"
+
+#: gtkstock.c:436
+msgctxt "Stock label"
+msgid "_Yes"
+msgstr "_Yes"
+
+#: gtkstock.c:438
+msgctxt "Stock label"
+msgid "_Normal Size"
+msgstr "_Normal Size"
+
+#: gtkstock.c:440
+msgctxt "Stock label"
+msgid "Best _Fit"
+msgstr "Best _Fit"
+
+#: gtkstock.c:441
+msgctxt "Stock label"
+msgid "Zoom _In"
+msgstr "Zoom _In"
+
+#: gtkstock.c:442
+msgctxt "Stock label"
+msgid "Zoom _Out"
+msgstr "Zoom _Out"
 
 #: gtktextbufferrichtext.c:652
 #, c-format
@@ -975,7 +1440,7 @@ msgstr "Unexpected start tag '%s' on line %d char %d"
 msgid "Unexpected character data on line %d char %d"
 msgstr "Unexpected character data on line %d char %d"
 
-#: gtkuimanager.c:2427
+#: gtkuimanager.c:2444
 msgid "Empty"
 msgstr "Empty"
 
@@ -1932,378 +2397,6 @@ msgstr "Empty"
 #~ msgctxt "throbbing progress animation widget"
 #~ msgid "Spinner"
 #~ msgstr "Spinner"
-
-#~ msgctxt "Stock label"
-#~ msgid "Information"
-#~ msgstr "Information"
-
-#~ msgctxt "Stock label"
-#~ msgid "Warning"
-#~ msgstr "Warning"
-
-#~ msgctxt "Stock label"
-#~ msgid "Error"
-#~ msgstr "Error"
-
-#~ msgctxt "Stock label"
-#~ msgid "Question"
-#~ msgstr "Question"
-
-#~ msgctxt "Stock label"
-#~ msgid "_About"
-#~ msgstr "_About"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Add"
-#~ msgstr "_Add"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Apply"
-#~ msgstr "_Apply"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Bold"
-#~ msgstr "_Bold"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Cancel"
-#~ msgstr "_Cancel"
-
-#~ msgctxt "Stock label"
-#~ msgid "_CD-Rom"
-#~ msgstr "_CD-ROM"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Clear"
-#~ msgstr "_Clear"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Close"
-#~ msgstr "_Close"
-
-#~ msgctxt "Stock label"
-#~ msgid "C_onnect"
-#~ msgstr "C_onnect"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Convert"
-#~ msgstr "_Convert"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Copy"
-#~ msgstr "_Copy"
-
-#~ msgctxt "Stock label"
-#~ msgid "Cu_t"
-#~ msgstr "Cu_t"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Delete"
-#~ msgstr "_Delete"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Discard"
-#~ msgstr "_Discard"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Disconnect"
-#~ msgstr "_Disconnect"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Execute"
-#~ msgstr "_Execute"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Edit"
-#~ msgstr "_Edit"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Find"
-#~ msgstr "_Find"
-
-#~ msgctxt "Stock label"
-#~ msgid "Find and _Replace"
-#~ msgstr "Find and _Replace"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Floppy"
-#~ msgstr "_Floppy"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Fullscreen"
-#~ msgstr "_Fullscreen"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Leave Fullscreen"
-#~ msgstr "_Leave Fullscreen"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_Bottom"
-#~ msgstr "_Bottom"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_First"
-#~ msgstr "_First"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_Last"
-#~ msgstr "_Last"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_Top"
-#~ msgstr "_Top"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_Back"
-#~ msgstr "_Back"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_Down"
-#~ msgstr "_Down"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_Forward"
-#~ msgstr "_Forward"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_Up"
-#~ msgstr "_Up"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Harddisk"
-#~ msgstr "_Hard disk"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Help"
-#~ msgstr "_Help"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Home"
-#~ msgstr "_Home"
-
-#~ msgctxt "Stock label"
-#~ msgid "Increase Indent"
-#~ msgstr "Increase Indent"
-
-#~ msgctxt "Stock label"
-#~ msgid "Decrease Indent"
-#~ msgstr "Decrease Indent"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Index"
-#~ msgstr "_Index"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Information"
-#~ msgstr "_Information"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Italic"
-#~ msgstr "_Italic"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Jump to"
-#~ msgstr "_Jump to"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Center"
-#~ msgstr "_Centre"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Fill"
-#~ msgstr "_Fill"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Left"
-#~ msgstr "_Left"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Right"
-#~ msgstr "_Right"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "_Forward"
-#~ msgstr "_Forward"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "_Next"
-#~ msgstr "_Next"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "P_ause"
-#~ msgstr "P_ause"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "_Play"
-#~ msgstr "_Play"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "Pre_vious"
-#~ msgstr "Pre_vious"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "_Record"
-#~ msgstr "_Record"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "R_ewind"
-#~ msgstr "R_ewind"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "_Stop"
-#~ msgstr "_Stop"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Network"
-#~ msgstr "_Network"
-
-#~ msgctxt "Stock label"
-#~ msgid "_New"
-#~ msgstr "_New"
-
-#~ msgctxt "Stock label"
-#~ msgid "_No"
-#~ msgstr "_No"
-
-#~ msgctxt "Stock label"
-#~ msgid "_OK"
-#~ msgstr "_OK"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Open"
-#~ msgstr "_Open"
-
-#~ msgctxt "Stock label"
-#~ msgid "Landscape"
-#~ msgstr "Landscape"
-
-#~ msgctxt "Stock label"
-#~ msgid "Portrait"
-#~ msgstr "Portrait"
-
-#~ msgctxt "Stock label"
-#~ msgid "Reverse landscape"
-#~ msgstr "Reverse landscape"
-
-#~ msgctxt "Stock label"
-#~ msgid "Reverse portrait"
-#~ msgstr "Reverse portrait"
-
-#~ msgctxt "Stock label"
-#~ msgid "Page Set_up"
-#~ msgstr "Page Set_up"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Paste"
-#~ msgstr "_Paste"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Preferences"
-#~ msgstr "_Preferences"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Print"
-#~ msgstr "_Print"
-
-#~ msgctxt "Stock label"
-#~ msgid "Print Pre_view"
-#~ msgstr "Print Pre_view"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Properties"
-#~ msgstr "_Properties"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Quit"
-#~ msgstr "_Quit"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Redo"
-#~ msgstr "_Redo"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Refresh"
-#~ msgstr "_Refresh"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Remove"
-#~ msgstr "_Remove"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Revert"
-#~ msgstr "_Revert"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Save"
-#~ msgstr "_Save"
-
-#~ msgctxt "Stock label"
-#~ msgid "Save _As"
-#~ msgstr "Save _As"
-
-#~ msgctxt "Stock label"
-#~ msgid "Select _All"
-#~ msgstr "Select _All"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Color"
-#~ msgstr "_Colour"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Font"
-#~ msgstr "_Font"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Ascending"
-#~ msgstr "_Ascending"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Descending"
-#~ msgstr "_Descending"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Spell Check"
-#~ msgstr "_Spell Check"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Stop"
-#~ msgstr "_Stop"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Strikethrough"
-#~ msgstr "_Strikethrough"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Undelete"
-#~ msgstr "_Undelete"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Underline"
-#~ msgstr "_Underline"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Undo"
-#~ msgstr "_Undo"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Yes"
-#~ msgstr "_Yes"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Normal Size"
-#~ msgstr "_Normal Size"
-
-#~ msgctxt "Stock label"
-#~ msgid "Best _Fit"
-#~ msgstr "Best _Fit"
-
-#~ msgctxt "Stock label"
-#~ msgid "Zoom _In"
-#~ msgstr "Zoom _In"
-
-#~ msgctxt "Stock label"
-#~ msgid "Zoom _Out"
-#~ msgstr "Zoom _Out"
 
 #~ msgid "--- No Tip ---"
 #~ msgstr "--- No Tip ---"

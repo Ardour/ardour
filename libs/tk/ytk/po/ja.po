@@ -15,7 +15,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk+ gtk-2-24\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-19 22:01+0100\n"
+"POT-Creation-Date: 2026-05-05 15:38+0200\n"
 "PO-Revision-Date: 2016-01-11 15:17+0900\n"
 "Last-Translator: Kiyotaka NISHIBORI <ml.nishibori.kiyotaka@gmail.com>\n"
 "Language-Team: Japanese <gnome-translation@gnome.gr.jp>\n"
@@ -110,74 +110,74 @@ msgstr ""
 "外側の輪から希望する色を、内側の三角で色の暗さ・明るさをそれぞれ選択してくだ"
 "さい"
 
-#: gtkcolorsel.c:382
+#: gtkcolorsel.c:393
 msgid ""
 "Click the eyedropper, then click a color anywhere on your screen to select "
 "that color."
 msgstr ""
 "スポイトをクリックして、画面上の好きな場所をクリックして色を選択してください"
 
-#: gtkcolorsel.c:391
+#: gtkcolorsel.c:403
 msgid "_Hue:"
 msgstr "色相(_H):"
 
-#: gtkcolorsel.c:392
+#: gtkcolorsel.c:404
 msgid "Position on the color wheel."
 msgstr "色の輪における位置です"
 
-#: gtkcolorsel.c:394
+#: gtkcolorsel.c:406
 msgid "_Saturation:"
 msgstr "彩度(_S):"
 
-#: gtkcolorsel.c:395
+#: gtkcolorsel.c:407
 msgid "\"Deepness\" of the color."
 msgstr "色の \"深さ\" です"
 
-#: gtkcolorsel.c:396
+#: gtkcolorsel.c:408
 msgid "_Value:"
 msgstr "明度(_V):"
 
-#: gtkcolorsel.c:397
+#: gtkcolorsel.c:409
 msgid "Brightness of the color."
 msgstr "色の明るさです"
 
-#: gtkcolorsel.c:398
+#: gtkcolorsel.c:410
 msgid "_Red:"
 msgstr "赤(_R):"
 
-#: gtkcolorsel.c:399
+#: gtkcolorsel.c:411
 msgid "Amount of red light in the color."
 msgstr "選択した色の赤成分の量です"
 
-#: gtkcolorsel.c:400
+#: gtkcolorsel.c:412
 msgid "_Green:"
 msgstr "緑(_G):"
 
-#: gtkcolorsel.c:401
+#: gtkcolorsel.c:413
 msgid "Amount of green light in the color."
 msgstr "選択した色の緑成分の量です"
 
-#: gtkcolorsel.c:402
+#: gtkcolorsel.c:414
 msgid "_Blue:"
 msgstr "青(_B):"
 
-#: gtkcolorsel.c:403
+#: gtkcolorsel.c:415
 msgid "Amount of blue light in the color."
 msgstr "選択した色の青成分の量です"
 
-#: gtkcolorsel.c:406
+#: gtkcolorsel.c:418
 msgid "Op_acity:"
 msgstr "不透明度(_A):"
 
-#: gtkcolorsel.c:413 gtkcolorsel.c:423
+#: gtkcolorsel.c:425 gtkcolorsel.c:435
 msgid "Transparency of the color."
 msgstr "色の透明度です"
 
-#: gtkcolorsel.c:430
+#: gtkcolorsel.c:442
 msgid "Color _name:"
 msgstr "色の名称(_N):"
 
-#: gtkcolorsel.c:444
+#: gtkcolorsel.c:456
 msgid ""
 "You can enter an HTML-style hexadecimal color value, or simply a color name "
 "such as 'orange' in this entry."
@@ -185,15 +185,15 @@ msgstr ""
 "このエントリに HTML 形式で 16進数の値、または色の名前 (例: 'orange') を入力で"
 "きます"
 
-#: gtkcolorsel.c:474
+#: gtkcolorsel.c:486
 msgid "_Palette:"
 msgstr "パレット(_P):"
 
-#: gtkcolorsel.c:503
+#: gtkcolorsel.c:515
 msgid "Color Wheel"
 msgstr "色ホイール"
 
-#: gtkcolorsel.c:962
+#: gtkcolorsel.c:974
 msgid ""
 "The previously-selected color, for comparison to the color you're selecting "
 "now. You can drag this color to a palette entry, or select this color as "
@@ -203,7 +203,7 @@ msgstr ""
 "色をパレットのエントリにドラッグしたり、他の見本の横にドラッグして現在の色と"
 "して選択できます"
 
-#: gtkcolorsel.c:965
+#: gtkcolorsel.c:977
 msgid ""
 "The color you've chosen. You can drag this color to a palette entry to save "
 "it for use in the future."
@@ -211,21 +211,21 @@ msgstr ""
 "選択した色で、この色を将来使用する色として保存するためパレットのエントリにド"
 "ラッグできます"
 
-#: gtkcolorsel.c:970
+#: gtkcolorsel.c:982
 msgid ""
 "The previously-selected color, for comparison to the color you're selecting "
 "now."
 msgstr "前に選択した色です。今選択している色との比較です。"
 
-#: gtkcolorsel.c:973
+#: gtkcolorsel.c:985
 msgid "The color you've chosen."
 msgstr "選択した色です。"
 
-#: gtkcolorsel.c:1389
+#: gtkcolorsel.c:1401
 msgid "_Save color here"
 msgstr "ここに色を保存する(_S)"
 
-#: gtkcolorsel.c:1593
+#: gtkcolorsel.c:1605
 msgid ""
 "Click this palette entry to make it the current color. To change this entry, "
 "drag a color swatch here or right-click it and select \"Save color here.\""
@@ -255,7 +255,7 @@ msgstr "Caps Lock が ON です"
 msgid "Select a File"
 msgstr "ファイルの選択"
 
-#: gtkfilechooserbutton.c:65 gtkfilechooserdefault.c:1851
+#: gtkfilechooserbutton.c:65 gtkfilechooserdefault.c:1853
 msgid "Desktop"
 msgstr "デスクトップ"
 
@@ -271,23 +271,23 @@ msgstr "その他..."
 msgid "Type name of new folder"
 msgstr "新しいフォルダの種類"
 
-#: gtkfilechooserdefault.c:956
+#: gtkfilechooserdefault.c:958
 msgid "Could not retrieve information about the file"
 msgstr "ファイルに関する情報を取得できませんでした"
 
-#: gtkfilechooserdefault.c:967
+#: gtkfilechooserdefault.c:969
 msgid "Could not add a bookmark"
 msgstr "ブックマークを追加できませんでした"
 
-#: gtkfilechooserdefault.c:978
+#: gtkfilechooserdefault.c:980
 msgid "Could not remove bookmark"
 msgstr "ブックマークを削除できませんでした"
 
-#: gtkfilechooserdefault.c:989
+#: gtkfilechooserdefault.c:991
 msgid "The folder could not be created"
 msgstr "フォルダを生成できませんでした"
 
-#: gtkfilechooserdefault.c:1002
+#: gtkfilechooserdefault.c:1004
 msgid ""
 "The folder could not be created, as a file with the same name already "
 "exists.  Try using a different name for the folder, or rename the file first."
@@ -295,218 +295,218 @@ msgstr ""
 "同名のフォルダが既に存在しているので、そのフォルダを生成できませんでした。別"
 "の名前にするか、ファイル名を変更するなどして、もう一度実行してください。"
 
-#: gtkfilechooserdefault.c:1016
+#: gtkfilechooserdefault.c:1018
 msgid "You need to choose a valid filename."
 msgstr ""
 
-#: gtkfilechooserdefault.c:1019
+#: gtkfilechooserdefault.c:1021
 #, c-format
 msgid "Cannot create a file under %s as it is not a folder"
 msgstr ""
 
-#: gtkfilechooserdefault.c:1031
+#: gtkfilechooserdefault.c:1033
 msgid ""
 "You may only select folders.  The item that you selected is not a folder; "
 "try using a different item."
 msgstr ""
 
-#: gtkfilechooserdefault.c:1041
+#: gtkfilechooserdefault.c:1043
 msgid "Invalid file name"
 msgstr "無効なファイル名です"
 
-#: gtkfilechooserdefault.c:1051
+#: gtkfilechooserdefault.c:1053
 msgid "The folder contents could not be displayed"
 msgstr "フォルダの内容を表示できませんでした"
 
-#: gtkfilechooserdefault.c:1584
+#: gtkfilechooserdefault.c:1586
 #, c-format
 msgid "%1$s on %2$s"
 msgstr "%2$s:%1$s"
 
-#: gtkfilechooserdefault.c:1733
+#: gtkfilechooserdefault.c:1735
 msgid "Search"
 msgstr "検索"
 
-#: gtkfilechooserdefault.c:1757 gtkfilechooserdefault.c:4872
+#: gtkfilechooserdefault.c:1759 gtkfilechooserdefault.c:4877
 msgid "Recently Used"
 msgstr "最近開いたファイル"
 
-#: gtkfilechooserdefault.c:2387
+#: gtkfilechooserdefault.c:2389
 msgid "Select which types of files are shown"
 msgstr "表示するファイルの種類を選択してください"
 
-#: gtkfilechooserdefault.c:2746
+#: gtkfilechooserdefault.c:2748
 #, c-format
 msgid "Add the folder '%s' to the bookmarks"
 msgstr "'%s' というフォルダをブックマークへ追加します"
 
-#: gtkfilechooserdefault.c:2790
+#: gtkfilechooserdefault.c:2792
 msgid "Add the current folder to the bookmarks"
 msgstr "このフォルダをブックマークへ追加します"
 
-#: gtkfilechooserdefault.c:2792
+#: gtkfilechooserdefault.c:2794
 msgid "Add the selected folders to the bookmarks"
 msgstr "指定したフォルダをブックマークへ追加します"
 
-#: gtkfilechooserdefault.c:2837
+#: gtkfilechooserdefault.c:2839
 #, c-format
 msgid "Remove the bookmark '%s'"
 msgstr "'%s' というブックマークを削除します"
 
-#: gtkfilechooserdefault.c:2839
+#: gtkfilechooserdefault.c:2841
 #, c-format
 msgid "Bookmark '%s' cannot be removed"
 msgstr "ブックマーク '%s'を削除できません"
 
-#: gtkfilechooserdefault.c:2846 gtkfilechooserdefault.c:3740
+#: gtkfilechooserdefault.c:2848 gtkfilechooserdefault.c:3742
 msgid "Remove the selected bookmark"
 msgstr "指定したブックマークを削除します"
 
-#: gtkfilechooserdefault.c:3421
+#: gtkfilechooserdefault.c:3423
 msgid "Remove"
 msgstr "削除"
 
-#: gtkfilechooserdefault.c:3430
+#: gtkfilechooserdefault.c:3432
 msgid "Rename..."
 msgstr "ファイル名の変更..."
 
-#: gtkfilechooserdefault.c:3597
+#: gtkfilechooserdefault.c:3599
 msgid "Places"
 msgstr "場所"
 
-#: gtkfilechooserdefault.c:3654
+#: gtkfilechooserdefault.c:3656
 msgid "_Places"
 msgstr "場所(_P)"
 
-#: gtkfilechooserdefault.c:3728
+#: gtkfilechooserdefault.c:3730
 msgid "Add the selected folder to the Bookmarks"
 msgstr "指定したフォルダをブックマークへ追加します"
 
-#: gtkfilechooserdefault.c:3872
+#: gtkfilechooserdefault.c:3874
 msgid "Could not select file"
 msgstr "ファイルを選択できませんでした"
 
-#: gtkfilechooserdefault.c:4045
+#: gtkfilechooserdefault.c:4047
 msgid "_Add to Bookmarks"
 msgstr "ブックマークへ追加(_A)"
 
-#: gtkfilechooserdefault.c:4058
+#: gtkfilechooserdefault.c:4060
 msgid "Show _Hidden Files"
 msgstr "隠しファイルを表示する(_H)"
 
-#: gtkfilechooserdefault.c:4065
+#: gtkfilechooserdefault.c:4067
 msgid "Show _Size Column"
 msgstr "サイズを表示する(_S)"
 
-#: gtkfilechooserdefault.c:4289
+#: gtkfilechooserdefault.c:4291
 msgid "Files"
 msgstr "ファイル"
 
-#: gtkfilechooserdefault.c:4340
+#: gtkfilechooserdefault.c:4342
 msgid "Name"
 msgstr "名前"
 
-#: gtkfilechooserdefault.c:4363
+#: gtkfilechooserdefault.c:4365
 msgid "Size"
 msgstr "サイズ"
 
-#: gtkfilechooserdefault.c:4377
+#: gtkfilechooserdefault.c:4379
 msgid "Modified"
 msgstr "最終変更日"
 
-#: gtkfilechooserdefault.c:4470
+#: gtkfilechooserdefault.c:4475
 msgid "_Name:"
 msgstr "名前(_N):"
 
-#: gtkfilechooserdefault.c:4710
+#: gtkfilechooserdefault.c:4715
 msgid "Type a file name"
 msgstr "ファイル名を入力してください"
 
-#: gtkfilechooserdefault.c:4757 gtkfilechooserdefault.c:4768
+#: gtkfilechooserdefault.c:4762 gtkfilechooserdefault.c:4773
 msgid "Please select a folder below"
 msgstr ""
 
-#: gtkfilechooserdefault.c:4763
+#: gtkfilechooserdefault.c:4768
 #, fuzzy
 msgid "Please type a file name"
 msgstr "ファイル名を入力してください"
 
-#: gtkfilechooserdefault.c:4834
+#: gtkfilechooserdefault.c:4839
 msgid "Create Fo_lder"
 msgstr "フォルダの作成(_L)"
 
-#: gtkfilechooserdefault.c:4882
+#: gtkfilechooserdefault.c:4887
 msgid "Search:"
 msgstr "検索:"
 
-#: gtkfilechooserdefault.c:4933
+#: gtkfilechooserdefault.c:4938
 msgid "_Location:"
 msgstr "場所(_L):"
 
-#: gtkfilechooserdefault.c:5383
+#: gtkfilechooserdefault.c:5388
 msgid "Save in _folder:"
 msgstr "フォルダの中に保存(_F):"
 
-#: gtkfilechooserdefault.c:5385
+#: gtkfilechooserdefault.c:5390
 msgid "Create in _folder:"
 msgstr "フォルダの中に作成(_F):"
 
-#: gtkfilechooserdefault.c:6479
+#: gtkfilechooserdefault.c:6484
 #, c-format
 msgid "Could not read the contents of %s"
 msgstr "%s の内容を読み込めませんでした"
 
-#: gtkfilechooserdefault.c:6483
+#: gtkfilechooserdefault.c:6488
 msgid "Could not read the contents of the folder"
 msgstr "フォルダの内容を読み込めませんでした"
 
-#: gtkfilechooserdefault.c:6576 gtkfilechooserdefault.c:6644
-#: gtkfilechooserdefault.c:6829
+#: gtkfilechooserdefault.c:6581 gtkfilechooserdefault.c:6649
+#: gtkfilechooserdefault.c:6834
 msgid "Unknown"
 msgstr "不明"
 
-#: gtkfilechooserdefault.c:6591
+#: gtkfilechooserdefault.c:6596
 msgid "%H:%M"
 msgstr "%H:%M"
 
-#: gtkfilechooserdefault.c:6593
+#: gtkfilechooserdefault.c:6598
 msgid "Yesterday at %H:%M"
 msgstr "昨日の %H:%M"
 
-#: gtkfilechooserdefault.c:7301
+#: gtkfilechooserdefault.c:7306
 msgid "Cannot change to folder because it is not local"
 msgstr "ローカルではないので、フォルダを変更できません"
 
-#: gtkfilechooserdefault.c:7898 gtkfilechooserdefault.c:7919
+#: gtkfilechooserdefault.c:7903 gtkfilechooserdefault.c:7924
 #, c-format
 msgid "Shortcut %s already exists"
 msgstr "ショートカット %s は既にあります"
 
-#: gtkfilechooserdefault.c:8009
+#: gtkfilechooserdefault.c:8014
 #, c-format
 msgid "Shortcut %s does not exist"
 msgstr "ショートカット %s はありません"
 
-#: gtkfilechooserdefault.c:8250
+#: gtkfilechooserdefault.c:8255
 #, c-format
 msgid "A file named \"%s\" already exists.  Do you want to replace it?"
 msgstr "\"%s\" というファイルは既に存在します。上書きしてもよろしいですか?"
 
-#: gtkfilechooserdefault.c:8253
+#: gtkfilechooserdefault.c:8258
 #, c-format
 msgid ""
 "The file already exists in \"%s\".  Replacing it will overwrite its contents."
 msgstr "\"%s\" にファイルが既に存在しています。すべての内容を上書きします。"
 
-#: gtkfilechooserdefault.c:8258
+#: gtkfilechooserdefault.c:8263
 msgid "_Replace"
 msgstr "置き換える(_R)"
 
-#: gtkfilechooserdefault.c:9066
+#: gtkfilechooserdefault.c:9136
 msgid "Could not start the search process"
 msgstr "検索処理を開始できませんでした"
 
-#: gtkfilechooserdefault.c:9067
+#: gtkfilechooserdefault.c:9137
 msgid ""
 "The program was not able to create a connection to the indexer daemon.  "
 "Please make sure it is running."
@@ -514,11 +514,11 @@ msgstr ""
 "検索用のインデックスを生成するデーモンに接続できませんでした。デーモンが実行"
 "中か確認してください。"
 
-#: gtkfilechooserdefault.c:9081
+#: gtkfilechooserdefault.c:9151
 msgid "Could not send the search request"
 msgstr "検索結果をプログラム側に送信できませんでした"
 
-#: gtkfilechooserdefault.c:9682
+#: gtkfilechooserdefault.c:9752
 #, c-format
 msgid "Could not mount %s"
 msgstr "%s をマウントできませんでした"
@@ -615,44 +615,44 @@ msgstr "URL のコピー"
 msgid "Invalid URI"
 msgstr "URI が間違っています"
 
-#: gtkmain.c:454
+#: gtkmain.c:412
 msgid "Load additional GTK+ modules"
 msgstr "追加で読み込む GTK+ モジュールを指定する"
 
-#: gtkmain.c:455
+#: gtkmain.c:413
 msgid "MODULES"
 msgstr "MODULES"
 
-#: gtkmain.c:457
+#: gtkmain.c:415
 msgid "Make all warnings fatal"
 msgstr "警告をすべて致命的と見なす"
 
-#: gtkmain.c:460
+#: gtkmain.c:418
 msgid "GTK+ debugging flags to set"
 msgstr "有効にする GTK+ のデバッグ・フラグを指定する"
 
-#: gtkmain.c:461 gtkmain.c:464
+#: gtkmain.c:419 gtkmain.c:422
 msgid "FLAGS"
 msgstr "FLAGS"
 
-#: gtkmain.c:463
+#: gtkmain.c:421
 msgid "GTK+ debugging flags to unset"
 msgstr "無効にする GTK+ のデバッグ・フラグを指定する"
 
-#: gtkmain.c:755
+#: gtkmain.c:698
 msgid "default:LTR"
 msgstr "default:LTR"
 
-#: gtkmain.c:820
+#: gtkmain.c:763
 #, c-format
 msgid "Cannot open display: %s"
 msgstr "ディスプレイをオープンできません: %s"
 
-#: gtkmain.c:857
+#: gtkmain.c:800
 msgid "GTK+ Options"
 msgstr "GTK+ のオプション"
 
-#: gtkmain.c:857
+#: gtkmain.c:800
 msgid "Show GTK+ Options"
 msgstr "GTK+ のオプションを表示する"
 
@@ -722,12 +722,12 @@ msgstr "下のパス"
 msgid "File System Root"
 msgstr "ファイル・システムのルート"
 
-#: gtkrc.c:2906
+#: gtkrc.c:2670
 #, c-format
 msgid "Unable to find include file: \"%s\""
 msgstr "インクルードファイルが見つかりません: \"%s\""
 
-#: gtkrc.c:3536 gtkrc.c:3539
+#: gtkrc.c:3300 gtkrc.c:3303
 #, c-format
 msgid "Unable to locate image file in pixmap_path: \"%s\""
 msgstr "pixmap_path に画像ファイルが見つかりません: \"%s\""
@@ -793,9 +793,9 @@ msgstr "'%s' を開きます"
 msgid "Unknown item"
 msgstr "不明なアイテム"
 
-#: gtkrecentmanager.c:1182 gtkrecentmanager.c:1195 gtkrecentmanager.c:1332
-#: gtkrecentmanager.c:1342 gtkrecentmanager.c:1395 gtkrecentmanager.c:1404
-#: gtkrecentmanager.c:1419
+#: gtkrecentmanager.c:1073 gtkrecentmanager.c:1086 gtkrecentmanager.c:1223
+#: gtkrecentmanager.c:1233 gtkrecentmanager.c:1286 gtkrecentmanager.c:1295
+#: gtkrecentmanager.c:1310
 #, c-format
 msgid "Unable to find an item with URI '%s'"
 msgstr "URI '%s' のアイテムが見つかりません"
@@ -803,6 +803,471 @@ msgstr "URI '%s' のアイテムが見つかりません"
 #: gtkspinner.c:459
 msgid "Provides visual indication of progress"
 msgstr "進行している様子を視覚的に表します"
+
+#: gtkstock.c:315
+msgctxt "Stock label"
+msgid "Information"
+msgstr "情報"
+
+#: gtkstock.c:316
+msgctxt "Stock label"
+msgid "Warning"
+msgstr "警告"
+
+#: gtkstock.c:317
+msgctxt "Stock label"
+msgid "Error"
+msgstr "エラー"
+
+#: gtkstock.c:318
+msgctxt "Stock label"
+msgid "Question"
+msgstr "質問"
+
+#: gtkstock.c:323
+msgctxt "Stock label"
+msgid "_About"
+msgstr "情報(_A)"
+
+#: gtkstock.c:324
+msgctxt "Stock label"
+msgid "_Add"
+msgstr "追加(_A)"
+
+#: gtkstock.c:325
+msgctxt "Stock label"
+msgid "_Apply"
+msgstr "適用(_A)"
+
+#: gtkstock.c:326
+msgctxt "Stock label"
+msgid "_Bold"
+msgstr "太字(_B)"
+
+#: gtkstock.c:327
+msgctxt "Stock label"
+msgid "_Cancel"
+msgstr "キャンセル(_C)"
+
+#: gtkstock.c:328
+msgctxt "Stock label"
+msgid "_CD-Rom"
+msgstr "CD-ROM(_C)"
+
+#: gtkstock.c:329
+msgctxt "Stock label"
+msgid "_Clear"
+msgstr "クリア(_C)"
+
+#: gtkstock.c:330
+msgctxt "Stock label"
+msgid "_Close"
+msgstr "閉じる(_C)"
+
+#: gtkstock.c:331
+msgctxt "Stock label"
+msgid "C_onnect"
+msgstr "接続(_O)"
+
+#: gtkstock.c:332
+msgctxt "Stock label"
+msgid "_Convert"
+msgstr "変換(_C)"
+
+#: gtkstock.c:333
+msgctxt "Stock label"
+msgid "_Copy"
+msgstr "コピー(_C)"
+
+#: gtkstock.c:334
+msgctxt "Stock label"
+msgid "Cu_t"
+msgstr "切り取り(_T)"
+
+#: gtkstock.c:335
+msgctxt "Stock label"
+msgid "_Delete"
+msgstr "削除(_D)"
+
+#: gtkstock.c:336
+msgctxt "Stock label"
+msgid "_Discard"
+msgstr "無効(_D)"
+
+#: gtkstock.c:337
+msgctxt "Stock label"
+msgid "_Disconnect"
+msgstr "切断(_D)"
+
+#: gtkstock.c:338
+msgctxt "Stock label"
+msgid "_Execute"
+msgstr "実行(_E)"
+
+#: gtkstock.c:339
+msgctxt "Stock label"
+msgid "_Edit"
+msgstr "編集(_E)"
+
+#: gtkstock.c:340
+msgctxt "Stock label"
+msgid "_Find"
+msgstr "検索(_F)"
+
+#: gtkstock.c:341
+msgctxt "Stock label"
+msgid "Find and _Replace"
+msgstr "検索して置換(_R)"
+
+#: gtkstock.c:342
+msgctxt "Stock label"
+msgid "_Floppy"
+msgstr "フロッピー(_F)"
+
+#: gtkstock.c:343
+msgctxt "Stock label"
+msgid "_Fullscreen"
+msgstr "フルスクリーン(_F)"
+
+#: gtkstock.c:344
+msgctxt "Stock label"
+msgid "_Leave Fullscreen"
+msgstr "フルスクリーンの解除(_L)"
+
+#: gtkstock.c:346
+msgctxt "Stock label, navigation"
+msgid "_Bottom"
+msgstr "最後(_B)"
+
+#: gtkstock.c:348
+msgctxt "Stock label, navigation"
+msgid "_First"
+msgstr "先頭(_F)"
+
+#: gtkstock.c:350
+msgctxt "Stock label, navigation"
+msgid "_Last"
+msgstr "最後(_L)"
+
+#: gtkstock.c:352
+msgctxt "Stock label, navigation"
+msgid "_Top"
+msgstr "先頭(_T)"
+
+#: gtkstock.c:354
+msgctxt "Stock label, navigation"
+msgid "_Back"
+msgstr "戻る(_B)"
+
+#: gtkstock.c:356
+msgctxt "Stock label, navigation"
+msgid "_Down"
+msgstr "下へ(_D)"
+
+#: gtkstock.c:358
+msgctxt "Stock label, navigation"
+msgid "_Forward"
+msgstr "進む(_F)"
+
+#: gtkstock.c:360
+msgctxt "Stock label, navigation"
+msgid "_Up"
+msgstr "上へ(_U)"
+
+#: gtkstock.c:361
+msgctxt "Stock label"
+msgid "_Harddisk"
+msgstr "ハードディスク(_H)"
+
+#: gtkstock.c:362
+msgctxt "Stock label"
+msgid "_Help"
+msgstr "ヘルプ(_H)"
+
+#: gtkstock.c:363
+msgctxt "Stock label"
+msgid "_Home"
+msgstr "ホーム(_H)"
+
+#: gtkstock.c:364
+msgctxt "Stock label"
+msgid "Increase Indent"
+msgstr "インデントを増やす"
+
+#: gtkstock.c:365
+msgctxt "Stock label"
+msgid "Decrease Indent"
+msgstr "インデントを減らす"
+
+#: gtkstock.c:366
+msgctxt "Stock label"
+msgid "_Index"
+msgstr "インデックス(_I)"
+
+#: gtkstock.c:367
+msgctxt "Stock label"
+msgid "_Information"
+msgstr "情報(_I)"
+
+#: gtkstock.c:368
+msgctxt "Stock label"
+msgid "_Italic"
+msgstr "斜体(_I)"
+
+#: gtkstock.c:369
+msgctxt "Stock label"
+msgid "_Jump to"
+msgstr "移動(_J)"
+
+#: gtkstock.c:371
+msgctxt "Stock label"
+msgid "_Center"
+msgstr "中央寄せ(_C)"
+
+#: gtkstock.c:373
+msgctxt "Stock label"
+msgid "_Fill"
+msgstr "埋める(_F)"
+
+#: gtkstock.c:375
+msgctxt "Stock label"
+msgid "_Left"
+msgstr "左寄せ(_L)"
+
+#: gtkstock.c:377
+msgctxt "Stock label"
+msgid "_Right"
+msgstr "右寄せ(_R)"
+
+#: gtkstock.c:380
+msgctxt "Stock label, media"
+msgid "_Forward"
+msgstr "早送り(_F)"
+
+#: gtkstock.c:382
+msgctxt "Stock label, media"
+msgid "_Next"
+msgstr "次(_N)"
+
+#: gtkstock.c:384
+msgctxt "Stock label, media"
+msgid "P_ause"
+msgstr "一時停止(_A)"
+
+#: gtkstock.c:386
+msgctxt "Stock label, media"
+msgid "_Play"
+msgstr "再生(_P)"
+
+#: gtkstock.c:388
+msgctxt "Stock label, media"
+msgid "Pre_vious"
+msgstr "前(_V)"
+
+#: gtkstock.c:390
+msgctxt "Stock label, media"
+msgid "_Record"
+msgstr "録音(_R)"
+
+#: gtkstock.c:392
+msgctxt "Stock label, media"
+msgid "R_ewind"
+msgstr "巻き戻し(_E)"
+
+#: gtkstock.c:394
+msgctxt "Stock label, media"
+msgid "_Stop"
+msgstr "停止(_S)"
+
+#: gtkstock.c:395
+msgctxt "Stock label"
+msgid "_Network"
+msgstr "ネットワーク(_N)"
+
+#: gtkstock.c:396
+msgctxt "Stock label"
+msgid "_New"
+msgstr "新規(_N)"
+
+#: gtkstock.c:397
+msgctxt "Stock label"
+msgid "_No"
+msgstr "いいえ(_N)"
+
+#: gtkstock.c:398
+msgctxt "Stock label"
+msgid "_OK"
+msgstr "OK(_O)"
+
+#: gtkstock.c:399
+msgctxt "Stock label"
+msgid "_Open"
+msgstr "開く(_O)"
+
+#: gtkstock.c:401
+msgctxt "Stock label"
+msgid "Landscape"
+msgstr "横置き"
+
+#: gtkstock.c:403
+msgctxt "Stock label"
+msgid "Portrait"
+msgstr "縦置き"
+
+#: gtkstock.c:405
+msgctxt "Stock label"
+msgid "Reverse landscape"
+msgstr "横置きの逆"
+
+#: gtkstock.c:407
+msgctxt "Stock label"
+msgid "Reverse portrait"
+msgstr "縦置きの逆"
+
+#: gtkstock.c:408
+msgctxt "Stock label"
+msgid "Page Set_up"
+msgstr "ページの設定(_U)"
+
+#: gtkstock.c:409
+msgctxt "Stock label"
+msgid "_Paste"
+msgstr "貼り付け(_P)"
+
+#: gtkstock.c:410
+msgctxt "Stock label"
+msgid "_Preferences"
+msgstr "設定(_P)"
+
+#: gtkstock.c:411
+msgctxt "Stock label"
+msgid "_Print"
+msgstr "印刷(_P)"
+
+#: gtkstock.c:412
+msgctxt "Stock label"
+msgid "Print Pre_view"
+msgstr "印刷プレビュー(_V)"
+
+#: gtkstock.c:413
+msgctxt "Stock label"
+msgid "_Properties"
+msgstr "プロパティ(_P)"
+
+#: gtkstock.c:414
+msgctxt "Stock label"
+msgid "_Quit"
+msgstr "終了(_Q)"
+
+#: gtkstock.c:415
+msgctxt "Stock label"
+msgid "_Redo"
+msgstr "やり直す(_R)"
+
+#: gtkstock.c:416
+msgctxt "Stock label"
+msgid "_Refresh"
+msgstr "更新(_R)"
+
+#: gtkstock.c:417
+msgctxt "Stock label"
+msgid "_Remove"
+msgstr "削除(_R)"
+
+#: gtkstock.c:418
+msgctxt "Stock label"
+msgid "_Revert"
+msgstr "元に戻す(_R)"
+
+#: gtkstock.c:419
+msgctxt "Stock label"
+msgid "_Save"
+msgstr "保存(_S)"
+
+#: gtkstock.c:420
+msgctxt "Stock label"
+msgid "Save _As"
+msgstr "別名で保存(_A)"
+
+#: gtkstock.c:421
+msgctxt "Stock label"
+msgid "Select _All"
+msgstr "すべて選択(_A)"
+
+#: gtkstock.c:422
+msgctxt "Stock label"
+msgid "_Color"
+msgstr "色(_C)"
+
+#: gtkstock.c:423
+msgctxt "Stock label"
+msgid "_Font"
+msgstr "フォント(_F)"
+
+#: gtkstock.c:425
+msgctxt "Stock label"
+msgid "_Ascending"
+msgstr "昇順(_A)"
+
+#: gtkstock.c:427
+msgctxt "Stock label"
+msgid "_Descending"
+msgstr "降順(_D)"
+
+#: gtkstock.c:428
+msgctxt "Stock label"
+msgid "_Spell Check"
+msgstr "スペル・チェック(_S)"
+
+#: gtkstock.c:429
+msgctxt "Stock label"
+msgid "_Stop"
+msgstr "停止(_S)"
+
+#: gtkstock.c:431
+msgctxt "Stock label"
+msgid "_Strikethrough"
+msgstr "打ち消し線(_S)"
+
+#: gtkstock.c:432
+msgctxt "Stock label"
+msgid "_Undelete"
+msgstr "削除の取り消し(_U)"
+
+#: gtkstock.c:434
+msgctxt "Stock label"
+msgid "_Underline"
+msgstr "下線(_U)"
+
+#: gtkstock.c:435
+msgctxt "Stock label"
+msgid "_Undo"
+msgstr "元に戻す(_U)"
+
+#: gtkstock.c:436
+msgctxt "Stock label"
+msgid "_Yes"
+msgstr "はい(_Y)"
+
+#: gtkstock.c:438
+msgctxt "Stock label"
+msgid "_Normal Size"
+msgstr "標準サイズ(_N)"
+
+#: gtkstock.c:440
+msgctxt "Stock label"
+msgid "Best _Fit"
+msgstr "フィットさせる(_F)"
+
+#: gtkstock.c:441
+msgctxt "Stock label"
+msgid "Zoom _In"
+msgstr "拡大(_I)"
+
+#: gtkstock.c:442
+msgctxt "Stock label"
+msgid "Zoom _Out"
+msgstr "縮小(_O)"
 
 #: gtktextbufferrichtext.c:652
 #, c-format
@@ -977,7 +1442,7 @@ msgstr "%2$d 行目 %3$d 文字目の予想外の開始タグ '%1$s'"
 msgid "Unexpected character data on line %d char %d"
 msgstr "%d 行の %d 文字目の文字データは予想外です"
 
-#: gtkuimanager.c:2427
+#: gtkuimanager.c:2444
 msgid "Empty"
 msgstr "空"
 
@@ -1923,378 +2388,6 @@ msgstr "空"
 #~ msgctxt "throbbing progress animation widget"
 #~ msgid "Spinner"
 #~ msgstr "スピナー"
-
-#~ msgctxt "Stock label"
-#~ msgid "Information"
-#~ msgstr "情報"
-
-#~ msgctxt "Stock label"
-#~ msgid "Warning"
-#~ msgstr "警告"
-
-#~ msgctxt "Stock label"
-#~ msgid "Error"
-#~ msgstr "エラー"
-
-#~ msgctxt "Stock label"
-#~ msgid "Question"
-#~ msgstr "質問"
-
-#~ msgctxt "Stock label"
-#~ msgid "_About"
-#~ msgstr "情報(_A)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Add"
-#~ msgstr "追加(_A)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Apply"
-#~ msgstr "適用(_A)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Bold"
-#~ msgstr "太字(_B)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Cancel"
-#~ msgstr "キャンセル(_C)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_CD-Rom"
-#~ msgstr "CD-ROM(_C)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Clear"
-#~ msgstr "クリア(_C)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Close"
-#~ msgstr "閉じる(_C)"
-
-#~ msgctxt "Stock label"
-#~ msgid "C_onnect"
-#~ msgstr "接続(_O)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Convert"
-#~ msgstr "変換(_C)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Copy"
-#~ msgstr "コピー(_C)"
-
-#~ msgctxt "Stock label"
-#~ msgid "Cu_t"
-#~ msgstr "切り取り(_T)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Delete"
-#~ msgstr "削除(_D)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Discard"
-#~ msgstr "無効(_D)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Disconnect"
-#~ msgstr "切断(_D)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Execute"
-#~ msgstr "実行(_E)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Edit"
-#~ msgstr "編集(_E)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Find"
-#~ msgstr "検索(_F)"
-
-#~ msgctxt "Stock label"
-#~ msgid "Find and _Replace"
-#~ msgstr "検索して置換(_R)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Floppy"
-#~ msgstr "フロッピー(_F)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Fullscreen"
-#~ msgstr "フルスクリーン(_F)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Leave Fullscreen"
-#~ msgstr "フルスクリーンの解除(_L)"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_Bottom"
-#~ msgstr "最後(_B)"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_First"
-#~ msgstr "先頭(_F)"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_Last"
-#~ msgstr "最後(_L)"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_Top"
-#~ msgstr "先頭(_T)"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_Back"
-#~ msgstr "戻る(_B)"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_Down"
-#~ msgstr "下へ(_D)"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_Forward"
-#~ msgstr "進む(_F)"
-
-#~ msgctxt "Stock label, navigation"
-#~ msgid "_Up"
-#~ msgstr "上へ(_U)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Harddisk"
-#~ msgstr "ハードディスク(_H)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Help"
-#~ msgstr "ヘルプ(_H)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Home"
-#~ msgstr "ホーム(_H)"
-
-#~ msgctxt "Stock label"
-#~ msgid "Increase Indent"
-#~ msgstr "インデントを増やす"
-
-#~ msgctxt "Stock label"
-#~ msgid "Decrease Indent"
-#~ msgstr "インデントを減らす"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Index"
-#~ msgstr "インデックス(_I)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Information"
-#~ msgstr "情報(_I)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Italic"
-#~ msgstr "斜体(_I)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Jump to"
-#~ msgstr "移動(_J)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Center"
-#~ msgstr "中央寄せ(_C)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Fill"
-#~ msgstr "埋める(_F)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Left"
-#~ msgstr "左寄せ(_L)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Right"
-#~ msgstr "右寄せ(_R)"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "_Forward"
-#~ msgstr "早送り(_F)"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "_Next"
-#~ msgstr "次(_N)"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "P_ause"
-#~ msgstr "一時停止(_A)"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "_Play"
-#~ msgstr "再生(_P)"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "Pre_vious"
-#~ msgstr "前(_V)"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "_Record"
-#~ msgstr "録音(_R)"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "R_ewind"
-#~ msgstr "巻き戻し(_E)"
-
-#~ msgctxt "Stock label, media"
-#~ msgid "_Stop"
-#~ msgstr "停止(_S)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Network"
-#~ msgstr "ネットワーク(_N)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_New"
-#~ msgstr "新規(_N)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_No"
-#~ msgstr "いいえ(_N)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_OK"
-#~ msgstr "OK(_O)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Open"
-#~ msgstr "開く(_O)"
-
-#~ msgctxt "Stock label"
-#~ msgid "Landscape"
-#~ msgstr "横置き"
-
-#~ msgctxt "Stock label"
-#~ msgid "Portrait"
-#~ msgstr "縦置き"
-
-#~ msgctxt "Stock label"
-#~ msgid "Reverse landscape"
-#~ msgstr "横置きの逆"
-
-#~ msgctxt "Stock label"
-#~ msgid "Reverse portrait"
-#~ msgstr "縦置きの逆"
-
-#~ msgctxt "Stock label"
-#~ msgid "Page Set_up"
-#~ msgstr "ページの設定(_U)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Paste"
-#~ msgstr "貼り付け(_P)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Preferences"
-#~ msgstr "設定(_P)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Print"
-#~ msgstr "印刷(_P)"
-
-#~ msgctxt "Stock label"
-#~ msgid "Print Pre_view"
-#~ msgstr "印刷プレビュー(_V)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Properties"
-#~ msgstr "プロパティ(_P)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Quit"
-#~ msgstr "終了(_Q)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Redo"
-#~ msgstr "やり直す(_R)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Refresh"
-#~ msgstr "更新(_R)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Remove"
-#~ msgstr "削除(_R)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Revert"
-#~ msgstr "元に戻す(_R)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Save"
-#~ msgstr "保存(_S)"
-
-#~ msgctxt "Stock label"
-#~ msgid "Save _As"
-#~ msgstr "別名で保存(_A)"
-
-#~ msgctxt "Stock label"
-#~ msgid "Select _All"
-#~ msgstr "すべて選択(_A)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Color"
-#~ msgstr "色(_C)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Font"
-#~ msgstr "フォント(_F)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Ascending"
-#~ msgstr "昇順(_A)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Descending"
-#~ msgstr "降順(_D)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Spell Check"
-#~ msgstr "スペル・チェック(_S)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Stop"
-#~ msgstr "停止(_S)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Strikethrough"
-#~ msgstr "打ち消し線(_S)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Undelete"
-#~ msgstr "削除の取り消し(_U)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Underline"
-#~ msgstr "下線(_U)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Undo"
-#~ msgstr "元に戻す(_U)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Yes"
-#~ msgstr "はい(_Y)"
-
-#~ msgctxt "Stock label"
-#~ msgid "_Normal Size"
-#~ msgstr "標準サイズ(_N)"
-
-#~ msgctxt "Stock label"
-#~ msgid "Best _Fit"
-#~ msgstr "フィットさせる(_F)"
-
-#~ msgctxt "Stock label"
-#~ msgid "Zoom _In"
-#~ msgstr "拡大(_I)"
-
-#~ msgctxt "Stock label"
-#~ msgid "Zoom _Out"
-#~ msgstr "縮小(_O)"
 
 #~ msgid "--- No Tip ---"
 #~ msgstr "--- Tip なし ---"

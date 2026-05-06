@@ -529,7 +529,6 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 
 		_zoom_trim_position = get_position (ev->x, ev->y);
 		_zoom_trim_dragging = true;
-		_editor._dragging_playhead = true;
 		_editor.set_follow_playhead (false);
 
 		if (suspending_editor_updates ()) {
@@ -553,7 +552,6 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 		/* start a move+zoom drag */
 		get_editor (&_pending_editor_x, &_pending_editor_y);
 		_pending_editor_changed = false;
-		_editor._dragging_playhead = true;
 		_editor.set_follow_playhead (false);
 
 		_move_dragging = true;
@@ -799,7 +797,6 @@ EditorSummary::on_button_release_event (GdkEventButton* ev)
 
 	_move_dragging = false;
 	_zoom_trim_dragging = false;
-	_editor._dragging_playhead = false;
 	_editor.set_follow_playhead (_old_follow_playhead, false);
 
 	if (was_suspended && _pending_editor_changed) {

@@ -150,7 +150,6 @@ private:
 	double _current_pointer_x; ///< canvas-coordinate space x of the current pointer
 	double _current_pointer_y; ///< canvas-coordinate space y of the current pointer
 	Temporal::timepos_t _current_pointer_time; ///< time that the pointer is now at
-	bool _old_follow_playhead; ///< state of Editor::follow_playhead() before the drags started
 };
 
 /** Abstract base class for dragging of things within the editor */

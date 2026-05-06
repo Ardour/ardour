@@ -387,6 +387,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 
 	void redisplay (bool view_only);
 	bool note_editable (NoteBase const *) const;
+	bool should_be_editable (NoteBase const *) const;
 
   protected:
 	friend class EditingContext;

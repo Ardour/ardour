@@ -1949,11 +1949,11 @@ Editor::edit_region (RegionView* rv)
 		if (att_bottom_visible()) {
 			maybe_edit_region_in_bottom_pane (*rv);
 		} else {
-			rv->show_region_editor ();
+			edit_region_in_dedicated_window ();
 		}
 		break;
 	case Editing::NeverBottomPane:
-		rv->show_region_editor ();
+		edit_region_in_dedicated_window ();
 		break;
 	}
 }

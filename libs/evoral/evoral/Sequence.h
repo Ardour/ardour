@@ -123,10 +123,19 @@ public:
 		return a->time() < b->time();
 	}
 
+	/* sorts lowest-to-highest */
 	struct NoteNumberComparator {
 		inline bool operator()(const std::shared_ptr< const Note<Time> > a,
 		                       const std::shared_ptr< const Note<Time> > b) const {
 			return a->note() < b->note();
+		}
+	};
+
+	/* sorts highest-to-lowest */
+	struct ReverseNoteNumberComparator {
+		inline bool operator()(const std::shared_ptr< const Note<Time> > a,
+		                       const std::shared_ptr< const Note<Time> > b) const {
+			return b->note() < a->note();
 		}
 	};
 

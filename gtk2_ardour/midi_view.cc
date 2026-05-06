@@ -240,6 +240,7 @@ MidiView::set_sensitive (bool yn)
 		gui->item().set_ignore_events (!yn);
 	}
 
+	color_handler ();
 	show_start (yn);
 	show_end (yn);
 
@@ -261,8 +262,6 @@ void
 MidiView::show_start (bool yn)
 {
 	if (!yn) {
-		delete _start_boundary_rect;
-		_start_boundary_rect = nullptr;
 		return;
 	}
 
@@ -482,8 +481,15 @@ MidiView::midi_canvas_group_event (GdkEvent* ev)
 
 	switch (ev->type) {
 	case GDK_ENTER_NOTIFY:
+		_last_event_x = ev->crossing.x;
+		_last_event_y = ev->crossing.y;
+		enter_notify (&ev->crossing);
+		break;
+
 	case GDK_LEAVE_NOTIFY:
-		/* we care only about note group enter/leave, which is handled by ::note_group_event () */
+		_last_event_x = ev->crossing.x;
+		_last_event_y = ev->crossing.y;
+		leave_notify (&ev->crossing);
 		break;
 
 	case GDK_SCROLL:
@@ -1114,7 +1120,7 @@ MidiView::drop_selected_chord (std::vector<int> const & which_notes)
 		return;
 	}
 
-	Evoral::Sequence<Temporal::Beats>::NoteNumberComparator sorter;
+	Evoral::Sequence<Temporal::Beats>::ReverseNoteNumberComparator sorter;
 	std::vector<std::shared_ptr<NoteType> > notes;
 
 	for (auto & s : _selection) {
@@ -1657,9 +1663,15 @@ MidiView::view_changed()
 }
 
 bool
+MidiView::should_be_editable (NoteBase const * ev) const
+{
+	return _sensitive && (ev != _ghost_note) && ((_visible_channel < 0) || (ev->note()->channel() == _visible_channel));
+}
+
+bool
 MidiView::note_editable (NoteBase const * ev) const
 {
-	return !ev->item()->ignore_events() && (ev != _ghost_note) && ((_visible_channel < 0) || (ev->note()->channel() == _visible_channel));
+	return _sensitive && should_be_editable (ev);
 }
 
 void
@@ -2147,7 +2159,7 @@ MidiView::update_sustained (Note* ev)
 	}
 
 	color_note (ev, note->channel());
-	ev->set_ignore_events (!note_editable (ev));
+	ev->set_ignore_events (!should_be_editable (ev));
 }
 
 void
@@ -2299,7 +2311,7 @@ MidiView::update_hit (Hit* ev)
 	ev->set_outline_color(ev->calculate_outline(base_col, ev->selected()));
 
 	color_note (ev, _visible_channel);
-	ev->set_ignore_events (!note_editable (ev));
+	ev->set_ignore_events (!should_be_editable (ev));
 }
 
 /** Add a MIDI note to the view (with length).
@@ -2679,13 +2691,6 @@ MidiView::delete_note (std::shared_ptr<NoteType> n)
 }
 
 void
-MidiView::clear_selection ()
-{
-	clear_note_selection ();
-	end_note_splitting ();
-}
-
-void
 MidiView::clear_selection_internal ()
 {
 	DEBUG_TRACE(DEBUG::Selection, "MRV::clear_selection_internal\n");
@@ -2697,6 +2702,14 @@ MidiView::clear_selection_internal ()
 		ghost_sync_selection (note);
 	}
 	_selection.clear();
+}
+
+void
+MidiView::clear_selection ()
+{
+	clear_note_selection ();
+	end_note_splitting ();
+	_editing_context.get_selection().clear ();
 }
 
 void
@@ -5886,7 +5899,9 @@ MidiView::set_visible_channel (int chn, bool clear_selection)
 
 		if (gui->item()->visible()) {
 			color_note (gui, note->channel());
-			gui->set_ignore_events (!note_editable (gui));
+			if (_sensitive) {
+				gui->set_ignore_events (!should_be_editable (gui));
+			}
 		}
 	}
 

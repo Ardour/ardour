@@ -5,9 +5,6 @@
 #define GETTEXT_PACKAGE "gtk20"
 #endif
 
-/* Define the location where the catalogs will be installed */
-#define GTK_LOCALEDIR "/ardour/share/locale"
-
 /* Define to 1 if you have the `bind_textdomain_codeset' function. */
 #ifndef __APPLE__
 #define HAVE_BIND_TEXTDOMAIN_CODESET 1

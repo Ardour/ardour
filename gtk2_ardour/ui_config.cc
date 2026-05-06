@@ -170,14 +170,13 @@ UIConfiguration::parameter_changed (string param)
 void
 UIConfiguration::reset_gtk_theme ()
 {
-	std::string color_scheme_string("gtk_color_scheme = \"");
+	std::string color_scheme_string;
 
-	for (ColorAliases::iterator g = color_aliases.begin(); g != color_aliases.end(); ++g) {
+	for (auto const & [alias,name] : color_aliases) {
 
-		if (g->first.find ("gtk_") == 0) {
-			const string gtk_name = g->first.substr (4);
-			Gtkmm2ext::Color a_color = color (g->second);
-
+		if (alias.find ("gtk_") == 0) {
+			const string gtk_name = alias.substr (4);
+			Gtkmm2ext::Color a_color = color (name);
 			color_scheme_string += gtk_name + ":#" + color_to_hex_string_no_alpha (a_color) + ';';
 		}
 	}

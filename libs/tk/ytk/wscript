@@ -282,11 +282,12 @@ def build(bld):
                             'GTK_PRINT_BACKENDS="file,lpr"', 'GTK_PRINT_BACKEND_ENABLE_UNSUPPORTED', 'GTK_PRINT_PREVIEW_COMMAND=""', '_POSIX_C_SOURCE=200809L',
                             'GTK_VERSION="2.24.23"', 'GTK_BINARY_VERSION="2.10.0"', 'GTK_HOST="ardour"',
                             'PACKAGE="' + I18N_PACKAGE + '"',
-                            'GETTEXT_PACKAGE="' + I18N_PACKAGE + '"',
+                            'GETTEXT_PACKAGE="' + I18N_PACKAGE + bld.env['MAJOR'] + '"',
                             'GTK_DATA_PREFIX="' + bld.env['PREFIX'] + '"',
                             'GTK_SYSCONFDIR="' + bld.env['SYSCONFDIR'] + '"',
                             'GTK_DATA_DIR="' + bld.env['DATADIR'] + '"',
                             'GTK_LIBDIR="' + bld.env['LIBDIR'] + '"',
+                            'GTK_LOCALEDIR="' + bld.env['LOCALEDIR'] + '"',
                           ]
     obj.vnum            = LIBYDK_VERSION
     obj.install_path    = bld.env['LIBDIR']

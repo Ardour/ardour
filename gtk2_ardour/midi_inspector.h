@@ -23,17 +23,29 @@
 
 class ChordBox;
 class EditingContext;
+class RegionEditor;
 class QuantizeWidget;
+
+namespace ARDOUR {
+	class Session;
+	class MidiRegion;
+}
 
 class MidiInspector : public Gtk::VBox
 {
   public:
 	MidiInspector (EditingContext&);
 
+	void set_region (ARDOUR::Session* s, std::shared_ptr<ARDOUR::MidiRegion> mr);
+
 	ChordBox* chord_box;
 	QuantizeWidget* quantize_widget;
+	RegionEditor* region_editor;
 
   private:
 	Gtk::Expander chord_expander;
 	Gtk::Expander quantize_expander;
+	Gtk::Expander region_expander;
+
+	void on_size_request (Gtk::Requisition*);
 };

@@ -108,7 +108,6 @@ DragManager::DragManager (EditingContext* ec)
 	, _current_pointer_x (0.0)
 	, _current_pointer_y (0.0)
 	, _current_pointer_time (timepos_t::from_superclock (0)) /* avoid early use of superclock_ticks_per_second */
-	, _old_follow_playhead (false)
 {
 }
 
@@ -126,10 +125,6 @@ DragManager::abort ()
 	for (auto const & drag: _drags) {
 		drag->abort ();
 		delete drag;
-	}
-
-	if (!_drags.empty ()) {
-		_editing_context->set_follow_playhead (_old_follow_playhead, false);
 	}
 
 	_drags.clear ();
@@ -193,10 +188,6 @@ DragManager::mid_drag_key_event (GdkEventKey* ev)
 void
 DragManager::start_grab (GdkEvent* e, Gdk::Cursor* c)
 {
-	/* Prevent follow playhead during the drag to be nice to the user */
-	_old_follow_playhead = _editing_context->follow_playhead ();
-	_editing_context->set_follow_playhead (false);
-
 	_current_pointer_time = timepos_t (_editing_context->canvas_event_sample (e, &_current_pointer_x, &_current_pointer_y));
 
 	for (auto const & drag : _drags) {
@@ -234,10 +225,6 @@ DragManager::end_grab (GdkEvent* e)
 	}
 
 	_ending = false;
-
-	if (_drags.empty ()) {
-		_editing_context->set_follow_playhead (_old_follow_playhead, false);
-	}
 
 	return r;
 }

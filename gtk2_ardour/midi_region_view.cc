@@ -313,7 +313,9 @@ MidiRegionView::canvas_group_event(GdkEvent* ev)
 
 		switch (ev->type) {
 		case GDK_ENTER_NOTIFY:
+			break;
 		case GDK_LEAVE_NOTIFY:
+			leave_notify (&ev->crossing);
 			break;
 		default:
 			return true;

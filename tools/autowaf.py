@@ -486,6 +486,7 @@ def build_i18n_pot(bld, srcdir, dir, name, sources, copyright_holder=None):
             '--keyword=N_',
             '--keyword=S_',
             '--keyword=P_:1,2',
+            '--keyword=NC_:1c,2',
             '--from-code=UTF-8',
             '-o', pot_file]
 
