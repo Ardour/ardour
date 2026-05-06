@@ -3916,8 +3916,10 @@ LV2PluginInfo::discover (std::function <void (std::string const&, PluginScanLogE
 		int err = 0;
 		LilvNodes* required_features = lilv_plugin_get_required_features (p);
 		LILV_FOREACH(nodes, i, required_features) {
-				const char* rf = lilv_node_as_uri (lilv_nodes_get (required_features, i));
-				bool ok = false;
+			const LilvNode* feature = lilv_nodes_get (required_features, i);
+			bool ok = false;
+			if (lilv_node_is_uri (feature)) {
+				const char* rf = lilv_node_as_uri (feature);
 				if (!strcmp (rf, "http://lv2plug.in/ns/lv2core#isLive")) { ok = true; }
 				if (!strcmp (rf, "http://lv2plug.in/ns/ext/instance-access")) { ok = true; }
 				if (!strcmp (rf, "http://lv2plug.in/ns/ext/data-access")) { ok = true; }
@@ -3941,6 +3943,15 @@ LV2PluginInfo::discover (std::function <void (std::string const&, PluginScanLogE
 					cb (uri, PluginScanLogEntry::Error, string_compose (_("Unsupported required LV2 feature: '%1'."), rf), false);
 					err = 1;
 				}
+			} else {
+				err = 1;
+				if (lilv_node_is_string (feature)) {
+					cb (uri, PluginScanLogEntry::Error, string_compose (_("Invalid required LV2 feature: '%1'."),
+					                                                    lilv_node_as_string (feature)), false);
+				} else {
+					cb (uri, PluginScanLogEntry::Error, _("Invalid required LV2 feature."), false);
+				}
+			}
 		}
 
 		lilv_nodes_free (required_features);
