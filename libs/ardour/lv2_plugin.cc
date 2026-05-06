@@ -3916,8 +3916,28 @@ LV2PluginInfo::discover (std::function <void (std::string const&, PluginScanLogE
 		int err = 0;
 		LilvNodes* required_features = lilv_plugin_get_required_features (p);
 		LILV_FOREACH(nodes, i, required_features) {
-				const char* rf = lilv_node_as_uri (lilv_nodes_get (required_features, i));
+std::cerr << "### seb: RF ith: " << i << std::endl;
+    const LilvNode* feature = lilv_nodes_get(required_features, i);
+std::cerr << "seb: is url: " << lilv_node_is_uri(feature) << std::endl;
+//std::cerr << "seb: is blank " << lilv_node_is_blank(feature) << std::endl;
+//std::cerr << "seb: is float " << lilv_node_is_float(feature) << std::endl;
+//std::cerr << "seb: is literal " << lilv_node_is_literal(feature) << std::endl;
+std::cerr << "seb: is string " << lilv_node_is_string(feature) << std::endl;
+
 				bool ok = false;
+
+if (lilv_node_is_string(feature)) {
+std::cerr << "================ SEB: AS STRING: =========== " << lilv_node_as_string(feature) << std::endl;
+
+}
+if (lilv_node_is_uri(feature)) {
+				const char* rf = lilv_node_as_uri (feature);
+                if (rf == NULL)  {
+//std::cerr << "seb: as uri: NULL" << std::endl;
+                }
+//std::cerr << "seb: as uri: " << rf << std::endl;
+//std::cerr << "  pointer: " << static_cast<const void*>(rf) << std::endl;
+
 				if (!strcmp (rf, "http://lv2plug.in/ns/lv2core#isLive")) { ok = true; }
 				if (!strcmp (rf, "http://lv2plug.in/ns/ext/instance-access")) { ok = true; }
 				if (!strcmp (rf, "http://lv2plug.in/ns/ext/data-access")) { ok = true; }
@@ -3941,6 +3961,7 @@ LV2PluginInfo::discover (std::function <void (std::string const&, PluginScanLogE
 					cb (uri, PluginScanLogEntry::Error, string_compose (_("Unsupported required LV2 feature: '%1'."), rf), false);
 					err = 1;
 				}
+}
 		}
 
 		lilv_nodes_free (required_features);
