@@ -3948,7 +3948,7 @@ LV2PluginInfo::discover (std::function <void (std::string const&, PluginScanLogE
 					cb (uri, PluginScanLogEntry::Error, string_compose (_("Unsupported required LV2 feature: '%1'."), rf), false);
 					err = 1;
 				}
-}
+			}
 		}
 
 		lilv_nodes_free (required_features);
