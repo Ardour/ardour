@@ -9525,8 +9525,21 @@ Editor::temporal_zoom_extents ()
 void
 Editor::edit_region_in_dedicated_window ()
 {
-	/* MIDI only right now */
-	pianoroll_edit ();
+	AudioRegionView* arv = nullptr;
+
+	for (auto & r : selection->regions) {
+		if (!arv && (arv = dynamic_cast<AudioRegionView*> (r))) {
+			break;
+		}
+		if (dynamic_cast<MidiRegionView*> (r)) {
+			pianoroll_edit ();
+			return;
+		}
+	}
+
+	if (arv) {
+		arv->show_region_editor ();
+	}
 }
 
 void
