@@ -78,7 +78,7 @@ using namespace PBD;
 using namespace Glib;
 using namespace std;
 
-GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
+GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s, std::string* config)
 	: ControlProtocol (s, _("Generic MIDI"))
 	, AbstractUI<GenericMIDIRequest> (name())
 	, connection_state (ConnectionState (0))
@@ -148,6 +148,10 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 	                                                                      this);
 
 	reload_maps ();
+
+	if (config) {
+		_config = *config;
+	}
 }
 
 GenericMidiControlProtocol::~GenericMidiControlProtocol ()
@@ -328,12 +332,20 @@ GenericMidiControlProtocol::set_active (bool yn)
 
 	if (yn) {
 		BaseUI::run ();
+
+		for (list<GenericMidiControlProtocol::MapInfo>::iterator x = map_info.begin(); x != map_info.end(); ++x) {
+			if (_config == x->name) {
+				load_bindings (x->path);
+				break;
+			}
+		}
 	} else {
 		tear_down_gui ();
 		BaseUI::quit ();
 	}
 
 	ControlProtocol::set_active (yn);
+
 
 	DEBUG_TRACE (DEBUG::GenericMidi, string_compose("GenericMIDI::set_active done with yn: '%1'\n", yn));
 
@@ -677,7 +689,7 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 
 	std::string str;
 	// midi map has to be loaded first so learned binding can go on top
-	if (node.get_property ("binding", str)) {
+	if (_config.empty() && node.get_property ("binding", str)) {
 		for (list<MapInfo>::iterator x = map_info.begin(); x != map_info.end(); ++x) {
 			if (str == (*x).name) {
 				load_bindings ((*x).path);

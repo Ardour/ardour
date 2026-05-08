@@ -30,7 +30,7 @@ new_generic_midi_protocol (Session* s, void* config)
 	GenericMidiControlProtocol* gmcp;
 
 	try {
-		gmcp =  new GenericMidiControlProtocol (*s);
+		gmcp =  new GenericMidiControlProtocol (*s, static_cast<std::string*>(config));
 	} catch (failed_constructor& err) {
 		return 0;
 	}
