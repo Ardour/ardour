@@ -34,8 +34,6 @@ using namespace std;
 using namespace ArdourSurface;
 using namespace ArdourSurface::MACKIE_NAMESPACE;
 
-#define PROTOCOL_NAME ("Mackie")
-
 static ControlProtocol*
 new_mackie_protocol (Session* s, void* config)
 {
@@ -74,7 +72,7 @@ enumerate_mackie_protocol ()
 }
 
 static ControlProtocolDescriptor mackie_descriptor = {
-	/* name       */ PROTOCOL_NAME,
+	/* name       */ "Mackie",
 	/* id         */ "uri://ardour.org/surfaces/mackie:0",
 	/* module     */ 0,
 	/* available  */ 0,

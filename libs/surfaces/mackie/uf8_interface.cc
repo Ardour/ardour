@@ -36,8 +36,6 @@ using namespace std;
 using namespace ArdourSurface;
 using namespace ArdourSurface::MACKIE_NAMESPACE;
 
-#define PROTOCOL_NAME ("SSL 360: UF8 UF1")
-
 static ControlProtocol*
 new_uf8_protocol (Session* s, void* config)
 {
@@ -79,7 +77,7 @@ enumerate_uf8_protocol ()
 
 // Field names commented out by JE - 06-01-2010
 static ControlProtocolDescriptor uf8_descriptor = {
-	/* name       */ PROTOCOL_NAME,
+	/* name       */ "SSL 360: UF8 UF1",
 	/* id         */ "uri://ardour.org/surfaces/ssl_uf8:0",
 	/* module     */ 0,
 	/* available  */ 0,
