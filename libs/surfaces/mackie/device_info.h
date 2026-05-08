@@ -93,6 +93,7 @@ class DeviceInfo
 	bool single_fader_follows_selection() const;
 	bool follows_selection() const;
 	const std::string& name() const;
+	const std::string& manufacturer() const;
 
 	void set_follows_selection (bool);
 
@@ -136,6 +137,7 @@ class DeviceInfo
 	bool     _follows_selection;
 	DeviceType _device_type;
 	std::string _name;
+	std::string _manufacturer;
 	std::string _global_button_name;
 
 	GlobalButtonsInfo _global_buttons;

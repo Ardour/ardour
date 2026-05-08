@@ -74,8 +74,10 @@ DeviceInfo::DeviceInfo()
 	, _device_type (MCU)
 #ifdef UF8
 	, _name (X_("UF8"))
+	, _manufacturer (X_("SSL"))
 #else
 	, _name (X_("Mackie Control Universal Pro"))
+	, _manufacturer (X_("Mackie"))
 #endif
 {
 	mackie_control_buttons ();
@@ -258,6 +260,13 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 	/* name is mandatory */
 	if ((child = node.child ("Name")) != 0) {
 		if (!child->get_property ("value", _name)) {
+			return -1;
+		}
+	}
+
+	/* manufacturer is mandatory */
+	if ((child = node.child ("Manufacturer")) != 0) {
+		if (!child->get_property ("value", _manufacturer)) {
 			return -1;
 		}
 	}
@@ -465,6 +474,12 @@ const string&
 DeviceInfo::name() const
 {
 	return _name;
+}
+
+const string&
+DeviceInfo::manufacturer() const
+{
+	return _manufacturer;
 }
 
 uint32_t
