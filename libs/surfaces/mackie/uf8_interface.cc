@@ -46,7 +46,7 @@ new_uf8_protocol (Session* s, void* config)
 	DEBUG_TRACE (DEBUG::MackieControl, "making uf8-protocol");
 
 	try {
-		mcp = new MackieControlProtocol (*s, PROTOCOL_NAME);
+		mcp = new MackieControlProtocol (*s, static_cast<std::string*>(config));
 		/* do not set active here - wait for set_state() */
 	}
 	catch (exception & e) {

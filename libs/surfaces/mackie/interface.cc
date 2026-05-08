@@ -42,7 +42,7 @@ new_mackie_protocol (Session* s, void* config)
 	MackieControlProtocol* mcp = 0;
 
 	try {
-		mcp = new MackieControlProtocol (*s, PROTOCOL_NAME);
+		mcp = new MackieControlProtocol (*s, static_cast<std::string*>(config));
 		/* do not set active here - wait for set_state() */
 	}
 	catch (exception & e) {

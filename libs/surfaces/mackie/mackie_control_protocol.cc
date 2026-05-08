@@ -118,8 +118,12 @@ const int MACKIE_NAMESPACE::MackieControlProtocol::MAIN_MODIFIER_MASK = (MackieC
 
 MACKIE_NAMESPACE::MackieControlProtocol* MACKIE_NAMESPACE::MackieControlProtocol::_instance = 0;
 
-MackieControlProtocol::MackieControlProtocol (Session& session, const char* pname)
-	: ControlProtocol (session, pname)
+MackieControlProtocol::MackieControlProtocol (Session& session, std::string* config)
+#ifdef UF8
+	: ControlProtocol (session, _("SSL 360: UF8 UF1"))
+#else
+	: ControlProtocol (session, _("Mackie"))
+#endif
 	, AbstractUI<MackieControlUIRequest> (name())
 	, _current_initial_bank (0)
 	, _timecode_last (10, '\0')
@@ -146,6 +150,10 @@ MackieControlProtocol::MackieControlProtocol (Session& session, const char* pnam
 
 	DeviceInfo::reload_device_info ();
 	DeviceProfile::reload_device_profiles ();
+
+	if (config) {
+		set_device(*config, true);
+	}
 
 	for (int i = 0; i < 9; i++) {
 		_last_bank[i] = 0;
@@ -1135,11 +1143,6 @@ MackieControlProtocol::set_state (const XMLNode & node, int version)
 	uint32_t bank = 0;
 	// fetch current bank
 	node.get_property (X_("bank"), bank);
-
-	std::string device_name;
-	if (node.get_property (X_("device-name"), device_name)) {
-		set_device_info (device_name);
-	}
 
 	std::string device_profile_name;
 	if (node.get_property (X_("device-profile"), device_profile_name)) {
