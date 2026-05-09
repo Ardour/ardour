@@ -3918,11 +3918,6 @@ LV2PluginInfo::discover (std::function <void (std::string const&, PluginScanLogE
 		LILV_FOREACH(nodes, i, required_features) {
 			const LilvNode* feature = lilv_nodes_get(required_features, i);
 			bool ok = false;
-			if (lilv_node_is_string(feature)) {
-				warning << string_compose(
-					_("Unknown LV2 'string' feature: <%1>"),
-					lilv_node_as_string(feature)) << endmsg;
-			}
 			if (lilv_node_is_uri(feature)) {
 				const char* rf = lilv_node_as_uri (feature);
 				if (!strcmp (rf, "http://lv2plug.in/ns/lv2core#isLive")) { ok = true; }
@@ -3948,7 +3943,16 @@ LV2PluginInfo::discover (std::function <void (std::string const&, PluginScanLogE
 					cb (uri, PluginScanLogEntry::Error, string_compose (_("Unsupported required LV2 feature: '%1'."), rf), false);
 					err = 1;
 				}
-			}
+			} else {
+				if (lilv_node_is_string(feature)) {
+					cb (uri, PluginScanLogEntry::Error, string_compose (_("Invalid required LV2 feature: '%1'."),
+						lilv_node_as_string(feature)), false);
+					err = 1;
+				} else {
+					cb (uri, PluginScanLogEntry::Error, _("Invalid required LV2 feature."), false);
+					err = 1;
+                }
+            }
 		}
 
 		lilv_nodes_free (required_features);
