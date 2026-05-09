@@ -96,6 +96,9 @@ Pianoroll::Pianoroll (std::string const & name, bool with_transport, bool expand
 	, bbt_metric (*this)
 	, ignore_channel_changes (false)
 	, xcursor (nullptr)
+	, midi_inspector (nullptr)
+	, inspector_scroller (nullptr)
+	, inspector_button (_("<"))
 {
 	if (controller_name_map.empty()) {
 		build_midi_controller_name_map ();
@@ -125,6 +128,16 @@ Pianoroll::Pianoroll (std::string const & name, bool with_transport, bool expand
 	colors_dropdown.add_menu_elem (MenuElem (_("Setup"), sigc::mem_fun (*this, &Pianoroll::setup_colors)));
 	colors_dropdown.set_active ((int) _color_mode);
 	ArdourWidgets::set_tooltip (colors_dropdown, _("Color Scheme for MIDI events"));
+
+	/* We always need the MIDI inspector to exist, but we don't pack it by default */
+
+	midi_inspector = manage (new MidiInspector (*this));
+	midi_inspector->chord_box->ReplaceChord.connect ([this](std::vector<int> intervals) { replace_chord (intervals); });
+	midi_inspector->chord_box->InvertChord.connect ([this](bool up) { invert_selected_chord (up); });
+	midi_inspector->chord_box->DropChord.connect ([this](std::vector<int> which_notes) { drop_selected_chord (which_notes); });
+
+	inspector_button.signal_clicked.connect (sigc::mem_fun (*this, &Pianoroll::inspector_button_clicked));
+	ArdourWidgets::set_tooltip (inspector_button, _("Expand/Collapse MIDI inspector"));
 
 	build_upper_toolbar ();
 	build_grid_type_menu ();
@@ -156,6 +169,31 @@ Pianoroll::~Pianoroll ()
 
 	delete bg;
 	delete xcursor;
+}
+
+void
+Pianoroll::inspector_button_clicked ()
+{
+	if (!inspector_scroller) {
+
+		inspector_scroller = manage (new Gtk::ScrolledWindow);
+		inspector_scroller->add (*midi_inspector);
+		inspector_scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+
+		UIConfiguration::instance().DPIReset.connect ([this]() { inspector_scroller->queue_resize(); });
+
+		_hpacker.pack_start (*inspector_scroller, false, false);
+		_hpacker.reorder_child (*inspector_scroller, 0);
+
+		midi_inspector->show_all ();
+	}
+
+	if (inspector_scroller->is_visible()) {
+		inspector_scroller->hide();
+	} else {
+		inspector_scroller->show();
+	}
+
 }
 
 void
@@ -340,6 +378,8 @@ void
 Pianoroll::pack_outer (Gtk::Box& box)
 {
 	EC_LOCAL_TEMPO_SCOPE;
+
+	box.pack_start (inspector_button, false, false);
 
 	if (with_transport_controls) {
 		box.pack_start (play_box, false, false, 12);
@@ -550,24 +590,6 @@ Pianoroll::build_canvas ()
 	_canvas.add_events (Gdk::POINTER_MOTION_HINT_MASK | Gdk::SCROLL_MASK | Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
 	_canvas.set_can_focus ();
 	_canvas.signal_show().connect (sigc::mem_fun (*this, &CueEditor::catch_pending_show_region));
-
-	midi_inspector = manage (new MidiInspector (*this));
-	midi_inspector->chord_box->ReplaceChord.connect ([this](std::vector<int> intervals) { replace_chord (intervals); });
-	midi_inspector->chord_box->InvertChord.connect ([this](bool up) { invert_selected_chord (up); });
-	midi_inspector->chord_box->DropChord.connect ([this](std::vector<int> which_notes) { drop_selected_chord (which_notes); });
-
-	Gtk::ScrolledWindow* sw (manage (new Gtk::ScrolledWindow));
-	sw->add (*midi_inspector);
-	sw->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-
-	UIConfiguration::instance().DPIReset.connect ([sw]() { sw->queue_resize(); });
-
-//	Gtk::Requisition req;
-//	midi_inspector->size_request (req);
-//	sw->set_size_request (req.width, -1);
-
-	_hpacker.pack_start (*sw, false, false);
-	_hpacker.reorder_child (*sw, 0);
 
 	_toolbox.pack_start (_canvas_viewport, true, true);
 	_toolbox.reorder_child (_canvas_viewport, 1);

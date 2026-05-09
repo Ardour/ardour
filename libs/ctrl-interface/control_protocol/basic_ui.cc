@@ -519,11 +519,7 @@ BasicUI::redo ()
 void
 BasicUI::toggle_all_rec_enables ()
 {
-	if (session->get_record_enabled()) {
-		// session->record_disenable_all ();
-	} else {
-		// session->record_enable_all ();
-	}
+	session->toggle_all_tracks_record_enabled ();
 }
 
 void

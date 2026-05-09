@@ -453,6 +453,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, X_("/transport_frame"), "", transport_sample);
 		REGISTER_CALLBACK (serv, X_("/transport_speed"), "", transport_speed);
 		REGISTER_CALLBACK (serv, X_("/record_enabled"), "", record_enabled);
+		REGISTER_CALLBACK (serv, X_("/is_recording"), "", is_recording);
 		REGISTER_CALLBACK (serv, X_("/set_transport_speed"), "f", set_transport_speed);
 		// locate ii is position and bool roll
 		REGISTER_CALLBACK (serv, X_("/locate"), "ii", locate);
@@ -488,7 +489,9 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, X_("/rec_enable_toggle"), "f", rec_enable_toggle);
 		REGISTER_CALLBACK (serv, X_("/toggle_all_rec_enables"), "", toggle_all_rec_enables);
 		REGISTER_CALLBACK (serv, X_("/toggle_all_rec_enables"), "f", toggle_all_rec_enables);
+		REGISTER_CALLBACK (serv, X_("/all_tracks_rec_in"), "", all_tracks_rec_in);
 		REGISTER_CALLBACK (serv, X_("/all_tracks_rec_in"), "f", all_tracks_rec_in);
+		REGISTER_CALLBACK (serv, X_("/all_tracks_rec_out"), "", all_tracks_rec_out);
 		REGISTER_CALLBACK (serv, X_("/all_tracks_rec_out"), "f", all_tracks_rec_out);
 		REGISTER_CALLBACK (serv, X_("/cancel_all_solos"), "f", cancel_all_solos);
 		REGISTER_CALLBACK (serv, X_("/remove_marker"), "", remove_marker_at_playhead);
@@ -2999,6 +3002,27 @@ OSC::record_enabled (lo_message msg)
 	lo_message_add_int32 (reply, re);
 
 	lo_send_message (get_address (msg), X_("/record_enabled"), reply);
+
+	lo_message_free (reply);
+}
+
+void
+OSC::is_recording (lo_message msg)
+{
+	if (!session) {
+		return;
+	}
+
+	check_surface (msg);
+
+	RecordState const r = session->record_status ();
+	bool const h = session->have_rec_enabled_track ();
+	int re = (int)(r == Recording && h);
+
+	lo_message reply = lo_message_new ();
+	lo_message_add_int32 (reply, re);
+
+	lo_send_message (get_address (msg), X_("/is_recording"), reply);
 
 	lo_message_free (reply);
 }

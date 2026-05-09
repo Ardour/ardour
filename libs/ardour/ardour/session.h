@@ -420,6 +420,7 @@ public:
 	void step_back_from_record ();
 
 	void set_all_tracks_record_enabled(bool);
+	void toggle_all_tracks_record_enabled();
 
 	void maybe_write_autosave ();
 

@@ -1457,17 +1457,28 @@ template<typename Time>
 void
 Sequence<Time>::shift (Time const & d)
 {
-	WriteLock rl (write_lock());
+	{
+		WriteLock rl (write_lock());
 
-	for (auto & n : _notes) {
-		n->set_time (n->time() + d);
+		for (auto & n : _notes) {
+			n->set_time (n->time() + d);
+		}
+		for (auto & s : _sysexes) {
+			s->set_time (s->time() + d);
+		}
+		for (auto & p : _patch_changes) {
+			p->set_time (p->time() + d);
+		}
 	}
-	for (auto & s : _sysexes) {
-		s->set_time (s->time() + d);
-	}
-	for (auto & p : _patch_changes) {
-		p->set_time (p->time() + d);
-	}
+
+	/* We cannot hold the write lock for this; MidiModel will catch the
+	 * list changing, and emit a ContentsChanged signal that will require
+	 * handlers to take the read lock.
+	 *
+	 * This is OK - each list has its own lock that is held during the
+	 * shift
+	 */
+
 	for (auto & [param,ctl] : _controls) {
 		ctl->list()->simple_shift (Temporal::timepos_t (d));
 	}

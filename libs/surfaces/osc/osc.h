@@ -350,6 +350,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	void transport_sample (lo_message msg);
 	void transport_speed (lo_message msg);
 	void record_enabled (lo_message msg);
+	void is_recording (lo_message msg);
 
 	void add_marker_name(const std::string &markername) {
 		add_marker(markername);
@@ -411,6 +412,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK_MSG(transport_sample);
 	PATH_CALLBACK_MSG(transport_speed);
 	PATH_CALLBACK_MSG(record_enabled);
+	PATH_CALLBACK_MSG(is_recording);
 	PATH_CALLBACK_MSG(refresh_surface);
 	PATH_CALLBACK_MSG(bank_up);
 	PATH_CALLBACK_MSG(bank_down);

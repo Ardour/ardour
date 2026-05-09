@@ -96,6 +96,5 @@ PianorollWindow::on_key_press_event (GdkEventKey* ev)
 bool
 PianorollWindow::on_delete_event (GdkEventAny*)
 {
-	delete_when_idle (this);
 	return true;
 }

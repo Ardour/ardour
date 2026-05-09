@@ -33,6 +33,7 @@
 namespace Gtk {
 	class Widget;
 	class HScrollbar;
+	class ScrolledWindow;
 }
 
 namespace ArdourCanvas {
@@ -349,6 +350,7 @@ class Pianoroll : public CueEditor
 	Evoral::Parameter automation_by_y (double y);
 
 	MidiInspector* midi_inspector;
+	Gtk::ScrolledWindow* inspector_scroller;
 	void replace_chord (std::vector<int> intervals);
 	void invert_selected_chord (bool up);
 	void drop_selected_chord (std::vector<int> which_notes);
@@ -361,4 +363,7 @@ class Pianoroll : public CueEditor
 	void show_automation_for_all ();
 	static void build_midi_controller_name_map ();
 	static std::map<std::string,std::string> controller_name_map;
+
+	ArdourWidgets::ArdourButton inspector_button;
+	void inspector_button_clicked ();
 };

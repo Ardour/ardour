@@ -750,23 +750,23 @@ Session::process_without_events (pframes_t nframes)
 void
 Session::process_audition (pframes_t nframes)
 {
-	SessionEvent* ev;
-	std::shared_ptr<RouteList const> r = routes.reader ();
 
-	std::shared_ptr<GraphChain> graph_chain = _graph_chain;
-	if (graph_chain) {
-		/* Ideally we'd use Session::rt_tasklist, since dependency is irrelevant. */
-		_process_graph->silence_routes (graph_chain, nframes);
-	} else {
-		for (auto const& i : *r) {
-			if (!i->is_auditioner()) {
-				i->silence (nframes);
-			}
+	/* NOTE: monitor bus must be excluded from Route::silence, because that
+	 * calls Processor::silence() and Plugins are fed with a cycle of
+	 * silence. This is very obvious with latent plugins, that then
+	 * later get fed by the auditioner.
+	 */
+	std::shared_ptr<RTTaskList> tl = rt_tasklist ();
+	for (auto const& r : *routes.reader ()) {
+		if (!r->is_auditioner() && !r->is_monitor ()) {
+			tl->push_back ([r, nframes]() { r->silence (nframes); });
 		}
 	}
+	tl->process ();
 
 	/* handle pending events */
 
+	SessionEvent* ev;
 	while (pending_events.read (&ev, 1) == 1) {
 		merge_event (ev);
 	}

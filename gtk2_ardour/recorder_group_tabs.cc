@@ -58,7 +58,6 @@ RecorderGroupTabs::compute_tabs () const
 	int32_t y = 0;
 
 	std::list<TrackRecordAxis*> recorders = _recorder->visible_recorders ();
-	std::shared_ptr<RouteGroup> tab_group (tab.group.lock());
 
 	for (std::list<TrackRecordAxis*>::const_iterator i = recorders.begin (); i != recorders.end (); ++i) {
 		if ((*i)->route ()->presentation_info ().hidden ()) { // marked_for_display ()
@@ -66,6 +65,7 @@ RecorderGroupTabs::compute_tabs () const
 		}
 
 		std::shared_ptr<RouteGroup> g = (*i)->route_group ();
+		std::shared_ptr<RouteGroup> tab_group (tab.group.lock());
 
 		if (g != tab_group) {
 			if (tab_group) {
@@ -83,7 +83,7 @@ RecorderGroupTabs::compute_tabs () const
 		y += (*i)->get_height ();
 	}
 
-	if (tab_group) {
+	if (tab.group.lock()) {
 		tab.to = y;
 		tabs.push_back (tab);
 	}

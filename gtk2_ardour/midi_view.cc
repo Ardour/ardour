@@ -262,6 +262,8 @@ void
 MidiView::show_start (bool yn)
 {
 	if (!yn) {
+		delete _start_boundary_rect;
+		_start_boundary_rect = nullptr;
 		return;
 	}
 
@@ -370,6 +372,10 @@ MidiView::track_going_away ()
 void
 MidiView::region_going_away ()
 {
+	if (_editing_context.session()->deletion_in_progress()) {
+		return;
+	}
+
 	_midi_region.reset ();
 	_model.reset ();
 
