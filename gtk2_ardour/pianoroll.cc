@@ -1176,7 +1176,13 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 	case ClipStartItem: {
 		ArdourCanvas::Rectangle* r = dynamic_cast<ArdourCanvas::Rectangle*> (item);
 		if (r) {
-			_drags->set (new ClipStartDrag (*this, *r), event);
+			switch (current_mouse_mode()) {
+			case Editing::MouseContent:
+				_drags->set (new ClipStartDrag (*this, *r), event);
+				break;
+			default:
+				return false;
+			}
 		}
 		return true;
 		break;
@@ -1185,7 +1191,13 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 	case ClipEndItem: {
 		ArdourCanvas::Rectangle* r = dynamic_cast<ArdourCanvas::Rectangle*> (item);
 		if (r) {
-			_drags->set (new ClipEndDrag (*this, *r), event);
+			switch (current_mouse_mode()) {
+			case Editing::MouseContent:
+				_drags->set (new ClipEndDrag (*this, *r), event);
+				break;
+			default:
+				return false;
+			}
 		}
 		return true;
 		break;
@@ -1595,7 +1607,7 @@ Pianoroll::which_canvas_cursor (ItemType type) const
 			break;
 		case ClipEndItem:
 		case ClipStartItem:
-			cursor = _cursors->expand_left_right;
+			cursor = _cursors->midi_pencil;
 			break;
 		case RegionItem:
 			cursor = _cursors->midi_pencil;
