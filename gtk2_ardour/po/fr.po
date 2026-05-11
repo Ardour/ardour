@@ -18,7 +18,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 8\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-02 18:48+0200\n"
+"POT-Creation-Date: 2026-05-11 09:16+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Jean-Emmanuel <jean-emmanuel@ammd.net>\n"
 "Language-Team: \n"
@@ -690,7 +690,7 @@ msgstr "Configuration :"
 msgid "Add:"
 msgstr "Ajouter :"
 
-#: add_route_dialog.cc:77 bundle_manager.cc:205 editor_ops.cc:9538
+#: add_route_dialog.cc:77 bundle_manager.cc:205 editor_ops.cc:9551
 #: loudness_dialog.cc:525 region_editor.cc:76 route_group_dialog.cc:75
 #: strip_export_dialog.cc:65
 msgid "Name:"
@@ -1061,7 +1061,7 @@ msgstr "Fenêtre d'analyse FFT"
 msgid "Spectral Analysis"
 msgstr "Analyse Spectrale"
 
-#: analysis_window.cc:64 editor_actions.cc:171 pianoroll.cc:123
+#: analysis_window.cc:64 editor_actions.cc:171 pianoroll.cc:126
 #: rc_option_editor.cc:3598 session_metadata_dialog.cc:729
 msgid "Track"
 msgstr "Piste"
@@ -1488,13 +1488,13 @@ msgstr ""
 "Le scan automatique des AU a été désactivé\n"
 "(vérifiez avec 'auval', puis réactivez le scan dans les préférences)."
 
-#: ardour_ui.cc:698 ardour_ui.cc:775 keyeditor.cc:611
+#: ardour_ui.cc:698 ardour_ui.cc:775 keyeditor.cc:622
 msgid "Could not open temporary file to print bindings (%1)"
 msgstr ""
 "Impossible d'ouvrir le fichier temporaire pour imprimer les raccourcis "
 "clavier (%1)"
 
-#: ardour_ui.cc:716 ardour_ui.cc:793 keyeditor.cc:629
+#: ardour_ui.cc:716 ardour_ui.cc:793 keyeditor.cc:640
 msgid "Could not save bindings to file (%1)"
 msgstr "Impossible de sauvegarder le fichier de raccourcis clavier (%1)"
 
@@ -1634,7 +1634,7 @@ msgid "16-int"
 msgstr "16-entier"
 
 # space before colon
-#: ardour_ui.cc:1294 editor_sources.cc:97 keyeditor.cc:253
+#: ardour_ui.cc:1294 editor_sources.cc:97 keyeditor.cc:254
 #: plugin_manager_ui.cc:64
 msgid "Path"
 msgstr "Chemin"
@@ -1978,26 +1978,24 @@ msgstr "Récupération après un crash"
 #: ardour_ui.cc:3020
 msgid ""
 "This session appears to have been modified\n"
-"without save, or in middle of recording when\n"
-"%1 or the computer was shutdown.\n"
+"without being saved or in the middle of recording\n"
+"when %1 or the computer was shutdown.\n"
 "\n"
 "%1 can recover any changes for\n"
-"you, or it can ignore it. Please decide\n"
-"what you would like to do.\n"
+"you or it can ignore them.\n"
 msgstr ""
-"Cette session semble avoir gardé des modifications\n"
-"non sauvegardées, ou un enregistrement en cours,\n"
-"alors que l'ordinateur ou %1 ont été éteints.\n"
+"L'ordinateur ou %1 a été éteint alors que cette session\n"
+"comportait des modifications non sauvegardées ou qu'un\n"
+"enregistrement était  en cours.\n"
 "\n"
-"%1 peut récupérer ces modifications pour vous,\n"
-"ou vous laisser les ignorer. Veuillez décider\n"
-"ce que vous voulez faire.\n"
+"%1 peut récupérer ces modifications pour vous\n"
+"ou  les ignorer.\n"
 
-#: ardour_ui.cc:3032
+#: ardour_ui.cc:3031
 msgid "Ignore crash data"
 msgstr "Ignorer les données"
 
-#: ardour_ui.cc:3033
+#: ardour_ui.cc:3032
 msgid "Recover from crash"
 msgstr "Récupérer les données"
 
@@ -3965,7 +3963,7 @@ msgid_plural "Set to %1 beats"
 msgstr[0] "Fixer sur %1 temps"
 msgstr[1] "Fixer sur %1 temps"
 
-#: automation_line.cc:410 editor_drag.cc:4925
+#: automation_line.cc:410 editor_drag.cc:4912
 msgid "automation event move"
 msgstr "déplacer un point automation"
 
@@ -4044,7 +4042,7 @@ msgid "Line"
 msgstr "Ligne"
 
 #: automation_time_axis.cc:674 midi_tracer.cc:64 mixer_ui.cc:4427
-#: pianoroll.cc:1907 rc_option_editor.cc:4292 rc_option_editor.cc:4297
+#: pianoroll.cc:1950 rc_option_editor.cc:4292 rc_option_editor.cc:4297
 #: rc_option_editor.cc:4343 rc_option_editor.cc:4348 rc_option_editor.cc:4398
 #: rc_option_editor.cc:4403 rta_window.cc:49 trigger_ui.cc:413
 msgid "Clear"
@@ -4134,8 +4132,8 @@ msgid "Edit"
 msgstr "Édition"
 
 #: bundle_manager.cc:277 editing_context.cc:495 editing_context.cc:496
-#: editing_context.cc:2077 editor.cc:5578 io_plugin_window.cc:390
-#: luawindow.cc:100 pianoroll.cc:1269 plugin_ui.cc:531 processor_box.cc:4243
+#: editing_context.cc:2078 editor.cc:5578 io_plugin_window.cc:390
+#: luawindow.cc:100 pianoroll.cc:1294 plugin_ui.cc:531 processor_box.cc:4243
 #: processor_box.cc:4245 region_editor.cc:607 region_editor.cc:608
 #: region_editor.cc:780
 msgid "Delete"
@@ -4589,16 +4587,16 @@ msgid "Set selected notes to this length"
 msgstr "Régler les notes sélectionnées à cette durée"
 
 #: edit_note_dialog.cc:64 editor_markers.cc:1903 midi_list_editor.cc:106
-#: pianoroll.cc:122 patch_change_dialog.cc:92 rc_option_editor.cc:3597
+#: pianoroll.cc:125 patch_change_dialog.cc:92 rc_option_editor.cc:3597
 #: step_entry.cc:309 virtual_keyboard_window.cc:134
 msgid "Channel"
 msgstr "Canal"
 
-#: edit_note_dialog.cc:74 pianoroll.cc:124 rc_option_editor.cc:3596
+#: edit_note_dialog.cc:74 pianoroll.cc:127 rc_option_editor.cc:3596
 msgid "Pitch"
 msgstr "Hauteur"
 
-#: edit_note_dialog.cc:84 midi_time_axis.cc:821 pianoroll.cc:121
+#: edit_note_dialog.cc:84 midi_time_axis.cc:821 pianoroll.cc:124
 #: rc_option_editor.cc:3595 step_entry.cc:323 virtual_keyboard_window.cc:180
 msgid "Velocity"
 msgstr "Vélocité"
@@ -4770,7 +4768,7 @@ msgstr "Point d'édition"
 msgid "Follow Playhead"
 msgstr "Suivre la tête de lecture"
 
-#: editing_context.cc:167 editing_context.cc:2469
+#: editing_context.cc:167 editing_context.cc:2470
 msgid "MIDI|Ch:"
 msgstr "Ch :"
 
@@ -4858,11 +4856,11 @@ msgid "Close value entry window for automation editing"
 msgstr ""
 "Fermer la fenêtre de saisie de valeur pour la modification de l'automation"
 
-#: editing_context.cc:482 editing_context.cc:2511
+#: editing_context.cc:482 editing_context.cc:2512
 msgid "Zoom Out"
 msgstr "Zoom arrière"
 
-#: editing_context.cc:483 editing_context.cc:2507
+#: editing_context.cc:483 editing_context.cc:2508
 msgid "Zoom In"
 msgstr "Zoom avant"
 
@@ -4874,12 +4872,12 @@ msgstr "Tête de lecture fixe"
 msgid "Scroll automatically to keep playhead visible"
 msgstr "Défiler automatiquement pour garder la tête de lecture visible"
 
-#: editing_context.cc:490 editing_context.cc:2872
+#: editing_context.cc:490 editing_context.cc:2873
 msgid "Command|Undo"
 msgstr "Annuler"
 
 #: editing_context.cc:491 editing_context.cc:492 editing_context.cc:493
-#: editing_context.cc:2883 recorder_ui.cc:389 recorder_ui.cc:390
+#: editing_context.cc:2884 recorder_ui.cc:389 recorder_ui.cc:390
 msgid "Redo"
 msgstr "Refaire"
 
@@ -5254,7 +5252,7 @@ msgstr "Quantifier les notes sélectionnées"
 
 #: editing_context.cc:734 editing_context.cc:751 editing_context.cc:755
 #: editing_context.cc:768 editing_context.cc:1043 editing_context.cc:1074
-#: editing_context.cc:1107 editing_context.cc:2479 editing_context.cc:2480
+#: editing_context.cc:1107 editing_context.cc:2480 editing_context.cc:2481
 msgid "Auto"
 msgstr "Auto"
 
@@ -5279,90 +5277,90 @@ msgstr "Quintolets"
 msgid "Septuplets"
 msgstr "Septolets"
 
-#: editing_context.cc:2080 editor.cc:1534 editor.cc:5577 editor_markers.cc:1259
+#: editing_context.cc:2081 editor.cc:1534 editor.cc:5577 editor_markers.cc:1259
 #: editor_markers.cc:1275 editor_markers.cc:1292 io_plugin_window.cc:386
-#: panner_ui.cc:416 pianoroll.cc:1272 processor_box.cc:4286
+#: panner_ui.cc:416 pianoroll.cc:1297 processor_box.cc:4286
 #: region_editor.cc:735 trigger_clip_picker.cc:333
 msgid "Edit..."
 msgstr "Éditer..."
 
-#: editing_context.cc:2081 editor_actions.cc:1356 pianoroll.cc:1273
+#: editing_context.cc:2082 editor_actions.cc:1356 pianoroll.cc:1298
 msgid "Transpose..."
 msgstr "Transposer..."
 
-#: editing_context.cc:2082 editor_actions.cc:1442 pianoroll.cc:1274
-#: pianoroll.cc:2779
+#: editing_context.cc:2083 editor_actions.cc:1442 pianoroll.cc:1299
+#: pianoroll.cc:2828
 msgid "Legatize"
 msgstr "Legato"
 
-#: editing_context.cc:2086 editor_actions.cc:1441 pianoroll.cc:1278
-#: pianoroll.cc:2778
+#: editing_context.cc:2087 editor_actions.cc:1441 pianoroll.cc:1303
+#: pianoroll.cc:2827
 msgid "Quantize..."
 msgstr "Quantifier..."
 
-#: editing_context.cc:2087 editor_actions.cc:1445 pianoroll.cc:1279
-#: pianoroll.cc:2781
+#: editing_context.cc:2088 editor_actions.cc:1445 pianoroll.cc:1304
+#: pianoroll.cc:2830
 msgid "Remove Overlap"
 msgstr "Supprimer le recouvrement"
 
-#: editing_context.cc:2091 editor_actions.cc:1444 pianoroll.cc:1283
-#: pianoroll.cc:2780
+#: editing_context.cc:2092 editor_actions.cc:1444 pianoroll.cc:1308
+#: pianoroll.cc:2829
 msgid "Transform..."
 msgstr "Transformer..."
 
-#: editing_context.cc:2093
+#: editing_context.cc:2094
 msgid "Strum Forward"
 msgstr "Égrener vers le haut"
 
-#: editing_context.cc:2094
+#: editing_context.cc:2095
 msgid "Strum Backward"
 msgstr "Égrener vers le bas"
 
-#: editing_context.cc:2272
+#: editing_context.cc:2273
 msgid "Add note interval of %1 semitones"
 msgstr "Ajouter un intervalle de note de %1 demi-tons"
 
-#: editing_context.cc:2466
+#: editing_context.cc:2467
 msgid "Len:"
 msgstr "Lon :"
 
-#: editing_context.cc:2472
+#: editing_context.cc:2473
 msgid "Vel:"
 msgstr "Vél :"
 
-#: editing_context.cc:2547
+#: editing_context.cc:2548
 msgid "Grab Mode (select/move objects)"
 msgstr "Mode Saisie (sélectionner/déplacer des objets)"
 
-#: editing_context.cc:2548
+#: editing_context.cc:2549
 msgid "Cut Mode (split regions)"
 msgstr "Mode Scinder (découper des régions)"
 
-#: editing_context.cc:2549
+#: editing_context.cc:2550
 msgid "Range Mode (select time ranges)"
 msgstr "Mode Intervalle (sélectionner des intervalles de temps)"
 
-#: editing_context.cc:2550
+#: editing_context.cc:2551
 msgid "Grid Mode (edit tempo-map, drag/drop music-time grid)"
 msgstr ""
 "Mode Gille (éditer la carte de tempo, glisser-déposer la grille de temps "
 "musical)"
 
-#: editing_context.cc:2551
+#: editing_context.cc:2552
 msgid "Draw Mode (draw and edit gain/notes/automation)"
 msgstr "Mode Dessin (dessiner et modifier gain/notes/automation)"
 
-#: editing_context.cc:2552
+#: editing_context.cc:2553
 msgid "Stretch Mode (time-stretch audio and midi regions, preserving pitch)"
 msgstr ""
 "Mode Étirement (modifier la durée des régions audio et MIDI en préservant la "
 "hauteur)"
 
-#: editing_context.cc:2553
+#: editing_context.cc:2554
 msgid "Internal Edit Mode (edit notes and automation points)"
 msgstr "Mode Édition (éditer les notes et points d'automation)"
 
-#: editing_context.cc:2696 rc_option_editor.cc:3425 rc_option_editor.cc:3427
+#: editing_context.cc:2697 rc_option_editor.cc:3425 rc_option_editor.cc:3427
 #: rc_option_editor.cc:3437 rc_option_editor.cc:3464 rc_option_editor.cc:3472
 #: rc_option_editor.cc:3480 rc_option_editor.cc:3488 rc_option_editor.cc:3497
 #: rc_option_editor.cc:3505 rc_option_editor.cc:3516 rc_option_editor.cc:3518
@@ -5371,15 +5369,15 @@ msgstr "Mode Édition (éditer les notes et points d'automation)"
 msgid "Editor/Snap"
 msgstr "Éditeur/Aimant"
 
-#: editing_context.cc:2875
+#: editing_context.cc:2876
 msgid "Command|Undo (%1)"
 msgstr "Annuler (%1)"
 
-#: editing_context.cc:2886
+#: editing_context.cc:2887
 msgid "Redo (%1)"
 msgstr "Refaire (%1)"
 
-#: editing_context.cc:4267
+#: editing_context.cc:4282
 msgid "Pianoroll Window"
 msgstr "Fenêtre de Pianoroll"
 
@@ -6116,7 +6114,7 @@ msgstr "Veuillez patienter : %1 charge les données graphiques."
 msgid "Autoconnect"
 msgstr "Auto-Connexion"
 
-#: editor_actions.cc:106 pianoroll.cc:2787 rc_option_editor.cc:5147
+#: editor_actions.cc:106 pianoroll.cc:2836 rc_option_editor.cc:5147
 #: route_time_axis.cc:282 route_time_axis.cc:861 vca_time_axis.cc:77
 #: vca_time_axis.cc:461
 msgid "Automation"
@@ -6993,7 +6991,7 @@ msgstr ""
 "Basculer l'entrée MIDI active pour les pistes / bus sélectionnés dans "
 "l'éditeur"
 
-#: editor_actions.cc:681 midi_inspector.cc:26 quantize_dialog.cc:191
+#: editor_actions.cc:681 midi_inspector.cc:34 quantize_dialog.cc:191
 #: quantize_dialog.cc:198
 msgid "Quantize"
 msgstr "Quantifier"
@@ -7448,33 +7446,33 @@ msgstr "Nouveau repère d'arrangement"
 msgid "Select Arrangement Section"
 msgstr "Sélectionner la section d'arrangement"
 
-#: editor_canvas_events.cc:1438 editor_drag.cc:1794
+#: editor_canvas_events.cc:1438 editor_drag.cc:1781
 msgid "Could not create new track after region placed in the drop zone"
 msgstr ""
 "Impossible de créer une nouvelle piste à partir de la région placée dans la "
 "zone cible"
 
-#: editor_drag.cc:802
+#: editor_drag.cc:789
 msgid "Slip Contents"
 msgstr "Glisser les contenus"
 
-#: editor_drag.cc:859
+#: editor_drag.cc:846
 msgid "Region brush drag"
 msgstr "Glisser le pinceau de région"
 
-#: editor_drag.cc:1672
+#: editor_drag.cc:1659
 msgid "fixed time region drag"
 msgstr "déplacement vertical de région"
 
-#: editor_drag.cc:2362
+#: editor_drag.cc:2349
 msgid "create region"
 msgstr "créer une région"
 
-#: editor_drag.cc:2458 midi_view.cc:3720
+#: editor_drag.cc:2445 midi_view.cc:3739
 msgid "resize notes"
 msgstr "redimensionner les notes"
 
-#: editor_drag.cc:2600 editor_drag.cc:2635
+#: editor_drag.cc:2587 editor_drag.cc:2622
 msgid ""
 "One or more Audio Regions\n"
 "are both Locked and\n"
@@ -7486,111 +7484,111 @@ msgstr ""
 "verrouillées à la vidéo.\n"
 "La vidéo ne peut pas être déplacée."
 
-#: editor_drag.cc:2670
+#: editor_drag.cc:2657
 msgid "Video Start:"
 msgstr "Début vidéo :"
 
-#: editor_drag.cc:2671
+#: editor_drag.cc:2658
 msgid "Diff:"
 msgstr "Différence :"
 
-#: editor_drag.cc:2692
+#: editor_drag.cc:2679
 msgid "Move Video"
 msgstr "Déplacer vidéo"
 
-#: editor_drag.cc:3146 editor_drag.cc:3193
+#: editor_drag.cc:3133 editor_drag.cc:3180
 msgid "move time signature"
 msgstr "déplacer la signature rythmique"
 
-#: editor_drag.cc:3246 editor_drag.cc:3284
+#: editor_drag.cc:3233 editor_drag.cc:3271
 msgid "change tempo"
 msgstr "changer le tempo"
 
-#: editor_drag.cc:3338
+#: editor_drag.cc:3325
 msgid "move tempo mark"
 msgstr "déplacer le repère de tempo"
 
-#: editor_drag.cc:3388
+#: editor_drag.cc:3375
 msgid "move tempo"
 msgstr "déplacer le tempo"
 
-#: editor_drag.cc:3439 editor_drag.cc:3477
+#: editor_drag.cc:3426 editor_drag.cc:3464
 msgid "move BBT point"
 msgstr "déplacer le point BBT"
 
-#: editor_drag.cc:3580
+#: editor_drag.cc:3567
 msgid "stretch tempo"
 msgstr "étirer le tempo"
 
-#: editor_drag.cc:3691 editor_drag.cc:3785 editor_drag.cc:3787
+#: editor_drag.cc:3678 editor_drag.cc:3772 editor_drag.cc:3774
 msgid "twist tempo"
 msgstr "tordre le tempo"
 
-#: editor_drag.cc:3862
+#: editor_drag.cc:3849
 msgid "stretch end tempo"
 msgstr "étirer la fin du tempo"
 
-#: editor_drag.cc:3896
+#: editor_drag.cc:3883
 msgid "move tempo end"
 msgstr "déplacer la fin de tempo"
 
-#: editor_drag.cc:4203
+#: editor_drag.cc:4190
 msgid "change fade in length"
 msgstr "modifier la durée du fondu d'entrée"
 
-#: editor_drag.cc:4341
+#: editor_drag.cc:4328
 msgid "change fade out length"
 msgstr "modifier la durée du fondu de sortie"
 
-#: editor_drag.cc:4759
+#: editor_drag.cc:4746
 msgid "move marker"
 msgstr "déplacer le repère"
 
-#: editor_drag.cc:5060 editor_drag.cc:6529
+#: editor_drag.cc:5047 editor_drag.cc:6516
 msgid "automation range move"
 msgstr "déplacement d'intervalle d'automation"
 
-#: editor_drag.cc:5442 editor_drag.cc:5484
+#: editor_drag.cc:5429 editor_drag.cc:5471
 msgid "An error occurred while executing time stretch operation"
 msgstr "Une erreur est survenue pendant l'opération d'étirement temporel"
 
-#: editor_drag.cc:6015
+#: editor_drag.cc:6002
 msgid "programming_error: %1"
 msgstr "%1 : erreur de programmation"
 
-#: editor_drag.cc:6080
+#: editor_drag.cc:6067
 msgid "new skip marker"
 msgstr "nouveau repère de saut"
 
-#: editor_drag.cc:6081
+#: editor_drag.cc:6068
 msgid "skip"
 msgstr "saut"
 
-#: editor_drag.cc:6085 location_ui.cc:67
+#: editor_drag.cc:6072 location_ui.cc:67
 msgid "CD"
 msgstr "CD"
 
-#: editor_drag.cc:6086
+#: editor_drag.cc:6073
 msgid "new CD marker"
 msgstr "nouveau repère de CD"
 
-#: editor_drag.cc:6090 editor_markers.cc:885
+#: editor_drag.cc:6077 editor_markers.cc:885
 msgid "new range marker"
 msgstr "nouveau repère d'intervalle"
 
-#: editor_drag.cc:6091 editor_route_groups.cc:433 mixer_ui.cc:2520
+#: editor_drag.cc:6078 editor_route_groups.cc:433 mixer_ui.cc:2520
 msgid "unnamed"
 msgstr "sans nom"
 
-#: editor_drag.cc:6426
+#: editor_drag.cc:6413
 msgid "Automation range drag created for invalid region type"
 msgstr "Zone d'automation créée pour un type de région invalide"
 
-#: editor_drag.cc:7081
+#: editor_drag.cc:7068
 msgid "brush notes"
 msgstr "peindre des notes"
 
-#: editor_drag.cc:7322
+#: editor_drag.cc:7309
 msgid "Edit Cue Marker Name"
 msgstr "Éditer le nom du repère Cue"
 
@@ -8326,19 +8324,19 @@ msgstr "bouncer l'intervalle"
 msgid "delete control points"
 msgstr "effacer les points de contrôle"
 
-#: editor_ops.cc:4304 pianoroll.cc:2213
+#: editor_ops.cc:4304 pianoroll.cc:2256
 msgid "delete"
 msgstr "supprimer"
 
-#: editor_ops.cc:4307 pianoroll.cc:2216
+#: editor_ops.cc:4307 pianoroll.cc:2259
 msgid "cut"
 msgstr "couper"
 
-#: editor_ops.cc:4310 pianoroll.cc:2219
+#: editor_ops.cc:4310 pianoroll.cc:2262
 msgid "copy"
 msgstr "copier"
 
-#: editor_ops.cc:4313 pianoroll.cc:2222
+#: editor_ops.cc:4313 pianoroll.cc:2265
 msgid "clear"
 msgstr "effacer"
 
@@ -8819,7 +8817,7 @@ msgstr "La valeur de l'écart que vous avez saisie n'est pas un nombre"
 msgid "remove gaps"
 msgstr "supprimer les écarts"
 
-#: editor_ops.cc:9535
+#: editor_ops.cc:9548
 msgid "Find Track/Bus"
 msgstr "Rechercher une piste / un bus"
 
@@ -10997,28 +10995,28 @@ msgstr "Rechercher..."
 msgid "Click to reset search string"
 msgstr "Cliquer pour réinitialiser le champ de recherche"
 
-#: keyeditor.cc:118
+#: keyeditor.cc:119
 msgid "To remove a shortcut, select an action then press this: "
 msgstr ""
 "Pour supprimer un raccourci, sélectionner une action et cliquer ceci : "
 
-#: keyeditor.cc:130
+#: keyeditor.cc:131
 msgid "Reset Bindings to Defaults"
 msgstr "Réinitialiser tous les raccourcis"
 
-#: keyeditor.cc:133
+#: keyeditor.cc:134
 msgid "Print Bindings (to your web browser)"
 msgstr "Imprimer les raccourcis (dans le navigateur)"
 
-#: keyeditor.cc:251 lua_script_manager.cc:54
+#: keyeditor.cc:252 lua_script_manager.cc:54
 msgid "Action"
 msgstr "Action"
 
-#: keyeditor.cc:252
+#: keyeditor.cc:253
 msgid "Shortcut"
 msgstr "Raccourci"
 
-#: keyeditor.cc:417
+#: keyeditor.cc:418
 msgid "RegionList"
 msgstr "Liste de régions"
 
@@ -11751,9 +11749,13 @@ msgstr "Cliquer pour forcer tous les canaux enregistrés à %1"
 msgid "Export MIDI: %1"
 msgstr "Export MIDI : %1"
 
-#: midi_inspector.cc:25
+#: midi_inspector.cc:33
 msgid "Chord Editing"
 msgstr "Édition d'accord"
+
+#: midi_inspector.cc:35 region_editor_window.cc:28
+msgid "Region Properties"
+msgstr "Propriétés de région"
 
 #: midi_list_editor.cc:57 trigger_ui.cc:735
 msgid "Whole"
@@ -11872,7 +11874,7 @@ msgstr "Mode périphérique externe"
 msgid "MIDNAM Channel Display"
 msgstr "Affichage du canal MIDNAM"
 
-#: midi_time_axis.cc:328 midi_time_axis.cc:333 midi_view.cc:4434
+#: midi_time_axis.cc:328 midi_time_axis.cc:333 midi_view.cc:4453
 msgid "Channel "
 msgstr "Canal "
 
@@ -11951,7 +11953,7 @@ msgstr "Cacher tous les canaux"
 msgid "Show all channels"
 msgstr "Afficher tous les canaux"
 
-#: midi_time_axis.cc:927 midi_time_axis.cc:1054 pianoroll.cc:298
+#: midi_time_axis.cc:927 midi_time_axis.cc:1054 pianoroll.cc:336
 msgid "Channel %1"
 msgstr "Canal %1"
 
@@ -12036,135 +12038,135 @@ msgstr "Contrôleurs %1-%2"
 msgid "New velocity"
 msgstr "Nouvelle vélocité"
 
-#: midi_view.cc:852
+#: midi_view.cc:864
 msgid "channel edit"
 msgstr "éditer le canal"
 
-#: midi_view.cc:892
+#: midi_view.cc:904
 msgid "velocity edit"
 msgstr "éditer la vélocité"
 
-#: midi_view.cc:954
+#: midi_view.cc:966
 msgid "add chord"
 msgstr "ajouter un accord"
 
-#: midi_view.cc:969
+#: midi_view.cc:981
 msgid "add note"
 msgstr "ajouter une note"
 
-#: midi_view.cc:1021
+#: midi_view.cc:1033
 msgid "add interval"
 msgstr "ajouter un intervalle"
 
-#: midi_view.cc:1085
+#: midi_view.cc:1097
 msgid "invert chord (up)"
 msgstr "renverser un accord (vers le haut)"
 
-#: midi_view.cc:1088
+#: midi_view.cc:1100
 msgid "invert chord (down)"
 msgstr "renverser un accord (vers le bas)"
 
-#: midi_view.cc:1126
+#: midi_view.cc:1138
 msgid "drop notes"
 msgstr "baisser des notes"
 
-#: midi_view.cc:1160
+#: midi_view.cc:1172
 msgid "replace chord"
 msgstr "remplacer un accord"
 
-#: midi_view.cc:2394
+#: midi_view.cc:2412
 msgid "step add"
 msgstr "ajouter un pas"
 
-#: midi_view.cc:2499 midi_view.cc:2524
+#: midi_view.cc:2517 midi_view.cc:2542
 msgid "alter patch change"
 msgstr "modifier le changement de patch"
 
-#: midi_view.cc:2573
+#: midi_view.cc:2591
 msgid "add patch change"
 msgstr "ajouter le changement de patch"
 
-#: midi_view.cc:2594
+#: midi_view.cc:2612
 msgid "move patch change"
 msgstr "déplacer le changement de patch"
 
-#: midi_view.cc:2608
+#: midi_view.cc:2626
 msgid "delete patch change"
 msgstr "supprimer le changement de patch"
 
-#: midi_view.cc:2654
+#: midi_view.cc:2672
 msgid "delete selection"
 msgstr "supprimer la sélection"
 
-#: midi_view.cc:2673
+#: midi_view.cc:2691
 msgid "delete note"
 msgstr "supprimer la note"
 
-#: midi_view.cc:3347
+#: midi_view.cc:3366
 msgid "move notes"
 msgstr "déplacer les notes"
 
-#: midi_view.cc:3391
+#: midi_view.cc:3410
 msgid "copy notes"
 msgstr "copier les notes"
 
-#: midi_view.cc:3993 velocity_display.cc:406
+#: midi_view.cc:4012 velocity_display.cc:406
 msgid "draw velocities"
 msgstr "dessiner les vélocités"
 
-#: midi_view.cc:4061
+#: midi_view.cc:4080
 msgid "set velocities"
 msgstr "régler les vélocités"
 
-#: midi_view.cc:4103
+#: midi_view.cc:4122
 msgid "change velocities"
 msgstr "changer les vélocités"
 
-#: midi_view.cc:4176
+#: midi_view.cc:4195
 msgid "duplicate notes"
 msgstr "dupliquer les notes"
 
-#: midi_view.cc:4242
+#: midi_view.cc:4261
 msgid "transpose"
 msgstr "transposer"
 
-#: midi_view.cc:4304
+#: midi_view.cc:4323
 msgid "change note lengths"
 msgstr "modifier les durées de note"
 
-#: midi_view.cc:4375
+#: midi_view.cc:4394
 msgid "nudge"
 msgstr "décaler"
 
-#: midi_view.cc:4432
+#: midi_view.cc:4451
 msgid "Bank "
 msgstr "Banque "
 
-#: midi_view.cc:4629
+#: midi_view.cc:4648
 msgid "paste"
 msgstr "coller"
 
-#: midi_view.cc:5314
+#: midi_view.cc:5333
 msgid "delete sysex"
 msgstr "effacer le sysex"
 
-#: midi_view.cc:5606
+#: midi_view.cc:5625
 msgid "split notes"
 msgstr "fractionner les notes"
 
-#: midi_view.cc:5632
+#: midi_view.cc:5651
 msgid "split notes more"
 msgstr "fractionner plus les notes"
 
-#: midi_view.cc:5662
+#: midi_view.cc:5681
 msgid "split notes less"
 msgstr "fractionner moins les notes"
 
-#: midi_view.cc:5725
+#: midi_view.cc:5744
 msgid "join notes"
 msgstr "joindre les notes"
 
-#: midi_view.cc:5781
+#: midi_view.cc:5800
 msgid "Shift MIDI by %1"
 msgstr "Décaler le MIDI de %1"
 
@@ -13533,10 +13535,6 @@ msgstr ""
 msgid "Normalize"
 msgstr "Normaliser"
 
-#: note_base.cc:102
-msgid "colors"
-msgstr ""
-
 #: note_select_dialog.cc:27
 msgid "Select Note"
 msgstr "Sélectionner une note"
@@ -13775,328 +13773,336 @@ msgstr ""
 msgid "A"
 msgstr "A"
 
-#: pianoroll.cc:116 pianoroll.cc:195
+#: pianoroll.cc:101
+msgid "<"
+msgstr ""
+
+#: pianoroll.cc:119 pianoroll.cc:233
 msgid "All Regions"
 msgstr "Toutes les régions"
 
-#: pianoroll.cc:117 pianoroll.cc:198
+#: pianoroll.cc:120 pianoroll.cc:236
 msgid "Active Region"
 msgstr "Région active"
 
-#: pianoroll.cc:125
+#: pianoroll.cc:128
 msgid "Setup"
 msgstr "Configurer"
 
-#: pianoroll.cc:127
+#: pianoroll.cc:130
 msgid "Color Scheme for MIDI events"
 msgstr "Mode de couleurs pour les évènements MIDI"
 
-#: pianoroll.cc:357
+#: pianoroll.cc:140
+msgid "Expand/Collapse MIDI inspector"
+msgstr ""
+
+#: pianoroll.cc:397
 msgid "Select visible MIDI automation"
 msgstr "Sélectionner l'automation MIDI visible"
 
-#: pianoroll.cc:1833
+#: pianoroll.cc:1875
 msgid "Attempt to set pianoroll region that was not added!"
 msgstr ""
 "Tentative de réglage du pianoroll sur une région qui n'a pas été ajoutée !"
 
-#: pianoroll.cc:2191
+#: pianoroll.cc:2234
 msgid "paste %1"
 msgstr "coller %1"
 
-#: pianoroll.cc:2929
+#: pianoroll.cc:2978
 msgid "Modulation"
 msgstr "Modulation"
 
-#: pianoroll.cc:2930
+#: pianoroll.cc:2979
 msgid "Breath Ctrlr"
 msgstr ""
 
-#: pianoroll.cc:2931
+#: pianoroll.cc:2980
 msgid "Foot Ctrlr"
 msgstr ""
 
-#: pianoroll.cc:2932
+#: pianoroll.cc:2981
 msgid "Portamento Time"
 msgstr ""
 
-#: pianoroll.cc:2933
+#: pianoroll.cc:2982
 msgid "Data Entry MSB"
 msgstr ""
 
-#: pianoroll.cc:2934
+#: pianoroll.cc:2983
 msgid "Channel Volume"
 msgstr ""
 
-#: pianoroll.cc:2935
+#: pianoroll.cc:2984
 msgid "Expression Ctrlr"
 msgstr ""
 
-#: pianoroll.cc:2936
+#: pianoroll.cc:2985
 msgid "Effect Control 1"
 msgstr ""
 
-#: pianoroll.cc:2937
+#: pianoroll.cc:2986
 msgid "Effect Control 2"
 msgstr ""
 
-#: pianoroll.cc:2938
+#: pianoroll.cc:2987
 msgid "Gen. Ctrlr 1"
 msgstr ""
 
-#: pianoroll.cc:2939
+#: pianoroll.cc:2988
 msgid "Gen. Ctrlr 2"
 msgstr ""
 
-#: pianoroll.cc:2940
+#: pianoroll.cc:2989
 msgid "Gen. Ctrlr 3"
 msgstr ""
 
-#: pianoroll.cc:2941
+#: pianoroll.cc:2990
 msgid "Gen. Ctrlr 4"
 msgstr ""
 
-#: pianoroll.cc:2942
+#: pianoroll.cc:2991
 msgid "CC 0 LSB"
 msgstr ""
 
-#: pianoroll.cc:2943
+#: pianoroll.cc:2992
 msgid "Modulation LSB"
 msgstr ""
 
-#: pianoroll.cc:2944
+#: pianoroll.cc:2993
 msgid "Breath LSB"
 msgstr ""
 
-#: pianoroll.cc:2945
+#: pianoroll.cc:2994
 msgid "CC 3 LSB"
 msgstr ""
 
-#: pianoroll.cc:2946
+#: pianoroll.cc:2995
 msgid "Foot LSB"
 msgstr ""
 
-#: pianoroll.cc:2947
+#: pianoroll.cc:2996
 msgid "Portamento LSB"
 msgstr ""
 
-#: pianoroll.cc:2948
+#: pianoroll.cc:2997
 msgid "Data LSB"
 msgstr ""
 
-#: pianoroll.cc:2949
+#: pianoroll.cc:2998
 msgid "Chn. Vol LSB"
 msgstr ""
 
-#: pianoroll.cc:2950
+#: pianoroll.cc:2999
 msgid "Balance LSB"
 msgstr ""
 
-#: pianoroll.cc:2951
+#: pianoroll.cc:3000
 msgid "CC 9 LSB"
 msgstr ""
 
-#: pianoroll.cc:2952
+#: pianoroll.cc:3001
 msgid "CC 10 LSB"
 msgstr ""
 
-#: pianoroll.cc:2953
+#: pianoroll.cc:3002
 msgid "CC 11 LSB"
 msgstr ""
 
-#: pianoroll.cc:2954
+#: pianoroll.cc:3003
 msgid "CC 12 LSB"
 msgstr ""
 
-#: pianoroll.cc:2955
+#: pianoroll.cc:3004
 msgid "CC 13 LSB"
 msgstr ""
 
-#: pianoroll.cc:2956
+#: pianoroll.cc:3005
 msgid "CC 14 LSB"
 msgstr ""
 
-#: pianoroll.cc:2957
+#: pianoroll.cc:3006
 msgid "CC 15 LSB"
 msgstr ""
 
-#: pianoroll.cc:2958
+#: pianoroll.cc:3007
 msgid "CC 16 LSB"
 msgstr ""
 
-#: pianoroll.cc:2959
+#: pianoroll.cc:3008
 msgid "CC 17 LSB"
 msgstr ""
 
-#: pianoroll.cc:2960
+#: pianoroll.cc:3009
 msgid "CC 18 LSB"
 msgstr ""
 
-#: pianoroll.cc:2961
+#: pianoroll.cc:3010
 msgid "CC 19 LSB"
 msgstr ""
 
-#: pianoroll.cc:2962
+#: pianoroll.cc:3011
 msgid "CC 20 LSB"
 msgstr ""
 
-#: pianoroll.cc:2963
+#: pianoroll.cc:3012
 msgid "CC 21 LSB"
 msgstr ""
 
-#: pianoroll.cc:2964
+#: pianoroll.cc:3013
 msgid "CC 22 LSB"
 msgstr ""
 
-#: pianoroll.cc:2965
+#: pianoroll.cc:3014
 msgid "CC 23 LSB"
 msgstr ""
 
-#: pianoroll.cc:2966
+#: pianoroll.cc:3015
 msgid "CC 24 LSB"
 msgstr ""
 
-#: pianoroll.cc:2967
+#: pianoroll.cc:3016
 msgid "CC 25 LSB"
 msgstr ""
 
-#: pianoroll.cc:2968
+#: pianoroll.cc:3017
 msgid "CC 26 LSB"
 msgstr ""
 
-#: pianoroll.cc:2969
+#: pianoroll.cc:3018
 msgid "CC 27 LSB"
 msgstr ""
 
-#: pianoroll.cc:2970
+#: pianoroll.cc:3019
 msgid "CC 28 LSB"
 msgstr ""
 
-#: pianoroll.cc:2971
+#: pianoroll.cc:3020
 msgid "CC 29 LSB"
 msgstr ""
 
-#: pianoroll.cc:2972
+#: pianoroll.cc:3021
 msgid "CC 30 LSB"
 msgstr ""
 
-#: pianoroll.cc:2973
+#: pianoroll.cc:3022
 msgid "CC 31 LSB"
 msgstr ""
 
-#: pianoroll.cc:2974
+#: pianoroll.cc:3023
 msgid "Sustain on/off"
 msgstr ""
 
-#: pianoroll.cc:2975
+#: pianoroll.cc:3024
 msgid "Portamento on/off"
 msgstr ""
 
-#: pianoroll.cc:2976
+#: pianoroll.cc:3025
 msgid "Sostenuto on/off"
 msgstr ""
 
-#: pianoroll.cc:2977
+#: pianoroll.cc:3026
 msgid "Soft Pedal on/off"
 msgstr ""
 
-#: pianoroll.cc:2978
+#: pianoroll.cc:3027
 msgid "Legato Footswitch"
 msgstr ""
 
-#: pianoroll.cc:2979
+#: pianoroll.cc:3028
 msgid "Hold 2 ≤63 off, ≥64 on"
 msgstr ""
 
-#: pianoroll.cc:2980
+#: pianoroll.cc:3029
 msgid "Sound Ctrlr 1"
 msgstr ""
 
-#: pianoroll.cc:2981
+#: pianoroll.cc:3030
 msgid "Sound Ctrlr 2"
 msgstr ""
 
-#: pianoroll.cc:2982
+#: pianoroll.cc:3031
 msgid "Sound Ctrlr 3"
 msgstr ""
 
-#: pianoroll.cc:2983
+#: pianoroll.cc:3032
 msgid "Sound Ctrlr 4"
 msgstr ""
 
-#: pianoroll.cc:2984
+#: pianoroll.cc:3033
 msgid "Sound Ctrlr 5"
 msgstr ""
 
-#: pianoroll.cc:2985
+#: pianoroll.cc:3034
 msgid "Sound Ctrlr 6"
 msgstr ""
 
-#: pianoroll.cc:2986
+#: pianoroll.cc:3035
 msgid "Sound Ctrlr 7"
 msgstr ""
 
-#: pianoroll.cc:2987
+#: pianoroll.cc:3036
 msgid "Sound Ctrlr 8"
 msgstr ""
 
-#: pianoroll.cc:2988
+#: pianoroll.cc:3037
 msgid "Sound Ctrlr 9"
 msgstr ""
 
-#: pianoroll.cc:2989
+#: pianoroll.cc:3038
 msgid "Sound Ctrlr 10"
 msgstr ""
 
-#: pianoroll.cc:2990
+#: pianoroll.cc:3039
 msgid "Gen. Ctrlr 5 LSB"
 msgstr ""
 
-#: pianoroll.cc:2991
+#: pianoroll.cc:3040
 msgid "Gen. Ctrlr 6 LSB"
 msgstr ""
 
-#: pianoroll.cc:2992
+#: pianoroll.cc:3041
 msgid "Gen. Ctrlr 7 LSB"
 msgstr ""
 
-#: pianoroll.cc:2993
+#: pianoroll.cc:3042
 msgid "Gen. Ctrlr 8 LSB"
 msgstr ""
 
-#: pianoroll.cc:2994
+#: pianoroll.cc:3043
 msgid "Portamento (Fine)"
 msgstr ""
 
-#: pianoroll.cc:2995
+#: pianoroll.cc:3044
 msgid "Hi-Res Velo. Prefix"
 msgstr ""
 
-#: pianoroll.cc:2996
+#: pianoroll.cc:3045
 msgid "Effects 1 Depth"
 msgstr ""
 
-#: pianoroll.cc:2997
+#: pianoroll.cc:3046
 msgid "Data Increment"
 msgstr ""
 
-#: pianoroll.cc:2998
+#: pianoroll.cc:3047
 msgid "Data Decrement"
 msgstr ""
 
-#: pianoroll.cc:2999
+#: pianoroll.cc:3048
 msgid "NRPN LSB"
 msgstr ""
 
-#: pianoroll.cc:3000
+#: pianoroll.cc:3049
 msgid "NPRN MSB"
 msgstr ""
 
-#: pianoroll.cc:3001
+#: pianoroll.cc:3050
 msgid "RPN LSB"
 msgstr ""
 
-#: pianoroll.cc:3002
+#: pianoroll.cc:3051
 msgid "RPN MSB"
 msgstr ""
 
@@ -19225,10 +19231,6 @@ msgstr ""
 "<b>%1</b>\n"
 "Double-clic pour afficher l'interface graphique générique."
 
-#: region_editor_window.cc:28
-msgid "Region Properties"
-msgstr "Propriétés de région"
-
 # ne pas traduire
 #: region_layering_order_editor.cc:44
 msgid "RegionLayeringOrderEditor"
@@ -23271,100 +23273,100 @@ msgstr ""
 "Arrêter les autres clips sur cette piste.\n"
 "Clic-droit de la souris pour sélectionner les options de lancement de ce clip"
 
-#: ui_config.cc:266 ui_config.cc:459
+#: ui_config.cc:265 ui_config.cc:458
 msgid "Loading default ui configuration file %1"
 msgstr ""
 "Chargement du fichier de style par défaut (%1) pour l'interface graphique"
 
-#: ui_config.cc:269 ui_config.cc:462
+#: ui_config.cc:268 ui_config.cc:461
 msgid "cannot read default ui configuration file \"%1\""
 msgstr ""
 "impossible de lire le fichier de configuration d'interface graphique par "
 "défaut \"%1\""
 
-#: ui_config.cc:272 ui_config.cc:467
+#: ui_config.cc:271 ui_config.cc:466
 msgid "default ui configuration file \"%1\" not loaded successfully."
 msgstr ""
 "le fichier par défaut (%1) pour la configuration de l'interface graphique "
 "n'a pas pu être chargé correctement."
 
-#: ui_config.cc:280
+#: ui_config.cc:279
 msgid "Could not find default UI configuration file %1"
 msgstr ""
 "Impossible de trouver le fichier de configuration de l'interface graphique "
 "par défaut (%1)"
 
-#: ui_config.cc:332
+#: ui_config.cc:331
 msgid "Loading color file %1"
 msgstr "Chargement du fichier de couleur %1"
 
-#: ui_config.cc:335
+#: ui_config.cc:334
 msgid "cannot read color file \"%1\""
 msgstr "impossible de lire le fichier de couleur \"%1\""
 
-#: ui_config.cc:340
+#: ui_config.cc:339
 msgid "color file \"%1\" not loaded successfully."
 msgstr "le fichier de couleur \"%1\" n'a pas été chargé correctement."
 
-#: ui_config.cc:393
+#: ui_config.cc:392
 msgid "no theme file was found; colors will be odd"
 msgstr "aucun fichier de thème n'a été trouvé ; les couleurs seront anormales"
 
-#: ui_config.cc:441 ui_config.cc:534
+#: ui_config.cc:440 ui_config.cc:533
 msgid "Color file %1 not saved"
 msgstr "Fichier de couleur %1 non sauvegardé"
 
-#: ui_config.cc:476
+#: ui_config.cc:475
 msgid "Loading user ui configuration file %1"
 msgstr ""
 "Chargement du fichier utilisateur de la configuration de l'interface "
 "graphique %1"
 
-#: ui_config.cc:479
+#: ui_config.cc:478
 msgid "cannot read ui configuration file \"%1\""
 msgstr ""
 "impossible de lire le fichier (%1) pour la configuration de l'interface "
 "graphique"
 
-#: ui_config.cc:484
+#: ui_config.cc:483
 msgid "user ui configuration file \"%1\" not loaded successfully."
 msgstr ""
 "le fichier utilisateur de configuration de l'interface graphique \"%1\" n'a "
 "pas pu être chargé correctement."
 
-#: ui_config.cc:492
+#: ui_config.cc:491
 msgid "could not find any ui configuration file, canvas will look broken."
 msgstr ""
 "aucun fichier de configuration de l'interface graphique n'a éte trouvé.\n"
 "Elle aura l'air étrange."
 
-#: ui_config.cc:513
+#: ui_config.cc:512
 msgid "Config file %1 not saved"
 msgstr "Fichier de configuration %1 non sauvegardé"
 
-#: ui_config.cc:515 ui_config.cc:523
+#: ui_config.cc:514 ui_config.cc:522
 msgid "Could not remove temporary ui-config file \"%1\" (%2)"
 msgstr ""
 "Impossible de supprimer le fichier temporaire de configuration de "
 "l'interface graphique  \"%1\" (%2)"
 
-#: ui_config.cc:521
+#: ui_config.cc:520
 msgid "could not rename temporary ui-config file %1 to %2 (%3)"
 msgstr ""
 "impossible de renommer le fichier temporaire de configuration de l'interface "
 "graphique %1 en %2 (%3)"
 
-#: ui_config.cc:764
+#: ui_config.cc:763
 msgid "Color %1 not found"
 msgstr "Couleur %1 introuvable"
 
-#: ui_config.cc:841
+#: ui_config.cc:840
 msgid "Unable to find UI style file %1 in search path %2. %3 will look strange"
 msgstr ""
 "Impossible de trouver le fichier de style \"%1\" dans \"%2\". L'interface de "
 "%3 sera étrange"
 
-#: ui_config.cc:847
+#: ui_config.cc:846
 msgid "Loading ui configuration file %1"
 msgstr "Chargement du fichier de configuration de l'interface graphique %1"
 
@@ -24112,6 +24114,23 @@ msgstr ""
 #: export_video_dialog.cc:815
 msgid "Input Video File"
 msgstr "Fichier vidéo d'entrée"
+
+#~ msgid ""
+#~ "This session appears to have been modified\n"
+#~ "without save, or in middle of recording when\n"
+#~ "%1 or the computer was shutdown.\n"
+#~ "\n"
+#~ "%1 can recover any changes for\n"
+#~ "you, or it can ignore it. Please decide\n"
+#~ "what you would like to do.\n"
+#~ msgstr ""
+#~ "Cette session semble avoir gardé des modifications\n"
+#~ "non sauvegardées, ou un enregistrement en cours,\n"
+#~ "alors que l'ordinateur ou %1 ont été éteints.\n"
+#~ "\n"
+#~ "%1 peut récupérer ces modifications pour vous,\n"
+#~ "ou vous laisser les ignorer. Veuillez décider\n"
+#~ "ce que vous voulez faire.\n"
 
 #~ msgid "All Views"
 #~ msgstr "Toutes les régions"
