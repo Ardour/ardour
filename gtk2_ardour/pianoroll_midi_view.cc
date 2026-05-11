@@ -575,7 +575,6 @@ PianorollMidiView::AutomationLane::~AutomationLane()
 {
 	/* line is managed via a shared_ptr */
 	delete velocity_display;
-	/* we do not own the velocity display */
 }
 
 void
