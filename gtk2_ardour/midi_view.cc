@@ -210,7 +210,11 @@ MidiView::~MidiView ()
 {
 	hide_verbose_cursor ();
 
-	region_going_away ();
+	_midi_region.reset ();
+	_model.reset ();
+
+	connections_requiring_model.drop_connections();
+	region_connections.drop_connections ();
 
 	delete _list_editor;
 
@@ -372,10 +376,6 @@ MidiView::track_going_away ()
 void
 MidiView::region_going_away ()
 {
-	if (_editing_context.session()->deletion_in_progress()) {
-		return;
-	}
-
 	_midi_region.reset ();
 	_model.reset ();
 
