@@ -2246,8 +2246,8 @@ Pianoroll::keyboard_paste ()
 
 	EC_LOCAL_TEMPO_SCOPE;
 
-	timepos_t where (get_preferred_edit_position (Editing::EDIT_IGNORE_NONE, false, false));
-	timepos_t absolute_where = _region->region_beats_to_absolute_time (where.beats());
+	timepos_t source_where (get_preferred_edit_position (Editing::EDIT_IGNORE_NONE, false, false));
+	timepos_t absolute_where (_region->source_beats_to_absolute_beats (source_where.beats()));
 
 	PasteContext pc (0, 1, ItemCounts(), true);
 	begin_reversible_command (string_compose (_("paste %1"), X_("MIDI")));
