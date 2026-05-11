@@ -113,7 +113,7 @@ KeyEditor::KeyEditor ()
 	filter_entry.set_icon_from_pixbuf (icon);
 	filter_entry.set_icon_tooltip_text (_("Click to reset search string"));
 	filter_entry.signal_search_string_updated ().connect (sigc::mem_fun (*this, &KeyEditor::search_string_updated));
-	filter_entry.set_alignment (1.0);
+	filter_entry.set_alignment (0.0);
 	vpacker.pack_start (filter_entry, false, false);
 
 	Label* hint = manage (new Label (_("To remove a shortcut, select an action then press this: ")));
