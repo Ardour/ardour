@@ -379,14 +379,16 @@ CueEditor::_get_preferred_edit_position (Editing::EditIgnoreOption ignore, bool 
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	samplepos_t where;
+	samplepos_t samples;
 	bool in_track_canvas = false;
 
-	if (!mouse_sample (where, in_track_canvas)) {
+	if (!mouse_sample (samples, in_track_canvas)) {
 		return Temporal::timepos_t (0);
 	}
 
-	return Temporal::timepos_t (where);
+	timepos_t where = timepos_t (samples);
+	snap_to (where);
+	return where;
 }
 
 Gtk::Box*
