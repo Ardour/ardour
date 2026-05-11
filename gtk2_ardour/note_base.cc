@@ -99,7 +99,7 @@ NoteBase::NoteBase(MidiView& v, bool with_events, const std::shared_ptr<NoteType
 		XMLNode* pcnode = ARDOUR::Config->instant_xml (pitch_colors_node_name);
 		if (pcnode) {
 			std::string val;
-			if (pcnode->get_property (_("colors"), val)) {
+			if (pcnode->get_property ("colors", val)) {
 				std::vector<std::string> cols;
 				split (val, cols, ':');
 				pitch_colors.clear ();
