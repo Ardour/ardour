@@ -200,7 +200,7 @@ SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_
 	_open_table.attach (recent_button,     0,1, row, row + 1, FILL, FILL); ++row;
 	_open_table.attach (existing_button,   0,1, row, row + 1, FILL, FILL); ++row;
 	if (!Config->get_demo_session_index_url ().empty ()) {
-		_open_table.attach (demo_button,       0,1, row, row + 1, FILL, FILL); ++row;
+		_open_table.attach (demo_button,     0,1, row, row + 1, FILL, FILL); ++row;
 	}
 	_open_table.attach (new_button,        0,1, row, row + 1, FILL, FILL); ++row;
 
@@ -978,6 +978,7 @@ SessionDialog::setup_demo_sessions ()
 	demo_folder_chooser.set_current_folder (poor_mans_glob (Config->get_default_session_parent_dir()));
 
 	demo_description.set_wrap_mode (Gtk::WRAP_WORD);
+	demo_description.set_editable (false);
 	demo_description.set_size_request (-1, std::max<int>(80, rintf(80. * UIConfiguration::instance().get_ui_scale())));
 
 	demo_name_entry.signal_changed().connect (sigc::mem_fun (*this, &SessionDialog::demo_name_changed));
