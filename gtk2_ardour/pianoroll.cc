@@ -161,6 +161,13 @@ Pianoroll::~Pianoroll ()
 		delete lane;
 	}
 
+	if (!inspector_scroller) {
+		/* the inspector was never packed, and so GTKmm mechanisms
+		   based on manage (Widget) won't take care of this for us.
+		*/
+		delete midi_inspector;
+	}
+
 	view_connections.drop_connections ();
 	_update_connection.disconnect ();
 	selection_connection.disconnect ();
