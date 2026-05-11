@@ -97,12 +97,6 @@ _pingback (void *arg)
 {
 	ArdourCurl::HttpGet h;
 
-	//initialize curl
-
-#ifdef MIXBUS
-	curl_easy_setopt (h.curl (), CURLOPT_FOLLOWLOCATION, 1);
-#endif
-
 	ping_call* cm = static_cast<ping_call*> (arg);
 	string return_str;
 	string qs;
