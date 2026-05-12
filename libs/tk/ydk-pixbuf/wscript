@@ -23,6 +23,7 @@ libydkpixbuf_sources = [
     'gdk-pixbuf.c',
     'gdk-pixdata.c',
     'io-pixdata.c',
+    'io-jpeg.c',
     'io-png.c',
     'io-xbm.c',
     'io-xpm.c',
@@ -38,6 +39,13 @@ def configure(conf):
     autowaf.check_pkg(conf, 'gobject-2.0', uselib_store='GOBJECT', mandatory=True)
     autowaf.check_pkg(conf, 'libpng', uselib_store='LIBPNG', mandatory=True)
     conf.check(header_name='unistd.h', define_name='HAVE_UNISTD_H',mandatory=False)
+    conf.check_cc(header_name='jpeglib.h',
+                  define_name='HAVE_LIBJPEG',
+                  uselib_store='LIBJPEG',
+                  lib='jpeg',
+                  mandatory=True,
+                  execute = False,
+                  fragment = "#include <stdio.h>\n#include <jpeglib.h>\nint main (int argc, char **argv) { struct jpeg_decompress_struct cinfo; jpeg_create_decompress (&cinfo); return 0; }")
 
 def build(bld):
     obj = bld.shlib(features = 'c cshlib', source=libydkpixbuf_sources)
@@ -47,10 +55,10 @@ def build(bld):
     obj.name            = 'libydk-pixbuf'
     obj.target          = 'ydk-pixbuf'
     obj.use             = ''
-    obj.uselib          = 'GLIB GIO GOBJECT LIBPNG'
+    obj.uselib          = 'GLIB GIO GOBJECT LIBPNG LIBJPEG'
     obj.defines         = [ 'HAVE_CONFIG_H', '_LARGEFILE64_SOURCE', '_REENTRANT', 'G_LOG_DOMAIN="GdkPixbuf"', 'DGDK_PIXBUF_COMPILATION', '_FILE_OFFSET_BITS=64',
                             'GDK_PIXBUF_ENABLE_BACKEND', 'G_DISABLE_SINGLE_INCLUDES', '_POSIX_C_SOURCE=200809L',
-                            'INCLUDE_png', 'INCLUDE_xbm', 'INCLUDE_xpm',
+                            'INCLUDE_png', 'INCLUDE_xbm', 'INCLUDE_xpm', 'INCLUDE_jpeg',
                             'PACKAGE="' + I18N_PACKAGE + '"', 'GDK_PIXBUF_LOCALEDIR=""'
 
                            ]
