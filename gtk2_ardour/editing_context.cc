@@ -2939,13 +2939,28 @@ EditingContext::get_grid_music_divisions (Editing::GridType gt) const
 }
 
 Temporal::Beats
+EditingContext::get_draw_length_as_beats (bool& success, timepos_t const & position) const
+{
+	EC_LOCAL_TEMPO_SCOPE;
+	return get_a_grid_type_as_beats (draw_length() == DRAW_LEN_AUTO ? grid_type() : draw_length(), success, position);
+}
+
+Temporal::Beats
 EditingContext::get_grid_type_as_beats (bool& success, timepos_t const & position) const
+{
+	EC_LOCAL_TEMPO_SCOPE;
+	return get_a_grid_type_as_beats (grid_type(), success, position);
+
+}
+
+Temporal::Beats
+EditingContext::get_a_grid_type_as_beats (GridType gtype, bool& success, timepos_t const & position) const
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
 	success = true;
 
-	int32_t const divisions = get_grid_beat_divisions (grid_type());
+	int32_t const divisions = get_grid_beat_divisions (gtype);
 	/* Beat (+1), and Bar (-1) are handled below */
 	if (divisions > 1) {
 		/* grid divisions are divisions of a 1/4 note */
@@ -2954,7 +2969,7 @@ EditingContext::get_grid_type_as_beats (bool& success, timepos_t const & positio
 
 	TempoMap::SharedPtr tmap (TempoMap::use());
 
-	switch (grid_type()) {
+	switch (gtype) {
 	case GridTypeBar:
 		if (_session) {
 			const Meter& m = tmap->meter_at (position);
@@ -3016,23 +3031,6 @@ EditingContext::get_grid_type_as_beats (bool& success, timepos_t const & positio
 		break;
 	}
 
-	return Temporal::Beats();
-}
-
-Temporal::Beats
-EditingContext::get_draw_length_as_beats (bool& success, timepos_t const & position) const
-{
-	EC_LOCAL_TEMPO_SCOPE;
-
-	success = true;
-	GridType grid_to_use = draw_length() == DRAW_LEN_AUTO ? grid_type() : draw_length();
-	int32_t const divisions = get_grid_beat_divisions (grid_to_use);
-
-	if (divisions != 0) {
-		return Temporal::Beats::ticks (Temporal::Beats::PPQN / divisions);
-	}
-
-	success = false;
 	return Temporal::Beats();
 }
 
