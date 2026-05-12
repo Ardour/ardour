@@ -43,6 +43,9 @@
 #endif
 
 
+/* Helper macros to convert between density units */
+#define DPCM_TO_DPI(value) ((int) round ((value) * 2.54))
+
 /* we are a "source manager" as far as libjpeg is concerned */
 #define JPEG_PROG_BUF_SIZE 65536
 
@@ -100,6 +103,8 @@ static gboolean gdk_pixbuf__jpeg_image_load_increment(gpointer context,
                                                       const guchar *buf, guint size,
                                                       GError **error);
 
+static gboolean gdk_pixbuf__jpeg_image_load_lines (JpegProgContext  *context,
+                                                   GError          **error);
 
 static void
 fatal_error_handler (j_common_ptr cinfo)
@@ -190,16 +195,13 @@ convert_cmyk_to_rgb (struct jpeg_decompress_struct *cinfo,
 			m = p[1];
 			y = p[2];
 			k = p[3];
-			if (cinfo->saw_Adobe_marker) {
-				p[0] = k*c / 255;
-				p[1] = k*m / 255;
-				p[2] = k*y / 255;
-			}
-			else {
-				p[0] = (255 - k)*(255 - c) / 255;
-				p[1] = (255 - k)*(255 - m) / 255;
-				p[2] = (255 - k)*(255 - y) / 255;
-			}
+
+			/* We now assume that all CMYK JPEG files
+			 * use inverted CMYK, as Photoshop does
+			 * See https://bugzilla.gnome.org/show_bug.cgi?id=618096 */
+			p[0] = k*c / 255;
+			p[1] = k*m / 255;
+			p[2] = k*y / 255;
 			p[3] = 255;
 			p += 4;
 		}
@@ -354,6 +356,7 @@ jpeg_parse_exif_app2_segment (JpegExifContext *context, jpeg_saved_marker_ptr ma
 		context->icc_profile = g_new (gchar, chunk_size);
 		/* copy the segment data to the profile space */
 		memcpy (context->icc_profile, marker->data + 14, chunk_size);
+                ret = TRUE;
 		goto out;
 	}
 
@@ -375,12 +378,15 @@ jpeg_parse_exif_app2_segment (JpegExifContext *context, jpeg_saved_marker_ptr ma
 	/* copy the segment data to the profile space */
 	memcpy (context->icc_profile + offset, marker->data + 14, chunk_size);
 
-	/* it's now this big plus the new data we've just copied */
-	context->icc_profile_size += chunk_size;
+        context->icc_profile_size = MAX (context->icc_profile_size, offset + chunk_size);
 
 	/* success */
 	ret = TRUE;
 out:
+        if (!ret) {
+                g_free (context->icc_profile);
+                context->icc_profile = NULL;
+        }
 	return ret;
 }
 
@@ -447,44 +453,64 @@ jpeg_parse_exif_app1 (JpegExifContext *context, jpeg_saved_marker_ptr marker)
 	i = i + offset;
 
 	/* check that we still are within the buffer and can read the tag count */
-	if ((i + 2) > marker->data_length) {
-		ret = FALSE;
-		goto out;
-	}
+	{
+	    const size_t new_i = i + 2;
+	    if (new_i < i || new_i > marker->data_length) {
+		    ret = FALSE;
+		    goto out;
+	    }
 
-	/* find out how many tags we have in IFD0. As per the TIFF spec, the first
-	   two bytes of the IFD contain a count of the number of tags. */
-	tags = de_get16(&marker->data[i], endian);
-	i = i + 2;
+	    /* find out how many tags we have in IFD0. As per the TIFF spec, the first
+	       two bytes of the IFD contain a count of the number of tags. */
+	    tags = de_get16(&marker->data[i], endian);
+	    i = new_i;
+	}
 
 	/* check that we still have enough data for all tags to check. The tags
 	   are listed in consecutive 12-byte blocks. The tag ID, type, size, and
 	   a pointer to the actual value, are packed into these 12 byte entries. */
-	if ((i + tags * 12) > marker->data_length) {
+	{
+	    const size_t new_i = i + tags * 12;
+	    if (new_i < i || new_i > marker->data_length) {
 		ret = FALSE;
 		goto out;
+	    }
 	}
 
 	/* check through IFD0 for tags */
-	while (tags--){
+	while (tags--) {
+		size_t new_i;
+
+		/* We check for integer overflow before the loop and
+		 * at the end of each iteration */
 		guint tag   = de_get16(&marker->data[i + 0], endian);
 		guint type  = de_get16(&marker->data[i + 2], endian);
 		guint count = de_get32(&marker->data[i + 4], endian);
-		/* values of types small enough to fit are stored directly in the (first) bytes of the Value Offset field */
-		guint short_value = de_get16(&marker->data[i + 8], endian);
 
 		/* orientation tag? */
 		if (tag == 0x112){
 
-			/* The orientation field should consist of a single 2-byte integer */
-			if (type != 0x3 || count != 1)
-				continue;
+			/* The orientation field should consist of a single 2-byte integer,
+			 * but might be a signed long.
+			 * Values of types smaller than 4 bytes are stored directly in the
+			 * Value Offset field */
+			if (type == 0x3 && count == 1) {
+				guint short_value = de_get16(&marker->data[i + 8], endian);
 
-			/* get the orientation value */
-			context->orientation = short_value <= 8 ? short_value : 0;
+				context->orientation = short_value <= 8 ? short_value : 0;
+			} else if (type == 0x9 && count == 1) {
+				guint long_value = de_get32(&marker->data[i + 8], endian);
+
+				context->orientation = long_value <= 8 ? long_value : 0;
+			}
 		}
 		/* move the pointer to the next 12-byte tag field. */
-		i = i + 12;
+		new_i = i + 12;
+		if (new_i < i || new_i > marker->data_length) {
+			ret = FALSE;
+			goto out;
+		}
+		i = new_i;
 	}
 
 out:
@@ -507,6 +533,21 @@ jpeg_parse_exif (JpegExifContext *context, j_decompress_ptr cinfo)
 	}
 }
 
+static gchar *
+jpeg_get_comment (j_decompress_ptr cinfo)
+{
+	jpeg_saved_marker_ptr cmarker;
+
+	cmarker = cinfo->marker_list;
+	while (cmarker != NULL) {
+		if (cmarker->marker == JPEG_COM)
+			return g_strndup ((const gchar *) cmarker->data, cmarker->data_length);
+		cmarker = cmarker->next;
+	}
+
+	return NULL;
+}
+
 static void
 jpeg_destroy_exif_context (JpegExifContext *context)
 {
@@ -515,10 +556,11 @@ jpeg_destroy_exif_context (JpegExifContext *context)
 
 /* Shared library entry point */
 static GdkPixbuf *
-gdk_pixbuf__jpeg_image_load (FILE *f, GError **error)
+gdk_pixbuf__real_jpeg_image_load (FILE *f, struct jpeg_decompress_struct *cinfo, GError **error)
 {
 	gint   i;
 	char   otag_str[5];
+	char  *density_str;
 	GdkPixbuf * volatile pixbuf = NULL;
 	guchar *dptr;
 	guchar *lines[4]; /* Used to expand rows, via rec_outbuf_height, 
@@ -527,14 +569,14 @@ gdk_pixbuf__jpeg_image_load (FILE *f, GError **error)
                            * at most 4."
 			   */
 	guchar **lptr;
-	struct jpeg_decompress_struct cinfo;
 	struct error_handler_data jerr;
 	stdio_src_ptr src;
 	gchar *icc_profile_base64;
+	gchar *comment;
 	JpegExifContext exif_context = { 0, };
 
 	/* setup error handler */
-	cinfo.err = jpeg_std_error (&jerr.pub);
+	cinfo->err = jpeg_std_error (&jerr.pub);
 	jerr.pub.error_exit = fatal_error_handler;
         jerr.pub.output_message = output_message_handler;
         jerr.error = error;
@@ -544,7 +586,7 @@ gdk_pixbuf__jpeg_image_load (FILE *f, GError **error)
 		if (pixbuf)
 			g_object_unref (pixbuf);
 
-		jpeg_destroy_decompress (&cinfo);
+		jpeg_destroy_decompress (cinfo);
 		jpeg_destroy_exif_context (&exif_context);
 
 		/* error should have been set by fatal_error_handler () */
@@ -552,14 +594,14 @@ gdk_pixbuf__jpeg_image_load (FILE *f, GError **error)
 	}
 
 	/* load header, setup */
-	jpeg_create_decompress (&cinfo);
+	jpeg_create_decompress (cinfo);
 
-	cinfo.src = (struct jpeg_source_mgr *)
-	  (*cinfo.mem->alloc_small) ((j_common_ptr) &cinfo, JPOOL_PERMANENT,
+	cinfo->src = (struct jpeg_source_mgr *)
+	  (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_PERMANENT,
 				  sizeof (stdio_source_mgr));
-	src = (stdio_src_ptr) cinfo.src;
+	src = (stdio_src_ptr) cinfo->src;
 	src->buffer = (JOCTET *)
-	  (*cinfo.mem->alloc_small) ((j_common_ptr) &cinfo, JPOOL_PERMANENT,
+	  (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_PERMANENT,
 				      JPEG_PROG_BUF_SIZE * sizeof (JOCTET));
 
 	src->pub.init_source = stdio_init_source;
@@ -571,20 +613,35 @@ gdk_pixbuf__jpeg_image_load (FILE *f, GError **error)
 	src->pub.bytes_in_buffer = 0; /* forces fill_input_buffer on first read */
 	src->pub.next_input_byte = NULL; /* until buffer loaded */
 
-	jpeg_save_markers (&cinfo, JPEG_APP0+1, 0xffff);
-	jpeg_save_markers (&cinfo, JPEG_APP0+2, 0xffff);
-	jpeg_read_header (&cinfo, TRUE);
+	jpeg_save_markers (cinfo, JPEG_APP0+1, 0xffff);
+	jpeg_save_markers (cinfo, JPEG_APP0+2, 0xffff);
+	jpeg_save_markers (cinfo, JPEG_COM, 0xffff);
+	jpeg_read_header (cinfo, TRUE);
 
 	/* parse exif data */
-	jpeg_parse_exif (&exif_context, &cinfo);
+	jpeg_parse_exif (&exif_context, cinfo);
 	
-	jpeg_start_decompress (&cinfo);
-	cinfo.do_fancy_upsampling = FALSE;
-	cinfo.do_block_smoothing = FALSE;
+	jpeg_start_decompress (cinfo);
+	cinfo->do_fancy_upsampling = FALSE;
+	cinfo->do_block_smoothing = FALSE;
+
+        /* Reject unsupported component counts */
+        if (cinfo->output_components != 3 && cinfo->output_components != 4 &&
+            !(cinfo->output_components == 1 &&
+              cinfo->out_color_space == JCS_GRAYSCALE)) {
+                g_set_error (error,
+                             GDK_PIXBUF_ERROR,
+                             GDK_PIXBUF_ERROR_CORRUPT_IMAGE,
+                             _("Unsupported number of color components (%d)"),
+                             cinfo->output_components);
+                goto out;
+        }
 
 	pixbuf = gdk_pixbuf_new (GDK_COLORSPACE_RGB, 
-				 cinfo.out_color_components == 4 ? TRUE : FALSE, 
-				 8, cinfo.output_width, cinfo.output_height);
+				 cinfo->out_color_components == 4 ? TRUE : FALSE, 
+				 8,
+                                 cinfo->output_width,
+                                 cinfo->output_height);
 	      
 	if (!pixbuf) {
                 /* broken check for *error == NULL for robustness against
@@ -600,6 +657,33 @@ gdk_pixbuf__jpeg_image_load (FILE *f, GError **error)
 		goto out; 
 	}
 
+	comment = jpeg_get_comment (cinfo);
+	if (comment != NULL) {
+		gdk_pixbuf_set_option (pixbuf, "comment", comment);
+		g_free (comment);
+	}
+
+	switch (cinfo->density_unit) {
+	case 1:
+		/* Dots per inch (no conversion required) */
+		density_str = g_strdup_printf ("%d", cinfo->X_density);
+		gdk_pixbuf_set_option (pixbuf, "x-dpi", density_str);
+		g_free (density_str);
+		density_str = g_strdup_printf ("%d", cinfo->Y_density);
+		gdk_pixbuf_set_option (pixbuf, "y-dpi", density_str);
+		g_free (density_str);
+		break;
+	case 2:
+		/* Dots per cm - convert into dpi */
+		density_str = g_strdup_printf ("%d", DPCM_TO_DPI (cinfo->X_density));
+		gdk_pixbuf_set_option (pixbuf, "x-dpi", density_str);
+		g_free (density_str);
+		density_str = g_strdup_printf ("%d", DPCM_TO_DPI (cinfo->Y_density));
+		gdk_pixbuf_set_option (pixbuf, "y-dpi", density_str);
+		g_free (density_str);
+		break;
+	}
+
 	/* if orientation tag was found */
 	if (exif_context.orientation != 0) {
 		g_snprintf (otag_str, sizeof (otag_str), "%d", exif_context.orientation);
@@ -613,48 +697,53 @@ gdk_pixbuf__jpeg_image_load (FILE *f, GError **error)
 		g_free (icc_profile_base64);
 	}
 
-	dptr = pixbuf->pixels;
+	dptr = gdk_pixbuf_get_pixels (pixbuf);
 
 	/* decompress all the lines, a few at a time */
-	while (cinfo.output_scanline < cinfo.output_height) {
+	while (cinfo->output_scanline < cinfo->output_height) {
 		lptr = lines;
-		for (i = 0; i < cinfo.rec_outbuf_height; i++) {
+		for (i = 0; i < cinfo->rec_outbuf_height; i++) {
 			*lptr++ = dptr;
-			dptr += pixbuf->rowstride;
+			dptr += gdk_pixbuf_get_rowstride (pixbuf);
 		}
 
-		jpeg_read_scanlines (&cinfo, lines, cinfo.rec_outbuf_height);
+		jpeg_read_scanlines (cinfo, lines, cinfo->rec_outbuf_height);
 
-		switch (cinfo.out_color_space) {
+		switch (cinfo->out_color_space) {
 		    case JCS_GRAYSCALE:
-		      explode_gray_into_buf (&cinfo, lines);
+		      explode_gray_into_buf (cinfo, lines);
 		      break;
 		    case JCS_RGB:
 		      /* do nothing */
 		      break;
 		    case JCS_CMYK:
-		      convert_cmyk_to_rgb (&cinfo, lines);
+		      convert_cmyk_to_rgb (cinfo, lines);
 		      break;
 		    default:
-		      g_object_unref (pixbuf);
-		      pixbuf = NULL;
-		      if (error && *error == NULL) {
-                        g_set_error (error,
-                                     GDK_PIXBUF_ERROR,
-				     GDK_PIXBUF_ERROR_UNKNOWN_TYPE,
-				     _("Unsupported JPEG color space (%s)"),
-				     colorspace_name (cinfo.out_color_space)); 
-		      }
-               	      goto out; 
+		      g_clear_object (&pixbuf);
+                      g_set_error (error,
+                                   GDK_PIXBUF_ERROR,
+				   GDK_PIXBUF_ERROR_UNKNOWN_TYPE,
+				   _("Unsupported JPEG color space (%s)"),
+				   colorspace_name (cinfo->out_color_space));
+		      goto out;
 		}
 	}
 
 out:
-	jpeg_finish_decompress (&cinfo);
-	jpeg_destroy_decompress (&cinfo);
+	jpeg_finish_decompress (cinfo);
+	jpeg_destroy_decompress (cinfo);
 	jpeg_destroy_exif_context (&exif_context);
 
 	return pixbuf;
+}
+
+static GdkPixbuf *
+gdk_pixbuf__jpeg_image_load (FILE *f, GError **error)
+{
+        struct jpeg_decompress_struct cinfo;
+
+        return gdk_pixbuf__real_jpeg_image_load (f, &cinfo, error);
 }
 
 
@@ -686,7 +775,6 @@ fill_input_buffer (j_decompress_ptr cinfo)
 	return FALSE;
 }
 
-
 static void
 skip_input_data (j_decompress_ptr cinfo, long num_bytes)
 {
@@ -710,7 +798,6 @@ skip_input_data (j_decompress_ptr cinfo, long num_bytes)
  * user_data - passed as arg 1 to func
  * return context (opaque to user)
  */
-
 static gpointer
 gdk_pixbuf__jpeg_image_begin_load (GdkPixbufModuleSizeFunc size_func,
 				   GdkPixbufModulePreparedFunc prepared_func, 
@@ -720,6 +807,10 @@ gdk_pixbuf__jpeg_image_begin_load (GdkPixbufModuleSizeFunc size_func,
 {
 	JpegProgContext *context;
 	my_source_mgr   *src;
+
+	g_assert (size_func != NULL);
+	g_assert (prepared_func != NULL);
+	g_assert (updated_func != NULL);
 
 	context = g_new0 (JpegProgContext, 1);
 	context->size_func = size_func;
@@ -782,10 +873,33 @@ static gboolean
 gdk_pixbuf__jpeg_image_stop_load (gpointer data, GError **error)
 {
 	JpegProgContext *context = (JpegProgContext *) data;
+	struct           jpeg_decompress_struct *cinfo;
         gboolean retval;
 
 	g_return_val_if_fail (context != NULL, TRUE);
-	
+
+	cinfo = &context->cinfo;
+
+	context->jerr.error = error;
+	if (!sigsetjmp (context->jerr.setjmp_buffer, 1)) {
+		/* Try to finish loading truncated files */
+		if (context->pixbuf &&
+		    cinfo->output_scanline < cinfo->output_height) {
+			my_src_ptr src = (my_src_ptr) cinfo->src;
+
+			/* But only if there's enough buffer space left */
+			if (src->skip_next < sizeof(src->buffer) - 2) {
+				/* Insert a fake EOI marker */
+				src->buffer[src->skip_next] = (JOCTET) 0xFF;
+				src->buffer[src->skip_next + 1] = (JOCTET) JPEG_EOI;
+				src->pub.next_input_byte = src->buffer + src->skip_next;
+				src->pub.bytes_in_buffer = 2;
+
+				gdk_pixbuf__jpeg_image_load_lines (context, NULL);
+			}
+		}
+	}
+
         /* FIXME this thing needs to report errors if
          * we have unused image data
          */
@@ -798,15 +912,14 @@ gdk_pixbuf__jpeg_image_stop_load (gpointer data, GError **error)
 	if (sigsetjmp (context->jerr.setjmp_buffer, 1)) {
                 retval = FALSE;
 	} else {
-		jpeg_finish_decompress (&context->cinfo);
+		jpeg_finish_decompress (cinfo);
                 retval = TRUE;
 	}
 
         jpeg_destroy_decompress (&context->cinfo);
 
-	if (context->cinfo.src) {
-		my_src_ptr src = (my_src_ptr) context->cinfo.src;
-		
+	if (cinfo->src) {
+		my_src_ptr src = (my_src_ptr) cinfo->src;
 		g_free (src);
 	}
 
@@ -814,7 +927,6 @@ gdk_pixbuf__jpeg_image_stop_load (gpointer data, GError **error)
 
         return retval;
 }
-
 
 static gboolean
 gdk_pixbuf__jpeg_image_load_lines (JpegProgContext  *context,
@@ -832,7 +944,7 @@ gdk_pixbuf__jpeg_image_load_lines (JpegProgContext  *context,
                 rowptr = context->dptr;
                 for (i=0; i < cinfo->rec_outbuf_height; i++) {
                         *lptr++ = rowptr;
-                        rowptr += context->pixbuf->rowstride;
+                        rowptr += gdk_pixbuf_get_rowstride (context->pixbuf);
                 }
 
                 nlines = jpeg_read_scanlines (cinfo, lines,
@@ -851,27 +963,24 @@ gdk_pixbuf__jpeg_image_load_lines (JpegProgContext  *context,
                         convert_cmyk_to_rgb (cinfo, lines);
                         break;
                 default:
-                        if (error && *error == NULL) {
-                                g_set_error (error,
-                                             GDK_PIXBUF_ERROR,
-                                             GDK_PIXBUF_ERROR_UNKNOWN_TYPE,
-                                             _("Unsupported JPEG color space (%s)"),
-                                             colorspace_name (cinfo->out_color_space));
-                        }
+                        g_set_error (error,
+                                     GDK_PIXBUF_ERROR,
+                                     GDK_PIXBUF_ERROR_UNKNOWN_TYPE,
+                                     _("Unsupported JPEG color space (%s)"),
+                                     colorspace_name (cinfo->out_color_space));
 
                         return FALSE;
                 }
 
-                context->dptr += nlines * context->pixbuf->rowstride;
+                context->dptr += (gsize)nlines * gdk_pixbuf_get_rowstride (context->pixbuf);
 
                 /* send updated signal */
-		if (context->updated_func)
-			(* context->updated_func) (context->pixbuf,
-						   0,
-						   cinfo->output_scanline - 1,
-						   cinfo->image_width,
-						   nlines,
-						   context->user_data);
+		(* context->updated_func) (context->pixbuf,
+					   0,
+					   cinfo->output_scanline - 1,
+					   cinfo->image_width,
+					   nlines,
+					   context->user_data);
         }
 
         return TRUE;
@@ -883,7 +992,7 @@ gdk_pixbuf__jpeg_image_load_lines (JpegProgContext  *context,
  * buf - new image data
  * size - length of new image data
  *
- * append image data onto inrecrementally built output image
+ * append image data onto incrementally built output image
  */
 static gboolean
 gdk_pixbuf__jpeg_image_load_increment (gpointer data,
@@ -901,6 +1010,7 @@ gdk_pixbuf__jpeg_image_load_increment (gpointer data,
 	gint             width, height;
 	char             otag_str[5];
 	gchar 		*icc_profile_base64;
+	char            *density_str;
 	JpegExifContext  exif_context = { 0, };
 	gboolean	 retval;
 
@@ -919,22 +1029,8 @@ gdk_pixbuf__jpeg_image_load_increment (gpointer data,
 		goto out;
 	}
 
-	/* skip over data if requested, handle unsigned int sizes cleanly */
-	/* only can happen if we've already called jpeg_get_header once   */
-	if (context->src_initialized && src->skip_next) {
-		if (src->skip_next > size) {
-			src->skip_next -= size;
-			retval = TRUE;
-			goto out;
-		} else {
-			num_left = size - src->skip_next;
-			bufhd = buf + src->skip_next;
-			src->skip_next = 0;
-		}
-	} else {
-		num_left = size;
-		bufhd = buf;
-	}
+	num_left = size;
+	bufhd = buf;
 
 	if (num_left == 0) {
 		retval = TRUE;
@@ -946,6 +1042,19 @@ gdk_pixbuf__jpeg_image_load_increment (gpointer data,
 	spinguard = 0;
 	first = TRUE;
 	while (TRUE) {
+		/* skip over data if requested, handle unsigned int sizes cleanly */
+		/* only can happen if we've already called jpeg_get_header        */
+		if (context->src_initialized && src->skip_next) {
+			if (src->skip_next >= num_left) {
+				src->skip_next -= num_left;
+				retval = TRUE;
+				goto out;
+			} else {
+				num_left -= src->skip_next;
+				bufhd += src->skip_next;
+				src->skip_next = 0;
+			}
+		}
 
 		/* handle any data from caller we haven't processed yet */
 		if (num_left > 0) {
@@ -986,11 +1095,17 @@ gdk_pixbuf__jpeg_image_load_increment (gpointer data,
 		/* try to load jpeg header */
 		if (!context->got_header) {
 			int rc;
+			gchar* comment;
+			gboolean has_alpha;
 		
 			jpeg_save_markers (cinfo, JPEG_APP0+1, 0xffff);
 			jpeg_save_markers (cinfo, JPEG_APP0+2, 0xffff);
+			jpeg_save_markers (cinfo, JPEG_COM, 0xffff);
 			rc = jpeg_read_header (cinfo, TRUE);
 			context->src_initialized = TRUE;
+
+                        /* Limit to 1GB to avoid OOM with large images */
+                        cinfo->mem->max_memory_to_use = 1024 * 1024 * 1024;
 			
 			if (rc == JPEG_SUSPENDED)
 				continue;
@@ -1002,16 +1117,14 @@ gdk_pixbuf__jpeg_image_load_increment (gpointer data,
 		
 			width = cinfo->image_width;
 			height = cinfo->image_height;
-			if (context->size_func) {
-				(* context->size_func) (&width, &height, context->user_data);
-				if (width == 0 || height == 0) {
-					g_set_error_literal (error,
-                                                             GDK_PIXBUF_ERROR,
-                                                             GDK_PIXBUF_ERROR_CORRUPT_IMAGE,
-                                                             _("Transformed JPEG has zero width or height."));
-					retval = FALSE;
-					goto out;
-				}
+			(* context->size_func) (&width, &height, context->user_data);
+			if (width == 0 || height == 0) {
+				g_set_error_literal (error,
+						     GDK_PIXBUF_ERROR,
+						     GDK_PIXBUF_ERROR_CORRUPT_IMAGE,
+						     _("Transformed JPEG has zero width or height."));
+				retval = FALSE;
+				goto out;
 			}
 			
 			cinfo->scale_num = 1;
@@ -1023,10 +1136,27 @@ gdk_pixbuf__jpeg_image_load_increment (gpointer data,
 				}
 			}
 			jpeg_calc_output_dimensions (cinfo);
-			
-			context->pixbuf = gdk_pixbuf_new (GDK_COLORSPACE_RGB, 
-							  cinfo->output_components == 4 ? TRUE : FALSE,
-							  8, 
+
+			if (cinfo->output_components == 3) {
+				has_alpha = FALSE;
+			} else if (cinfo->output_components == 4) {
+				has_alpha = TRUE;
+			} else if (cinfo->output_components == 1 &&
+				   cinfo->out_color_space == JCS_GRAYSCALE) {
+				has_alpha = FALSE;
+			} else {
+				g_set_error (error,
+					     GDK_PIXBUF_ERROR,
+					     GDK_PIXBUF_ERROR_CORRUPT_IMAGE,
+					     _("Unsupported number of color components (%d)"),
+					     cinfo->output_components);
+				retval = FALSE;
+				goto out;
+			}
+
+			context->pixbuf = gdk_pixbuf_new (GDK_COLORSPACE_RGB,
+							  has_alpha,
+							  8,
 							  cinfo->output_width,
 							  cinfo->output_height);
 
@@ -1037,6 +1167,33 @@ gdk_pixbuf__jpeg_image_load_increment (gpointer data,
                                                      _("Couldn't allocate memory for loading JPEG file"));
                                 retval = FALSE;
 				goto out;
+			}
+
+			comment = jpeg_get_comment (cinfo);
+			if (comment != NULL) {
+				gdk_pixbuf_set_option (context->pixbuf, "comment", comment);
+				g_free (comment);
+			}
+
+			switch (cinfo->density_unit) {
+			case 1:
+				/* Dots per inch (no conversion required) */
+				density_str = g_strdup_printf ("%d", cinfo->X_density);
+				gdk_pixbuf_set_option (context->pixbuf, "x-dpi", density_str);
+				g_free (density_str);
+				density_str = g_strdup_printf ("%d", cinfo->Y_density);
+				gdk_pixbuf_set_option (context->pixbuf, "y-dpi", density_str);
+				g_free (density_str);
+				break;
+			case 2:
+				/* Dots per cm - convert into dpi */
+				density_str = g_strdup_printf ("%d", DPCM_TO_DPI (cinfo->X_density));
+				gdk_pixbuf_set_option (context->pixbuf, "x-dpi", density_str);
+				g_free (density_str);
+				density_str = g_strdup_printf ("%d", DPCM_TO_DPI (cinfo->Y_density));
+				gdk_pixbuf_set_option (context->pixbuf, "y-dpi", density_str);
+				g_free (density_str);
+				break;
 			}
 		
 		        /* if orientation tag was found set an option to remember its value */
@@ -1053,13 +1210,12 @@ gdk_pixbuf__jpeg_image_load_increment (gpointer data,
 
 
 			/* Use pixbuf buffer to store decompressed data */
-			context->dptr = context->pixbuf->pixels;
+			context->dptr = gdk_pixbuf_get_pixels (context->pixbuf);
 			
 			/* Notify the client that we are ready to go */
-			if (context->prepared_func)
-				(* context->prepared_func) (context->pixbuf,
-							    NULL,
-							    context->user_data);
+			(* context->prepared_func) (context->pixbuf,
+						    NULL,
+						    context->user_data);
 			
 		} else if (!context->did_prescan) {
 			int rc;			
@@ -1098,7 +1254,7 @@ gdk_pixbuf__jpeg_image_load_increment (gpointer data,
 				if (!context->in_output) {
 					if (jpeg_start_output (cinfo, cinfo->input_scan_number)) {
 						context->in_output = TRUE;
-						context->dptr = context->pixbuf->pixels;
+						context->dptr = gdk_pixbuf_get_pixels (context->pixbuf);
 					}
 					else
 						break;
@@ -1218,7 +1374,6 @@ real_save_jpeg (GdkPixbuf          *pixbuf,
        guchar *ptr;
        guchar *pixels = NULL;
        JSAMPROW *jbuf;
-       int y = 0;
        volatile int quality = 75; /* default; must be between 0 and 100 */
        int i, j;
        int w, h = 0;
@@ -1226,6 +1381,8 @@ real_save_jpeg (GdkPixbuf          *pixbuf,
        int n_channels;
        struct error_handler_data jerr;
        ToFunctionDestinationManager to_callback_destmgr;
+       int x_density = 0;
+       int y_density = 0;
        gchar *icc_profile = NULL;
        gchar *data;
        gint retval = TRUE;
@@ -1268,6 +1425,48 @@ real_save_jpeg (GdkPixbuf          *pixbuf,
                                        retval = FALSE;
                                        goto cleanup;
                                }
+                       } else if (strcmp (*kiter, "x-dpi") == 0) {
+                               char *endptr = NULL;
+                               x_density = strtol (*viter, &endptr, 10);
+                               if (endptr == *viter)
+                                       x_density = -1;
+
+                               if (x_density <= 0 ||
+                                   x_density > 65535) {
+                                       /* This is a user-visible error;
+                                        * lets people skip the range-checking
+                                        * in their app.
+                                        */
+                                       g_set_error (error,
+                                                    GDK_PIXBUF_ERROR,
+                                                    GDK_PIXBUF_ERROR_BAD_OPTION,
+                                                    _("JPEG x-dpi must be a value between 1 and 65535; value “%s” is not allowed."),
+                                                    *viter);
+
+                                       retval = FALSE;
+                                       goto cleanup;
+                               }
+                       } else if (strcmp (*kiter, "y-dpi") == 0) {
+                               char *endptr = NULL;
+                               y_density = strtol (*viter, &endptr, 10);
+                               if (endptr == *viter)
+                                       y_density = -1;
+
+                               if (y_density <= 0 ||
+                                   y_density > 65535) {
+                                       /* This is a user-visible error;
+                                        * lets people skip the range-checking
+                                        * in their app.
+                                        */
+                                       g_set_error (error,
+                                                    GDK_PIXBUF_ERROR,
+                                                    GDK_PIXBUF_ERROR_BAD_OPTION,
+                                                    _("JPEG y-dpi must be a value between 1 and 65535; value “%s” is not allowed."),
+                                                    *viter);
+
+                                       retval = FALSE;
+                                       goto cleanup;
+                               }
                        } else if (strcmp (*kiter, "icc-profile") == 0) {
                                /* decode from base64 */
                                icc_profile = (gchar*) g_base64_decode (*viter, &icc_profile_size);
@@ -1296,6 +1495,12 @@ real_save_jpeg (GdkPixbuf          *pixbuf,
        w = gdk_pixbuf_get_width (pixbuf);
        h = gdk_pixbuf_get_height (pixbuf);
        pixels = gdk_pixbuf_get_pixels (pixbuf);
+
+       /* Guaranteed by the caller. */
+       g_assert (w >= 0);
+       g_assert (h >= 0);
+       g_assert (rowstride >= 0);
+       g_assert (n_channels >= 0);
 
        /* Allocate a small buffer to convert image data,
 	* and a larger buffer if doing to_callback save.
@@ -1355,6 +1560,13 @@ real_save_jpeg (GdkPixbuf          *pixbuf,
        jpeg_set_defaults (&cinfo);
        jpeg_set_quality (&cinfo, quality, TRUE);
 
+       /* set density information */
+       if (x_density > 0 && y_density > 0) {
+           cinfo.density_unit = 1; /* Dots per inch */
+           cinfo.X_density = x_density;
+           cinfo.Y_density = y_density;
+       }
+
        jpeg_start_compress (&cinfo, TRUE);
 
 	/* write ICC profile data */
@@ -1397,13 +1609,17 @@ real_save_jpeg (GdkPixbuf          *pixbuf,
        while (cinfo.next_scanline < cinfo.image_height) {
                /* convert scanline from ARGB to RGB packed */
                for (j = 0; j < w; j++)
-                       memcpy (&(buf[j*3]), &(ptr[i*rowstride + j*n_channels]), 3);
+                       memcpy (&(buf[j*3]), &(ptr[(gsize)i*rowstride + j*n_channels]), 3);
 
                /* write scanline */
                jbuf = (JSAMPROW *)(&buf);
-               jpeg_write_scanlines (&cinfo, jbuf, 1);
+               if (jpeg_write_scanlines (&cinfo, jbuf, 1) == 0) {
+                      jpeg_destroy_compress (&cinfo);
+                      retval = FALSE;
+                      goto cleanup;
+               }
+
                i++;
-               y++;
 
        }
 
@@ -1439,6 +1655,7 @@ gdk_pixbuf__jpeg_image_save_to_callback (GdkPixbufSaveFunc   save_func,
 	return real_save_jpeg (pixbuf, keys, values, error,
 			       TRUE, NULL, save_func, user_data);
 }
+
 
 #ifndef INCLUDE_jpeg
 #define MODULE_ENTRY(function) G_MODULE_EXPORT void function

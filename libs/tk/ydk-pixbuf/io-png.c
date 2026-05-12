@@ -26,9 +26,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <png.h>
+#include <math.h>
 #include "gdk-pixbuf-private.h"
 
-
+/* Helper macros to convert between density units */
+#define DPI_TO_DPM(value) ((int) round ((value) * 1000 / 25.4))
+#define DPM_TO_DPI(value) ((int) round ((value) * 25.4 / 1000))
+
+#define DEFAULT_FILL_COLOR 0x979899ff
+
 
 static gboolean
 setup_png_transformations(png_structp png_read_ptr, png_infop png_info_ptr,
@@ -247,6 +253,7 @@ static GdkPixbuf *
 gdk_pixbuf__png_image_load (FILE *f, GError **error)
 {
         GdkPixbuf * volatile pixbuf = NULL;
+        gint rowstride;
 	png_structp png_ptr;
 	png_infop info_ptr;
         png_textp text_ptr;
@@ -260,8 +267,13 @@ gdk_pixbuf__png_image_load (FILE *f, GError **error)
         const gchar *icc_profile_title;
         const gchar *icc_profile;
         png_uint_32 icc_profile_size;
+        png_uint_32 x_resolution;
+        png_uint_32 y_resolution;
+        int unit_type;
+        gchar *density_str;
         guint32 retval;
         gint compression_type;
+        gpointer ptr;
 
 #ifdef PNG_USER_MEM_SUPPORTED
 	png_ptr = png_create_read_struct_2 (PNG_LIBPNG_VER_STRING,
@@ -307,22 +319,23 @@ gdk_pixbuf__png_image_load (FILE *f, GError **error)
         pixbuf = gdk_pixbuf_new (GDK_COLORSPACE_RGB, ctype & PNG_COLOR_MASK_ALPHA, 8, w, h);
 
 	if (!pixbuf) {
-                if (error && *error == NULL) {
-                        g_set_error_literal (error,
-                                             GDK_PIXBUF_ERROR,
-                                             GDK_PIXBUF_ERROR_INSUFFICIENT_MEMORY,
-                                             _("Insufficient memory to load PNG file"));
-                }
-                
+                g_set_error_literal (error,
+                                     GDK_PIXBUF_ERROR,
+                                     GDK_PIXBUF_ERROR_INSUFFICIENT_MEMORY,
+                                     _("Insufficient memory to load PNG file"));
 
 		png_destroy_read_struct (&png_ptr, &info_ptr, NULL);
 		return NULL;
 	}
 
+        rowstride = gdk_pixbuf_get_rowstride (pixbuf);
+
+        gdk_pixbuf_fill (pixbuf, DEFAULT_FILL_COLOR);
+
 	rows = g_new (png_bytep, h);
 
-	for (i = 0; i < h; i++)
-		rows[i] = pixbuf->pixels + i * pixbuf->rowstride;
+        for (i = 0, ptr = gdk_pixbuf_get_pixels (pixbuf); i < h; i++, ptr = (guchar *) ptr + rowstride)
+		rows[i] = ptr;
 
 	png_read_image (png_ptr, rows);
         png_read_end (png_ptr, info_ptr);
@@ -345,6 +358,18 @@ gdk_pixbuf__png_image_load (FILE *f, GError **error)
                 icc_profile_base64 = g_base64_encode ((const guchar *) icc_profile, (gsize)icc_profile_size);
                 gdk_pixbuf_set_option (pixbuf, "icc-profile", icc_profile_base64);
                 g_free (icc_profile_base64);
+        }
+#endif
+
+#ifdef PNG_pHYs_SUPPORTED
+        retval = png_get_pHYs (png_ptr, info_ptr, &x_resolution, &y_resolution, &unit_type);
+        if (retval != 0 && unit_type == PNG_RESOLUTION_METER) {
+                density_str = g_strdup_printf ("%d", DPM_TO_DPI (x_resolution));
+                gdk_pixbuf_set_option (pixbuf, "x-dpi", density_str);
+                g_free (density_str);
+                density_str = g_strdup_printf ("%d", DPM_TO_DPI (y_resolution));
+                gdk_pixbuf_set_option (pixbuf, "y-dpi", density_str);
+                g_free (density_str);
         }
 #endif
 
@@ -384,8 +409,8 @@ struct _LoadContext {
         png_infop   png_info_ptr;
 
         GdkPixbufModuleSizeFunc size_func;
-        GdkPixbufModulePreparedFunc prepare_func;
-        GdkPixbufModuleUpdatedFunc update_func;
+        GdkPixbufModulePreparedFunc prepared_func;
+        GdkPixbufModuleUpdatedFunc updated_func;
         gpointer notify_user_data;
 
         GdkPixbuf* pixbuf;
@@ -413,20 +438,24 @@ struct _LoadContext {
 
 static gpointer
 gdk_pixbuf__png_image_begin_load (GdkPixbufModuleSizeFunc size_func,
-                                  GdkPixbufModulePreparedFunc prepare_func,
-				  GdkPixbufModuleUpdatedFunc update_func,
+                                  GdkPixbufModulePreparedFunc prepared_func,
+				  GdkPixbufModuleUpdatedFunc updated_func,
 				  gpointer user_data,
                                   GError **error)
 {
         LoadContext* lc;
         
+        g_assert (size_func != NULL);
+        g_assert (prepared_func != NULL);
+        g_assert (updated_func != NULL);
+
         lc = g_new0(LoadContext, 1);
         
         lc->fatal_error_occurred = FALSE;
 
         lc->size_func = size_func;
-        lc->prepare_func = prepare_func;
-        lc->update_func = update_func;
+        lc->prepared_func = prepared_func;
+        lc->updated_func = updated_func;
         lc->notify_user_data = user_data;
 
         lc->first_row_seen_in_chunk = -1;
@@ -454,17 +483,19 @@ gdk_pixbuf__png_image_begin_load (GdkPixbufModuleSizeFunc size_func,
 #endif
         if (lc->png_read_ptr == NULL) {
                 g_free(lc);
-                /* error callback should have set the error */
+
+                /* A failure here isn't supposed to call the error
+                 * callback, but it doesn't hurt to be careful.
+                 */
+                if (error && *error == NULL) {
+                        g_set_error_literal (error,
+                                             GDK_PIXBUF_ERROR,
+                                             GDK_PIXBUF_ERROR_INSUFFICIENT_MEMORY,
+                                             _("Couldn’t allocate memory for loading PNG"));
+                }
+
                 return NULL;
         }
-        
-	if (setjmp (png_jmpbuf(lc->png_read_ptr))) {
-		if (lc->png_info_ptr)
-			png_destroy_read_struct(&lc->png_read_ptr, NULL, NULL);
-                g_free(lc);
-                /* error callback should have set the error */
-                return NULL;
-	}
 
         /* Create the auxiliary context struct */
 
@@ -472,6 +503,23 @@ gdk_pixbuf__png_image_begin_load (GdkPixbufModuleSizeFunc size_func,
 
         if (lc->png_info_ptr == NULL) {
                 png_destroy_read_struct(&lc->png_read_ptr, NULL, NULL);
+                g_free(lc);
+
+                /* A failure here isn't supposed to call the error
+                 * callback, but it doesn't hurt to be careful.
+                 */
+                if (error && *error == NULL) {
+                        g_set_error_literal (error,
+                                             GDK_PIXBUF_ERROR,
+                                             GDK_PIXBUF_ERROR_INSUFFICIENT_MEMORY,
+                                             _("Couldn’t allocate memory for loading PNG"));
+                }
+
+                return NULL;
+        }
+
+        if (setjmp (png_jmpbuf(lc->png_read_ptr))) {
+                png_destroy_read_struct(&lc->png_read_ptr, &lc->png_info_ptr, NULL);
                 g_free(lc);
                 /* error callback should have set the error */
                 return NULL;
@@ -496,6 +544,7 @@ static gboolean
 gdk_pixbuf__png_image_stop_load (gpointer context, GError **error)
 {
         LoadContext* lc = context;
+        gboolean retval = TRUE;
 
         g_return_val_if_fail(lc != NULL, TRUE);
 
@@ -505,11 +554,17 @@ gdk_pixbuf__png_image_stop_load (gpointer context, GError **error)
         
         if (lc->pixbuf)
                 g_object_unref (lc->pixbuf);
+        else {
+                g_set_error_literal (error, GDK_PIXBUF_ERROR,
+                                     GDK_PIXBUF_ERROR_CORRUPT_IMAGE,
+                                     _("Premature end-of-file encountered"));
+                retval = FALSE;
+	}
         
         png_destroy_read_struct(&lc->png_read_ptr, &lc->png_info_ptr, NULL);
         g_free(lc);
 
-        return TRUE;
+        return retval;
 }
 
 static gboolean
@@ -542,7 +597,8 @@ gdk_pixbuf__png_image_load_increment(gpointer context,
                 lc->error = NULL;
                 return FALSE;
         } else {
-                if (lc->first_row_seen_in_chunk >= 0 && lc->update_func) {
+                if (lc->first_row_seen_in_chunk >= 0) {
+                        gint width = gdk_pixbuf_get_width (lc->pixbuf);
                         /* We saw at least one row */
                         gint pass_diff = lc->last_pass_seen_in_chunk - lc->first_pass_seen_in_chunk;
                         
@@ -550,38 +606,38 @@ gdk_pixbuf__png_image_load_increment(gpointer context,
                         
                         if (pass_diff == 0) {
                                 /* start and end row were in the same pass */
-                                (lc->update_func)(lc->pixbuf, 0,
-                                                  lc->first_row_seen_in_chunk,
-                                                  lc->pixbuf->width,
-                                                  (lc->last_row_seen_in_chunk -
-                                                   lc->first_row_seen_in_chunk) + 1,
-						  lc->notify_user_data);
+                                (lc->updated_func)(lc->pixbuf, 0,
+                                                   lc->first_row_seen_in_chunk,
+                                                   width,
+                                                   (lc->last_row_seen_in_chunk -
+                                                    lc->first_row_seen_in_chunk) + 1,
+                                                   lc->notify_user_data);
                         } else if (pass_diff == 1) {
                                 /* We have from the first row seen to
                                    the end of the image (max row
                                    seen), then from the top of the
                                    image to the last row seen */
                                 /* first row to end */
-                                (lc->update_func)(lc->pixbuf, 0,
-                                                  lc->first_row_seen_in_chunk,
-                                                  lc->pixbuf->width,
-                                                  (lc->max_row_seen_in_chunk -
-                                                   lc->first_row_seen_in_chunk) + 1,
-						  lc->notify_user_data);
+                                (lc->updated_func)(lc->pixbuf, 0,
+                                                   lc->first_row_seen_in_chunk,
+                                                   width,
+                                                   (lc->max_row_seen_in_chunk -
+                                                    lc->first_row_seen_in_chunk) + 1,
+                                                   lc->notify_user_data);
                                 /* top to last row */
-                                (lc->update_func)(lc->pixbuf,
-                                                  0, 0, 
-                                                  lc->pixbuf->width,
-                                                  lc->last_row_seen_in_chunk + 1,
-						  lc->notify_user_data);
+                                (lc->updated_func)(lc->pixbuf,
+                                                   0, 0, 
+                                                   width,
+                                                   lc->last_row_seen_in_chunk + 1,
+                                                   lc->notify_user_data);
                         } else {
                                 /* We made at least one entire pass, so update the
                                    whole image */
-                                (lc->update_func)(lc->pixbuf,
-                                                  0, 0, 
-                                                  lc->pixbuf->width,
-                                                  lc->max_row_seen_in_chunk + 1,
-						  lc->notify_user_data);
+                                (lc->updated_func)(lc->pixbuf,
+                                                   0, 0, 
+                                                   width,
+                                                   lc->max_row_seen_in_chunk + 1,
+                                                   lc->notify_user_data);
                         }
                 }
 
@@ -606,6 +662,10 @@ png_info_callback   (png_structp png_read_ptr,
         const gchar *icc_profile_title;
         const gchar *icc_profile;
         png_uint_32 icc_profile_size;
+        png_uint_32 x_resolution;
+        png_uint_32 y_resolution;
+        int unit_type;
+        gchar *density_str;
         guint32 retval;
         gint compression_type;
 
@@ -626,19 +686,17 @@ png_info_callback   (png_structp png_read_ptr,
         if (color_type & PNG_COLOR_MASK_ALPHA)
                 have_alpha = TRUE;
         
-        if (lc->size_func) {
+        {
                 gint w = width;
                 gint h = height;
                 (* lc->size_func) (&w, &h, lc->notify_user_data);
                 
                 if (w == 0 || h == 0) {
                         lc->fatal_error_occurred = TRUE;
-                        if (lc->error && *lc->error == NULL) {
-                                g_set_error_literal (lc->error,
-                                                     GDK_PIXBUF_ERROR,
-                                                     GDK_PIXBUF_ERROR_FAILED,
-                                                     _("Transformed PNG has zero width or height."));
-                        }
+                        g_set_error_literal (lc->error,
+                                             GDK_PIXBUF_ERROR,
+                                             GDK_PIXBUF_ERROR_FAILED,
+                                             _("Transformed PNG has zero width or height."));
                         return;
                 }
         }
@@ -648,15 +706,15 @@ png_info_callback   (png_structp png_read_ptr,
         if (lc->pixbuf == NULL) {
                 /* Failed to allocate memory */
                 lc->fatal_error_occurred = TRUE;
-                if (lc->error && *lc->error == NULL) {
-                        g_set_error (lc->error,
-                                     GDK_PIXBUF_ERROR,
-                                     GDK_PIXBUF_ERROR_INSUFFICIENT_MEMORY,
-                                     _("Insufficient memory to store a %lu by %lu image; try exiting some applications to reduce memory usage"),
-                                     (gulong) width, (gulong) height);
-                }
+                g_set_error (lc->error,
+                             GDK_PIXBUF_ERROR,
+                             GDK_PIXBUF_ERROR_INSUFFICIENT_MEMORY,
+                             _("Insufficient memory to store a %lu by %lu image; try exiting some applications to reduce memory usage"),
+                             (gulong) width, (gulong) height);
                 return;
         }
+
+        gdk_pixbuf_fill (lc->pixbuf, DEFAULT_FILL_COLOR);
 
         /* Extract text chunks and attach them as pixbuf options */
         
@@ -685,10 +743,21 @@ png_info_callback   (png_structp png_read_ptr,
         }
 #endif
 
+#ifdef PNG_pHYs_SUPPORTED
+        retval = png_get_pHYs (png_read_ptr, png_info_ptr, &x_resolution, &y_resolution, &unit_type);
+        if (retval != 0 && unit_type == PNG_RESOLUTION_METER) {
+                density_str = g_strdup_printf ("%d", DPM_TO_DPI (x_resolution));
+                gdk_pixbuf_set_option (lc->pixbuf, "x-dpi", density_str);
+                g_free (density_str);
+                density_str = g_strdup_printf ("%d", DPM_TO_DPI (y_resolution));
+                gdk_pixbuf_set_option (lc->pixbuf, "y-dpi", density_str);
+                g_free (density_str);
+        }
+#endif
+
         /* Notify the client that we are ready to go */
 
-        if (lc->prepare_func)
-                (* lc->prepare_func) (lc->pixbuf, NULL, lc->notify_user_data);
+        (* lc->prepared_func) (lc->pixbuf, NULL, lc->notify_user_data);
 
         return;
 }
@@ -703,20 +772,19 @@ png_row_callback   (png_structp png_read_ptr,
 {
         LoadContext* lc;
         guchar* old_row = NULL;
+        gsize rowstride;
 
         lc = png_get_progressive_ptr(png_read_ptr);
 
         if (lc->fatal_error_occurred)
                 return;
 
-        if (row_num >= lc->pixbuf->height) {
+        if (row_num >= gdk_pixbuf_get_height (lc->pixbuf)) {
                 lc->fatal_error_occurred = TRUE;
-                if (lc->error && *lc->error == NULL) {
-                        g_set_error_literal (lc->error,
-                                             GDK_PIXBUF_ERROR,
-                                             GDK_PIXBUF_ERROR_CORRUPT_IMAGE,
-                                             _("Fatal error reading PNG image file"));
-                }
+                g_set_error_literal (lc->error,
+                                     GDK_PIXBUF_ERROR,
+                                     GDK_PIXBUF_ERROR_CORRUPT_IMAGE,
+                                     _("Fatal error reading PNG image file"));
                 return;
         }
 
@@ -728,8 +796,9 @@ png_row_callback   (png_structp png_read_ptr,
         lc->max_row_seen_in_chunk = MAX(lc->max_row_seen_in_chunk, ((gint)row_num));
         lc->last_row_seen_in_chunk = row_num;
         lc->last_pass_seen_in_chunk = pass_num;
-        
-        old_row = lc->pixbuf->pixels + (row_num * lc->pixbuf->rowstride);
+
+        rowstride = gdk_pixbuf_get_rowstride (lc->pixbuf);
+        old_row = gdk_pixbuf_get_pixels (lc->pixbuf) + (row_num * rowstride);
 
         png_progressive_combine_row(lc->png_read_ptr, old_row, new_row);
 }
@@ -812,250 +881,288 @@ png_save_to_callback_flush_func (png_structp png_ptr)
         ;
 }
 
-static gboolean real_save_png (GdkPixbuf        *pixbuf, 
-                               gchar           **keys,
-                               gchar           **values,
-                               GError          **error,
-                               gboolean          to_callback,
-                               FILE             *f,
-                               GdkPixbufSaveFunc save_func,
-                               gpointer          user_data)
+static gboolean
+real_save_png (GdkPixbuf        *pixbuf,
+               int               n_keys,
+               gchar           **keys,
+               gchar           **values,
+               GError          **error,
+               gboolean          to_callback,
+               FILE             *f,
+               GdkPixbufSaveFunc save_func,
+               gpointer          user_data)
 {
-       png_structp png_ptr = NULL;
-       png_infop info_ptr;
-       png_textp text_ptr = NULL;
-       guchar *ptr;
-       guchar *pixels;
-       int y;
-       int i;
-       png_bytep row_ptr;
-       png_color_8 sig_bit;
-       int w, h, rowstride;
-       int has_alpha;
-       int bpc;
-       int num_keys;
-       int compression = -1;
-       gboolean success = TRUE;
-       guchar *icc_profile = NULL;
-       gsize icc_profile_size = 0;
-       SaveToFunctionIoPtr to_callback_ioptr;
+        png_structp png_ptr = NULL;
+        png_infop info_ptr;
+        guchar *ptr;
+        guchar *pixels;
+        int y;
+        png_bytep row_ptr;
+        png_color_8 sig_bit;
+        int w, h, rowstride;
+        int has_alpha;
+        int bpc;
+        int compression = -1;
+        int x_density = 0;
+        int y_density = 0;
+        gboolean success = TRUE;
+        guchar *icc_profile = NULL;
+        gsize icc_profile_size = 0;
+        SaveToFunctionIoPtr to_callback_ioptr;
+        int num_keys = 0;
+        png_textp text_ptr = NULL;
+        GArray *text_data = NULL;
 
-       num_keys = 0;
+        text_data = g_array_sized_new (FALSE, TRUE, sizeof (png_text), n_keys);
 
-       if (keys && *keys) {
-               gchar **kiter = keys;
-               gchar **viter = values;
+        for (int i = 0; i < n_keys; i++) {
+                const char *key = keys[i];
+                const char *value = values[i];
 
-               while (*kiter) {
-                       if (strncmp (*kiter, "tEXt::", 6) == 0) {
-                               gchar  *key = *kiter + 6;
-                               int     len = strlen (key);
-                               if (len < 1 || len > 79) {
-                                       g_set_error_literal (error,
-                                                            GDK_PIXBUF_ERROR,
-                                                            GDK_PIXBUF_ERROR_BAD_OPTION,
-                                                            _("Keys for PNG text chunks must have at least 1 and at most 79 characters."));
-                                       success = FALSE;
-                                       goto cleanup;
-                               }
-                               for (i = 0; i < len; i++) {
-                                       if ((guchar) key[i] > 127) {
-                                               g_set_error_literal (error,
-                                                                    GDK_PIXBUF_ERROR,
-                                                                    GDK_PIXBUF_ERROR_BAD_OPTION,
-                                                                    _("Keys for PNG text chunks must be ASCII characters."));
-                                               success = FALSE;
-                                               goto cleanup;
-                                       }
-                               }
-                               num_keys++;
-                       } else if (strcmp (*kiter, "icc-profile") == 0) {
-                               /* decode from base64 */
-                               icc_profile = g_base64_decode (*viter, &icc_profile_size);
-                               if (icc_profile_size < 127) {
-                                       /* This is a user-visible error */
-                                       g_set_error (error,
-                                                    GDK_PIXBUF_ERROR,
-                                                    GDK_PIXBUF_ERROR_BAD_OPTION,
-                                                    _("Color profile has invalid length %d."),
-                                                    (gint)icc_profile_size);
-                                       success = FALSE;
-                                       goto cleanup;
-                               }
-                       } else if (strcmp (*kiter, "compression") == 0) {
-                               char *endptr = NULL;
-                               compression = strtol (*viter, &endptr, 10);
+                if (strncmp (key, "tEXt::", 6) == 0) {
+                        const char *unprefixed_key = key + 6;
+                        int len = strlen (unprefixed_key);
+                        png_text text;
 
-                               if (endptr == *viter) {
-                                       g_set_error (error,
-                                                    GDK_PIXBUF_ERROR,
-                                                    GDK_PIXBUF_ERROR_BAD_OPTION,
-                                                    _("PNG compression level must be a value between 0 and 9; value '%s' could not be parsed."),
-                                                    *viter);
-                                       success = FALSE;
-                                       goto cleanup;
-                               }
-                               if (compression < 0 || compression > 9) {
-                                       /* This is a user-visible error;
-                                        * lets people skip the range-checking
-                                        * in their app.
-                                        */
-                                       g_set_error (error,
-                                                    GDK_PIXBUF_ERROR,
-                                                    GDK_PIXBUF_ERROR_BAD_OPTION,
-                                                    _("PNG compression level must be a value between 0 and 9; value '%d' is not allowed."),
-                                                    compression);
-                                       success = FALSE;
-                                       goto cleanup;
-                               }
-                       } else {
-                               g_warning ("Unrecognized parameter (%s) passed to PNG saver.", *kiter);
-                       }
+                        if (len < 1 || len > 79) {
+                                /* Translators notice: '%s' is the name of the
+                                 * PNG text key
+                                 */
+                                g_set_error (error, GDK_PIXBUF_ERROR,
+                                             GDK_PIXBUF_ERROR_BAD_OPTION,
+                                             _("Invalid key “%s”. Keys for PNG text chunks must have at least 1 and at most 79 characters."),
+                                             unprefixed_key);
+                                success = FALSE;
+                                goto cleanup;
+                        }
 
-                       ++kiter;
-                       ++viter;
-               }
-       }
+                        for (int i = 0; i < len; i++) {
+                                if ((guchar) unprefixed_key[i] > 127) {
+                                        /* Translators notice: '%s' is the name of
+                                         * the PNG text key
+                                         */
+                                        g_set_error (error, GDK_PIXBUF_ERROR,
+                                                     GDK_PIXBUF_ERROR_BAD_OPTION,
+                                                     _("Invalid key “%s”. Keys for PNG text chunks must be ASCII characters."),
+                                                     unprefixed_key);
+                                        success = FALSE;
+                                        goto cleanup;
+                                }
+                        }
 
-       if (num_keys > 0) {
-               gchar **kiter = keys;
-               gchar **viter = values;
-
-               text_ptr = g_new0 (png_text, num_keys);
-               for (i = 0; i < num_keys; i++) {
-                       if (strncmp (*kiter, "tEXt::", 6) != 0) {
-                                kiter++;
-                                viter++;
-                       }
-
-                       text_ptr[i].compression = PNG_TEXT_COMPRESSION_NONE;
-                       text_ptr[i].key  = *kiter + 6;
-                       text_ptr[i].text = g_convert (*viter, -1, 
-                                                     "ISO-8859-1", "UTF-8", 
-                                                     NULL, &text_ptr[i].text_length, 
-                                                     NULL);
+                        text.compression = PNG_TEXT_COMPRESSION_NONE;
+                        text.key = unprefixed_key;
+                        text.text = g_convert (value, -1,
+                                               "ISO-8859-1", "UTF-8",
+                                               NULL,
+                                               &text.text_length,
+                                               NULL);
 
 #ifdef PNG_iTXt_SUPPORTED 
-                       if (!text_ptr[i].text) {
-                               text_ptr[i].compression = PNG_ITXT_COMPRESSION_NONE;
-                               text_ptr[i].text = g_strdup (*viter);
-                               text_ptr[i].text_length = 0;
-                               text_ptr[i].itxt_length = strlen (text_ptr[i].text);
-                               text_ptr[i].lang = NULL;
-                               text_ptr[i].lang_key = NULL;
-                       }
+                        if (text.text == NULL) {
+                                text.compression = PNG_ITXT_COMPRESSION_NONE;
+                                text.text = g_strdup (value);
+                                text.text_length = 0;
+                                text.itxt_length = strlen (value);
+                                text.lang = NULL;
+                                text.lang_key = NULL;
+                        }
 #endif
 
-                       if (!text_ptr[i].text) {
-                               gint j;
-                               g_set_error (error,
+                        if (text.text == NULL) {
+                                g_set_error (error,
                                             GDK_PIXBUF_ERROR,
                                             GDK_PIXBUF_ERROR_BAD_OPTION,
-                                            _("Value for PNG text chunk %s cannot be converted to ISO-8859-1 encoding."), *kiter + 6);
-                               for (j = 0; j < i; j++)
-                                       g_free (text_ptr[j].text);
-                               g_free (text_ptr);
-                               return FALSE;
-                       }
+                                            _("Value for PNG text chunk '%s' cannot be converted to ISO-8859-1 encoding."), unprefixed_key);
+                                success = FALSE;
+                                goto cleanup;
+                        }
 
-                        kiter++;
-                        viter++;
-               }
-       }
+                        g_array_append_val (text_data, text);
+                } else if (strcmp (key, "icc-profile") == 0) {
+                        icc_profile = g_base64_decode (value, &icc_profile_size);
 
-       bpc = gdk_pixbuf_get_bits_per_sample (pixbuf);
-       w = gdk_pixbuf_get_width (pixbuf);
-       h = gdk_pixbuf_get_height (pixbuf);
-       rowstride = gdk_pixbuf_get_rowstride (pixbuf);
-       has_alpha = gdk_pixbuf_get_has_alpha (pixbuf);
-       pixels = gdk_pixbuf_get_pixels (pixbuf);
+                        if (icc_profile_size < 127) {
+                                g_set_error (error, GDK_PIXBUF_ERROR,
+                                             GDK_PIXBUF_ERROR_BAD_OPTION,
+                                             _("Color profile has invalid length %d"),
+                                             (int) icc_profile_size);
+                                success = FALSE;
+                                goto cleanup;
+                        }
+                } else if (strcmp (key, "compression") == 0) {
+                        char *endptr = NULL;
 
-       png_ptr = png_create_write_struct (PNG_LIBPNG_VER_STRING,
-                                          error,
-                                          png_simple_error_callback,
-                                          png_simple_warning_callback);
-       if (png_ptr == NULL) {
-	       success = FALSE;
-	       goto cleanup;
-       }
+                        compression = strtol (value, &endptr, 10);
+                        if (endptr == value || (compression < 0 || compression > 9)) {
+                                g_set_error (error, GDK_PIXBUF_ERROR,
+                                             GDK_PIXBUF_ERROR_BAD_OPTION,
+                                             _("PNG compression level must be a value between 0 and 9; value “%s” is invalid"),
+                                             value);
+                                success = FALSE;
+                                goto cleanup;
+                        }
+                } else if (strcmp (key, "x-dpi") == 0 || strcmp (key, "y-dpi") == 0) {
+                        gboolean is_horizontal = strcmp (key, "x-dpi") == 0;
+                        char *endptr = NULL;
 
-       info_ptr = png_create_info_struct (png_ptr);
-       if (info_ptr == NULL) {
-	       success = FALSE;
-	       goto cleanup;
-       }
-       if (setjmp (png_jmpbuf(png_ptr))) {
-	       success = FALSE;
-	       goto cleanup;
-       }
+                        int dpi = strtol (value, &endptr, 10);
 
-       if (num_keys > 0) {
-               png_set_text (png_ptr, info_ptr, text_ptr, num_keys);
-       }
+                        if (endptr == value || dpi <= 0) {
+                                g_set_error (error, GDK_PIXBUF_ERROR,
+                                             GDK_PIXBUF_ERROR_BAD_OPTION,
+                                             _("PNG %s must be greater than zero; value “%s” is not allowed"),
+                                             is_horizontal ? "x-dpi" : "y-dpi",
+                                             value);
+                                success = FALSE;
+                                goto cleanup;
+                        }
 
-       if (to_callback) {
-               to_callback_ioptr.save_func = save_func;
-               to_callback_ioptr.user_data = user_data;
-               to_callback_ioptr.error = error;
-               png_set_write_fn (png_ptr, &to_callback_ioptr,
-                                 png_save_to_callback_write_func,
-                                 png_save_to_callback_flush_func);
-       } else {
-               png_init_io (png_ptr, f);
-       }
+                        if (is_horizontal) {
+                                x_density = dpi;
+                        } else {
+                                y_density = dpi;
+                        }
+                } else {
+                        g_warning ("Unrecognized parameter “%s” passed to the PNG saver", key);
+                }
+        }
 
-       if (compression >= 0)
-               png_set_compression_level (png_ptr, compression);
+        bpc = gdk_pixbuf_get_bits_per_sample (pixbuf);
+        w = gdk_pixbuf_get_width (pixbuf);
+        h = gdk_pixbuf_get_height (pixbuf);
+        rowstride = gdk_pixbuf_get_rowstride (pixbuf);
+        has_alpha = gdk_pixbuf_get_has_alpha (pixbuf);
+        pixels = gdk_pixbuf_get_pixels (pixbuf);
+
+        if (text_data->len > 0) {
+                num_keys = text_data->len;
+                text_ptr = (png_textp) g_array_free (text_data, FALSE);
+                text_data = NULL;
+        } else {
+                g_clear_pointer (&text_data, g_array_unref);
+                num_keys = 0;
+                text_ptr = NULL;
+        }
+
+        /* Guaranteed by the caller. */
+        g_assert (w >= 0);
+        g_assert (h >= 0);
+        g_assert (rowstride >= 0);
+
+        png_ptr = png_create_write_struct (PNG_LIBPNG_VER_STRING,
+                                           error,
+                                           png_simple_error_callback,
+                                           png_simple_warning_callback);
+        if (png_ptr == NULL) {
+	        success = FALSE;
+	        goto cleanup;
+        }
+
+        info_ptr = png_create_info_struct (png_ptr);
+        if (info_ptr == NULL) {
+	        success = FALSE;
+	        goto cleanup;
+        }
+
+        if (setjmp (png_jmpbuf (png_ptr))) {
+	        success = FALSE;
+	        goto cleanup;
+        }
+
+        if (num_keys > 0) {
+                png_set_text (png_ptr, info_ptr, text_ptr, num_keys);
+        }
+
+        if (to_callback) {
+                to_callback_ioptr.save_func = save_func;
+                to_callback_ioptr.user_data = user_data;
+                to_callback_ioptr.error = error;
+                png_set_write_fn (png_ptr, &to_callback_ioptr,
+                                  png_save_to_callback_write_func,
+                                  png_save_to_callback_flush_func);
+        } else {
+                png_init_io (png_ptr, f);
+        }
+
+        if (compression >= 0) {
+                png_set_compression_level (png_ptr, compression);
+        }
+
+#ifdef PNG_pHYs_SUPPORTED
+        if (x_density > 0 && y_density > 0) {
+                png_set_pHYs (png_ptr, info_ptr,
+                              DPI_TO_DPM (x_density),
+                              DPI_TO_DPM (y_density),
+                              PNG_RESOLUTION_METER);
+        }
+#endif
 
 #if defined(PNG_iCCP_SUPPORTED)
         /* the proper ICC profile title is encoded in the profile */
         if (icc_profile != NULL) {
                 png_set_iCCP (png_ptr, info_ptr,
-                              "ICC profile", PNG_COMPRESSION_TYPE_BASE,
-                              (png_bytep) icc_profile, icc_profile_size);
+                              "ICC profile",
+                              PNG_COMPRESSION_TYPE_BASE,
+                              (png_bytep) icc_profile,
+                              icc_profile_size);
         }
 #endif
 
-       if (has_alpha) {
-               png_set_IHDR (png_ptr, info_ptr, w, h, bpc,
-                             PNG_COLOR_TYPE_RGB_ALPHA, PNG_INTERLACE_NONE,
-                             PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
-       } else {
-               png_set_IHDR (png_ptr, info_ptr, w, h, bpc,
-                             PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE,
-                             PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
-       }
-       sig_bit.red = bpc;
-       sig_bit.green = bpc;
-       sig_bit.blue = bpc;
-       sig_bit.alpha = bpc;
-       png_set_sBIT (png_ptr, info_ptr, &sig_bit);
-       png_write_info (png_ptr, info_ptr);
-       png_set_shift (png_ptr, &sig_bit);
-       png_set_packing (png_ptr);
+        if (has_alpha) {
+                png_set_IHDR (png_ptr, info_ptr, w, h, bpc,
+                              PNG_COLOR_TYPE_RGB_ALPHA,
+                              PNG_INTERLACE_NONE,
+                              PNG_COMPRESSION_TYPE_BASE,
+                              PNG_FILTER_TYPE_BASE);
+        } else {
+                png_set_IHDR (png_ptr, info_ptr, w, h, bpc,
+                              PNG_COLOR_TYPE_RGB,
+                              PNG_INTERLACE_NONE,
+                              PNG_COMPRESSION_TYPE_BASE,
+                              PNG_FILTER_TYPE_BASE);
+        }
 
-       ptr = pixels;
-       for (y = 0; y < h; y++) {
-               row_ptr = (png_bytep)ptr;
-               png_write_rows (png_ptr, &row_ptr, 1);
-               ptr += rowstride;
-       }
+        /* Note bpc is always 8 */
+        sig_bit.red = bpc;
+        sig_bit.green = bpc;
+        sig_bit.blue = bpc;
+        sig_bit.alpha = bpc;
+        png_set_sBIT (png_ptr, info_ptr, &sig_bit);
+        png_write_info (png_ptr, info_ptr);
+        png_set_packing (png_ptr);
 
-       png_write_end (png_ptr, info_ptr);
+        for (y = 0, ptr = pixels; y < h; y++, ptr += rowstride) {
+                row_ptr = (png_bytep)ptr;
+                png_write_rows (png_ptr, &row_ptr, 1);
+        }
+
+        png_write_end (png_ptr, info_ptr);
+
+        for (int i = 0; i < num_keys; i++) {
+                g_free (text_ptr[i].text);
+        }
+
+        g_free (text_ptr);
 
 cleanup:
-        if (png_ptr != NULL)
+        if (png_ptr != NULL) {
                 png_destroy_write_struct (&png_ptr, &info_ptr);
+        }
+
+        if (text_data != NULL) {
+                for (guint i = 0; i < text_data->len; i++) {
+                        png_textp text = &g_array_index (text_data, png_text, i);
+
+                        g_free (text->text);
+                }
+
+                g_array_unref (text_data);
+        }
 
         g_free (icc_profile);
 
-        if (text_ptr != NULL) {
-                for (i = 0; i < num_keys; i++)
-                        g_free (text_ptr[i].text);
-                g_free (text_ptr);
-        }
-
-       return success;
+        return success;
 }
 
 static gboolean
@@ -1065,7 +1172,9 @@ gdk_pixbuf__png_image_save (FILE          *f,
                             gchar        **values,
                             GError       **error)
 {
-        return real_save_png (pixbuf, keys, values, error,
+        int n_keys = keys != NULL ? g_strv_length (keys) : 0;
+
+        return real_save_png (pixbuf, n_keys, keys, values, error,
                               FALSE, f, NULL, NULL);
 }
 
@@ -1077,7 +1186,9 @@ gdk_pixbuf__png_image_save_to_callback (GdkPixbufSaveFunc   save_func,
                                         gchar             **values,
                                         GError            **error)
 {
-        return real_save_png (pixbuf, keys, values, error,
+        int n_keys = keys != NULL ? g_strv_length (keys) : 0;
+
+        return real_save_png (pixbuf, n_keys, keys, values, error,
                               TRUE, NULL, save_func, user_data);
 }
 

@@ -178,7 +178,7 @@ parse_color (const char *spec,
 	     XPMColor   *colorPtr)
 {
 	if (spec[0] == '#') {
-		int i, red, green, blue;
+		unsigned int i, red, green, blue;
 
 		if ((i = strlen (spec + 1)) % 3) {
 			return FALSE;

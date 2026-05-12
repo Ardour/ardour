@@ -44,8 +44,8 @@
 typedef struct _XBMData XBMData;
 struct _XBMData
 {
-	GdkPixbufModulePreparedFunc prepare_func;
-	GdkPixbufModuleUpdatedFunc update_func;
+	GdkPixbufModulePreparedFunc prepared_func;
+	GdkPixbufModuleUpdatedFunc updated_func;
 	gpointer user_data;
 
 	gchar *tempname;
@@ -131,8 +131,8 @@ next_int (FILE *fstream)
 			/* trim high bits, check type and accumulate */
 			ch &= 0xff;
 			if (g_ascii_isxdigit (ch)) {
-				value = (value << 4) + g_ascii_xdigit_value (ch);
-				gotone++;
+				value = ((value & 0xf) << 4) + g_ascii_xdigit_value (ch);
+				gotone = 1;
 			} else if ((hex_table[ch]) < 0 && gotone) {
 				done++;
 			}
@@ -151,7 +151,7 @@ read_bitmap_file_data (FILE    *fstream,
 {
 	guchar *bits = NULL;		/* working variable */
 	char line[MAX_SIZE];		/* input line from file */
-	int size;			/* number of bytes of data */
+	guint size;			/* number of bytes of data */
 	char name_and_type[MAX_SIZE];	/* an input line */
 	char *type;			/* for parsing */
 	int value;			/* from an input line */
@@ -227,21 +227,37 @@ read_bitmap_file_data (FILE    *fstream,
 		if (!ww || !hh)
 			RETURN (FALSE);
 
+		/* Choose @padding so @size is even if @version10p is %TRUE.
+		 * If @version10p is %FALSE, @size could be even or odd. */
 		if ((ww % 16) && ((ww % 16) < 9) && version10p)
 			padding = 1;
 		else
 			padding = 0;
 
-		bytes_per_line = (ww+7)/8 + padding;
+		/* Check for overflow for the bytes_per_line calculation. */
+		if (ww > G_MAXUINT - 7)
+			RETURN (FALSE);
 
-		size = bytes_per_line * hh;
-                if (size / bytes_per_line != hh) /* overflow */
-                        RETURN (FALSE);
+		bytes_per_line = (ww+7)/8 + padding;
+		g_assert (!version10p || (bytes_per_line % 2) == 0);
+
+		/* size = bytes_per_line * hh */
+		if (!g_uint_checked_mul (&size, bytes_per_line, hh))
+			RETURN (FALSE);
+
 		bits = g_malloc (size);
 
 		if (version10p) {
 			unsigned char *ptr;
-			int bytes;
+			guint bytes;
+
+			/* @bytes is guaranteed not to overflow (which could
+			 * happen if @size is the odd-valued %G_MAXUINT: @bytes would reach
+			 * %G_MAXUINT-1 in the loop, then be incremented to %G_MAXUINT+1 on the
+			 * next iteration) because @bytes_per_line is guaranteed to be even if
+			 * @version10p is %TRUE (due to the selection of
+			 * @padding in that case), so @size must be even too. */
+			g_assert ((size % 2) == 0);
 
 			for (bytes = 0, ptr = bits; bytes < size; (bytes += 2)) {
 				if ((value = next_int (fstream)) < 0)
@@ -252,7 +268,7 @@ read_bitmap_file_data (FILE    *fstream,
 			}
 		} else {
 			unsigned char *ptr;
-			int bytes;
+			guint bytes;
 
 			for (bytes = 0, ptr = bits; bytes < size; bytes++, ptr++) {
 				if ((value = next_int (fstream)) < 0) 
@@ -286,7 +302,7 @@ gdk_pixbuf__xbm_image_load_real (FILE     *f,
 {
 	guint w, h;
 	int x_hot, y_hot;
-	guchar *data, *ptr;
+	guchar *data = NULL, *ptr;
 	guchar *pixels;
 	guint row_stride;
 	int x, y;
@@ -306,6 +322,7 @@ gdk_pixbuf__xbm_image_load_real (FILE     *f,
 	pixbuf = gdk_pixbuf_new (GDK_COLORSPACE_RGB, FALSE, 8, w, h);
 
         if (pixbuf == NULL) {
+                g_free (data);
                 g_set_error_literal (error,
                                      GDK_PIXBUF_ERROR,
                                      GDK_PIXBUF_ERROR_INSUFFICIENT_MEMORY,
@@ -324,8 +341,8 @@ gdk_pixbuf__xbm_image_load_real (FILE     *f,
 	pixels = gdk_pixbuf_get_pixels (pixbuf);
 	row_stride = gdk_pixbuf_get_rowstride (pixbuf);
 
-	if (context && context->prepare_func)
-		(* context->prepare_func) (pixbuf, NULL, context->user_data);
+	if (context)
+		(* context->prepared_func) (pixbuf, NULL, context->user_data);
 
 
 	/* Initialize PIXBUF */
@@ -344,17 +361,16 @@ gdk_pixbuf__xbm_image_load_real (FILE     *f,
 			reg >>= 1;
 			bits--;
 
-			pixels[x*3+0] = channel;
-			pixels[x*3+1] = channel;
-			pixels[x*3+2] = channel;
+			pixels[x * 3 + 0] = channel;
+			pixels[x * 3 + 1] = channel;
+			pixels[x * 3 + 2] = channel;
 		}
 		pixels += row_stride;
 	}
 	g_free (data);
 
 	if (context) {
-		if (context->update_func)
-			(* context->update_func) (pixbuf, 0, 0, w, h, context->user_data);
+		(* context->updated_func) (pixbuf, 0, 0, w, h, context->user_data);
 	}
 
 	return pixbuf;
@@ -380,17 +396,21 @@ gdk_pixbuf__xbm_image_load (FILE    *f,
 
 static gpointer
 gdk_pixbuf__xbm_image_begin_load (GdkPixbufModuleSizeFunc       size_func,
-                                  GdkPixbufModulePreparedFunc   prepare_func,
-				  GdkPixbufModuleUpdatedFunc    update_func,
+                                  GdkPixbufModulePreparedFunc   prepared_func,
+				  GdkPixbufModuleUpdatedFunc    updated_func,
 				  gpointer                      user_data,
 				  GError                      **error)
 {
 	XBMData *context;
 	gint fd;
 
+	g_assert (size_func != NULL);
+	g_assert (prepared_func != NULL);
+	g_assert (updated_func != NULL);
+
 	context = g_new (XBMData, 1);
-	context->prepare_func = prepare_func;
-	context->update_func = update_func;
+	context->prepared_func = prepared_func;
+	context->updated_func = updated_func;
 	context->user_data = user_data;
 	context->all_okay = TRUE;
 	fd = g_file_open_tmp ("gdkpixbuf-xbm-tmp.XXXXXX",
