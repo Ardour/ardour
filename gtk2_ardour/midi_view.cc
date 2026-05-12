@@ -1151,32 +1151,41 @@ MidiView::drop_selected_chord (std::vector<int> const & which_notes)
 void
 MidiView::replace_chord (std::vector<int> const & intervals)
 {
-	if (_selection.size() != intervals.size()) {
-		/* cannot replace triads with tetrads etc */
-		return;
-	}
-
 	if (!chord_is_selected()) {
 		return;
 	}
 
 	/* this ignores inversions */
 	int root_pitch = 128;
+	int channel;
+	Temporal::Beats time;
+	Temporal::Beats length;
+	int velocity;
+	std::shared_ptr<NoteType> base;
 
 	for (auto const & sel : _selection) {
 		if (sel->note()->note() < root_pitch) {
 			root_pitch = sel->note ()->note();
+			base = sel->note (); /* use root pitch properties for all new notes */
 		}
 	}
 
+	channel = base->channel ();
+	time = base->time();
+	length = base->length();
+	velocity = base->velocity ();
+
 	start_note_diff_command (_("replace chord"));
 
-	std::vector<int>::size_type n = 0;
-
 	for (auto const & sel : _selection) {
-		_note_diff_command->change (sel->note (), MidiModel::NoteDiffCommand::NoteNumber, root_pitch + intervals[n]);
-		++n;
+		_note_diff_command->remove (sel->note());
 	}
+
+	for (auto & interval : intervals) {
+		const std::shared_ptr<NoteType> new_note (new NoteType (channel, time,length, root_pitch + interval, velocity));
+		_note_diff_command->add (new_note);
+	}
+
 	apply_note_diff ();
 	std::vector<std::shared_ptr<NoteType> > notes;
 	selection_as_notevector (notes);
