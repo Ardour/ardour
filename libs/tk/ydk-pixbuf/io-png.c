@@ -445,10 +445,6 @@ gdk_pixbuf__png_image_begin_load (GdkPixbufModuleSizeFunc size_func,
 {
         LoadContext* lc;
         
-        g_assert (size_func != NULL);
-        g_assert (prepared_func != NULL);
-        g_assert (updated_func != NULL);
-
         lc = g_new0(LoadContext, 1);
         
         lc->fatal_error_occurred = FALSE;
@@ -597,7 +593,7 @@ gdk_pixbuf__png_image_load_increment(gpointer context,
                 lc->error = NULL;
                 return FALSE;
         } else {
-                if (lc->first_row_seen_in_chunk >= 0) {
+                if (lc->first_row_seen_in_chunk >= 0 && lc->updated_func) {
                         gint width = gdk_pixbuf_get_width (lc->pixbuf);
                         /* We saw at least one row */
                         gint pass_diff = lc->last_pass_seen_in_chunk - lc->first_pass_seen_in_chunk;
@@ -686,7 +682,7 @@ png_info_callback   (png_structp png_read_ptr,
         if (color_type & PNG_COLOR_MASK_ALPHA)
                 have_alpha = TRUE;
         
-        {
+        if (lc->size_func) {
                 gint w = width;
                 gint h = height;
                 (* lc->size_func) (&w, &h, lc->notify_user_data);
@@ -756,8 +752,8 @@ png_info_callback   (png_structp png_read_ptr,
 #endif
 
         /* Notify the client that we are ready to go */
-
-        (* lc->prepared_func) (lc->pixbuf, NULL, lc->notify_user_data);
+				if (lc->prepared_func)
+					(* lc->prepared_func) (lc->pixbuf, NULL, lc->notify_user_data);
 
         return;
 }
