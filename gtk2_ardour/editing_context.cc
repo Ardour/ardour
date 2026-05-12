@@ -4280,7 +4280,6 @@ EditingContext::pianoroll_edit ()
 
 	if (!pianoroll_window) {
 		pianoroll_window = new PianorollWindow (_("Pianoroll Window"), *_session);
-		pianoroll_window->signal_delete_event().connect (sigc::bind (sigc::ptr_fun (ARDOUR_UI_UTILS::just_hide_it), pianoroll_window));
 	}
 
 	pianoroll_window->set_show_source (false);
