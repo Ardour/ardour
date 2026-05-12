@@ -389,7 +389,7 @@ int rd_acquire(
 	if (!request_cb && priority != INT32_MAX)
 		return -EINVAL;
 
-	if (!(d = calloc(sizeof(rd_device), 1)))
+	if (!(d = calloc(1, sizeof(rd_device))))
 		return -ENOMEM;
 
 	d->ref = 1;
