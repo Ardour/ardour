@@ -2612,6 +2612,13 @@ LuaBindings::common (lua_State* L)
 		.addConst ("ForceChannel", ARDOUR::ChannelMode(ForceChannel))
 		.endNamespace ()
 
+		.beginNamespace ("ColorMode")
+		.addConst ("MeterColors", ARDOUR::ColorMode(MeterColors))
+		.addConst ("ChannelColors,", ARDOUR::ColorMode(ChannelColors))
+		.addConst ("TrackColor", ARDOUR::ColorMode(TrackColor))
+		.addConst ("PitchColors", ARDOUR::ColorMode(PitchColors))
+		.endNamespace ()
+
 		.beginNamespace ("PortFlags")
 		.addConst ("IsInput", ARDOUR::PortFlags(IsInput))
 		.addConst ("IsOutput", ARDOUR::PortFlags(IsOutput))
