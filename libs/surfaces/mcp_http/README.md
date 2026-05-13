@@ -235,6 +235,20 @@ In Claude Desktop, open `Settings > Developer` and add:
 }
 ```
 
+## Ollama (local)
+
+See https://docs.ollama.com/linux to install ollama
+
+```bash
+ollama serve
+
+ollama pull qwen2.5:7b
+python -m venv mcp-bridge
+source  mcp-bridge/bin/activate
+pip install --upgrade ollmcp
+ollmcp -u http://localhost:4820/mcp
+```
+
 ## Copilot CLI
 
 Copilot CLI currently uses an interactive flow.
