@@ -1446,6 +1446,11 @@ SessionDialog::info_scroller_update()
 bool
 SessionDialog::on_delete_event (GdkEventAny* ev)
 {
+	if (download_active) {
+		cancel_download = true;
+		/* wait for demo_dl_timer_callback () */
+		Glib::usleep (150000);
+	}
 	response (RESPONSE_CANCEL);
 	return ArdourDialog::on_delete_event (ev);
 }
