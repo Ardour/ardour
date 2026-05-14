@@ -418,7 +418,7 @@ for x in $BUILD_ROOT/../share/mcp/*.device $BUILD_ROOT/../share/mcp/*.profile ; 
 done
 
 # Chord data
-cp $BUILD_ROOT/../share/chord.txt $Shared
+cp $BUILD_ROOT/../share/chords.txt $Shared
 
 # OSC data
 # got to be careful with names here
