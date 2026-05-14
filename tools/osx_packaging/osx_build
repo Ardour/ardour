@@ -407,6 +407,9 @@ for x in $BUILD_ROOT/../share/mcp/*.device $BUILD_ROOT/../share/mcp/*.profile ; 
 	cp "$x" $MackieControl
 done
 
+# Chord data
+cp $BUILD_ROOT/../share/chord.txt $Shared
+
 # OSC data
 # got to be careful with names here
 for x in $BUILD_ROOT/../share/osc/*.preset ; do
