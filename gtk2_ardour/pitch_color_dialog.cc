@@ -92,7 +92,7 @@ PitchColorDialog::refill ()
 
 	for (int n = 0; n < pitch_cycle; ++n) {
 		pitch_label = manage (new Label);
-		snprintf (buf, sizeof (buf), "%d (%s)", n+1, ARDOUR::ParameterDescriptor::midi_note_name (n).c_str());
+		snprintf (buf, sizeof (buf), "%d (%s)", n+1, ARDOUR::ParameterDescriptor::midi_note_name (n, true, false, true).c_str());
 		pitch_label->set_text (buf);
 
 		color_button = manage (new ColorButton);
