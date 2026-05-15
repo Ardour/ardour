@@ -39,7 +39,7 @@ PianorollWindow::PianorollWindow (std::string const & name, Session& s)
 	, region_editor (nullptr)
 {
 	pianoroll->set_session (&s);
-	pianoroll->get_canvas_viewport()->set_size_request (1270, 700);
+	set_default_size (1270, 700);
 
 	hpacker.pack_start (pianoroll->contents(), true, true);
 	pianoroll->contents().show ();
