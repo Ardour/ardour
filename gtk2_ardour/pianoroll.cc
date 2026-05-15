@@ -1835,6 +1835,8 @@ Pianoroll::rebuild_region_dropdown ()
 void
 Pianoroll::region_going_away (std::weak_ptr<ARDOUR::Region> wr)
 {
+	std::cerr << "RGA\n";
+
 	std::shared_ptr<ARDOUR::Region> region (wr.lock());
 	if (!region) {
 		return;

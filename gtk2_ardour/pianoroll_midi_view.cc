@@ -108,6 +108,9 @@ PianorollMidiView::PianorollMidiView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 
 PianorollMidiView::~PianorollMidiView ()
 {
+	delete _start_boundary_rect;
+	delete _end_boundary_rect;
+
 	er_connection.disconnect ();
 	parent_connection.disconnect ();
 
@@ -829,4 +832,18 @@ PianorollMidiView::get_selectables (Evoral::Parameter const & param, Temporal::t
 	}
 
 	return lane->line->get_selectables (start, end, x, y, results, within);
+}
+
+void
+PianorollMidiView::clear_events ()
+{
+	if (_start_boundary_rect) {
+		_note_group->remove (_start_boundary_rect);
+	}
+
+	if (_end_boundary_rect) {
+		_note_group->remove (_end_boundary_rect);
+	}
+
+	MidiView::clear_events ();
 }

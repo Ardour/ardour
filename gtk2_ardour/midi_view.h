@@ -473,7 +473,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	 */
 	void clear_selection_internal ();
 
-	void clear_events ();
+	virtual void clear_events ();
 	virtual void clear_ghost_events() {}
 	virtual void ghosts_model_changed() {}
 	virtual void ghosts_view_changed() {}

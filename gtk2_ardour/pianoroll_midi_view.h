@@ -54,6 +54,7 @@ class PianorollMidiView : public MidiView
 	void set_samples_per_pixel (double);
 	void set_height (double);
 
+	void clear_events ();
 	void clear_ghost_events();
 	void ghosts_model_changed();
 	void ghosts_view_changed();
