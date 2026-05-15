@@ -246,13 +246,24 @@ Pianoroll::set_editing_policy (EditingPolicy ep)
 
 	policy_dropdown.set_text (txt);
 
+	set_sensitivities ();
+}
+
+void
+Pianoroll::set_sensitivities ()
+{
 	if (_editing_policy == ActiveView) {
 		for (auto & [region,view] : region_view_map) {
-			view->set_sensitive ((view == _active_view));
+			bool is_active = (view == _active_view);
+			view->set_sensitive (is_active);
+			view->show_start (is_active);
+			view->show_end (is_active);
 		}
 	} else {
 		for (auto & [region,view] : region_view_map) {
 			view->set_sensitive (true);
+			view->show_start (false);
+			view->show_end (false);
 		}
 	}
 }
@@ -1902,16 +1913,8 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 	_active_view = rvm->second;
 	CueEditor::set_track (_active_view->midi_track());
 
-	if (_editing_policy == ActiveView) {
-		for (auto & [region,view] : region_view_map) {
-			view->set_sensitive ((view == _active_view));
-		}
-	} else {
-		for (auto & [region,view] : region_view_map) {
-			view->set_sensitive (true);
-		}
-	}
-
+	set_sensitivities ();
+	
 	_active_view->VisibleChannelChanged.connect (view_connections, invalidator (*this), std::bind (&Pianoroll::visible_channel_changed, this), gui_context());
 	selection_connection = _active_view->SelectionChanged.connect ([this]() { midi_view_selection_changed (); });
 

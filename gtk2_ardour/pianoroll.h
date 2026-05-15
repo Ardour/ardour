@@ -366,4 +366,6 @@ class Pianoroll : public CueEditor
 
 	ArdourWidgets::ArdourButton inspector_button;
 	void inspector_button_clicked ();
+
+	void set_sensitivities ();
 };
