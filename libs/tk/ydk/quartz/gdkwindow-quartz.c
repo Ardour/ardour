@@ -2472,7 +2472,7 @@ gdk_window_get_frame_extents (GdkWindow    *window,
   toplevel = gdk_window_get_effective_toplevel (window);
   impl = GDK_WINDOW_IMPL_QUARTZ (GDK_WINDOW_OBJECT (toplevel)->impl);
 
-  ns_rect = [impl->toplevel frame];
+  ns_rect = [impl->toplevel contentRectForFrameRect:[impl->toplevel frame]];
 
   _gdk_quartz_window_xy_to_gdk_xy (ns_rect.origin.x,
                                    ns_rect.origin.y + ns_rect.size.height,
