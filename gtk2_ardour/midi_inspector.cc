@@ -52,8 +52,10 @@ void
 MidiInspector::set_region (Session* s, std::shared_ptr<MidiRegion> mr)
 {
 	if (mr) {
-		region_editor = manage (new RegionEditor (s, mr));
-		region_expander.add (*region_editor);
+		if (!region_expander.get_child()) {
+			region_editor = manage (new RegionEditor (s, mr));
+			region_expander.add (*region_editor);
+		}
 	} else if (region_editor) {
 		region_expander.remove (); /* will delete */
 		region_editor = nullptr;
