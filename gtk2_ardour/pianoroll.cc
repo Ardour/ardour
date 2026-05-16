@@ -540,7 +540,7 @@ Pianoroll::build_canvas ()
 	/* a group to hold time (measure) lines
 	 * (grid lines are added to this group in EditingContext::maybe_draw_grid_lines)
 	 * Note: we are using hv_scroll_group instead of h_scroll_group to be able to draw
-	 *       the grid lines behind everything in h_scroll_group
+	 *       the grid lines behind everything in hv_scroll_group
 	 */
 	time_line_group = new ArdourCanvas::Container (hv_scroll_group);
 	CANVAS_DEBUG_NAME (time_line_group, "pianoroll time line group");
