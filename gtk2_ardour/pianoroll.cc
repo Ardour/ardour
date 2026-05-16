@@ -1792,6 +1792,91 @@ Pianoroll::replace_region (std::shared_ptr<ARDOUR::Region> region, std::shared_p
 }
 
 void
+Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
+{
+	CueEditor::set_region (region);
+
+	if (_visible_pending_region) {
+		return;
+	}
+
+	/* unset everything */
+
+	for (auto & [param,lane] : automation_lanes) {
+		(void) lane->group->set_data ("linemerger", nullptr);
+	}
+
+	_active_view = nullptr;
+	view_connections.drop_connections ();
+	_update_connection.disconnect ();
+	selection_connection.disconnect ();
+	midi_inspector->set_region (_session, nullptr);
+
+	if (!region) {
+		return;
+	}
+
+	std::shared_ptr<MidiRegion> r (std::dynamic_pointer_cast<ARDOUR::MidiRegion> (region));
+
+	auto rvm = region_view_map.find (region);
+
+	if (rvm == region_view_map.end()) {
+		error << _("Attempt to set pianoroll region that was not added!") << endmsg;
+		return;
+	}
+
+	/* OK, time to switch the "active" view */
+
+	_active_view = rvm->second;
+	CueEditor::set_track (_active_view->midi_track());
+
+	set_sensitivities ();
+
+	_active_view->VisibleChannelChanged.connect (view_connections, invalidator (*this), std::bind (&Pianoroll::visible_channel_changed, this), gui_context());
+	selection_connection = _active_view->SelectionChanged.connect ([this]() { midi_view_selection_changed (); });
+
+	set_visible_channel (_active_view->pick_visible_channel());
+
+	for (auto & [param,lane] : automation_lanes) {
+		lane->group->set_data ("linemerger", _active_view);
+	}
+
+	/* Visible note range should always span all regions on display */
+
+	uint8_t lowest_note = 127;
+	uint8_t highest_note = 0;
+
+	for (auto & [region,view] : region_view_map) {
+		std::shared_ptr<ARDOUR::SMFSource> smf (std::dynamic_pointer_cast<ARDOUR::SMFSource> (region->source()));
+		assert (smf);
+		lowest_note = std::min (lowest_note, smf->model()->lowest_note());
+		highest_note = std::max (highest_note, smf->model()->highest_note());
+	}
+
+	(void) bg->update_data_note_range (lowest_note, highest_note);
+	bg->apply_note_range (lowest_note, highest_note, true);
+
+	if (!_active_view || !maybe_set_from_rsu (_active_view->midi_region()->id())) {
+		/* Compute zoom level to show entire source plus some margin if possible */
+		zoom_to_show (max_zoom_extent());
+	}
+
+	if (region_view_map.size() > 1) {
+		show_automation_for_all ();
+	}
+
+	if (r->source()->empty()) {
+		std::shared_ptr<MidiTrack> mt (std::dynamic_pointer_cast<ARDOUR::MidiTrack> (_track));
+		if (mt) {
+			note_mode_actions[mt->note_mode()]->set_active (true);
+		}
+	}
+
+	region_dropdown.set_active (region->name());
+	midi_inspector->set_region (_session, _active_view->midi_region());
+}
+
+void
 Pianoroll::add_region (std::shared_ptr<ARDOUR::Region> region, std::shared_ptr<ARDOUR::Track> tr)
 {
 	std::shared_ptr<ARDOUR::MidiTrack> track (std::dynamic_pointer_cast<ARDOUR::MidiTrack> (tr));
@@ -1913,91 +1998,6 @@ Pianoroll::region_going_away (std::weak_ptr<ARDOUR::Region> wr)
 			set_region (region_view_map.begin()->first);
 		}
 	}
-}
-
-void
-Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
-{
-	CueEditor::set_region (region);
-
-	if (_visible_pending_region) {
-		return;
-	}
-
-	/* unset everything */
-
-	for (auto & [param,lane] : automation_lanes) {
-		(void) lane->group->set_data ("linemerger", nullptr);
-	}
-
-	_active_view = nullptr;
-	view_connections.drop_connections ();
-	_update_connection.disconnect ();
-	selection_connection.disconnect ();
-	midi_inspector->set_region (_session, nullptr);
-
-	if (!region) {
-		return;
-	}
-
-	std::shared_ptr<MidiRegion> r (std::dynamic_pointer_cast<ARDOUR::MidiRegion> (region));
-
-	auto rvm = region_view_map.find (region);
-
-	if (rvm == region_view_map.end()) {
-		error << _("Attempt to set pianoroll region that was not added!") << endmsg;
-		return;
-	}
-
-	/* OK, time to switch the "active" view */
-
-	_active_view = rvm->second;
-	CueEditor::set_track (_active_view->midi_track());
-
-	set_sensitivities ();
-
-	_active_view->VisibleChannelChanged.connect (view_connections, invalidator (*this), std::bind (&Pianoroll::visible_channel_changed, this), gui_context());
-	selection_connection = _active_view->SelectionChanged.connect ([this]() { midi_view_selection_changed (); });
-
-	set_visible_channel (_active_view->pick_visible_channel());
-
-	for (auto & [param,lane] : automation_lanes) {
-		lane->group->set_data ("linemerger", _active_view);
-	}
-
-	/* Visible note range should always span all regions on display */
-
-	uint8_t lowest_note = 127;
-	uint8_t highest_note = 0;
-
-	for (auto & [region,view] : region_view_map) {
-		std::shared_ptr<ARDOUR::SMFSource> smf (std::dynamic_pointer_cast<ARDOUR::SMFSource> (region->source()));
-		assert (smf);
-		lowest_note = std::min (lowest_note, smf->model()->lowest_note());
-		highest_note = std::max (highest_note, smf->model()->highest_note());
-	}
-
-	(void) bg->update_data_note_range (lowest_note, highest_note);
-	bg->apply_note_range (lowest_note, highest_note, true);
-
-	if (!_active_view || !maybe_set_from_rsu (_active_view->midi_region()->id())) {
-		/* Compute zoom level to show entire source plus some margin if possible */
-		zoom_to_show (max_zoom_extent());
-	}
-
-	if (region_view_map.size() > 1) {
-		show_automation_for_all ();
-	}
-
-	if (r->source()->empty()) {
-		std::shared_ptr<MidiTrack> mt (std::dynamic_pointer_cast<ARDOUR::MidiTrack> (_track));
-		if (mt) {
-			note_mode_actions[mt->note_mode()]->set_active (true);
-		}
-	}
-
-	region_dropdown.set_active (region->name());
-	midi_inspector->set_region (_session, _active_view->midi_region());
 }
 
 void
