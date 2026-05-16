@@ -1613,6 +1613,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished, bool will_
 		for (VCAList::const_iterator i = v.begin(); i != v.end(); ++i) {
 			(*i)->non_realtime_locate (_transport_sample);
 		}
+		Located (); /* EMIT SIGNAL */
 	}
 
 	/* reset loop_changing so it does not affect next transport action */
