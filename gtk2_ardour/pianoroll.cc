@@ -1429,14 +1429,7 @@ Pianoroll::motion_track (ArdourCanvas::Duple const & pos)
 
 	xcursor->show ();
 
-	/* when events arrive in the canvas, they are adjusted to canvas
-	   coordinates by using the "best" scrollgroup, which will always be
-	   the HV scroll group. Reverse this transformation to get back to
-	   window coordinates. Canvas::canvas_to_window() doesn't do
-	   specifically this transformation, for various reasons.
-	*/
-
-	ArdourCanvas::Duple xc (ArdourCanvas::Duple (pos.x, pos.y).translate (-hv_scroll_group->scroll_offset()));
+	ArdourCanvas::Duple xc (pos);
 
 	ArdourCanvas::Item const * bounds = _drags->drags().front()->bounding_item();
 
