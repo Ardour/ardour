@@ -1376,7 +1376,10 @@ CueEditor::set_trigger (TriggerReference& tref)
 		length_selector.set_active (0); /* "until stopped" */
 	}
 
-	set_region (trigger->the_region());
+	remove_regions ();
+	add_region (trigger->the_region (), _track);
+	set_region (trigger->the_region ());
+
 	if (trigger->armed()) {
 		play_button.set_sensitive (false);
 	} else {

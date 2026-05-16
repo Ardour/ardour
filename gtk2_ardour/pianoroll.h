@@ -117,7 +117,7 @@ class Pianoroll : public CueEditor
 
 	std::shared_ptr<ARDOUR::MidiTrack> midi_track() const;
 
-	void add_region (std::shared_ptr<ARDOUR::Region>, std::shared_ptr<ARDOUR::MidiTrack>);
+	void add_region (std::shared_ptr<ARDOUR::Region>, std::shared_ptr<ARDOUR::Track>);
 	void replace_region (std::shared_ptr<ARDOUR::Region>, std::shared_ptr<ARDOUR::MidiTrack>);
 	void remove_regions ();
 	void remove_region (std::shared_ptr<ARDOUR::Region>);
@@ -368,4 +368,5 @@ class Pianoroll : public CueEditor
 	void inspector_button_clicked ();
 
 	void set_sensitivities ();
+	PianorollMidiView* empty_view;
 };

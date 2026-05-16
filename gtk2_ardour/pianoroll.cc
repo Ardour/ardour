@@ -99,6 +99,7 @@ Pianoroll::Pianoroll (std::string const & name, bool with_transport, bool expand
 	, midi_inspector (nullptr)
 	, inspector_scroller (nullptr)
 	, inspector_button (_("<"))
+	, empty_view (nullptr)
 {
 	if (controller_name_map.empty()) {
 		build_midi_controller_name_map ();
@@ -1747,6 +1748,7 @@ Pianoroll::make_a_region ()
 		ref.trigger()->set_region (mr);
 	}
 
+	add_region (mr, _track);
 	set_region (mr);
 }
 
@@ -1779,9 +1781,33 @@ Pianoroll::replace_region (std::shared_ptr<ARDOUR::Region> region, std::shared_p
 }
 
 void
-Pianoroll::add_region (std::shared_ptr<ARDOUR::Region> region, std::shared_ptr<ARDOUR::MidiTrack> track)
+Pianoroll::add_region (std::shared_ptr<ARDOUR::Region> region, std::shared_ptr<ARDOUR::Track> tr)
 {
-	PianorollMidiView* new_view = new PianorollMidiView (track, *data_group, *no_scroll_group, *this, *bg);
+	std::shared_ptr<ARDOUR::MidiTrack> track (std::dynamic_pointer_cast<ARDOUR::MidiTrack> (tr));
+
+	if (!region || !track) {
+		/* this happens when used in on the cue page, and
+		   CueEditor::set_trigger() is called with an empty slot (no
+		   region, but the track is known). We need an empty MidiView
+		   so that we can edit using NoteCreateDrags (for
+		   example). When a NoteCreateDrag starts, it will call
+		   ::make_a_region(), and when it is finished, it will call
+		   ::add_region() with the region thus created.
+		*/
+		empty_view = new PianorollMidiView (track, *data_group, *no_scroll_group, *this, *bg);
+		return;
+	}
+
+	PianorollMidiView* new_view;
+
+	if (empty_view) {
+		/* Take over the empty view - CueEditor case */
+		new_view = empty_view;
+		empty_view = nullptr;
+	} else {
+		/* need a new MidiView - editor bottom pane/pianoroll window cases */
+		new_view = new PianorollMidiView (track, *data_group, *no_scroll_group, *this, *bg);
+	}
 
 	std::shared_ptr<ARDOUR::MidiRegion> mr (std::dynamic_pointer_cast<ARDOUR::MidiRegion> (region));
 	assert (mr);
@@ -1803,6 +1829,12 @@ void
 Pianoroll::remove_regions ()
 {
 	std::vector<MidiView*> mvs;
+
+	if (empty_view) {
+		delete empty_view;
+		empty_view = nullptr;
+	}
+
 	for (auto & [region,view] : region_view_map) {
 		mvs.push_back (view);
 	}
@@ -1846,8 +1878,6 @@ Pianoroll::rebuild_region_dropdown ()
 void
 Pianoroll::region_going_away (std::weak_ptr<ARDOUR::Region> wr)
 {
-	std::cerr << "RGA\n";
-
 	std::shared_ptr<ARDOUR::Region> region (wr.lock());
 	if (!region) {
 		return;
@@ -1914,7 +1944,7 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 	CueEditor::set_track (_active_view->midi_track());
 
 	set_sensitivities ();
-	
+
 	_active_view->VisibleChannelChanged.connect (view_connections, invalidator (*this), std::bind (&Pianoroll::visible_channel_changed, this), gui_context());
 	selection_connection = _active_view->SelectionChanged.connect ([this]() { midi_view_selection_changed (); });
 

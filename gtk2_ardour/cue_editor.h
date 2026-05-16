@@ -123,6 +123,8 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner
 	bool ruler_event (GdkEvent*);
 
 	virtual void set_show_source (bool);
+	virtual void add_region (std::shared_ptr<ARDOUR::Region>, std::shared_ptr<ARDOUR::Track>) {}
+	virtual void remove_regions() {}
 	virtual void set_region (std::shared_ptr<ARDOUR::Region>);
 	virtual void set_track (std::shared_ptr<ARDOUR::Track>);
 	virtual void set_trigger (ARDOUR::TriggerReference&);
