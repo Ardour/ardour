@@ -796,7 +796,8 @@ Pianoroll::maybe_update ()
 	}
 
 	assert (_session);
-	if (_session && _session->transport_rolling() && follow_playhead() && !_scroll_drag) {
+
+	if (_session && follow_playhead() && !_scroll_drag) {
 		reset_x_origin_to_follow_playhead ();
 	}
 }
