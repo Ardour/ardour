@@ -603,7 +603,6 @@ Pianoroll::build_canvas ()
 	_playhead_cursor->set_sensitive (UIConfiguration::instance().get_sensitize_playhead());
 	_playhead_cursor->set_color (UIConfiguration::instance().color ("play head"));
 	_playhead_cursor->canvas_item().raise_to_top();
-	h_scroll_group->raise_to_top ();
 
 	_canvas.set_name ("MidiCueCanvas");
 	_canvas.add_events (Gdk::POINTER_MOTION_HINT_MASK | Gdk::SCROLL_MASK | Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
@@ -2032,10 +2031,11 @@ void
 Pianoroll::AutomationLane::deduce_color (uint32_t nth)
 {
 	if (nth % 2 != 0) {
-		group->set_fill_color (UIConfiguration::instance().color ("midi automation track fill"));
+		group->set_fill_color (UIConfiguration::instance().color_mod ("midi automation track fill", "automation track fill"));
 	} else {
 		Gtkmm2ext::HSV hsv (UIConfiguration::instance().color ("midi automation track fill"));
-		hsv = hsv.lighter (0.05);
+		hsv = hsv.lighter (0.1);
+		hsv = Gtkmm2ext::change_alpha (hsv, UIConfiguration::instance().modifier ("automation track fill").a());
 		group->set_fill_color (hsv.color());
 	}
 }
