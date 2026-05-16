@@ -129,6 +129,8 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner
 	virtual void set_track (std::shared_ptr<ARDOUR::Track>);
 	virtual void set_trigger (ARDOUR::TriggerReference&);
 
+	virtual void set_inspector_visibility (bool) {}
+
 	virtual void maybe_update () = 0;
 
 	ArdourCanvas::GtkCanvasViewport* get_canvas_viewport() const;

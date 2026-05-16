@@ -1491,6 +1491,7 @@ CueEditor::set_from_rsu (RegionUISettings& rsu)
 	set_draw_length (rsu.draw_length);
 	set_draw_velocity (rsu.draw_velocity);
 	set_draw_channel (rsu.channel);
+	set_inspector_visibility (rsu.inspector_visible);
 
 	if (rsu.width > 0) {
 		/* If we're inside an ArdourWindow, set it's geometry */

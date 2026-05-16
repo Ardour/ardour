@@ -65,6 +65,8 @@ struct RegionUISettings
 	int    note_min;
 	int    note_max;
 
+	bool   inspector_visible;
+
 	XMLNode& get_state () const;
 	int set_state (XMLNode const & state, int version);
 };

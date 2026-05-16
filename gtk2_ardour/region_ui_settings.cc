@@ -54,6 +54,7 @@ RegionUISettings::RegionUISettings ()
 	, channel (0)
 	, note_min (32)
 	, note_max (96)
+	, inspector_visible (false)
 {
 }
 
@@ -85,7 +86,8 @@ RegionUISettings::operator= (RegionUISettings const & other)
 	channel = other.channel;
 	note_min = other.note_min;
 	note_max = other.note_max;
-
+	inspector_visible = other.inspector_visible;
+	
 	if (other.automation) {
 		automation.reset (new XMLNode (*other.automation));
 	} else {
@@ -120,6 +122,7 @@ RegionUISettings::get_state () const
 	node->set_property (X_("channel"), channel);
 	node->set_property (X_("note-min"), note_min);
 	node->set_property (X_("note-max"), note_max);
+	node->set_property (X_("inspector-visible"), inspector_visible);
 
 	node->set_property (X_("width"), width);
 	node->set_property (X_("height"), height);
@@ -161,6 +164,7 @@ RegionUISettings::set_state (XMLNode const & state, int)
 	state.get_property (X_("height"), height);
 	state.get_property (X_("x"), x);
 	state.get_property (X_("y"), y);
+	state.get_property (X_("inspector-visible"), inspector_visible);
 
 	return 0;
 }

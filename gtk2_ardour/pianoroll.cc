@@ -182,6 +182,16 @@ Pianoroll::~Pianoroll ()
 void
 Pianoroll::inspector_button_clicked ()
 {
+	if (inspector_scroller) {
+		set_inspector_visibility (!inspector_scroller->is_visible());
+	} else {
+		set_inspector_visibility (true);
+	}
+}
+
+void
+Pianoroll::set_inspector_visibility (bool yn)
+{
 	if (!inspector_scroller) {
 
 		inspector_scroller = manage (new Gtk::ScrolledWindow);
@@ -202,16 +212,13 @@ Pianoroll::inspector_button_clicked ()
 		inspector_scroller->show();
 	}
 
-}
-
-void
-Pianoroll::set_inspector_visibility (bool yn)
-{
 	if (yn) {
 		inspector_scroller->show();
 	} else {
 		inspector_scroller->hide();
 	}
+
+	instant_save ();
 }
 
 void
@@ -1891,8 +1898,10 @@ Pianoroll::add_region (std::shared_ptr<ARDOUR::Region> region, std::shared_ptr<A
 		   ::add_region() with the region thus created.
 		*/
 		empty_view = new PianorollMidiView (track, *data_group, *no_scroll_group, *this, *bg);
+		set_inspector_visibility (false);
 		return;
 	}
+
 
 	PianorollMidiView* new_view;
 
@@ -2741,6 +2750,8 @@ Pianoroll::set_from_rsu (RegionUISettings& region_ui_settings)
 	assert (_active_view);
 
 	note_mode_actions[region_ui_settings.note_mode]->set_active (true);
+	set_inspector_visibility (region_ui_settings.inspector_visible);
+
 	CueEditor::set_from_rsu (region_ui_settings);
 
 	if (region_view_map.size() > 1) {
@@ -2812,6 +2823,7 @@ Pianoroll::instant_save ()
 		rus.note_max = bg->highest_note();
 		rus.note_mode = note_mode ();
 		rus.color_mode = color_mode ();
+		rus.inspector_visible = inspector_scroller ? inspector_scroller->is_visible () : false;
 
 		XMLNode* as (view->automation_state());
 		if (as) {
