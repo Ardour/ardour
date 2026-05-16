@@ -205,6 +205,16 @@ Pianoroll::inspector_button_clicked ()
 }
 
 void
+Pianoroll::set_inspector_visibility (bool yn)
+{
+	if (yn) {
+		inspector_scroller->show();
+	} else {
+		inspector_scroller->hide();
+	}
+}
+
+void
 Pianoroll::toggle_size()
 {
 	PublicEditor::instance().toggle_main ();

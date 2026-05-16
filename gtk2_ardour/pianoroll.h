@@ -195,6 +195,7 @@ class Pianoroll : public CueEditor
 	bool get_midi_chord (int root_pitch, std::vector<int>& pitches) const;
 
 	void midi_view_selection_changed ();
+	void set_inspector_visibility (bool);
 
   protected:
 	Temporal::timepos_t snap_to_grid (Temporal::timepos_t const & start,
