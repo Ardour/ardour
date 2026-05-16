@@ -537,8 +537,12 @@ Pianoroll::build_canvas ()
 	CANVAS_DEBUG_NAME (transport_loop_range_rect, "pianoroll loop rect");
 	transport_loop_range_rect->hide();
 
-	/*a group to hold time (measure) lines */
-	time_line_group = new ArdourCanvas::Container (h_scroll_group);
+	/* a group to hold time (measure) lines
+	 * (grid lines are added to this group in EditingContext::maybe_draw_grid_lines)
+	 * Note: we using hv_scroll_group instead of h_scroll_group to be able to draw
+	 *       the grid lines behind everything in h_scroll_group
+	 */
+	time_line_group = new ArdourCanvas::Container (hv_scroll_group);
 	CANVAS_DEBUG_NAME (time_line_group, "pianoroll time line group");
 
 	n_timebars = 0;
@@ -613,11 +617,10 @@ Pianoroll::build_canvas ()
 	_timeline_origin = w;
 
 	prh->set_position (Duple (0., n_timebars * timebar_height));
-	data_group->set_position (ArdourCanvas::Duple (_timeline_origin, timebar_height * n_timebars));
 	no_scroll_group->set_position (ArdourCanvas::Duple (_timeline_origin, timebar_height * n_timebars));
 	cursor_scroll_group->set_position (ArdourCanvas::Duple (_timeline_origin, timebar_height * n_timebars));
 	h_scroll_group->set_position (Duple (_timeline_origin, 0.));
-	time_line_group->set_y_position (timebar_height * n_timebars);
+	hv_scroll_group->set_position (Duple (_timeline_origin, timebar_height * n_timebars));
 
 	_verbose_cursor.reset (new VerboseCursor (*this));
 
@@ -625,7 +628,10 @@ Pianoroll::build_canvas ()
 	_playhead_cursor = new EditorCursor (*this, X_("playhead"));
 	_playhead_cursor->set_sensitive (UIConfiguration::instance().get_sensitize_playhead());
 	_playhead_cursor->set_color (UIConfiguration::instance().color ("play head"));
+
+	/* raise playhead cursor and its group on top */
 	_playhead_cursor->canvas_item().raise_to_top();
+	h_scroll_group->raise_to_top();
 
 	_canvas.set_name ("MidiCueCanvas");
 	_canvas.add_events (Gdk::POINTER_MOTION_HINT_MASK | Gdk::SCROLL_MASK | Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
@@ -899,11 +905,10 @@ Pianoroll::canvas_allocate (Gtk::Allocation alloc)
 
 	partition_height ();
 
-	data_group->set_position (ArdourCanvas::Duple (_timeline_origin, timebars));
 	no_scroll_group->set_position (ArdourCanvas::Duple (_timeline_origin, timebars));
 	cursor_scroll_group->set_position (ArdourCanvas::Duple (_timeline_origin, timebars));
 	h_scroll_group->set_position (Duple (_timeline_origin, 0.));
-	time_line_group->set_y_position (timebar_height * n_timebars);
+	hv_scroll_group->set_position (Duple (_timeline_origin, timebars));
 
 	if (!xcursor) {
 		xcursor = new CrossCursor (_canvas.root());
