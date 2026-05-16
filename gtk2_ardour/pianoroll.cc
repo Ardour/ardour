@@ -169,6 +169,8 @@ Pianoroll::~Pianoroll ()
 		delete midi_inspector;
 	}
 
+	delete inspector_scroller;
+
 	view_connections.drop_connections ();
 	_update_connection.disconnect ();
 	selection_connection.disconnect ();
@@ -194,27 +196,30 @@ Pianoroll::set_inspector_visibility (bool yn)
 {
 	if (!inspector_scroller) {
 
-		inspector_scroller = manage (new Gtk::ScrolledWindow);
+		if (!yn) {
+			/* nothing to do */
+			return;
+		}
+
+		inspector_scroller = new Gtk::ScrolledWindow; /* Note: not managed, must be explicitly deleted */
 		inspector_scroller->add (*midi_inspector);
 		inspector_scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
 		UIConfiguration::instance().DPIReset.connect ([this]() { inspector_scroller->queue_resize(); });
 
-		_hpacker.pack_start (*inspector_scroller, false, false);
-		_hpacker.reorder_child (*inspector_scroller, 0);
-
 		midi_inspector->show_all ();
 	}
 
-	if (inspector_scroller->is_visible()) {
-		inspector_scroller->hide();
-	} else {
-		inspector_scroller->show();
-	}
-
 	if (yn) {
+		if (!inspector_scroller->get_parent()) {
+			_hpacker.pack_start (*inspector_scroller, false, false);
+			_hpacker.reorder_child (*inspector_scroller, 0);
+		}
 		inspector_scroller->show();
 	} else {
+		if (inspector_scroller->get_parent()) {
+			_hpacker.remove (*inspector_scroller);
+		}
 		inspector_scroller->hide();
 	}
 
@@ -2823,7 +2828,7 @@ Pianoroll::instant_save ()
 		rus.note_max = bg->highest_note();
 		rus.note_mode = note_mode ();
 		rus.color_mode = color_mode ();
-		rus.inspector_visible = inspector_scroller ? inspector_scroller->is_visible () : false;
+		rus.inspector_visible = inspector_scroller ? bool (inspector_scroller->get_parent ()) : false;
 
 		XMLNode* as (view->automation_state());
 		if (as) {
