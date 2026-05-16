@@ -1828,6 +1828,8 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 		return;
 	}
 
+	_update_connection = Timers::super_rapid_connect (sigc::mem_fun (*this, &CueEditor::maybe_update));
+
 	std::shared_ptr<MidiRegion> r (std::dynamic_pointer_cast<ARDOUR::MidiRegion> (region));
 
 	auto rvm = region_view_map.find (region);
