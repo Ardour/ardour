@@ -522,7 +522,7 @@ Pianoroll::build_canvas ()
 	n_timebars = 0;
 
 #if 0 /* these can't be used for anything useful, so don't display them until they can */
-	meter_bar = new ArdourCanvas::Rectangle (time_line_group, ArdourCanvas::Rect (0., 0, ArdourCanvas::COORD_MAX, timebar_height * (n_timebars+1)));
+	meter_bar = new ArdourCanvas::Rectangle (h_scroll_group, ArdourCanvas::Rect (0., 0, ArdourCanvas::COORD_MAX, timebar_height * (n_timebars+1)));
 	CANVAS_DEBUG_NAME (meter_bar, "Meter Bar");
 	meter_bar->set_fill(true);
 	meter_bar->set_outline(true);
@@ -533,7 +533,7 @@ Pianoroll::build_canvas ()
 
 	n_timebars++;
 
-	tempo_bar = new ArdourCanvas::Rectangle (time_line_group, ArdourCanvas::Rect (0.0, timebar_height * n_timebars, ArdourCanvas::COORD_MAX, timebar_height * (n_timebars+1)));
+	tempo_bar = new ArdourCanvas::Rectangle (h_scroll_group, ArdourCanvas::Rect (0.0, timebar_height * n_timebars, ArdourCanvas::COORD_MAX, timebar_height * (n_timebars+1)));
 	CANVAS_DEBUG_NAME (tempo_bar, "Tempo Bar");
 	tempo_bar->set_fill(true);
 	tempo_bar->set_outline(true);
@@ -545,7 +545,7 @@ Pianoroll::build_canvas ()
 	n_timebars++;
 #endif
 
-	bbt_ruler = new ArdourCanvas::Ruler (time_line_group, &bbt_metric, ArdourCanvas::Rect (0, timebar_height * n_timebars, ArdourCanvas::COORD_MAX, timebar_height * (n_timebars+1)));
+	bbt_ruler = new ArdourCanvas::Ruler (h_scroll_group, &bbt_metric, ArdourCanvas::Rect (0, timebar_height * n_timebars, ArdourCanvas::COORD_MAX, timebar_height * (n_timebars+1)));
 	bbt_ruler->set_font_description (UIConfiguration::instance().get_NormalBoldFont());
 	bbt_ruler->set_minor_font_description (UIConfiguration::instance().get_SmallFont());
 	Gtkmm2ext::Color base = UIConfiguration::instance().color ("ruler base");
@@ -595,6 +595,7 @@ Pianoroll::build_canvas ()
 	no_scroll_group->set_position (ArdourCanvas::Duple (_timeline_origin, timebar_height * n_timebars));
 	cursor_scroll_group->set_position (ArdourCanvas::Duple (_timeline_origin, timebar_height * n_timebars));
 	h_scroll_group->set_position (Duple (_timeline_origin, 0.));
+	time_line_group->set_y_position (timebar_height * n_timebars);
 
 	_verbose_cursor.reset (new VerboseCursor (*this));
 
@@ -880,6 +881,7 @@ Pianoroll::canvas_allocate (Gtk::Allocation alloc)
 	no_scroll_group->set_position (ArdourCanvas::Duple (_timeline_origin, timebars));
 	cursor_scroll_group->set_position (ArdourCanvas::Duple (_timeline_origin, timebars));
 	h_scroll_group->set_position (Duple (_timeline_origin, 0.));
+	time_line_group->set_y_position (timebar_height * n_timebars);
 
 	if (!xcursor) {
 		xcursor = new CrossCursor (_canvas.root());
