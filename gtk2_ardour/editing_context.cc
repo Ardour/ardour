@@ -3738,49 +3738,49 @@ EditingContext::reset_x_origin_to_follow_playhead ()
 
 	samplepos_t const sample = _playhead_cursor->current_sample ();
 
-	if (sample < _leftmost_sample || sample > _leftmost_sample + current_page_samples()) {
+	if (sample > _leftmost_sample && sample <= _leftmost_sample + current_page_samples()) {
+		return;
+	}
 
-		if (_session->transport_speed() < 0) {
+	if (_session->transport_speed() < 0) {
 
-			if (sample > (current_page_samples() / 2)) {
-				center_screen (sample-(current_page_samples()/2));
-			} else {
-				center_screen (current_page_samples()/2);
-			}
-
+		if (sample > (current_page_samples() / 2)) {
+			center_screen (sample-(current_page_samples()/2));
 		} else {
-
-			samplepos_t l = 0;
-
-			if (sample < _leftmost_sample) {
-				/* moving left */
-				if (_session->transport_rolling()) {
-					/* rolling; end up with the playhead at the right of the page */
-					l = sample - current_page_samples ();
-				} else {
-					/* not rolling: end up with the playhead 1/4 of the way along the page */
-					l = sample - current_page_samples() / 4;
-				}
-			} else {
-				/* moving right */
-				if (_session->transport_rolling()) {
-					/* rolling: end up with the playhead on the left of the page */
-					l = sample;
-				} else {
-					/* not rolling: end up with the playhead 3/4 of the way along the page */
-					l = sample - 3 * current_page_samples() / 4;
-				}
-			}
-
-			if (l < 0) {
-				l = 0;
-			}
-
-			center_screen_internal (l + (current_page_samples() / 2), current_page_samples ());
+			center_screen (current_page_samples()/2);
 		}
+
+	} else {
+
+		samplepos_t l = 0;
+
+		if (sample < _leftmost_sample) {
+			/* moving left */
+			if (_session->transport_rolling()) {
+				/* rolling; end up with the playhead at the right of the page */
+				l = sample - current_page_samples ();
+			} else {
+				/* not rolling: end up with the playhead 1/4 of the way along the page */
+				l = sample - current_page_samples() / 4;
+			}
+		} else {
+			/* moving right */
+			if (_session->transport_rolling()) {
+				/* rolling: end up with the playhead on the left of the page */
+				l = sample;
+			} else {
+				/* not rolling: end up with the playhead 3/4 of the way along the page */
+				l = sample - 3 * current_page_samples() / 4;
+			}
+		}
+
+		if (l < 0) {
+			l = 0;
+		}
+
+		center_screen_internal (l + (current_page_samples() / 2), current_page_samples ());
 	}
 }
-
 
 void
 EditingContext::center_screen (samplepos_t sample)

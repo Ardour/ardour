@@ -312,6 +312,8 @@ class Pianoroll : public CueEditor
 	void visible_channel_changed ();
 
 	void map_transport_state ();
+	void session_located ();
+	void position_playhead_cursor (samplepos_t pos);
 
 	void update_tempo_based_rulers ();
 	void update_rulers() { update_tempo_based_rulers (); }

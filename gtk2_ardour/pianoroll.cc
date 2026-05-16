@@ -770,32 +770,13 @@ Pianoroll::maybe_update ()
 
 	} else if (_active_view->midi_region()) {
 
-		Temporal::TempoMap::SharedPtr global_tempo_map (Temporal::TempoMap::global_fetch());
-		Temporal::TempoMap::SharedPtr local_tempo_map (Temporal::TempoMap::use());
-
 		/* Timeline region editor */
 
 		if (!_session) {
 			return;
 		}
 
-		samplepos_t pos = _session->audible_sample();
-
-		/* find out the beat time represented by pos in the global map,
-		 * convert back to sample position with the local map
-		 */
-
-		pos = local_tempo_map->sample_at (global_tempo_map->quarters_at (timepos_t (pos)));
-
-		/* Do the same for the source position */
-
-		samplepos_t spos = local_tempo_map->sample_at (global_tempo_map->quarters_at (_active_view->midi_region()->source_position()));
-
-		if (pos < spos) {
-			_playhead_cursor->set_position (0);
-		} else {
-			_playhead_cursor->set_position (pos - spos);
-		}
+		position_playhead_cursor (_session->audible_sample());
 
 	} else {
 		_playhead_cursor->set_position (0);
@@ -804,6 +785,29 @@ Pianoroll::maybe_update ()
 	assert (_session);
 	if (_session && _session->transport_rolling() && follow_playhead() && !_scroll_drag) {
 		reset_x_origin_to_follow_playhead ();
+	}
+}
+
+void
+Pianoroll::position_playhead_cursor (samplepos_t pos)
+{
+	Temporal::TempoMap::SharedPtr global_tempo_map (Temporal::TempoMap::global_fetch());
+	Temporal::TempoMap::SharedPtr local_tempo_map (Temporal::TempoMap::use());
+
+	/* find out the beat time represented by pos in the global map,
+	 * convert back to sample position with the local map
+	 */
+
+	pos = local_tempo_map->sample_at (global_tempo_map->quarters_at (timepos_t (pos)));
+
+	/* Do the same for the source position */
+
+	samplepos_t spos = local_tempo_map->sample_at (global_tempo_map->quarters_at (_active_view->midi_region()->source_position()));
+
+	if (pos < spos) {
+		_playhead_cursor->set_position (0);
+	} else {
+		_playhead_cursor->set_position (pos - spos);
 	}
 }
 
@@ -2509,6 +2513,7 @@ Pianoroll::set_session (ARDOUR::Session* s)
 	if (with_transport_controls) {
 		if (_session) {
 			_session->TransportStateChange.connect (_session_connections, invalidator (*this), std::bind (&Pianoroll::map_transport_state, this), gui_context());
+			_session->Located.connect (_session_connections, invalidator (*this), std::bind (&Pianoroll::session_located, this), gui_context());
 		} else {
 			_session_connections.drop_connections();
 		}
@@ -2568,6 +2573,24 @@ Pianoroll::map_transport_state ()
 		}
 
 		hide_count_in ();
+	}
+}
+
+void
+Pianoroll::session_located ()
+{
+	/* find out the beat time represented by pos in the global map,
+	 * convert back to sample position with the local map
+	 */
+
+	if (!_session) {
+		return;
+	}
+
+	position_playhead_cursor (_session->audible_sample());
+
+	if (_session && follow_playhead() && !_scroll_drag) {
+		reset_x_origin_to_follow_playhead ();
 	}
 }
 
