@@ -582,7 +582,7 @@ AudioClipEditor::set_wave_heights ()
 
 	for (auto& wave : waves) {
 		wave->set_height (ht);
-		wave->set_y_position ((n_timebars * timebar_height) + (n * ht));
+		wave->set_y_position (n * ht);
 		++n;
 	}
 }
