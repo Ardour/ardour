@@ -151,13 +151,76 @@ json_escape (const std::string& s)
 static std::string
 canonical_tool_name (std::string tool_name)
 {
+	static const struct {
+		const char* alias;
+		const char* canonical;
+	} aliases[] = {
+		{"transport/locate_sample", "transport/locate"},
+		{"transport/locate_bbt", "transport/locate"},
+		{"transport/loop_location_samples", "transport/loop_location"},
+		{"transport/loop_location_bbt", "transport/loop_location"},
+		{"markers/add_range_samples", "markers/add_range"},
+		{"markers/add_range_bbt", "markers/add_range"},
+		{"markers/set_auto_loop_samples", "markers/set_auto_loop"},
+		{"markers/set_auto_loop_bbt", "markers/set_auto_loop"},
+		{"markers/set_auto_punch_samples", "markers/set_auto_punch"},
+		{"markers/set_auto_punch_bbt", "markers/set_auto_punch"},
+		{"markers/delete_by_location_id", "markers/delete"},
+		{"markers/delete_by_name", "markers/delete"},
+		{"markers/rename_by_location_id", "markers/rename"},
+		{"markers/rename_by_name", "markers/rename"},
+		{"region/set_gain_linear", "region/set_gain"},
+		{"region/set_gain_db", "region/set_gain"},
+		{"region/resize_samples", "region/resize"},
+		{"region/resize_bbt", "region/resize"},
+		{"region/copy_to_sample", "region/copy"},
+		{"region/copy_to_bbt", "region/copy"},
+		{"region/copy_by_samples", "region/copy"},
+		{"region/copy_by_beats", "region/copy"},
+		{"region/move_to_sample", "region/move"},
+		{"region/move_to_bbt", "region/move"},
+		{"region/move_by_samples", "region/move"},
+		{"region/move_by_beats", "region/move"},
+		{"plugin/set_parameter_by_index_value", "plugin/set_parameter"},
+		{"plugin/set_parameter_by_index_interface", "plugin/set_parameter"},
+		{"plugin/set_parameter_by_control_value", "plugin/set_parameter"},
+		{"plugin/set_parameter_by_control_interface", "plugin/set_parameter"},
+		{"plugin/add_by_plugin_id", "plugin/add"},
+		{"plugin/add_by_unique_id", "plugin/add"},
+		{"track/set_send_level_position", "track/set_send_level"},
+		{"track/set_send_level_db", "track/set_send_level"},
+		{"track/set_fader_position", "track/set_fader"},
+		{"track/set_fader_db", "track/set_fader"},
+		{"midi_region/add_samples", "midi_region/add"},
+		{"midi_region/add_bbt", "midi_region/add"},
+		{"midi_note/add_region_beat", "midi_note/add"},
+		{"midi_note/add_sample", "midi_note/add"},
+		{"midi_note/add_bbt", "midi_note/add"},
+		{"midi_note/import_json_into_region", "midi_note/import_json"},
+		{"midi_note/import_json_to_new_region_samples", "midi_note/import_json"},
+		{"midi_note/import_json_to_new_region_bbt", "midi_note/import_json"}
+	};
+
+	const struct {
+		std::string operator() (const std::string& name) const
+		{
+			for (size_t i = 0; i < (sizeof (aliases) / sizeof (aliases[0])); ++i) {
+				if (name == aliases[i].alias) {
+					return aliases[i].canonical;
+				}
+			}
+
+			return name;
+		}
+	} resolve_alias;
+
 	/* Some MCP clients only support function-safe identifiers, so accept
 	 * underscore and dotted aliases in addition to slash-delimited names.
 	 */
 	std::replace (tool_name.begin (), tool_name.end (), '.', '/');
 
 	if (tool_name.find ('/') != std::string::npos) {
-		return tool_name;
+		return resolve_alias (tool_name);
 	}
 
 	static const char* known_groups[] = {
@@ -181,11 +244,11 @@ canonical_tool_name (std::string tool_name)
 		}
 		if (tool_name.compare (0, prefix.size (), prefix) == 0) {
 			tool_name[group.size ()] = '/';
-			return tool_name;
+			return resolve_alias (tool_name);
 		}
 	}
 
-	return tool_name;
+	return resolve_alias (tool_name);
 }
 
 static bool
@@ -400,6 +463,28 @@ session_info_json (ARDOUR::Session& session)
 	   << ",\"tempoBpm\":" << transport_tempo_bpm (session)
 	   << ",\"transport\":" << transport_state_json (session)
 	   << "}";
+	return ss.str ();
+}
+
+static std::string
+transport_state_json_at_sample (ARDOUR::Session& session, samplepos_t sample)
+{
+	std::ostringstream ss;
+	ss << "{\"rolling\":" << (session.transport_rolling () ? "true" : "false")
+	   << ",\"speed\":" << session.transport_speed ()
+	   << ",\"sample\":" << sample
+	   << ",\"state\":\"" << transport_state_string (session) << "\"}";
+	return ss.str ();
+}
+
+static std::string
+transport_state_json_override (ARDOUR::Session& session, samplepos_t sample, bool rolling, double speed, const char* state)
+{
+	std::ostringstream ss;
+	ss << "{\"rolling\":" << (rolling ? "true" : "false")
+	   << ",\"speed\":" << speed
+	   << ",\"sample\":" << sample
+	   << ",\"state\":\"" << state << "\"}";
 	return ss.str ();
 }
 
@@ -4238,7 +4323,7 @@ handle_transport_locate_tool (ARDOUR::Session& session, const pt::ptree& root, c
 	std::ostringstream structured;
 	structured << "{\"requestedSample\":" << target_sample
 	           << ",\"requestedBbt\":" << bbt_json_at_sample (target_sample)
-	           << ",\"transport\":" << transport_state_json (session)
+	           << ",\"transport\":" << transport_state_json_at_sample (session, target_sample)
 	           << "}";
 
 	return jsonrpc_result (
@@ -4306,7 +4391,7 @@ handle_transport_prev_marker_tool (ARDOUR::Session& session, const std::string& 
 	structured << "{\"moved\":true"
 	           << ",\"targetSample\":" << pos.samples ()
 	           << ",\"targetBbt\":" << bbt_json_at_sample (pos.samples ())
-	           << ",\"transport\":" << transport_state_json (session)
+	           << ",\"transport\":" << transport_state_json_at_sample (session, pos.samples ())
 	           << "}";
 	return jsonrpc_result (
 	    id,
@@ -4341,7 +4426,7 @@ handle_transport_next_marker_tool (ARDOUR::Session& session, const std::string& 
 	structured << "{\"moved\":true"
 	           << ",\"targetSample\":" << pos.samples ()
 	           << ",\"targetBbt\":" << bbt_json_at_sample (pos.samples ())
-	           << ",\"transport\":" << transport_state_json (session)
+	           << ",\"transport\":" << transport_state_json_at_sample (session, pos.samples ())
 	           << "}";
 	return jsonrpc_result (
 	    id,
@@ -4457,7 +4542,7 @@ static std::string
 handle_transport_play_tool (ARDOUR::Session& session, const std::string& id)
 {
 	session.request_roll ();
-	std::string structured = transport_state_json (session);
+	std::string structured = transport_state_json_override (session, session.transport_sample (), true, session.default_play_speed (), "rolling");
 	return jsonrpc_result (
 	    id,
 	    std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Transport play requested\"}],\"structuredContent\":") + structured + "}");
@@ -4467,7 +4552,7 @@ static std::string
 handle_transport_stop_tool (ARDOUR::Session& session, const std::string& id)
 {
 	session.request_stop ();
-	std::string structured = transport_state_json (session);
+	std::string structured = transport_state_json_override (session, session.transport_sample (), false, 0.0, "stopped");
 	return jsonrpc_result (
 	    id,
 	    std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Transport stop requested\"}],\"structuredContent\":") + structured + "}");

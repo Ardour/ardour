@@ -174,16 +174,50 @@ R"mcp(
       }
     },
     {
-      "name": "transport_locate",
-      "title": "Transport Locate",
-      "description": "Move playhead to an absolute target position. Provide either sample, or bar+beat (fractional beat allowed).",
+      "name": "transport_locate_sample",
+      "title": "Transport Locate By Sample",
+      "description": "Move playhead to an absolute sample position.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "sample": {
             "type": "integer",
             "minimum": 0
+          }
+        },
+        "required": [
+          "sample"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "requestedSample",
+          "requestedBbt",
+          "transport"
+        ],
+        "properties": {
+          "requestedSample": {
+            "type": "integer"
           },
+          "requestedBbt": {
+            "type": "object"
+          },
+          "transport": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "transport_locate_bbt",
+      "title": "Transport Locate By Bar Beat",
+      "description": "Move playhead to an absolute musical location using {bar, beat}. beat may be fractional.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
           "bar": {
             "type": "integer",
             "minimum": 1
@@ -193,18 +227,9 @@ R"mcp(
             "minimum": 1
           }
         },
-        "oneOf": [
-          {
-            "required": [
-              "sample"
-            ]
-          },
-          {
-            "required": [
-              "bar",
-              "beat"
-            ]
-          }
+        "required": [
+          "bar",
+          "beat"
         ],
         "additionalProperties": false
       },
@@ -288,9 +313,9 @@ R"mcp(
       }
     },
     {
-      "name": "transport_loop_location",
-      "title": "Transport Loop Location",
-      "description": "Set loop range. Provide either startSample+endSample, or startBar+startBeat+endBar+endBeat.",
+      "name": "transport_loop_location_samples",
+      "title": "Transport Loop Location By Samples",
+      "description": "Set loop range using absolute sample positions.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -301,7 +326,55 @@ R"mcp(
           "endSample": {
             "type": "integer",
             "minimum": 0
+          }
+        },
+        "required": [
+          "startSample",
+          "endSample"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string"
           },
+          "locationId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "startSample": {
+            "type": "integer"
+          },
+          "endSample": {
+            "type": "integer"
+          },
+          "startBbt": {
+            "type": "object"
+          },
+          "endBbt": {
+            "type": "object"
+          },
+          "lengthSamples": {
+            "type": "integer"
+          },
+          "hidden": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "transport_loop_location_bbt",
+      "title": "Transport Loop Location By Bar Beat",
+      "description": "Set loop range using musical positions.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
           "startBar": {
             "type": "integer",
             "minimum": 1
@@ -319,21 +392,11 @@ R"mcp(
             "minimum": 1
           }
         },
-        "oneOf": [
-          {
-            "required": [
-              "startSample",
-              "endSample"
-            ]
-          },
-          {
-            "required": [
-              "startBar",
-              "startBeat",
-              "endBar",
-              "endBeat"
-            ]
-          }
+        "required": [
+          "startBar",
+          "startBeat",
+          "endBar",
+          "endBeat"
         ],
         "additionalProperties": false
       },
@@ -467,9 +530,9 @@ R"mcp(
       }
     },
     {
-      "name": "markers_add_range",
-      "title": "Add Range Marker",
-      "description": "Add one range marker. Provide either startSample+endSample, or startBar+startBeat+endBar+endBeat.",
+      "name": "markers_add_range_samples",
+      "title": "Add Range Marker By Samples",
+      "description": "Add one range marker using absolute sample positions.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -483,6 +546,24 @@ R"mcp(
           "endSample": {
             "type": "integer",
             "minimum": 0
+          }
+        },
+        "required": [
+          "startSample",
+          "endSample"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "markers_add_range_bbt",
+      "title": "Add Range Marker By Bar Beat",
+      "description": "Add one range marker using musical positions.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
           },
           "startBar": {
             "type": "integer",
@@ -501,29 +582,19 @@ R"mcp(
             "minimum": 1
           }
         },
-        "oneOf": [
-          {
-            "required": [
-              "startSample",
-              "endSample"
-            ]
-          },
-          {
-            "required": [
-              "startBar",
-              "startBeat",
-              "endBar",
-              "endBeat"
-            ]
-          }
+        "required": [
+          "startBar",
+          "startBeat",
+          "endBar",
+          "endBeat"
         ],
         "additionalProperties": false
       }
     },
     {
-      "name": "markers_set_auto_loop",
-      "title": "Set Auto Loop Range",
-      "description": "Set auto-loop range. Provide either startSample+endSample, or startBar+startBeat+endBar+endBeat.",
+      "name": "markers_set_auto_loop_samples",
+      "title": "Set Auto Loop Range By Samples",
+      "description": "Set auto-loop range using absolute sample positions.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -534,7 +605,22 @@ R"mcp(
           "endSample": {
             "type": "integer",
             "minimum": 0
-          },
+          }
+        },
+        "required": [
+          "startSample",
+          "endSample"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "markers_set_auto_loop_bbt",
+      "title": "Set Auto Loop Range By Bar Beat",
+      "description": "Set auto-loop range using musical positions.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
           "startBar": {
             "type": "integer",
             "minimum": 1
@@ -552,21 +638,11 @@ R"mcp(
             "minimum": 1
           }
         },
-        "oneOf": [
-          {
-            "required": [
-              "startSample",
-              "endSample"
-            ]
-          },
-          {
-            "required": [
-              "startBar",
-              "startBeat",
-              "endBar",
-              "endBeat"
-            ]
-          }
+        "required": [
+          "startBar",
+          "startBeat",
+          "endBar",
+          "endBeat"
         ],
         "additionalProperties": false
       }
@@ -586,9 +662,9 @@ R"mcp(
       }
     },
     {
-      "name": "markers_set_auto_punch",
-      "title": "Set Auto Punch Range",
-      "description": "Set auto-punch range. Provide either startSample+endSample, or startBar+startBeat+endBar+endBeat.",
+      "name": "markers_set_auto_punch_samples",
+      "title": "Set Auto Punch Range By Samples",
+      "description": "Set auto-punch range using absolute sample positions.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -599,7 +675,22 @@ R"mcp(
           "endSample": {
             "type": "integer",
             "minimum": 0
-          },
+          }
+        },
+        "required": [
+          "startSample",
+          "endSample"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "markers_set_auto_punch_bbt",
+      "title": "Set Auto Punch Range By Bar Beat",
+      "description": "Set auto-punch range using musical positions.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
           "startBar": {
             "type": "integer",
             "minimum": 1
@@ -617,21 +708,11 @@ R"mcp(
             "minimum": 1
           }
         },
-        "oneOf": [
-          {
-            "required": [
-              "startSample",
-              "endSample"
-            ]
-          },
-          {
-            "required": [
-              "startBar",
-              "startBeat",
-              "endBar",
-              "endBeat"
-            ]
-          }
+        "required": [
+          "startBar",
+          "startBeat",
+          "endBar",
+          "endBeat"
         ],
         "additionalProperties": false
       }
@@ -651,15 +732,29 @@ R"mcp(
       }
     },
     {
-      "name": "markers_delete",
-      "title": "Delete Marker",
-      "description": "Delete one marker/range by locationId (preferred), or by name with optional sample to disambiguate duplicate names.",
+      "name": "markers_delete_by_location_id",
+      "title": "Delete Marker By Location ID",
+      "description": "Delete one marker or range by locationId.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "locationId": {
             "type": "string"
-          },
+          }
+        },
+        "required": [
+          "locationId"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "markers_delete_by_name",
+      "title": "Delete Marker By Name",
+      "description": "Delete one marker or range by name. Optional sample disambiguates duplicates.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
           "name": {
             "type": "string"
           },
@@ -668,31 +763,40 @@ R"mcp(
             "minimum": 0
           }
         },
-        "anyOf": [
-          {
-            "required": [
-              "locationId"
-            ]
-          },
-          {
-            "required": [
-              "name"
-            ]
-          }
+        "required": [
+          "name"
         ],
         "additionalProperties": false
       }
     },
     {
-      "name": "markers_rename",
-      "title": "Rename Marker",
-      "description": "Rename one marker/range by locationId (preferred), or by name with optional sample to disambiguate duplicate names.",
+      "name": "markers_rename_by_location_id",
+      "title": "Rename Marker By Location ID",
+      "description": "Rename one marker or range by locationId.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "locationId": {
             "type": "string"
           },
+          "newName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "locationId",
+          "newName"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "markers_rename_by_name",
+      "title": "Rename Marker By Name",
+      "description": "Rename one marker or range by name. Optional sample disambiguates duplicates.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
           "name": {
             "type": "string"
           },
@@ -705,19 +809,8 @@ R"mcp(
           }
         },
         "required": [
+          "name",
           "newName"
-        ],
-        "anyOf": [
-          {
-            "required": [
-              "locationId"
-            ]
-          },
-          {
-            "required": [
-              "name"
-            ]
-          }
         ],
         "additionalProperties": false
       }
@@ -970,9 +1063,9 @@ R"mcp(
       }
     },
     {
-      "name": "region_set_gain",
-      "title": "Set Region Gain",
-      "description": "Set one audio region gain using linear gain or dB. Optional invertPolarity toggles polarity.",
+      "name": "region_set_gain_linear",
+      "title": "Set Region Gain Linear",
+      "description": "Set one audio region gain using linear gain. Optional invertPolarity toggles polarity.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -983,6 +1076,46 @@ R"mcp(
             "type": "number",
             "minimum": 0
           },
+          "invertPolarity": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "linear"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "regionId",
+          "updated",
+          "gain"
+        ],
+        "properties": {
+          "regionId": {
+            "type": "string"
+          },
+          "updated": {
+            "type": "boolean"
+          },
+          "gain": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "region_set_gain_db",
+      "title": "Set Region Gain dB",
+      "description": "Set one audio region gain using dB. Optional invertPolarity toggles polarity.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "regionId": {
+            "type": "string"
+          },
           "db": {
             "type": "number"
           },
@@ -990,17 +1123,8 @@ R"mcp(
             "type": "boolean"
           }
         },
-        "oneOf": [
-          {
-            "required": [
-              "linear"
-            ]
-          },
-          {
-            "required": [
-              "db"
-            ]
-          }
+        "required": [
+          "db"
         ],
         "additionalProperties": false
       },
@@ -1121,9 +1245,9 @@ R"mcp(
       }
     },
     {
-      "name": "region_resize",
-      "title": "Resize Region",
-      "description": "Resize one region (audio or MIDI) by setting start and/or end timeline boundary using sample or bar+beat. If regionId is omitted, uses selected track's top region at playhead.",
+      "name": "region_resize_samples",
+      "title": "Resize Region By Samples",
+      "description": "Resize one region (audio or MIDI) by updating startSample and/or endSample. If regionId is omitted, uses selected track's top region at playhead.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1134,51 +1258,11 @@ R"mcp(
             "type": "integer",
             "minimum": 0
           },
-          "startBar": {
-            "type": "integer",
-            "minimum": 1
-          },
-          "startBeat": {
-            "type": "number",
-            "minimum": 1
-          },
           "endSample": {
             "type": "integer",
             "minimum": 0
-          },
-          "endBar": {
-            "type": "integer",
-            "minimum": 1
-          },
-          "endBeat": {
-            "type": "number",
-            "minimum": 1
           }
         },
-        "anyOf": [
-          {
-            "required": [
-              "startSample"
-            ]
-          },
-          {
-            "required": [
-              "startBar",
-              "startBeat"
-            ]
-          },
-          {
-            "required": [
-              "endSample"
-            ]
-          },
-          {
-            "required": [
-              "endBar",
-              "endBeat"
-            ]
-          }
-        ],
         "additionalProperties": false
       },
       "outputSchema": {
@@ -1206,9 +1290,62 @@ R"mcp(
       }
     },
     {
-      "name": "region_copy",
-      "title": "Copy Region",
-      "description": "Copy one region (audio or MIDI) to an absolute position or by delta. deltaBeats can be fractional. Optional trackId copies to another track. If regionId is omitted, uses selected track's top region at playhead.",
+      "name": "region_resize_bbt",
+      "title": "Resize Region By Bar Beat",
+      "description": "Resize one region (audio or MIDI) by updating startBar/startBeat and/or endBar/endBeat. If regionId is omitted, uses selected track's top region at playhead.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "regionId": {
+            "type": "string"
+          },
+          "startBar": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "startBeat": {
+            "type": "number",
+            "minimum": 1
+          },
+          "endBar": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "endBeat": {
+            "type": "number",
+            "minimum": 1
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "regionId",
+          "startSample",
+          "endSample"
+        ],
+        "properties": {
+          "regionId": {
+            "type": "string"
+          },
+          "resolvedVia": {
+            "type": "string"
+          },
+          "startSample": {
+            "type": "integer"
+          },
+          "endSample": {
+            "type": "integer"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "region_copy_to_sample",
+      "title": "Copy Region To Sample",
+      "description": "Copy one region (audio or MIDI) to an absolute sample position. Optional trackId copies to another track. If regionId is omitted, uses selected track's top region at playhead.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1221,44 +1358,10 @@ R"mcp(
           "sample": {
             "type": "integer",
             "minimum": 0
-          },
-          "bar": {
-            "type": "integer",
-            "minimum": 1
-          },
-          "beat": {
-            "type": "number",
-            "minimum": 1
-          },
-          "deltaSamples": {
-            "type": "integer"
-          },
-          "deltaBeats": {
-            "type": "number"
           }
         },
-        "oneOf": [
-          {
-            "required": [
-              "sample"
-            ]
-          },
-          {
-            "required": [
-              "bar",
-              "beat"
-            ]
-          },
-          {
-            "required": [
-              "deltaSamples"
-            ]
-          },
-          {
-            "required": [
-              "deltaBeats"
-            ]
-          }
+        "required": [
+          "sample"
         ],
         "additionalProperties": false
       },
@@ -1294,9 +1397,174 @@ R"mcp(
       }
     },
     {
-      "name": "region_move",
-      "title": "Move Region",
-      "description": "Move one region (audio or MIDI) to an absolute position or by delta. deltaBeats can be fractional. Optional trackId moves to another track. If regionId is omitted, uses selected track's top region at playhead.",
+      "name": "region_copy_to_bbt",
+      "title": "Copy Region To Bar Beat",
+      "description": "Copy one region (audio or MIDI) to an absolute musical position. Optional trackId copies to another track. If regionId is omitted, uses selected track's top region at playhead.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "regionId": {
+            "type": "string"
+          },
+          "trackId": {
+            "type": "string"
+          },
+          "bar": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "beat": {
+            "type": "number",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "bar",
+          "beat"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "regionId",
+          "sourceRegionId",
+          "startSample",
+          "endSample"
+        ],
+        "properties": {
+          "regionId": {
+            "type": "string"
+          },
+          "sourceRegionId": {
+            "type": "string"
+          },
+          "resolvedVia": {
+            "type": "string"
+          },
+          "startSample": {
+            "type": "integer"
+          },
+          "endSample": {
+            "type": "integer"
+          },
+          "crossTrack": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "region_copy_by_samples",
+      "title": "Copy Region By Sample Delta",
+      "description": "Copy one region (audio or MIDI) by a sample delta. Optional trackId copies to another track. If regionId is omitted, uses selected track's top region at playhead.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "regionId": {
+            "type": "string"
+          },
+          "trackId": {
+            "type": "string"
+          },
+          "deltaSamples": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "deltaSamples"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "regionId",
+          "sourceRegionId",
+          "startSample",
+          "endSample"
+        ],
+        "properties": {
+          "regionId": {
+            "type": "string"
+          },
+          "sourceRegionId": {
+            "type": "string"
+          },
+          "resolvedVia": {
+            "type": "string"
+          },
+          "startSample": {
+            "type": "integer"
+          },
+          "endSample": {
+            "type": "integer"
+          },
+          "crossTrack": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "region_copy_by_beats",
+      "title": "Copy Region By Beat Delta",
+      "description": "Copy one region (audio or MIDI) by a beat delta. deltaBeats may be fractional. Optional trackId copies to another track. If regionId is omitted, uses selected track's top region at playhead.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "regionId": {
+            "type": "string"
+          },
+          "trackId": {
+            "type": "string"
+          },
+          "deltaBeats": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "deltaBeats"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "regionId",
+          "sourceRegionId",
+          "startSample",
+          "endSample"
+        ],
+        "properties": {
+          "regionId": {
+            "type": "string"
+          },
+          "sourceRegionId": {
+            "type": "string"
+          },
+          "resolvedVia": {
+            "type": "string"
+          },
+          "startSample": {
+            "type": "integer"
+          },
+          "endSample": {
+            "type": "integer"
+          },
+          "crossTrack": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "region_move_to_sample",
+      "title": "Move Region To Sample",
+      "description": "Move one region (audio or MIDI) to an absolute sample position. Optional trackId moves to another track. If regionId is omitted, uses selected track's top region at playhead.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1309,6 +1577,56 @@ R"mcp(
           "sample": {
             "type": "integer",
             "minimum": 0
+          }
+        },
+        "required": [
+          "sample"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "regionId",
+          "sourceRegionId",
+          "startSample",
+          "endSample"
+        ],
+        "properties": {
+          "regionId": {
+            "type": "string"
+          },
+          "sourceRegionId": {
+            "type": "string"
+          },
+          "resolvedVia": {
+            "type": "string"
+          },
+          "startSample": {
+            "type": "integer"
+          },
+          "endSample": {
+            "type": "integer"
+          },
+          "crossTrack": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "region_move_to_bbt",
+      "title": "Move Region To Bar Beat",
+      "description": "Move one region (audio or MIDI) to an absolute musical position. Optional trackId moves to another track. If regionId is omitted, uses selected track's top region at playhead.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "regionId": {
+            "type": "string"
+          },
+          "trackId": {
+            "type": "string"
           },
           "bar": {
             "type": "integer",
@@ -1317,36 +1635,117 @@ R"mcp(
           "beat": {
             "type": "number",
             "minimum": 1
+          }
+        },
+        "required": [
+          "bar",
+          "beat"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "regionId",
+          "sourceRegionId",
+          "startSample",
+          "endSample"
+        ],
+        "properties": {
+          "regionId": {
+            "type": "string"
+          },
+          "sourceRegionId": {
+            "type": "string"
+          },
+          "resolvedVia": {
+            "type": "string"
+          },
+          "startSample": {
+            "type": "integer"
+          },
+          "endSample": {
+            "type": "integer"
+          },
+          "crossTrack": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "region_move_by_samples",
+      "title": "Move Region By Sample Delta",
+      "description": "Move one region (audio or MIDI) by a sample delta. Optional trackId moves to another track. If regionId is omitted, uses selected track's top region at playhead.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "regionId": {
+            "type": "string"
+          },
+          "trackId": {
+            "type": "string"
           },
           "deltaSamples": {
             "type": "integer"
+          }
+        },
+        "required": [
+          "deltaSamples"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "regionId",
+          "sourceRegionId",
+          "startSample",
+          "endSample"
+        ],
+        "properties": {
+          "regionId": {
+            "type": "string"
+          },
+          "sourceRegionId": {
+            "type": "string"
+          },
+          "resolvedVia": {
+            "type": "string"
+          },
+          "startSample": {
+            "type": "integer"
+          },
+          "endSample": {
+            "type": "integer"
+          },
+          "crossTrack": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "region_move_by_beats",
+      "title": "Move Region By Beat Delta",
+      "description": "Move one region (audio or MIDI) by a beat delta. deltaBeats may be fractional. Optional trackId moves to another track. If regionId is omitted, uses selected track's top region at playhead.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "regionId": {
+            "type": "string"
+          },
+          "trackId": {
+            "type": "string"
           },
           "deltaBeats": {
             "type": "number"
           }
         },
-        "oneOf": [
-          {
-            "required": [
-              "sample"
-            ]
-          },
-          {
-            "required": [
-              "bar",
-              "beat"
-            ]
-          },
-          {
-            "required": [
-              "deltaSamples"
-            ]
-          },
-          {
-            "required": [
-              "deltaBeats"
-            ]
-          }
+        "required": [
+          "deltaBeats"
         ],
         "additionalProperties": false
       },
@@ -1404,9 +1803,9 @@ R"mcp(
       }
     },
     {
-      "name": "plugin_set_parameter",
-      "title": "Set Plugin Parameter",
-      "description": "Set one plugin parameter by parameterIndex or controlId. Use exactly one of value or interface: value sets the parameter's native/internal range; interface sets the normalized/display-mapped control value.",
+      "name": "plugin_set_parameter_by_index_value",
+      "title": "Set Plugin Parameter By Index Value",
+      "description": "Set one plugin parameter identified by parameterIndex using its native/internal value range.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1421,9 +1820,40 @@ R"mcp(
             "type": "integer",
             "minimum": 0
           },
+          "value": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "pluginIndex",
+          "parameterIndex",
+          "value"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "id",
+          "pluginIndex",
+          "parameterIndex",
+          "controlId",
+          "value",
+          "interface"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "pluginIndex": {
+            "type": "integer"
+          },
+          "parameterIndex": {
+            "type": "integer"
+          },
           "controlId": {
-            "type": "integer",
-            "minimum": 0
+            "type": "integer"
           },
           "value": {
             "type": "number"
@@ -1432,39 +1862,162 @@ R"mcp(
             "type": "number"
           }
         },
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "plugin_set_parameter_by_index_interface",
+      "title": "Set Plugin Parameter By Index Interface",
+      "description": "Set one plugin parameter identified by parameterIndex using normalized/display-mapped interface value.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "pluginIndex": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "parameterIndex": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "interface": {
+            "type": "number"
+          }
+        },
         "required": [
           "id",
-          "pluginIndex"
+          "pluginIndex",
+          "parameterIndex",
+          "interface"
         ],
-        "allOf": [
-          {
-            "oneOf": [
-              {
-                "required": [
-                  "parameterIndex"
-                ]
-              },
-              {
-                "required": [
-                  "controlId"
-                ]
-              }
-            ]
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "id",
+          "pluginIndex",
+          "parameterIndex",
+          "controlId",
+          "value",
+          "interface"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
           },
-          {
-            "oneOf": [
-              {
-                "required": [
-                  "value"
-                ]
-              },
-              {
-                "required": [
-                  "interface"
-                ]
-              }
-            ]
+          "pluginIndex": {
+            "type": "integer"
+          },
+          "parameterIndex": {
+            "type": "integer"
+          },
+          "controlId": {
+            "type": "integer"
+          },
+          "value": {
+            "type": "number"
+          },
+          "interface": {
+            "type": "number"
           }
+        },
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "plugin_set_parameter_by_control_value",
+      "title": "Set Plugin Parameter By Control Value",
+      "description": "Set one plugin parameter identified by controlId using its native/internal value range.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "pluginIndex": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "controlId": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "value": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "pluginIndex",
+          "controlId",
+          "value"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "id",
+          "pluginIndex",
+          "parameterIndex",
+          "controlId",
+          "value",
+          "interface"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "pluginIndex": {
+            "type": "integer"
+          },
+          "parameterIndex": {
+            "type": "integer"
+          },
+          "controlId": {
+            "type": "integer"
+          },
+          "value": {
+            "type": "number"
+          },
+          "interface": {
+            "type": "number"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "plugin_set_parameter_by_control_interface",
+      "title": "Set Plugin Parameter By Control Interface",
+      "description": "Set one plugin parameter identified by controlId using normalized/display-mapped interface value.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "pluginIndex": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "controlId": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "interface": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "pluginIndex",
+          "controlId",
+          "interface"
         ],
         "additionalProperties": false
       },
@@ -1689,7 +2242,7 @@ R"mcp(
     {
       "name": "plugin_list_available",
       "title": "List Available Plugins",
-      "description": "List discovered plugins from Ardour's plugin manager. Returns stable pluginId values suitable for plugin_add.",
+      "description": "List discovered plugins from Ardour's plugin manager. Returns stable pluginId values suitable for plugin_add_by_plugin_id.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1726,9 +2279,9 @@ R"mcp(
       }
     },
     {
-      "name": "plugin_add",
-      "title": "Add Plugin",
-      "description": "Add one plugin to a route by pluginId (preferred) or uniqueId+type. position inserts at plugin index.",
+      "name": "plugin_add_by_plugin_id",
+      "title": "Add Plugin By Plugin ID",
+      "description": "Add one plugin to a route by pluginId. Optional position inserts at a plugin index.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1736,6 +2289,51 @@ R"mcp(
             "type": "string"
           },
           "pluginId": {
+            "type": "string"
+          },
+          "position": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "pluginId"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "id",
+          "pluginIndex",
+          "plugins"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "pluginIndex": {
+            "type": "integer"
+          },
+          "plugins": {
+            "type": "array"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "plugin_add_by_unique_id",
+      "title": "Add Plugin By Unique ID",
+      "description": "Add one plugin to a route by uniqueId and type. Optional position inserts at a plugin index.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
             "type": "string"
           },
           "uniqueId": {
@@ -1753,23 +2351,9 @@ R"mcp(
           }
         },
         "required": [
-          "id"
-        ],
-        "allOf": [
-          {
-            "oneOf": [
-              {
-                "required": [
-                  "pluginId"
-                ]
-              },
-              {
-                "required": [
-                  "uniqueId"
-                ]
-              }
-            ]
-          }
+          "id",
+          "uniqueId",
+          "type"
         ],
         "additionalProperties": false
       },
@@ -1957,9 +2541,9 @@ R"mcp(
       }
     },
     {
-      "name": "track_set_send_level",
-      "title": "Set Send Level",
-      "description": "Set route send level by send index using normalized position (0.0 to 1.0) or dB. For dB mode, valid range is -193.0 to +6.0, and -193.0 is silence floor.",
+      "name": "track_set_send_level_position",
+      "title": "Set Send Level Position",
+      "description": "Set route send level by send index using normalized position (0.0 to 1.0).",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1974,6 +2558,29 @@ R"mcp(
             "type": "number",
             "minimum": 0,
             "maximum": 1
+          }
+        },
+        "required": [
+          "id",
+          "sendIndex",
+          "position"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "track_set_send_level_db",
+      "title": "Set Send Level dB",
+      "description": "Set route send level by send index using dB. Valid range is -193.0 to +6.0, and -193.0 is silence floor.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "sendIndex": {
+            "type": "integer",
+            "minimum": 0
           },
           "db": {
             "type": "number",
@@ -1983,19 +2590,8 @@ R"mcp(
         },
         "required": [
           "id",
-          "sendIndex"
-        ],
-        "oneOf": [
-          {
-            "required": [
-              "position"
-            ]
-          },
-          {
-            "required": [
-              "db"
-            ]
-          }
+          "sendIndex",
+          "db"
         ],
         "additionalProperties": false
       }
@@ -2165,9 +2761,9 @@ R"mcp(
       }
     },
     {
-      "name": "track_set_fader",
-      "title": "Set Route Fader",
-      "description": "Set route fader by normalized position (0.0 to 1.0) or dB. For dB mode, valid range is -193.0 to +6.0, and -193.0 is silence floor.",
+      "name": "track_set_fader_position",
+      "title": "Set Route Fader Position",
+      "description": "Set route fader using normalized position (0.0 to 1.0).",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -2178,6 +2774,24 @@ R"mcp(
             "type": "number",
             "minimum": 0,
             "maximum": 1
+          }
+        },
+        "required": [
+          "id",
+          "position"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "track_set_fader_db",
+      "title": "Set Route Fader dB",
+      "description": "Set route fader using dB. Valid range is -193.0 to +6.0, and -193.0 is silence floor.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
           },
           "db": {
             "type": "number",
@@ -2186,27 +2800,16 @@ R"mcp(
           }
         },
         "required": [
-          "id"
-        ],
-        "oneOf": [
-          {
-            "required": [
-              "position"
-            ]
-          },
-          {
-            "required": [
-              "db"
-            ]
-          }
+          "id",
+          "db"
         ],
         "additionalProperties": false
       }
     },
     {
-      "name": "midi_region_add",
-      "title": "Add MIDI Region",
-      "description": "Create an empty MIDI region on a MIDI track. Provide either startSample+endSample, or startBar+startBeat+endBar+endBeat.",
+      "name": "midi_region_add_samples",
+      "title": "Add MIDI Region By Samples",
+      "description": "Create an empty MIDI region on a MIDI track using absolute sample positions.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -2223,42 +2826,12 @@ R"mcp(
           "endSample": {
             "type": "integer",
             "minimum": 0
-          },
-          "startBar": {
-            "type": "integer",
-            "minimum": 1
-          },
-          "startBeat": {
-            "type": "number",
-            "minimum": 1
-          },
-          "endBar": {
-            "type": "integer",
-            "minimum": 1
-          },
-          "endBeat": {
-            "type": "number",
-            "minimum": 1
           }
         },
         "required": [
-          "trackId"
-        ],
-        "oneOf": [
-          {
-            "required": [
-              "startSample",
-              "endSample"
-            ]
-          },
-          {
-            "required": [
-              "startBar",
-              "startBeat",
-              "endBar",
-              "endBeat"
-            ]
-          }
+          "trackId",
+          "startSample",
+          "endSample"
         ],
         "additionalProperties": false
       },
@@ -2279,9 +2852,64 @@ R"mcp(
       }
     },
     {
-      "name": "midi_note_add",
-      "title": "Add MIDI Note",
-      "description": "Add one MIDI note to an existing MIDI region at region beats, sample, or bar+beat position.",
+      "name": "midi_region_add_bbt",
+      "title": "Add MIDI Region By Bar Beat",
+      "description": "Create an empty MIDI region on a MIDI track using musical positions.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "trackId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "startBar": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "startBeat": {
+            "type": "number",
+            "minimum": 1
+          },
+          "endBar": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "endBeat": {
+            "type": "number",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "trackId",
+          "startBar",
+          "startBeat",
+          "endBar",
+          "endBeat"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "created"
+        ],
+        "properties": {
+          "created": {
+            "type": "object"
+          },
+          "usedDefaultName": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "midi_note_add_region_beat",
+      "title": "Add MIDI Note By Region Beat",
+      "description": "Add one MIDI note to an existing MIDI region using regionBeat relative to the region start.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -2310,10 +2938,88 @@ R"mcp(
           "regionBeat": {
             "type": "number",
             "minimum": 0
+          }
+        },
+        "required": [
+          "regionId",
+          "note",
+          "lengthBeats",
+          "regionBeat"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "midi_note_add_sample",
+      "title": "Add MIDI Note By Sample",
+      "description": "Add one MIDI note to an existing MIDI region using an absolute sample position.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "regionId": {
+            "type": "string"
+          },
+          "note": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 127
+          },
+          "velocity": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 127
+          },
+          "channel": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16
+          },
+          "lengthBeats": {
+            "type": "number",
+            "exclusiveMinimum": 0
           },
           "sample": {
             "type": "integer",
             "minimum": 0
+          }
+        },
+        "required": [
+          "regionId",
+          "note",
+          "lengthBeats",
+          "sample"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "midi_note_add_bbt",
+      "title": "Add MIDI Note By Bar Beat",
+      "description": "Add one MIDI note to an existing MIDI region using an absolute musical position.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "regionId": {
+            "type": "string"
+          },
+          "note": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 127
+          },
+          "velocity": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 127
+          },
+          "channel": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16
+          },
+          "lengthBeats": {
+            "type": "number",
+            "exclusiveMinimum": 0
           },
           "bar": {
             "type": "integer",
@@ -2327,25 +3033,9 @@ R"mcp(
         "required": [
           "regionId",
           "note",
-          "lengthBeats"
-        ],
-        "oneOf": [
-          {
-            "required": [
-              "regionBeat"
-            ]
-          },
-          {
-            "required": [
-              "sample"
-            ]
-          },
-          {
-            "required": [
-              "bar",
-              "beat"
-            ]
-          }
+          "lengthBeats",
+          "bar",
+          "beat"
         ],
         "additionalProperties": false
       }
@@ -2437,9 +3127,9 @@ R"mcp(
       }
     },
     {
-      "name": "midi_note_import_json",
-      "title": "Import MIDI JSON",
-      "description": "Import MIDI JSON into an existing MIDI region (regionId), or create/populate a new MIDI region on a track (trackId plus range endpoints). midi.midi_events is required. Event positions (bar/b) are relative to region start: bar 1 beat 1 = region start (not absolute session time). b may be fractional (e.g. 1.5 = off-beat 8th note in 4/4), and t is tick offset within the beat using ticks_per_quarter. Channel numbering is 1..16 by default (channel_base=\"one\"). For legacy 0..15 payloads set channel_base=\"zero\". In drum mode (is_drum_mode=true), note_off events are optional; hits may be provided as note_on only.",
+      "name": "midi_note_import_json_into_region",
+      "title": "Import MIDI JSON Into Existing Region",
+      "description": "Import MIDI JSON into an existing MIDI region. midi.midi_events is required. Event positions (bar/b) are relative to region start: bar 1 beat 1 = region start, not absolute session time. b may be fractional, for example 1.5 for an off-beat 8th note in 4/4. t is tick offset within the beat using ticks_per_quarter. Channel numbering is 1..16 by default (channel_base=\"one\"). For legacy 0..15 payloads set channel_base=\"zero\". In drum mode (is_drum_mode=true), note_off events are optional; hits may be provided as note_on only.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -2549,6 +3239,150 @@ R"mcp(
           "regionId": {
             "type": "string"
           },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "midi",
+          "regionId"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "createdRegion",
+          "region",
+          "summary"
+        ],
+        "properties": {
+          "createdRegion": {
+            "type": "boolean"
+          },
+          "region": {
+            "type": "object"
+          },
+          "summary": {
+            "type": "object"
+          },
+          "warnings": {
+            "type": "array"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "midi_note_import_json_to_new_region_samples",
+      "title": "Import MIDI JSON To New Region By Samples",
+      "description": "Create and populate a new MIDI region from MIDI JSON using absolute sample positions. midi.midi_events is required. Event positions (bar/b) are relative to the new region start: bar 1 beat 1 = region start, not absolute session time. b may be fractional, for example 1.5 for an off-beat 8th note in 4/4. t is tick offset within the beat using ticks_per_quarter. Channel numbering is 1..16 by default (channel_base=\"one\"). For legacy 0..15 payloads set channel_base=\"zero\". In drum mode (is_drum_mode=true), note_off events are optional; hits may be provided as note_on only.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "midi": {
+            "type": "object",
+            "properties": {
+              "channel_base": {
+                "type": "string",
+                "enum": [
+                  "one",
+                  "zero"
+                ]
+              },
+              "channel": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 16
+              },
+              "is_drum_mode": {
+                "type": "boolean"
+              },
+              "ticks_per_quarter": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 96000
+              },
+              "time_signature": {
+                "type": "string"
+              },
+              "midi_events": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "bar": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "repeat": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "b": {
+                      "type": "number",
+                      "minimum": 1
+                    },
+                    "t": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "n": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 127
+                    },
+                    "v": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 127
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "note_on",
+                        "note_off"
+                      ]
+                    },
+                    "channel": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 16
+                    },
+                    "comment": {
+                      "type": "string"
+                    }
+                  },
+                  "oneOf": [
+                    {
+                      "required": [
+                        "comment"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "bar",
+                        "repeat"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "bar",
+                        "b",
+                        "n"
+                      ]
+                    }
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "midi_events"
+            ],
+            "additionalProperties": false
+          },
           "trackId": {
             "type": "string"
           },
@@ -2562,6 +3396,155 @@ R"mcp(
           "endSample": {
             "type": "integer",
             "minimum": 0
+          }
+        },
+        "required": [
+          "midi",
+          "trackId",
+          "startSample",
+          "endSample"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "createdRegion",
+          "region",
+          "summary"
+        ],
+        "properties": {
+          "createdRegion": {
+            "type": "boolean"
+          },
+          "region": {
+            "type": "object"
+          },
+          "summary": {
+            "type": "object"
+          },
+          "warnings": {
+            "type": "array"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "midi_note_import_json_to_new_region_bbt",
+      "title": "Import MIDI JSON To New Region By Bar Beat",
+      "description": "Create and populate a new MIDI region from MIDI JSON using musical positions. midi.midi_events is required. Event positions (bar/b) are relative to the new region start: bar 1 beat 1 = region start, not absolute session time. b may be fractional, for example 1.5 for an off-beat 8th note in 4/4. t is tick offset within the beat using ticks_per_quarter. Channel numbering is 1..16 by default (channel_base=\"one\"). For legacy 0..15 payloads set channel_base=\"zero\". In drum mode (is_drum_mode=true), note_off events are optional; hits may be provided as note_on only.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "midi": {
+            "type": "object",
+            "properties": {
+              "channel_base": {
+                "type": "string",
+                "enum": [
+                  "one",
+                  "zero"
+                ]
+              },
+              "channel": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 16
+              },
+              "is_drum_mode": {
+                "type": "boolean"
+              },
+              "ticks_per_quarter": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 96000
+              },
+              "time_signature": {
+                "type": "string"
+              },
+              "midi_events": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "bar": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "repeat": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "b": {
+                      "type": "number",
+                      "minimum": 1
+                    },
+                    "t": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "n": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 127
+                    },
+                    "v": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 127
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "note_on",
+                        "note_off"
+                      ]
+                    },
+                    "channel": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 16
+                    },
+                    "comment": {
+                      "type": "string"
+                    }
+                  },
+                  "oneOf": [
+                    {
+                      "required": [
+                        "comment"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "bar",
+                        "repeat"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "bar",
+                        "b",
+                        "n"
+                      ]
+                    }
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "midi_events"
+            ],
+            "additionalProperties": false
+          },
+          "trackId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
           },
           "startBar": {
             "type": "integer",
@@ -2581,30 +3564,12 @@ R"mcp(
           }
         },
         "required": [
-          "midi"
-        ],
-        "oneOf": [
-          {
-            "required": [
-              "regionId"
-            ]
-          },
-          {
-            "required": [
-              "trackId",
-              "startSample",
-              "endSample"
-            ]
-          },
-          {
-            "required": [
-              "trackId",
-              "startBar",
-              "startBeat",
-              "endBar",
-              "endBeat"
-            ]
-          }
+          "midi",
+          "trackId",
+          "startBar",
+          "startBeat",
+          "endBar",
+          "endBeat"
         ],
         "additionalProperties": false
       },
