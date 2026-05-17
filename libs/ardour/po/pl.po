@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libardour3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-26 15:40+0200\n"
-"PO-Revision-Date: 2026-04-27 17:35+0200\n"
+"POT-Creation-Date: 2026-05-16 22:50+0200\n"
+"PO-Revision-Date: 2026-05-17 11:54+0200\n"
 "Last-Translator: Krzysztof Gajdemski <songo@debian.org.pl>\n"
 "Language-Team: Polish <songo@debian.org.pl>\n"
 "Language: pl\n"
@@ -176,7 +176,7 @@ msgstr "Błąd braku pamięci"
 msgid "Could not reconnect to Audio/MIDI engine"
 msgstr "Nie można podłączyć się do silnika audio/MIDI"
 
-#: audio_backend.cc:107 export_formats.cc:60 session.cc:7659
+#: audio_backend.cc:107 export_formats.cc:60 session.cc:7684
 #: transport_master.cc:477
 msgid "None"
 msgstr "Brak"
@@ -214,9 +214,9 @@ msgstr ""
 "odtwarzania „%2”. Przejście usunięte."
 
 #: audio_playlist_source.cc:156 audiosource.cc:1179 midi_source.cc:408
-#: midi_source.cc:435 plug_insert_base.cc:282 rb_effect.cc:329 session.cc:5006
-#: session.cc:5808 session.cc:5813 session.cc:5844 session.cc:5849
-#: session.cc:5948 session_handle.cc:139 sndfilesource.cc:179 sp_stretch.cc:307
+#: midi_source.cc:435 plug_insert_base.cc:282 rb_effect.cc:329 session.cc:5031
+#: session.cc:5833 session.cc:5838 session.cc:5869 session.cc:5874
+#: session.cc:5973 session_handle.cc:139 sndfilesource.cc:179 sp_stretch.cc:307
 #: triggerbox.cc:1291
 msgid "programming error: %1"
 msgstr "błąd programowania: %1"
@@ -413,8 +413,8 @@ msgid "Return"
 msgstr "Powrót"
 
 #: automatable.cc:216
-msgid "Trim"
-msgstr "Wzmocnienie (trim)"
+msgid "Gain|Trim"
+msgstr ""
 
 #: automatable.cc:218
 msgid "Master Volume"
@@ -515,263 +515,11 @@ msgstr "Błąd buforowania odczytu butlera na dstream %1"
 msgid "Butler write-behind failure on dstream %1"
 msgstr "Błąd buforowania zapisu butlera na dstream %1"
 
-#: chord_provider.cc:68
-msgid "Power (5th)"
-msgstr "power chord (kwinta)"
-
-#: chord_provider.cc:68
-msgid "pow5"
-msgstr ""
-
-#: chord_provider.cc:72
-msgid "Major"
-msgstr "dur"
-
-#: chord_provider.cc:72
-msgid "maj"
-msgstr ""
-
-#: chord_provider.cc:72
-msgid "major"
-msgstr "dur"
-
-#: chord_provider.cc:73
-msgid "Minor"
-msgstr "mol"
-
-#: chord_provider.cc:73
-msgid "min"
-msgstr "mol"
-
-#: chord_provider.cc:73
-msgid "minor"
-msgstr "mol"
-
-#: chord_provider.cc:74
-msgid "Diminished"
-msgstr "zmniejszony"
-
-#: chord_provider.cc:74
-msgid "dim"
-msgstr ""
-
-#: chord_provider.cc:75
-msgid "Augmented"
-msgstr "zwiększony"
-
-#: chord_provider.cc:75
-msgid "aug"
-msgstr ""
-
-#: chord_provider.cc:76
-msgid "Sus4"
-msgstr ""
-
-#: chord_provider.cc:76
-msgid "sus4"
-msgstr ""
-
-#: chord_provider.cc:77
-msgid "Sus2"
-msgstr ""
-
-#: chord_provider.cc:77
-msgid "sus2"
-msgstr ""
-
-#: chord_provider.cc:81
-msgid "Major 7th"
-msgstr "dur 7"
-
-#: chord_provider.cc:81
-msgid "maj7"
-msgstr ""
-
-#: chord_provider.cc:82
-msgid "Dominant 7th"
-msgstr "dom. 7 (septyma mała)"
-
-#: chord_provider.cc:82
-msgid "dom7"
-msgstr ""
-
-#: chord_provider.cc:83
-msgid "Minor 7th"
-msgstr "mol 7"
-
-#: chord_provider.cc:83
-msgid "min7"
-msgstr ""
-
-#: chord_provider.cc:84
-msgid "Half Diminished 7th"
-msgstr "półzmniejszony 7"
-
-#: chord_provider.cc:84
-msgid "halfdim7"
-msgstr ""
-
-#: chord_provider.cc:85 chord_provider.cc:90
-msgid "Diminished 7th"
-msgstr "zmniejszony 7"
-
-#: chord_provider.cc:85 chord_provider.cc:90
-msgid "dim7"
-msgstr ""
-
-#: chord_provider.cc:86
-msgid "Minor/Major 7th"
-msgstr "mol - dur 7"
-
-#: chord_provider.cc:86
-msgid "min/maj7"
-msgstr ""
-
-#: chord_provider.cc:87
-msgid "Major 7th/flat 5"
-msgstr "dur7 z obn. kwintą"
-
-#: chord_provider.cc:87
-msgid "maj7b5"
-msgstr ""
-
-#: chord_provider.cc:88
-msgid "Major 7th/sharp 5"
-msgstr "dur7  z podw. kwintą"
-
-#: chord_provider.cc:88
-msgid "maj7#5"
-msgstr ""
-
-#: chord_provider.cc:89
-msgid "Half-Diminished 7th"
-msgstr "półzmniejszony 7"
-
-#: chord_provider.cc:89
-msgid "m7b5"
-msgstr ""
-
-#: chord_provider.cc:91
-msgid "Augmented 7th"
-msgstr "zwiększony 7"
-
-#: chord_provider.cc:91
-msgid "aug7"
-msgstr ""
-
-#: chord_provider.cc:92
-msgid "Augmented Major 7th"
-msgstr "zwięk. (septyma wielka)"
-
-#: chord_provider.cc:92
-msgid "aug-dom-7"
-msgstr ""
-
-#: chord_provider.cc:96
-msgid "Dominant 9th"
-msgstr "dominantowy 9"
-
-#: chord_provider.cc:96
-msgid "dom9"
-msgstr ""
-
-#: chord_provider.cc:97
-msgid "Major 9th"
-msgstr "dur 9"
-
-#: chord_provider.cc:97
-msgid "9"
-msgstr ""
-
-#: chord_provider.cc:97
-msgid "maj9"
-msgstr ""
-
-#: chord_provider.cc:98
-msgid "Minor 9th"
-msgstr "mol 9"
-
-#: chord_provider.cc:98
-msgid "min9"
-msgstr ""
-
-#: chord_provider.cc:99
-msgid "Add9"
-msgstr "add9"
-
-#: chord_provider.cc:99
-msgid "add9"
-msgstr ""
-
-#: chord_provider.cc:100
-msgid "Minor Add9"
-msgstr "mol add9"
-
-#: chord_provider.cc:100
-msgid "min/9"
-msgstr ""
-
-#: chord_provider.cc:101
-msgid "Major 6th"
-msgstr "dur 6"
-
-#: chord_provider.cc:101
-msgid "maj6"
-msgstr ""
-
-#: chord_provider.cc:102
-msgid "Minor 6th"
-msgstr "mol 6"
-
-#: chord_provider.cc:102
-msgid "min6"
-msgstr ""
-
-#: chord_provider.cc:103
-msgid "Major 6/9"
-msgstr "dur 6/9"
-
-#: chord_provider.cc:103
-msgid "maj6/9"
-msgstr ""
-
-#: chord_provider.cc:104
-msgid "Sus2/7"
-msgstr "sus2/7"
-
-#: chord_provider.cc:104
-msgid "sus2/7"
-msgstr ""
-
-#: chord_provider.cc:105
-msgid "Sus4/7"
-msgstr "sus4/7"
-
-#: chord_provider.cc:105
-msgid "sus4/7"
-msgstr ""
-
-#: chord_provider.cc:109
-msgid "Dominant 11th"
-msgstr "dominantowy 11"
-
-#: chord_provider.cc:109
-msgid "dom11"
-msgstr ""
-
-#: chord_provider.cc:110
-msgid "Major 13th"
-msgstr "dur 13"
-
-#: chord_provider.cc:110
-msgid "maj13"
-msgstr ""
-
-#: chord_provider.cc:166
+#: chord_provider.cc:143
 msgid "Not a chord"
 msgstr "To nie akord"
 
-#: chord_provider.cc:200 instrument_info.cc:41 instrument_info.cc:74
+#: chord_provider.cc:177 instrument_info.cc:41 instrument_info.cc:74
 msgid "Unknown"
 msgstr "Nieznany"
 
@@ -841,7 +589,7 @@ msgstr "Convolver: IR \"%1\" plik zbyt długi."
 msgid "audio"
 msgstr "audio"
 
-#: data_type.cc:28 session.cc:2747 session.cc:2775
+#: data_type.cc:28 session.cc:2772 session.cc:2800
 msgid "MIDI"
 msgstr "MIDI"
 
@@ -1175,8 +923,8 @@ msgid ""
 "Multiple Timespan/Ranges have the same name resulting in identical file-"
 "names!"
 msgstr ""
-"Przedziały czasowe/zakresy mają taką samą nazwę, co oznacza, że nazwy plików b"
-"ędą się pokrywać!"
+"Przedziały czasowe/zakresy mają taką samą nazwę, co oznacza, że nazwy plików "
+"będą się pokrywać!"
 
 #: export_profile_manager.cc:1018
 msgid "Destination folder does not exist."
@@ -1863,8 +1611,8 @@ msgid ""
 "LV2: Plugin '%1' has inline-display extension without lv2:extensionData meta-"
 "data "
 msgstr ""
-"LV2: Wtyczka „%1” zawiera rozszerzenie wyświetlania w pasu bez meta"
-"danych lv2:extensionData"
+"LV2: Wtyczka „%1” zawiera rozszerzenie wyświetlania w pasu bez metadanych "
+"lv2:extensionData"
 
 #: lv2_plugin.cc:1215
 msgid "LV2: update midnam for plugin '%1'"
@@ -1966,48 +1714,56 @@ msgstr "Ignorowanie niewłaściwej wtyczki LV2 (brak nazwy/portów)"
 msgid "Ignoring LV2 plugin since it cannot do inplace processing."
 msgstr "Ignorowanie wtyczki LV2 ponieważ nie wspiera przetwarzania „inplace”."
 
-#: lv2_plugin.cc:3941
+#: lv2_plugin.cc:3943
 msgid "Unsupported required LV2 feature: '%1'."
 msgstr "Niewspierana wymagana funkcjonalność LV2: „%1”."
 
-#: lv2_plugin.cc:3962
+#: lv2_plugin.cc:3949
+msgid "Invalid required LV2 feature: '%1'."
+msgstr "Niewłaściwa wymagana funkcjonalność LV2: „%1”."
+
+#: lv2_plugin.cc:3952
+msgid "Invalid required LV2 feature."
+msgstr "Niewłaściwa wymagana funkcjonalność LV2."
+
+#: lv2_plugin.cc:3973
 msgid "Unsupported required LV2 option: '%1'."
 msgstr "Niewspierana wymagana opcja LV2: „%1”"
 
-#: lv2_plugin.cc:3977
+#: lv2_plugin.cc:3988
 msgid "LV2"
 msgstr "LV2"
 
-#: lv2_plugin.cc:3984
+#: lv2_plugin.cc:3995
 msgid "LV2 Category: '%1'"
 msgstr "Kategoria LV2: „%1”"
 
-#: lv2_plugin.cc:4000
+#: lv2_plugin.cc:4011
 msgid "LV2 Parent Class URI: '%1'"
 msgstr "URI klasy rodzica LV2: „%1”"
 
-#: lv2_plugin.cc:4014
+#: lv2_plugin.cc:4025
 msgid "LV2 Class: '%1'"
 msgstr "Klasa LV2: „%1”"
 
-#: lv2_plugin.cc:4043
+#: lv2_plugin.cc:4054
 msgid "Found Atom port not marked for input or output."
 msgstr "Znaleziono port Atom nie oznaczony jako wejście bądź wyjście."
 
-#: lv2_plugin.cc:4048
+#: lv2_plugin.cc:4059
 msgid "Found Atom port without sequence support."
 msgstr "Znaleziono port Atom  bez wsparcia dla sekwencji."
 
-#: lv2_plugin.cc:4074
+#: lv2_plugin.cc:4085
 msgid "Ignored optional port %1 ('%2') which has unsupported data type."
 msgstr ""
 "Zignorowano opcjonalny port %1 („%2”) zawierający niewspierany typ danych."
 
-#: lv2_plugin.cc:4080
+#: lv2_plugin.cc:4091
 msgid "Port %1 ('%2') has unsupported data type."
 msgstr "Port %1 („%2”) zawiera niewspierany typ danych."
 
-#: lv2_plugin.cc:4109
+#: lv2_plugin.cc:4120
 msgid ""
 "LV2 Ports: Atom-in: %1, Atom-out: %2, Audio-in: %3 Audio-out: %4 MIDI-in: "
 "%5  MIDI-out: %6 Ctrl-in: %7 Ctrl-out: %8"
@@ -2428,7 +2184,7 @@ msgstr "Istnieje już preset dostawcy o takiej samej nazwie."
 msgid "Failed to save plugin preset."
 msgstr "Nie można zapisać presetu wtyczki."
 
-#: plugin.cc:326 session.cc:2743
+#: plugin.cc:326 session.cc:2768
 msgid "Audio"
 msgstr "Audio"
 
@@ -3373,11 +3129,11 @@ msgstr ""
 msgid "programming error: session range removed!"
 msgstr "błąd programowania: zakres sesji usunięty!"
 
-#: session.cc:2819
+#: session.cc:2844
 msgid "Session: could not create new midi track."
 msgstr "Sesja: nie można utworzyć nowej ścieżki MIDI ."
 
-#: session.cc:2825
+#: session.cc:2850
 msgid ""
 "A required port for MIDI I/O could not be created (%1).\n"
 "You may need to restart the Audio/MIDI engine to fix this."
@@ -3385,130 +3141,130 @@ msgstr ""
 "Nie można utworzyć wymaganego portu dla we/wy MIDI (%1).\n"
 "Naprawa może wymagać restartu silnika audio/MIDI."
 
-#: session.cc:2858 session.cc:2861
+#: session.cc:2883 session.cc:2886
 msgid "Midi Bus"
 msgstr "Szyna MIDI"
 
-#: session.cc:2883
+#: session.cc:2908
 msgid "cannot configure new midi bus input"
 msgstr "nie można skonfigurować nowej szyny wejściowej MIDI"
 
-#: session.cc:2889
+#: session.cc:2914
 msgid "cannot configure new midi bus output"
 msgstr "nie można skonfigurować nowej szyny wyjściowej MIDI"
 
-#: session.cc:2903
+#: session.cc:2928
 msgid "Session: could not create new MIDI bus."
 msgstr "Sesja: nie można utworzyć nowej szyny MIDI ."
 
-#: session.cc:3062 session.cc:3070 session.cc:3176 session.cc:3184
+#: session.cc:3087 session.cc:3095 session.cc:3201 session.cc:3209
 msgid "cannot configure %1 in/%2 out configuration for new audio track"
 msgstr "nie można zestawić konfiguracji %1 we/%2 wy dla nowej ścieżki audio"
 
-#: session.cc:3088
+#: session.cc:3113
 msgid "Session: could not create new audio track."
 msgstr "Sesja: nie można utworzyć nowej ścieżki audio."
 
-#: session.cc:3151 session.cc:3154
+#: session.cc:3176 session.cc:3179
 msgid "Bus"
 msgstr "Szyna"
 
-#: session.cc:3200
+#: session.cc:3225
 msgid "Session: could not create new audio bus."
 msgstr "Sesja: nie można utworzyć nowej szyny audio."
 
-#: session.cc:3278
+#: session.cc:3303
 msgid "Session: Failed to create unique ID for track from template."
 msgstr "Sesja: nie można utworzyć unikalnego ID dla ścieżki z szablonu."
 
-#: session.cc:3292
+#: session.cc:3317
 msgid "Session: Failed to generate unique name and ID for track from template."
 msgstr ""
 "Sesja: nie można wygenerować unikalnej nazwy i ID dla ścieżki z szablonu."
 
-#: session.cc:3437
+#: session.cc:3462
 msgid "Session: cannot create track/bus from template description"
 msgstr "Sesja: nie można utworzyć ścieżki/szyny z opisu szablonu"
 
-#: session.cc:3471
+#: session.cc:3496
 msgid "Session: could not create new track/bus from template"
 msgstr "Sesja: nie można utworzyć nowej ścieżki/szyny z szablonu"
 
-#: session.cc:3542
+#: session.cc:3567
 msgid "Adding new tracks/busses failed"
 msgstr "Błąd dodawania nowych ścieżek/szyn"
 
-#: session.cc:5255
+#: session.cc:5280
 msgid "Merging embedded file %1: name collision AND md5 hash collision!"
 msgstr "Dołączanie osadzonego pliku: kolizja nazwy i skrótu MD5!"
 
-#: session.cc:5378
+#: session.cc:5403
 msgid "There are already %1 recordings for %2, which I consider too many."
 msgstr "Jest już %1 nagrań dla %2, co wydaje się wartością zbyt dużą."
 
-#: session.cc:5439
+#: session.cc:5464
 msgid ""
 "There are already many recordings for %1, resulting in a too long file-path "
 "%2."
 msgstr "Jest już wiele nagrań dla %1, co skutkuje zbyt długą ścieżką pliku %2."
 
-#: session.cc:6112
+#: session.cc:6137
 msgid "send ID %1 appears to be in use already"
 msgstr "wydaje się, że ID wysyłki %1 jest już w użyciu"
 
-#: session.cc:6124
+#: session.cc:6149
 msgid "aux send ID %1 appears to be in use already"
 msgstr "wydaje się, że aux ID %1 jest już w użyciu"
 
-#: session.cc:6136
+#: session.cc:6161
 msgid "surround send ID %1 appears to be in use already"
 msgstr "wydaje się, że ID wysyłki surround %1 jest już w użyciu"
 
-#: session.cc:6148
+#: session.cc:6173
 msgid "return ID %1 appears to be in use already"
 msgstr "wydaje się, że ID powrotu %1 jest już w użyciu"
 
-#: session.cc:6160
+#: session.cc:6185
 msgid "insert ID %1 appears to be in use already"
 msgstr "wydaje się, że ID insertu %1 jest już w użyciu"
 
-#: session.cc:6321
+#: session.cc:6346
 msgid "Cannot write a range where end <= start (e.g. %1 <= %2)"
 msgstr "Nie można zapisać zakresu, w którym koniec <= początek (np. %1 <= %2)"
 
-#: session.cc:6334
+#: session.cc:6359
 msgid "Cannot write a range with no data."
 msgstr "Nie można zapisać zakresu, w którym brak danych."
 
-#: session.cc:6373
+#: session.cc:6398
 msgid "cannot create new file \"%1\" for %2"
 msgstr "Nie można utworzyć nowego pliku „%1” dla ”%2”"
 
-#: session.cc:7618
+#: session.cc:7643
 msgid "Control Char"
 msgstr "Znak kontrolny"
 
-#: session.cc:7706
+#: session.cc:7731
 msgid "Copy Section"
 msgstr "Kopiuj sekcję"
 
-#: session.cc:7709
+#: session.cc:7734
 msgid "Move Section"
 msgstr "Przenieś sekcję"
 
-#: session.cc:7712
+#: session.cc:7737
 msgid "Insert Section"
 msgstr "Wstaw sekcję"
 
-#: session.cc:7715
+#: session.cc:7740
 msgid "Delete Section"
 msgstr "Skasuj sekcję"
 
-#: session.cc:7810
+#: session.cc:7835
 msgid "cut tempo map"
 msgstr "wycięcie mapy tempa"
 
-#: session.cc:8065 session.cc:8066
+#: session.cc:8090 session.cc:8091
 msgid "Virtual Keyboard"
 msgstr "Wirtualna klawiatura"
 
@@ -4721,6 +4477,102 @@ msgstr "Rejestracja ZeroConf nie powiodła się"
 #: zeroconf.cc:141
 msgid "ardour-avahi tool was not found."
 msgstr "Nie odnaleziono narzędzia ardour-avahi."
+
+#~ msgid "Trim"
+#~ msgstr "Wzmocnienie (trim)"
+
+#~ msgid "Power (5th)"
+#~ msgstr "power chord (kwinta)"
+
+#~ msgid "Major"
+#~ msgstr "dur"
+
+#~ msgid "major"
+#~ msgstr "dur"
+
+#~ msgid "Minor"
+#~ msgstr "mol"
+
+#~ msgid "min"
+#~ msgstr "mol"
+
+#~ msgid "minor"
+#~ msgstr "mol"
+
+#~ msgid "Diminished"
+#~ msgstr "zmniejszony"
+
+#~ msgid "Augmented"
+#~ msgstr "zwiększony"
+
+#~ msgid "Major 7th"
+#~ msgstr "dur 7"
+
+#~ msgid "Dominant 7th"
+#~ msgstr "dom. 7 (septyma mała)"
+
+#~ msgid "Minor 7th"
+#~ msgstr "mol 7"
+
+#~ msgid "Half Diminished 7th"
+#~ msgstr "półzmniejszony 7"
+
+#~ msgid "Diminished 7th"
+#~ msgstr "zmniejszony 7"
+
+#~ msgid "Minor/Major 7th"
+#~ msgstr "mol - dur 7"
+
+#~ msgid "Major 7th/flat 5"
+#~ msgstr "dur7 z obn. kwintą"
+
+#~ msgid "Major 7th/sharp 5"
+#~ msgstr "dur7  z podw. kwintą"
+
+#~ msgid "Half-Diminished 7th"
+#~ msgstr "półzmniejszony 7"
+
+#~ msgid "Augmented 7th"
+#~ msgstr "zwiększony 7"
+
+#~ msgid "Augmented Major 7th"
+#~ msgstr "zwięk. (septyma wielka)"
+
+#~ msgid "Dominant 9th"
+#~ msgstr "dominantowy 9"
+
+#~ msgid "Major 9th"
+#~ msgstr "dur 9"
+
+#~ msgid "Minor 9th"
+#~ msgstr "mol 9"
+
+#~ msgid "Add9"
+#~ msgstr "add9"
+
+#~ msgid "Minor Add9"
+#~ msgstr "mol add9"
+
+#~ msgid "Major 6th"
+#~ msgstr "dur 6"
+
+#~ msgid "Minor 6th"
+#~ msgstr "mol 6"
+
+#~ msgid "Major 6/9"
+#~ msgstr "dur 6/9"
+
+#~ msgid "Sus2/7"
+#~ msgstr "sus2/7"
+
+#~ msgid "Sus4/7"
+#~ msgstr "sus4/7"
+
+#~ msgid "Dominant 11th"
+#~ msgstr "dominantowy 11"
+
+#~ msgid "Major 13th"
+#~ msgstr "dur 13"
 
 #~ msgid "cannot open click soundfile %1 (%2)"
 #~ msgstr "nie można otworzyć pliku dźwiękowego metronomu %1 (%2)"
