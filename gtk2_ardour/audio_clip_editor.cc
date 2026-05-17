@@ -216,10 +216,11 @@ AudioClipEditor::build_canvas ()
 	n_timebars = 0;
 
 	clip_metric = new ClipMetric (*this);
-	main_ruler = new ArdourCanvas::Ruler (time_line_group, clip_metric, ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, timebar_height));
+	main_ruler = new ArdourCanvas::Ruler (h_scroll_group, clip_metric, ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, timebar_height));
 	main_ruler->set_font_description (UIConfiguration::instance ().get_SmallerFont ());
-	main_ruler->set_fill_color (UIConfiguration::instance().color (X_("ruler base")));
-	main_ruler->set_outline_color (UIConfiguration::instance().color (X_("ruler text")));
+	main_ruler->set_fill_color (UIConfiguration::instance().color ("ruler base"));
+	main_ruler->set_outline_color (UIConfiguration::instance().color ("ruler text"));
+	CANVAS_DEBUG_NAME (main_ruler, "audio clip ruler");
 	n_timebars++;
 
 	main_ruler->Event.connect (sigc::mem_fun (*this, &CueEditor::ruler_event));
@@ -227,17 +228,15 @@ AudioClipEditor::build_canvas ()
 	data_group = new ArdourCanvas::Container (hv_scroll_group);
 	CANVAS_DEBUG_NAME (data_group, "cue data group");
 
-	data_group->set_position (ArdourCanvas::Duple (_timeline_origin, timebar_height * n_timebars));
 	no_scroll_group->set_position (ArdourCanvas::Duple (_timeline_origin, timebar_height * n_timebars));
-	cursor_scroll_group->set_position (ArdourCanvas::Duple (_timeline_origin, timebar_height * n_timebars));
+	cursor_scroll_group->set_position (ArdourCanvas::Duple (_timeline_origin, 0));
 	h_scroll_group->set_position (Duple (_timeline_origin, 0.));
+	hv_scroll_group->set_position (Duple (_timeline_origin, timebar_height * n_timebars));
 
 	// _playhead_cursor = new EditorCursor (*this, &Editor::canvas_playhead_cursor_event, X_("playhead"));
 	_playhead_cursor = new EditorCursor (*this, X_("playhead"));
 	_playhead_cursor->set_sensitive (UIConfiguration::instance().get_sensitize_playhead());
 	_playhead_cursor->set_color (UIConfiguration::instance().color ("play head"));
-	_playhead_cursor->canvas_item().raise_to_top();
-	h_scroll_group->raise_to_top ();
 
 	_canvas.set_name ("AudioClipCanvas");
 	_canvas.add_events (Gdk::POINTER_MOTION_HINT_MASK | Gdk::SCROLL_MASK | Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
@@ -548,14 +547,8 @@ AudioClipEditor::canvas_allocate (Gtk::Allocation& alloc)
 	/* no track header here, "track width" is the whole canvas */
 	_track_canvas_width = _visible_canvas_width;
 
-	main_ruler->set (ArdourCanvas::Rect (2, 2, alloc.get_width() - 4, timebar_height));
-
 	position_lines ();
 	update_fixed_rulers ();
-
-	start_line->set_y1 (_visible_canvas_height - 2.);
-	end_line->set_y1 (_visible_canvas_height - 2.);
-	// loop_line->set_y1 (_visible_canvas_height - 2.);
 
 	set_wave_heights ();
 
@@ -877,6 +870,7 @@ AudioClipEditor::compute_fixed_ruler_scale ()
 	}
 
 	set_minsec_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
+	main_ruler->set_range (_leftmost_sample, _leftmost_sample + current_page_samples());
 }
 
 void
