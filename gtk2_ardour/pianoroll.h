@@ -184,6 +184,7 @@ class Pianoroll : public CueEditor
 
 		ArdourCanvas::Rectangle* group;
 		ArdourCanvas::Text* label;
+		ArdourCanvas::Line* label_separator;
 		ArdourCanvas::Icon* close_x;
 		ArdourCanvas::Button* clear_button;
 	};

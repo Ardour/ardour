@@ -859,17 +859,22 @@ Pianoroll::partition_height ()
 	}
 
 	double ay = note_area_height;
-	double per_lane = floor (automation_height / automation_lanes.size()) - 2;
+	double per_lane = floor (automation_height / automation_lanes.size());
 
 	for (auto & [param, lane] : automation_lanes) {
 		lane->group->set_position (ArdourCanvas::Duple (0., ay));
 		lane->group->set (ArdourCanvas::Rect (0., 0., ArdourCanvas::COORD_MAX, per_lane));
+		lane->label_separator->set (ArdourCanvas::Duple (0., ay + timebars), ArdourCanvas::Duple (prh->x1(), ay + timebars));
+		/* FIXME: y-coordinates for label, close_x and clear_button don't
+		 *        take timebars into account, this will break if more timebars
+		 *        are shown.
+		 */
 		lane->close_x->set_position (ArdourCanvas::Duple (4, ay + 30));
 		lane->label->set_position (ArdourCanvas::Duple (20, ay + 30));
 		if (lane->clear_button) {
 			lane->clear_button->set_position (ArdourCanvas::Duple (prh->get().width() - (lane->clear_button->size().x + 4), ay + 25));
 		}
-		ay += per_lane + 2;
+		ay += per_lane;
 	}
 
 	for (auto & [region,view] : region_view_map) {
@@ -2029,15 +2034,19 @@ Pianoroll::apply_note_range (uint8_t lowest, uint8_t highest)
 Pianoroll::AutomationLane::AutomationLane (Evoral::Parameter const & param, Pianoroll const & pr, ArdourCanvas::Item* parent, uint32_t nth)
 	: group (new ArdourCanvas::Rectangle (parent))
 	, label (new ArdourCanvas::Text (parent->canvas()->root()))
+	, label_separator (new ArdourCanvas::Line (parent->canvas()->root()))
 	, close_x (new ArdourCanvas::Icon (parent->canvas()->root(), ArdourWidgets::ArdourIcon::CloseCross))
 	, clear_button ((param.type() == MidiVelocityAutomation) ? nullptr : new ArdourCanvas::Button (parent->canvas()->root(), _("Clear"), UIConfiguration::instance().get_SmallFont()))
 {
-	group->set_outline (false);
+	group->set_outline_what(ArdourCanvas::Rectangle::TOP);
+	group->set_outline_color(UIConfiguration::instance().color ("track separator"));
 	CANVAS_DEBUG_NAME (group, std::string ("pr auto group for ") + pr.parameter_name (param));
 
 	label->set (pr.parameter_name (param));
 	label->set_color (UIConfiguration::instance().color (X_("gtk_foreground")));
 	label->set_font_description (UIConfiguration::instance().get_SmallFont());
+
+	label_separator->set_outline_color(UIConfiguration::instance().color ("track separator"));
 
 	close_x->set (ArdourCanvas::Rect (0, 0, 12, 12));
 	close_x->set_outline_color (UIConfiguration::instance().color (X_("gtk_foreground")));
@@ -2055,6 +2064,7 @@ Pianoroll::AutomationLane::~AutomationLane ()
 	delete label;
 	delete close_x;
 	delete clear_button;
+	delete label_separator;
 }
 
 void
