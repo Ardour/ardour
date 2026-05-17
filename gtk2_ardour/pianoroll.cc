@@ -539,10 +539,8 @@ Pianoroll::build_canvas ()
 
 	/* a group to hold time (measure) lines
 	 * (grid lines are added to this group in EditingContext::maybe_draw_grid_lines)
-	 * Note: we are using hv_scroll_group instead of h_scroll_group to be able to draw
-	 *       the grid lines behind everything in hv_scroll_group
 	 */
-	time_line_group = new ArdourCanvas::Container (hv_scroll_group);
+	time_line_group = new ArdourCanvas::Container (h_scroll_group);
 	CANVAS_DEBUG_NAME (time_line_group, "pianoroll time line group");
 
 	n_timebars = 0;
@@ -618,7 +616,7 @@ Pianoroll::build_canvas ()
 
 	prh->set_position (Duple (0., n_timebars * timebar_height));
 	no_scroll_group->set_position (ArdourCanvas::Duple (_timeline_origin, timebar_height * n_timebars));
-	cursor_scroll_group->set_position (ArdourCanvas::Duple (_timeline_origin, timebar_height * n_timebars));
+	cursor_scroll_group->set_position (ArdourCanvas::Duple (_timeline_origin, 0));
 	h_scroll_group->set_position (Duple (_timeline_origin, 0.));
 	hv_scroll_group->set_position (Duple (_timeline_origin, timebar_height * n_timebars));
 
@@ -628,10 +626,6 @@ Pianoroll::build_canvas ()
 	_playhead_cursor = new EditorCursor (*this, X_("playhead"));
 	_playhead_cursor->set_sensitive (UIConfiguration::instance().get_sensitize_playhead());
 	_playhead_cursor->set_color (UIConfiguration::instance().color ("play head"));
-
-	/* raise playhead cursor and its group on top */
-	_playhead_cursor->canvas_item().raise_to_top();
-	h_scroll_group->raise_to_top();
 
 	_canvas.set_name ("MidiCueCanvas");
 	_canvas.add_events (Gdk::POINTER_MOTION_HINT_MASK | Gdk::SCROLL_MASK | Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
@@ -915,7 +909,7 @@ Pianoroll::canvas_allocate (Gtk::Allocation alloc)
 	partition_height ();
 
 	no_scroll_group->set_position (ArdourCanvas::Duple (_timeline_origin, timebars));
-	cursor_scroll_group->set_position (ArdourCanvas::Duple (_timeline_origin, timebars));
+	cursor_scroll_group->set_position (ArdourCanvas::Duple (_timeline_origin, 0.));
 	h_scroll_group->set_position (Duple (_timeline_origin, 0.));
 	hv_scroll_group->set_position (Duple (_timeline_origin, timebars));
 

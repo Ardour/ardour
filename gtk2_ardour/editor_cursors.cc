@@ -59,7 +59,7 @@ EditorCursor::EditorCursor (EditingContext& ed, bool (EditingContext::*callback)
 
 EditorCursor::EditorCursor (EditingContext& ed, std::string const & name)
 	: _editor (ed)
-	, _canvas_item (new ArdourCanvas::Arrow (_editor.get_hscroll_group()))
+	, _canvas_item (new ArdourCanvas::Arrow (_editor.get_cursor_scroll_group()))
 {
 	CANVAS_DEBUG_NAME (_canvas_item, string_compose ("track canvas cursor <%1>", name));
 
