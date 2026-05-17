@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: libardour 5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-05-02 17:56+0200\n"
-"PO-Revision-Date: 2026-02-22 20:10+0100\n"
+"PO-Revision-Date: 2026-05-17 15:13+0200\n"
 "Last-Translator: Jean-Emmanuel <jean-emmanuel@ammd.net>\n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -424,7 +424,7 @@ msgstr "Retour"
 
 #: automatable.cc:216
 msgid "Gain|Trim"
-msgstr ""
+msgstr "Gain d'entrée (trim)"
 
 #: automatable.cc:218
 msgid "Master Volume"
@@ -476,7 +476,7 @@ msgstr "Vélocité"
 
 #: automatable.cc:251
 msgid "Controller"
-msgstr ""
+msgstr "Contrôle"
 
 #: automation_control.cc:337
 msgid "record %1 automation"

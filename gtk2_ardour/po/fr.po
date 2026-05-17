@@ -19578,7 +19578,7 @@ msgstr "Atténuateur"
 
 #: route_time_axis.cc:593 vca_time_axis.cc:500
 msgid "Gain|Trim"
-msgstr "Atténuation (trim)"
+msgstr "Gain d'entrée (trim)"
 
 #: route_time_axis.cc:611
 msgid "Pan"
