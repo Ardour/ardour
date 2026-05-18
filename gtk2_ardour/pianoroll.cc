@@ -82,7 +82,7 @@ using namespace Temporal;
 std::map<std::string,std::string> Pianoroll::controller_name_map;
 
 
-Pianoroll::Pianoroll (std::string const & name, bool with_transport, bool expandabl)
+Pianoroll::Pianoroll (std::string const & name, bool with_transport, bool expandabl, bool singl_region)
 	: CueEditor (name, with_transport)
 	, prh (nullptr)
 	, _editing_policy (ActiveView)
@@ -90,6 +90,7 @@ Pianoroll::Pianoroll (std::string const & name, bool with_transport, bool expand
 	, size_button (ArdourButton::default_elements, true)
 	, automation_button (_("A"))
 	, expandable (expandabl)
+	, single_region (singl_region)
 	, no_toggle (false)
 	, bg (nullptr)
 	, _active_view (nullptr)
@@ -439,10 +440,13 @@ Pianoroll::pack_outer (Gtk::Box& box)
 
 	box.pack_end (automation_button, false, false);
 	box.pack_end (colors_dropdown, false, false);
-	box.pack_end (region_dropdown, false, false);
-	box.pack_end (policy_dropdown, false, false);
-	region_dropdown.show ();
-	policy_dropdown.show ();
+
+	if (!single_region) {
+		box.pack_end (region_dropdown, false, false);
+		box.pack_end (policy_dropdown, false, false);
+		region_dropdown.show ();
+		policy_dropdown.show ();
+	}
 }
 
 void
@@ -1895,6 +1899,11 @@ void
 Pianoroll::add_region (std::shared_ptr<ARDOUR::Region> region, std::shared_ptr<ARDOUR::Track> tr)
 {
 	std::shared_ptr<ARDOUR::MidiTrack> track (std::dynamic_pointer_cast<ARDOUR::MidiTrack> (tr));
+
+	if (single_region && !region_view_map.empty()) {
+		replace_region (region, track);
+		return;
+	}
 
 	if (!region || !track) {
 		/* this happens when used in on the cue page, and

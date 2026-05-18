@@ -86,7 +86,7 @@ class Pianoroll : public CueEditor
 	};
 
 
-	Pianoroll (std::string const & name, bool with_transport_controls = false, bool expandable = false);
+	Pianoroll (std::string const & name, bool with_transport_controls = false, bool expandable = false, bool single_region = false);
 	~Pianoroll ();
 
 	Gtk::Widget& contents ();
@@ -240,6 +240,7 @@ class Pianoroll : public CueEditor
 	ArdourWidgets::ArdourButton size_button;
 	ArdourWidgets::ArdourButton automation_button;
 	bool expandable;
+	bool single_region;
 	void toggle_size();
 
 	ArdourWidgets::ArdourDropdown region_dropdown;
