@@ -113,8 +113,11 @@ SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_
 	new_button.set_text (_("NEW"));
 	new_button.set_name ("tab button");
 	new_button.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceFlat));
-	new_button.set_corner_mask(ArdourButton::BOTTOM);
-	new_button.set_border_mask(ArdourButton::HIDE_TOP);
+	if (Config->get_demo_session_index_url ().empty ()) {
+		new_button.set_corner_mask(ArdourButton::BOTTOM);
+	} else {
+		new_button.set_corner_mask(ArdourButton::NONE);
+	}
 	new_button.set_can_focus (true);
 	new_button.set_related_action (new_session_action);
 
@@ -130,13 +133,15 @@ SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_
 	existing_button.set_name ("tab button");
 	existing_button.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceFlat));
 	existing_button.set_corner_mask(ArdourButton::NONE);
+	existing_button.set_border_mask(ArdourButton::HIDE_BOTTOM);
 	existing_button.set_can_focus (true);
 	existing_button.set_related_action (existing_session_action);
 
 	demo_button.set_text (_("DEMO\nSessions"));
 	demo_button.set_name ("tab button");
 	demo_button.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceFlat));
-	demo_button.set_corner_mask(ArdourButton::NONE);
+	demo_button.set_corner_mask(ArdourButton::BOTTOM);
+	demo_button.set_border_mask(ArdourButton::HIDE_TOP);
 	demo_button.set_can_focus (true);
 	demo_button.set_related_action (demo_session_action);
 
@@ -199,10 +204,10 @@ SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_
 
 	_open_table.attach (recent_button,     0,1, row, row + 1, FILL, FILL); ++row;
 	_open_table.attach (existing_button,   0,1, row, row + 1, FILL, FILL); ++row;
+	_open_table.attach (new_button,        0,1, row, row + 1, FILL, FILL); ++row;
 	if (!Config->get_demo_session_index_url ().empty ()) {
 		_open_table.attach (demo_button,     0,1, row, row + 1, FILL, FILL); ++row;
 	}
-	_open_table.attach (new_button,        0,1, row, row + 1, FILL, FILL); ++row;
 
 	Label *vblank = manage (new Label());
 	vblank->set_size_request(1, 1);
