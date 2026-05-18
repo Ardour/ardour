@@ -157,9 +157,13 @@ void pingback (const string& version, const string& announce_path)
 {
 	if (ARDOUR_UI_UTILS::running_from_source_tree ()) {
 		/* we don't ping under these conditions, because the user is
-		   probably just paul or robin :)
+		 * probably just paul or robin :)
+		 *
+		 * ..unless they ask for it:
 		*/
-		return;
+		if (!g_getenv ("ARDOUR_PINGBACK")) {
+			return;
+		}
 	}
 
 	ping_call* cm = new ping_call (version, announce_path);
