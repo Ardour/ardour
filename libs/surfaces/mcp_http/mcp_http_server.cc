@@ -23,7 +23,6 @@
 #include <cmath>
 #include <condition_variable>
 #include <cstdlib>
-#include <cstring>
 #include <ctime>
 #include <iomanip>
 #include <map>
@@ -1387,7 +1386,7 @@ struct MidiJsonEventDef {
 	int         note;
 	int         velocity;
 	int         channel;
-	std::string type;
+	double      length;
 };
 
 struct MidiJsonNoteDef {
@@ -1600,7 +1599,9 @@ parse_midi_json_events (
 		return false;
 	}
 
-	const int64_t default_channel = one_based_channel_input ? 10 : 9;
+	is_drum_mode = midi_root.get<bool> ("is_drum_mode", false);
+
+	const int64_t default_channel = is_drum_mode ? (one_based_channel_input ? 10 : 9) : (one_based_channel_input ? 1 : 0);
 	const int64_t channel_in      = midi_root.get<int64_t> ("channel", default_channel);
 	if (!parse_midi_json_channel_value (channel_in, one_based_channel_input, "midi.channel", channel, error)) {
 		if (!explicit_channel_base) {
@@ -1608,8 +1609,6 @@ parse_midi_json_events (
 		}
 		return false;
 	}
-
-	is_drum_mode = midi_root.get<bool> ("is_drum_mode", true);
 
 	const int64_t tpq_in = midi_root.get<int64_t> ("ticks_per_quarter", 480);
 	if (tpq_in <= 0 || tpq_in > 96000) {
@@ -1635,7 +1634,12 @@ parse_midi_json_events (
 		const pt::ptree& ev = it->second;
 
 		if (get_optional_std<std::string> (ev, "comment")) {
-			continue;
+			error = "midi event comments are not supported";
+			return false;
+		}
+		if (get_optional_std<std::string> (ev, "type")) {
+			error = "midi event type is not supported; use l for note length instead of note_on/note_off events";
+			return false;
 		}
 
 		const std::optional<int64_t> bar_opt = get_optional_std<int64_t> (ev, "bar");
@@ -1647,12 +1651,16 @@ parse_midi_json_events (
 
 		const std::optional<int64_t> repeat_opt = get_optional_std<int64_t> (ev, "repeat");
 		if (repeat_opt) {
-			if (*repeat_opt < 0 || *repeat_opt > 1000000) {
-				error = "Invalid repeat value (expected >= 0)";
+			if (get_optional_std<double> (ev, "b") || get_optional_std<int64_t> (ev, "n") || get_optional_std<int64_t> (ev, "v") || get_optional_std<double> (ev, "l") || get_optional_std<int64_t> (ev, "t") || get_optional_std<int64_t> (ev, "channel")) {
+				error = "Repeat midi events must only provide bar and repeat";
+				return false;
+			}
+			if (*repeat_opt < 1 || *repeat_opt > 1000000) {
+				error = "Invalid repeat value (expected source bar >= 1)";
 				return false;
 			}
 
-			const int                                                    source_bar = (*repeat_opt == 0) ? (bar - 1) : (int)*repeat_opt;
+			const int                                                    source_bar = (int)*repeat_opt;
 			std::map<int, std::vector<MidiJsonEventDef>>::const_iterator src        = events_by_bar.find (source_bar);
 			if (src == events_by_bar.end ()) {
 				std::ostringstream w;
@@ -1672,13 +1680,24 @@ parse_midi_json_events (
 
 		const std::optional<double> beat_opt = get_optional_std<double> (ev, "b");
 		if (!beat_opt || !std::isfinite (*beat_opt) || *beat_opt < 1.0) {
-			error = "Each normal midi event must provide b >= 1";
+			error = "Each midi note event must provide b >= 1";
 			return false;
 		}
 
 		const std::optional<int64_t> note_opt = get_optional_std<int64_t> (ev, "n");
 		if (!note_opt || *note_opt < 0 || *note_opt > 127) {
-			error = "Each normal midi event must provide n (0..127)";
+			error = "Each midi note event must provide n (0..127)";
+			return false;
+		}
+
+		const double default_length = is_drum_mode ? 0.0 : 1.0;
+		const double length_in      = ev.get<double> ("l", default_length);
+		if (!std::isfinite (length_in) || length_in < 0.0) {
+			error = "Invalid midi event l (expected note length >= 0)";
+			return false;
+		}
+		if (!is_drum_mode && length_in <= 0.0) {
+			error = "Invalid midi event l (expected note length > 0 when is_drum_mode is false)";
 			return false;
 		}
 
@@ -1705,9 +1724,6 @@ parse_midi_json_events (
 			}
 		}
 
-		std::string type = ev.get<std::string> ("type", "note_on");
-		std::transform (type.begin (), type.end (), type.begin (), ::tolower);
-
 		MidiJsonEventDef out;
 		out.bar      = bar;
 		out.beat     = *beat_opt;
@@ -1715,7 +1731,7 @@ parse_midi_json_events (
 		out.note     = (int)*note_opt;
 		out.velocity = (int)velocity_in;
 		out.channel  = event_channel;
-		out.type     = type;
+		out.length   = length_in;
 
 		expanded_events.push_back (out);
 		events_by_bar[bar].push_back (out);
@@ -1726,14 +1742,13 @@ parse_midi_json_events (
 
 static bool
 build_midi_json_note_defs (
-    const std::vector<MidiJsonEventDef>& expanded_events,
-    bool                                 is_drum_mode,
-    int                                  ticks_per_quarter,
-    int                                  time_sig_num,
-    int                                  time_sig_den,
-    std::vector<MidiJsonNoteDef>&        notes,
-    std::vector<std::string>&            warnings,
-    std::string&                         error)
+	const std::vector<MidiJsonEventDef>& expanded_events,
+	int                                  ticks_per_quarter,
+	int                                  time_sig_num,
+	int                                  time_sig_den,
+	std::vector<MidiJsonNoteDef>&        notes,
+	std::vector<std::string>&            warnings,
+	std::string&                         error)
 {
 	notes.clear ();
 	error.clear ();
@@ -1770,85 +1785,22 @@ build_midi_json_note_defs (
 		    return a.ordinal < b.ordinal;
 	    });
 
-	if (is_drum_mode) {
-		const double default_length = 0.0;
-
-		for (size_t i = 0; i < events.size (); ++i) {
-			MidiJsonNoteDef n;
-			n.start_quarters  = events[i].quarters;
-			n.length_quarters = default_length;
-			n.note            = events[i].ev.note;
-			n.velocity        = events[i].ev.velocity;
-			n.channel         = events[i].ev.channel;
-			notes.push_back (n);
-		}
-		return true;
-	}
-
-	struct PendingOn {
-		double quarters;
-		int    velocity;
-	};
-	std::map<int, std::vector<PendingOn>> active_by_note;
-
 	for (size_t i = 0; i < events.size (); ++i) {
-		const MidiJsonEventDef& ev       = events[i].ev;
-		const bool              is_off   = (ev.type == "note_off") || (ev.velocity == 0);
-		const bool              is_on    = (ev.type.empty () || ev.type == "note_on");
-		const int               note_key = (ev.channel * 128) + ev.note;
-
-		if (is_off) {
-			std::vector<PendingOn>& stack = active_by_note[note_key];
-			if (stack.empty ()) {
-				std::ostringstream w;
-				w << "Unmatched note_off skipped for note " << ev.note << " on channel " << (ev.channel + 1) << " at bar " << ev.bar;
-				warnings.push_back (w.str ());
-				continue;
-			}
-
-			const PendingOn on = stack.back ();
-			stack.pop_back ();
-
-			const double len = events[i].quarters - on.quarters;
-			if (!std::isfinite (len) || len <= 0.0) {
-				std::ostringstream w;
-				w << "Non-positive note length skipped for note " << ev.note << " at bar " << ev.bar;
-				warnings.push_back (w.str ());
-				continue;
-			}
-
-			MidiJsonNoteDef n;
-			n.start_quarters  = on.quarters;
-			n.length_quarters = len;
-			n.note            = ev.note;
-			n.velocity        = on.velocity;
-			n.channel         = ev.channel;
-			notes.push_back (n);
-			continue;
-		}
-
-		if (!is_on) {
+		const MidiJsonEventDef& ev = events[i].ev;
+		if (!std::isfinite (ev.length) || ev.length < 0.0) {
 			std::ostringstream w;
-			w << "Unknown event type '" << ev.type << "' skipped at bar " << ev.bar;
+			w << "Invalid note length skipped for note " << ev.note << " at bar " << ev.bar;
 			warnings.push_back (w.str ());
 			continue;
 		}
 
-		PendingOn on;
-		on.quarters = events[i].quarters;
-		on.velocity = ev.velocity;
-		active_by_note[note_key].push_back (on);
-	}
-
-	for (std::map<int, std::vector<PendingOn>>::const_iterator it = active_by_note.begin (); it != active_by_note.end (); ++it) {
-		if (!it->second.empty ()) {
-			const int          channel = it->first / 128;
-			const int          note    = it->first % 128;
-			std::ostringstream w;
-			w << "Unclosed note_on skipped for note " << note << " on channel " << (channel + 1)
-			  << " (" << it->second.size () << " pending)";
-			warnings.push_back (w.str ());
-		}
+		MidiJsonNoteDef n;
+		n.start_quarters  = events[i].quarters;
+		n.length_quarters = ev.length;
+		n.note            = ev.note;
+		n.velocity        = ev.velocity;
+		n.channel         = ev.channel;
+		notes.push_back (n);
 	}
 
 	return true;
@@ -6717,7 +6669,7 @@ handle_midi_note_import_json_tool (ARDOUR::Session& session, pt::ptree& root, co
 	std::vector<std::string>      warnings;
 	int                           channel                 = 9;
 	bool                          one_based_channel_input = true;
-	bool                          is_drum_mode            = true;
+	bool                          is_drum_mode            = false;
 	int                           ticks_per_quarter       = 480;
 	int                           time_sig_num            = 4;
 	int                           time_sig_den            = 4;
@@ -6726,7 +6678,7 @@ handle_midi_note_import_json_tool (ARDOUR::Session& session, pt::ptree& root, co
 	if (!parse_midi_json_events (*midi_opt, expanded_events, channel, one_based_channel_input, is_drum_mode, ticks_per_quarter, time_sig_num, time_sig_den, warnings, parse_error)) {
 		return jsonrpc_error (id, -32602, parse_error);
 	}
-	if (!build_midi_json_note_defs (expanded_events, is_drum_mode, ticks_per_quarter, time_sig_num, time_sig_den, note_defs, warnings, parse_error)) {
+	if (!build_midi_json_note_defs (expanded_events, ticks_per_quarter, time_sig_num, time_sig_den, note_defs, warnings, parse_error)) {
 		return jsonrpc_error (id, -32602, parse_error);
 	}
 
@@ -6875,11 +6827,11 @@ handle_midi_note_get_json_tool (ARDOUR::Session& session, pt::ptree& root, const
 
 	struct ExportEvent {
 		double      quarters;
+		double      length;
 		size_t      ordinal;
 		int         note;
 		int         velocity;
 		int         channel;
-		const char* type;
 	};
 
 	std::vector<ExportEvent> events;
@@ -6926,25 +6878,14 @@ handle_midi_note_get_json_tool (ARDOUR::Session& session, pt::ptree& root, const
 			continue;
 		}
 
-		const size_t base_ordinal = events.size ();
-
-		ExportEvent on;
-		on.quarters = start_quarters;
-		on.ordinal  = base_ordinal;
-		on.note     = note_num;
-		on.velocity = velocity;
-		on.channel  = channel;
-		on.type     = "note_on";
-		events.push_back (on);
-
-		ExportEvent off;
-		off.quarters = end_quarters;
-		off.ordinal  = base_ordinal + 1;
-		off.note     = note_num;
-		off.velocity = 0;
-		off.channel  = channel;
-		off.type     = "note_off";
-		events.push_back (off);
+		ExportEvent ev;
+		ev.quarters = start_quarters;
+		ev.length   = end_quarters - start_quarters;
+		ev.ordinal  = events.size ();
+		ev.note     = note_num;
+		ev.velocity = velocity;
+		ev.channel  = channel;
+		events.push_back (ev);
 
 		channel_counts[channel] += 1;
 		++notes_exported;
@@ -6953,21 +6894,13 @@ handle_midi_note_get_json_tool (ARDOUR::Session& session, pt::ptree& root, const
 	std::sort (
 	    events.begin (),
 	    events.end (),
-	    [] (const ExportEvent& a, const ExportEvent& b) {
-		    if (a.quarters != b.quarters) {
-			    return a.quarters < b.quarters;
-		    }
-		    if (a.channel == b.channel && a.note == b.note && a.ordinal != b.ordinal) {
-			    return a.ordinal < b.ordinal;
-		    }
-		    const int a_type_order = (std::strcmp (a.type, "note_off") == 0) ? 0 : 1;
-		    const int b_type_order = (std::strcmp (b.type, "note_off") == 0) ? 0 : 1;
-		    if (a_type_order != b_type_order) {
-			    return a_type_order < b_type_order;
-		    }
-		    if (a.channel != b.channel) {
-			    return a.channel < b.channel;
-		    }
+		    [] (const ExportEvent& a, const ExportEvent& b) {
+			    if (a.quarters != b.quarters) {
+				    return a.quarters < b.quarters;
+			    }
+			    if (a.channel != b.channel) {
+				    return a.channel < b.channel;
+			    }
 		    if (a.note != b.note) {
 			    return a.note < b.note;
 		    }
@@ -7002,12 +6935,12 @@ handle_midi_note_get_json_tool (ARDOUR::Session& session, pt::ptree& root, const
 			events_json << ",";
 		}
 		first_event = false;
-		events_json << "{\"bar\":" << bar
-		            << ",\"b\":" << beat
-		            << ",\"t\":" << tick
-		            << ",\"n\":" << events[i].note
-		            << ",\"v\":" << events[i].velocity
-		            << ",\"type\":\"" << events[i].type << "\"";
+			events_json << "{\"bar\":" << bar
+			            << ",\"b\":" << beat
+			            << ",\"t\":" << tick
+			            << ",\"n\":" << events[i].note
+			            << ",\"v\":" << events[i].velocity
+			            << ",\"l\":" << events[i].length;
 		if (events[i].channel != default_channel) {
 			events_json << ",\"channel\":" << (events[i].channel + 1);
 		}

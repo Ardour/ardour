@@ -3129,7 +3129,7 @@ R"mcp(
     {
       "name": "midi_note_import_json_into_region",
       "title": "Import MIDI JSON Into Existing Region",
-      "description": "Import MIDI JSON into an existing MIDI region. midi.midi_events is required. Event positions (bar/b) are relative to region start: bar 1 beat 1 = region start, not absolute session time. b may be fractional, for example 1.5 for an off-beat 8th note in 4/4. t is tick offset within the beat using ticks_per_quarter. Channel numbering is 1..16 by default (channel_base=\"one\"). For legacy 0..15 payloads set channel_base=\"zero\". In drum mode (is_drum_mode=true), note_off events are optional; hits may be provided as note_on only.",
+      "description": "Import MIDI JSON notes into an existing MIDI region. midi.midi_events is required. Event positions are relative to region start: bar 1 beat 1 = region start, not absolute session time. Each normal item is one note: bar, b, n, optional v, optional l, optional t, optional channel. b may be fractional, for example 1.5 for an off-beat 8th note in 4/4. l is note length in Ardour beats and may be fractional; omit l for 1 beat in melodic mode or 0 beats in drum mode. t is extra tick offset inside the beat using ticks_per_quarter. Repeat items use only bar and repeat; repeat is the source bar number to copy. Channel numbering is 1..16 by default (channel_base=\"one\"). For legacy 0..15 payloads set channel_base=\"zero\". By default is_drum_mode is false and omitted channel defaults to 1. Set is_drum_mode=true for drums; then omitted channel defaults to 10.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -3167,65 +3167,50 @@ R"mcp(
                   "properties": {
                     "bar": {
                       "type": "integer",
-                      "minimum": 1
+                      "minimum": 1,
+                      "description": "Region-relative bar number. Bar 1 starts at the beginning of the region."
                     },
                     "repeat": {
                       "type": "integer",
-                      "minimum": 0
+                      "minimum": 1,
+                      "description": "Optional source bar number to copy into this bar. Repeat items should only include bar and repeat."
                     },
                     "b": {
                       "type": "number",
-                      "minimum": 1
+                      "minimum": 1,
+                      "description": "Beat number inside the bar. Decimal values are allowed; 1.5 is the off-beat eighth note after beat 1 in 4/4."
                     },
                     "t": {
                       "type": "integer",
-                      "minimum": 0
+                      "minimum": 0,
+                      "description": "Optional additional tick offset inside the beat using ticks_per_quarter."
                     },
                     "n": {
                       "type": "integer",
                       "minimum": 0,
-                      "maximum": 127
+                      "maximum": 127,
+                      "description": "MIDI note number."
                     },
                     "v": {
                       "type": "integer",
                       "minimum": 0,
-                      "maximum": 127
+                      "maximum": 127,
+                      "description": "Optional velocity. Defaults to 64."
                     },
-                    "type": {
-                      "type": "string",
-                      "enum": [
-                        "note_on",
-                        "note_off"
-                      ]
+                    "l": {
+                      "type": "number",
+                      "minimum": 0,
+                      "description": "Optional note length in Ardour beats. Decimal values are allowed; 0.5 is an eighth note in 4/4. Defaults to 1.0 for melodic MIDI and 0.0 for drum mode."
                     },
                     "channel": {
                       "type": "integer",
                       "minimum": 0,
-                      "maximum": 16
-                    },
-                    "comment": {
-                      "type": "string"
+                      "maximum": 16,
+                      "description": "Optional per-note channel using midi.channel_base."
                     }
                   },
-                  "oneOf": [
-                    {
-                      "required": [
-                        "comment"
-                      ]
-                    },
-                    {
-                      "required": [
-                        "bar",
-                        "repeat"
-                      ]
-                    },
-                    {
-                      "required": [
-                        "bar",
-                        "b",
-                        "n"
-                      ]
-                    }
+                  "required": [
+                    "bar"
                   ],
                   "additionalProperties": false
                 }
@@ -3276,7 +3261,7 @@ R"mcp(
     {
       "name": "midi_note_import_json_to_new_region_samples",
       "title": "Import MIDI JSON To New Region By Samples",
-      "description": "Create and populate a new MIDI region from MIDI JSON using absolute sample positions. midi.midi_events is required. Event positions (bar/b) are relative to the new region start: bar 1 beat 1 = region start, not absolute session time. b may be fractional, for example 1.5 for an off-beat 8th note in 4/4. t is tick offset within the beat using ticks_per_quarter. Channel numbering is 1..16 by default (channel_base=\"one\"). For legacy 0..15 payloads set channel_base=\"zero\". In drum mode (is_drum_mode=true), note_off events are optional; hits may be provided as note_on only.",
+      "description": "Create and populate a new MIDI region from MIDI JSON using absolute sample positions. midi.midi_events is required. Event positions are relative to the new region start: bar 1 beat 1 = region start, not absolute session time. Each normal item is one note: bar, b, n, optional v, optional l, optional t, optional channel. b may be fractional, for example 1.5 for an off-beat 8th note in 4/4. l is note length in Ardour beats and may be fractional; omit l for 1 beat in melodic mode or 0 beats in drum mode. t is extra tick offset inside the beat using ticks_per_quarter. Repeat items use only bar and repeat; repeat is the source bar number to copy. Channel numbering is 1..16 by default (channel_base=\"one\"). For legacy 0..15 payloads set channel_base=\"zero\". By default is_drum_mode is false and omitted channel defaults to 1. Set is_drum_mode=true for drums; then omitted channel defaults to 10.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -3314,65 +3299,50 @@ R"mcp(
                   "properties": {
                     "bar": {
                       "type": "integer",
-                      "minimum": 1
+                      "minimum": 1,
+                      "description": "Region-relative bar number. Bar 1 starts at the beginning of the region."
                     },
                     "repeat": {
                       "type": "integer",
-                      "minimum": 0
+                      "minimum": 1,
+                      "description": "Optional source bar number to copy into this bar. Repeat items should only include bar and repeat."
                     },
                     "b": {
                       "type": "number",
-                      "minimum": 1
+                      "minimum": 1,
+                      "description": "Beat number inside the bar. Decimal values are allowed; 1.5 is the off-beat eighth note after beat 1 in 4/4."
                     },
                     "t": {
                       "type": "integer",
-                      "minimum": 0
+                      "minimum": 0,
+                      "description": "Optional additional tick offset inside the beat using ticks_per_quarter."
                     },
                     "n": {
                       "type": "integer",
                       "minimum": 0,
-                      "maximum": 127
+                      "maximum": 127,
+                      "description": "MIDI note number."
                     },
                     "v": {
                       "type": "integer",
                       "minimum": 0,
-                      "maximum": 127
+                      "maximum": 127,
+                      "description": "Optional velocity. Defaults to 64."
                     },
-                    "type": {
-                      "type": "string",
-                      "enum": [
-                        "note_on",
-                        "note_off"
-                      ]
+                    "l": {
+                      "type": "number",
+                      "minimum": 0,
+                      "description": "Optional note length in Ardour beats. Decimal values are allowed; 0.5 is an eighth note in 4/4. Defaults to 1.0 for melodic MIDI and 0.0 for drum mode."
                     },
                     "channel": {
                       "type": "integer",
                       "minimum": 0,
-                      "maximum": 16
-                    },
-                    "comment": {
-                      "type": "string"
+                      "maximum": 16,
+                      "description": "Optional per-note channel using midi.channel_base."
                     }
                   },
-                  "oneOf": [
-                    {
-                      "required": [
-                        "comment"
-                      ]
-                    },
-                    {
-                      "required": [
-                        "bar",
-                        "repeat"
-                      ]
-                    },
-                    {
-                      "required": [
-                        "bar",
-                        "b",
-                        "n"
-                      ]
-                    }
+                  "required": [
+                    "bar"
                   ],
                   "additionalProperties": false
                 }
@@ -3433,7 +3403,7 @@ R"mcp(
     {
       "name": "midi_note_import_json_to_new_region_bbt",
       "title": "Import MIDI JSON To New Region By Bar Beat",
-      "description": "Create and populate a new MIDI region from MIDI JSON using musical positions. midi.midi_events is required. Event positions (bar/b) are relative to the new region start: bar 1 beat 1 = region start, not absolute session time. b may be fractional, for example 1.5 for an off-beat 8th note in 4/4. t is tick offset within the beat using ticks_per_quarter. Channel numbering is 1..16 by default (channel_base=\"one\"). For legacy 0..15 payloads set channel_base=\"zero\". In drum mode (is_drum_mode=true), note_off events are optional; hits may be provided as note_on only.",
+      "description": "Create and populate a new MIDI region from MIDI JSON using musical positions. midi.midi_events is required. Event positions are relative to the new region start: bar 1 beat 1 = region start, not absolute session time. Each normal item is one note: bar, b, n, optional v, optional l, optional t, optional channel. b may be fractional, for example 1.5 for an off-beat 8th note in 4/4. l is note length in Ardour beats and may be fractional; omit l for 1 beat in melodic mode or 0 beats in drum mode. t is extra tick offset inside the beat using ticks_per_quarter. Repeat items use only bar and repeat; repeat is the source bar number to copy. Channel numbering is 1..16 by default (channel_base=\"one\"). For legacy 0..15 payloads set channel_base=\"zero\". By default is_drum_mode is false and omitted channel defaults to 1. Set is_drum_mode=true for drums; then omitted channel defaults to 10.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -3471,65 +3441,50 @@ R"mcp(
                   "properties": {
                     "bar": {
                       "type": "integer",
-                      "minimum": 1
+                      "minimum": 1,
+                      "description": "Region-relative bar number. Bar 1 starts at the beginning of the region."
                     },
                     "repeat": {
                       "type": "integer",
-                      "minimum": 0
+                      "minimum": 1,
+                      "description": "Optional source bar number to copy into this bar. Repeat items should only include bar and repeat."
                     },
                     "b": {
                       "type": "number",
-                      "minimum": 1
+                      "minimum": 1,
+                      "description": "Beat number inside the bar. Decimal values are allowed; 1.5 is the off-beat eighth note after beat 1 in 4/4."
                     },
                     "t": {
                       "type": "integer",
-                      "minimum": 0
+                      "minimum": 0,
+                      "description": "Optional additional tick offset inside the beat using ticks_per_quarter."
                     },
                     "n": {
                       "type": "integer",
                       "minimum": 0,
-                      "maximum": 127
+                      "maximum": 127,
+                      "description": "MIDI note number."
                     },
                     "v": {
                       "type": "integer",
                       "minimum": 0,
-                      "maximum": 127
+                      "maximum": 127,
+                      "description": "Optional velocity. Defaults to 64."
                     },
-                    "type": {
-                      "type": "string",
-                      "enum": [
-                        "note_on",
-                        "note_off"
-                      ]
+                    "l": {
+                      "type": "number",
+                      "minimum": 0,
+                      "description": "Optional note length in Ardour beats. Decimal values are allowed; 0.5 is an eighth note in 4/4. Defaults to 1.0 for melodic MIDI and 0.0 for drum mode."
                     },
                     "channel": {
                       "type": "integer",
                       "minimum": 0,
-                      "maximum": 16
-                    },
-                    "comment": {
-                      "type": "string"
+                      "maximum": 16,
+                      "description": "Optional per-note channel using midi.channel_base."
                     }
                   },
-                  "oneOf": [
-                    {
-                      "required": [
-                        "comment"
-                      ]
-                    },
-                    {
-                      "required": [
-                        "bar",
-                        "repeat"
-                      ]
-                    },
-                    {
-                      "required": [
-                        "bar",
-                        "b",
-                        "n"
-                      ]
-                    }
+                  "required": [
+                    "bar"
                   ],
                   "additionalProperties": false
                 }
@@ -3600,7 +3555,7 @@ R"mcp(
     {
       "name": "midi_note_get_json",
       "title": "Export MIDI JSON",
-      "description": "Export all notes from a MIDI region as import-compatible MIDI JSON (standard mode with note_on/note_off events). Export uses channel_base=\"one\" and channels 1..16.",
+      "description": "Export all notes from a MIDI region as import-compatible MIDI JSON using one note item per note. Each item includes bar, b, t, n, v, and l. Export uses channel_base=\"one\" and channels 1..16.",
       "inputSchema": {
         "type": "object",
         "properties": {
