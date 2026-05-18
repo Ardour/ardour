@@ -767,6 +767,10 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 
 		if (_zoom_trim_position == LEFT) {
 			xr.first += dx;
+			/* prevent from moving once we've reached the right edge of the view rect */
+			if (xr.first > xr.second) {
+				xr.first = xr.second;
+			}
 		} else if (_zoom_trim_position == RIGHT) {
 
 			/* zoom-behavior-tweaks: protect the right edge from expanding beyond the edge */
