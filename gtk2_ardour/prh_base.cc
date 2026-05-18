@@ -525,8 +525,8 @@ PianoRollHeaderBase::motion_handler (GdkEventMotion* ev)
 
 		case TOP:
 			real_val_at_pointer = min (127.0, ceil (real_val_at_pointer));
-			idle_lower      = _adj.get_value();
-			idle_upper      = real_val_at_pointer;
+			idle_lower      = max(0., _adj.get_value());
+			idle_upper      = min(127., real_val_at_pointer);
 			_saved_top_val  = idle_upper;
 			if (!scroomer_drag_connection.connected()) {
 				scroomer_drag_connection = Glib::signal_idle().connect (sigc::mem_fun (*this, &PianoRollHeaderBase::idle_apply_range));
@@ -536,8 +536,8 @@ PianoRollHeaderBase::motion_handler (GdkEventMotion* ev)
 
 		case BOTTOM:
 			real_val_at_pointer = max (0.0, floor (real_val_at_pointer));
-			idle_upper        = _adj.get_value() + _adj.get_page_size();
-			idle_lower        = real_val_at_pointer;
+			idle_lower        = max(0., real_val_at_pointer);
+			idle_upper        = min(127., _adj.get_value() + _adj.get_page_size());
 			_saved_bottom_val = idle_lower;
 			if (!scroomer_drag_connection.connected()) {
 				scroomer_drag_connection = Glib::signal_idle().connect (sigc::mem_fun (*this, &PianoRollHeaderBase::idle_apply_range));
@@ -606,7 +606,9 @@ PianoRollHeaderBase::motion_handler (GdkEventMotion* ev)
 bool
 PianoRollHeaderBase::idle_apply_range ()
 {
-	_midi_context.apply_note_range (idle_lower, idle_upper, true);
+	if (idle_upper > idle_lower) {
+		_midi_context.apply_note_range (idle_lower, idle_upper, true);
+	}
 	scroomer_drag_connection.disconnect ();
 	return false;
 }
