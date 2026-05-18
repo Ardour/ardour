@@ -265,7 +265,8 @@ MidiViewBackground::apply_note_range (uint8_t lowest, uint8_t highest, bool to_c
 
 	if (highest - lowest < 11) {
 		int8_t mid = lowest + ((highest - lowest) / 2);
-		lowest = std::max (mid - 6, 0);
+		mid = max(6, min(121, mid));
+		lowest = mid - 6;
 		highest = lowest + 11;
 	}
 
