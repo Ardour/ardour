@@ -269,6 +269,18 @@ MidiViewBackground::apply_note_range (uint8_t lowest, uint8_t highest, bool to_c
 		highest = lowest + 11;
 	}
 
+	/* Apply maximum note height setting */
+	
+	bool extend_top = true;
+	while (contents_height() / (highest - lowest) > UIConfiguration::instance().get_max_note_height()) {
+		if (extend_top && highest < 127) {
+			highest++;
+		} else if (!extend_top && lowest > 0) {
+			lowest--;
+		}
+		extend_top = !extend_top;
+	}
+
 	if (_highest_note != highest) {
 		_highest_note = highest;
 		changed = true;
