@@ -145,15 +145,14 @@ Editor::mouse_mode_chosen (MouseMode m)
 	/* Switch snap type/mode if we're moving to/from an internal tool.  Note
 	   this must toggle the actions and not call set_snap_*() directly,
 	   otherwise things get out of sync and the combo box stops working. */
-	if (!UIConfiguration::instance().get_grid_follows_internal()) {
-		grid_actions[pre_internal_grid_type]->set_active(true);
-		snap_mode_actions[pre_internal_snap_mode]->set_active(true);
-	} else if (!was_internal && internal_editing()) {
-		grid_actions[internal_grid_type]->set_active(true);
-		snap_mode_actions[internal_snap_mode]->set_active(true);
-	} else if (was_internal && !internal_editing()) {
-		grid_actions[pre_internal_grid_type]->set_active(true);
-		snap_mode_actions[pre_internal_snap_mode]->set_active(true);
+	if (UIConfiguration::instance().get_grid_follows_internal()) {
+		if (!was_internal && internal_editing()) {
+			grid_actions[internal_grid_type]->set_active(true);
+			snap_mode_actions[internal_snap_mode]->set_active(true);
+		} else if (was_internal && !internal_editing()) {
+			grid_actions[pre_internal_grid_type]->set_active(true);
+			snap_mode_actions[pre_internal_snap_mode]->set_active(true);
+		}
 	}
 
 	instant_save ();
