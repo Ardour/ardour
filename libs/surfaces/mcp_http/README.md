@@ -135,11 +135,20 @@ Use the JSON tools for fast note generation and round-trip editing:
 - Beat and tick fields:
   - `b` is beat number in the bar and may be fractional. Example: `b: 1.5` is an off-beat 8th note in 4/4.
   - `t` is additional tick offset inside the beat, using `ticks_per_quarter`.
+- Note length:
+  - `l` is note length in Ardour beats and may be fractional. Example: `l: 0.5` is an 8th note in 4/4.
+  - For melodic MIDI, omit `l` to use a default length of 1 beat.
+- Repeat bars:
+  - Use `{ "bar": 2, "repeat": 1 }` to copy all notes from relative bar 1 into relative bar 2.
+  - A repeat item should only include `bar` and `repeat`; do not include note fields on the same item.
 - Drum mode behavior:
-  - `is_drum_mode: true`: `note_off` events are optional; you can provide drum hits as `note_on` only.
-  - Imported hits are written as zero-length notes (note-on and note-off at the same timestamp).
+  - `is_drum_mode` defaults to `false`; omit it for melodic parts, bass lines, chords, and other sustained MIDI.
+  - When `is_drum_mode` is omitted, `channel` defaults to `1`.
+  - Set `is_drum_mode: true` for drum grooves; note items do not need `l` unless you want a visible duration.
+  - When `is_drum_mode: true`, omitted `channel` defaults to `10` with one-based channel numbering.
+  - Imported drum hits default to zero-length notes (note-on and note-off at the same timestamp).
 - Non-drum mode behavior:
-  - Use normal `note_on` + `note_off` timing pairs for sustained notes/chords.
+  - Use `l` for sustained notes/chords instead of separate `note_on` and `note_off` events.
 
 ## Prompt Cookbook
 
