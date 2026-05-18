@@ -303,7 +303,7 @@ MidiStreamView::redisplay_track ()
 	layer_regions();
 
 	// Update note range (not regions which are correct) and draw note lines
-	apply_note_range (_lowest_note, _highest_note, false);
+	apply_note_range (_data_note_min, _data_note_max, false);
 }
 
 void
