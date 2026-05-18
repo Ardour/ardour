@@ -247,6 +247,7 @@ private:
 		DemoColumns () {
 			add (name);
 			add (size);
+			add (download_size);
 			add (url);
 			add (file);
 			add (downloader);
@@ -257,6 +258,7 @@ private:
 		}
 		Gtk::TreeModelColumn<std::string>      name;
 		Gtk::TreeModelColumn<std::string>      size;
+		Gtk::TreeModelColumn<std::string>      download_size;
 		Gtk::TreeModelColumn<std::string>      url;
 		Gtk::TreeModelColumn<std::string>      file;
 		Gtk::TreeModelColumn<PBD::Downloader*> downloader;

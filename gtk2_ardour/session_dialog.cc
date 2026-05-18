@@ -964,7 +964,7 @@ SessionDialog::setup_demo_sessions ()
 	demo_display.set_model (demo_model);
 
 	demo_display.append_column (_("Session Name"), demo_columns.name);
-	demo_display.append_column (_("Download Size"), demo_columns.size);
+	demo_display.append_column (_("Download Size"), demo_columns.download_size);
 
 	Gtk::CellRendererProgress* progress_renderer = new Gtk::CellRendererProgress();
 	progress_renderer->property_width() = std::max<int>(100, rintf(100. * UIConfiguration::instance().get_ui_scale()));
@@ -1472,13 +1472,20 @@ SessionDialog::on_delete_event (GdkEventAny* ev)
 void
 SessionDialog::add_demo_session (ARDOUR::RemoteResourceInfo const& ld)
 {
-	Gtk::TreeModel::iterator i     = demo_model->append();
-	(*i)[demo_columns.name]        = ld.name();
-	(*i)[demo_columns.size]        = ld.size();
-	(*i)[demo_columns.url]         = ld.url();
-	(*i)[demo_columns.file]        = ld.toplevel_dir();
-	(*i)[demo_columns.downloading] = false;
-	(*i)[demo_columns.description] = Glib::Markup::escape_text (ld.description());
+	Gtk::TreeModel::iterator i       = demo_model->append();
+	(*i)[demo_columns.name]          = ld.name();
+	(*i)[demo_columns.size]          = ld.size();
+	(*i)[demo_columns.download_size] = ld.size();
+	(*i)[demo_columns.url]           = ld.url();
+	(*i)[demo_columns.file]          = ld.toplevel_dir();
+	(*i)[demo_columns.downloading]   = false;
+	(*i)[demo_columns.description]   = Glib::Markup::escape_text (ld.description());
+
+	string demo_filename = ld.toplevel_dir();
+	string demo_session_archive = Glib::build_filename (demo_session_dir (), demo_filename);
+	if (Glib::file_test (demo_session_archive, Glib::FILE_TEST_EXISTS)) {
+		(*i)[demo_columns.download_size] = "Downloaded";
+	}
 }
 
 void
@@ -1551,6 +1558,7 @@ SessionDialog::demo_button_press (GdkEventButton* ev)
 	}
 
 	Gtk::TreeModel::iterator row = demo_display.get_selection()->get_selected();
+	string file_size = (*row)[demo_columns.size];
 	string demo_filename = (*row)[demo_columns.file];
 	string demo_session_archive = Glib::build_filename (demo_session_dir (), demo_filename);
 
@@ -1560,7 +1568,7 @@ SessionDialog::demo_button_press (GdkEventButton* ev)
 	Gtk::Menu* m     = ARDOUR_UI_UTILS::shared_popup_menu ();
 	MenuList&  items = m->items ();
 
-	items.push_back (MenuElem (_("Delete Downloaded Session Archive"), [demo_session_archive](){ ::g_unlink (demo_session_archive.c_str()); }));
+	items.push_back (MenuElem (_("Delete Downloaded Session Archive"), [&, row, demo_session_archive, file_size](){ ::g_unlink (demo_session_archive.c_str()); (*row)[demo_columns.download_size] = file_size;}));
 	items.back ().set_sensitive (exists);
 	m->popup (ev->button, ev->time);
 
@@ -1674,6 +1682,7 @@ SessionDialog::deploy_demo_session ()
 		}
 	}
 
+	set_downloading (false);
 
 	std::string error_msg = _("Failed to extract demo session archive.");
 	switch (ARDOUR::inflate_demo_session (PBD::basename_nosuffix (demo_filename), session_folder ())) {
@@ -1699,8 +1708,6 @@ SessionDialog::deploy_demo_session ()
 
 	ArdourMessageDialog msg (error_msg, false, MESSAGE_ERROR);
 	msg.run ();
-
-	set_downloading (false);
 
 	return false; // Error
 }
