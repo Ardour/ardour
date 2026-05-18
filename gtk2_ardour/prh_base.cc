@@ -606,7 +606,10 @@ PianoRollHeaderBase::motion_handler (GdkEventMotion* ev)
 bool
 PianoRollHeaderBase::idle_apply_range ()
 {
-	if (idle_upper > idle_lower) {
+	/* Check if the range is valid before submitting it to avoid
+	 * range automatic adjustment during dragging
+	 */
+	if (idle_upper - idle_lower >= 11 && _midi_context.contents_height() / (idle_upper - idle_lower) <= UIConfiguration::instance().get_max_note_height()) {
 		_midi_context.apply_note_range (idle_lower, idle_upper, true);
 	}
 	scroomer_drag_connection.disconnect ();
