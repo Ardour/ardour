@@ -273,6 +273,7 @@ private:
 	DemoColumns                  demo_columns;
 	Gtk::FileChooserButton       demo_folder_chooser;
 	Gtk::Entry                   demo_name_entry;
+	Gtk::Frame                   demo_desc_frame;
 	Gtk::TextView                demo_description;
 	bool                         demo_name_was_edited;
 	bool                         download_active;

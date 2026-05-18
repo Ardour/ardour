@@ -984,6 +984,8 @@ SessionDialog::setup_demo_sessions ()
 
 	demo_description.set_wrap_mode (Gtk::WRAP_WORD);
 	demo_description.set_editable (false);
+	demo_description.set_name (X_("TextOnBackground"));
+	demo_description.set_border_width (6);
 	demo_description.set_size_request (-1, std::max<int>(80, rintf(80. * UIConfiguration::instance().get_ui_scale())));
 
 	demo_name_entry.signal_changed().connect (sigc::mem_fun (*this, &SessionDialog::demo_name_changed));
@@ -1008,8 +1010,15 @@ SessionDialog::setup_demo_sessions ()
 	name_hbox->pack_start (*name_label, false, true);
 	name_hbox->pack_start (demo_name_entry, true, true);
 
+	Gtk::ScrolledWindow* desc_scroller = manage (new Gtk::ScrolledWindow());
+	desc_scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+	desc_scroller->add (demo_description);
+
+	demo_desc_frame.set_name (X_("TextHighlightFrame"));
+	demo_desc_frame.add (*desc_scroller);
+
 	demo_vbox.pack_start (demo_scroller, true, true);
-	demo_vbox.pack_start (demo_description, false, false);
+	demo_vbox.pack_start (demo_desc_frame, false, false);
 	demo_vbox.pack_start (*folder_hbox, false, false);
 	demo_vbox.pack_start (*name_hbox, false, false);
 	demo_vbox.set_spacing (8);
