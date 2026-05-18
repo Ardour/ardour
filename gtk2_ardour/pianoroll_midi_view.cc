@@ -201,7 +201,7 @@ PianorollMidiView::scroll (GdkEventScroll* ev)
 			return true;
 		}
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-			_editing_context.reset_zoom (_editing_context.get_current_zoom() / 2);
+			_editing_context.temporal_zoom_step_mouse_focus (false);
 			return true;
 		}
 		break;
@@ -211,7 +211,7 @@ PianorollMidiView::scroll (GdkEventScroll* ev)
 			return true;
 		}
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-			_editing_context.reset_zoom (_editing_context.get_current_zoom() * 2);
+			_editing_context.temporal_zoom_step_mouse_focus (true);
 			return true;
 		}
 		break;
