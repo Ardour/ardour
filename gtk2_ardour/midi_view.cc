@@ -139,6 +139,7 @@ MidiView::MidiView (std::shared_ptr<MidiTrack> mt,
 	, _entered_note (0)
 	, _select_all_notes_after_add (false)
 	, _mouse_changed_selection (false)
+	, _suspend_note_range_update (false)
 	, in_note_split (false)
 	, split_tuple (0)
 	, note_splitting (false)
@@ -178,6 +179,7 @@ MidiView::MidiView (MidiView const & other)
 	, _entered_note (0)
 	, _select_all_notes_after_add (false)
 	, _mouse_changed_selection (false)
+	, _suspend_note_range_update (false)
 	, in_note_split (false)
 	, split_tuple (0)
 	, note_splitting (false)
@@ -729,6 +731,11 @@ MidiView::button_press (GdkEventButton* ev)
 bool
 MidiView::button_release (GdkEventButton* ev)
 {
+	/* Avoid disruption when adding notes
+	 * XXX: this is merely a start, other actions should probably do the same
+	 */
+	PBD::Unwinder<bool> uw (_suspend_note_range_update, true);
+
 	if (ev->button != 1) {
 		return false;
 	}
@@ -1506,7 +1513,7 @@ MidiView::model_changed()
 
 		_midi_context.update_data_note_range (low_note, hi_note);
 
-		if (((old_low != low_note) || (old_high != hi_note)) && _midi_context.visibility_range_style() == MidiViewBackground::ContentsRange) {
+		if (!_suspend_note_range_update && ((old_low != low_note) || (old_high != hi_note)) && _midi_context.visibility_range_style() == MidiViewBackground::ContentsRange) {
 			maybe_set_note_range (low_note, hi_note);
 		}
 	} else {

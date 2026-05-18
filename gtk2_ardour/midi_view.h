@@ -629,6 +629,8 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 
 	bool _mouse_changed_selection;
 
+	bool _suspend_note_range_update;
+
 	Gtkmm2ext::Color _patch_change_outline;
 	Gtkmm2ext::Color _patch_change_fill;
 
