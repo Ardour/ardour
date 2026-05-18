@@ -29,6 +29,8 @@
 #include "gtk2ardour-config.h"
 #endif
 
+#include <unordered_set>
+
 #include <cairo/cairo.h>
 
 #include <boost/algorithm/string.hpp>
@@ -1491,19 +1493,28 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 {
 	public:
 		ControlSurfacesOptions ()
-			: _ignore_view_change (0)
+			: active_heading (_("Active Surfaces"))
+			, devices_heading (_("Control Surfaces"))
+			, _ignore_view_change (0)
 		{
-			_store = TreeStore::create (_model);
-			_view.set_model (_store);
-			_view.append_column_editable (_("Enable"), _model.enabled);
-			_view.append_column (_("Control Surface"), _model.name);
-			_view.get_column(1)->set_resizable (true);
-			_view.get_column(1)->set_expand (true);
+			// Active Scroller
+			active_heading.add_to_page (this);
+			active_store = TreeStore::create (active_model);
+			active_store->set_sort_column(active_model.name, Gtk::SORT_ASCENDING);
+			active_view.set_model (active_store);
+			active_view.append_column_editable (_("Enable"), active_model.enabled);
+			active_view.append_column (_("Control Surface"), active_model.name);
+			active_view.get_column(1)->set_resizable (true);
+			active_view.get_column(1)->set_expand (true);
 
-			scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-			scroller.set_size_request(-1, 800);
-			scroller.add(_view);
+			active_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+			active_scroller.set_size_request(-1, 300);
+			active_scroller.add(active_view);
 
+			int n = table.property_n_rows();
+			table.attach (active_scroller, 0, 3, n, n + 1);
+
+			// Edit Box
 			Gtk::HBox* edit_box = manage (new Gtk::HBox);
 			edit_box->set_spacing(3);
 			edit_box->show ();
@@ -1513,24 +1524,61 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			edit_box->pack_start (*label, false, false);
 			label->show ();
 
-			edit_button = manage (new Button(_("Show Protocol Settings")));
-			edit_button->signal_clicked().connect (sigc::mem_fun(*this, &ControlSurfacesOptions::edit_btn_clicked));
-			edit_box->pack_start (*edit_button, true, true);
-			edit_button->set_sensitive (false);
-			edit_button->show ();
+			active_edit_button = manage (new Button(_("Show Protocol Settings")));
+			active_edit_button->signal_clicked().connect (sigc::bind(sigc::mem_fun(*this, &ControlSurfacesOptions::edit_btn_clicked), &active_view, &active_model));
+			edit_box->pack_start (*active_edit_button, true, true);
+			active_edit_button->set_sensitive (false);
+			active_edit_button->show ();
 
-			int const n = table.property_n_rows();
-			table.resize (n + 2, 3);
-			table.attach (scroller, 0, 3, n, n + 1);
-			table.attach (*edit_box, 0, 3, n + 1, n + 2);
+			n = table.property_n_rows();
+			table.attach (*edit_box, 0, 3, n + 2, n + 3);
+
+			// Devices Scroller
+			devices_heading.add_to_page (this);
+			devices_store = TreeStore::create (devices_model);
+			devices_store->set_sort_column(devices_model.name, Gtk::SORT_ASCENDING);
+			devices_view.set_model (devices_store);
+			devices_view.append_column_editable (_("Enable"), devices_model.enabled);
+			devices_view.append_column (_("Control Surface"), devices_model.name);
+			devices_view.get_column(1)->set_resizable (true);
+			devices_view.get_column(1)->set_expand (true);
+
+			devices_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+			devices_scroller.set_size_request(-1, 500);
+			devices_scroller.add(devices_view);
+
+			n = table.property_n_rows();
+			table.attach (devices_scroller, 0, 3, n + 1, n + 2);
+
+			// Edit Box
+			edit_box = manage (new Gtk::HBox);
+			edit_box->set_spacing(3);
+			edit_box->show ();
+
+			label = manage (new Label);
+			label->set_text (_("Edit the settings for selected protocol (it must be ENABLED first):"));
+			edit_box->pack_start (*label, false, false);
+			label->show ();
+
+			devices_edit_button = manage (new Button(_("Show Protocol Settings")));
+			devices_edit_button->signal_clicked().connect (sigc::bind(sigc::mem_fun(*this, &ControlSurfacesOptions::edit_btn_clicked), &devices_view, &devices_model));
+			edit_box->pack_start (*devices_edit_button, true, true);
+			devices_edit_button->set_sensitive (false);
+			devices_edit_button->show ();
+
+			n = table.property_n_rows();
+			table.attach (*edit_box, 0, 3, n + 2, n + 3);
 
 			ControlProtocolManager& m = ControlProtocolManager::instance ();
 			m.ProtocolStatusChange.connect (protocol_status_connection, MISSING_INVALIDATOR,
 					std::bind (&ControlSurfacesOptions::protocol_status_changed, this, _1), gui_context());
 
-			_store->signal_row_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::view_changed));
-			_view.signal_button_press_event().connect_notify (sigc::mem_fun(*this, &ControlSurfacesOptions::edit_clicked));
-			_view.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::selection_changed));
+			devices_store->signal_row_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::devices_view_changed));
+			devices_view.signal_button_press_event().connect_notify (sigc::bind(sigc::mem_fun(*this, &ControlSurfacesOptions::edit_clicked), &devices_view, &devices_model));
+			devices_view.get_selection()->signal_changed().connect (sigc::bind(sigc::mem_fun (*this, &ControlSurfacesOptions::selection_changed), devices_edit_button, &devices_view, &devices_model));
+			active_store->signal_row_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::active_view_changed));
+			active_view.signal_button_press_event().connect_notify (sigc::bind(sigc::mem_fun(*this, &ControlSurfacesOptions::edit_clicked), &active_view, &active_model));
+			active_view.get_selection()->signal_changed().connect (sigc::bind(sigc::mem_fun (*this, &ControlSurfacesOptions::selection_changed), active_edit_button, &active_view, &active_model));
 		}
 
 		void parameter_changed (std::string const &)
@@ -1540,130 +1588,50 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 
 		void set_state_from_config ()
 		{
-			_store->clear ();
+			devices_store->clear ();
+			std::unordered_set<std::string> manufacturers;
 
 			ControlProtocolManager& m = ControlProtocolManager::instance ();
 			for (auto const& i : m.control_protocol_infos ()) {
 				for (const auto& man : i->descriptor->enumerate()) {
-					TreeModel::Row manufacturer = *_store->append ();
-					manufacturer[_model.name] = man.first;
+					TreeModel::Row manufacturer;
+					bool found = false;
 
-					for (const auto& dev : man.second) {
-						TreeModel::Row device = *_store->append (manufacturer.children());
-						device[_model.name] = dev;
-						device[_model.enabled] = 0 != i->protocol;
-						device[_model.protocol_info] = i;
+					TreeModel::Children rows = devices_store->children();
+
+					if (manufacturers.find(man.first) != manufacturers.end()) {
+						for (const auto& row : rows) {
+							if ((std::string)row[devices_model.name] == man.first) {
+								found = true;
+								manufacturer = row;
+								break;
+							}
+						}
+					}
+
+					if (!found) {
+						manufacturers.insert(man.first);
+
+						manufacturer = *devices_store->append ();
+						manufacturer[devices_model.name] = man.first;
+					}
+
+					if (man.second.empty()) {
+						manufacturer[devices_model.enabled] = 0 != i->protocol;
+						manufacturer[devices_model.protocol_info] = i;
+					} else {
+						for (const auto& dev : man.second) {
+							TreeModel::Row device = *devices_store->append (manufacturer.children());
+							device[devices_model.name] = dev;
+							device[devices_model.enabled] = 0 != i->protocol;
+							device[devices_model.protocol_info] = i;
+						}
 					}
 				}
 			}
 		}
 
 	private:
-
-		void protocol_status_changed (ControlProtocolInfo* cpi) {
-			/* find the row */
-			TreeModel::Children rows = _store->children();
-
-			for (TreeModel::Children::iterator x = rows.begin(); x != rows.end(); ++x) {
-				string n = ((*x)[_model.name]);
-
-				if ((*x)[_model.protocol_info] == cpi) {
-					_ignore_view_change++;
-					(*x)[_model.enabled] = 0 != cpi->protocol;
-					_ignore_view_change--;
-					selection_changed (); // update sensitivity
-					break;
-				}
-			}
-		}
-
-		void selection_changed ()
-		{
-			//enable the Edit button when a row is selected for editing
-			TreeModel::Row row = *(_view.get_selection()->get_selected());
-			if (row && row[_model.enabled]) {
-				ControlProtocolInfo* cpi = row[_model.protocol_info];
-				edit_button->set_sensitive (cpi && cpi->protocol && cpi->protocol->has_editor ());
-			} else {
-				edit_button->set_sensitive (false);
-			}
-		}
-
-		void view_changed (TreeModel::Path const &, TreeModel::iterator const & i)
-		{
-			TreeModel::Row r = *i;
-
-			if (_ignore_view_change) {
-				return;
-			}
-
-			ControlProtocolInfo* cpi = r[_model.protocol_info];
-			if (!cpi) {
-				return;
-			}
-
-			bool const was_enabled = (cpi->protocol != 0);
-			bool const is_enabled = r[_model.enabled];
-			string* name = new string(r[_model.name]);
-
-
-			if (was_enabled != is_enabled) {
-
-				if (!was_enabled) {
-					ControlProtocolManager::instance().activate (*cpi, (void*)name);
-				} else {
-					ControlProtocolManager::instance().deactivate (*cpi);
-				}
-			}
-
-			selection_changed ();
-		}
-
-		void edit_btn_clicked ()
-		{
-			std::string name;
-			ControlProtocolInfo* cpi;
-			TreeModel::Row row;
-
-			row = *(_view.get_selection()->get_selected());
-			if (!row[_model.enabled]) {
-				return;
-			}
-			cpi = row[_model.protocol_info];
-			if (!cpi || !cpi->protocol || !cpi->protocol->has_editor ()) {
-				return;
-			}
-			Box* box = (Box*) cpi->protocol->get_gui ();
-			if (!box) {
-				return;
-			}
-			if (box->get_parent()) {
-				static_cast<ArdourWindow*>(box->get_parent())->present();
-				return;
-			}
-			WindowTitle title (Glib::get_application_name());
-			title += row[_model.name];
-			title += _("Configuration");
-			/* once created, the window is managed by the surface itself (as ->get_parent())
-			 * Surface's tear_down_gui() is called on session close, when de-activating
-			 * or re-initializing a surface.
-			 * tear_down_gui() hides an deletes the Window if it exists.
-			 */
-			ArdourWindow* win = new ArdourWindow (*((Gtk::Window*) _view.get_toplevel()), title.get_string());
-			win->set_title (_("Control Protocol Settings"));
-			win->add (*box);
-			box->show ();
-			win->present ();
-		}
-
-		void edit_clicked (GdkEventButton* ev)
-		{
-			if (ev->type != GDK_2BUTTON_PRESS) {
-				return;
-			}
-
-			edit_btn_clicked();
-		}
 
 		class ControlSurfacesModelColumns : public TreeModelColumnRecord
 	{
@@ -1681,13 +1649,201 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			TreeModelColumn<ControlProtocolInfo*> protocol_info;
 	};
 
-		Glib::RefPtr<TreeStore> _store;
-		ControlSurfacesModelColumns _model;
-		TreeView _view;
-		Gtk::ScrolledWindow scroller;
+		void protocol_status_changed (ControlProtocolInfo* cpi) {
+			/* find the row */
+			TreeModel::Children rows = devices_store->children();
+
+			for (TreeModel::Children::iterator x = rows.begin(); x != rows.end(); ++x) {
+				string n = ((*x)[devices_model.name]);
+
+				if ((*x)[devices_model.protocol_info] == cpi) {
+					_ignore_view_change++;
+					(*x)[devices_model.enabled] = 0 != cpi->protocol;
+					_ignore_view_change--;
+					selection_changed (devices_edit_button); // update sensitivity
+					break;
+				}
+			}
+		}
+
+		void selection_changed (Gtk::Button* button, TreeView* view, ControlSurfacesModelColumns* model)
+		{
+			//enable the Edit button when a row is selected for editing
+			TreeModel::Row row = *(view->get_selection()->get_selected());
+			if (row && row[model->enabled]) {
+				ControlProtocolInfo* cpi = row[model->protocol_info];
+				button->set_sensitive (cpi && cpi->protocol && cpi->protocol->has_editor ());
+			} else {
+				button->set_sensitive (false);
+			}
+		}
+
+		void active_view_changed (TreeModel::Path const &, TreeModel::iterator const & i)
+		{
+			TreeModel::Row r = *i;
+
+			if (_ignore_view_change) {
+				return;
+			}
+
+			ControlProtocolInfo* cpi = r[active_model.protocol_info];
+			if (!cpi) {
+				return;
+			}
+
+			bool const was_enabled = (cpi->protocol != 0);
+			bool const is_enabled = r[devices_model.enabled];
+
+			if (!is_enabled) {
+				TreeModel::Children manufacturers = devices_store->children();
+				string* active_name = new string(r[active_model.name]);
+
+				for (const auto& manufacturer : manufacturers) {
+					TreeModel::Children devices = manufacturer->children();
+					string* devices_name = new string((*manufacturer)[devices_model.name]);
+					if (*active_name == *devices_name) {
+						(*manufacturer)[devices_model.enabled] = 0;
+						goto endloop;
+					}
+
+					for (const auto& device : devices) {
+						string* devices_name = new string((*device)[devices_model.name]);
+						if (*active_name == *devices_name) {
+							(*device)[devices_model.enabled] = 0;
+							goto endloop;
+						}
+					}
+				}
+
+				endloop:
+			}
+		}
+
+		void devices_view_changed (TreeModel::Path const &, TreeModel::iterator const & i)
+		{
+			TreeModel::Row r = *i;
+
+			if (_ignore_view_change) {
+				return;
+			}
+
+			ControlProtocolInfo* cpi = r[devices_model.protocol_info];
+			if (!cpi) {
+				return;
+			}
+
+			ControlProtocolManager& m = ControlProtocolManager::instance ();
+			bool const was_enabled = (cpi->protocol != 0);
+			bool const is_enabled = r[devices_model.enabled];
+			string* name = new string(r[devices_model.name]);
+
+			if (is_enabled) {
+				if (was_enabled) {
+					TreeModel::Children rows = active_store->children();
+
+					for (TreeModel::Children::iterator x = rows.begin(); x != rows.end();) {
+						string* active_name = new string((*x)[active_model.name]);
+						if (cpi == (*x)[active_model.protocol_info] && *name != *active_name) {
+							TreeModel::Children::iterator temp = x;
+							++temp;
+							(*x)[active_model.enabled] = 0;
+							x = temp;
+						} else {
+							++x;
+						}
+					}
+
+					ControlProtocolManager::instance().deactivate (*cpi);
+				}
+
+				ControlProtocolManager::instance().activate (*cpi, (void*)name);
+
+				TreeModel::Row device = *(active_store->append ());
+
+				device[devices_model.name] = *name;
+				device[devices_model.enabled] = is_enabled;
+				device[devices_model.protocol_info] = cpi;
+			} else {
+				if (was_enabled) {
+					ControlProtocolManager::instance().deactivate (*cpi);
+				}
+
+				TreeModel::Children rows = active_store->children();
+
+				for (TreeModel::Children::iterator x = rows.begin(); x != rows.end();) {
+					string* active_name = new string((*x)[active_model.name]);
+					if (*active_name == *name) {
+						x = active_store->erase(x);
+					} else {
+						++x;
+					}
+				}
+
+			}
+
+			selection_changed (devices_edit_button, &devices_view, &devices_model);
+		}
+
+		void edit_btn_clicked (TreeView* view, ControlSurfacesModelColumns* model)
+		{
+			std::string name;
+			ControlProtocolInfo* cpi;
+			TreeModel::Row row;
+
+			row = *(view->get_selection()->get_selected());
+			if (!row[model->enabled]) {
+				return;
+			}
+			cpi = row[model->protocol_info];
+			if (!cpi || !cpi->protocol || !cpi->protocol->has_editor ()) {
+				return;
+			}
+			Box* box = (Box*) cpi->protocol->get_gui ();
+			if (!box) {
+				return;
+			}
+			if (box->get_parent()) {
+				static_cast<ArdourWindow*>(box->get_parent())->present();
+				return;
+			}
+			WindowTitle title (Glib::get_application_name());
+			title += row[model->name];
+			title += _("Configuration");
+			/* once created, the window is managed by the surface itself (as ->get_parent())
+			 * Surface's tear_down_gui() is called on session close, when de-activating
+			 * or re-initializing a surface.
+			 * tear_down_gui() hides an deletes the Window if it exists.
+			 */
+			ArdourWindow* win = new ArdourWindow (*((Gtk::Window*) view->get_toplevel()), title.get_string());
+			win->set_title (_("Control Protocol Settings"));
+			win->add (*box);
+			box->show ();
+			win->present ();
+		}
+
+		void edit_clicked (GdkEventButton* ev, TreeView* view, ControlSurfacesModelColumns* model)
+		{
+			if (ev->type != GDK_2BUTTON_PRESS) {
+				return;
+			}
+
+			edit_btn_clicked(view, model);
+		}
+
+		Glib::RefPtr<TreeStore> active_store;
+		Glib::RefPtr<TreeStore> devices_store;
+		ControlSurfacesModelColumns active_model;
+		ControlSurfacesModelColumns devices_model;
+		TreeView devices_view;
+		TreeView active_view;
+		Gtk::ScrolledWindow active_scroller;
+		Gtk::ScrolledWindow devices_scroller;
+		OptionEditorHeading active_heading;
+		OptionEditorHeading devices_heading;
 		PBD::ScopedConnection protocol_status_connection;
 		uint32_t _ignore_view_change;
-		Gtk::Button* edit_button;
+		Gtk::Button* active_edit_button;
+		Gtk::Button* devices_edit_button;
 };
 
 class VideoTimelineOptions : public OptionEditorMiniPage
@@ -4698,7 +4854,6 @@ These settings will only take effect after %1 is restarted.\n\
 
 	/* CONTROL SURFACES *********************************************************/
 
-	add_option (_("Control Surfaces"), new OptionEditorHeading (_("Control Surfaces")));
 	add_option (_("Control Surfaces"), new ControlSurfacesOptions ());
 
 
