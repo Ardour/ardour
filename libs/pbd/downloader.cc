@@ -178,6 +178,7 @@ Downloader::download ()
 	curl_easy_setopt (curl, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CurlWrite_CallbackFunc_Downloader);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
+	curl_easy_setopt(curl, CURLOPT_TIMEOUT, 0L);
 	CURLcode res = curl_easy_perform (curl);
 
 	long int rstatus;
