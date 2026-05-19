@@ -36,6 +36,7 @@
 #include <ytkmm/liststore.h>
 #include <ytkmm/stock.h>
 #include <ytkmm/scale.h>
+#include <ytkmm/treestore.h>
 
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/utils.h"
@@ -1492,12 +1493,16 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 		ControlSurfacesOptions ()
 			: _ignore_view_change (0)
 		{
-			_store = ListStore::create (_model);
+			_store = TreeStore::create (_model);
 			_view.set_model (_store);
 			_view.append_column_editable (_("Enable"), _model.enabled);
-			_view.append_column (_("Control Surface Protocol"), _model.name);
+			_view.append_column (_("Control Surface"), _model.name);
 			_view.get_column(1)->set_resizable (true);
 			_view.get_column(1)->set_expand (true);
+
+			scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+			scroller.set_size_request(-1, 800);
+			scroller.add(_view);
 
 			Gtk::HBox* edit_box = manage (new Gtk::HBox);
 			edit_box->set_spacing(3);
@@ -1516,7 +1521,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 
 			int const n = table.property_n_rows();
 			table.resize (n + 2, 3);
-			table.attach (_view, 0, 3, n, n + 1);
+			table.attach (scroller, 0, 3, n, n + 1);
 			table.attach (*edit_box, 0, 3, n + 1, n + 2);
 
 			ControlProtocolManager& m = ControlProtocolManager::instance ();
@@ -1539,10 +1544,17 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 
 			ControlProtocolManager& m = ControlProtocolManager::instance ();
 			for (auto const& i : m.control_protocol_infos ()) {
-				TreeModel::Row r = *_store->append ();
-				r[_model.name] = i->name;
-				r[_model.enabled] = 0 != i->protocol;
-				r[_model.protocol_info] = i;
+				for (const auto& man : i->descriptor->enumerate()) {
+					TreeModel::Row manufacturer = *_store->append ();
+					manufacturer[_model.name] = man.first;
+
+					for (const auto& dev : man.second) {
+						TreeModel::Row device = *_store->append (manufacturer.children());
+						device[_model.name] = dev;
+						device[_model.enabled] = 0 != i->protocol;
+						device[_model.protocol_info] = i;
+					}
+				}
 			}
 		}
 
@@ -1592,12 +1604,13 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 
 			bool const was_enabled = (cpi->protocol != 0);
 			bool const is_enabled = r[_model.enabled];
+			string* name = new string(r[_model.name]);
 
 
 			if (was_enabled != is_enabled) {
 
 				if (!was_enabled) {
-					ControlProtocolManager::instance().activate (*cpi);
+					ControlProtocolManager::instance().activate (*cpi, (void*)name);
 				} else {
 					ControlProtocolManager::instance().deactivate (*cpi);
 				}
@@ -1668,9 +1681,10 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			TreeModelColumn<ControlProtocolInfo*> protocol_info;
 	};
 
-		Glib::RefPtr<ListStore> _store;
+		Glib::RefPtr<TreeStore> _store;
 		ControlSurfacesModelColumns _model;
 		TreeView _view;
+		Gtk::ScrolledWindow scroller;
 		PBD::ScopedConnection protocol_status_connection;
 		uint32_t _ignore_view_change;
 		Gtk::Button* edit_button;
