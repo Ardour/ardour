@@ -219,7 +219,6 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 {
 	RequestBufferMapIterator i;
 	RequestBufferVector vec;
-	int cnt = 0;
 
 	/* check all registered per-thread buffers first */
 	PBD::RWLock::ReaderLock rbml (request_buffer_map_lock);
@@ -285,7 +284,6 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 
 					DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: valid request, calling ::do_request()\n", event_loop_name()));
 					do_request (vec.buf[0]);
-					cnt++;
 				}
 
 				/* if the request was CallSlot, then we need to ensure that we reset the functor in the request, in case it
@@ -385,7 +383,6 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 		 */
 
 		do_request (req);
-		cnt++;
 
 		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 delete heap request type %3\n", event_loop_name(), pthread_name(), req->type));
 		delete req;
