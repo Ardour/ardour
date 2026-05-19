@@ -125,8 +125,30 @@ public:
 	bool has_inline_display () { return _lua_has_inline_display; }
 	void setup_lua_inline_gui (LuaState *lua_gui);
 
+	/* libardour-owned bootstrap for the GUI-thread "handler" interpreter
+	 * (interpreter #3 in the RT->GUI dispatch design).  Mirrors
+	 * setup_lua_inline_gui but also pushes the Session global and exposes
+	 * route()/name()/unique_id(), since handlers do route/session work that
+	 * the RT path used to do unsafely.  The GUI side (LuaProcHandlers, in
+	 * gtk2_ardour) layers LuaInstance::register_classes()/register_hooks()
+	 * and a small register_handler() prelude on top, then calls gui_init().
+	 * Kept here because _script / _control_data / _session are private. */
+	void setup_lua_handler_gui (LuaState *lua_handler);
+
 	DSP::DspShm* instance_shm () { return &lshm; }
 	LuaTableRef* instance_ref () { return &lref; }
+
+	/* RT->GUI Lua dispatch.  A script's realtime dsp_run() calls
+	 * self:dispatch(handler_id, value); this emits AccessLuaScript, which a
+	 * GUI-side manager connects with gui_context() so the registered Lua
+	 * handler runs on the GUI thread.  RT-safe: a pure signal emit over the
+	 * same cross-thread call_slot path Ardour already treats as RT-callable
+	 * for Session::request_* (per-thread SPSC ringbuffer + pipe wakeup, see
+	 * pbd/abstract_ui.inc.cc).  The (LuaProc*,int,int) payload fits the
+	 * std::function small-buffer, so no allocation on the RT side.
+	 * See project report ardour-rt-gui-lua-dispatch-design.md. */
+	void dispatch (uint32_t handler_id, int value);
+	static PBD::Signal<void(LuaProc*, int, int)> AccessLuaScript;
 
 	struct FactoryPreset {
 		std::string               name;
