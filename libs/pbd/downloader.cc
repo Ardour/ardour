@@ -163,6 +163,9 @@ Downloader::download ()
 
 		if (res != CURLE_OK ) {
 			error << string_compose (_("Download failed, error code %1 (%2)"), curl_easy_strerror (res), curl_error) << endmsg;
+#ifndef NDEBUG
+			std::cerr << string_compose (_("Download failed, error code %1 (%2)"), curl_easy_strerror (res), curl_error) << "\n";
+#endif
 			_status = -2;
 			return;
 		}
@@ -188,6 +191,10 @@ Downloader::download ()
 		_status = 1;
 	} else {
 		_status = -1;
+		error << string_compose (_("Download failed, error code %1 (%2)"), curl_easy_strerror (res), curl_error) << endmsg;
+#ifndef NDEBUG
+		std::cerr << string_compose (_("Download failed, error code %1 (%2)"), curl_easy_strerror (res), curl_error) << "\n";
+#endif
 	}
 
 	if (file) {
