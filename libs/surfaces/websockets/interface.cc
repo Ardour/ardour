@@ -26,7 +26,7 @@ using namespace ARDOUR;
 using namespace ArdourSurface;
 
 static ControlProtocol*
-new_ardour_websockets_protocol (Session* s)
+new_ardour_websockets_protocol (Session* s, void* config)
 {
 	ArdourWebsockets* surface = new ArdourWebsockets (*s);
 
@@ -41,6 +41,12 @@ delete_ardour_websockets_protocol (ControlProtocol* cp)
 	delete cp;
 }
 
+static std::map<std::string, std::vector<std::string>>
+enumerate_ardour_websockets_protocol ()
+{
+	return {{surface_name, {}}};
+}
+
 static ControlProtocolDescriptor ardour_websockets_descriptor = {
 	/* name       */ surface_name,
 	/* id         */ surface_id,
@@ -50,6 +56,7 @@ static ControlProtocolDescriptor ardour_websockets_descriptor = {
 	/* match usb  */ 0,
 	/* initialize */ new_ardour_websockets_protocol,
 	/* destroy    */ delete_ardour_websockets_protocol,
+	/* enumerate  */ enumerate_ardour_websockets_protocol,
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor*
