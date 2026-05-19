@@ -1496,6 +1496,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			: active_heading (_("Active Surfaces"))
 			, devices_heading (_("Control Surfaces"))
 			, _ignore_view_change (0)
+			, _protocol_change (0)
 		{
 			// Active Scroller
 			active_heading.add_to_page (this);
@@ -1623,7 +1624,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 						for (const auto& dev : man.second) {
 							TreeModel::Row device = *devices_store->append (manufacturer.children());
 							device[devices_model.name] = dev;
-							device[devices_model.enabled] = 0 != i->protocol;
+							device[devices_model.enabled] = dev == i->config;
 							device[devices_model.protocol_info] = i;
 						}
 					}
@@ -1651,19 +1652,32 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 
 		void protocol_status_changed (ControlProtocolInfo* cpi) {
 			/* find the row */
-			TreeModel::Children rows = devices_store->children();
+			TreeModel::Children manufacturers = devices_store->children();
 
-			for (TreeModel::Children::iterator x = rows.begin(); x != rows.end(); ++x) {
-				string n = ((*x)[devices_model.name]);
+			for (const auto& manufacturer : manufacturers) {
+				string* devices_name = new string((*manufacturer)[devices_model.name]);
 
-				if ((*x)[devices_model.protocol_info] == cpi) {
-					_ignore_view_change++;
-					(*x)[devices_model.enabled] = 0 != cpi->protocol;
-					_ignore_view_change--;
-					selection_changed (devices_edit_button); // update sensitivity
-					break;
+				if (cpi->config == *devices_name) {
+					_protocol_change++;
+					(*manufacturer)[devices_model.enabled] = 0 != cpi->protocol;
+					_protocol_change--;
+					goto endloop;
+				}
+
+				TreeModel::Children devices = manufacturer->children();
+
+				for (const auto& device : devices) {
+					string* devices_name = new string((*device)[devices_model.name]);
+					if (cpi->config == *devices_name) {
+						_protocol_change++;
+						(*device)[devices_model.enabled] = 0 != cpi->protocol;
+						_protocol_change--;
+						goto endloop;
+					}
 				}
 			}
+
+			endloop:
 		}
 
 		void selection_changed (Gtk::Button* button, TreeView* view, ControlSurfacesModelColumns* model)
@@ -1691,7 +1705,6 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 				return;
 			}
 
-			bool const was_enabled = (cpi->protocol != 0);
 			bool const is_enabled = r[devices_model.enabled];
 
 			if (!is_enabled) {
@@ -1753,16 +1766,22 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 						}
 					}
 
-					ControlProtocolManager::instance().deactivate (*cpi);
+					if (!_protocol_change) { m.deactivate (*cpi); }
 				}
 
-				ControlProtocolManager::instance().activate (*cpi, (void*)name);
+				if (!_protocol_change) { m.activate (*cpi, (void*)name); }
 
 				TreeModel::Row device = *(active_store->append ());
 
 				device[devices_model.name] = *name;
 				device[devices_model.enabled] = is_enabled;
 				device[devices_model.protocol_info] = cpi;
+
+				for (auto const& i : m.control_protocol_infos ()) {
+					if (cpi->protocol == i->protocol) {
+						i->config = *name;
+					}
+				}
 			} else {
 				if (was_enabled) {
 					ControlProtocolManager::instance().deactivate (*cpi);
@@ -1779,6 +1798,11 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 					}
 				}
 
+				for (auto const& i : m.control_protocol_infos ()) {
+					if (cpi->protocol == i->protocol) {
+						i->config = {};
+					}
+				}
 			}
 
 			selection_changed (devices_edit_button, &devices_view, &devices_model);
@@ -1842,6 +1866,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 		OptionEditorHeading devices_heading;
 		PBD::ScopedConnection protocol_status_connection;
 		uint32_t _ignore_view_change;
+		uint32_t _protocol_change;
 		Gtk::Button* active_edit_button;
 		Gtk::Button* devices_edit_button;
 };
