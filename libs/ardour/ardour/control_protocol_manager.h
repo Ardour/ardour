@@ -83,7 +83,7 @@ public:
 		return _control_protocol_info;
 	}
 
-	int activate (ControlProtocolInfo&);
+	int activate (ControlProtocolInfo&, void* config);
 	int deactivate (ControlProtocolInfo&);
 
 	static const std::string state_node_name;
@@ -109,7 +109,7 @@ private:
 	int                        control_protocol_discover (std::string path);
 	ControlProtocolDescriptor* get_descriptor (std::string path);
 	ControlProtocolInfo*       cpi_by_name (std::string);
-	ControlProtocol*           instantiate (ControlProtocolInfo&);
+	ControlProtocol*           instantiate (ControlProtocolInfo&, void* config);
 	int                        teardown (ControlProtocolInfo&, bool lock_required);
 };
 

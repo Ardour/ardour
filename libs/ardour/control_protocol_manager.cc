@@ -164,7 +164,7 @@ ControlProtocolManager::set_session (Session* s)
 
 	for (auto const& p : _control_protocol_info) {
 		if (p->requested) {
-			(void)activate (*p);
+			(void)activate (*p, {});
 		}
 	}
 
@@ -204,7 +204,7 @@ ControlProtocolManager::set_session (Session* s)
 }
 
 int
-ControlProtocolManager::activate (ControlProtocolInfo& cpi)
+ControlProtocolManager::activate (ControlProtocolInfo& cpi, void* config)
 {
 	PBD::RWLock::WriterLock lm (_protocols_lock);
 	ControlProtocol*        cp;
@@ -215,7 +215,7 @@ ControlProtocolManager::activate (ControlProtocolInfo& cpi)
 
 	cpi.requested = true;
 
-	if ((cp = instantiate (cpi)) == 0) {
+	if ((cp = instantiate (cpi, config)) == 0) {
 		return -1;
 	}
 
@@ -289,7 +289,7 @@ ControlProtocolManager::drop_protocols ()
 }
 
 ControlProtocol*
-ControlProtocolManager::instantiate (ControlProtocolInfo& cpi)
+ControlProtocolManager::instantiate (ControlProtocolInfo& cpi, void* config)
 {
 	/* CALLER MUST HOLD LOCK */
 
@@ -310,7 +310,7 @@ ControlProtocolManager::instantiate (ControlProtocolInfo& cpi)
 
 	DEBUG_TRACE (DEBUG::ControlProtocols, string_compose ("initializing %1\n", cpi.name));
 
-	if ((cpi.protocol = cpi.descriptor->initialize (_session)) == 0) {
+	if ((cpi.protocol = cpi.descriptor->initialize (_session, config)) == 0) {
 		error << string_compose (_("control protocol name \"%1\" could not be initialized"), cpi.name) << endmsg;
 		return 0;
 	}
@@ -559,7 +559,7 @@ ControlProtocolManager::set_state (const XMLNode& node, int session_specific_sta
 					cpi->state = new XMLNode (**citer);
 					cpi->state->set_property (X_("session-state"), session_specific_state ? true : false);
 					if (_session) {
-						instantiate (*cpi);
+						instantiate (*cpi, {});
 					} else {
 						cpi->requested = true;
 					}
@@ -651,7 +651,7 @@ ControlProtocolManager::probe_midi_control_protocols ()
 
 		if (!active && found) {
 			cpi->automatic = true;
-			activate (*cpi);
+			activate (*cpi, {});
 		} else if (active && cpi->automatic && !found) {
 			cpi->automatic = false;
 			deactivate (*cpi);
@@ -683,7 +683,7 @@ ControlProtocolManager::probe_usb_control_protocols (bool arrived, uint16_t vend
 
 		if (!active && arrived) {
 			cpi->automatic = true;
-			activate (*cpi);
+			activate (*cpi, {});
 		} else if (active && cpi->automatic && !arrived) {
 			cpi->automatic = false;
 			deactivate (*cpi);
