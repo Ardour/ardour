@@ -49,6 +49,7 @@ public:
 	bool                       requested;
 	bool                       automatic;
 	XMLNode*                   state;
+	std::string                config;
 
 	ControlProtocolInfo ()
 		: descriptor (0)

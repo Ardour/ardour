@@ -164,7 +164,8 @@ ControlProtocolManager::set_session (Session* s)
 
 	for (auto const& p : _control_protocol_info) {
 		if (p->requested) {
-			(void)activate (*p, {});
+			std::string* config = new std::string(p->config);
+			(void)activate (*p, config);
 		}
 	}
 
@@ -465,6 +466,7 @@ ControlProtocolManager::control_protocol_discover (string path)
 			cpi->requested  = false;
 			cpi->automatic  = false;
 			cpi->state      = 0;
+			cpi->config     = {};
 
 			_control_protocol_info.push_back (cpi);
 
@@ -544,8 +546,10 @@ ControlProtocolManager::set_state (const XMLNode& node, int session_specific_sta
 		if (child->name () == X_("Protocol")) {
 			bool        active;
 			std::string name;
+			std::string config;
 			if (!child->get_property (X_("active"), active) ||
-			    !child->get_property (X_("name"), name)) {
+			    !child->get_property (X_("name"), name) ||
+			    !child->get_property (X_("config"), config)) {
 				continue;
 			}
 
@@ -558,8 +562,10 @@ ControlProtocolManager::set_state (const XMLNode& node, int session_specific_sta
 					delete cpi->state;
 					cpi->state = new XMLNode (**citer);
 					cpi->state->set_property (X_("session-state"), session_specific_state ? true : false);
+					cpi->config = config;
 					if (_session) {
-						instantiate (*cpi, {});
+						std::string* conf = new std::string(config);
+						instantiate (*cpi, conf);
 					} else {
 						cpi->requested = true;
 					}
@@ -593,6 +599,7 @@ ControlProtocolManager::get_state () const
 		if (p->protocol) {
 			XMLNode& child_state (p->protocol->get_state ());
 			child_state.set_property (X_("active"), !p->automatic);
+			child_state.set_property (X_("config"), p->config);
 			delete (p->state);
 			p->state = new XMLNode (child_state);
 			root->add_child_nocopy (child_state);
