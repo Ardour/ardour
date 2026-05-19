@@ -24,6 +24,8 @@
 
 #include "pbd/md5.h"
 
+using namespace PBD;
+
 // Constants for MD5Transform routine.
 static const int S11 = 7;
 static const int S12 = 12;
@@ -179,7 +181,7 @@ MD5::writeToString()
 /// Load a file from disk and digest it
 // Digests a file and returns the result.
 char*
-MD5::digestFile (char *filename)
+MD5::digestFile (const char *filename)
 {
 	Init();
 

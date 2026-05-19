@@ -28,6 +28,8 @@
 
 #include "pbd/libpbd_visibility.h"
 
+namespace PBD {
+
 class LIBPBD_API MD5
 {
     public:
@@ -41,7 +43,7 @@ class LIBPBD_API MD5
 	char digestChars[33] ;
 
 	void   writeToString ();
-	char*  digestFile (char *filename);
+	char*  digestFile (const char *filename);
 	char*  digestMemory (uint8_t const * memchunk, size_t len);
 	char*  digestString (char const *string);
 
@@ -62,5 +64,7 @@ class LIBPBD_API MD5
 	void Final ();
 
 };
+
+}
 
 #endif /* __libpbd_md5_h__ */
