@@ -90,9 +90,11 @@ MidiInspector::on_size_request (Gtk::Requisition* req)
 		max.height = sub.height;
 	}
 
-	region_editor->size_request (sub);
-	if (sub.width > 0 && sub.width > max.width) {
-		max.width = sub.width;
+	if (region_editor) {
+		region_editor->size_request (sub);
+		if (sub.width > 0 && sub.width > max.width) {
+			max.width = sub.width;
+		}
 	}
 
 	VBox::on_size_request (req);
