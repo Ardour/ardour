@@ -2289,6 +2289,7 @@ private:
 	bool bbt_to_grid (Temporal::BBT_Offset const & bbt, Editing::GridType& gt) const;
 
 	MidiInspector* _midi_inspector;
+	ARDOUR::Quantize* get_quantize_op ();
 
 	friend class RegionMoveDrag;
 	friend class TrimDrag;

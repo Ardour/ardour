@@ -116,6 +116,7 @@
 #include "paste_context.h"
 #include "patch_change_dialog.h"
 #include "pianoroll_window.h"
+#include "quantize_dialog.h"
 #include "region_gain_line.h"
 #include "route_time_axis.h"
 #include "selection.h"
@@ -9642,4 +9643,20 @@ bool
 Editor::get_midi_chord (int root_pitch, std::vector<int>& pitches) const
 {
 	return _midi_inspector->chord_box->get_midi_chord (root_pitch, pitches);
+}
+
+Quantize*
+Editor::get_quantize_op ()
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	QuantizeWidget* qw (_midi_inspector->quantize_widget);
+
+	return new Quantize (qw->snap_start(),
+	                     qw->snap_end(),
+	                     qw->start_grid_size(),
+	                     qw->end_grid_size(),
+	                     qw->strength(),
+	                     qw->swing(),
+	                     qw->threshold());
 }
