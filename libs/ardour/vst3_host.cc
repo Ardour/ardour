@@ -270,6 +270,19 @@ Steinberg::tchar_to_utf8 (Vst::TChar const* s)
 	return rv;
 }
 
+Glib::ustring
+Steinberg::tchar_to_ustring (Vst::TChar const* s)
+{
+	glong  len;
+	gchar* utf8 = g_utf16_to_utf8 ((const gunichar2*)s, -1, NULL, &len, NULL);
+	if (!utf8 || len == 0) {
+		return "";
+	}
+	Glib::ustring rv (utf8, len);
+	g_free (utf8);
+	return rv;
+}
+
 bool
 Steinberg::utf8_to_tchar (Vst::TChar* rv, const char* s, size_t l)
 {
