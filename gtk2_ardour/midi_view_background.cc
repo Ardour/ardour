@@ -211,6 +211,10 @@ MidiViewBackground::setup_note_lines()
 			break;
 		}
 
+		if (y + h > contents_height()) {
+			/* clip last note line to avoid bleeding */
+			h -= y + h - contents_height();
+		}
 
 		_note_lines->add_rect (i, ArdourCanvas::Rect (0., y, ArdourCanvas::COORD_MAX, y + h), color);
 
