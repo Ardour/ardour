@@ -51,6 +51,7 @@
 #include "editor_regions.h"
 #include "editor_cursors.h"
 #include "keyboard.h"
+#include "midi_inspector.h"
 #include "midi_region_view.h"
 #include "mixer_strip.h"
 #include "pianoroll.h"

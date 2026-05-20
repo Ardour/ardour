@@ -107,6 +107,7 @@
 #include "interthread_progress_window.h"
 #include "item_counts.h"
 #include "keyboard.h"
+#include "midi_inspector.h"
 #include "midi_region_view.h"
 #include "mixer_ui.h"
 #include "mixer_strip.h"

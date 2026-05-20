@@ -134,6 +134,7 @@
 #include "keyboard.h"
 #include "luainstance.h"
 #include "marker.h"
+#include "midi_inspector.h"
 #include "midi_region_view.h"
 #include "midi_time_axis.h"
 #include "midi_view.h"

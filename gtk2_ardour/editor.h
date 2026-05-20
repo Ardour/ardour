@@ -71,7 +71,6 @@
 #include "editing.h"
 #include "enums.h"
 #include "editor_items.h"
-#include "midi_inspector.h"
 #include "region_selection.h"
 #include "selection_memento.h"
 #include "trigger_clip_picker.h"
@@ -132,6 +131,7 @@ class ArdourMarker;
 class MidiRegionView;
 class MidiView;
 class MidiExportDialog;
+class MidiInspector;
 class MixerStrip;
 class MouseCursors;
 class NoteBase;
