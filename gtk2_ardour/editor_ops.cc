@@ -92,6 +92,7 @@
 #include "audio_time_axis.h"
 #include "automation_line.h"
 #include "automation_time_axis.h"
+#include "chord_box.h"
 #include "control_point.h"
 #include "debug.h"
 #include "editing.h"
@@ -9601,4 +9602,43 @@ Editor::find_and_display_track ()
 	if (stv) {
 		ensure_time_axis_view_is_visible (*stv, true);
 	}
+}
+
+void
+Editor::replace_chord (std::vector<int> intervals)
+{
+	for (auto & rv : selection->regions) {
+		MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rv);
+		if (mrv) {
+			mrv->replace_chord (intervals);
+		}
+	}
+}
+
+void
+Editor::invert_selected_chord (bool up)
+{
+	for (auto & rv : selection->regions) {
+		MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rv);
+		if (mrv) {
+			mrv->invert_selected_chord (up);
+		}
+	}
+}
+
+void
+Editor::drop_selected_chord (std::vector<int> which_notes)
+{
+	for (auto & rv : selection->regions) {
+		MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rv);
+		if (mrv) {
+			mrv->drop_selected_chord (which_notes);
+		}
+	}
+}
+
+bool
+Editor::get_midi_chord (int root_pitch, std::vector<int>& pitches) const
+{
+	return _midi_inspector->chord_box->get_midi_chord (root_pitch, pitches);
 }

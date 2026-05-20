@@ -1736,6 +1736,9 @@ Editor::region_selection_changed ()
 		RegionView* rv = (selection->regions.back ());
 		assert (rv);
 		maybe_edit_region_in_bottom_pane (*rv);
+
+		std::shared_ptr<MidiRegion> mr (std::dynamic_pointer_cast<MidiRegion> (selection->regions.back()->region()));
+		_midi_inspector->set_region (_session, mr); /* mr could be null, that's OK */
 	}
 
 	EditingContext::region_selection_changed ();

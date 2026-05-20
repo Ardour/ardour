@@ -71,6 +71,7 @@
 #include "editing.h"
 #include "enums.h"
 #include "editor_items.h"
+#include "midi_inspector.h"
 #include "region_selection.h"
 #include "selection_memento.h"
 #include "trigger_clip_picker.h"
@@ -1571,6 +1572,11 @@ private:
 	void set_visible_range_types (RangeBarType);
 	void maybe_show_instrument_plugin (std::shared_ptr<ARDOUR::MidiTrack> mt);
 
+	void replace_chord (std::vector<int> intervals);
+	void invert_selected_chord (bool up);
+	void drop_selected_chord (std::vector<int> which_notes);
+	bool get_midi_chord (int root_pitch, std::vector<int>& pitches) const;
+
 protected:
 	void _commit_tempo_map_edit (Temporal::TempoMap::WritableSharedPtr&, bool with_update = false);
 	void automation_create_point_at_edit_point (bool with_guard_points);
@@ -2281,6 +2287,8 @@ private:
 	std::map<Editing::GridType,Glib::RefPtr<Gtk::RadioAction> > quantization_actions;
 	void global_quantization_chosen (Editing::GridType);
 	bool bbt_to_grid (Temporal::BBT_Offset const & bbt, Editing::GridType& gt) const;
+
+	MidiInspector* _midi_inspector;
 
 	friend class RegionMoveDrag;
 	friend class TrimDrag;

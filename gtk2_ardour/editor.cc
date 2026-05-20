@@ -108,6 +108,7 @@
 #include "audio_time_axis.h"
 #include "automation_time_axis.h"
 #include "bundle_manager.h"
+#include "chord_box.h"
 #include "crossfade_edit.h"
 #include "debug.h"
 #include "editing.h"
@@ -378,6 +379,7 @@ Editor::Editor ()
 	, track_drag (nullptr)
 	, _visible_marker_types (all_marker_types)
 	, _visible_range_types (all_range_types)
+	, _midi_inspector (nullptr)
 {
 	/* we are a singleton */
 
@@ -536,31 +538,6 @@ Editor::Editor ()
 	Location::end_changed.connect (*this, invalidator (*this), std::bind (&Editor::location_changed, this, _1), gui_context());
 	Location::changed.connect (*this, invalidator (*this), std::bind (&Editor::location_changed, this, _1), gui_context());
 
-	add_notebook_page (_("Tracks"), _("Tracks & Busses"), _routes->widget ());
-	add_notebook_page (_("Sources"), _("Sources"), _sources->widget ());
-	add_notebook_page (_("Regions"), _("Regions"), _regions->widget ());
-	add_notebook_page (_("Clips"), _("Clips"), _trigger_clip_picker);
-	add_notebook_page (_("Arrange"), _("Arrangement"), _sections->widget ());
-	add_notebook_page (_("Snaps"), _("Snapshots"), _snapshots->widget ());
-	add_notebook_page (_("Groups"), _("Track & Bus Groups"), _route_groups->widget ());
-	add_notebook_page (_("Marks"), _("Ranges & Marks"), _locations->widget ());
-
-	_notebook_tab2.set_index (4);
-
-	_the_notebook.set_show_tabs (false);
-	_the_notebook.set_scrollable (true);
-	_the_notebook.popup_disable ();
-	_the_notebook.show_all ();
-
-	_the_notebook.signal_switch_page().connect ([this](GtkNotebookPage*, guint page) {
-			std::string label (_the_notebook.get_tab_label_text (*_the_notebook.get_nth_page (page)));
-			_notebook_tab1.set_active (label);
-			_notebook_tab2.set_active (label);
-			instant_save ();
-			});
-
-	_notebook_tab1.set_name ("tab button");
-	_notebook_tab2.set_name ("tab button");
 
 	/* Pick up some settings we need to cache, early */
 
@@ -690,6 +667,40 @@ Editor::Editor ()
 	load_bindings ();
 	register_actions ();
 	bind_mouse_mode_buttons ();
+
+	/* MIDI Inspect needs MIDI bindings during construction*/
+
+	_midi_inspector = manage (new MidiInspector (*this));
+	_midi_inspector->chord_box->ReplaceChord.connect ([this](std::vector<int> intervals) { replace_chord (intervals); });
+	_midi_inspector->chord_box->InvertChord.connect ([this](bool up) { invert_selected_chord (up); });
+	_midi_inspector->chord_box->DropChord.connect ([this](std::vector<int> which_notes) { drop_selected_chord (which_notes); });
+
+	add_notebook_page (_("Tracks"), _("Tracks & Busses"), _routes->widget ());
+	add_notebook_page (_("Sources"), _("Sources"), _sources->widget ());
+	add_notebook_page (_("Regions"), _("Regions"), _regions->widget ());
+	add_notebook_page (_("Clips"), _("Clips"), _trigger_clip_picker);
+	add_notebook_page (_("Arrange"), _("Arrangement"), _sections->widget ());
+	add_notebook_page (_("Snaps"), _("Snapshots"), _snapshots->widget ());
+	add_notebook_page (_("Groups"), _("Track & Bus Groups"), _route_groups->widget ());
+	add_notebook_page (_("Marks"), _("Ranges & Marks"), _locations->widget ());
+	add_notebook_page (_("Inspector"), _("MIDI Inspector"), *_midi_inspector);
+
+	_notebook_tab2.set_index (4);
+
+	_the_notebook.set_show_tabs (false);
+	_the_notebook.set_scrollable (true);
+	_the_notebook.popup_disable ();
+	_the_notebook.show_all ();
+
+	_the_notebook.signal_switch_page().connect ([this](GtkNotebookPage*, guint page) {
+			std::string label (_the_notebook.get_tab_label_text (*_the_notebook.get_nth_page (page)));
+			_notebook_tab1.set_active (label);
+			_notebook_tab2.set_active (label);
+			instant_save ();
+			});
+
+	_notebook_tab1.set_name ("tab button");
+	_notebook_tab2.set_name ("tab button");
 
 	build_edit_mode_menu();
 	build_zoom_focus_menu();
