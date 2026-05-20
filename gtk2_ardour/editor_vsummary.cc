@@ -53,9 +53,7 @@ EditorVSummary::EditorVSummary (Editor& e)
 	  _image (0),
 	  _background_dirty (true)
 {
-	CairoWidget::use_nsglview (UIConfiguration::instance().get_nsgl_view_mode () == NSGLHiRes);
-	add_events (Gdk::POINTER_MOTION_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
-	set_can_focus ();
+	add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
 
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &EditorVSummary::parameter_changed));
 }
@@ -68,10 +66,9 @@ EditorVSummary::~EditorVSummary ()
 void
 EditorVSummary::parameter_changed (string p)
 {
-	// TODO use_route_colors
-	// if (p == "color-regions-using-track-color") {
-	// 	set_background_dirty ();
-	// }
+	if (p == "vertical-summary-uses-track-colors") {
+		set_background_dirty ();
+	}
 }
 
 void
@@ -180,10 +177,8 @@ EditorVSummary::render_background_image ()
 
 		/* Route color */
 
-		// TODO config for use_route_colors
-		bool use_route_colors = true;
 		double alpha;
-		if (use_route_colors) {
+		if (UIConfiguration::instance().get_vsummary_uses_track_colors()) {
 			alpha = 0.75;
 			if (route && route->is_master()) {
 				alpha = 1.0;

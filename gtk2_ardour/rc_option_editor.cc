@@ -2672,6 +2672,14 @@ RCOptionEditor::RCOptionEditor ()
 			));
 
 	add_option (_("Appearance/Editor"),
+		    new BoolOption (
+			    "vertical-summary-uses-track-colors",
+				_("Use track colors in the vertical summary"),
+			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_vsummary_uses_track_colors),
+			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_vsummary_uses_track_colors)
+			    ));
+
+	add_option (_("Appearance/Editor"),
 			new BoolOption (
 			"show-region-names",
 			_("Show Region Names"),

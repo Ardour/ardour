@@ -62,6 +62,7 @@ UI_CONFIG_VARIABLE (bool, show_waveforms_while_recording, "show-waveforms-while-
 UI_CONFIG_VARIABLE (ARDOUR::WaveformScale, waveform_scale, "waveform-scale", Logarithmic)
 UI_CONFIG_VARIABLE (ARDOUR::WaveformShape, waveform_shape, "waveform-shape", Traditional)
 UI_CONFIG_VARIABLE (bool, update_editor_during_summary_drag, "update-editor-during-summary-drag", true)
+UI_CONFIG_VARIABLE (bool, vsummary_uses_track_colors, "vertical-summary-uses-track-colors", true)
 UI_CONFIG_VARIABLE (bool, never_display_periodic_midi, "never-display-periodic-midi", true)
 UI_CONFIG_VARIABLE (bool, sound_midi_notes, "sound-midi-notes", true)
 UI_CONFIG_VARIABLE (bool, select_last_drawn_note_only, "select-last-drawn-note-only", true)
