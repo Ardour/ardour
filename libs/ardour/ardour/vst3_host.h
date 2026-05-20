@@ -58,6 +58,7 @@ namespace ARDOUR {
 namespace Steinberg {
 
 LIBARDOUR_API extern std::string tchar_to_utf8 (Vst::TChar const* s);
+LIBARDOUR_API extern Glib::ustring tchar_to_ustring (Vst::TChar const* s);
 LIBARDOUR_API extern bool utf8_to_tchar (Vst::TChar* rv, const char* s, size_t l = 0);
 LIBARDOUR_API extern bool utf8_to_tchar (Vst::TChar* rv, std::string const& s, size_t l = 0);
 
