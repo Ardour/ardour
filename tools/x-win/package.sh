@@ -240,9 +240,7 @@ if test -n "$PACKAGE_GDB"; then
 	download libwinpthread-1.dll http://ardour.org/files/deps/libwinpthread-1.dll
 fi
 
-if test -n "$PACKAGE_GDB" -a -f ${SRCCACHE}/libwinpthread-1.dll; then
-	cp ${SRCCACHE}/libwinpthread-1.dll $DESTDIR/bin/
-elif test -f /usr/${XPREFIX}/lib/libwinpthread-1.dll; then
+if test -f /usr/${XPREFIX}/lib/libwinpthread-1.dll; then
 	cp /usr/${XPREFIX}/lib/libwinpthread-1.dll $DESTDIR/bin/
 fi
 
@@ -322,6 +320,12 @@ fi
 OUTFILE="${TMPDIR}/${PRODUCT_NAME}-${ARDOURVERSION}${BUILDTYPE}-${WARCH}-Setup.exe"
 
 if test -n "$PACKAGE_GDB"; then
+	# https://gist.github.com/x42/469f412b51294d5123be82f34906ba3f
+	# applied to mingw-w64-12.0.0 to work around thread_local use after free
+	# https://github.com/msys2/MINGW-packages/issues/2519
+	download libwinpthread-1.dll http://ardour.org/files/deps/libwinpthread-1.dll
+	cp ${SRCCACHE}/libwinpthread-1.dll $DESTDIR/bin/
+
 	# re-packaged from https://packages.msys2.org/package/mingw-w64-x86_64-gdb
 	download gdb12-win64.tar.xz http://ardour.org/files/gdb/gdb12-win64.tar.xz
 	cd ${SRCCACHE}
