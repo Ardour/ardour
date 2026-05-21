@@ -340,6 +340,8 @@
   solo meterbridge
 [show-summary]
   summary show
+[show-vertical-summary]
+  vertical summary show
 [slave-timecode-offset]
   timecode synchronization offset
 [subframes-per-frame]

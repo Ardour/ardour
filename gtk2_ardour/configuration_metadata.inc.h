@@ -105,7 +105,7 @@ UIConfiguration::build_metadata ()
 	VAR_META (X_("use-double-click-to-zoom-to-selection"), _("editor"), _("zoom"), _("selection"), _("mouse"), _("click"),  NULL);
 	VAR_META (X_("use-mouse-position-as-zoom-focus-on-scroll"), _("editor"), _("zoom"), _("selection"), _("mouse"), _("wheel"), _("focus"), _("scroll"),  NULL);
 	VAR_META (X_("use-note-bars-for-velocity"), _("midi"), _("velocity"), _("bars"), _("box"),  NULL);
-	VAR_META (X_("use-note-color-for-velocity"), _("midi"), _("velocity"), _("color"),  NULL);
+	VAR_META (X_("default-midi-note-color-mode"), _("midi"), _("velocity"), _("colors"), _("pitches"), _("channels"),  NULL);
 	VAR_META (X_("use-route-color-widely"), _("mixer"), _("colors"), _("faders"),  NULL);
 	VAR_META (X_("use-time-rulers-to-zoom-with-vertical-drag"), _("zoom"), _("drag"), _("mouse"),  NULL);
 	VAR_META (X_("use-tooltips"), _("tooltips"), _("help"), _("popup"), _("information"),  NULL);
@@ -145,6 +145,7 @@ UIConfiguration::build_metadata ()
 	VAR_META (X_("show-region-fades"), _("region"), _("gain"), _("fades"), _("show"), _("hide"), _("fadein"), _("fadeout"),  NULL);
 	VAR_META (X_("show-solo-on-meterbridge"), _("solo"), _("meterbridge"),  NULL);
 	VAR_META (X_("show-summary"), _("summary"), _("show"),  NULL);
+	VAR_META (X_("show-vertical-summary"), _("vertical"), _("summary"), _("show"),  NULL);
 	VAR_META (X_("slave-timecode-offset"), _("timecode"), _("synchronization"), _("offset"),  NULL);
 	VAR_META (X_("subframes-per-frame"), _("timecode"), _("subframes"), _("sync"),  NULL);
 	VAR_META (X_("take-name"), _("take"), _("names"),  NULL);
