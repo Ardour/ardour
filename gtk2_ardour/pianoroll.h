@@ -195,7 +195,7 @@ class Pianoroll : public CueEditor
 
 	bool get_midi_chord (int root_pitch, std::vector<int>& pitches) const;
 
-	void midi_view_selection_changed ();
+	void our_midi_view_selection_changed ();
 	void set_inspector_visibility (bool);
 
   protected:

@@ -37,12 +37,13 @@
 #include "ardour/session.h"
 #include "ardour/vca.h"
 
+#include "actions.h"
+#include "chord_box.h"
 #include "editor.h"
 #include "editor_drag.h"
 #include "editor_routes.h"
 #include "editor_section_box.h"
 #include "editor_sources.h"
-#include "actions.h"
 #include "audio_time_axis.h"
 #include "audio_region_view.h"
 #include "audio_streamview.h"
@@ -54,6 +55,7 @@
 #include "midi_inspector.h"
 #include "midi_region_view.h"
 #include "mixer_strip.h"
+#include "note_base.h"
 #include "pianoroll.h"
 #include "selection_properties_box.h"
 #include "sfdb_ui.h"
@@ -2537,4 +2539,23 @@ Editor::selectable_owners()
 	}
 
 	return sl;
+}
+
+void
+Editor::midi_view_selection_changed (SimpleMidiNoteSelection& selection)
+{
+	if (selection.size() < 2) {
+		_midi_inspector->chord_box->show_chord ("");
+		return;
+	}
+
+	std::vector<int> pitches;
+
+	for (auto const & s : selection) {
+		pitches.push_back (s->note()->note());
+	}
+
+	std::sort (pitches.begin(), pitches.end());
+	std::string name = _midi_inspector->chord_box->identify_chord (pitches);
+	_midi_inspector->chord_box->show_chord (name);
 }

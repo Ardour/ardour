@@ -545,6 +545,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	virtual void add_semitone_interval (int semitones);
 
 	void pianoroll_edit ();
+	virtual void midi_view_selection_changed (SimpleMidiNoteSelection& selection) {}
 
   protected:
 	std::string _name;

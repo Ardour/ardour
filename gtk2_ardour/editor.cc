@@ -5889,3 +5889,4 @@ Editor::toggle_main ()
 	}
 #endif
 }
+

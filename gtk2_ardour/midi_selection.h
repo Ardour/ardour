@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include <set>
+
 #include "region_selection.h"
 
 class MidiRegionView;
@@ -48,3 +50,6 @@ public:
 	}
 };
 
+class NoteBase;
+
+typedef std::set<NoteBase*> SimpleMidiNoteSelection;

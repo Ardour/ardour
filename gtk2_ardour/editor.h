@@ -71,6 +71,7 @@
 #include "editing.h"
 #include "enums.h"
 #include "editor_items.h"
+#include "midi_selection.h"
 #include "region_selection.h"
 #include "selection_memento.h"
 #include "trigger_clip_picker.h"
@@ -1576,6 +1577,7 @@ private:
 	void invert_selected_chord (bool up);
 	void drop_selected_chord (std::vector<int> which_notes);
 	bool get_midi_chord (int root_pitch, std::vector<int>& pitches) const;
+	void midi_view_selection_changed (SimpleMidiNoteSelection& selection);
 
 protected:
 	void _commit_tempo_map_edit (Temporal::TempoMap::WritableSharedPtr&, bool with_update = false);
@@ -2290,6 +2292,8 @@ private:
 
 	MidiInspector* _midi_inspector;
 	ARDOUR::Quantize* get_quantize_op ();
+	void midi_view_selection_changed (SimpleMidiNoteSelection selection);
+	sigc::connection midi_view_selection_connection;
 
 	friend class RegionMoveDrag;
 	friend class TrimDrag;

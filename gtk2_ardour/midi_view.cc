@@ -1043,7 +1043,7 @@ MidiView::add_semitone_interval (int semitones, bool as_subcommand)
 
 	to_be_selected.push_back (new_note->id());
 	select_notes (to_be_selected, false);
-	SelectionChanged (); /* EMIT SIGNAL */
+	selection_changed (); /* EMIT SIGNAL */
 
 	std::vector<std::shared_ptr<NoteType> > snotes;
 	selection_as_notevector (snotes);
@@ -1113,7 +1113,7 @@ MidiView::invert_selected_chord (bool up)
 	selection_as_notevector (notes);
 	start_playing_midi_chord (notes);
 	hide_verbose_cursor ();
-	SelectionChanged ();
+	selection_changed ();
 }
 
 void
@@ -1152,7 +1152,7 @@ MidiView::drop_selected_chord (std::vector<int> const & which_notes)
 	selection_as_notevector (sn);
 	start_playing_midi_chord (sn);
 	hide_verbose_cursor ();
-	SelectionChanged ();
+	selection_changed ();
 }
 
 void
@@ -1197,7 +1197,7 @@ MidiView::replace_chord (std::vector<int> const & intervals)
 	std::vector<std::shared_ptr<NoteType> > notes;
 	selection_as_notevector (notes);
 	start_playing_midi_chord (notes);
-	SelectionChanged ();
+	selection_changed ();
 	hide_verbose_cursor ();
 }
 
@@ -1220,7 +1220,7 @@ MidiView::clear_events ()
 	_patch_changes.clear();
 	_sys_exes.clear();
 	_optimization_iterator = _events.end();
-	SelectionChanged ();
+	selection_changed ();
 }
 
 void
@@ -2671,7 +2671,7 @@ MidiView::note_deleted (NoteBase* cne)
 	}
 
 	_selection.erase (cne);
-	SelectionChanged ();
+	selection_changed ();
 }
 
 void
@@ -2698,7 +2698,7 @@ MidiView::delete_selection()
 	apply_note_diff ();
 
 	hide_verbose_cursor ();
-	SelectionChanged ();
+	selection_changed ();
 }
 
 void
@@ -2709,7 +2709,7 @@ MidiView::delete_note (std::shared_ptr<NoteType> n)
 	apply_note_diff ();
 
 	hide_verbose_cursor ();
-	SelectionChanged ();
+	selection_changed ();
 }
 
 void
@@ -2757,7 +2757,7 @@ MidiView::select_all_notes ()
 		add_to_selection (gui);
 	}
 
-	SelectionChanged ();
+	selection_changed ();
 }
 
 void
@@ -2775,7 +2775,7 @@ MidiView::select_range (timepos_t const & start, timepos_t const & end)
 		}
 	}
 
-	SelectionChanged ();
+	selection_changed ();
 }
 
 void
@@ -2814,7 +2814,7 @@ MidiView::extend_selection ()
 		}
 	}
 
-	SelectionChanged ();
+	selection_changed ();
 }
 
 void
@@ -2829,7 +2829,7 @@ MidiView::invert_selection ()
 		}
 	}
 
-	SelectionChanged ();
+	selection_changed ();
 }
 
 /** Used for selection undo/redo.
@@ -2850,7 +2850,7 @@ MidiView::select_notes (list<Evoral::event_id_t> notes, bool allow_audition)
 			_pending_note_selection.insert(*n);
 		}
 	}
-	SelectionChanged ();
+	selection_changed ();
 }
 
 void
@@ -2890,7 +2890,7 @@ MidiView::select_matching_notes (uint8_t notenum, uint16_t channel_mask, bool ad
 			/* only note previously selected is the one we are
 			 * reselecting. treat this as cancelling the selection.
 			 */
-			SelectionChanged ();
+			selection_changed ();
 			return;
 		}
 	}
@@ -2929,7 +2929,7 @@ MidiView::select_matching_notes (uint8_t notenum, uint16_t channel_mask, bool ad
 		add = true; // we need to add all remaining matching notes, even if the passed in value was false (for "set")
 
 	}
-	SelectionChanged ();
+	selection_changed ();
 }
 
 void
@@ -2957,7 +2957,7 @@ MidiView::toggle_matching_notes (uint8_t notenum, uint16_t channel_mask)
 			}
 		}
 	}
-	SelectionChanged ();
+	selection_changed ();
 }
 
 void
@@ -2970,7 +2970,7 @@ MidiView::note_selected (NoteBase* ev, bool add, bool extend)
 		}
 
 		add_to_selection (ev);
-		SelectionChanged ();
+		selection_changed ();
 		return;
 
 	} else {
@@ -3007,14 +3007,14 @@ MidiView::note_selected (NoteBase* ev, bool add, bool extend)
 		}
 	}
 
-	SelectionChanged ();
+	selection_changed ();
 }
 
 void
 MidiView::note_deselected(NoteBase* ev)
 {
 	remove_from_selection (ev);
-	SelectionChanged ();
+	selection_changed ();
 }
 
 bool
@@ -3055,7 +3055,7 @@ MidiView::update_drag_selection(timepos_t const & start, timepos_t const & end, 
 		}
 	}
 
-	SelectionChanged ();
+	selection_changed ();
 
 	if (!_selection.empty()) {
 		return true;
@@ -3087,7 +3087,7 @@ MidiView::update_vertical_drag_selection (double y1, double y2, bool extend)
 		}
 	}
 
-	SelectionChanged ();
+	selection_changed ();
 }
 
 void
@@ -3215,7 +3215,7 @@ MidiView::move_selection (timecnt_t const & dx_qn, double dy, double cumulative_
 		}
 	}
 
-	SelectionChanged ();
+	selection_changed ();
 
 	if (dy && !_selection.empty() && !_no_sound_notes && UIConfiguration::instance().get_sound_midi_notes()) {
 
@@ -3321,7 +3321,7 @@ MidiView::move_copies (timecnt_t const & dx_qn, double dy, double cumulative_dy)
 		}
 	}
 
-	SelectionChanged ();
+	selection_changed ();
 
 	if (dy && !_copy_drag_events.empty() && !_no_sound_notes && UIConfiguration::instance().get_sound_midi_notes()) {
 
@@ -3485,7 +3485,7 @@ MidiView::note_dropped (NoteBase *, timecnt_t const & d_qn, int8_t dnote, bool c
 	_midi_context.maybe_extend_note_range (lowest_note_in_selection);
 	_midi_context.maybe_extend_note_range (highest_note_in_selection);
 
-	SelectionChanged ();
+	selection_changed ();
 }
 
 /** @param x Pixel relative to the region position.
@@ -4313,7 +4313,7 @@ MidiView::transpose (bool up, bool fine, bool allow_smush)
 		}
 	}
 
-	SelectionChanged ();
+	selection_changed ();
 }
 
 void
@@ -5930,4 +5930,11 @@ MidiView::set_visible_channel (int chn, bool clear_selection)
 	if (clear_selection) {
 		clear_selection_internal ();
 	}
+}
+
+void
+MidiView::selection_changed ()
+{
+	SelectionChanged (); /* EMIT SIGNAL */
+	_editing_context.midi_view_selection_changed (_selection);
 }

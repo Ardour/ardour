@@ -1852,7 +1852,7 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 	set_sensitivities ();
 
 	_active_view->VisibleChannelChanged.connect (view_connections, invalidator (*this), std::bind (&Pianoroll::visible_channel_changed, this), gui_context());
-	selection_connection = _active_view->SelectionChanged.connect ([this]() { midi_view_selection_changed (); });
+	selection_connection = _active_view->SelectionChanged.connect ([this]() { our_midi_view_selection_changed (); });
 
 	set_visible_channel (_active_view->pick_visible_channel());
 
@@ -2980,7 +2980,7 @@ Pianoroll::midiviews_from_region_selection (RegionSelection const &) const
 }
 
 void
-Pianoroll::midi_view_selection_changed ()
+Pianoroll::our_midi_view_selection_changed ()
 {
 	if (!_active_view) {
 		midi_inspector->chord_box->show_chord ("");

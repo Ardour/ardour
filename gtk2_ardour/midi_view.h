@@ -42,6 +42,7 @@
 #include "boundary.h"
 #include "editing.h"
 #include "region_view.h"
+#include "midi_selection.h"
 #include "midi_view_background.h"
 #include "time_axis_view_item.h"
 #include "editor_automation_line.h"
@@ -320,7 +321,7 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	bool maybe_set_note_range (uint8_t low, uint8_t high);
 	virtual void set_visibility_note_range (MidiViewBackground::VisibleNoteRange, bool);
 
-	typedef std::set<NoteBase*> Selection;
+	typedef SimpleMidiNoteSelection Selection;
 	Selection const & selection () const {
 		return _selection;
 	}
@@ -706,5 +707,5 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 
 	void _duplicate_notes (int times);
 	bool chord_is_selected () const;
-
+	void selection_changed ();
 };
