@@ -232,8 +232,17 @@ else
 	cp /usr/lib/gcc/${XPREFIX}/*/libgcc_s_sjlj-1.dll $DESTDIR/bin/
 	cp /usr/lib/gcc/${XPREFIX}/*/libstdc++-6.dll $DESTDIR/bin/
 fi
-#Ubuntu's 14.04's mingw needs this one for the std libs above
-if test -f /usr/${XPREFIX}/lib/libwinpthread-1.dll; then
+
+if test -n "$PACKAGE_GDB"; then
+	# https://gist.github.com/x42/469f412b51294d5123be82f34906ba3f
+	# applied to mingw-w64-12.0.0 to work around thread_local use after free
+	# https://github.com/msys2/MINGW-packages/issues/2519
+	download libwinpthread-1.dll http://ardour.org/files/deps/libwinpthread-1.dll
+fi
+
+if test -n "$PACKAGE_GDB" -a -f ${SRCCACHE}/libwinpthread-1.dll; then
+	cp ${SRCCACHE}/libwinpthread-1.dll $DESTDIR/bin/
+elif test -f /usr/${XPREFIX}/lib/libwinpthread-1.dll; then
 	cp /usr/${XPREFIX}/lib/libwinpthread-1.dll $DESTDIR/bin/
 fi
 
