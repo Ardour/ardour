@@ -4914,7 +4914,7 @@ Session::setup_midi_machine_control ()
 	std::shared_ptr<AsyncMIDIPort> async_in = std::dynamic_pointer_cast<AsyncMIDIPort> (_midi_ports->mmc_input_port());
 	std::shared_ptr<AsyncMIDIPort> async_out = std::dynamic_pointer_cast<AsyncMIDIPort> (_midi_ports->mmc_output_port());
 
-	if (!async_out || !async_out) {
+	if (!async_in || !async_out) {
 		return;
 	}
 
