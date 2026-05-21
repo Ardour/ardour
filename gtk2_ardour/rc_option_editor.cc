@@ -1507,6 +1507,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			active_view.append_column (_("Control Surface"), active_model.name);
 			active_view.get_column(1)->set_resizable (true);
 			active_view.get_column(1)->set_expand (true);
+			active_view.set_headers_visible(false);
 
 			active_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 			active_scroller.set_size_request(-1, 300);
@@ -1547,6 +1548,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 
 			setup_col (append_toggle (devices_model.enabled, devices_model.is_device, toggle), _("Enabled"));
 			devices_view.append_column (_("Control Surface"), devices_model.name);
+			devices_view.set_headers_visible(false);
 
 			devices_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 			devices_scroller.set_size_request(-1, 500);
