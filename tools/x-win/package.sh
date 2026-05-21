@@ -233,13 +233,6 @@ else
 	cp /usr/lib/gcc/${XPREFIX}/*/libstdc++-6.dll $DESTDIR/bin/
 fi
 
-if test -n "$PACKAGE_GDB"; then
-	# https://gist.github.com/x42/469f412b51294d5123be82f34906ba3f
-	# applied to mingw-w64-12.0.0 to work around thread_local use after free
-	# https://github.com/msys2/MINGW-packages/issues/2519
-	download libwinpthread-1.dll http://ardour.org/files/deps/libwinpthread-1.dll
-fi
-
 if test -f /usr/${XPREFIX}/lib/libwinpthread-1.dll; then
 	cp /usr/${XPREFIX}/lib/libwinpthread-1.dll $DESTDIR/bin/
 fi
@@ -320,6 +313,7 @@ fi
 OUTFILE="${TMPDIR}/${PRODUCT_NAME}-${ARDOURVERSION}${BUILDTYPE}-${WARCH}-Setup.exe"
 
 if test -n "$PACKAGE_GDB"; then
+	echo " === bundle gdb + custom libwinpthread-1.dll"
 	# https://gist.github.com/x42/469f412b51294d5123be82f34906ba3f
 	# applied to mingw-w64-12.0.0 to work around thread_local use after free
 	# https://github.com/msys2/MINGW-packages/issues/2519
