@@ -1498,6 +1498,8 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			, _ignore_view_change (0)
 			, _protocol_change (0)
 		{
+			int scale = UIConfiguration::instance ().get_font_scale() / 102400;
+
 			// Active Scroller
 			active_heading.add_to_page (this);
 			active_store = TreeStore::create (active_model);
@@ -1510,7 +1512,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			active_view.set_headers_visible(false);
 
 			active_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-			active_scroller.set_size_request(-1, 300);
+			active_scroller.set_size_request(-1, 100 * scale);
 			active_scroller.add(active_view);
 
 			int n = table.property_n_rows();
@@ -1551,7 +1553,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			devices_view.set_headers_visible(false);
 
 			devices_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-			devices_scroller.set_size_request(-1, 500);
+			devices_scroller.set_size_request(-1, 300 * scale);
 			devices_scroller.add(devices_view);
 
 			n = table.property_n_rows();
