@@ -111,6 +111,7 @@ UIConfiguration::build_metadata ()
 	VAR_META (X_("use-tooltips"), _("tooltips"), _("help"), _("popup"), _("information"),  NULL);
 	VAR_META (X_("use-wm-visibility"), _("quirks"), _("visibility"), _("switch"), _("windows"),  NULL);
 	VAR_META (X_("vertical-region-gap"), _("visual"), _("gap"), _("tracks"), _("spacing"),  NULL);
+	VAR_META (X_("vertical-summary-uses-track-colors"), _("summary"), _("scrollbar"), _("tracks"), _("colors"),  NULL);
 	VAR_META (X_("vkeybd-layout"), _("virtual"), _("keyboard"), _("layout"), _("qwerty"), _("midi"),  NULL);
 	VAR_META (X_("waveform-cache-size"), _("memory"), _("cache"), _("performance"), _("optimization"), _("image"),  NULL);
 	VAR_META (X_("waveform-clip-level"), _("clip"), _("level"), _("dbfs"), _("waveform"), _("peaking"),  NULL);

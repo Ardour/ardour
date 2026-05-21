@@ -257,6 +257,8 @@
   quirks visibility switch windows
 [vertical-region-gap]
   visual gap tracks spacing
+[vertical-summary-uses-track-colors]
+  summary scrollbar tracks colors
 [vkeybd-layout]
   virtual keyboard layout qwerty midi
 [waveform-cache-size]
