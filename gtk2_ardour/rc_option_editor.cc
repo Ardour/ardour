@@ -1548,8 +1548,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 				row[devices_model.enabled] = !row[devices_model.enabled];
 			};
 
-			setup_col (append_toggle (devices_model.enabled, devices_model.is_device, toggle), _("Enabled"));
-			devices_view.append_column (_("Control Surface"), devices_model.name);
+			append_toggle_row (devices_model.enabled, devices_model.is_device, devices_model.name, toggle);
 			devices_view.set_headers_visible(false);
 
 			devices_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
@@ -1590,26 +1589,28 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			active_view.get_selection()->signal_changed().connect (sigc::bind(sigc::mem_fun (*this, &ControlSurfacesOptions::selection_changed), active_edit_button, &active_view, &active_model));
 		}
 
-		void setup_col (Gtk::TreeViewColumn* tvc, const char* label)
+		template <class T, class U, class V>
+		Gtk::TreeViewColumn* append_toggle_row (Gtk::TreeModelColumn<T> const& col_state, Gtk::TreeModelColumn<U> const& col_viz, Gtk::TreeModelColumn<V> const& col_text, sigc::slot<void, std::string> cb)
 		{
-			Gtk::Label* l = manage (new Label (label));
-			tvc->set_widget (*l);
-			l->show ();
-		}
-
-		template <class T, class U>
-		Gtk::TreeViewColumn* append_toggle (Gtk::TreeModelColumn<T> const& col_state, Gtk::TreeModelColumn<U> const& col_viz, sigc::slot<void, std::string> cb)
-		{
-			Gtk::TreeViewColumn* tvc = manage (new Gtk::TreeViewColumn ("", col_state));
+			Gtk::TreeViewColumn* tvc = manage (new Gtk::TreeViewColumn ());
 			tvc->set_resizable (false);
 			tvc->set_expand (false);
+			tvc->set_spacing (8);
 
-			Gtk::CellRendererToggle* tc = dynamic_cast<Gtk::CellRendererToggle*> (tvc->get_first_cell ());
-			tc->property_activatable () = true;
-			tc->property_radio ()       = false;
-			tc->signal_toggled ().connect (cb);
+			Gtk::CellRendererToggle* tgc = manage (new Gtk::CellRendererToggle());
+			tgc->property_activatable () = true;
+			tgc->property_radio ()       = false;
+			tgc->signal_toggled ().connect (cb);
 
-			tvc->add_attribute (tc->property_visible (), col_viz);
+			tvc->pack_start(*tgc, false);
+			tvc->add_attribute (tgc->property_active (), col_state);
+			tvc->add_attribute (tgc->property_visible (), col_viz);
+
+			Gtk::CellRendererText* txc = manage (new Gtk::CellRendererText());
+			txc->property_mode() = Gtk::CELL_RENDERER_MODE_ACTIVATABLE;
+
+			tvc->pack_start(*txc);
+			tvc->add_attribute (txc->property_text (), col_text);
 
 			devices_view.append_column (*tvc);
 			return tvc;
