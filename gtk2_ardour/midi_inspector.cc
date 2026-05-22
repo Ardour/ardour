@@ -19,6 +19,7 @@
 #include <ardour/midi_region.h>
 
 #include "chord_box.h"
+#include "gui_thread.h"
 #include "midi_inspector.h"
 #include "ui_config.h"
 #include "region_editor.h"
@@ -55,10 +56,13 @@ MidiInspector::set_region (Session* s, std::shared_ptr<MidiRegion> mr)
 		if (!region_expander.get_child()) {
 			region_editor = manage (new RegionEditor (s, mr));
 			region_expander.add (*region_editor);
+			mr->DropReferences.connect (region_connection, invalidator (*this), [this]() { set_region (nullptr, nullptr); }, gui_context());
 		}
 	} else if (region_editor) {
-		region_expander.remove (); /* will delete */
+		region_expander.remove ();
+		delete region_editor;
 		region_editor = nullptr;
+		region_connection.disconnect(); /* not strictly necessary */
 	}
 }
 

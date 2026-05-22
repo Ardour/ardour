@@ -47,5 +47,7 @@ class MidiInspector : public Gtk::VBox
 	Gtk::Expander quantize_expander;
 	Gtk::Expander region_expander;
 
+	PBD::ScopedConnection region_connection;
+
 	void on_size_request (Gtk::Requisition*);
 };
