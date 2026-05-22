@@ -32,6 +32,7 @@
 #include "ardour/delivery.h"
 #include "ardour/disk_reader.h"
 #include "ardour/disk_writer.h"
+#include "ardour/file_source.h"
 #include "ardour/midi_playlist.h"
 #include "ardour/midi_region.h"
 #include "ardour/plugin_insert.h"
@@ -501,6 +502,15 @@ Auditioner::play_audition (samplecnt_t nframes)
 		if (_reload_synth) {
 			unload_synth (false);
 		}
+		std::set<std::shared_ptr<Source>> sources;
+		_disk_reader->audio_playlist()->deep_sources (sources);
+		for (auto const& s : sources) {
+			std::shared_ptr<FileSource> fs = std::dynamic_pointer_cast<FileSource> (s);
+			if (fs) {
+				fs->close ();
+			}
+		}
+		_disk_reader->audio_playlist()->drop_regions ();
 		return 0;
 	}
 
