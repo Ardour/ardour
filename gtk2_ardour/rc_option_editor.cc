@@ -1716,7 +1716,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 				}
 			}
 
-			endloop:
+			endloop: {}
 		}
 
 		void selection_changed (Gtk::Button* button, TreeView* view, ControlSurfacesModelColumns* model)
@@ -1767,7 +1767,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 					}
 				}
 
-				endloop:
+				endloop: {}
 			}
 		}
 
