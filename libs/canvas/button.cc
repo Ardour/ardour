@@ -36,7 +36,7 @@ Button::Button (Canvas* canvas, double w, double h, Pango::FontDescription const
 	: Rectangle (canvas)
 	, width (w)
 	, height (h)
-	, margin (2)
+	, padding (2)
 	, _label (new Text (this))
 	, prelight (false)
 	, highlight (false)
@@ -48,7 +48,7 @@ Button::Button (Canvas* canvas, double w, double h, Pango::FontDescription const
 
 Button::Button (Item* parent, double w, double h, Pango::FontDescription const & font_description)
 	: Rectangle (parent)
-	, margin (2)
+	, padding (2)
 	, _label (new Text (this))
 	, prelight (false)
 	, highlight (false)
@@ -61,7 +61,7 @@ Button::Button (Item* parent, double w, double h, Pango::FontDescription const &
 
 Button::Button (Canvas* canvas, std::string const & str, Pango::FontDescription const & font_description)
 	: Rectangle (canvas)
-	, margin (2)
+	, padding (2)
 	, _label (new Text (this))
 	, prelight (false)
 	, highlight (false)
@@ -69,18 +69,13 @@ Button::Button (Canvas* canvas, std::string const & str, Pango::FontDescription 
 {
 	_label->set_font_description (font_description);
 	_label->set (str);
-
-	Rect r = _label->bounding_box();
-
-	width = r.width() + (2 * margin);
-	height = r.height() + (2 * margin);;
 
 	init ();
 }
 
 Button::Button (Item* parent, std::string const & str, Pango::FontDescription const & font_description)
 	: Rectangle (parent)
-	, margin (2)
+	, padding (2)
 	, _label (new Text (this))
 	, prelight (false)
 	, highlight (false)
@@ -88,11 +83,6 @@ Button::Button (Item* parent, std::string const & str, Pango::FontDescription co
 {
 	_label->set_font_description (font_description);
 	_label->set (str);
-
-	Rect r = _label->bounding_box();
-
-	width = r.width() + (2 * margin);
-	height = r.height() + (2 * margin);;
 
 	init ();
 }
@@ -103,10 +93,7 @@ Button::init ()
 	Event.connect (sigc::mem_fun (*this, &Button::event_handler));
 	_label->Event.connect (sigc::mem_fun (*this, &Button::event_handler));
 
-	Rect r = _label->bounding_box ();
-	_label->set_position (Duple ((width - r.width())/2.0, (height - r.height())/2.0));
-
-	set_size_request (width, height);
+	update_size();
 }
 
 void
@@ -136,16 +123,39 @@ Button::set_label (std::string const & str)
 {
 	_label->set (str);
 
+	update_size();
+	redraw ();
+}
+
+void
+Button::set_padding (double p)
+{
+	if (p == padding) {
+		return;
+	}
+
+	padding = p;
+
+	update_size();
+	redraw ();
+}
+
+void
+Button::update_size ()
+{
 	Rect r = _label->bounding_box ();
 
-	/* alter our own size request to fit text + padding */
-	set_size_request (r.width(), r.height());
+	/* Add horizontal padding between the text and the edge of the button
+	 * We don't add vertical adding as the the pango layout already has some
+	 */
+	width = r.width() + (2 * padding);
+	height = r.height();;
 
 	/* move to recenter */
-
 	_label->set_position (Duple ((width - r.width())/2.0, (height - r.height())/2.0));
 
-	redraw ();
+	/* alter our own size request to fit text + padding */
+	set_size_request (width, height);
 }
 
 void
@@ -164,12 +174,12 @@ Button::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 	context->set_operator (OPERATOR_OVER);
 
 	/* basic (rounded) rectangle, with pattern to fill */
-	rounded_rectangle (context, self.x0 + 2.5, self.y0 + 2.5, width - 4, height - 4, CORNER_RADIUS);
+	rounded_rectangle (context, self.x0, self.y0, width , height, CORNER_RADIUS);
 
 	if (highlight) {
 		context->set_operator (Cairo::OPERATOR_OVER);
 		context->set_source_rgba (1.0, 0.0, 0.0, .2);
-		rounded_rectangle (context, self.x0 + 2.5, self.y0 + 2.5, width - 4, height - 4, CORNER_RADIUS);
+		rounded_rectangle (context, self.x0, self.y0, width, height, CORNER_RADIUS);
 		context->fill();
 	}
 
@@ -177,15 +187,13 @@ Button::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		context->set_operator (Cairo::OPERATOR_OVER);
 		color_to_rgba (contrasting_text_color (color.color()), cr, g, b, a);
 		context->set_source_rgba (cr, g, b, 0.1);
-		rounded_rectangle (context, self.x0 + 2.5, self.y0 + 2.5, width - 4, height - 4, CORNER_RADIUS);
+		rounded_rectangle (context, self.x0 + .5, self.y0 + .5, width, height, CORNER_RADIUS);
 		context->fill();
 	}
 
 	context->restore ();
-	context->save ();
-	context->translate (margin, margin);
+
 	_label->render (area, context);
-	context->restore ();
 }
 
 void
