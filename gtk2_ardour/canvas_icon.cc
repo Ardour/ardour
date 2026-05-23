@@ -38,9 +38,10 @@ void
 Icon::render (Rect const & area, Cairo::RefPtr<Cairo::Context> ctxt) const
 {
 	/* no rectangle rendering here */
+	Rect self (item_to_window (_rect));
 	ctxt->save ();
-	ctxt->translate (_position.x, _position.y);
-	ArdourIcon::render (ctxt->cobj(), _icon, _rect.width(), _rect.height(), Gtkmm2ext::Off, _outline_color);
+	ctxt->translate (self.x0, self.y0);
+	ArdourIcon::render (ctxt->cobj(), _icon, self.width(), self.height(), Gtkmm2ext::Off, _outline_color);
 	ctxt->restore ();
 }
 
