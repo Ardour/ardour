@@ -183,6 +183,7 @@ class Pianoroll : public CueEditor
 		void deduce_color (uint32_t nth);
 
 		ArdourCanvas::Rectangle* group;
+		ArdourCanvas::Container* label_group;
 		ArdourCanvas::Text* label;
 		ArdourCanvas::Line* label_separator;
 		ArdourCanvas::Icon* close_x;

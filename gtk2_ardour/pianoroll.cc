@@ -611,18 +611,14 @@ Pianoroll::build_canvas ()
 	prh->ExtendNoteSelection.connect (sigc::mem_fun (*this, &Pianoroll::extend_note_selection));
 	prh->ToggleNoteSelection.connect (sigc::mem_fun (*this, &Pianoroll::toggle_note_selection));
 
-	/* This must be called after prh and bg have had their view set */
-
-	double w, h;
-	prh->size_request (w, h);
-
-	_timeline_origin = w;
-
-	prh->set_position (Duple (0., n_timebars * timebar_height));
-	no_scroll_group->set_position (ArdourCanvas::Duple (_timeline_origin, timebar_height * n_timebars));
-	cursor_scroll_group->set_position (ArdourCanvas::Duple (_timeline_origin, 0));
-	h_scroll_group->set_position (Duple (_timeline_origin, 0.));
-	hv_scroll_group->set_position (Duple (_timeline_origin, timebar_height * n_timebars));
+	/* Position groups vertically (horizontal position will depend
+	 * on the presence of automation lanes
+	 */
+	prh->set_y_position (n_timebars * timebar_height);
+	no_scroll_group->set_y_position (timebar_height * n_timebars);
+	cursor_scroll_group->set_y_position (0);
+	h_scroll_group->set_y_position (0.);
+	hv_scroll_group->set_y_position (timebar_height * n_timebars);
 
 	_verbose_cursor.reset (new VerboseCursor (*this));
 
@@ -841,10 +837,27 @@ Pianoroll::canvas_enter_leave (GdkEventCrossing* ev)
 void
 Pianoroll::partition_height ()
 {
+	/* XXX: partition_height() does a little more than it's name suggest,
+	 * 		it could be worth splitting or renaming it.
+	 */
+
 	double timebars = n_timebars * timebar_height;
 	double data_height = _visible_canvas_height - timebars;
 	double note_area_height = automation_lanes.empty() ? data_height : floor (2 * data_height / 3.);
 	double automation_height = floor (data_height - note_area_height);
+
+	/* We need a wide scroomer if there are any automation lanes shown
+	 * otherthise there won't be enough space for lane labels
+	 */
+	prh->set_force_show_scroomer (!automation_lanes.empty());
+
+	_track_canvas_width = _visible_canvas_width - prh->x1();
+	_timeline_origin = prh->x1();
+
+	h_scroll_group->set_x_position (_timeline_origin);
+	hv_scroll_group->set_x_position (_timeline_origin);
+	no_scroll_group->set_x_position (_timeline_origin);
+	cursor_scroll_group->set_x_position (_timeline_origin);
 
 	bg->set_size (_visible_canvas_width, note_area_height);
 	prh->set (ArdourCanvas::Rect (0, 0, prh->x1(), note_area_height));
@@ -862,16 +875,7 @@ Pianoroll::partition_height ()
 	for (auto & [param, lane] : automation_lanes) {
 		lane->group->set_position (ArdourCanvas::Duple (0., ay));
 		lane->group->set (ArdourCanvas::Rect (0., 0., ArdourCanvas::COORD_MAX, per_lane));
-		lane->label_separator->set (ArdourCanvas::Duple (0., ay + timebars), ArdourCanvas::Duple (prh->x1(), ay + timebars));
-		/* FIXME: y-coordinates for label, close_x and clear_button don't
-		 *        take timebars into account, this will break if more timebars
-		 *        are shown.
-		 */
-		lane->close_x->set_position (ArdourCanvas::Duple (4, ay + 30));
-		lane->label->set_position (ArdourCanvas::Duple (20, ay + 30));
-		if (lane->clear_button) {
-			lane->clear_button->set_position (ArdourCanvas::Duple (prh->get().width() - (lane->clear_button->size().x + 4), ay + 25));
-		}
+		lane->label_group->set_position (ArdourCanvas::Duple (0., ay + timebars));
 		ay += per_lane;
 	}
 
@@ -905,17 +909,7 @@ Pianoroll::canvas_allocate (Gtk::Allocation alloc)
 	_visible_canvas_width = alloc.get_width();
 	_visible_canvas_height = alloc.get_height();
 
-	double timebars = n_timebars * timebar_height;
-
-	_track_canvas_width = _visible_canvas_width - prh->x1();
-	_timeline_origin = prh->x1();
-
 	partition_height ();
-
-	no_scroll_group->set_position (ArdourCanvas::Duple (_timeline_origin, timebars));
-	cursor_scroll_group->set_position (ArdourCanvas::Duple (_timeline_origin, 0.));
-	h_scroll_group->set_position (Duple (_timeline_origin, 0.));
-	hv_scroll_group->set_position (Duple (_timeline_origin, timebars));
 
 	if (!xcursor) {
 		xcursor = new CrossCursor (_canvas.root());
@@ -2036,10 +2030,11 @@ Pianoroll::apply_note_range (uint8_t lowest, uint8_t highest)
 
 Pianoroll::AutomationLane::AutomationLane (Evoral::Parameter const & param, Pianoroll const & pr, ArdourCanvas::Item* parent, uint32_t nth)
 	: group (new ArdourCanvas::Rectangle (parent))
-	, label (new ArdourCanvas::Text (parent->canvas()->root()))
-	, label_separator (new ArdourCanvas::Line (parent->canvas()->root()))
-	, close_x (new ArdourCanvas::Icon (parent->canvas()->root(), ArdourWidgets::ArdourIcon::CloseCross))
-	, clear_button ((param.type() == MidiVelocityAutomation) ? nullptr : new ArdourCanvas::Button (parent->canvas()->root(), _("Clear"), UIConfiguration::instance().get_SmallFont()))
+	, label_group (new ArdourCanvas::Container (parent->canvas()->root()))
+	, label (new ArdourCanvas::Text (label_group))
+	, label_separator (new ArdourCanvas::Line (label_group))
+	, close_x (new ArdourCanvas::Icon (label_group, ArdourWidgets::ArdourIcon::CloseCross))
+	, clear_button ((param.type() == MidiVelocityAutomation) ? nullptr : new ArdourCanvas::Button (label_group, _("Clear"), UIConfiguration::instance().get_SmallFont()))
 {
 	group->set_outline_what(ArdourCanvas::Rectangle::TOP);
 	group->set_outline_color(UIConfiguration::instance().color ("track separator"));
@@ -2049,25 +2044,30 @@ Pianoroll::AutomationLane::AutomationLane (Evoral::Parameter const & param, Pian
 	label->set_color (UIConfiguration::instance().color (X_("gtk_foreground")));
 	label->set_font_description (UIConfiguration::instance().get_SmallFont());
 
-	label_separator->set_outline_color(UIConfiguration::instance().color ("track separator"));
+	double scale = UIConfiguration::instance().get_ui_scale();
+	int spacing = 4 * scale;
+	int close_x_size = label->height();
 
-	close_x->set (ArdourCanvas::Rect (0, 0, 12, 12));
+	label->set_position (ArdourCanvas::Duple (spacing * 2 + close_x_size, spacing));
+
+	label_separator->set_outline_color(UIConfiguration::instance().color ("track separator"));
+	label_separator->set (ArdourCanvas::Duple (0., 0.), ArdourCanvas::Duple (pr.prh->x1(), 0.));
+
+	close_x->set (ArdourCanvas::Rect (spacing, spacing, spacing + close_x_size, spacing + close_x_size));
 	close_x->set_outline_color (UIConfiguration::instance().color (X_("gtk_foreground")));
 
 	if (clear_button) {
 		clear_button->text()->set_color (UIConfiguration::instance().color (X_("gtk_foreground")));
 		clear_button->set_highlight (true);
-		clear_button->set_size (clear_button->text()->width() + 8, clear_button->text()->height() + 8);
+		clear_button->set_padding (2 * scale);
+		clear_button->set_position (ArdourCanvas::Duple (pr.prh->get().width() - (clear_button->size().x + spacing), spacing));
 	}
 }
 
 Pianoroll::AutomationLane::~AutomationLane ()
 {
 	delete group;
-	delete label;
-	delete close_x;
-	delete clear_button;
-	delete label_separator;
+	delete label_group;
 }
 
 void
@@ -2135,6 +2135,9 @@ Pianoroll::add_automation_lane (Evoral::Parameter const & param)
 	if (automation_lanes.find (param) != automation_lanes.end()) {
 		return;
 	}
+
+	/* make sure the lane"s content will be laid out according to the scroomer size */
+	prh->set_force_show_scroomer(true);
 
 	AutomationLane* lane = new AutomationLane (param, *this, data_group, automation_lanes.size());;
 	lane->group->Event.connect ([this,param](GdkEvent* event) { return automation_group_event (event, param); });
