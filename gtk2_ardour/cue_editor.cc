@@ -55,7 +55,7 @@ CueEditor::CueEditor (std::string const & name, bool with_transport)
 	, length_label (_("Record:"))
 	, solo_button (S_("Solo|S"))
 	, zoom_in_allocate (false)
-	, timebar_height (15.)
+	, timebar_height (std::max (13., ceil (17. * UIConfiguration::instance().get_ui_scale())))
 	, n_timebars (0)
 	, _scroll_drag (false)
 {
