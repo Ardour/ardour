@@ -45,10 +45,14 @@ class PianoRollHeader : public ArdourCanvas::Rectangle, public PianoRollHeaderBa
 
 	void render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
 
+	void set_force_show_scroomer (bool s);
 
  private:
 	PBD::ScopedConnection height_connection;
 	bool event_handler (GdkEvent*);
+
+	bool _force_show_scroomer;
+	bool show_scroomer () const;
 };
 
 }

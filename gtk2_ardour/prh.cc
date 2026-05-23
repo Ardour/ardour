@@ -53,6 +53,7 @@ namespace ArdourCanvas {
 PianoRollHeader::PianoRollHeader (Item* parent, MidiViewBackground& bg)
 	: Rectangle (parent)
 	, PianoRollHeaderBase (bg)
+	, _force_show_scroomer (false)
 {
 	Event.connect (sigc::mem_fun (*this, &PianoRollHeader::event_handler));
 
@@ -210,5 +211,19 @@ PianoRollHeader::midi_track()
 	return _midi_context.midi_track();
 }
 
+bool
+PianoRollHeader::show_scroomer () const
+{
+	return _force_show_scroomer || PianoRollHeaderBase::show_scroomer ();
+}
+
+void
+PianoRollHeader::set_force_show_scroomer (bool s)
+{
+	if (s != _force_show_scroomer) {
+		_force_show_scroomer = s;
+		resize ();
+	}
+}
 
 } // namespace
