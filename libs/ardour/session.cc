@@ -1000,6 +1000,8 @@ Session::setup_click_state (const XMLNode* node)
 
 	if (node && (child = find_named_node (*node, "Click")) != 0) {
 
+		_click_io->disconnect ();
+
 		/* existing state for Click */
 		int c = 0;
 
