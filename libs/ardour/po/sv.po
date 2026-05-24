@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: ardour\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-12-20 11:15+0100\n"
-"PO-Revision-Date: 2026-01-16 20:48+0100\n"
+"PO-Revision-Date: 2026-05-24 11:30+0200\n"
 "Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
 "Language-Team: Swedish <sv@li.org>\n"
 "Language: sv\n"
@@ -359,7 +359,7 @@ msgstr "kan inte ladda automatiseringsdata från %2"
 
 #: automatable.cc:196 delivery.cc:213 session.cc:976
 msgid "Fader"
-msgstr "Volymreglage"
+msgstr "Fader"
 
 #: automatable.cc:198 automatable.cc:200
 msgid "Send"
@@ -518,7 +518,7 @@ msgstr "okänd"
 
 #: delivery.cc:145
 msgid "main outs"
-msgstr "huvudsakliga utgifter"
+msgstr "huvudutgångar"
 
 #: delivery.cc:148 send.cc:80
 msgid "listen"
@@ -1004,11 +1004,11 @@ msgstr "Laddar konfiguration"
 
 #: globals.cc:769 route.cc:229 session.cc:1153
 msgid "Monitor"
-msgstr "Övervaka"
+msgstr "Monitor"
 
 #: globals.cc:770 session.cc:1612
 msgid "Master"
-msgstr "Säkerhetsansvarig"
+msgstr "Master"
 
 #: globals.cc:771 session.cc:1517 surround_send.cc:38 surround_send.cc:51
 msgid "Surround"
@@ -1028,7 +1028,7 @@ msgstr "FaderPort Recv"
 
 #: globals.cc:784
 msgid "FaderPort Send"
-msgstr "FaderPort Skicka"
+msgstr "FaderPort Send"
 
 #: globals.cc:785
 msgid "FaderPort2 Recv"
@@ -1036,7 +1036,7 @@ msgstr "FaderPort2 Recv"
 
 #: globals.cc:786
 msgid "FaderPort2 Send"
-msgstr "FaderPort2 Skicka"
+msgstr "FaderPort2 Send"
 
 #: globals.cc:787
 msgid "FaderPort8 Recv"
@@ -1044,7 +1044,7 @@ msgstr "FaderPort8 Recv"
 
 #: globals.cc:788
 msgid "FaderPort8 Send"
-msgstr "FaderPort8 Skicka"
+msgstr "FaderPort8 Send"
 
 #: globals.cc:789
 msgid "FaderPort16 Recv"
@@ -1052,7 +1052,7 @@ msgstr "FaderPort16 Recv"
 
 #: globals.cc:790
 msgid "FaderPort16 Send"
-msgstr "FaderPort16 Skicka"
+msgstr "FaderPort16 Send"
 
 #: globals.cc:791
 msgid "Console1 Recv"
@@ -1549,7 +1549,7 @@ msgstr ""
 
 #: operations.cc:41
 msgid "capture"
-msgstr "fånga"
+msgstr "inspelning"
 
 #: operations.cc:42
 msgid "paste"
@@ -3186,11 +3186,11 @@ msgstr "Det går inte att byta namn på sessionen under inspelning"
 
 #: session_state.cc:5007 session_state.cc:5047
 msgid "renaming %s as %2 failed (%3)"
-msgstr "omdöpning av %s till %2 failed (%3)"
+msgstr "namnbyte av %s till %2 misslyckades (%3)"
 
 #: session_state.cc:5061 session_state.cc:5073
 msgid "renaming %1 as %2 failed (%3)"
-msgstr "byter namn på %1 till %2 failed (%3)"
+msgstr "namnbyte av %1 till %2 misslyckades (%3)"
 
 #: session_state.cc:5463
 msgid "Cannot create new session folder %1"
@@ -3465,7 +3465,7 @@ msgstr "AudioDiskstream: kunde inte skapa region för inspelat ljud!"
 
 #: transport_master.cc:394 transport_master.cc:395
 msgid "Construction of transport master object of type %1 failed"
-msgstr "Byggnation av transportmasterobjekt av typ %1 failed"
+msgstr "Skapande av transportmasterobjekt av typen %1 misslyckades"
 
 #: transport_master.cc:419 transport_master.cc:452
 msgid "SyncSource|JACK"
@@ -3477,7 +3477,7 @@ msgstr "SyncSource|MTC"
 
 #: transport_master.cc:436
 msgid "SyncSource|M-Clk"
-msgstr "Synkroniseringskälla|M-Clk"
+msgstr "SyncSource|M-Clk"
 
 #: transport_master.cc:446
 msgid "SyncSource|LTC"
@@ -3493,7 +3493,7 @@ msgstr "Hastighet"
 
 #: transport_master.cc:483
 msgid "Locate"
-msgstr "Leta upp"
+msgstr "Positionera"
 
 #: transport_master.cc:485
 msgid "Complex"
@@ -3505,7 +3505,7 @@ msgstr "programmeringsfel:%1"
 
 #: transport_master_manager.cc:356
 msgid "Transport master adjusted framerate from %1 to %2."
-msgstr "Transportmästaren justerade bildfrekvensen från %1 till %2."
+msgstr "Transportmastern justerade bildfrekvensen från %1 till %2."
 
 #: transport_master_manager.cc:405
 msgid "There is already a transport master named \"%1\" - not duplicated"
@@ -3683,7 +3683,7 @@ msgstr "VCA %1 : %2"
 
 #: vca.cc:220
 msgid "Master assignment ignored to prevent recursion"
-msgstr "Huvuduppgift ignorerad för att förhindra rekursion"
+msgstr "Mastertilldelning ignorerad för att förhindra rekursion"
 
 #: vca_manager.cc:207
 msgid "Cannot set state of a VCA"
@@ -3916,7 +3916,7 @@ msgstr "ardour-avahi-verktyget hittades inte."
 #~ msgstr "Pannbar status hittad för rutt (%1) utan panner!"
 
 #~ msgid "Amp/Fader on Route '%1' went AWOL. Re-added."
-#~ msgstr "Amp/Fader på rutt '%1' försvann. Tillagd igen."
+#~ msgstr "Amp/Fader på signalvägen '%1' försvann. Tillagd igen."
 
 #~ msgid "lo"
 #~ msgstr "lo"
@@ -3986,7 +3986,7 @@ msgstr "ardour-avahi-verktyget hittades inte."
 #~ msgstr "Kan inte förbereda transport för export"
 
 #~ msgid "Session: cannot create Route from XML description."
-#~ msgstr "Session: kan inte skapa rutt från XML-beskrivning."
+#~ msgstr "Session: kan inte skapa signalväg från XML-beskrivning."
 
 #~ msgid "WAV"
 #~ msgstr "WAV"
