@@ -305,7 +305,7 @@ MidiViewBackground::apply_note_range (uint8_t lowest, uint8_t highest, bool to_c
 	{
 		/* if data range is smaller than one octave and close to an edge,
 		 * displaying ContentsRange is not strictly possible, but we want
-		 * to store ContentsRange because it's a close as it can get
+		 * to store ContentsRange because it's as close as it can get
 		 */
 		_visibility_note_range = ContentsRange;
 	} else {
