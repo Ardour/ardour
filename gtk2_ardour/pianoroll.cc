@@ -844,7 +844,7 @@ Pianoroll::partition_height ()
 	double timebars = n_timebars * timebar_height;
 	double data_height = _visible_canvas_height - timebars;
 	double note_area_height = automation_lanes.empty() ? data_height : floor (2 * data_height / 3.);
-	double automation_height = floor (data_height - note_area_height);
+	double automation_height = data_height - note_area_height;
 
 	/* We need a wide scroomer if there are any automation lanes shown
 	 * otherthise there won't be enough space for lane labels
@@ -870,7 +870,7 @@ Pianoroll::partition_height ()
 	}
 
 	double ay = note_area_height;
-	double per_lane = floor (automation_height / automation_lanes.size());
+	double per_lane = automation_height / automation_lanes.size();
 
 	for (auto & [param, lane] : automation_lanes) {
 		lane->group->set_position (ArdourCanvas::Duple (0., ay));
