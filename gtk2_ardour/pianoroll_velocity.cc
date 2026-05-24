@@ -47,7 +47,7 @@ PianorollVelocityDisplay::set_height (double h)
 void
 PianorollVelocityDisplay::set_colors ()
 {
-	base.set_fill_color (UIConfiguration::instance().color_mod ("ghost track base", "ghost track midi fill"));
+	/* don't set base colors & outline here, Pianoroll::AutomationLane handles that part */
 
 	for (auto & gev : events) {
 		gev.second->item->set_fill_color (gev.second->event->base_color());

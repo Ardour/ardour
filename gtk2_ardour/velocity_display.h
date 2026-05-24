@@ -63,7 +63,7 @@ class VelocityDisplay : virtual public sigc::trackable
 	void note_selected (NoteBase*);
 	void clear ();
 
-	void set_colors ();
+	virtual void set_colors ();
 	void drag_lolli (ArdourCanvas::Lollipop* l, GdkEventMotion* ev);
 
 	int y_position_to_velocity (double y) const;
