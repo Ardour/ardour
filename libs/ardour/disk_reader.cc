@@ -220,7 +220,7 @@ DiskReader::midi_chase (samplepos_t spos)
 		return;
 	}
 
-	_locate_tracker.reset ();
+	clear_midi_chase ();
 
 	if (rtmb) {
 		for (size_t n = 0; n < rtmb->size(); ++n) {
