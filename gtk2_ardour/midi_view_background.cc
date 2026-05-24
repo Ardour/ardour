@@ -225,15 +225,14 @@ void
 MidiViewBackground::set_note_visibility_range_style (VisibleNoteRange r)
 {
 	if (r == UserRange) {
-		_visibility_note_range = UserRange;
+		/* do nothing, _visibility_note_range is set in apply_note_range,
+		 * this avoids setting it to UserRange range when the actual range
+		 * is ContentsRange or FullRange
+		 */
 	} else if (r == ContentsRange) {
-		if (apply_note_range (_data_note_min, _data_note_max, true)) {
-			_visibility_note_range = ContentsRange;
-		}
+		apply_note_range (_data_note_min, _data_note_max, true);
 	} else {
-		if (apply_note_range (0, 127, true)) {
-			_visibility_note_range = FullRange;
-		}
+		apply_note_range (0, 127, true);
 	}
 }
 
@@ -294,6 +293,23 @@ MidiViewBackground::apply_note_range (uint8_t lowest, uint8_t highest, bool to_c
 	if (_lowest_note != lowest) {
 		changed = true;
 		_lowest_note = lowest;
+	}
+
+	if (_lowest_note == 0 && _highest_note == 127) {
+		_visibility_note_range = FullRange;
+	} else if (_lowest_note == _data_note_min && _highest_note == _data_note_max) {
+		_visibility_note_range = ContentsRange;
+	} else if ( (_highest_note == 127 || _lowest_note == 0) &&
+				 _data_note_max - _data_note_min < 11 &&
+	             _lowest_note <= _data_note_min && _highest_note >= _data_note_max )
+	{
+		/* if data range is smaller than one octave and close to an edge,
+		 * displaying ContentsRange is not strictly possible, but we want
+		 * to store ContentsRange because it's a close as it can get
+		 */
+		_visibility_note_range = ContentsRange;
+	} else {
+		_visibility_note_range = UserRange;
 	}
 
 	if (contents_height() == 0) {

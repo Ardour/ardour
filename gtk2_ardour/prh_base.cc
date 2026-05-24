@@ -630,9 +630,6 @@ void
 PianoRollHeaderBase::end_scroomer_drag ()
 {
 	_scroomer_drag = false;
-	if (scroomer_did_drag) {
-		_midi_context.set_note_visibility_range_style (MidiViewBackground::UserRange);
-	}
 	scroomer_did_drag = false;
 }
 
@@ -648,7 +645,7 @@ PianoRollHeaderBase::button_press_handler (GdkEventButton* ev)
 		/* button press on scroomer handler */
 
 		if (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS) {
-			if (_midi_context.visibility_range_style () == MidiViewBackground::FullRange) {
+			if (_midi_context.visibility_range_style () != MidiViewBackground::ContentsRange) {
 				_midi_context.set_note_visibility_range_style (MidiViewBackground::ContentsRange);
 			} else {
 				_midi_context.set_note_visibility_range_style (MidiViewBackground::FullRange);
