@@ -1427,98 +1427,6 @@ protected:
 	virtual void port_changed () = 0;
 };
 
-class LTCPortSelectOption : public PortSelectOption
-{
-public:
-	LTCPortSelectOption (RCConfiguration* c, SessionHandlePtr* shp)
-		: PortSelectOption (c, shp,
-		                       _("The LTC generator output will be auto-connected to this port when a session is loaded."),
-		                       X_("ltc-output-port"),
-		                       _("LTC Output Port:"),
-		                       ARDOUR::DataType::AUDIO,
-		                       ARDOUR::PortFlags (ARDOUR::IsInput|ARDOUR::IsTerminal)) {
-		/* cannot call from parent due to the method being pure virtual */
-		update_port_combo ();
-	}
-
-	void port_changed ()
-	{
-		if (_ignore_change) {
-			return;
-		}
-		TreeModel::iterator active = _combo.get_active ();
-		string new_port = (*active)[_port_columns.full_name];
-		_rc_config->set_ltc_output_port (new_port);
-
-		if (!_shp->session()) {
-			return;
-		}
-		std::shared_ptr<Port> ltc_port = _shp->session()->ltc_output_port ();
-		if (!ltc_port) {
-			return;
-		}
-		if (ltc_port->connected_to (new_port)) {
-			return;
-		}
-
-		ltc_port->disconnect_all ();
-		if (!new_port.empty()) {
-			ltc_port->connect (new_port);
-		}
-	}
-
-	void update_selection ()
-	{
-		int n;
-		Gtk::TreeModel::Children children = _store->children();
-		Gtk::TreeModel::Children::iterator i = children.begin();
-		++i; /* skip "Disconnected" */
-
-		std::string const& pn = _rc_config->get_ltc_output_port ();
-		std::shared_ptr<Port> ltc_port;
-		if (_shp->session()) {
-			ltc_port = _shp->session()->ltc_output_port ();
-		}
-
-		PBD::Unwinder<bool> uw (_ignore_change, true);
-
-		/* try match preference with available port-names */
-		for (n = 1;  i != children.end(); ++i, ++n) {
-			string port_name = (*i)[_port_columns.full_name];
-			if (port_name == pn) {
-				_combo.set_active (n);
-				return;
-			}
-		}
-
-		/* Set preference to current port connection
-		 * (LTC is auto-connected at session load).
-		 */
-		if (ltc_port) {
-			i = children.begin();
-			++i; /* skip "Disconnected" */
-			for (n = 1;  i != children.end(); ++i, ++n) {
-				string port_name = (*i)[_port_columns.full_name];
-				if (ltc_port->connected_to (port_name)) {
-					_combo.set_active (n);
-					return;
-				}
-			}
-		}
-
-		if (pn.empty ()) {
-			_combo.set_active (0); /* disconnected */
-		} else {
-			/* The port is currently not available, retain preference */
-			TreeModel::Row row = *_store->append ();
-			row[_port_columns.full_name] = pn;
-			row[_port_columns.short_name] = (pn).substr ((pn).find (':') + 1);
-			_combo.set_active (n);
-		}
-	}
-
-};
-
 class TriggerPortSelectOption : public PortSelectOption
 {
 public:
@@ -4011,8 +3919,6 @@ These settings will only take effect after %1 is restarted.\n\
 		 _("Specify the Peak Volume of the generated LTC signal in dBFS. A good value is  0dBu ^= -18dBFS in an EBU calibrated system"));
 
 	add_option (_("Transport/Generate"), _ltc_volume_slider);
-
-	add_option (_("Transport/Generate"), new LTCPortSelectOption (_rc_config, this));
 
 	add_option (_("Transport/Generate"), new OptionEditorHeading (_("MIDI Time Code (MTC) Generator")));
 
