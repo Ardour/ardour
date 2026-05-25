@@ -305,7 +305,7 @@
         <menuitem action='marker-click-locate'/>
         <menuitem action='marker-click-locate-when-stopped'/>
       </menu>
-      <menuitem action='cycle-snap-mode'/>
+      <menuitem action='EditorEditing/cycle-snap-mode'/>
       <menu name='GridChoice' action='GridChoice'>
         <menu name='GlobalQuantize' action='GlobalQuantize'>
           <menuitem action='set-global-quantization-1-bar'/>
@@ -317,36 +317,36 @@
           <menuitem action='set-global-quantization-onetwentyeighth-note'/>
         </menu>
         <separator/>
-        <menuitem action='prev-grid-choice'/>
-        <menuitem action='next-grid-choice'/>
+        <menuitem action='EditorEditing/prev-grid-choice'/>
+        <menuitem action='EditorEditing/next-grid-choice'/>
         <separator/>
-        <menuitem action='grid-type-none'/>
-        <menuitem action='grid-type-bar'/>
-        <menuitem action='grid-type-beat'/>
-        <menuitem action='grid-type-halves'/>
-        <menuitem action='grid-type-quarters'/>
-        <menuitem action='grid-type-eighths'/>
-        <menuitem action='grid-type-asixteenthbeat'/>
-        <menuitem action='grid-type-thirtyseconds'/>
+        <menuitem action='EditorEditing/grid-type-none'/>
+        <menuitem action='EditorEditing/grid-type-bar'/>
+        <menuitem action='EditorEditing/grid-type-beat'/>
+        <menuitem action='EditorEditing/grid-type-halves'/>
+        <menuitem action='EditorEditing/grid-type-quarters'/>
+        <menuitem action='EditorEditing/grid-type-eighths'/>
+        <menuitem action='EditorEditing/grid-type-asixteenthbeat'/>
+        <menuitem action='EditorEditing/grid-type-thirtyseconds'/>
         <menu action='GridChoiceTriplets'>
-          <menuitem action='grid-type-thirds'/>
-          <menuitem action='grid-type-sixths'/>
-          <menuitem action='grid-type-twelfths'/>
-          <menuitem action='grid-type-twentyfourths'/>
+          <menuitem action='EditorEditing/grid-type-thirds'/>
+          <menuitem action='EditorEditing/grid-type-sixths'/>
+          <menuitem action='EditorEditing/grid-type-twelfths'/>
+          <menuitem action='EditorEditing/grid-type-twentyfourths'/>
         </menu>
         <menu action='GridChoiceQuintuplets'>
-          <menuitem action='grid-type-fifths'/>
-          <menuitem action='grid-type-tenths'/>
-          <menuitem action='grid-type-twentieths'/>
+          <menuitem action='EditorEditing/grid-type-fifths'/>
+          <menuitem action='EditorEditing/grid-type-tenths'/>
+          <menuitem action='EditorEditing/grid-type-twentieths'/>
         </menu>
         <menu action='GridChoiceSeptuplets'>
-          <menuitem action='grid-type-sevenths'/>
-          <menuitem action='grid-type-fourteenths'/>
-          <menuitem action='grid-type-twentyeighths'/>
+          <menuitem action='EditorEditing/grid-type-sevenths'/>
+          <menuitem action='EditorEditing/grid-type-fourteenths'/>
+          <menuitem action='EditorEditing/grid-type-twentyeighths'/>
         </menu>
-        <menuitem action='grid-type-timecode'/>
-        <menuitem action='grid-type-minsec'/>
-        <menuitem action='grid-type-cdframe'/>
+        <menuitem action='EditorEditing/grid-type-timecode'/>
+        <menuitem action='EditorEditing/grid-type-minsec'/>
+        <menuitem action='EditorEditing/grid-type-cdframe'/>
       </menu>
       <separator/>
       <menu action="TempoMenu">
