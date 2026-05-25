@@ -154,6 +154,8 @@ public:
 	int set_state_2X (const XMLNode&, int, bool);
 	static void prepare_for_reset (XMLNode&, const std::string&);
 
+	void set_port_state (const XMLNode&, int version);
+
 	/* We'd like this to use bool, but there are unexplained issues using
 	 * bool with a PBD::StackAllocator. They may arise from stdlib's
 	 * specialiation of std::list<bool> and/or std::vector<bool>.

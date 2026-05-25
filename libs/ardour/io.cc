@@ -609,13 +609,18 @@ IO::set_state (const XMLNode& node, int version)
 		return set_port_state_2X (node, version, false);
 	}
 
-	XMLProperty const * prop;
+	set_port_state (node, version);
+	return 0;
+}
 
+void
+IO::set_port_state (const XMLNode& node, int version)
+{
 	for (XMLNodeConstIterator i = node.children().begin(); i != node.children().end(); ++i) {
 
 		if ((*i)->name() == "Port") {
 
-			prop = (*i)->property (X_("name"));
+			XMLProperty const * prop = (*i)->property (X_("name"));
 
 			if (!prop) {
 				continue;
@@ -635,9 +640,8 @@ IO::set_state (const XMLNode& node, int version)
 			}
 		}
 	}
-
-	return 0;
 }
+
 
 int
 IO::set_state_2X (const XMLNode& node, int version, bool in)
