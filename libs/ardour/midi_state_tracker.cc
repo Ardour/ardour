@@ -224,12 +224,20 @@ MidiStateTracker::reset ()
 {
 	const size_t n_channels = 16;
 	const size_t n_controls = 127;
+	const size_t n_keys = 127;
 
 	MidiNoteTracker::reset ();
 
 	for (size_t n = 0; n < n_channels; ++n) {
 		program[n] = 0x80;
 		bender[n] = 0x8000;
+		pressure[n] = 0x80;
+	}
+
+	for (size_t chn = 0; chn < n_channels; ++chn) {
+		for (size_t k = 0; k < n_keys; ++k) {
+			poly_pressure[chn][k] = 0x80;
+		}
 	}
 
 	for (size_t chn = 0; chn < n_channels; ++chn) {
@@ -307,6 +315,7 @@ MidiStateTracker::track (const uint8_t* evbuf)
 		break;
 
 	case MIDI_CMD_NOTE_PRESSURE:
+		poly_pressure[chan][evbuf[1] & 0x7f] = evbuf[2];
 		break;
 
 	case MIDI_CMD_BENDER:
@@ -325,11 +334,16 @@ MidiStateTracker::track (const uint8_t* evbuf)
 void
 MidiStateTracker::flush (MidiBuffer& dst, samplepos_t time, bool reset)
 {
+	flush_notes (dst, time, reset);
+	flush_non_notes (dst, time, reset);
+}
+
+void
+MidiStateTracker::flush_non_notes (MidiBuffer& dst, samplepos_t time, bool reset)
+{
 	uint8_t buf[3];
 	const size_t n_channels = 16;
 	const size_t n_controls = 127;
-
-	flush_notes (dst, time, reset);
 
 	for (size_t chn = 0; chn < n_channels; ++chn) {
 		for (size_t ctl = 0; ctl < n_controls; ++ctl) {
@@ -353,8 +367,24 @@ MidiStateTracker::flush (MidiBuffer& dst, samplepos_t time, bool reset)
 			}
 		}
 
-		/* XXX bender */
-		/* XXX pressure */
+		if ((bender[chn] & 0x8000) == 0) {
+			buf[0] = MIDI_CMD_BENDER|chn;
+			buf[1] = bender[chn] & 0x7f;
+			buf[2] = (bender[chn] >> 7) & 0x7f;
+			dst.write (time, Evoral::MIDI_EVENT, 3, buf);
+			if (reset) {
+				bender[chn] = 0x8000;
+			}
+		}
+
+		if ((pressure[chn] & 0x80) == 0) {
+			buf[0] = MIDI_CMD_CHANNEL_PRESSURE;
+			buf[1] = pressure[chn] & 0x7f;
+			dst.write (time, Evoral::MIDI_EVENT, 2, buf);
+			if (reset) {
+				pressure[chn] = 0x80;
+			}
+		}
 	}
 }
 
@@ -458,6 +488,18 @@ MidiStateTracker::resolve_state (Evoral::EventSink<samplepos_t>& dst, Evoral::Ev
 			}
 		}
 
+		for (int k = 0; k < 127; ++k) {
+			if ((poly_pressure[chn][k] & 0x80)) {
+				buf[0] = MIDI_CMD_NOTE_PRESSURE | chn;
+				buf[1] = k;
+				buf[2] = poly_pressure[chn][k];
+				dst.write (time, Evoral::MIDI_EVENT, 3, buf);
+			}
+			if (reset) {
+				poly_pressure[chn][k] = 0x80;
+			}
+		}
+
 		/* If the program was modified, replay the most recent event found in evlist before *time*.
 		 *
 		 *    Layer 1: [P1....]         [.......]
@@ -541,6 +583,15 @@ MidiStateTracker::resolve_diff (MidiStateTracker const & other, Evoral::EventSin
 			buf[0] = MIDI_CMD_CHANNEL_PRESSURE | channel;
 			buf[1] = other.pressure[channel];;
 			dst.write (0, Evoral::MIDI_EVENT, 2, buf);
+		}
+
+		for (int i = 0; i < 127; ++i) {
+			if (poly_pressure[channel][i] != other.poly_pressure[channel][i]) {
+				buf[0] = MIDI_CMD_NOTE_PRESSURE | channel;
+				buf[1] = i;
+				buf[2] = other.poly_pressure[channel][i];
+				dst.write (0, Evoral::MIDI_EVENT, 3, buf);
+			}
 		}
 
 		if (bender[channel] != other.bender[channel]) {
