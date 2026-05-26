@@ -92,6 +92,7 @@ MidiTrack::MidiTrack (Session& sess, string name, TrackMode mode)
 	, _restore_pgm_on_load (true)
 	, _last_seen_external_midi_note (-1)
 	, _chase_notes (true)
+	, _key_enforcement_policy (KeyEnforcementPolicy (0))
 {
 	_session.SessionLoaded.connect_same_thread (*this, std::bind (&MidiTrack::restore_controls, this));
 
@@ -1063,3 +1064,17 @@ MidiTrack::note_on_handler (int notenum)
 {
 	_last_seen_external_midi_note = notenum;
 }
+
+KeyEnforcementPolicy
+MidiTrack::key_enforcment_policy () const
+{
+	return _key_enforcement_policy;
+}
+
+void
+MidiTrack::set_key_enforcement_policy (KeyEnforcementPolicy kep)
+{
+	_key_enforcement_policy = kep;
+	/* XXX do more ? */
+}
+
