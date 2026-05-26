@@ -121,6 +121,7 @@ protected:
 	void start_step_editing ();
 	void stop_step_editing ();
 	void processors_changed (ARDOUR::RouteProcessorChange);
+	void route_property_changed (PBD::PropertyChange const &);
 
 private:
 	void _midnam_channel_changed();
