@@ -467,6 +467,7 @@ MidiTrack::non_realtime_locate (samplepos_t spos)
 	}
 
 	if (_chase_notes && Config->get_midi_chase()) {
+		/* Get the locate tracker up to date for this position */
 		_disk_reader->midi_chase (spos);
 	}
 
