@@ -1808,6 +1808,16 @@ MidiTimeAxisView::get_regions_with_selected_data (RegionSelection& rs)
 }
 
 void
+MidiTimeAxisView::route_property_changed (PBD::PropertyChange const & pc)
+{
+	RouteTimeAxisView::route_property_changed (pc);
+
+	if (pc.contains (Properties::musical_mode)) {
+		_view->redisplay_track ();
+	}
+}
+
+void
 MidiTimeAxisView::create_velocity_automation_child (Evoral::Parameter const &, bool show)
 {
 	std::shared_ptr<AutomationControl> c = midi_track()->velocity_control();
@@ -1858,4 +1868,3 @@ MidiTimeAxisView::exited ()
 	TimeAxisView::exited();
 	_editor.disable_midi_bindings ();
 }
-
