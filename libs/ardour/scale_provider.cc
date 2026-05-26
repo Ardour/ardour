@@ -39,6 +39,9 @@ ScaleProvider::ScaleProvider (ScaleProvider* parent)
 	: _parent (parent)
 	, _key (nullptr)
 {
+	if (parent) {
+		parent->PropertyChanged.connect_same_thread (parent_connection, [this] (PBD::PropertyChange const & pc) { parent_prop_change (pc); });
+	}
 }
 
 ScaleProvider::~ScaleProvider ()
@@ -47,10 +50,17 @@ ScaleProvider::~ScaleProvider ()
 }
 
 void
+ScaleProvider::parent_prop_change (PBD::PropertyChange const & pc)
+{
+	send_change (pc);
+}
+
+void
 ScaleProvider::set_key (MusicalKey const & k)
 {
 	delete _key;
 	_key = new MusicalKey (k);
+	send_change (Properties::musical_mode);
 }
 
 MusicalKey const *

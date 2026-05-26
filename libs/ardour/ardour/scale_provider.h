@@ -51,9 +51,12 @@ class LIBARDOUR_API ScaleProvider : public virtual PBD::Stateful {
 	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 
+	void parent_prop_change (PBD::PropertyChange const &);
+
   private:
 	ScaleProvider* _parent;
 	MusicalKey const * _key;
+	PBD::ScopedConnection parent_connection;
 };
 
 } // namespace
