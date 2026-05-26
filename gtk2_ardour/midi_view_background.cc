@@ -25,6 +25,8 @@
 #include "canvas/debug.h"
 #include "canvas/rect_set.h"
 
+#include "ardour/midi_track.h"
+
 #include "keyboard.h"
 #include "midi_view_background.h"
 #include "ui_config.h"
@@ -165,6 +167,7 @@ MidiViewBackground::setup_note_lines()
 
 	Gtkmm2ext::Color black = UIConfiguration::instance().color_mod ("piano roll black", "piano roll black");
 	Gtkmm2ext::Color white = UIConfiguration::instance().color_mod ("piano roll white", "piano roll white");
+	Gtkmm2ext::Color offkey = UIConfiguration::instance().color_mod ("piano roll offkey", "piano roll offkey");
 	Gtkmm2ext::Color divider = UIConfiguration::instance().color ("piano roll black outline");
 	Gtkmm2ext::Color color;
 
@@ -181,6 +184,8 @@ MidiViewBackground::setup_note_lines()
 
 	double h = note_height();
 	double y;
+	std::shared_ptr<ARDOUR::MidiTrack> mt (midi_track());
+	ARDOUR::MusicalKey const * key = mt->key();
 
 	for (int i = highest_note(); i >= lowest_note(); i--) {
 
@@ -199,7 +204,11 @@ MidiViewBackground::setup_note_lines()
 		case 6:
 		case 8:
 		case 10:
-			color = black;
+			if (key && key->in_key (i)) {
+				color = black;
+			} else {
+				color = offkey;
+			}
 			break;
 		case 4:
 		case 11:
@@ -207,7 +216,11 @@ MidiViewBackground::setup_note_lines()
 			_note_lines->add_rect (i, ArdourCanvas::Rect (0., y, ArdourCanvas::COORD_MAX, y + 1.), divider);
 			/* fallthrough */
 		default:
-			color = white;
+			if (key && key->in_key (i)) {
+				color = white;
+			} else {
+				color = offkey;
+			}
 			break;
 		}
 
@@ -274,7 +287,7 @@ MidiViewBackground::apply_note_range (uint8_t lowest, uint8_t highest, bool to_c
 	}
 
 	/* Apply maximum note height setting */
-	
+
 	bool extend_top = true;
 	int max_note_height = UIConfiguration::instance().get_max_note_height() * UIConfiguration::instance().get_ui_scale();
 	while (contents_height() / (highest - lowest) > max_note_height) {
