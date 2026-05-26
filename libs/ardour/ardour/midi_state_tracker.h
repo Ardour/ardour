@@ -124,6 +124,7 @@ class LIBARDOUR_API MidiStateTracker : public MidiNoteTracker
 	void reset ();
 
 	void flush (MidiBuffer&, samplepos_t, bool reset);
+	void flush_non_notes (MidiBuffer& buffer, samplepos_t time, bool reset = true);
 	void resolve_state (Evoral::EventSink<samplepos_t>&, Evoral::EventList<samplepos_t> const&, samplepos_t time, bool reset = true);
 	void resolve_diff (MidiStateTracker const& other, Evoral::EventSink<samplepos_t>&, samplepos_t time, bool reset = true);
 
@@ -131,6 +132,7 @@ class LIBARDOUR_API MidiStateTracker : public MidiNoteTracker
 	uint8_t  program[16];
 	uint16_t bender[16];
 	uint16_t pressure[16];
+	uint16_t poly_pressure[16][127];
 	uint8_t  control[16][127];
 };
 
