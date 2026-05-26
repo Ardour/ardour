@@ -87,7 +87,6 @@ CONFIG_VARIABLE (int, mtc_qf_speed_tolerance, "mtc-qf-speed-tolerance", 5)
 CONFIG_VARIABLE (bool, timecode_sync_frame_rate, "timecode-sync-frame-rate", true)
 CONFIG_VARIABLE (bool, send_ltc, "send-ltc", false)
 CONFIG_VARIABLE (bool, ltc_send_continuously, "ltc-send-continuously", true)
-CONFIG_VARIABLE (std::string, ltc_output_port, "ltc-output-port", "")
 CONFIG_VARIABLE (float, ltc_output_volume, "ltc-output-volume", 0.125893)
 
 /* control surfaces */
@@ -201,8 +200,6 @@ CONFIG_VARIABLE (MeterType, meter_type_bus, "meter-type-bus", MeterPeak)
 
 CONFIG_VARIABLE (bool, try_autostart_engine, "try-autostart-engine", true)
 CONFIG_VARIABLE (bool, hide_dummy_backend, "hide-dummy-backend", true)
-CONFIG_VARIABLE (std::string, auditioner_output_left, "auditioner-output-left", "default")
-CONFIG_VARIABLE (std::string, auditioner_output_right, "auditioner-output-right", "default")
 CONFIG_VARIABLE (bool, replicate_missing_region_channels, "replicate-missing-region-channels", true)
 CONFIG_VARIABLE (bool, hiding_groups_deactivates_groups, "deprecated-hiding-groups-deactivates-groups", false)  /*deprecated*/
 CONFIG_VARIABLE (bool, group_override_inverts, "group-override-inverts", true)
