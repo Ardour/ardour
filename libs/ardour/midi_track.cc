@@ -479,10 +479,10 @@ MidiTrack::non_realtime_locate (samplepos_t spos)
 	/* Update track controllers based on its "automation". */
 	const timepos_t pos_beats = timepos_t (region->source_position().distance (pos).beats ()); /* relative to source start */
 
-	for (Controls::const_iterator c = _controls.begin(); c != _controls.end(); ++c) {
+	for (auto const & [parameter,control] : _controls) {
 
-		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (c->second);
-		std::shared_ptr<MidiTrack::MidiControl> tcontrol (std::dynamic_pointer_cast<MidiTrack::MidiControl>(c->second));
+		std::shared_ptr<MidiTrack::MidiControl> midi_control (std::dynamic_pointer_cast<MidiTrack::MidiControl>(control));
+		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (control);
 
 		/* MidiTrack::MidiControl has no automation list, which will
 		 * make AutomationControl::automation_playback() always return
@@ -495,15 +495,18 @@ MidiTrack::non_realtime_locate (samplepos_t spos)
 		 * it. Otherwise, proceed.
 		 */
 
-		if (!tcontrol && !ac->automation_playback()) {
+		if (!midi_control && !ac->automation_playback()) {
 			continue;
 		}
 
 		std::shared_ptr<Evoral::Control> rcontrol;
 
-		if (tcontrol && (rcontrol = region->control (tcontrol->parameter()))) {
+		if (midi_control && (rcontrol = region->control (midi_control->parameter()))) {
 			if (rcontrol->list()->size() > 0) {
-				tcontrol->set_value(rcontrol->list()->eval(pos_beats), Controllable::NoGroup);
+				/* this both sets the AutomationControl value
+				 * and* sends a MIDI message.
+				 */
+				midi_control->set_value (rcontrol->list()->eval (pos_beats), Controllable::NoGroup);
 			}
 		}
 	}
