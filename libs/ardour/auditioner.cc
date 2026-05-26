@@ -514,6 +514,7 @@ Auditioner::play_audition (samplecnt_t nframes)
 			}
 		}
 		_disk_reader->audio_playlist()->drop_regions ();
+		the_region.reset ();
 		return 0;
 	}
 
