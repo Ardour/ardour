@@ -709,6 +709,8 @@ public:
 	void add_instant_xml (XMLNode&, bool write_to_config = true);
 	XMLNode* instant_xml (const std::string& str);
 
+	XMLNode* misc_port_state () { return _misc_port_state; };
+
 	enum StateOfTheState {
 		Clean = 0x0,
 		Dirty = 0x1,
@@ -1360,6 +1362,7 @@ public:
 	void reconnect_mmc_ports (bool);
 
 	void reconnect_ltc_output ();
+	void reconnect_click_output ();
 
 	VCAManager& vca_manager() { return *_vca_manager; }
 	VCAManager* vca_manager_ptr() { return _vca_manager; }
@@ -1655,6 +1658,12 @@ private:
 	int        load_options (const XMLNode&);
 	int        load_state (std::string snapshot_name, bool from_template = false);
 	static int parse_stateful_loading_version (const std::string&);
+
+	bool load_misc_port_state ();
+	bool save_misc_port_state () const;
+	void update_misc_port_state (IOChange);
+
+	XMLNode*    _misc_port_state;
 
 	samplepos_t _last_roll_location;
 	/** the session sample time at which we last rolled, located, or changed transport direction */
@@ -2205,7 +2214,7 @@ private:
 	samplecnt_t                   click_emphasis_length;
 	mutable PBD::RWLock          _click_lock;
 	samplecnt_t                  _click_io_latency;
-	PBD::ScopedConnection        _click_io_connection;
+	PBD::ScopedConnectionList    _click_io_connections;
 	Temporal::GridIterator       _click_iterator;
 
 	static const Sample     default_click[];

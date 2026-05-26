@@ -103,6 +103,7 @@
 #include "ardour/directory_names.h"
 #include "ardour/disk_reader.h"
 #include "ardour/filename_extensions.h"
+#include "ardour/filesystem_paths.h"
 #include "ardour/graph.h"
 #include "ardour/io_plug.h"
 #include "ardour/location.h"
@@ -950,6 +951,10 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 		remove_pending_capture_state ();
 	}
 
+	if (!pending && !for_archive && ! template_only) {
+		save_misc_port_state ();
+	}
+
 	return 0;
 }
 
@@ -1108,6 +1113,62 @@ Session::get_template ()
 	disable_record (false);
 
 	return state (true, NormalSave);
+}
+
+bool
+Session::load_misc_port_state ()
+{
+	const std::string rcfile = Glib::build_filename (user_config_directory(), "session_port.rc");
+	XMLTree tree;
+	if (!tree.read (rcfile)) {
+		return false;
+	}
+
+	if (tree.root()->name() != X_("SessionPorts")) {
+		return false;
+	}
+
+	delete _misc_port_state;
+	_misc_port_state = new XMLNode (*tree.root());
+
+	return true;
+}
+
+bool
+Session::save_misc_port_state () const
+{
+	const std::string rcfile = Glib::build_filename (user_config_directory(), "session_port.rc");
+	XMLTree tree;
+	XMLNode* root = _misc_port_state ? _misc_port_state : new XMLNode(X_("SessionPorts"));
+
+	if (_click_io) {
+		root->remove_nodes ("Click");
+		XMLNode* node = root->add_child ("Click");
+		node->add_child_nocopy (_click_io->get_state ());
+		node->add_child_nocopy (_click_gain->get_state ());
+	}
+
+	if (auditioner) {
+		auditioner->update_misc_port_state (*root);
+	}
+
+	if (_ltc_output_port) {
+		root->remove_nodes ("LTC");
+		XMLNode* node = root->add_child ("LTC");
+		node->add_child_nocopy (_ltc_output_port->get_state ());
+	}
+
+	tree.set_root (root);
+	bool ok = tree.write (rcfile.c_str());
+
+	if (!ok) {
+		error << string_compose (_("port connections could not be saved to %1"), rcfile) << endmsg;
+	}
+
+	/* retain _misc_port_state */
+	tree.set_root (0);
+
+	return ok;
 }
 
 typedef std::set<std::shared_ptr<Source> > SourceSet;
@@ -1864,12 +1925,6 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 		child->add_child_nocopy (rg->get_state());
 	}
 
-	if (_click_io) {
-		XMLNode* gain_child = node->add_child ("Click");
-		gain_child->add_child_nocopy (_click_io->get_state ());
-		gain_child->add_child_nocopy (_click_gain->get_state ());
-	}
-
 	node->add_child_nocopy (_speakers->get_state());
 	node->add_child_nocopy (TempoMap::fetch()->get_state());
 	node->add_child_nocopy (get_control_protocol_state());
@@ -2385,11 +2440,15 @@ Session::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	if ((child = find_named_node (node, "Click")) == 0) {
+#if 0
+	if (_misc_port_state)  {
+		/* already done in Session::immediately_post_engine */
+	} else if ((child = find_named_node (node, "Click")) == 0) {
 		warning << _("Session: XML state has no 'Click' section") << endmsg;
 	} else if (_click_io) {
 		setup_click_state (&node);
 	}
+#endif
 
 	if ((child = find_named_node (node, ControlProtocolManager::state_node_name)) != 0) {
 		ControlProtocolManager::instance().set_state (*child, 1 /* here: session-specific state */);
@@ -4811,8 +4870,6 @@ Session::config_changed (std::string p, bool ours)
 		_solo_cut_control->Changed (true, Controllable::NoGroup);
 	} else if (p == "timecode-offset" || p == "timecode-offset-negative") {
 		last_timecode_valid = false;
-	} else if (p == "ltc-sink-port") {
-		reconnect_ltc_output ();
 	} else if (p == "timecode-generator-offset") {
 		ltc_tx_parse_offset();
 	} else if (p == "auto-return-target-list") {

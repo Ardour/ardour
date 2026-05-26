@@ -68,6 +68,8 @@ public:
 
 	bool needs_monitor() const { return via_monitor; }
 
+	void update_misc_port_state (XMLNode&);
+
 	virtual ChanCount input_streams () const;
 
 	PBD::Signal<void(ARDOUR::samplecnt_t, ARDOUR::samplecnt_t)> AuditionProgress;

@@ -257,6 +257,7 @@ Session::Session (AudioEngine &eng,
 	, _save_queued (false)
 	, _save_queued_pending (false)
 	, _no_save_signal (false)
+	, _misc_port_state (nullptr)
 	, _last_roll_location (0)
 	, _last_roll_or_reversal_location (0)
 	, _last_record_location (0)
@@ -401,6 +402,8 @@ Session::Session (AudioEngine &eng,
 		destroy ();
 		throw SessionException (_("Session initialization failed because Audio/MIDI engine is not running."));
 	}
+
+	load_misc_port_state ();
 
 	immediately_post_engine ();
 
@@ -704,7 +707,7 @@ Session::destroy ()
 
 	/* remove I/O objects that we (the session) own */
 	_click_io.reset ();
-	_click_io_connection.disconnect ();
+	_click_io_connections.drop_connections ();
 
 	{
 		PBD::Mutex::Lock lm (controllables_lock);
@@ -721,6 +724,9 @@ Session::destroy ()
 	/* clear state tree so that no references to objects are held any more */
 
 	delete _engine_state;
+
+	delete _misc_port_state;
+	_misc_port_state = 0;
 
 	delete state_tree;
 	state_tree = 0;
@@ -965,11 +971,25 @@ void
 Session::setup_ltc ()
 {
 	_ltc_output_port = AudioEngine::instance()->register_output_port (DataType::AUDIO, X_("LTC-Out"), false, TransportGenerator);
+	reconnect_ltc_output ();
+	_ltc_output_port->ConnectedOrDisconnected.connect_same_thread (*this, std::bind (&Session::update_misc_port_state, this, IOChange (IOChange::ConnectionsChanged)));
+}
 
-	{
-		PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+void
+Session::reconnect_ltc_output ()
+{
+	if (!_ltc_output_port) {
+		return;
+	}
+	XMLNode* n = _misc_port_state ? _misc_port_state->child ("LTC") : 0;
+	XMLNode* p = n ? n->child ("Port") : 0;
+	if (p) {
+		PBD::Unwinder uw (_reconnecting_routes_in_progress, true);
+		_ltc_output_port->disconnect_all ();
+		_ltc_output_port->set_state (*p, CURRENT_SESSION_FILE_VERSION);
 		/* TODO use auto-connect thread */
-		reconnect_ltc_output ();
+		PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		_ltc_output_port->reconnect ();
 	}
 }
 
@@ -984,68 +1004,85 @@ Session::setup_click ()
 	_click_io.reset (new ClickIO (*this, X_("Click")));
 	_click_gain.reset (new Amp (*this, _("Fader"), gain_control, true));
 	_click_gain->activate ();
-	if (state_tree) {
-		setup_click_state (state_tree->root());
+
+	_click_io->add_port ("", DataType::AUDIO);
+
+	reconnect_click_output ();
+
+	click_io_resync_latency (true);
+
+	_click_io->changed.connect_same_thread (_click_io_connections, std::bind (&Session::update_misc_port_state, this, _1)); 
+	LatencyUpdated.connect_same_thread (_click_io_connections, std::bind (&Session::click_io_resync_latency, this, _1));
+}
+
+void
+Session::reconnect_click_output ()
+{
+	PBD::Unwinder uw (_reconnecting_routes_in_progress, true);
+	if (_misc_port_state) {
+		setup_click_state (_misc_port_state);
 	} else {
 		setup_click_state (0);
 	}
-	click_io_resync_latency (true);
-	LatencyUpdated.connect_same_thread (_click_io_connection, std::bind (&Session::click_io_resync_latency, this, _1));
 }
 
 void
 Session::setup_click_state (const XMLNode* node)
 {
-	const XMLNode* child = 0;
+	_click_io->disconnect ();
 
-	if (node && (child = find_named_node (*node, "Click")) != 0) {
+	const XMLNode* click = node ? find_named_node (*node, "Click") : 0;
 
-		_click_io->disconnect ();
-
-		/* existing state for Click */
-		int c = 0;
-
-		if (Stateful::loading_state_version < 3000) {
-			c = _click_io->set_state_2X (*child->children().front(), Stateful::loading_state_version, false);
-		} else {
-			const XMLNodeList& children (child->children());
-			XMLNodeList::const_iterator i = children.begin();
-			if ((c = _click_io->set_state (**i, Stateful::loading_state_version)) == 0) {
-				++i;
-				if (i != children.end()) {
-					c = _click_gain->set_state (**i, Stateful::loading_state_version);
-				}
-			}
+	if (click && Stateful::loading_state_version >= 3000) {
+		const XMLNode* io = click->child ("IO");
+		if (io) {
+			_click_io->set_port_state (*io, Stateful::loading_state_version);
 		}
-
-		if (c == 0) {
-			_clicking = Config->get_clicking ();
-
-		} else {
-
-			error << _("could not setup Click I/O") << endmsg;
-			_clicking = false;
+		const XMLNode* proc = click->child ("Processor");
+		if (proc) {
+			_click_gain->set_state (*proc, Stateful::loading_state_version);
 		}
+	}
 
-
-	} else {
-
-		/* default state for Click: dual-mono to first 2 physical outputs */
-
+	if (!click || Stateful::loading_state_version < 3000 || !_click_io->connected ()) {
+		/* connect to first two physical outputs */
 		vector<string> outs;
 		_engine.get_physical_outputs (DataType::AUDIO, outs);
-
-		for (uint32_t physport = 0; physport < 2; ++physport) {
-			if (outs.size() > physport) {
-				if (_click_io->add_port (outs[physport])) {
-					// relax, even though its an error
-				}
-			}
+		for (uint32_t physport = 0; physport < std::min<uint32_t> (2, outs.size()); ++physport) {
+			_click_io->connect (_click_io->nth (0), outs[physport]);
 		}
+	}
 
-		if (_click_io->n_ports () > ChanCount::ZERO) {
-			_clicking = Config->get_clicking ();
-		}
+	_clicking = Config->get_clicking ();
+}
+
+void
+Session::update_misc_port_state (IOChange change)
+{
+	if (!_misc_port_state) {
+		return;
+	}
+	if (0 == (change.type & IOChange::ConnectionsChanged)) {
+		return;
+	}
+	if (inital_connect_or_deletion_in_progress ()) {
+		return;
+	}
+	if (reconnection_in_progress ()) {
+		return;
+	}
+
+	if (_click_io) {
+		_misc_port_state->remove_nodes ("Click");
+		XMLNode* node = _misc_port_state->add_child ("Click");
+		node->add_child_nocopy (_click_io->get_state ());
+		node->add_child_nocopy (_click_gain->get_state ());
+	}
+
+	if (_ltc_output_port) {
+		_misc_port_state->remove_nodes ("LTC");
+		XMLNode* node = _misc_port_state->add_child ("LTC");
+		node->add_child_nocopy (_ltc_output_port->get_state ());
 	}
 }
 
@@ -7673,20 +7710,6 @@ std::shared_ptr<PBD::Controllable>
 Session::recently_touched_controllable () const
 {
 	return _recently_touched_controllable.lock ();
-}
-
-void
-Session::reconnect_ltc_output ()
-{
-	if (_ltc_output_port) {
-		string src = Config->get_ltc_output_port();
-
-		_ltc_output_port->disconnect_all ();
-
-		if (src != _("None") && !src.empty())  {
-			_ltc_output_port->connect (src);
-		}
-	}
 }
 
 void

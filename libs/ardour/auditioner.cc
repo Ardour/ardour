@@ -186,78 +186,81 @@ Auditioner::unload_synth (bool need_lock)
 int
 Auditioner::connect ()
 {
-	string left = Config->get_auditioner_output_left();
-	string right = Config->get_auditioner_output_right();
+	XMLNode const* mns = _session.misc_port_state () ? _session.misc_port_state ()->child ("Auditioner") : 0;
+	XMLNode const* node = 0;
 
+	string left;
+	string right;
 	vector<string> outputs;
-	_session.engine().get_physical_outputs (DataType::AUDIO, outputs);
 
-	via_monitor = false;
-
-	if (left.empty() || left == "default") {
-		if (_session.monitor_out() && _session.monitor_out()->input()->audio (0)) {
-			left = _session.monitor_out()->input()->audio (0)->name();
-		} else {
-			if (outputs.size() > 0) {
-				left = outputs[0];
-			}
-		}
-	}
-
-	if (right.empty() || right == "default") {
-		if (_session.monitor_out() && _session.monitor_out()->input()->audio (1)) {
-			right = _session.monitor_out()->input()->audio (1)->name();
-		} else {
-			if (outputs.size() > 1) {
-				right = outputs[1];
-			}
-		}
+	if (mns) {
+		node = _session.monitor_out() ? mns->child ("Monitor") : mns->child ("DirectOut");
 	}
 
 	_output->disconnect ();
 
-	if (left.empty() && right.empty()) {
-		if (_output->n_ports().n_audio() == 0) {
-			/* ports not set up, so must be during startup */
-			warning << _("no outputs available for auditioner - manual connection required") << endmsg;
+	if (node) {
+		_output->set_port_state (*node, CURRENT_SESSION_FILE_VERSION);
+	}
+
+	if (_output->connected ()) {
+		goto already_connected;
+	}
+
+	_session.engine().get_physical_outputs (DataType::AUDIO, outputs);
+
+	if (_session.monitor_out() && _session.monitor_out()->input()->audio (0)) {
+		left = _session.monitor_out()->input()->audio (0)->name();
+	} else {
+		if (outputs.size() > 0) {
+			left = outputs[0];
 		}
+	}
+
+	if (_session.monitor_out() && _session.monitor_out()->input()->audio (1)) {
+		right = _session.monitor_out()->input()->audio (1)->name();
+	} else {
+		if (outputs.size() > 1) {
+			right = outputs[1];
+		}
+	}
+
+	if (_output->n_ports().n_audio() == 0) {
+
+		/* create (and connect) new ports */
+		_main_outs->defer_pan_reset ();
+
+		if (left.length()) {
+			_output->add_port (left, DataType::AUDIO);
+		}
+
+		if (right.length()) {
+			_output->add_port (right, DataType::AUDIO);
+		}
+
+		_main_outs->allow_pan_reset ();
+		_main_outs->reset_panner ();
+
 	} else {
 
-		if (_output->n_ports().n_audio() == 0) {
+		/* reconnect existing ports */
 
-			/* create (and connect) new ports */
-
-			_main_outs->defer_pan_reset ();
-
-			if (left.length()) {
-				_output->add_port (left, DataType::AUDIO);
-			}
-
-			if (right.length()) {
-				_output->add_port (right, DataType::AUDIO);
-			}
-
-			_main_outs->allow_pan_reset ();
-			_main_outs->reset_panner ();
-
-		} else {
-
-			/* reconnect existing ports */
-
-			std::shared_ptr<Port> oleft (_output->nth (0));
-			std::shared_ptr<Port> oright (_output->nth (1));
-			if (oleft) {
-				oleft->connect (left);
-			}
-			if (oright) {
-				oright->connect (right);
-			}
+		std::shared_ptr<Port> oleft (_output->nth (0));
+		std::shared_ptr<Port> oright (_output->nth (1));
+		if (oleft) {
+			oleft->connect (left);
 		}
-
+		if (oright) {
+			oright->connect (right);
+		}
 	}
+
+already_connected:
 
 	if (_session.monitor_out () && _output->connected_to (_session.monitor_out ()->input())) {
 		via_monitor = true;
+	} else {
+		via_monitor = false;
 	}
 
 	return 0;
@@ -646,45 +649,8 @@ Auditioner::output_changed (IOChange change)
 	if (_session.reconnection_in_progress ()) {
 		return;
 	}
-
-	string phys;
-	vector<string> connections;
-	vector<string> outputs;
-	_session.engine().get_physical_outputs (DataType::AUDIO, outputs);
-
-	if (_session.monitor_out () && _output->connected_to (_session.monitor_out ()->input ())) {
-		Config->set_auditioner_output_left ("default");
-		Config->set_auditioner_output_right ("default");
-		via_monitor = true;
-		return;
-	}
-
-	if (_output->nth (0)->get_connections (connections)) {
-		if (outputs.size() > 0) {
-			phys = outputs[0];
-		}
-		if (phys != connections[0]) {
-			Config->set_auditioner_output_left (connections[0]);
-		} else {
-			Config->set_auditioner_output_left ("default");
-		}
-	} else {
-		Config->set_auditioner_output_left ("");
-	}
-
-	connections.clear ();
-
-	if (_output->nth (1)->get_connections (connections)) {
-		if (outputs.size() > 1) {
-			phys = outputs[1];
-		}
-		if (phys != connections[0]) {
-			Config->set_auditioner_output_right (connections[0]);
-		} else {
-			Config->set_auditioner_output_right ("default");
-		}
-	} else {
-		Config->set_auditioner_output_right ("");
+	if (_session.misc_port_state ()) {
+		update_misc_port_state (*_session.misc_port_state ());
 	}
 }
 
@@ -710,4 +676,22 @@ MonitorState
 Auditioner::monitoring_state () const
 {
 	return MonitoringDisk;
+}
+
+void
+Auditioner::update_misc_port_state (XMLNode& root) {
+	XMLNode* node = root.child ("Auditioner");
+	if (!node) {
+		node = root.add_child ("Auditioner");
+	}
+
+	XMLNode* anode;
+	if (_session.monitor_out ()) {
+		node->remove_nodes ("Monitor");
+		anode = node->add_child ("Monitor");
+	} else {
+		node->remove_nodes ("DirectOut");
+		anode = node->add_child ("DirectOut");
+	}
+	anode->add_child_nocopy (_output->get_state ());
 }
