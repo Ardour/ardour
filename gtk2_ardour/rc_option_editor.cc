@@ -1518,24 +1518,14 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			int n = table.property_n_rows();
 			table.attach (active_scroller, 0, 3, n, n + 1);
 
-			// Edit Box
-			Gtk::HBox* edit_box = manage (new Gtk::HBox);
-			edit_box->set_spacing(3);
-			edit_box->show ();
-
-			Label* label = manage (new Label);
-			label->set_text (_("Edit the settings for selected protocol (it must be ENABLED first):"));
-			edit_box->pack_start (*label, false, false);
-			label->show ();
-
-			active_edit_button = manage (new Button(_("Show Protocol Settings")));
+			// Edit Button
+			active_edit_button = manage (new Button(_("Show Selected Protocol Settings")));
 			active_edit_button->signal_clicked().connect (sigc::bind(sigc::mem_fun(*this, &ControlSurfacesOptions::edit_btn_clicked), &active_view, &active_model));
-			edit_box->pack_start (*active_edit_button, true, true);
 			active_edit_button->set_sensitive (false);
 			active_edit_button->show ();
 
 			n = table.property_n_rows();
-			table.attach (*edit_box, 0, 3, n + 2, n + 3);
+			table.attach (*active_edit_button, 0, 1, n + 2, n + 3, FILL);
 
 			// Devices Scroller
 			devices_heading.add_to_page (this);
@@ -1558,32 +1548,12 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			n = table.property_n_rows();
 			table.attach (devices_scroller, 0, 3, n + 1, n + 2);
 
-			// Edit Box
-			edit_box = manage (new Gtk::HBox);
-			edit_box->set_spacing(3);
-			edit_box->show ();
-
-			label = manage (new Label);
-			label->set_text (_("Edit the settings for selected protocol (it must be ENABLED first):"));
-			edit_box->pack_start (*label, false, false);
-			label->show ();
-
-			devices_edit_button = manage (new Button(_("Show Protocol Settings")));
-			devices_edit_button->signal_clicked().connect (sigc::bind(sigc::mem_fun(*this, &ControlSurfacesOptions::edit_btn_clicked), &devices_view, &devices_model));
-			edit_box->pack_start (*devices_edit_button, true, true);
-			devices_edit_button->set_sensitive (false);
-			devices_edit_button->show ();
-
-			n = table.property_n_rows();
-			table.attach (*edit_box, 0, 3, n + 2, n + 3);
-
 			ControlProtocolManager& m = ControlProtocolManager::instance ();
 			m.ProtocolStatusChange.connect (protocol_status_connection, MISSING_INVALIDATOR,
 					std::bind (&ControlSurfacesOptions::protocol_status_changed, this, _1), gui_context());
 
 			devices_store->signal_row_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::devices_view_changed));
 			devices_view.signal_button_press_event().connect_notify (sigc::bind(sigc::mem_fun(*this, &ControlSurfacesOptions::edit_clicked), &devices_view, &devices_model));
-			devices_view.get_selection()->signal_changed().connect (sigc::bind(sigc::mem_fun (*this, &ControlSurfacesOptions::selection_changed), devices_edit_button, &devices_view, &devices_model));
 			active_store->signal_row_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::active_view_changed));
 			active_view.signal_button_press_event().connect_notify (sigc::bind(sigc::mem_fun(*this, &ControlSurfacesOptions::edit_clicked), &active_view, &active_model));
 			active_view.get_selection()->signal_changed().connect (sigc::bind(sigc::mem_fun (*this, &ControlSurfacesOptions::selection_changed), active_edit_button, &active_view, &active_model));
@@ -1844,8 +1814,6 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 					}
 				}
 			}
-
-			selection_changed (devices_edit_button, &devices_view, &devices_model);
 		}
 
 		void edit_btn_clicked (TreeView* view, ControlSurfacesModelColumns* model)
