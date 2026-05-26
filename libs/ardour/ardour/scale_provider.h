@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include "pbd/properties.h"
+
 #include "ardour/libardour_visibility.h"
 
 namespace Temporal {
@@ -25,10 +27,13 @@ namespace Temporal {
 }
 
 namespace ARDOUR {
+	namespace Properties {
+		LIBARDOUR_API extern PBD::PropertyDescriptor<bool> musical_mode; /* type is irrelevant */
+}
 
 class MusicalKey;
 
-class LIBARDOUR_API ScaleProvider {
+class LIBARDOUR_API ScaleProvider : public virtual PBD::Stateful {
    public:
 	ScaleProvider (ScaleProvider* parent);
 	virtual ~ScaleProvider ();
@@ -41,9 +46,14 @@ class LIBARDOUR_API ScaleProvider {
 	}
 	void set_key (MusicalKey const &);
 
+	static void make_property_quarks ();
+
+	XMLNode& get_state () const;
+	int set_state (const XMLNode&, int version);
+
   private:
 	ScaleProvider* _parent;
 	MusicalKey const * _key;
 };
 
-} // namespace 
+} // namespace

@@ -19,7 +19,21 @@
 #include "ardour/scale.h"
 #include "ardour/scale_provider.h"
 
+#include "pbd/i18n.h"
+
+namespace ARDOUR {
+	namespace Properties {
+		PBD::PropertyDescriptor<bool> musical_mode; /* type is irrelevant */
+	}
+}
+
 using namespace ARDOUR;
+
+void
+ScaleProvider::make_property_quarks ()
+{
+	Properties::musical_mode.property_id = g_quark_from_static_string (X_("musical-mode"));
+}
 
 ScaleProvider::ScaleProvider (ScaleProvider* parent)
 	: _parent (parent)
@@ -51,4 +65,17 @@ ScaleProvider::key () const
 	}
 
 	return nullptr;
+}
+
+XMLNode&
+ScaleProvider::get_state () const
+{
+	XMLNode* node = new XMLNode (X_("ScaleProvider"));
+	return *node;
+}
+
+int
+ScaleProvider::set_state (const XMLNode&, int version)
+{
+	return 0;
 }

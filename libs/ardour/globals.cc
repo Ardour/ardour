@@ -659,6 +659,7 @@ ARDOUR::init (bool try_optimization, const char* localedir, bool with_gui)
 	PresentationInfo::make_property_quarks ();
 	TransportMaster::make_property_quarks ();
 	Trigger::make_property_quarks ();
+	ScaleProvider::make_property_quarks ();
 
 	/* this is a useful ready to use PropertyChange that many
 	   things need to check. This avoids having to compose
