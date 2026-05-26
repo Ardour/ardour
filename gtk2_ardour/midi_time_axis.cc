@@ -740,6 +740,10 @@ MidiTimeAxisView::append_extra_display_menu_items ()
 	items.push_back (MenuElem (_("Patch Selector..."),
 				sigc::mem_fun(*this, &RouteUI::select_midi_patch)));
 
+	if (midi_view()) {
+		items.push_back (MenuElem (_("Key Enforcement"), *(midi_view()->build_key_enforcement_menu())));
+	}
+
 	items.push_back (CheckMenuElem (_("Restore Patch")));
 	Gtk::CheckMenuItem* cmi = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
 	cmi->set_active (midi_track ()->restore_pgm_on_load ());

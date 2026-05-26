@@ -2196,6 +2196,10 @@ MidiView::color_note (NoteBase* ev, int channel)
 		base_color = Gtkmm2ext::change_alpha (base_color, 0.15);
 	}
 
+	if ((midi_track()->key_enforcment_policy() & NoDraw) && !midi_track()->key()->in_key (ev->note()->note())) {
+		base_color = Gtkmm2ext::change_alpha (base_color, 0.05);
+	}
+
 	ev->set_fill_color (base_color);
 	ev->set_outline_color (ev->calculate_outline (base_color, ev->selected()));
 }
@@ -3357,6 +3361,9 @@ MidiView::note_dropped (NoteBase *, timecnt_t const & d_qn, int8_t dnote, bool c
 
 	Temporal::Beats last_note_off;
 
+	std::shared_ptr<MidiTrack> mt  (midi_track());
+	MusicalKey const * key (mt->key());
+
 	if (!copy) {
 		// find highest and lowest notes first
 
@@ -3386,8 +3393,15 @@ MidiView::note_dropped (NoteBase *, timecnt_t const & d_qn, int8_t dnote, bool c
 		for (auto & sel : _selection) {
 
 			Temporal::Beats new_time = sel->note()->time() + d_qn.beats ();
+			uint8_t original_pitch = sel->note()->note();
+			uint8_t new_pitch      = original_pitch + dnote - highest_note_difference;
+
 
 			if (new_time < Temporal::Beats()) {
+				continue;
+			}
+
+			if ((mt->key_enforcment_policy() & NoInsert) && (key && !key->in_key (new_pitch))) {
 				continue;
 			}
 
@@ -3396,9 +3410,6 @@ MidiView::note_dropped (NoteBase *, timecnt_t const & d_qn, int8_t dnote, bool c
 			if (new_time != sel->note()->time()) {
 				note_diff_add_change (sel, MidiModel::NoteDiffCommand::StartTime, new_time);
 			}
-
-			uint8_t original_pitch = sel->note()->note();
-			uint8_t new_pitch      = original_pitch + dnote - highest_note_difference;
 
 			// keep notes in standard midi range
 			clamp_to_0_127(new_pitch);
@@ -3431,8 +3442,15 @@ MidiView::note_dropped (NoteBase *, timecnt_t const & d_qn, int8_t dnote, bool c
 
 			/* update time */
 			Temporal::Beats new_time = copy_event->note()->time() + d_qn.beats();
+			uint8_t original_pitch = copy_event->note()->note();
+			uint8_t new_pitch      = original_pitch + dnote - highest_note_difference;
+
 
 			if (new_time < Temporal::Beats()) {
+				continue;
+			}
+
+			if ((mt->key_enforcment_policy() & NoInsert) && (key && !key->in_key (new_pitch))) {
 				continue;
 			}
 
@@ -3440,9 +3458,6 @@ MidiView::note_dropped (NoteBase *, timecnt_t const & d_qn, int8_t dnote, bool c
 			last_note_off = std::max (last_note_off, copy_event->note()->end_time());
 
 			/* update pitch */
-
-			uint8_t original_pitch = copy_event->note()->note();
-			uint8_t new_pitch      = original_pitch + dnote - highest_note_difference;
 
 			copy_event->note()->set_note (new_pitch);
 

@@ -22,6 +22,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "ytkmm/menu.h"
+
 #include "canvas/debug.h"
 #include "canvas/rect_set.h"
 
@@ -448,3 +450,67 @@ MidiViewBackground::set_note_mode (ARDOUR::NoteMode nm)
 		NoteModeChanged(); /* EMIT SIGNAL */
 	}
 }
+
+Gtk::Menu*
+MidiViewBackground::build_key_enforcement_menu ()
+{
+	using namespace Gtk;
+	using namespace Menu_Helpers;
+
+	Menu* menu = manage (new Menu);
+	MenuList& items = menu->items();
+	menu->set_name ("ArdourContextMenu");
+
+	RadioMenuItem::Group group;
+	CheckMenuItem* last_check_item;
+	RadioMenuItem* last_radio_item;
+
+	ARDOUR::KeyEnforcementPolicy kep = midi_track()->key_enforcment_policy();
+
+	items.push_back (CheckMenuElem (_("Don't show non-scale ghost notes while drawing/editing")));
+	last_check_item = dynamic_cast<CheckMenuItem*>(&items.back());
+	last_check_item->set_active (kep & ARDOUR::NoDraw);
+	last_check_item->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiViewBackground::toggle_key_enforcement_policy), ARDOUR::NoDraw, last_check_item));
+	items.push_back (CheckMenuElem (_("Don't allow mouse edits to create non-scale notes")));
+	last_check_item = dynamic_cast<CheckMenuItem*>(&items.back());
+	last_check_item->set_active (kep & ARDOUR::NoInsert);
+	last_check_item->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiViewBackground::toggle_key_enforcement_policy), ARDOUR::NoInsert, last_check_item));
+
+	items.push_back (RadioMenuElem (group, _("Force note edits of non-scale notes to next lower note")));
+	last_radio_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_radio_item->set_active (kep & ARDOUR::ForceLower);
+	last_radio_item->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiViewBackground::toggle_key_enforcement_policy), ARDOUR::ForceLower, last_radio_item));
+
+	items.push_back (RadioMenuElem (group, _("Force note edits of non-scale notes to next higher note")));
+	last_radio_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_radio_item->set_active (kep & ARDOUR::ForceHigher);
+	last_radio_item->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiViewBackground::toggle_key_enforcement_policy), ARDOUR::ForceHigher, last_radio_item));
+
+	items.push_back (RadioMenuElem (group, _("Force note edits of non-scale notes to nearest note")));
+	last_radio_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_radio_item->set_active (kep & ARDOUR::ForceNearest);
+	last_radio_item->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiViewBackground::toggle_key_enforcement_policy), ARDOUR::ForceNearest, last_radio_item));
+	return menu;
+}
+
+void
+MidiViewBackground::toggle_key_enforcement_policy (ARDOUR::KeyEnforcementPolicy kepb, Gtk::CheckMenuItem* item)
+{
+	ARDOUR::KeyEnforcementPolicy kep = midi_track()->key_enforcment_policy();
+
+	/* Some of the menu items that trigger this are radio menu items, and
+	   this method will be called when they go inactive. We want to ignore
+	   these calls.
+	*/
+
+	if (!item->get_active()) {
+		return;
+	}
+	if (kep & kepb) {
+		midi_track()->set_key_enforcement_policy (ARDOUR::KeyEnforcementPolicy (kep & ~kepb));
+	} else {
+		midi_track()->set_key_enforcement_policy (ARDOUR::KeyEnforcementPolicy (kep | kepb));
+	}
+}
+
+
