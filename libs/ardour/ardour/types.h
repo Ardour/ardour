@@ -926,6 +926,16 @@ enum LocateTransportDisposition {
 	RollIfAppropriate
 };
 
+
+enum KeyEnforcementPolicy {
+ 	NoDraw = 0x1, /* do not show visually as candidate for new notes */
+	NoInsert = 0x2,
+	NoPlay = 0x4,
+	ForceLower = 0x8,
+	ForceHigher = 0x10,
+	ForceNearest = 0x20
+};
+
 enum CueBehavior {
 	FollowCues = 0x1,
 	ImplicitlyIgnoreCues = 0x2
