@@ -452,7 +452,7 @@ MusicalMode::fill (Name nom)
 	}
 }
 
-/** Return a sorted vector of all notes in a musical mode.
+/** Return a sorted vector of all MIDI notes in a musical mode.
  *
  * The returned vector has every possible MIDI note number (0 through 127
  * inclusive) that is in the mode in any octave.
