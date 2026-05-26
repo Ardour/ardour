@@ -3610,6 +3610,11 @@ EditingContext::load_shared_bindings ()
 	Bindings* a = Bindings::get_bindings (X_("Automation"));
 
 	if (need_shared_actions) {
+		/* This registers 3 different groups of actions (midi, common,
+		   automation), but with a null prefix name. We will use them to
+		   make copies below, using our editor_name() to define unique
+		   per-EditingContext actions.
+		*/
 		register_midi_actions (m, string());
 		register_common_actions (b, string());
 		register_automation_actions (a, string());
