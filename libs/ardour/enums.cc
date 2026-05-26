@@ -172,7 +172,8 @@ setup_enum_writer ()
 	VST3KnobMode _VST3KnobMode;
 	DSP::PerceptualAnalyzer::Speed _DSPAnalyzerSpeed;
 	DSP::PerceptualAnalyzer::Warp _DSPAnalyzerWarp;
-
+	KeyEnforcementPolicy _KeyEnforcementPolicy;
+	
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_ENUM(e) i.push_back (e); s.push_back (#e)
@@ -983,6 +984,16 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (DSP::PerceptualAnalyzer, Medium);
 	REGISTER_CLASS_ENUM (DSP::PerceptualAnalyzer, High);
 	REGISTER (_DSPAnalyzerWarp);
+
+	REGISTER_ENUM (NoDraw);
+	REGISTER_ENUM (NoInsert);
+	REGISTER_ENUM (NoPlay);
+ 	REGISTER_ENUM (ForceLower);
+ 	REGISTER_ENUM (ForceHigher);
+ 	REGISTER_ENUM (ForceNearest);
+	REGISTER (_KeyEnforcementPolicy);
 }
 
+
 } /* namespace ARDOUR */
+
