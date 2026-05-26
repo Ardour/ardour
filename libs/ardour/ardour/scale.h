@@ -140,11 +140,12 @@ class LIBARDOUR_API MusicalKey : public MusicalMode
 	MusicalKey operator= (MusicalKey const & other);
 
 	float root() const { return _root; }
-	float nth (unsigned n) const;
+	float nth (unsigned int n) const;
+	bool  in_key (int midi_note) const;
 
    private:
 	float _root;
-
+	mutable std::vector<int> _midi_notes;
 };
 
 } // namespace

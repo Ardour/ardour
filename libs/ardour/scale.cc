@@ -631,3 +631,13 @@ MusicalKey::nth (unsigned n) const
 #pragma GCC warning "warning paul you need to fix this"
 	return 99;
 }
+
+bool
+MusicalKey::in_key (int midi_note) const
+{
+	if (_midi_notes.empty()) {
+		_midi_notes = as_midi (_root);
+	}
+
+	return (std::find (_midi_notes.begin(), _midi_notes.end(), midi_note) != _midi_notes.end());
+}
