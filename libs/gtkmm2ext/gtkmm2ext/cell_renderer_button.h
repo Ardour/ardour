@@ -46,8 +46,8 @@ public:
 
 protected:
 private:
-	Glib::Property<std::string> _property_label;
-	SignalClicked               _signal_clicked;
+	mutable Glib::Property<std::string> _property_label;
+	SignalClicked                       _signal_clicked;
 };
 
 } // namespace Gtkmm2ext
