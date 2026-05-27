@@ -1119,6 +1119,11 @@ bool
 Session::load_misc_port_state ()
 {
 	const std::string rcfile = Glib::build_filename (user_config_directory(), "session_port.rc");
+
+	if (!Glib::file_test (rcfile, Glib::FILE_TEST_EXISTS)) {
+		return false;
+	}
+
 	XMLTree tree;
 	if (!tree.read (rcfile)) {
 		return false;
