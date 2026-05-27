@@ -4054,7 +4054,7 @@ OSC::_strip_parse (const char *path, const char *sub_path, const char* types, lo
 	else if (!strncmp (sub_path, X_("hide"), 4)) {
 		if (!control_disabled) {
 			if (argc > (param_1)) {
-				if (s_int && yn != s->is_hidden ()) {
+				if (s_int && (bool)yn != s->is_hidden ()) {
 					s->presentation_info().set_hidden ((bool) yn);
 					ret = 0;
 				} else {

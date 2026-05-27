@@ -92,9 +92,9 @@ class OSCGlobalObserver
 	float _last_meter;
 	uint32_t master_timeout;
 	uint32_t monitor_timeout;
-	uint32_t last_punchin;
-	uint32_t last_punchout;
-	uint32_t last_click;
+	std::optional<bool> last_punchin;
+	std::optional<bool> last_punchout;
+	std::optional<bool> last_click;
 	samplepos_t prev_mark;
 	samplepos_t next_mark;
 	std::vector<LocationMarker> lm;

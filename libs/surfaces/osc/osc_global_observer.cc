@@ -46,9 +46,6 @@ OSCGlobalObserver::OSCGlobalObserver (OSC& o, Session& s, ArdourSurface::OSC::OS
 	,_last_master_trim (-1.0)
 	,_last_monitor_gain (-1.0)
 	,_jog_mode (1024)
-	,last_punchin (4)
-	,last_punchout (4)
-	,last_click (4)
 {
 	addr = lo_address_new_from_url 	(sur->remote_url.c_str());
 	session = &s;
@@ -532,17 +529,17 @@ OSCGlobalObserver::solo_active (bool active)
 void
 OSCGlobalObserver::extra_check ()
 {
-	if (last_punchin != session->config.get_punch_in()) {
+	if (!last_punchin || last_punchin.value () != (uint32_t) session->config.get_punch_in()) {
 		last_punchin = session->config.get_punch_in();
-		_osc.float_message (X_("/toggle_punch_in"), last_punchin, addr);
+		_osc.float_message (X_("/toggle_punch_in"), last_punchin.value () ? 1.f : 0.f, addr);
 	}
-	if (last_punchout != session->config.get_punch_out()) {
+	if (!last_punchin || last_punchout.value () != (uint32_t) session->config.get_punch_out()) {
 		last_punchout = session->config.get_punch_out();
-		_osc.float_message (X_("/toggle_punch_out"), last_punchout, addr);
+		_osc.float_message (X_("/toggle_punch_out"), last_punchout.value () ? 1.f : 0.f, addr);
 	}
-	if (last_click != Config->get_clicking()) {
+	if (!last_click || last_click.value () != Config->get_clicking()) {
 		last_click = Config->get_clicking();
-		_osc.float_message (X_("/toggle_click"), last_click, addr);
+		_osc.float_message (X_("/toggle_click"), last_click.value () ? 1.f : 0.f, addr);
 	}
 }
 
