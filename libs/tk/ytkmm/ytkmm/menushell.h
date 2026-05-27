@@ -29,9 +29,9 @@
 #include <ydk/gdkkeysyms.h>
 
 
-#include <ytkmm/container.h>
-#include <ytkmm/menu_elems.h>
-#include <glibmm/helperlist.h>
+#include "ytkmm/container.h"
+#include "ytkmm/menu_elems.h"
+#include "ytkmm/helperlist.h"
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 typedef struct _GtkMenuShell GtkMenuShell;
@@ -56,7 +56,7 @@ namespace Menu_Helpers
 *********************************************************************/
 
  
-class MenuList : public Glib::HelperList< MenuItem, const Element, Glib::List_Cpp_Iterator<GtkMenuItem,MenuItem> >
+class MenuList : public Ytkmm::HelperList< MenuItem, const Element, Glib::List_Cpp_Iterator<GtkMenuItem,MenuItem> >
 {
 public:
   MenuList();
@@ -66,7 +66,7 @@ public:
 
   MenuList& operator=(const MenuList& src);
 
-  typedef Glib::HelperList< MenuItem, const Element,  Glib::List_Cpp_Iterator<GtkMenuItem,MenuItem> > type_base;
+  typedef Ytkmm::HelperList< MenuItem, const Element,  Glib::List_Cpp_Iterator<GtkMenuItem,MenuItem> > type_base;
 
   GtkMenuShell* gparent();
   const GtkMenuShell* gparent() const;

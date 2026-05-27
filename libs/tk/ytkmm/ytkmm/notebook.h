@@ -30,8 +30,6 @@
  
 #include <ytkmm/container.h>
 #include <ytkmm/label.h>
-//#include <ytk/gtknotebook.h>
-#include <glibmm/helperlist.h>
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

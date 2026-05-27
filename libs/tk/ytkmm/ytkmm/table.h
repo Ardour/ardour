@@ -26,9 +26,9 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <glibmm/helperlist.h>
-#include <ytkmm/container.h>
-#include <ytkmm/enums.h>
+#include "ytkmm/helperlist.h"
+#include "ytkmm/container.h"
+#include "ytkmm/enums.h"
 
 //TODO: Careful of including this before box.h,
 //because we need to undef some things first.
@@ -100,7 +100,7 @@ protected:
 };
 
 
-class TableList : public Glib::HelperList< Child, Widget, Glib::List_Iterator< Child > >
+class TableList : public Ytkmm::HelperList< Child, Widget, Glib::List_Iterator< Child > >
 {
 public:
   TableList();
@@ -110,7 +110,7 @@ public:
 
   TableList& operator=(const TableList& src);
 
-  typedef Glib::HelperList< Child, Widget,  Glib::List_Iterator< Child > > type_base;
+  typedef Ytkmm::HelperList< Child, Widget,  Glib::List_Iterator< Child > > type_base;
 
   GtkTable* gparent();
   const GtkTable* gparent() const;

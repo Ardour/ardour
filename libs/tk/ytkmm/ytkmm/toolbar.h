@@ -33,7 +33,6 @@
 #include <ytkmm/toolitem.h>
 #include <ytkmm/toolbutton.h>
 #include <ytkmm/toggletoolbutton.h>
-#include <glibmm/helperlist.h>
 #include <ytkmm/container.h>
 #include <ytkmm/stockid.h>
 

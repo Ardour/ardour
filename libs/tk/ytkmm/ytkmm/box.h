@@ -56,8 +56,8 @@
 #endif
 
 
-#include <ytkmm/container.h>
-#include <glibmm/helperlist.h>
+#include "ytkmm/container.h"
+#include "ytkmm/helperlist.h"
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 typedef struct _GtkBox GtkBox;
@@ -166,7 +166,7 @@ struct EndElem : public Element
 };
 
  
-class BoxList : public Glib::HelperList< Child, const Element, Glib::List_Iterator< Child > >
+class BoxList : public Ytkmm::HelperList< Child, const Element, Glib::List_Iterator< Child > >
 {
 public:
   BoxList();
@@ -176,7 +176,7 @@ public:
 
   BoxList& operator=(const BoxList& src);
 
-  typedef Glib::HelperList< Child, const Element,  Glib::List_Iterator< Child > > type_base;
+  typedef Ytkmm::HelperList< Child, const Element,  Glib::List_Iterator< Child > > type_base;
 
   GtkBox* gparent();
   const GtkBox* gparent() const;
