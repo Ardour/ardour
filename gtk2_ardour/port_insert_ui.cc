@@ -265,7 +265,7 @@ PortInsertUI::set_measured_status (MTDM* mtdm)
 	}
 
 	char buf[256];
-	snprintf (buf, sizeof (buf), "%s %ld spl = %.2f ms%s%s%s",
+	snprintf (buf, sizeof (buf), "%s %" PRId64 "spl = %.2f ms%s%s%s",
 			mtdm ? _("Measured:") : _("Previously measured:"),
 			ml,
 			ml * 1000.0f / sr,
