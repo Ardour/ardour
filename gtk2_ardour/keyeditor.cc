@@ -52,6 +52,7 @@
 #include "pbd/openuri.h"
 #include "pbd/strsplit.h"
 #include "pbd/unwind.h"
+#include "pbd/natsort.h"
 
 #include "ardour/filesystem_paths.h"
 #include "ardour/profile.h"
@@ -270,6 +271,7 @@ KeyEditor::Tab::Tab (KeyEditor& ke, string const & str, Bindings* b)
 	view.get_column(2)->set_visible (false);
 	view.set_tooltip_column(2);
 	data_model->set_sort_column (owner.sort_column,  owner.sort_type);
+	data_model->set_sort_func(owner.sort_column, sigc::mem_fun(*this, &Tab::name_sorter));
 	data_model->signal_sort_column_changed().connect (sigc::mem_fun (*this, &Tab::sort_column_changed));
 
 	signal_map().connect (sigc::mem_fun (*this, &Tab::tab_mapped));
@@ -480,6 +482,15 @@ KeyEditor::Tab::sort_column_changed ()
 		owner.sort_column = column;
 		owner.sort_type = type;
 	}
+}
+
+int
+KeyEditor::Tab::name_sorter (Gtk::TreeModel::iterator a, Gtk::TreeModel::iterator b) const
+{
+	std::string const& n1 = (*a)[columns.name];
+	std::string const& n2 = (*b)[columns.name];
+
+	return natcmp (n1.c_str(), n2.c_str());
 }
 
 void
