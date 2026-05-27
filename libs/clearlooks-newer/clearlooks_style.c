@@ -196,7 +196,7 @@ clearlooks_style_draw_shadow (DRAW_ARGS)
 	{
 		WidgetParameters params;
 		FrameParameters  frame;
-		frame.shadow  = shadow_type;
+		frame.shadow  = (ClearlooksShadowType) shadow_type;
 		frame.gap_x   = -1;                 /* No gap will be drawn */
 		frame.border  = &colors->shade[4];
 
@@ -220,7 +220,7 @@ clearlooks_style_draw_shadow (DRAW_ARGS)
 		WidgetParameters params;
 		FrameParameters frame;
 
-		frame.shadow = shadow_type;
+		frame.shadow = (ClearlooksShadowType) shadow_type;
 		frame.gap_x  = -1;
 		frame.border = &colors->shade[5];
 		clearlooks_set_widget_parameters (widget, style, state_type, &params);
@@ -253,8 +253,8 @@ clearlooks_style_draw_box_gap (DRAW_ARGS,
 		FrameParameters  frame;
 		gboolean start, end;
 
-		frame.shadow    = shadow_type;
-		frame.gap_side  = gap_side;
+		frame.shadow    = (ClearlooksShadowType) shadow_type;
+		frame.gap_side  = (ClearlooksGapSide) gap_side;
 		frame.gap_x     = gap_x;
 		frame.gap_width = gap_width;
 		frame.border    = &colors->shade[5];
@@ -347,16 +347,16 @@ clearlooks_style_draw_extension (DRAW_ARGS, GtkPositionType gap_side)
 
 		switch (gap_side)
 		{
-			case CL_GAP_BOTTOM:
+			case (GtkPositionType) CL_GAP_BOTTOM:
 				params.corners = CR_CORNER_TOPLEFT | CR_CORNER_TOPRIGHT;
 				break;
-			case CL_GAP_TOP:
+			case (GtkPositionType) CL_GAP_TOP:
 				params.corners = CR_CORNER_BOTTOMLEFT | CR_CORNER_BOTTOMRIGHT;
 				break;
-			case CL_GAP_RIGHT:
+			case (GtkPositionType) CL_GAP_RIGHT:
 				params.corners = CR_CORNER_TOPLEFT | CR_CORNER_BOTTOMLEFT;
 				break;
-			case CL_GAP_LEFT:
+			case (GtkPositionType) CL_GAP_LEFT:
 				params.corners = CR_CORNER_TOPRIGHT | CR_CORNER_BOTTOMRIGHT;
 		}
 
@@ -685,7 +685,7 @@ clearlooks_style_draw_box (DRAW_ARGS)
 
 		if (widget && GE_IS_PROGRESS_BAR (widget))
 		{
-			progressbar.orientation = gtk_progress_bar_get_orientation (GTK_PROGRESS_BAR (widget));
+			progressbar.orientation = (ClearlooksOrientation) gtk_progress_bar_get_orientation (GTK_PROGRESS_BAR (widget));
 			progressbar.value = gtk_progress_bar_get_fraction(GTK_PROGRESS_BAR(widget));
 			progressbar.pulsing = GTK_PROGRESS (widget)->activity_mode;
 		}
@@ -699,9 +699,9 @@ clearlooks_style_draw_box (DRAW_ARGS)
 		if (!params.ltr)
 		{
 			if (progressbar.orientation == (ClearlooksOrientation)GTK_PROGRESS_LEFT_TO_RIGHT)
-				progressbar.orientation = GTK_PROGRESS_RIGHT_TO_LEFT;
+				progressbar.orientation = (ClearlooksOrientation) GTK_PROGRESS_RIGHT_TO_LEFT;
 			else if (progressbar.orientation == (ClearlooksOrientation)GTK_PROGRESS_RIGHT_TO_LEFT)
-				progressbar.orientation = GTK_PROGRESS_LEFT_TO_RIGHT;
+				progressbar.orientation = (ClearlooksOrientation) GTK_PROGRESS_LEFT_TO_RIGHT;
 		}
 
 		/* Following is a hack to have a larger clip area, the one passed in
@@ -713,16 +713,16 @@ clearlooks_style_draw_box (DRAW_ARGS)
 			{
 				switch (progressbar.orientation)
 				{
-					case GTK_PROGRESS_RIGHT_TO_LEFT:
+					case (ClearlooksOrientation) GTK_PROGRESS_RIGHT_TO_LEFT:
 						tmp.x -= 1;
 						/* fallthrough */
-					case GTK_PROGRESS_LEFT_TO_RIGHT:
+					case (ClearlooksOrientation) GTK_PROGRESS_LEFT_TO_RIGHT:
 						tmp.width += 1;
 						break;
-					case GTK_PROGRESS_BOTTOM_TO_TOP:
+					case (ClearlooksOrientation) GTK_PROGRESS_BOTTOM_TO_TOP:
 						tmp.y -= 1;
 						/* fallthrough */
-					case GTK_PROGRESS_TOP_TO_BOTTOM:
+					case (ClearlooksOrientation) GTK_PROGRESS_TOP_TO_BOTTOM:
 						tmp.height += 1;
 						break;
 				}
@@ -958,7 +958,7 @@ clearlooks_style_draw_option (DRAW_ARGS)
 	cr = ge_gdk_drawable_to_cairo (window, area);
 	colors = &clearlooks_style->colors;
 
-	checkbox.shadow_type = shadow_type;
+	checkbox.shadow_type = (ClearlooksShadowType) shadow_type;
 	checkbox.in_menu = (widget && GTK_IS_MENU(widget->parent));
 
 	clearlooks_set_widget_parameters (widget, style, state_type, &params);
@@ -985,7 +985,7 @@ clearlooks_style_draw_check (DRAW_ARGS)
 
 	params.corners = CR_CORNER_ALL;
 
-	checkbox.shadow_type = shadow_type;
+	checkbox.shadow_type = (ClearlooksShadowType) shadow_type;
 	checkbox.in_cell = DETAIL("cellcheck");
 
 	checkbox.in_menu = (widget && widget->parent && GTK_IS_MENU(widget->parent));
@@ -1091,8 +1091,8 @@ clearlooks_style_draw_shadow_gap (DRAW_ARGS,
 		WidgetParameters params;
 		FrameParameters  frame;
 
-		frame.shadow    = shadow_type;
-		frame.gap_side  = gap_side;
+		frame.shadow    = (ClearlooksShadowType) shadow_type;
+		frame.gap_side  = (ClearlooksGapSide) gap_side;
 		frame.gap_x     = gap_x;
 		frame.gap_width = gap_width;
 		frame.border    = &colors->shade[5];
