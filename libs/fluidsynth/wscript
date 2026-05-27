@@ -52,10 +52,15 @@ def build(bld):
         'src/fluid_synth_monopoly.c',
         'src/fluid_sys.c'
         ],
-        cflags = [ bld.env['compiler_flags_dict']['pic']] + (['-fvisibility=hidden', '-std=gnu99', '-Wno-unused-function'] if bld.env['build_target'] != 'msvc' else []),
+        cflags = [ bld.env['compiler_flags_dict']['pic']],
         includes = ['.', 'src/' ],
                target = 'libfluidsynth',
                use    = 'libfluidsynth_includes',
                uselib = 'GLIB',
                defines = [ 'HAVE_CONFIG_H', 'DEFAULT_SOUNDFONT=""' ]
                )
+
+    if bld.env['build_target'] != 'msvc':
+        obj.cflags += [ '-fvisibility=hidden', '-std=gnu99', '-Wno-unused-function' ]
+    else:
+        obj.cflags += ['/wd5287', '/wd4005']
