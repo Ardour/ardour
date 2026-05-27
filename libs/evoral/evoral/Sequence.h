@@ -183,10 +183,6 @@ public:
 
 	void get_notes (Notes&, NoteOperator, uint8_t val, int chan_mask = 0) const;
 
-	void remove_overlapping_notes ();
-	void trim_overlapping_notes ();
-	void remove_duplicate_notes ();
-
 	enum OverlapPitchResolution {
 		LastOnFirstOff,
 		FirstOnFirstOff
