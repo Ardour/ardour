@@ -40,6 +40,7 @@
 #include <ytkmm/scale.h>
 #include <ytkmm/treestore.h>
 
+#include "gtkmm2ext/cell_renderer_button.h"
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/gtk_ui.h"
@@ -1505,8 +1506,15 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			active_store = TreeStore::create (active_model);
 			active_store->set_sort_column(active_model.name, Gtk::SORT_ASCENDING);
 			active_view.set_model (active_store);
+
+			auto click = [this](std::string const& path) {
+				Gtk::TreeModel::Row row = *(active_store->get_iter (path));
+				edit_btn_clicked(&active_view, &active_model, &row);
+			};
+
 			active_view.append_column_editable (_("Enable"), active_model.enabled);
 			active_view.append_column (_("Control Surface"), active_model.name);
+			append_button(&active_view, "Settings", click);
 			active_view.get_column(1)->set_resizable (true);
 			active_view.get_column(1)->set_expand (true);
 			active_view.set_headers_visible(false);
@@ -1517,15 +1525,6 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 
 			int n = table.property_n_rows();
 			table.attach (active_scroller, 0, 3, n, n + 1);
-
-			// Edit Button
-			active_edit_button = manage (new Button(_("Show Selected Protocol Settings")));
-			active_edit_button->signal_clicked().connect (sigc::bind(sigc::mem_fun(*this, &ControlSurfacesOptions::edit_btn_clicked), &active_view, &active_model));
-			active_edit_button->set_sensitive (false);
-			active_edit_button->show ();
-
-			n = table.property_n_rows();
-			table.attach (*active_edit_button, 0, 1, n + 2, n + 3, FILL);
 
 			// Devices Scroller
 			devices_heading.add_to_page (this);
@@ -1552,11 +1551,10 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			m.ProtocolStatusChange.connect (protocol_status_connection, MISSING_INVALIDATOR,
 					std::bind (&ControlSurfacesOptions::protocol_status_changed, this, _1), gui_context());
 
-			devices_store->signal_row_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::devices_view_changed));
-			devices_view.signal_button_press_event().connect_notify (sigc::bind(sigc::mem_fun(*this, &ControlSurfacesOptions::edit_clicked), &devices_view, &devices_model));
 			active_store->signal_row_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::active_view_changed));
 			active_view.signal_button_press_event().connect_notify (sigc::bind(sigc::mem_fun(*this, &ControlSurfacesOptions::edit_clicked), &active_view, &active_model));
-			active_view.get_selection()->signal_changed().connect (sigc::bind(sigc::mem_fun (*this, &ControlSurfacesOptions::selection_changed), active_edit_button, &active_view, &active_model));
+			devices_store->signal_row_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::devices_view_changed));
+			devices_view.signal_button_press_event().connect_notify (sigc::bind(sigc::mem_fun(*this, &ControlSurfacesOptions::edit_clicked), &devices_view, &devices_model));
 		}
 
 		template <class T, class U, class V>
@@ -1583,6 +1581,22 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			tvc->add_attribute (txc->property_text (), col_text);
 
 			devices_view.append_column (*tvc);
+			return tvc;
+		}
+
+		Gtk::TreeViewColumn* append_button (TreeView* view, std::string label, sigc::slot<void, std::string> cb)
+		{
+			Gtk::TreeViewColumn* tvc = manage (new Gtk::TreeViewColumn ());
+			tvc->set_resizable (false);
+			tvc->set_expand (false);
+
+			Gtkmm2ext::CellRendererButton* btc = manage (new Gtkmm2ext::CellRendererButton());
+			btc->property_label () = label;
+			btc->signal_clicked ().connect (cb);
+
+			tvc->pack_start(*btc, false);
+
+			view->append_column (*tvc);
 			return tvc;
 		}
 
@@ -1816,17 +1830,15 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			}
 		}
 
-		void edit_btn_clicked (TreeView* view, ControlSurfacesModelColumns* model)
+		void edit_btn_clicked (TreeView* view, ControlSurfacesModelColumns* model, TreeModel::Row* row)
 		{
 			std::string name;
 			ControlProtocolInfo* cpi;
-			TreeModel::Row row;
 
-			row = *(view->get_selection()->get_selected());
-			if (!row[model->enabled]) {
+			if (!(*row)[model->enabled]) {
 				return;
 			}
-			cpi = row[model->protocol_info];
+			cpi = (*row)[model->protocol_info];
 			if (!cpi || !cpi->protocol || !cpi->protocol->has_editor ()) {
 				return;
 			}
@@ -1839,7 +1851,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 				return;
 			}
 			WindowTitle title (Glib::get_application_name());
-			title += row[model->name];
+			title += (*row)[model->name];
 			title += _("Configuration");
 			/* once created, the window is managed by the surface itself (as ->get_parent())
 			 * Surface's tear_down_gui() is called on session close, when de-activating
@@ -1859,7 +1871,8 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 				return;
 			}
 
-			edit_btn_clicked(view, model);
+			TreeModel::Row row = *((view->get_selection()->get_selected()));
+			edit_btn_clicked(view, model, &row);
 		}
 
 		Glib::RefPtr<TreeStore> active_store;
