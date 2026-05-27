@@ -730,7 +730,7 @@ pair<float, float>
 AutomationLine::drag_motion (timecnt_t const & pdt, float fraction, bool ignore_x, bool with_push, uint32_t& final_index)
 {
 	if (_drag_points.empty()) {
-		return pair<double,float> (fraction, _desc.is_linear () ? 0 : 1);
+		return pair<float, float> (fraction, _desc.is_linear () ? 0.0f : 1.0f);
 	}
 
 	timecnt_t dt (pdt);
@@ -870,7 +870,7 @@ AutomationLine::drag_motion (timecnt_t const & pdt, float fraction, bool ignore_
 	_last_drag_fraction = result_frac;
 	did_push = with_push;
 
-	return pair<float, float> (result_frac, effective_delta);
+	return pair<float, float> (static_cast<float>(result_frac), effective_delta);
 }
 
 /** Should be called to indicate the end of a drag */

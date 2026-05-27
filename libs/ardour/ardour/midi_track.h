@@ -79,7 +79,7 @@ public:
 			, _route (route)
 		{
 			if (param.type() == MidiPitchBenderAutomation) {
-				_numeric_entry_convert = [](double val, bool to_user) { return to_user ? val - 8192 : val + 8192; };
+				_numeric_entry_convert = [](double val, bool to_user) { return static_cast<float>(to_user ? val - 8192 : val + 8192); };
 			}
 		}
 

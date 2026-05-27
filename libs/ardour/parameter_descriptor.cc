@@ -125,10 +125,10 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 		upper  = 3.0f;
 		normal = 0.0f;
 		scale_points = std::shared_ptr<ScalePoints>(new ScalePoints());
-		scale_points->insert (std::make_pair (_("Mid"), 0));
-		scale_points->insert (std::make_pair (_("Off"), 1));
-		scale_points->insert (std::make_pair (_("Near"), 2));
-		scale_points->insert (std::make_pair (_("Far"), 3));
+		scale_points->insert (std::make_pair (_("Mid"), 0.f));
+		scale_points->insert (std::make_pair (_("Off"), 1.f));
+		scale_points->insert (std::make_pair (_("Near"), 2.f));
+		scale_points->insert (std::make_pair (_("Far"), 3.f));
 		break;
 	case PanSurroundZones:
 		enumeration = true;
@@ -136,12 +136,12 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 		upper  = 5.0f;
 		normal = 0.0f;
 		scale_points = std::shared_ptr<ScalePoints>(new ScalePoints());
-		scale_points->insert (std::make_pair (_("All"), 0));
-		scale_points->insert (std::make_pair (_("No Back"), 1));
-		scale_points->insert (std::make_pair (_("No Sides"), 2));
-		scale_points->insert (std::make_pair (_("Center Back"), 3));
-		scale_points->insert (std::make_pair (_("Screen Only"), 4));
-		scale_points->insert (std::make_pair (_("Surround Only"), 5));
+		scale_points->insert (std::make_pair (_("All"), 0.f));
+		scale_points->insert (std::make_pair (_("No Back"), 1.f));
+		scale_points->insert (std::make_pair (_("No Sides"), 2.f));
+		scale_points->insert (std::make_pair (_("Center Back"), 3.f));
+		scale_points->insert (std::make_pair (_("Screen Only"), 4.f));
+		scale_points->insert (std::make_pair (_("Surround Only"), 5.f));
 		break;
 	case PanSurroundElevationEnable:
 		upper  = 1.0f;
@@ -205,8 +205,8 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 	case PhaseAutomation:
 		toggled = true;
 		scale_points = std::shared_ptr<ScalePoints>(new ScalePoints());
-		scale_points->insert (std::make_pair (_("Normal"), 0));
-		scale_points->insert (std::make_pair (_("Invert"), 1));
+		scale_points->insert (std::make_pair (_("Normal"), 0.f));
+		scale_points->insert (std::make_pair (_("Invert"), 1.f));
 		break;
 	case MonitoringAutomation:
 		enumeration = true;
@@ -214,9 +214,9 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 		lower = MonitorAuto;
 		upper = MonitorCue;
 		scale_points = std::shared_ptr<ScalePoints>(new ScalePoints());
-		scale_points->insert (std::make_pair (_("Auto"), MonitorAuto));
-		scale_points->insert (std::make_pair (_("Input"), MonitorInput));
-		scale_points->insert (std::make_pair (_("Disk"), MonitorDisk));
+		scale_points->insert (std::make_pair (_("Auto"), static_cast<float>(MonitorAuto)));
+		scale_points->insert (std::make_pair (_("Input"), static_cast<float>(MonitorInput)));
+		scale_points->insert (std::make_pair (_("Disk"), static_cast<float>(MonitorDisk)));
 		break;
 	case SoloIsolateAutomation:
 	case SoloSafeAutomation:
