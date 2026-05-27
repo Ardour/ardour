@@ -1537,7 +1537,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 				row[devices_model.enabled] = !row[devices_model.enabled];
 			};
 
-			append_toggle_row (devices_model.enabled, devices_model.is_device, devices_model.name, toggle);
+			append_toggle_row (&devices_view, devices_model.enabled, devices_model.is_device, devices_model.name, toggle);
 			devices_view.set_headers_visible(false);
 
 			devices_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
@@ -1558,7 +1558,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 		}
 
 		template <class T, class U, class V>
-		Gtk::TreeViewColumn* append_toggle_row (Gtk::TreeModelColumn<T> const& col_state, Gtk::TreeModelColumn<U> const& col_viz, Gtk::TreeModelColumn<V> const& col_text, sigc::slot<void, std::string> cb)
+		Gtk::TreeViewColumn* append_toggle_row (TreeView* view, Gtk::TreeModelColumn<T> const& col_state, Gtk::TreeModelColumn<U> const& col_viz, Gtk::TreeModelColumn<V> const& col_text, sigc::slot<void, std::string> cb)
 		{
 			Gtk::TreeViewColumn* tvc = manage (new Gtk::TreeViewColumn ());
 			tvc->set_resizable (false);
@@ -1580,7 +1580,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			tvc->pack_start(*txc);
 			tvc->add_attribute (txc->property_text (), col_text);
 
-			devices_view.append_column (*tvc);
+			view->append_column (*tvc);
 			return tvc;
 		}
 
