@@ -213,7 +213,7 @@ FollowAction::to_string () const
 }
 
 
-Trigger * const Trigger::MagicClearPointerValue = (Trigger*) 0xfeedface;
+Trigger * const Trigger::MagicClearPointerValue = reinterpret_cast<Trigger*> (static_cast<uintptr_t>(0xfeedface));
 PBD::Signal<void(PropertyChange,Trigger*)> Trigger::TriggerPropertyChange;
 PBD::Signal<void(Trigger const *)> Trigger::TriggerArmChanged;
 

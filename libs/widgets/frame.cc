@@ -51,7 +51,7 @@ Frame::Frame (Orientation orientation, bool boxy)
 	_layout = Pango::Layout::create (get_pango_context ());
 
 	/* provide bg color for cairo child widgets */
-	g_object_set_data (G_OBJECT (gobj ()), "has_cairo_widget_background_info", (void*)0xfeedface);
+	g_object_set_data (G_OBJECT (gobj ()), "has_cairo_widget_background_info", GUINT_TO_POINTER(0xfeedface));
 	UIConfigurationBase::instance().DPIReset.connect (sigc::mem_fun (*this, &Frame::on_name_changed));
 }
 

@@ -455,7 +455,7 @@ CairoWidget::provide_background_for_cairo_widget (Gtk::Widget& w, const Gdk::Col
 	w.modify_bg (Gtk::STATE_ACTIVE, bg);
 	w.modify_bg (Gtk::STATE_SELECTED, bg);
 
-	g_object_set_data (G_OBJECT(w.gobj()), has_cairo_widget_background_info, (void*) 0xfeedface);
+	g_object_set_data (G_OBJECT(w.gobj()), has_cairo_widget_background_info, GUINT_TO_POINTER(0xfeedface));
 }
 
 void
