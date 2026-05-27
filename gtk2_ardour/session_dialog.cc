@@ -966,7 +966,7 @@ SessionDialog::setup_demo_sessions ()
 	demo_display.append_column (_("Session Name"), demo_columns.name);
 	demo_display.append_column (_("Download Size"), demo_columns.download_size);
 
-	Gtk::CellRendererProgress* progress_renderer = new Gtk::CellRendererProgress();
+	Gtk::CellRendererProgress* progress_renderer = manage (new Gtk::CellRendererProgress());
 	progress_renderer->property_width() = std::max<int>(100, rintf(100. * UIConfiguration::instance().get_ui_scale()));
 	Gtk::TreeViewColumn* tvc = manage (new Gtk::TreeViewColumn ("", *progress_renderer));
 	tvc->add_attribute (*progress_renderer, "value", demo_columns.progress);
