@@ -639,6 +639,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			// Pump entire port buffer into the ring buffer (TODO: split cycles?)
 			MidiBuffer& buf    = bufs.get_midi (0);
 			MidiTrack* mt = dynamic_cast<MidiTrack*>(&_track);
+			MusicalKey const * key (mt->key());
 			MidiChannelFilter* filter = mt ? &mt->capture_filter() : 0;
 
 			assert (buf.size() == 0 || _midi_buf);
@@ -648,6 +649,13 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				if (ev.time() + rec_offset > rec_nframes) {
 					break;
 				}
+
+				if (key && (mt->key_enforcment_policy() & NoInsert) && ev.is_note() && !key->in_key (ev.note())) {
+					DEBUG_TRACE (DEBUG::MidiIO, string_compose ("dropped note %1 due to key enforcement policy for %2\n", ev.note(), key->name()));
+					std::cerr << string_compose ("dropped note %1 due to key enforcement policy for %2\n", (int) ev.note(), key->name());
+					continue;
+				}
+
 #ifndef NDEBUG
 				if (DEBUG_ENABLED(DEBUG::MidiIO)) {
 					const uint8_t* __data = ev.buffer();
