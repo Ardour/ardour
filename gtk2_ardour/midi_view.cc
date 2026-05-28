@@ -951,11 +951,18 @@ MidiView::create_note_at (timepos_t const & source_relative_start, double y, Tem
 		return;
 	}
 
+	const int  note        = y_to_note(y);
+
+	std::shared_ptr<MidiTrack> mt  (midi_track());
+	MusicalKey const * key (mt->key());
+
+	if ((mt->key_enforcment_policy() & NoInsert) && (key && !key->in_key (note))) {
+		return;
+	}
+
 	/* assume time is already source-relative and snapped */
 
 	Temporal::Beats t = source_relative_start.beats();
-
-	const int  note        = y_to_note(y);
 	const uint8_t chan     = get_channel_for_add (t);
 	const uint8_t velocity = get_velocity_for_add (t);
 
