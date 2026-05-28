@@ -715,10 +715,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 						 */
 
 						samplepos_t mpos = (*i).time() + start_sample - _accumulated_capture_offset;
-
-						if (mpos >= _first_recordable_sample) {
-							_gui_feed_fifo.write (mpos, Evoral::MIDI_EVENT, (*i).size(), (*i).buffer());
-						}
+						_gui_feed_fifo.write (mpos, Evoral::MIDI_EVENT, (*i).size(), (*i).buffer());
 
 					} else {
 						/* what? */
