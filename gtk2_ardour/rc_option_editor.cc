@@ -1514,7 +1514,8 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 
 			active_view.append_column_editable (_("Enable"), active_model.enabled);
 			active_view.append_column (_("Control Surface"), active_model.name);
-			append_button(&active_view, "Settings", click);
+			append_button (&active_view, active_model.has_editor, "Settings", click);
+
 			active_view.get_column(1)->set_resizable (true);
 			active_view.get_column(1)->set_expand (true);
 			active_view.set_headers_visible(false);
@@ -1584,17 +1585,17 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			return tvc;
 		}
 
-		Gtk::TreeViewColumn* append_button (TreeView* view, std::string label, sigc::slot<void, std::string> cb)
+		template <class U>
+		Gtk::TreeViewColumn* append_button (TreeView* view,  Gtk::TreeModelColumn<U> const& col_viz, std::string label, sigc::slot<void, std::string> cb)
 		{
-			Gtk::TreeViewColumn* tvc = manage (new Gtk::TreeViewColumn ());
-			tvc->set_resizable (false);
-			tvc->set_expand (false);
-
 			Gtkmm2ext::CellRendererButton* btc = manage (new Gtkmm2ext::CellRendererButton());
 			btc->property_label () = label;
 			btc->signal_clicked ().connect (cb);
 
-			tvc->pack_start(*btc, false);
+			Gtk::TreeViewColumn* tvc = manage (new Gtk::TreeViewColumn ("", *btc));
+			tvc->set_resizable (false);
+			tvc->set_expand (false);
+			tvc->add_attribute (*btc, "visible", col_viz);
 
 			view->append_column (*tvc);
 			return tvc;
@@ -1666,12 +1667,14 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 				add (enabled);
 				add (protocol_info);
 				add (is_device);
+				add (has_editor);
 			}
 
 			TreeModelColumn<string> name;
 			TreeModelColumn<bool> enabled;
 			TreeModelColumn<ControlProtocolInfo*> protocol_info;
 			TreeModelColumn<bool> is_device;
+			TreeModelColumn<bool> has_editor;
 	};
 
 		void protocol_status_changed (ControlProtocolInfo* cpi) {
@@ -1702,18 +1705,6 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			}
 
 			endloop: {}
-		}
-
-		void selection_changed (Gtk::Button* button, TreeView* view, ControlSurfacesModelColumns* model)
-		{
-			//enable the Edit button when a row is selected for editing
-			TreeModel::Row row = *(view->get_selection()->get_selected());
-			if (row && row[model->enabled]) {
-				ControlProtocolInfo* cpi = row[model->protocol_info];
-				button->set_sensitive (cpi && cpi->protocol && cpi->protocol->has_editor ());
-			} else {
-				button->set_sensitive (false);
-			}
 		}
 
 		void active_view_changed (TreeModel::Path const &, TreeModel::iterator const & i)
@@ -1800,6 +1791,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 				device[devices_model.name] = *name;
 				device[devices_model.enabled] = is_enabled;
 				device[devices_model.protocol_info] = cpi;
+				device[devices_model.has_editor] = cpi->protocol->has_editor ();
 
 				for (auto const& i : m.control_protocol_infos ()) {
 					if (cpi->protocol == i->protocol) {
