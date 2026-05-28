@@ -17,21 +17,16 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include <iostream>
-#include <errno.h>
 #include <sys/types.h>
 
-#include "pbd/error.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/pthread_utils.h"
 
 #include "ardour/debug.h"
 #include "ardour/dsp_filter.h"
-#include "ardour/profile.h"
 #include "ardour/transport_master.h"
 #include "ardour/session.h"
 #include "ardour/audioengine.h"
-#include "ardour/audio_port.h"
 
 #include "pbd/i18n.h"
 
