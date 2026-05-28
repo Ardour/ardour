@@ -420,6 +420,8 @@ LTC_TransportMaster::process_ltc(samplepos_t const now)
 	LTCFrameExt ltc_frame;
 	LTC_TV_STANDARD tv_standard = LTC_TV_625_50;
 
+	bool keep_rolling = Config->get_transport_masters_just_roll_when_sync_lost();
+
 	while (ltc_decoder_read (decoder, &ltc_frame)) {
 
 		SMPTETimecode stime;
@@ -443,7 +445,9 @@ LTC_TransportMaster::process_ltc(samplepos_t const now)
 			}
 		}
 
-		if (!ltc_is_stationary && detect_ltc_fps (stime.frame, (ltc_frame.ltc.dfbit) ? true : false)) {
+		if (keep_rolling && fps_detected && _session && _session->actively_recording ()) {
+			/* keep recording with current framerate. */
+		} else if (!ltc_is_stationary && detect_ltc_fps (stime.frame, (ltc_frame.ltc.dfbit) ? true : false)) {
 			reset (true);
 			fps_detected = true;
 			timecode_format_valid = true; /* SET FLAG */
@@ -632,7 +636,11 @@ LTC_TransportMaster::pre_process (ARDOUR::pframes_t nframes, samplepos_t now, st
 		}
 	}
 
-	if (abs (now - current.timestamp) > FLYWHEEL_TIMEOUT) {
+	bool const keep_rolling = Config->get_transport_masters_just_roll_when_sync_lost();
+
+	if (keep_rolling && _session && _session->actively_recording ()) {
+		/* keep recording */
+	} else if (abs (now - current.timestamp) > FLYWHEEL_TIMEOUT) {
 		DEBUG_TRACE (DEBUG::LTC, "flywheel timeout\n");
 		reset(true);
 		/* don't change position from last known */
