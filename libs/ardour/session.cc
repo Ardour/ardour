@@ -376,7 +376,7 @@ Session::Session (AudioEngine &eng,
 	_seek_counter.store (0);
 	_butler_seek_counter.store (0);
 
-	ScaleProvider::set_key (MusicalKey (440.0, ARDOUR::MusicalMode (ARDOUR::MusicalMode::IonianMajor)));
+	ScaleProvider::set_key (MusicalKey (60, ARDOUR::MusicalMode (ARDOUR::MusicalMode::IonianMajor)));
 
 	created_with = string_compose ("%1 %2", PROGRAM_NAME, revision);
 
