@@ -35,6 +35,10 @@ class SMFSource;
 class Session;
 class VelocityControl;
 
+namespace Properties {
+	LIBARDOUR_API extern PBD::PropertyDescriptor<KeyEnforcementPolicy> key_enforcement;
+}
+
 class LIBARDOUR_API MidiTrack : public Track
 {
 public:

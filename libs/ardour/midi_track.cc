@@ -79,6 +79,12 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+namespace ARDOUR {
+	namespace Properties {
+		PBD::PropertyDescriptor<KeyEnforcementPolicy> key_enforcement;
+	}
+}
+
 MidiTrack::MidiTrack (Session& sess, string name, TrackMode mode)
 	: Track (sess, name, PresentationInfo::MidiTrack, mode, DataType::MIDI)
 	, _immediate_events(6096) // FIXME: size?
@@ -1075,6 +1081,6 @@ void
 MidiTrack::set_key_enforcement_policy (KeyEnforcementPolicy kep)
 {
 	_key_enforcement_policy = kep;
-	/* XXX do more ? */
+	PropertyChanged (Properties::key_enforcement); /* EMIT SIGNAL */
 }
 
