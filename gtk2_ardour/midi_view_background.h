@@ -142,6 +142,7 @@ class MidiViewBackground : public virtual ViewBackground
 
 	Gtk::Menu* build_key_enforcement_menu ();
 	void toggle_key_enforcement_policy (ARDOUR::KeyEnforcementPolicy kepb, Gtk::CheckMenuItem* item);
+	void setup_note_lines();
 
   protected:
 	EditingContext&           _editing_context;
@@ -160,7 +161,6 @@ class MidiViewBackground : public virtual ViewBackground
 	void color_handler ();
 	void parameter_changed (std::string const &);
 	void note_range_adjustment_changed();
-	void setup_note_lines();
 	void update_contents_height ();
 	virtual void apply_note_range_to_children () = 0;
 	virtual bool updates_suspended() const { return false; }
