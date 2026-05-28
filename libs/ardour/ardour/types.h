@@ -933,7 +933,8 @@ enum KeyEnforcementPolicy {
 	NoPlay = 0x4,
 	ForceLower = 0x8,
 	ForceHigher = 0x10,
-	ForceNearest = 0x20
+	ForceNearest = 0x20,
+	ShowKey = 0x40
 };
 
 enum CueBehavior {
