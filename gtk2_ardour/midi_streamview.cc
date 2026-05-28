@@ -279,8 +279,7 @@ MidiStreamView::redisplay_track ()
 	_range_dirty = false;
 	_data_note_min = 127;
 	_data_note_max = 0;
-	_trackview.track()->playlist()->foreach_region(
-		sigc::mem_fun (*this, &StreamView::update_contents_metrics));
+	_trackview.track()->playlist()->foreach_region (sigc::mem_fun (*this, &StreamView::update_contents_metrics));
 
 	// No notes, use default range
 	if (!_range_dirty) {
