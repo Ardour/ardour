@@ -52,7 +52,7 @@ ScaleDialog::fill_maps ()
 
 ScaleDialog::ScaleDialog ()
 	: ArdourDialog (_("Scale Editor"))
-	, _key (440.0, ARDOUR::MusicalMode (ARDOUR::MusicalMode::IonianMajor))
+	, _key (60, ARDOUR::MusicalMode (ARDOUR::MusicalMode::IonianMajor))
 	, name_label (_("Name"))
 	, type_label (_("Type"))
 	, step_adjustment (7, 1, 56, 1, 8)
