@@ -645,7 +645,9 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			assert (buf.size() == 0 || _midi_buf);
 
 			for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
-				Evoral::Event<MidiBuffer::TimeType> ev (*i, false);
+
+				Evoral::Event<MidiBuffer::TimeType> ev (*i, false); /* Evoral::Event<T> without its own buffer, we reuse the data buffer */
+
 				if (ev.time() + rec_offset > rec_nframes) {
 					break;
 				}
