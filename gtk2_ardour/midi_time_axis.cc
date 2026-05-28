@@ -1812,12 +1812,17 @@ MidiTimeAxisView::get_regions_with_selected_data (RegionSelection& rs)
 }
 
 void
-MidiTimeAxisView::route_property_changed (PBD::PropertyChange const & pc)
+MidiTimeAxisView::route_property_changed (PBD::PropertyChange const & what_changed)
 {
-	RouteTimeAxisView::route_property_changed (pc);
+	RouteTimeAxisView::route_property_changed (what_changed);
 
-	if (pc.contains (Properties::musical_mode)) {
-		_view->redisplay_track ();
+	PBD::PropertyChange our_interests;
+
+	our_interests.add (Properties::musical_mode);
+	our_interests.add (Properties::key_enforcement);
+
+	if (what_changed.contains (our_interests)) {
+		dynamic_cast<MidiStreamView*> (_view)->setup_note_lines ();
 	}
 }
 
