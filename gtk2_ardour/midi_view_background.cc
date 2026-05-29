@@ -187,7 +187,7 @@ MidiViewBackground::setup_note_lines()
 	double h = note_height();
 	double y;
 	std::shared_ptr<ARDOUR::MidiTrack> mt (midi_track());
-	bool show_key = mt->key_enforcment_policy() & ARDOUR::ShowKey;
+	bool show_key = mt->key_enforcement_policy() & ARDOUR::ShowKey;
 	ARDOUR::MusicalKey const * key = mt->key();
 
 	for (int i = highest_note(); i >= lowest_note(); i--) {
@@ -474,7 +474,7 @@ MidiViewBackground::build_key_enforcement_menu ()
 	CheckMenuItem* last_check_item;
 	RadioMenuItem* last_radio_item;
 
-	ARDOUR::KeyEnforcementPolicy kep = midi_track()->key_enforcment_policy();
+	ARDOUR::KeyEnforcementPolicy kep = midi_track()->key_enforcement_policy();
 
 	items.push_back (CheckMenuElem (_("Show notes-in-scale in MIDI backgrounds")));
 	last_check_item = dynamic_cast<CheckMenuItem*>(&items.back());
@@ -511,7 +511,7 @@ MidiViewBackground::build_key_enforcement_menu ()
 void
 MidiViewBackground::toggle_key_enforcement_policy (ARDOUR::KeyEnforcementPolicy kepb, Gtk::CheckMenuItem* item)
 {
-	ARDOUR::KeyEnforcementPolicy kep = midi_track()->key_enforcment_policy();
+	ARDOUR::KeyEnforcementPolicy kep = midi_track()->key_enforcement_policy();
 
 	/* Some of the menu items that trigger this are radio menu items, and
 	   this method will be called when they go inactive. We want to ignore
