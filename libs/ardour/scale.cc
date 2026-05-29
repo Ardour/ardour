@@ -16,16 +16,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <algorithm>
 #include <cmath>
 #include <fstream>
 
+#include "pbd/compose.h"
+#include "pbd/debug.h"
 #include "pbd/enumwriter.h"
 #include "pbd/failed_constructor.h"
 
+#include "ardour/debug.h"
 #include "ardour/scale.h"
 #include "ardour/scala_file.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 
 MusicalMode::MusicalMode (std::string const & name, MusicalModeType type, std::vector<float> const & elements)
 	: _name (name)
@@ -516,7 +521,7 @@ MusicalMode::semitone_steps_as_midi (int scale_root) const
 {
 	std::vector<int> midi_notes;
 
-	int root = scale_root - 12;
+	int root = (scale_root % 12) - 12;
 
 	// Repeatedly loop through the intervals in an octave
 	for (std::vector<float>::const_iterator i = _elements.begin ();;) {
@@ -552,7 +557,7 @@ MusicalMode::wholetone_steps_as_midi (int scale_root) const
 {
 	std::vector<int> midi_notes;
 
-	int root = scale_root - 12;
+	int root = (scale_root % 12) - 12;
 
 	// Repeatedly loop through the intervals in an octave
 	for (std::vector<float>::const_iterator i = _elements.begin ();;) {
@@ -637,7 +642,147 @@ MusicalKey::in_key (int midi_note) const
 {
 	if (_midi_notes.empty()) {
 		_midi_notes = as_midi (_root);
+		std::cerr << name() << ": ";
+		for (auto n : _midi_notes) {
+			std::cerr << n << ' ';
+		}
+		std::cerr << std::endl;
 	}
 
 	return (std::find (_midi_notes.begin(), _midi_notes.end(), midi_note) != _midi_notes.end());
+}
+
+int
+MusicalKey::lower_midi_note (int midi_note) const
+{
+	if (_midi_notes.empty()) {
+		_midi_notes = as_midi (_root);
+		std::cerr << name() << ": ";
+		for (auto n : _midi_notes) {
+			std::cerr << n << ' ';
+		}
+		std::cerr << std::endl;
+	}
+
+	assert (!_midi_notes.empty());
+
+	if (midi_note < _midi_notes.front()) {
+		return _midi_notes.front();
+	}
+
+	if (midi_note > _midi_notes.back()) {
+		return _midi_notes.back();
+	}
+
+	auto lb = std::lower_bound (_midi_notes.begin(), _midi_notes.end(), midi_note);
+
+	assert (lb != _midi_notes.end()); /* addressed in previous conditionals */
+
+	/* *lb could equal midi_note or be lower than it */
+
+	return *lb;
+}
+
+int
+MusicalKey::higher_midi_note (int midi_note) const
+{
+	if (_midi_notes.empty()) {
+		_midi_notes = as_midi (_root);
+		std::cerr << name() << ": ";
+		for (auto n : _midi_notes) {
+			std::cerr << n << ' ';
+		}
+		std::cerr << std::endl;
+	}
+
+	assert (!_midi_notes.empty());
+
+	if (midi_note < _midi_notes.front()) {
+		return _midi_notes.front();
+	}
+
+	if (midi_note > _midi_notes.back()) {
+		return _midi_notes.back();
+	}
+
+	auto ub = std::upper_bound (_midi_notes.begin(), _midi_notes.end(), midi_note);
+
+	assert (ub != _midi_notes.end()); /* addressed in previous conditionals */
+
+	/* *ub must be > midi_note */
+
+	return *ub;
+}
+
+int
+MusicalKey::closest_midi_note (int midi_note) const
+{
+	if (_midi_notes.empty()) {
+		_midi_notes = as_midi (_root);
+		std::cerr << name() << ": ";
+		for (auto n : _midi_notes) {
+			std::cerr << n << ' ';
+		}
+		std::cerr << std::endl;
+	}
+
+	assert (!_midi_notes.empty());
+
+	if (midi_note < _midi_notes.front()) {
+		return _midi_notes.front();
+	}
+
+	if (midi_note > _midi_notes.back()) {
+		return _midi_notes.back();
+	}
+
+	auto lb = std::lower_bound (_midi_notes.begin(), _midi_notes.end(), midi_note);
+
+	assert (lb != _midi_notes.end()); /* addressed in previous conditionals */
+	assert (lb != _midi_notes.begin()); /* addressed in previous conditionals */
+
+	if (midi_note == *lb) {
+		return midi_note;
+	}
+
+	/* lower bound did not equal midi_note, so it must be lower */
+
+	int prev = *lb;
+	++lb;
+	int next = *lb;
+
+	if ((midi_note - prev) < (next - midi_note)) {
+		return prev;
+	}
+
+	return next;
+}
+
+int
+MusicalKey::conform_midi_note (int midi_note, KeyEnforcementPolicy key_enforcment_policy) const
+{
+	if (key_enforcment_policy & NoInsert) {
+		DEBUG_TRACE (DEBUG::MidiIO, string_compose ("dropped note %1 due to key enforcement policy for %2\n", midi_note, name()));
+		return -1;
+	}
+
+	int new_note;
+
+	if (key_enforcment_policy & ForceNearest) {
+		int old = midi_note;
+		new_note = closest_midi_note (midi_note);
+		std::cerr << string_compose ("mutated note %1 to %2 due to key enforcement policy for %2\n", new_note, old, name());
+	} else if (key_enforcment_policy & ForceLower) {
+		int old = midi_note;
+		new_note = lower_midi_note (midi_note);
+		std::cerr << string_compose ("mutated note %1 to %2 due to key enforcement policy for %2\n", new_note, old, name());
+	} else if (key_enforcment_policy & ForceHigher) {
+		int old = midi_note;
+		new_note = higher_midi_note (midi_note);
+		std::cerr << string_compose ("mutated note %1 to %2 due to key enforcement policy for %2\n", new_note, old, name());
+	} else {
+		new_note = midi_note;
+	}
+
+	return new_note;
 }
