@@ -45,6 +45,7 @@ bool MidiPort::sysex_midi_io_may_be_broken = false;
 
 MidiPort::MidiPort (const std::string& name, PortFlags flags)
 	: Port (name, DataType::MIDI, flags)
+	, _scale_provider (nullptr)
 	, _resolve_required (false)
 	, _input_active (true)
 	, _data_fetched_for_cycle (false)
