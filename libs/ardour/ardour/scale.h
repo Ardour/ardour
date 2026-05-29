@@ -24,6 +24,7 @@
 #include "pbd/signals.h"
 
 #include "ardour/libardour_visibility.h"
+#include "ardour/types.h"
 
 namespace ARDOUR {
 
@@ -142,6 +143,10 @@ class LIBARDOUR_API MusicalKey : public MusicalMode
 	float root() const { return _root; }
 	float nth (unsigned int n) const;
 	bool  in_key (int midi_note) const;
+	int   closest_midi_note (int midi_note) const;
+	int   lower_midi_note (int midi_note) const;
+	int   higher_midi_note (int midi_note) const;
+	int   conform_midi_note (int midi_note, ARDOUR::KeyEnforcementPolicy) const;
 
    private:
 	float _root;
