@@ -58,8 +58,8 @@ ControlSurfacesTest::instantiateAndTeardownTest ()
 			m.deactivate (*i);
 		}
 
-		m.activate (*i);
-		m.activate (*i); // should be a NO-OP, prints a warning
+		m.activate (*i, {});
+		m.activate (*i, {}); // should be a NO-OP, prints a warning
 
 		m.deactivate (*i);
 		m.deactivate (*i); // should be a NO-OP
