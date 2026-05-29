@@ -956,7 +956,7 @@ MidiView::create_note_at (timepos_t const & source_relative_start, double y, Tem
 	std::shared_ptr<MidiTrack> mt  (midi_track());
 	MusicalKey const * key (mt->key());
 
-	if ((mt->key_enforcment_policy() & NoInsert) && (key && !key->in_key (note))) {
+	if ((mt->key_enforcement_policy() & NoInsert) && (key && !key->in_key (note))) {
 		return;
 	}
 
@@ -2203,7 +2203,7 @@ MidiView::color_note (NoteBase* ev, int channel)
 		base_color = Gtkmm2ext::change_alpha (base_color, 0.15);
 	}
 
-	if ((midi_track()->key_enforcment_policy() & NoDraw) && !midi_track()->key()->in_key (ev->note()->note())) {
+	if ((midi_track()->key_enforcement_policy() & NoDraw) && !midi_track()->key()->in_key (ev->note()->note())) {
 		base_color = Gtkmm2ext::change_alpha (base_color, 0.05);
 	}
 
@@ -3408,7 +3408,7 @@ MidiView::note_dropped (NoteBase *, timecnt_t const & d_qn, int8_t dnote, bool c
 				continue;
 			}
 
-			if ((mt->key_enforcment_policy() & NoInsert) && (key && !key->in_key (new_pitch))) {
+			if ((mt->key_enforcement_policy() & NoInsert) && (key && !key->in_key (new_pitch))) {
 				continue;
 			}
 
@@ -3457,7 +3457,7 @@ MidiView::note_dropped (NoteBase *, timecnt_t const & d_qn, int8_t dnote, bool c
 				continue;
 			}
 
-			if ((mt->key_enforcment_policy() & NoInsert) && (key && !key->in_key (new_pitch))) {
+			if ((mt->key_enforcement_policy() & NoInsert) && (key && !key->in_key (new_pitch))) {
 				continue;
 			}
 
