@@ -30,6 +30,7 @@ namespace ARDOUR {
 
 class MidiBuffer;
 class MidiEngine;
+class ScaleProvider;
 
 class LIBARDOUR_API MidiPort : public Port {
   public:
@@ -71,6 +72,8 @@ class LIBARDOUR_API MidiPort : public Port {
 	PBD::Signal<void(int)> NoteOn;
 	PBD::Signal<void(int)> NoteOff;
 
+	void set_scale_provider (ScaleProvider*);
+
 	static bool sysex_midi_io_may_be_broken;
 
 protected:
@@ -80,6 +83,7 @@ protected:
 
 private:
 	MidiBuffer*                 _buffer;
+	ScaleProvider*              _scale_provider;
 	bool                        _resolve_required;
 	bool                        _input_active;
 	MidiFilter                  _inbound_midi_filter;
