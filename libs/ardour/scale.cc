@@ -677,6 +677,9 @@ MusicalKey::lower_midi_note (int midi_note) const
 	auto lb = std::lower_bound (_midi_notes.begin(), _midi_notes.end(), midi_note);
 
 	assert (lb != _midi_notes.end()); /* addressed in previous conditionals */
+	assert (lb != _midi_notes.begin()); /* addressed in previous conditionals */
+
+	--lb;
 
 	/* *lb could equal midi_note or be lower than it */
 
