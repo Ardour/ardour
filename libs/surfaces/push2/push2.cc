@@ -122,7 +122,10 @@ Push2::probe (std::string& i, std::string& o)
 
 	auto has_push2 = [](string const& s) {
 		std::string pn = AudioEngine::instance()->get_hardware_port_name_by_name (s);
-		return pn.find ("Ableton Push 2 MIDI 1") != string::npos;
+		if  (pn.find ("Ableton Push 2 MIDI 1") != string::npos) {
+			return true;
+		}
+		return pn.find ("Ableton Push 2 Live") != string::npos;
 	};
 
 	auto pi = std::find_if (midi_inputs.begin (), midi_inputs.end (), has_push2);
