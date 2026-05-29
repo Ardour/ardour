@@ -24,6 +24,7 @@
 namespace ARDOUR {
 	namespace Properties {
 		PBD::PropertyDescriptor<bool> musical_mode; /* type is irrelevant */
+		PBD::PropertyDescriptor<KeyEnforcementPolicy> key_enforcement;
 	}
 }
 
@@ -38,6 +39,7 @@ ScaleProvider::make_property_quarks ()
 ScaleProvider::ScaleProvider (ScaleProvider* parent)
 	: _parent (parent)
 	, _key (nullptr)
+	, _key_enforcement_policy (KeyEnforcementPolicy (0))
 {
 	if (parent) {
 		parent->PropertyChanged.connect_same_thread (parent_connection, [this] (PBD::PropertyChange const & pc) { parent_prop_change (pc); });
@@ -88,4 +90,17 @@ int
 ScaleProvider::set_state (const XMLNode&, int version)
 {
 	return 0;
+}
+
+void
+ScaleProvider::set_key_enforcement_policy (KeyEnforcementPolicy kep)
+{
+	_key_enforcement_policy = kep;
+	PropertyChanged (Properties::key_enforcement);
+}
+
+KeyEnforcementPolicy
+ScaleProvider::key_enforcement_policy () const
+{
+	return _key_enforcement_policy;
 }
