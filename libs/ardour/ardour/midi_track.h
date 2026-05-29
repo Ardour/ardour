@@ -35,10 +35,6 @@ class SMFSource;
 class Session;
 class VelocityControl;
 
-namespace Properties {
-	LIBARDOUR_API extern PBD::PropertyDescriptor<KeyEnforcementPolicy> key_enforcement;
-}
-
 class LIBARDOUR_API MidiTrack : public Track
 {
 public:
@@ -156,9 +152,6 @@ public:
 
 	int last_seen_external_midi_note () const { return _last_seen_external_midi_note; }
 
-	KeyEnforcementPolicy key_enforcment_policy () const;
-	void set_key_enforcement_policy (KeyEnforcementPolicy);
-
 protected:
 
 	XMLNode& state (bool save_template) const;
@@ -186,7 +179,6 @@ private:
 	MidiChannelFilter           _capture_filter;
 	int                         _last_seen_external_midi_note;
 	bool                        _chase_notes;
-	KeyEnforcementPolicy        _key_enforcement_policy;
 
 	std::shared_ptr<VelocityControl>  _velocity_control;
 

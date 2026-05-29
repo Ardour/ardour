@@ -29,7 +29,8 @@ namespace Temporal {
 namespace ARDOUR {
 	namespace Properties {
 		LIBARDOUR_API extern PBD::PropertyDescriptor<bool> musical_mode; /* type is irrelevant */
-}
+		LIBARDOUR_API extern PBD::PropertyDescriptor<KeyEnforcementPolicy> key_enforcement;
+	}
 
 class MusicalKey;
 
@@ -53,9 +54,13 @@ class LIBARDOUR_API ScaleProvider : public virtual PBD::Stateful {
 
 	void parent_prop_change (PBD::PropertyChange const &);
 
+	virtual void set_key_enforcement_policy (KeyEnforcementPolicy kep);
+	KeyEnforcementPolicy key_enforcement_policy() const;
+
   private:
 	ScaleProvider* _parent;
 	MusicalKey const * _key;
+	KeyEnforcementPolicy _key_enforcement_policy;
 	PBD::ScopedConnection parent_connection;
 };
 
