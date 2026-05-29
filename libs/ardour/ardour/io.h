@@ -59,6 +59,7 @@ class PeakMeter;
 class Port;
 class Processor;
 class Session;
+class ScaleProvider;
 class UserBundle;
 
 /** A collection of ports (all input or all output) with connections.
@@ -202,6 +203,8 @@ public:
 	/* AudioTrack::deprecated_use_diskstream_connections() needs these */
 
 	int set_ports (const std::string& str);
+
+	void set_scale_provider (ScaleProvider*);
 
 protected:
 	virtual XMLNode& state () const;

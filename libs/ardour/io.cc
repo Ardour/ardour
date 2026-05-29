@@ -118,6 +118,26 @@ IO::ports () const {
 }
 
 void
+IO::set_scale_provider (ScaleProvider* sp)
+{
+	if (_direction != Input) {
+		return;
+	}
+
+	size_t n = 0;
+
+	do {
+		std::shared_ptr<MidiPort> mp = ports()->nth_midi_port (n);
+		if (!mp) {
+			break;
+		}
+		mp->set_scale_provider (sp);
+		++n;
+
+	}  while (true);
+}
+
+void
 IO::connection_change (std::shared_ptr<Port> a, std::shared_ptr<Port> b)
 {
 	if (_session.deletion_in_progress ()) {
