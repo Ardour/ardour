@@ -926,6 +926,7 @@ MidiTrack::map_input_active (bool yn)
 		if (yn != mp->input_active()) {
 			mp->set_input_active (yn);
 		}
+		mp->set_scale_provider (this);
 	}
 }
 
