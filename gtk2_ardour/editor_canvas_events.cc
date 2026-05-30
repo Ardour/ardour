@@ -105,7 +105,17 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			current_stepping_trackview->step_height (false);
 			return true;
 		} else {
-			scroll_up_one_track ();
+			if (UIConfiguration::instance().get_smooth_scrolling()) {
+				gdouble dx, dy;
+				if (gdk_event_get_scroll_deltas((GdkEvent*)ev, &dx, &dy)) {
+					scroll_to_y (vertical_adjustment.get_value() + dy);
+				} else {
+					scroll_tracks_up_line();
+				}
+			} else {
+				scroll_up_one_track ();
+			}
+
 			return true;
 		}
 		break;
@@ -130,7 +140,16 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			current_stepping_trackview->step_height (true);
 			return true;
 		} else {
-			scroll_down_one_track ();
+			if (UIConfiguration::instance().get_smooth_scrolling()) {
+				gdouble dx, dy;
+				if (gdk_event_get_scroll_deltas((GdkEvent*)ev, &dx, &dy)) {
+					scroll_to_y (vertical_adjustment.get_value() + dy);
+				} else {
+					scroll_tracks_down_line();
+				}
+			} else {
+				scroll_down_one_track ();
+			}
 			return true;
 		}
 		break;

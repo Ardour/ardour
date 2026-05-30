@@ -411,7 +411,11 @@ EditorVSummary::set_editor (double y)
 	double editor_y = y / get_height() * _editor_scroll_height;
 
 	if (editor_y != _last_editor_y) {
-		_editor.scroll_to_track_at_y (editor_y);
+		if (UIConfiguration::instance().get_smooth_scrolling()) {
+			_editor.scroll_to_y (editor_y);
+		} else {
+			_editor.scroll_to_track_at_y (editor_y);
+		}
 		_last_editor_y = editor_y;
 	}
 
