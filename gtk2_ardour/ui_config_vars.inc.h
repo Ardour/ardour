@@ -72,6 +72,7 @@ UI_CONFIG_VARIABLE (bool, show_manager_if_plugins_are_missing, "show-manager-if-
 UI_CONFIG_VARIABLE (bool, show_zoom_tools, "show-zoom-tools", true)
 UI_CONFIG_VARIABLE (bool, use_mouse_position_as_zoom_focus_on_scroll, "use-mouse-position-as-zoom-focus-on-scroll", true)
 UI_CONFIG_VARIABLE (bool, use_time_rulers_to_zoom_with_vertical_drag, "use-time-rulers-to-zoom-with-vertical-drag", false)
+UI_CONFIG_VARIABLE (bool, smooth_scrolling, "smooth_scrolling", false)
 UI_CONFIG_VARIABLE (bool, preview_video_frame_on_drag, "preview-video-frame-on-drag", true)
 UI_CONFIG_VARIABLE (bool, use_double_click_to_zoom_to_selection, "use-double-click-to-zoom-to-selection", false)
 UI_CONFIG_VARIABLE (bool, widget_prelight, "widget-prelight", true)

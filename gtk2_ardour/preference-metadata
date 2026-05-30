@@ -207,6 +207,8 @@
 [show-waveforms-while-recording]
   waveform display recording
 [show-zoom-tools]
+[smooth-scrolling]
+  scrolling smooth vertical
 [snap-threshold]
   snap threshold distance mouse
 [snap-target]

@@ -3405,6 +3405,16 @@ These settings will only take effect after %1 is restarted.\n\
 		    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_autoscroll_editor)
 		    ));
 
+	bo = new BoolOption (
+				"smooth-scrolling",
+				_("Enable smooth vertical scrolling"),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_smooth_scrolling),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_smooth_scrolling)
+			    );
+	add_option (_("Editor"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+			_("<b>When enabled</b> vertical scrolling won't be tied to tracks"));
+
 	ComboOption<float>* dps = new ComboOption<float> (
 		     "draggable-playhead-speed",
 		     _("Auto-scroll speed when dragging playhead"),
