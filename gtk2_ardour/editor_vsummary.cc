@@ -146,8 +146,8 @@ EditorVSummary::render_background_image ()
 	std::shared_ptr<RouteGroup> prev_group = nullptr;
 	std::shared_ptr<RouteGroup> group = nullptr;
 
-	/* The editor's scrollable height depends on the last track's height
-	 * (automation tracks excluded), store it now.
+	/* The editor's scrollable height depends on the last track's height,
+	 * we store it now to compute accurate relative track heights.
 	 * It's actually not true when there's only one or zero TAV visible but we
 	 * clamp the view rect's height so that's not a problem.
 	 */
