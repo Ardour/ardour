@@ -1569,13 +1569,13 @@ Editor::scroll_tracks_up ()
 void
 Editor::scroll_tracks_down_line ()
 {
-	scroll_to_y (vertical_adjustment.get_value() + 60);
+	scroll_to_y (vertical_adjustment.get_value() + 60 * UIConfiguration::instance().get_ui_scale());
 }
 
 void
 Editor::scroll_tracks_up_line ()
 {
-	scroll_to_y (vertical_adjustment.get_value() - 60);
+	scroll_to_y (vertical_adjustment.get_value() - 60 * UIConfiguration::instance().get_ui_scale());
 }
 
 void
