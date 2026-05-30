@@ -23,6 +23,7 @@
 
 #include "pbd/basename.h"
 #include "pbd/file_utils.h"
+#include "pbd/natsort.h"
 #include "pbd/openuri.h"
 #include "pbd/pathexpand.h"
 #include "pbd/search_path.h"
@@ -780,8 +781,12 @@ TriggerClipPicker::list_dir (std::string const& path, Gtk::TreeNodeChildren cons
 	} catch (Glib::FileError const& err) {
 	}
 
-	std::sort (dirs.begin (), dirs.end ());
-	std::sort (files.begin (), files.end ());
+	std::sort (dirs.begin (), dirs.end (), [](const std::string a, const std::string b) {
+		return naturally_less (a, b);
+	});
+	std::sort (files.begin (), files.end (), [](const std::string a, const std::string b) {
+		return naturally_less (a, b);
+	});
 
 	if (!pc) {
 		if (_root_paths.find (_current_path) == _root_paths.end ()) {
