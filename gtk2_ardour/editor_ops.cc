@@ -1797,12 +1797,33 @@ Editor::scroll_to_y (double y)
 {
 	if (y < 0) {
 		y = 0;
-	} else if (y > vertical_adjustment.get_upper() - _visible_canvas_height) {
-		y = vertical_adjustment.get_upper() - _visible_canvas_height;
 	}
 
 	if (y == vertical_adjustment.get_value()) {
 		return;
+	}
+
+	/* stop scrolling past last track / automation track */
+	for (TrackViewList::const_reverse_iterator i = track_views.crbegin(); i != track_views.crend(); ++i) {
+		if ((*i)->hidden()) {
+			continue;
+		}
+		TimeAxisView::Children kids = (*i)->get_child_list();
+		for (TimeAxisView::Children::const_reverse_iterator ci = kids.crbegin(); ci != kids.crend(); ++ci) {
+			if ((*ci)->hidden()) {
+				continue;
+			}
+			if (y > (*ci)->y_position()) {
+				ensure_time_axis_view_is_visible(**ci, true);
+				return;
+			}
+			break;
+		}
+		if (y > (*i)->y_position()) {
+			ensure_time_axis_view_is_visible(**i, true);
+			return;
+		}
+		break;
 	}
 
 	reset_y_origin (y);
