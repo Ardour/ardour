@@ -2777,6 +2777,16 @@ EditingContext::reset_y_origin (double y)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
+	if (y < 0) {
+		y = 0;
+	} else if (y > vertical_adjustment.get_upper() - _visible_canvas_height) {
+		y = vertical_adjustment.get_upper() - _visible_canvas_height;
+	}
+
+	if (y == get_y_origin()) {
+		return;
+	}
+
 	pending_visual_change.add (VisualChange::YOrigin);
 	pending_visual_change.y_origin = y;
 	ensure_visual_change_idle_handler ();

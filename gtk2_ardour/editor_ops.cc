@@ -1557,12 +1557,7 @@ Editor::scroll_forward (float pages)
 void
 Editor::scroll_tracks_down ()
 {
-	double vert_value = vertical_adjustment.get_value() + vertical_adjustment.get_page_size();
-	if (vert_value > vertical_adjustment.get_upper() - _visible_canvas_height) {
-		vert_value = vertical_adjustment.get_upper() - _visible_canvas_height;
-	}
-
-	vertical_adjustment.set_value (vert_value);
+	scroll_to_y (vertical_adjustment.get_value() + vertical_adjustment.get_page_size());
 }
 
 void
@@ -1574,19 +1569,13 @@ Editor::scroll_tracks_up ()
 void
 Editor::scroll_tracks_down_line ()
 {
-	double vert_value = vertical_adjustment.get_value() + 60;
-
-	if (vert_value > vertical_adjustment.get_upper() - _visible_canvas_height) {
-		vert_value = vertical_adjustment.get_upper() - _visible_canvas_height;
-	}
-
-	vertical_adjustment.set_value (vert_value);
+	scroll_to_y (vertical_adjustment.get_value() + 60);
 }
 
 void
 Editor::scroll_tracks_up_line ()
 {
-	reset_y_origin (vertical_adjustment.get_value() - 60);
+	scroll_to_y (vertical_adjustment.get_value() - 60);
 }
 
 void
@@ -1801,6 +1790,22 @@ Editor::scroll_to_track_at_y (double y, bool skip_child_views)
 	}
 
 	return false;
+}
+
+void
+Editor::scroll_to_y (double y)
+{
+	if (y < 0) {
+		y = 0;
+	} else if (y > vertical_adjustment.get_upper() - _visible_canvas_height) {
+		y = vertical_adjustment.get_upper() - _visible_canvas_height;
+	}
+
+	if (y == vertical_adjustment.get_value()) {
+		return;
+	}
+
+	reset_y_origin (y);
 }
 
 /* ZOOM */
