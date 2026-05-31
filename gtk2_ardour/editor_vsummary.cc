@@ -279,14 +279,9 @@ EditorVSummary::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangl
 	cairo_set_source_surface (cr, _image, 0, 0);
 	cairo_fill (cr);
 
-	/* Render the view rectangle.  If there is an editor visual pending, don't update
-	 * the view rectangle now --- wait until the expose event that we'll get after
-	 * the visual change.  This prevents a flicker.
-	 */
+	/* Render the view rectangle */
 
-	if (_editor.pending_visual_change.idle_handler_id < 0) {
-		get_editor (&_view_rectangle);
-	}
+	get_editor (&_view_rectangle);
 
 	int height = min((int)(_view_rectangle.second - _view_rectangle.first), get_height() - 1);
 	cairo_rectangle (cr, 0, _view_rectangle.first, get_width(), height);
