@@ -1007,9 +1007,9 @@ SessionDialog::setup_demo_sessions ()
 
 	Table* license_tabel = manage (new Table);
 	license_tabel->set_spacings (8);
-	license_tabel->attach (*author_label,  0, 1, 0, 1, FILL,        SHRINK);
+	license_tabel->attach (*author_label,  0, 1, 0, 1, FILL,          SHRINK);
 	license_tabel->attach (demo_author,    1, 2, 0, 1, EXPAND | FILL, SHRINK);
-	license_tabel->attach (*license_label, 0, 1, 1, 2, FILL,        SHRINK);
+	license_tabel->attach (*license_label, 0, 1, 1, 2, FILL,          SHRINK);
 	license_tabel->attach (demo_license,   1, 2, 1, 2, EXPAND | FILL, SHRINK);
 
 	HBox* folder_hbox = manage (new HBox);
