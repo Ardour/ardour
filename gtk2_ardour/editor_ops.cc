@@ -1826,7 +1826,7 @@ Editor::scroll_to_y (double y)
 		break;
 	}
 
-	reset_y_origin (y);
+	vertical_adjustment.set_value(y);
 }
 
 /* ZOOM */
