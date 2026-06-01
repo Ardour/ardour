@@ -3414,7 +3414,7 @@ These settings will only take effect after %1 is restarted.\n\
 	add_option (_("Editor"), bo);
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 			_("<b>When enabled</b>, vertical scrolling will occur in even steps.\n"
-			  "<b>When disabled</b>, vertical scrolling will be tied to tracks.");
+			  "<b>When disabled</b>, vertical scrolling will be tied to tracks."));
 
 	ComboOption<float>* dps = new ComboOption<float> (
 		     "draggable-playhead-speed",
