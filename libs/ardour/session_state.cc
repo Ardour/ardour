@@ -336,6 +336,8 @@ Session::post_engine_init ()
 
 		ControlProtocolManager::instance().set_session (this);
 
+		_butler->delegate (std::bind (&Session::probe_ctrl_surfaces, this));
+
 		/* This must be done after the ControlProtocolManager set_session above,
 		   as it will set states for ports which the ControlProtocolManager creates.
 		*/

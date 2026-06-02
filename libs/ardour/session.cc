@@ -941,15 +941,15 @@ void
 Session::port_registry_changed()
 {
 	setup_bundles ();
-	_butler->delegate (std::bind (&Session::probe_ctrl_surfaces, this));
+
+	if (_engine.running() && !deletion_in_progress () && ControlProtocolManager::instance().session()) {
+		_butler->delegate (std::bind (&Session::probe_ctrl_surfaces, this));
+	}
 }
 
 void
 Session::probe_ctrl_surfaces()
 {
-	if (!_engine.running() || deletion_in_progress ()) {
-		return;
-	}
 	ControlProtocolManager::instance ().probe_midi_control_protocols ();
 }
 
