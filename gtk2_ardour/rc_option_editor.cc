@@ -1608,6 +1608,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 
 		void set_state_from_config ()
 		{
+			_ignore_view_change++;
 			devices_store->clear ();
 			std::unordered_set<std::string> manufacturers;
 
@@ -1653,6 +1654,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 					}
 				}
 			}
+			_ignore_view_change--;
 		}
 
 	private:
