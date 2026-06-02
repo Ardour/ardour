@@ -593,6 +593,29 @@ PluginInsert::create_automatable_parameters ()
 			ac->alist()->automation_state_changed.connect_same_thread (*this, std::bind (&PluginInsert::bypassable_changed, this));
 			ac->Changed.connect_same_thread (*this, std::bind (&PluginInsert::enable_changed, this));
 		}
+	} else {
+		// host-level Bypass
+		Evoral::Parameter    param (PluginAutomation, 0, UINT32_MAX);
+		ParameterDescriptor  desc;
+		desc.label   = _("Plugin Enable");
+		desc.toggled = true;
+		desc.normal  = 1;
+		desc.lower   = 0;
+		desc.upper   = 1;
+		desc.scale_points = std::make_shared<ScalePoints>();
+		desc.scale_points->insert (std::make_pair (_("Bypassed"), 0.0f));
+		desc.scale_points->insert (std::make_pair (_("Enabled"), 1.0f));
+
+		std::shared_ptr<AutomationList> list (new AutomationList (param, desc, *this));
+		std::shared_ptr<AutomationControl> c (new PlugInsertBase::HostBypassControl (_session, param, desc, list));
+		add_control (c);
+		_host_bypass_control = c;
+
+		c->Changed.connect_same_thread (_bypass_control_connection,
+			std::bind (&PluginInsert::host_bypass_control_changed, this));
+
+		ActiveChanged.connect_same_thread (_bypass_active_connection,
+			std::bind (&PluginInsert::sync_bypass_control, this));
 	}
 	plugin->PresetPortSetValue.connect_same_thread (*this, std::bind (&PluginInsert::preset_load_set_value, this, _1, _2));
 }
@@ -2882,6 +2905,14 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		}
 	}
 
+	if (_host_bypass_control) {
+		std::shared_ptr<AutomationList> alist = _host_bypass_control->alist ();
+		if (alist && alist->empty ()) {
+			double new_val = enabled () ? 1.0 : 0.0;
+			_host_bypass_control->set_value_unchecked (new_val);
+		}
+	}
+
 	PluginConfigChanged (); /* EMIT SIGNAL */
 	return 0;
 }
@@ -2975,10 +3006,44 @@ PluginInsert::control_output (uint32_t num) const
 	}
 }
 
+std::shared_ptr<PBD::Controllable>
+PluginInsert::bypass_control () const
+{
+	if (_bypass_port != UINT32_MAX) {
+		/* Plugin exposes a native bypass/enable port – return it directly.
+		 * Ctrl+middle-click MIDI learn works through the AutomationControl. */
+		return std::const_pointer_cast<AutomationControl> (
+			automation_control (Evoral::Parameter (PluginAutomation, 0, _bypass_port)));
+	}
+	return _host_bypass_control;
+}
+
+void
+PluginInsert::sync_bypass_control ()
+{
+	if (_host_bypass_control) {
+		_host_bypass_control->set_value_unchecked (enabled () ? 1.0 : 0.0);
+	}
+}
+
+void
+PluginInsert::host_bypass_control_changed ()
+{
+	if (_host_bypass_control) {
+		bool want_enable = _host_bypass_control->get_value () >= 0.5;
+		if (enabled () != want_enable) {
+			enable (want_enable);
+		}
+	}
+}
+
 string
 PluginInsert::describe_parameter (Evoral::Parameter param)
 {
 	if (param.type() == PluginAutomation) {
+		if (param.id() == UINT32_MAX && _bypass_port == UINT32_MAX) {
+			return _("Plugin Enable");
+		}
 		return _plugins[0]->describe_parameter (param);
 	} else if (param.type() == PluginPropertyAutomation) {
 		std::shared_ptr<AutomationControl> c(automation_control(param));
