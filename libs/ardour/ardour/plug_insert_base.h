@@ -109,6 +109,20 @@ public:
 		Variant         _value;
 	};
 
+	/** A host-level bypass control for plugins without native bypass port. */
+	class HostBypassControl : public AutomationControl {
+	public:
+		HostBypassControl (Session& s,
+		                   const Evoral::Parameter& param,
+		                   const ParameterDescriptor& desc,
+		                   std::shared_ptr<AutomationList> list = std::shared_ptr<AutomationList> ());
+
+		XMLNode& get_state () const;
+
+	protected:
+		virtual void actually_set_value (double val, PBD::Controllable::GroupControlDisposition);
+	};
+
 	/** Enumeration of the ways in which we can match our insert's
 	 *  IO to that of the plugin(s).
 	 */
