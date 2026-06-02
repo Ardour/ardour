@@ -110,6 +110,7 @@ end
 --------------------------------------------------------------------------
 
 -- a convenience function that enables or disables a plugin by name
+-- (route is an Ardour Route object, not a string)
 function get_processor_by_name(route, name)
    local i = 0;
    repeat
@@ -134,6 +135,7 @@ function activate_processor_by_name(route, value, name)
 end
 
 -- load a plugin's preset by name
+-- (route is an Ardour Route object; plugin and preset are strings)
 function load_preset(route, plugin, preset)
    local proc = get_processor_by_name(route, plugin)
    if not proc:isnil() then
