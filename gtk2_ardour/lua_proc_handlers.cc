@@ -36,13 +36,23 @@
 
 using namespace ARDOUR;
 
-/* The Lua "prelude" loaded into every handler interpreter.  It supplies the
- * script-facing registry API (register_handler / unregister_handler /
- * clear_handlers) and the single C++-callable entry point __dispatch(id,val).
- * Keeping the registry in Lua keeps the C++ surface minimal (the design
- * report's explicit preference) and gives handlers a plain Lua table to
- * reason about.  pcall isolates a throwing handler so one bad callback can't
- * take down the GUI thread. */
+/* The Lua "prelude" loaded, on the GUI thread, into every handler
+ * interpreter.  It supplies the script-facing registry API (register_handler
+ * / unregister_handler / clear_handlers) and the single C++-callable entry
+ * point __dispatch(id,val).
+ *
+ * The handler interpreter does not exist until the DSP (RT) thread sends its
+ * first message.  That first self:dispatch() emits AccessLuaScript, which is
+ * marshalled to the GUI thread, where dispatch() -> get_or_create() builds the
+ * interpreter, loads this prelude, and runs the script's gui_init() (which
+ * should call register_handler to populate __rt_handlers).  That first
+ * message -- and every message after it -- is then delivered by calling
+ * __dispatch(id, val) in the interpreter, which looks up the handler
+ * registered for id and invokes it.
+ *
+ * Keeping the registry in Lua keeps the C++ surface minimal and gives handlers
+ * a plain Lua table to reason about.  pcall isolates a throwing handler so one
+ * bad callback can't take down the GUI thread. */
 static const char* handler_prelude =
 	"__rt_handlers = {}\n"
 	"function register_handler (id, fn) __rt_handlers[id] = fn end\n"
@@ -122,8 +132,8 @@ LuaProcHandlers::get_or_create (LuaProc* proc)
 		/* registry API + __dispatch entry point */
 		vm->lua->do_command (handler_prelude);
 
-		/* one-time GUI initialisation; this is where the script calls
-		 * register_handler(...) to populate __rt_handlers */
+		/* one-time GUI initialisation; this is where the script is
+		 * expected to call register_handler(...) to populate __rt_handlers */
 		luabridge::LuaRef gi = luabridge::getGlobal (L, "gui_init");
 		if (gi.isFunction ()) {
 			gi ();

@@ -46,15 +46,15 @@ MIDI CC 93: load_preset(route, "plugin", "preset")
 
 Remember that a "MIDI Program #" (or "MIDI Bank # Program #") line is required for MIDI CC lines to be processed.
 
-Implementation note: the realtime DSP callback only inspects incoming MIDI
-and forwards Program Change / Control Change events to the GUI thread (via
-the RT->GUI Lua dispatch primitive).  All route activation, comment-block
-parsing and user-supplied CC code runs on the GUI thread, where load(),
-pcall() and Session/route mutation are safe.  There is, by design, almost
-no expectation that a program change is processed in hard real time.  All
-other MIDI (notes, etc.) passes through untouched.
+There is, by design, almost no expectation that a program change is processed in hard real time.  All other MIDI (notes, etc.) passes through untouched.
 ]]
 }
+
+-- Implementation note: the realtime DSP callback (dsp_run) only inspects
+-- incoming MIDI and forwards Program Change / Control Change events to the
+-- GUI thread via the RT->GUI Lua dispatch primitive.  All route activation,
+-- comment-block parsing and user-supplied CC code runs on the GUI thread,
+-- where load(), pcall() and Session/route mutation are safe.
 
 function dsp_ioconfig ()
   return { { midi_in = 1, midi_out = 1, audio_in = 0, audio_out = 0}, }
@@ -105,9 +105,8 @@ end
 --
 -- gui_init() runs once on the GUI thread, in a dedicated interpreter that
 -- has the full action-script binding set.  It registers two handlers; the
--- RT side's self:dispatch() calls them (on the GUI thread) with the
--- forwarded MIDI.  All of the heavy lifting that used to run on the RT
--- thread lives here.
+-- RT side's self:dispatch() signals them with the forwarded MIDI.  The GUI
+-- thread receives the signals and does all the heavy lifting.
 --------------------------------------------------------------------------
 
 -- a convenience function that enables or disables a plugin by name
@@ -286,7 +285,7 @@ function program_change()
       -- if at least one of either kind of line was seen, there is further handling of this track
       if MIDI_Program_seen then
          -- all tracks with a "MIDI Program" line present are set either active or inactive, depending on if they matched
-         -- all other tracks (no "MIDI Progam" line) are not affected (they never get to this point)
+         -- all other tracks (no "MIDI Program" line) are not affected (they never get to this point)
          route:set_active(route_active, nil);
          -- if this route is active, execute any program change functions and parse any CC functions in the route's comment block
          if route_active then
