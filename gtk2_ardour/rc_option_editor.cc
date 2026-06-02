@@ -1762,15 +1762,26 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			}
 
 			ControlProtocolManager& m = ControlProtocolManager::instance ();
-			bool const is_enabled = r[active_model.enabled];
-			bool const was_enabled = (cpi->protocol != 0);
+			bool const should_be_enabled = r[active_model.enabled];
+			bool const currently_enabled = (cpi->protocol != 0);
 
-			if (is_enabled != was_enabled) {
-				if (is_enabled) {
-					string const name (r[active_model.name]);
-					m.activate (*cpi, name);
-				} else {
+			if (should_be_enabled) {
+				if (currently_enabled) {
 					m.deactivate (*cpi);
+					/* ports don't vanish instantly, ya' know! */
+					Glib::usleep (500);
+				}
+				string const name (r[active_model.name]);
+				if (m.activate (*cpi, name)) {
+					_ignore_view_change++;
+					r[active_model.enabled] = false;
+					_ignore_view_change--;
+				}
+			} else {
+				if (m.deactivate (*cpi)) {
+					_ignore_view_change++;
+					r[active_model.enabled] = true;
+					_ignore_view_change--;
 				}
 			}
 		}
@@ -1789,15 +1800,27 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			}
 
 			ControlProtocolManager& m = ControlProtocolManager::instance ();
-			bool const is_enabled = r[devices_model.enabled];
-			bool const was_enabled = (cpi->protocol != 0);
+			bool const should_be_enabled = r[devices_model.enabled];
+			bool const currently_enabled = (cpi->protocol != 0);
 
-			if (is_enabled != was_enabled) {
-				if (is_enabled) {
-					string const name (r[devices_model.name]);
-					m.activate (*cpi, name);
-				} else {
+			if (should_be_enabled) {
+				if (currently_enabled) {
 					m.deactivate (*cpi);
+					/* ports don't vanish instantly, ya' know! */
+					Glib::usleep (500);
+				}
+				string const name (r[devices_model.name]);
+				if (m.activate (*cpi, name)) {
+					std::cerr << "failed\n";
+					_ignore_view_change++;
+					r[devices_model.enabled] = false;
+					_ignore_view_change--;
+				}
+			} else {
+				if (m.deactivate (*cpi)) {
+					_ignore_view_change++;
+					r[devices_model.enabled] = true;
+					_ignore_view_change--;
 				}
 			}
 		}
