@@ -33,6 +33,8 @@
 #include "ardour/midi_port.h"
 #include "ardour/session.h"
 
+#include "pbd/i18n.h"
+
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
@@ -170,7 +172,24 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 				ev[2] = 0x40;  /* default velocity */
 				_buffer->push_back (timestamp, Evoral::LIVE_MIDI_EVENT, size, ev);
 			} else {
-				_buffer->push_back (timestamp, Evoral::LIVE_MIDI_EVENT, size, buf);
+				if (buf[0] == MIDI_CMD_COMMON_SYSEX) {
+					if (sysex_midi_io_may_be_broken) {
+						size_t n = 0;
+						while (n < size) {
+							if (buf[n] == MIDI_CMD_COMMON_SYSEX_END) {
+								break;
+							}
+							++n;
+						}
+						if (n == size) {
+							PBD::error << string_compose (_("MIDI sysex message on port %1 not terminated within %2 bytes - ignored"), name(), size) << endmsg;
+						} else {
+							_buffer->push_back (timestamp, Evoral::LIVE_MIDI_EVENT, size, buf);
+						}
+					}
+				} else {
+					_buffer->push_back (timestamp, Evoral::LIVE_MIDI_EVENT, size, buf);
+				}
 			}
 		}
 
