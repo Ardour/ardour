@@ -659,7 +659,18 @@ ControlProtocolManager::probe_midi_control_protocols ()
 
 		if (!active && found) {
 			cpi->automatic = true;
-			activate (*cpi, {});
+
+			string device_config;
+
+			if (cpi->config.empty()) {
+				auto en = cpi->descriptor->enumerate ();
+				if (!en.empty()) {
+					if (!en.begin()->second.empty()) {
+						device_config = en.begin()->second.front();
+					}
+				}
+			}
+			activate (*cpi, device_config);
 		} else if (active && cpi->automatic && !found) {
 			cpi->automatic = false;
 			deactivate (*cpi);
