@@ -440,13 +440,7 @@ MonitorSection::MonitorSection ()
 	vpacker.pack_start (*level_tbl,           false, false, PX_SCALE(8));
 	vpacker.pack_start (*lower_packer,        false, false, PX_SCALE(8));
 	vpacker.pack_start (master_packer,        false, false, PX_SCALE(10));
-	vpacker.pack_end   (*out_packer,          false, false,
-#ifdef MIXBUS
-			scrollbar_height /* no outer frame */
-#else
-			scrollbar_height + 2 /* frame borders */
-#endif
-			);
+	vpacker.pack_end   (*out_packer,          false, false, scrollbar_height + 2 /* frame borders */);
 
 	hpacker.set_spacing (0);
 	hpacker.pack_start (vpacker, true, true);

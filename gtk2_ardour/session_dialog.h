@@ -255,6 +255,8 @@ private:
 			add (progress);
 			add (status);
 			add (description);
+			add (license);
+			add (author);
 		}
 		Gtk::TreeModelColumn<std::string>      name;
 		Gtk::TreeModelColumn<std::string>      size;
@@ -266,6 +268,8 @@ private:
 		Gtk::TreeModelColumn<int>              progress;
 		Gtk::TreeModelColumn<int>              status;
 		Gtk::TreeModelColumn<std::string>      description;
+		Gtk::TreeModelColumn<std::string>      license;
+		Gtk::TreeModelColumn<std::string>      author;
 	};
 
 	Gtk::VBox                    demo_vbox;
@@ -277,6 +281,8 @@ private:
 	Gtk::Entry                   demo_name_entry;
 	Gtk::Frame                   demo_desc_frame;
 	Gtk::TextView                demo_description;
+	Gtk::Label                   demo_license;
+	Gtk::Label                   demo_author;
 	bool                         demo_name_was_edited;
 	bool                         download_active;
 	bool                         cancel_download;
