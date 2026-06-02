@@ -39,6 +39,8 @@ using namespace PBD;
 
 #define port_engine AudioEngine::instance()->port_engine()
 
+bool MidiPort::sysex_midi_io_may_be_broken = false;
+
 MidiPort::MidiPort (const std::string& name, PortFlags flags)
 	: Port (name, DataType::MIDI, flags)
 	, _resolve_required (false)
