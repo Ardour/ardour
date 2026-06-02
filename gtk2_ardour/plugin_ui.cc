@@ -606,6 +606,7 @@ PlugUIBase::PlugUIBase (std::shared_ptr<PlugInsertBase> pib)
 	if (_pi) {
 		_pi->ActiveChanged.connect (active_connection, invalidator (*this), std::bind (&PlugUIBase::processor_active_changed, this, std::weak_ptr<Processor> (_pi)), gui_context ());
 		_bypass_button.set_active (!_pi->enabled ());
+		_bypass_button.set_controllable (_pi->bypass_control ());
 	} else {
 		_bypass_button.set_sensitive (false);
 	}
