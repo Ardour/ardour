@@ -1168,18 +1168,18 @@ msgstr "Mehrdeutig"
 
 #: application_bar.cc:430
 msgid ""
-"<b>Layered</b>, new recordings will be added as regions on a layer atop "
+"<b>Layered</b>: New recordings will be added as regions on a layer atop "
 "existing regions.\n"
-"<b>Non Layered</b>, the underlying region will be spliced and replaced with "
+"<b>Non Layered</b>: The underlying region will be spliced and replaced with "
 "the newly recorded region.\n"
-"<b>SoundOnSound</b>, behaves like <i>Layered</i>, except underlying regions "
+"<b>SoundOnSound</b>: Behaves like <i>Layered</i>, except underlying regions "
 "will be audible."
 msgstr ""
 "<b>Geschichtet</b>, neue Aufnahmen werden als Regionen in einer Schicht "
 "oberhalb existierender Regionen hinzugefügt.\n"
 "<b>Nicht geschichtet</b>, die unten liegende Region wird geteilt und durch "
 "die neu aufgenommene ersetzt.\n"
-"<b>SoundOnSound</b>, verhält sich wie <b>Geschichtet</b>, aber tiefer "
+"<b>SoundOnSound</b>: Verhält sich wie <b>Geschichtet</b>, aber tiefer "
 "liegende Regionen bleiben hörbar."
 
 #: application_bar.cc:431
