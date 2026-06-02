@@ -25,6 +25,11 @@ INSTALL_DIR=$(dirname $BIN_DIR)
 LIB_DIR=$INSTALL_DIR/lib
 ETC_DIR=$INSTALL_DIR/etc
 
+pipewire_version=$(pipewire --version | tail -1 | sed 's/^[^0-9][^0-9]*//g')
+if echo $pipewire_version | grep -q '1\.[12345]' ; then
+    export PIPEWIRE_MIDI_BROKEN=1
+fi
+
 # this triggers code in main() that will reset runtime environment variables
 # to point to directories inside the ardour package
 
