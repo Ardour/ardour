@@ -26,7 +26,7 @@ using namespace ARDOUR;
 using namespace ArdourSurface;
 
 static ControlProtocol*
-new_faderport_midi_protocol (Session* s, void* config)
+new_faderport_midi_protocol (Session* s, std::string const & config)
 {
 	FaderPort* fp;
 

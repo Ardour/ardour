@@ -36,7 +36,7 @@ using namespace PBD;
 using namespace ArdourSurface::LAUNCHPAD_NAMESPACE;
 
 static ControlProtocol*
-new_lpx (Session* s, void* config)
+new_lpx (Session* s, std::string const & config)
 {
 	LaunchPadX * lpx = nullptr;
 

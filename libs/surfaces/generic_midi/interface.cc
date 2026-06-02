@@ -25,12 +25,12 @@
 using namespace ARDOUR;
 
 static ControlProtocol*
-new_generic_midi_protocol (Session* s, void* config)
+new_generic_midi_protocol (Session* s, std::string const & config)
 {
 	GenericMidiControlProtocol* gmcp;
 
 	try {
-		gmcp =  new GenericMidiControlProtocol (*s, static_cast<std::string*>(config));
+		gmcp =  new GenericMidiControlProtocol (*s, config);
 	} catch (failed_constructor& err) {
 		return 0;
 	}

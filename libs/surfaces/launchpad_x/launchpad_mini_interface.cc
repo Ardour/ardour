@@ -37,7 +37,7 @@ using namespace ArdourSurface;
 using namespace ArdourSurface::LAUNCHPAD_NAMESPACE;
 
 static ControlProtocol*
-new_lpmini (Session* s, void* config)
+new_lpmini (Session* s, std::string const & config)
 {
 	LaunchPadX * lpm = nullptr;
 

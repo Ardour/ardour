@@ -78,10 +78,11 @@ using namespace PBD;
 using namespace Glib;
 using namespace std;
 
-GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s, std::string* config)
+GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s, std::string const & config)
 	: ControlProtocol (s, _("Generic MIDI"))
 	, AbstractUI<GenericMIDIRequest> (name())
 	, connection_state (ConnectionState (0))
+	, _config (config)
 	, _motorised (false)
 	, _threshold (10)
 	, gui (0)
@@ -148,10 +149,6 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s, std::string*
 	                                                                      this);
 
 	reload_maps ();
-
-	if (config) {
-		_config = *config;
-	}
 }
 
 GenericMidiControlProtocol::~GenericMidiControlProtocol ()

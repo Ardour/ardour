@@ -118,7 +118,7 @@ const int MACKIE_NAMESPACE::MackieControlProtocol::MAIN_MODIFIER_MASK = (MackieC
 
 MACKIE_NAMESPACE::MackieControlProtocol* MACKIE_NAMESPACE::MackieControlProtocol::_instance = 0;
 
-MackieControlProtocol::MackieControlProtocol (Session& session, std::string* config)
+MackieControlProtocol::MackieControlProtocol (Session& session, std::string const & config)
 #ifdef UF8
 	: ControlProtocol (session, _("SSL 360: UF8 UF1"))
 #else
@@ -151,9 +151,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session, std::string* con
 	DeviceInfo::reload_device_info ();
 	DeviceProfile::reload_device_profiles ();
 
-	if (config) {
-		set_device(*config, true);
-	}
+	set_device (config, true);
 
 	for (int i = 0; i < 9; i++) {
 		_last_bank[i] = 0;

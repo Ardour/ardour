@@ -28,7 +28,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 static ControlProtocol*
-new_wiimote_protocol (Session* s, void* config)
+new_wiimote_protocol (Session* s, std::string const & config)
 {
 	WiimoteControlProtocol* wmcp = new WiimoteControlProtocol (*s);
 	wmcp->set_active (true);

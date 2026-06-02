@@ -178,7 +178,7 @@ public:
 	bool (*available) ();                   /* called directly after loading module */
 	bool (*probe_port) ();                  /* called when ports change (PortRegisteredOrUnregistered) */
 	bool (*match_usb) (uint16_t, uint16_t); /* called when USB devices are hotplugged (libusb) */
-	ControlProtocol* (*initialize) (Session*, void* config);
+	ControlProtocol* (*initialize) (Session*, std::string const & config);
 	void (*destroy) (ControlProtocol*);
 	std::map<std::string, std::vector<std::string>> (*enumerate) ();
 };
