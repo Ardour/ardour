@@ -77,6 +77,7 @@ fixup_bundle_environment (int /*argc*/, char* argv[], string & localedir)
 		lpath.push_back ("share");
 		lpath.push_back ("locale");
 		localedir = canonical_path (Glib::build_filename (lpath)).c_str();
+		Glib::setenv ("GTK_LOCALEDIR", localedir, true);
 	}
 #endif
 
