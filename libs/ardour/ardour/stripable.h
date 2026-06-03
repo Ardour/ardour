@@ -79,6 +79,15 @@ class LIBARDOUR_API Stripable : public SessionObject,
 	bool is_surround_master() const { return _presentation_info.flags() & PresentationInfo::SurroundMaster; }
 	bool is_main_bus() const { return _presentation_info.flags() & PresentationInfo::MainBus; }
 	bool is_singleton () const { return _presentation_info.flags() & PresentationInfo::Singleton; }
+	/* no fancy bits set */
+	bool is_normal_route () const {
+		PresentationInfo::Flag f (PresentationInfo::Flag (
+			                          PresentationInfo::AudioTrack|
+			                          PresentationInfo::MidiTrack|
+			                          PresentationInfo::AudioBus|
+			                          PresentationInfo::MidiBus));
+		return (_presentation_info.flags() & f) && !is_singleton();
+	}
 
 	int set_state (XMLNode const&, int);
 
