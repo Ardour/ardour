@@ -4743,7 +4743,30 @@ Editor::add_stripables (StripableList& sl)
 	std::shared_ptr<Route> r;
 	TrackViewList new_selection;
 	bool changed = false;
-	bool from_scratch = (track_views.size() == 0);
+	int32_t real_routes = 0;
+
+	/* Count the number of "normal" tracks & busses */
+
+	{
+		std::shared_ptr<RouteList const> rl (_session->get_routes());
+
+		for (auto const & r : *rl) {
+			if (r->is_normal_route()) {
+				real_routes++;
+			}
+		}
+	}
+
+	/* Session::get_routes() will include the ones we just added */
+
+	for (auto & s : sl) {
+		if (s->is_normal_route()) {
+			real_routes--;
+		}
+	}
+
+	bool from_scratch = (real_routes <= 0);
+	bool initial_selection = (from_scratch || _no_not_select_reimported_tracks);
 
 	sl.sort (Stripable::Sorter());
 
@@ -4784,7 +4807,11 @@ Editor::add_stripables (StripableList& sl)
 			}
 
 			track_views.push_back (rtv);
-			new_selection.push_back (rtv);
+			if (!initial_selection || new_selection.empty()) {
+				if (r->is_normal_route()) {
+					new_selection.push_back (rtv);
+				}
+			}
 
 			rtv->effective_gain_display ();
 
@@ -4803,7 +4830,7 @@ Editor::add_stripables (StripableList& sl)
 	 * than just VCAs
 	 */
 
-	if (!from_scratch && !_no_not_select_reimported_tracks && !new_selection.empty()) {
+	if (!new_selection.empty()) {
 		selection->set (new_selection);
 		begin_selection_op_history();
 	}
