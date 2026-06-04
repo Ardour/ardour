@@ -139,7 +139,7 @@ Pianoroll::Pianoroll (std::string const & name, bool with_transport, bool expand
 	midi_inspector->chord_box->DropChord.connect ([this](std::vector<int> which_notes) { drop_selected_chord (which_notes); });
 
 	inspector_button.signal_clicked.connect (sigc::mem_fun (*this, &Pianoroll::inspector_button_clicked));
-	ArdourWidgets::set_tooltip (inspector_button, _("Expand/Collapse MIDI inspector"));
+	ArdourWidgets::set_tooltip (inspector_button, _("Expand/Collapse MIDI tools"));
 
 	build_upper_toolbar ();
 	build_grid_type_menu ();
