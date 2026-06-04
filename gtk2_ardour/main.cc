@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2005-2006 Taybin Rutkin <taybin@taybin.com>
  * Copyright (C) 2005-2007 Doug McLain <doug@nostar.net>
- * Copyright (C) 2005-2019 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2005-2026 Paul Davis <paul@linuxaudiosystems.com>
  * Copyright (C) 2006-2011 David Robillard <d@drobilla.net>
  * Copyright (C) 2006-2015 Tim Mayberry <mojofunk@gmail.com>
  * Copyright (C) 2006 Nick Mainsbridge <mainsbridge@gmail.com>
