@@ -300,7 +300,7 @@ MidiViewBackground::apply_note_range (uint8_t lowest, uint8_t highest, bool to_c
 		_visibility_note_range = FullRange;
 	} else if (_lowest_note == _data_note_min && _highest_note == _data_note_max) {
 		_visibility_note_range = ContentsRange;
-	} else if ( _data_note_max - _data_note_min < 11 &&
+	} else if ( _data_note_max - _data_note_min < 11 && _highest_note - _lowest_note == 11 &&
 	            _lowest_note <= _data_note_min && _highest_note >= _data_note_max )
 	{
 		/* if data range is smaller than one octave,
