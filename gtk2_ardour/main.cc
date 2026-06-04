@@ -8,7 +8,7 @@
  * Copyright (C) 2007-2012 Carl Hetherington <carl@carlh.net>
  * Copyright (C) 2008-2009 Hans Baier <hansfbaier@googlemail.com>
  * Copyright (C) 2013-2017 John Emmas <john@creativepost.co.uk>
- * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2013-2026 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
