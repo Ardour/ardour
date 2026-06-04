@@ -3712,6 +3712,14 @@ These settings will only take effect after %1 is restarted.\n\
 		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_note_bars_for_velocity)
 		            ));
 
+	add_option (_("Appearance/Editor"),
+	            new BoolOption (
+		            "use-cross-cursor",
+		            _("Use cross-cursor when editing MIDI"),
+		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_cross_cursor),
+		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_cross_cursor)
+		            ));
+
 	auto midi_color_mode = new ComboOption<ARDOUR::ColorMode> (
 		"default-midi-note-color-mode",
 		_("Default MIDI note colors"),

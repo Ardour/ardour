@@ -1407,6 +1407,10 @@ Pianoroll::note_left ()
 void
 Pianoroll::motion_track (ArdourCanvas::Duple const & pos)
 {
+	if (!UIConfiguration::instance().get_use_cross_cursor()) {
+		return;
+	}
+
 	assert (xcursor);
 
 	if (!_drags->active()) {
