@@ -5660,6 +5660,8 @@ Editor::ui_parameter_changed (string parameter)
 		_track_canvas->request_redraw (_track_canvas->visible_area());
 	} else if (parameter == "show-selection-marker") {
 		update_ruler_visibility ();
+	} else if (parameter == "use-cross-cursor") {
+		maybe_enable_cross_cursor ();
 	}
 }
 
