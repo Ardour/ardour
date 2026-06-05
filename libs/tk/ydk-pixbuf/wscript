@@ -39,6 +39,12 @@ def configure(conf):
     autowaf.check_pkg(conf, 'gobject-2.0', uselib_store='GOBJECT', mandatory=True)
     autowaf.check_pkg(conf, 'libpng', uselib_store='LIBPNG', mandatory=True)
     conf.check(header_name='unistd.h', define_name='HAVE_UNISTD_H',mandatory=False)
+    conf.check_cc(header_name='setjmp.h',
+                  define_name='HAVE_SIGSETJMP',
+                  uselib_store='SIGSETJMP',
+                  mandatory=False,
+                  defines=['_POSIX_C_SOURCE=200809L'],
+                  fragment = "#include <setjmp.h>\nint main (int argc, char **argv) { sigjmp_buf buf; return sigsetjmp(buf, 0); }")
     conf.check_cc(header_name='jpeglib.h',
                   define_name='HAVE_LIBJPEG',
                   uselib_store='LIBJPEG',
