@@ -695,7 +695,7 @@ Editor::Editor ()
 	add_notebook_page (_("Snaps"), _("Snapshots"), _snapshots->widget ());
 	add_notebook_page (_("Groups"), _("Track & Bus Groups"), _route_groups->widget ());
 	add_notebook_page (_("Marks"), _("Ranges & Marks"), _locations->widget ());
-	add_notebook_page (_("MIDITools"), _("MIDI Tools"), *_midi_inspector);
+	add_notebook_page (_("MIDI Tools"), _("MIDI Tools"), *_midi_inspector);
 
 	_notebook_tab2.set_index (4);
 
