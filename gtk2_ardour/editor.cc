@@ -383,6 +383,7 @@ Editor::Editor ()
 	, _visible_marker_types (all_marker_types)
 	, _visible_range_types (all_range_types)
 	, _midi_inspector (nullptr)
+	, xcursor (nullptr)
 {
 	/* we are a singleton */
 
