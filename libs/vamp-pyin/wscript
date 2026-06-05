@@ -40,3 +40,8 @@ def build(bld):
     autowaf.ensure_visible_symbols (obj, True)
     obj.vnum         = VAMP_PYIN_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'vamp')
+    if bld.env['build_target'] != 'msvc':
+        obj.cxxflags += ['-Wno-unused-but-set-variable']
+        if 'clang' in bld.env.CXX_NAME:
+            obj.cxxflags += ['-Wno-absolute-value']
+

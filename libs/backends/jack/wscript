@@ -81,6 +81,9 @@ def build(bld):
         obj.cxxflags = [ ]
         obj.cflags   = [ ]
 
+    if bld.env['build_target'] != 'msvc':
+        obj.cxxflags += ['-Wno-deprecated-declarations']
+
     if bld.is_defined ('HAVE_JACK_METADATA'):
         obj.cxxflags += [ '-DHAVE_JACK_METADATA' ]
         obj.cflags += [ '-DHAVE_JACK_METADATA' ]

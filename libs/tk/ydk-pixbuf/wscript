@@ -71,6 +71,27 @@ def build(bld):
     obj.vnum            = LIBYDKPIXBUF_VERSION
     obj.install_path    = bld.env['LIBDIR']
 
+    if bld.env['build_target'] != 'msvc':
+        obj.cflags += [
+            '-Wno-cast-function-type',
+            '-Wno-cast-qual',
+            '-Wno-deprecated-declarations',
+            '-Wno-implicit-fallthrough',
+            '-Wno-missing-prototypes',
+            '-Wno-pedantic',
+            '-Wno-shadow',
+            '-Wno-sign-compare',
+            '-Wno-unused-but-set-variable',
+        ]
+
+        if 'clang' in bld.env.CC_NAME:
+            obj.cflags += [
+                '-Wno-cast-align',
+                '-Wno-incompatible-pointer-types-discards-qualifiers',
+            ]
+        elif 'gcc' in bld.env.CC_NAME:
+            obj.cflags += ['-Wno-discarded-qualifiers']
+
     if sys.platform == 'darwin':
         obj.uselib     += ' OSX'
         obj.ldflags     = ' -lintl'

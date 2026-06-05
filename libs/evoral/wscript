@@ -64,6 +64,7 @@ def build(bld):
     libsmf.install_path = None
     if bld.env['build_target'] != 'mingw' and bld.env['build_target'] != 'msvc':
         libsmf.cflags       = [ bld.env['compiler_flags_dict']['pic'] ]
+        libsmf.cflags      += ['-Wno-sign-compare']
 
     lib_source = '''
             Control.cc
@@ -81,11 +82,15 @@ def build(bld):
     if bld.is_defined ('INTERNAL_SHARED_LIBS'):
         obj              = bld.shlib(features = 'cxx cxxshlib', source=lib_source)
         # DLL exports for this library
+        obj.cxxflags     = [ ]
         obj.defines      = [ 'LIBEVORAL_DLL_EXPORTS' ]
     else:
         obj              = bld.stlib(features = 'cxx cxxstlib', source=lib_source)
         obj.cxxflags     = [ bld.env['compiler_flags_dict']['pic'] ]
         obj.defines      = [ ]
+
+    if bld.env['build_target'] != 'msvc':
+        obj.cxxflags += ['-Wno-unused-result']
 
     obj.export_includes = ['.']
     obj.includes       = ['.', './src']

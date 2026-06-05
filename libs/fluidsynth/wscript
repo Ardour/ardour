@@ -61,6 +61,12 @@ def build(bld):
                )
 
     if bld.env['build_target'] != 'msvc':
-        obj.cflags += [ '-fvisibility=hidden', '-std=gnu99', '-Wno-unused-function' ]
+        obj.cflags += [
+            '-Wno-pedantic',
+            '-Wno-unknown-pragmas',
+            '-Wno-unused-function',
+            '-fvisibility=hidden',
+            '-std=gnu99',
+        ]
     else:
         obj.cflags += ['/wd5287', '/wd4005']

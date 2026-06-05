@@ -36,3 +36,19 @@ def build(bld):
     obj.target          = 'staffpad'
     obj.vnum            = STAFFPAD_LIB_VERSION
     obj.defines         = [ 'PACKAGE="' + I18N_PACKAGE + '"' ]
+
+    if bld.env['build_target'] != 'msvc':
+        obj.cflags += [
+            '-Wno-cast-qual',
+            '-Wno-missing-prototypes',
+            '-Wno-shadow',
+            '-Wno-strict-prototypes',
+        ]
+        obj.cxxflags += [
+            '-Wno-cast-qual',
+        ]
+
+        if 'clang' in bld.env.CC_NAME:
+            obj.cflags += ['-Wno-cast-align']
+        if 'clang' in bld.env.CXX_NAME:
+            obj.cxxflags += ['-Wno-unused-private-field']

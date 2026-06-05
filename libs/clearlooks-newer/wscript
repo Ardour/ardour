@@ -30,6 +30,15 @@ def build(bld):
 
     obj.use     = [ 'libztk', 'libytk', 'libydk-pixbuf' ]
     obj.uselib  = ' CAIRO PANGO'
+    if bld.env['build_target'] != 'msvc':
+        obj.cflags = [
+            '-Wno-cast-function-type',
+            '-Wno-cast-qual',
+            '-Wno-unused-result',
+        ]
+
+        if 'clang' in bld.env.CC_NAME:
+            obj.cflags += ['-Wno-literal-conversion']
 
     if sys.platform == 'darwin':
         # Bit of a hack: make a symlink to the .dylib that meets GTK's criteria for finding it (namely that the library must be a *.so

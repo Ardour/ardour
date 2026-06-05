@@ -48,3 +48,8 @@ def build(bld):
         obj.source += ' Onset.cpp '
         obj.uselib += ' AUBIO '
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'vamp')
+    if 'clang' in bld.env.CXX_NAME:
+        obj.cxxflags += [
+            '-Wno-unused-private-field',
+            '-Wno-vla-cxx-extension',
+        ]

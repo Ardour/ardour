@@ -18,4 +18,7 @@ def build(bld):
                    target = 'liblua',
                    uselib = [ 'SIGCPP', 'DL' ]
                )
+    if 'clang' in bld.env.CC_NAME:
+        obj.cxxflags += ['-Wno-string-plus-int']
+
     autowaf.ensure_visible_symbols (obj, True)

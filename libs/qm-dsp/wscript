@@ -97,3 +97,9 @@ def build(bld):
     if bld.env['build_target'] != 'mingw' and bld.env['build_target'] != 'msvc':
         obj.cxxflags += [ bld.env['compiler_flags_dict']['pic'] ]
         obj.cflags   += [ bld.env['compiler_flags_dict']['pic'] ]
+    if bld.env['build_target'] != 'msvc':
+        obj.cxxflags += ['-Wno-cast-qual']
+        if 'clang' in bld.env.CC_NAME:
+            obj.cxxflags += ['-Wno-unused-private-field']
+            obj.cflags += ['-Wno-cast-align']
+

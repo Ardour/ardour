@@ -207,3 +207,6 @@ def build(bld):
     obj.vnum            = LIBYTKMM_VERSION
     obj.install_path    = bld.env['LIBDIR']
 
+    if bld.env['build_target'] != 'msvc':
+        obj.cxxflags += ['-Wno-deprecated-declarations']
+

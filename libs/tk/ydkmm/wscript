@@ -64,3 +64,8 @@ def build(bld):
     obj.vnum            = LIBYDKMM_VERSION
     obj.install_path    = bld.env['LIBDIR']
 
+    if bld.env['build_target'] != 'msvc':
+        obj.cxxflags += [
+            '-Wno-cast-qual',
+            '-Wno-deprecated-declarations',
+        ]

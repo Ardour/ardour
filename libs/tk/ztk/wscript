@@ -69,6 +69,19 @@ def build(bld):
     obj.vnum            = LIBZTK_VERSION
     obj.install_path    = bld.env['LIBDIR']
 
+    if bld.env['build_target'] != 'msvc':
+        obj.cflags += [
+            '-Wno-cast-function-type',
+            '-Wno-cast-qual',
+            '-Wno-deprecated-declarations',
+            '-Wno-extra',
+            '-Wno-missing-field-initializers',
+            '-Wno-missing-prototypes',
+            '-Wno-pedantic',
+            '-Wno-sign-compare',
+            '-Wno-strict-prototypes',
+        ]
+
     if sys.platform == 'darwin':
         obj.uselib += ' OSX' # -framework Cocoa -framework CoreFoundation -framework ApplicationServices
 
