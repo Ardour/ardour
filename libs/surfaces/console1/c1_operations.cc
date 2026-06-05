@@ -1213,14 +1213,10 @@ Console1::map_encoder (ControllerID controllerID, std::shared_ptr<ARDOUR::Automa
 		return;
 	}
 
-	double val;
-	double gain;
+	double gain = 0.0;
 
-	if (!control) {
-		val = 0.0;
-	} else {
-		val = control->get_value ();
-		gain = control_to_midi (control, val);
+	if (control) {
+		gain = control_to_midi (control, control->get_value ());
 	}
 	try {
 		get_encoder (controllerID)->set_value (gain);
