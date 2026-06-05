@@ -2429,8 +2429,8 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs, 
 	/* check that settings have not changed */
 	assert (_n_bus_in == _component->getBusCount (Vst::kAudio, Vst::kInput));
 	assert (_n_bus_out == _component->getBusCount (Vst::kAudio, Vst::kOutput));
-	assert (_bus_info_in.size () == _n_bus_in);
-	assert (_bus_info_out.size () == _n_bus_out);
+	assert (_bus_info_in.size () == static_cast<size_t>(_n_bus_in));
+	assert (_bus_info_out.size () == static_cast<size_t>(_n_bus_out));
 
 	DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::enable_io: n_bus_in = %1 n_bus_out = %2\n", _n_bus_in, _n_bus_out));
 
