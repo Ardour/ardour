@@ -4382,8 +4382,7 @@ TempoMap::stretch_tempo (TempoPoint& focus, double tempo_value)
 
 		/* limit range of possible discovered tempo */
 
-		if (new_npm < 4.0 && new_npm > 400) {
-			/* too low of a tempo for our taste, bail out */
+		if (new_npm < 4.0 || new_npm > 400.0) {
 			*prev = old_prev;
 			focus = old_focus;
 			return;
@@ -4598,8 +4597,7 @@ TempoMap::solve_ramped_twist (TempoPoint& earlier, TempoPoint& later)
 
 		/* limit range of possible discovered tempo */
 
-		if (new_end_npm < 4.0 && new_end_npm > 400) {
-			/* too low of a tempo for our taste, bail out */
+		if (new_end_npm < 4.0 || new_end_npm > 400.0) {
 			return false;
 		}
 
@@ -4653,8 +4651,7 @@ TempoMap::solve_constant_twist (TempoPoint& earlier, TempoPoint& later)
 
 		/* limit range of possible discovered tempo */
 
-		if (new_npm < 4.0 && new_npm > 400) {
-			/* too low of a tempo for our taste, bail out */
+		if (new_npm < 4.0 || new_npm > 400.0) {
 			return false;
 		}
 
