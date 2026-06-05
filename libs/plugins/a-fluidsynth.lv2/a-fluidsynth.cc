@@ -1004,7 +1004,7 @@ restore (LV2_Handle                  instance,
 
 	value = retrieve (handle, self->afs_tuning, &size, &type, &valflags);
 	if (value && size == sizeof (LV2_Atom_Vector_Body) + 128 * sizeof (double) && type == self->atom_Vector) {
-		memcpy (self->queue_tuning, LV2_ATOM_BODY (value), 128 * sizeof (double));
+		memcpy (self->queue_tuning, LV2_ATOM_BODY_CONST (value), 128 * sizeof (double));
 		self->queue_retune = true;
 	}
 
