@@ -83,27 +83,6 @@ using namespace ArdourSurface::MACKIE_NAMESPACE;
 
 #define ui_context() MackieControlProtocol::instance() /* a UICallback-derived object that specifies the event loop for signal handling */
 
-// The MCU sysex header.4th byte Will be overwritten
-// when we get an incoming sysex that identifies
-// the device type
-static MidiByteArray mackie_sysex_hdr  ({MIDI::sysex, 0x0, 0x0, 0x66, 0x14});
-
-// The MCU extender sysex header.4th byte Will be overwritten
-// when we get an incoming sysex that identifies
-// the device type
-static MidiByteArray mackie_sysex_hdr_xt  ({MIDI::sysex, 0x0, 0x0, 0x66, 0x15});
-
-//QCON
-// The MCU sysex header for QCon Control surface
-static MidiByteArray mackie_sysex_hdr_qcon  ({MIDI::sysex, 0x0, 0x0, 0x66, 0x14});
-
-// The MCU sysex header for QCon Control - extender
-// The extender differs from Mackie by 4th bit - it's same like for main control surface (for display)
-static MidiByteArray mackie_sysex_hdr_xt_qcon  ({MIDI::sysex, 0x0, 0x0, 0x66, 0x14});
-
-
-static MidiByteArray empty_midi_byte_array;
-
 Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, uint32_t number, surface_type_t stype)
 	: _mcp (mcp)
 	, _stype (stype)
@@ -121,6 +100,24 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 	, is_v1m (false)
 	, is_p1m (false)
 	, is_p1nano (false)
+
+	  // 4th byte of these will be overwritten when we get an incoming sysex
+	  // that identifies the device type
+
+	  // The MCU sysex header
+	, mackie_sysex_hdr ({MIDI::sysex, 0x0, 0x0, 0x66, 0x14})
+
+	  // The MCU extender sysex header
+	, mackie_sysex_hdr_xt ({MIDI::sysex, 0x0, 0x0, 0x66, 0x15})
+
+	  // The MCU sysex header for QCon Control surface
+	, mackie_sysex_hdr_qcon ({MIDI::sysex, 0x0, 0x0, 0x66, 0x14})
+
+	  // The MCU sysex header for QCon Control - extender.  The extender
+	  // differs from Mackie by 4th bit - it's same like for main control
+	  // surface (for display) */
+	, mackie_sysex_hdr_xt_qcon ({MIDI::sysex, 0x0, 0x0, 0x66, 0x14})
+
 	, input_source (0)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "Surface::Surface init\n");

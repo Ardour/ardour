@@ -195,6 +195,10 @@ public:
 	PBD::ScopedConnection   master_connection;
 	bool                   _joystick_active;
 
+	// SYSEX headers for this device
+	MidiByteArray mackie_sysex_hdr;
+	MidiByteArray mackie_sysex_hdr_xt;
+
 	void handle_midi_sysex (MIDI::Parser&, MIDI::byte *, size_t count);
 	MidiByteArray host_connection_query (MidiByteArray& bytes);
 	MidiByteArray host_connection_confirmation (const MidiByteArray& bytes);

@@ -272,6 +272,12 @@ public:
 	bool is_p1m;
 	bool is_p1nano;
 
+	// SYSEX headers for this device
+	MidiByteArray mackie_sysex_hdr;
+	MidiByteArray mackie_sysex_hdr_xt;
+	MidiByteArray mackie_sysex_hdr_qcon;
+	MidiByteArray mackie_sysex_hdr_xt_qcon;
+
 	/** Send RGB colors to P1-M and V1-M scribble strips (iCON-specific SysEx) */
 	MidiByteArray display_colors_on_p1m_v1m (const std::array<uint8_t, 24>& rgb_values) const;
 	std::array<uint8_t, 24> _solid_icon_rgb{};     // stores the real solid colors

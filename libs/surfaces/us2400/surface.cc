@@ -73,18 +73,6 @@ using namespace US2400;
 
 #define ui_context() US2400Protocol::instance() /* a UICallback-derived object that specifies the event loop for signal handling */
 
-// The MCU sysex header.4th byte Will be overwritten
-// when we get an incoming sysex that identifies
-// the device type
-static MidiByteArray mackie_sysex_hdr  ({MIDI::sysex, 0x0, 0x0, 0x66, 0x14});
-
-// The MCU extender sysex header.4th byte Will be overwritten
-// when we get an incoming sysex that identifies
-// the device type
-static MidiByteArray mackie_sysex_hdr_xt  ({MIDI::sysex, 0x0, 0x0, 0x66, 0x15});
-
-static MidiByteArray empty_midi_byte_array;
-
 Surface::Surface (US2400Protocol& mcp, const std::string& device_name, uint32_t number, surface_type_t stype)
 	: _mcp (mcp)
 	, _stype (stype)
@@ -96,6 +84,16 @@ Surface::Surface (US2400Protocol& mcp, const std::string& device_name, uint32_t 
 	, _master_fader (0)
 	, _last_master_gain_written (-0.0f)
 	, _joystick_active (false)
+
+	  // 4th byte of these will be overwritten when we get an incoming sysex
+	  // that identifies the device type
+
+	  // The MCU sysex header
+	, mackie_sysex_hdr ({MIDI::sysex, 0x0, 0x0, 0x66, 0x14})
+
+	  // The MCU extender sysex header
+	, mackie_sysex_hdr_xt ({MIDI::sysex, 0x0, 0x0, 0x66, 0x15})
+
 	, connection_state (0)
 	, input_source (0)
 {
