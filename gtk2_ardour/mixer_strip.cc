@@ -808,8 +808,6 @@ MixerStrip::update_spacer ()
 		gint scrollbar_spacing = 0;
 		gtk_widget_style_get (GTK_WIDGET (scroller.gobj()), "scrollbar-spacing", &scrollbar_spacing, NULL);
 		_scrollbar_spacer_height += scrollbar_spacing;
-
-		_scrollbar_spacer_height += 6; // track_display_frame border/shadow
 	}
 	spacer.set_size_request (-1, _scrollbar_spacer_height);
 }
