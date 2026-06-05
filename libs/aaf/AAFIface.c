@@ -788,7 +788,7 @@ aafi_newTransition (AAF_Iface* aafi, aafiAudioTrack* track)
 aafiMarker*
 aafi_newMarker (AAF_Iface* aafi, aafRational_t* editRate, aafPosition_t start, aafPosition_t length, char* name, char* comment, uint16_t*(RGBColor[]))
 {
-	aafiMarker* marker = calloc (sizeof (aafiMarker), 1);
+	aafiMarker* marker = calloc (1, sizeof (aafiMarker));
 
 	if (!marker) {
 		error ("Out of memory");
