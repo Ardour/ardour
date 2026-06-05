@@ -37,7 +37,6 @@ ControlPointDialog::ControlPointDialog (ControlPoint* p, bool multi)
 	: ArdourDialog (_("Control point"))
 	, point_ (p)
 	, toggle_all_ (_("Apply to selected points"))
-	, all_selected_points_ (true)
 {
 	assert (point_);
 

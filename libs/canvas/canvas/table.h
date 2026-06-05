@@ -95,11 +95,8 @@ public:
 	FourDimensions margin;
 	Distance row_spacing;
 	Distance col_spacing;
-	bool collapse_on_hide;
 	bool row_homogenous;
 	bool col_homogenous;
-	bool draw_hgrid;
-	bool draw_vgrid;
 
 	mutable bool ignore_child_changes;
 

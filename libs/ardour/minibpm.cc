@@ -135,7 +135,7 @@ class FourierFilterbank
 public:
     FourierFilterbank(int n, double fs, double minFreq, double maxFreq,
 		      bool windowed) :
-	m_n(n), m_fs(fs), m_fmin(minFreq), m_fmax(maxFreq),
+	m_n(n), m_fmin(minFreq), m_fmax(maxFreq),
 	m_windowed(windowed)
     {
 	m_binmin = int(floor(n * m_fmin) / fs);
@@ -170,7 +170,6 @@ public:
 
 private:
     int m_n;
-    double m_fs;
     double m_fmin;
     double m_fmax;
     bool m_windowed;

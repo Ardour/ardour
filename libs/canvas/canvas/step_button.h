@@ -60,9 +60,6 @@ public:
 	double current_value;
 	bool prelight;
 	bool highlight;
-	bool dragging;
-	bool clicking;
-	double scale;
 	Gtkmm2ext::HSV color;
 
 	Cairo::RefPtr<Cairo::LinearGradient> inactive_pattern;

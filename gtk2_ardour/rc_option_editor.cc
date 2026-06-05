@@ -1883,8 +1883,6 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 		PBD::ScopedConnection protocol_status_connection;
 		uint32_t _ignore_view_change;
 		uint32_t _protocol_change;
-		Gtk::Button* active_edit_button;
-		Gtk::Button* devices_edit_button;
 };
 
 class VideoTimelineOptions : public OptionEditorMiniPage

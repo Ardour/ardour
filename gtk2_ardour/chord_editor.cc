@@ -33,8 +33,7 @@
 using namespace ARDOUR;
 
 ChordEditor::ChordEditor (EditingContext& ec, ChordProvider& cp, int cs)
-	: editing_context (ec)
-	, chord_provider (cp)
+	: chord_provider (cp)
 	, _chord_size (cs)
 	, button_sizing (Gtk::SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL))
 	, canonical_label (_("Canonical name"))

@@ -62,7 +62,6 @@ public:
 	Text* _label;
 	bool prelight;
 	bool highlight;
-	bool clicking;
 	Gtkmm2ext::HSV color;
 
 	bool event_handler (GdkEvent*);
