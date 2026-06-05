@@ -1304,9 +1304,9 @@ TempoMap::shift (timepos_t const & at, BBT_Offset const & offset)
 		if (p->sclock() >= at_superclocks) {
 			if (offset.bars > p->bbt().bars) {
 
-				TempoPoint* tp;
-				MeterPoint* mp;
-				Point* rp;
+				TempoPoint* tp = nullptr;
+				MeterPoint* mp = nullptr;
+				Point* rp = nullptr;
 
 				if (dynamic_cast<MusicTimePoint*> (&*p)) {
 					break;
