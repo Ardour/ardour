@@ -676,8 +676,6 @@ LadspaPlugin::latency_compute_run ()
 	activate ();
 
 	uint32_t port_index = 0;
-	uint32_t in_index = 0;
-	uint32_t out_index = 0;
 	const samplecnt_t bufsize = 1024;
 	LADSPA_Data buffer[bufsize];
 
@@ -693,10 +691,8 @@ LadspaPlugin::latency_compute_run ()
 		if (LADSPA_IS_PORT_AUDIO (port_descriptor (port_index))) {
 			if (LADSPA_IS_PORT_INPUT (port_descriptor (port_index))) {
 				connect_port (port_index, buffer);
-				in_index++;
 			} else if (LADSPA_IS_PORT_OUTPUT (port_descriptor (port_index))) {
 				connect_port (port_index, buffer);
-				out_index++;
 			}
 		}
 		port_index++;

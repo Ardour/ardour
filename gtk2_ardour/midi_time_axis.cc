@@ -111,7 +111,6 @@ using namespace Editing;
 using namespace std;
 
 // Minimum height at which a control is displayed
-static const uint32_t MIDI_CONTROLS_BOX_MIN_HEIGHT = 160;
 static const uint32_t KEYBOARD_MIN_HEIGHT = 130;
 
 #define DEFAULT_MIDNAM_MODEL (X_("Generic"))

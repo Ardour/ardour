@@ -1057,7 +1057,6 @@ MidiView::chord_is_selected () const
 		return false;
 	}
 
-	size_t cnt = 1;
 	auto s = _selection.begin();
 
 	Temporal::Beats start = (*s)->note()->time();
@@ -1068,7 +1067,6 @@ MidiView::chord_is_selected () const
 		if (delta.abs() > Temporal::Beats (0, 15)) { /* 1/128th note */
 			return false;
 		}
-		++cnt;
 		++s;
 	}
 	return true;

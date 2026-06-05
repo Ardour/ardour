@@ -666,7 +666,7 @@ bool
 PTFFormat::parseaudio(void) {
 	bool found = false;
 	uint32_t nwavs = 0;
-	uint32_t i, n;
+	uint32_t n;
 	uint32_t pos = 0;
 	std::string wavtype;
 	std::string wavname;
@@ -684,7 +684,7 @@ PTFFormat::parseaudio(void) {
 					//nstrings = u_endian_read4(&_ptfunxored[c->offset+1], is_bigendian);
 					pos = c->offset + 11;
 					// Found wav list
-					for (i = n = 0; (pos < c->offset + c->block_size) && (n < nwavs); i++) {
+					for (n = 0; (pos < c->offset + c->block_size) && (n < nwavs);) {
 						wavname = parsestring(pos);
 						pos += wavname.size() + 4;
 						wavtype = std::string((const char*)&_ptfunxored[pos], 4);

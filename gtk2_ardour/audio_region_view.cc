@@ -1514,7 +1514,6 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev, b
 		return;
 	}
 
-	uint32_t before_p, after_p;
 	double mx = ev->button.x;
 	double my = ev->button.y;
 

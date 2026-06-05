@@ -5981,7 +5981,6 @@ Editor::apply_filter (Filter& filter, string command, ProgressReporter* progress
 	CursorRAII cr (*this, _cursors->wait);
 	bool in_command = false;
 
-	int n = 0;
 	int const N = rs.size ();
 
 	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ) {
@@ -6043,7 +6042,6 @@ Editor::apply_filter (Filter& filter, string command, ProgressReporter* progress
 		}
 
 		r = tmp;
-		++n;
 	}
 
 	if (in_command) {

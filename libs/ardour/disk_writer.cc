@@ -957,11 +957,10 @@ DiskWriter::seek (samplepos_t /*sample*/, bool /*complete_refill*/)
 void
 DiskWriter::reset_capture ()
 {
-	uint32_t n;
 	ChannelList::const_iterator chan;
 	std::shared_ptr<ChannelList const> c = channels.reader();
 
-	for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
+	for (chan = c->begin(); chan != c->end(); ++chan) {
 		(*chan)->wbuf->reset ();
 	}
 
@@ -1208,7 +1207,6 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 	SourceList midi_srcs;
 	ChannelList::const_iterator chan;
 	std::shared_ptr<ChannelList const> c = channels.reader();
-	uint32_t n = 0;
 	bool mark_write_completed = false;
 
 	finish_capture (c);
@@ -1267,7 +1265,7 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 
 	/* figure out the name for this take */
 
-	for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
+	for (chan = c->begin(); chan != c->end(); ++chan) {
 
 		std::shared_ptr<AudioFileSource> as = (*chan)->write_source;
 

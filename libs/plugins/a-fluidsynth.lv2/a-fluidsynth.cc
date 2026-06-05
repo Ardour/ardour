@@ -1069,12 +1069,11 @@ mn_file (LV2_Handle instance)
 	pf ("      </AvailableForChannels>\n");
 	pf ("      <UsesControlNameList Name=\"Controls\"/>\n");
 
-	int bn = 1;
 	pthread_mutex_lock (&self->bp_lock);
 	const BPMap& ps (self->presets);
 	pthread_mutex_unlock (&self->bp_lock);
 
-	for (BPMap::const_iterator i = ps.begin (); i != ps.end (); ++i, ++bn) {
+	for (BPMap::const_iterator i = ps.begin (); i != ps.end (); ++i) {
 		pf ("      <PatchBank Name=\"Patch Bank %d\">\n", i->first);
 		if (i->second.size () > 0) {
 			pf ("        <MIDICommands>\n");

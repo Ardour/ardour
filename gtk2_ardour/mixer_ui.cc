@@ -615,7 +615,6 @@ Mixer_UI::add_stripables (StripableList& slist)
 {
 	Gtk::TreeModel::Children::iterator insert_iter = track_model->children().end();
 	bool from_scratch = (track_model->children().size() == 0);
-	uint32_t nroutes = 0;
 
 	slist.sort (Stripable::Sorter());
 
@@ -625,8 +624,6 @@ Mixer_UI::add_stripables (StripableList& slist)
 		if (!s) {
 			continue;
 		}
-
-		nroutes++;
 
 		// XXX what does this special case do?
 		// A: it inserts the new track at the correct point in the model

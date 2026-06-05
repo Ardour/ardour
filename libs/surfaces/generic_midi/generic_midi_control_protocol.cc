@@ -829,11 +829,6 @@ GenericMidiControlProtocol::enumerate ()
 			return devices;
 		}
 
-		const XMLNodeList& children (root->children());
-		XMLNodeConstIterator citer;
-
-		MIDIControllable* mc;
-
 		DEBUG_TRACE (DEBUG::GenericMidi, "Getting manufacturers\n");
 		string manufacturer;
 		string name;

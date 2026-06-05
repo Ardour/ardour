@@ -814,8 +814,6 @@ icon_transport_auto_return (cairo_t* cr, const int width, const int height, cons
 static void
 icon_transport_follow_playhead (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
 {
-	static const double degrees = M_PI / 180.0;
-
 	double linew = std::max(1, std::min(width, height) / 16);
 	cairo_set_line_width(cr,linew);
 
@@ -861,8 +859,6 @@ icon_transport_follow_playhead (cairo_t* cr, const int width, const int height, 
 static void
 icon_transport_follow_edits (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
 {
-	static const double degrees = M_PI / 180.0;
-
 	double linew = std::max(1, std::min(width, height) / 16);
 	cairo_set_line_width(cr,linew);
 
