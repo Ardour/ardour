@@ -10,7 +10,6 @@
 
 #ifdef PLATFORM_WINDOWS
 # include <io.h>
-# include <windows.h>
 #else
 # include <unistd.h>
 #endif

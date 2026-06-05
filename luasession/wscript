@@ -77,6 +77,8 @@ def build(bld):
         obj.use    += ' libappleutility'
     elif bld.env['build_target'] == 'mingw' or bld.env['build_target'] == 'msvc':
         obj.linkflags += bld.env['compiler_flags_dict']['mconsole']
+        if bld.env['build_target'] == 'msvc':
+            obj.lib = ['getopt']
 
     if bld.is_defined('NEED_INTL'):
         obj.linkflags.append ('-lintl')
