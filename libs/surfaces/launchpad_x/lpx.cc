@@ -86,10 +86,10 @@ using namespace Gtkmm2ext;
 
 #ifdef LAUNCHPAD_MINI
 #define LAUNCHPADX   0x0113
-static const std::vector<int> sysex_header ({ 0xf0, 0x00, 0x20, 0x29, 0x2, 0xd });
+static constexpr std::array<MIDI::byte, 6> sysex_header ({ 0xf0, 0x00, 0x20, 0x29, 0x2, 0xd });
 #else
 #define LAUNCHPADX   0x0103
-static const std::vector<int> sysex_header ({ 0xf0, 0x00, 0x20, 0x29, 0x2, 0xc });
+static constexpr std::array<MIDI::byte, 6> sysex_header ({ 0xf0, 0x00, 0x20, 0x29, 0x2, 0xc });
 #endif
 
 static int first_fader = 0x9;

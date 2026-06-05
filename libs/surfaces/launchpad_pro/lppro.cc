@@ -18,6 +18,7 @@
  */
 
 #include <algorithm>
+#include <array>
 #include <bitset>
 #include <cmath>
 #include <limits>
@@ -77,7 +78,7 @@ using namespace Gtkmm2ext;
 
 #define NOVATION          0x1235
 #define LAUNCHPADPROMK3   0x0123
-static const std::vector<int> sysex_header ({ 0xf0, 0x00, 0x20, 0x29, 0x2, 0xe });
+static constexpr std::array<MIDI::byte, 6> sysex_header ({ 0xf0, 0x00, 0x20, 0x29, 0x2, 0xe });
 static int first_fader = 0x9;
 
 const LaunchPadPro::PadID LaunchPadPro::all_pad_ids[] = {

@@ -35,7 +35,7 @@ namespace MIDI {
 	MidiByteArray buf;
 	buf << mba;
 
-	MidiByteArray direct({0xf0, 0x00, 0xf7});
+	MidiByteArray direct({0xf0, 0x70 | 0x01, 0xf7});
 
 	cout << mba << endl;
 	cout << buf << endl;
@@ -46,9 +46,13 @@ namespace MIDI {
 class MidiByteArray : public std::vector<MIDI::byte>
 {
 public:
-	MidiByteArray () = default;
+	MidiByteArray ()                                = default;
+	MidiByteArray (const MidiByteArray&)            = default;
+	MidiByteArray& operator= (const MidiByteArray&) = default;
+	MidiByteArray (MidiByteArray&&)                 = default;
+	MidiByteArray& operator= (MidiByteArray&&)      = default;
 
-	MidiByteArray (const std::vector<int>& array);
+	MidiByteArray (std::initializer_list<int> bytes);
 
 	bool compare_n (const MidiByteArray& other, MidiByteArray::size_type len) const;
 

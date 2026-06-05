@@ -27,10 +27,15 @@
 #include <iomanip>
 #include <stdexcept>
 
-MidiByteArray::MidiByteArray (const std::vector<int>& vec)
+MidiByteArray::MidiByteArray (std::initializer_list<int> bytes)
 {
-	for (size_t i = 0; i < vec.size(); ++i) {
-		push_back (static_cast<MIDI::byte>(vec[i]));
+	for (size_t i = 0; i < bytes.size (); ++i) {
+		const int byte = bytes.begin ()[i];
+		if (byte >= 0 && byte <= 255) {
+			push_back (static_cast<MIDI::byte> (byte));
+		} else {
+			throw std::out_of_range ("MIDI byte");
+		}
 	}
 }
 

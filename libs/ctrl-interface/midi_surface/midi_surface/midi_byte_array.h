@@ -18,6 +18,7 @@
 #ifndef midi_byte_array_h
 #define midi_byte_array_h
 
+#include <array>
 #include <iostream>
 #include <vector>
 
@@ -37,7 +38,7 @@ namespace MIDI {
 	MidiByteArray buf;
 	buf << mba;
 
-	MidiByteArray direct({0xf0, 0x00, 0xf7});
+	MidiByteArray direct({0xf0, 0x70 | 0x01, 0xf7});
 
 	cout << mba << endl;
 	cout << buf << endl;
@@ -48,9 +49,18 @@ namespace MIDI {
 class ARDOURSURFACE_API MidiByteArray : public std::vector<MIDI::byte>
 {
 public:
-	MidiByteArray () : std::vector<MIDI::byte>() {};
+	MidiByteArray ()                                = default;
+	MidiByteArray (const MidiByteArray&)            = default;
+	MidiByteArray& operator= (const MidiByteArray&) = default;
+	MidiByteArray (MidiByteArray&&)                 = default;
+	MidiByteArray& operator= (MidiByteArray&&)      = default;
 
-	MidiByteArray (const std::vector<int>& array);
+	MidiByteArray (std::initializer_list<int> bytes);
+
+	template<size_t count>
+	MidiByteArray (std::array<MIDI::byte, count> array)
+		: std::vector<MIDI::byte>{array.data (), array.data () + count}
+	{}
 
 	bool compare_n (const MidiByteArray& other, MidiByteArray::size_type len) const;
 
