@@ -63,7 +63,6 @@ def build(bld):
     libsmf.use          = [ 'libtemporal' ]
     libsmf.install_path = None
     if bld.env['build_target'] != 'mingw' and bld.env['build_target'] != 'msvc':
-        libsmf.cxxflags     = [ bld.env['compiler_flags_dict']['pic'] ]
         libsmf.cflags       = [ bld.env['compiler_flags_dict']['pic'] ]
 
     lib_source = '''
@@ -80,13 +79,12 @@ def build(bld):
 
     # Library
     if bld.is_defined ('INTERNAL_SHARED_LIBS'):
-        obj              = bld.shlib(features = 'c cxx cshlib cxxshlib', source=lib_source)
+        obj              = bld.shlib(features = 'cxx cxxshlib', source=lib_source)
         # DLL exports for this library
         obj.defines      = [ 'LIBEVORAL_DLL_EXPORTS' ]
     else:
-        obj              = bld.stlib(features = 'c cxx cstlib cxxstlib', source=lib_source)
+        obj              = bld.stlib(features = 'cxx cxxstlib', source=lib_source)
         obj.cxxflags     = [ bld.env['compiler_flags_dict']['pic'] ]
-        obj.cflags       = [ bld.env['compiler_flags_dict']['pic'] ]
         obj.defines      = [ ]
 
     obj.export_includes = ['.']
@@ -114,7 +112,6 @@ def build(bld):
         obj.install_path   = ''
         if bld.env['TEST_COVERAGE']:
             obj.linkflags      = ['--coverage']
-            obj.cflags         = ['--coverage']
             obj.cxxflags       = ['--coverage']
         obj.defines        = ['PACKAGE="libevoral"']
 
@@ -136,7 +133,6 @@ def build(bld):
         obj.defines      = ['PACKAGE="libevoraltest"']
         if bld.env['TEST_COVERAGE']:
             obj.linkflags      = ['--coverage']
-            obj.cflags         = ['--coverage']
             obj.cxxflags       = ['--coverage']
 
 def test(ctx):
