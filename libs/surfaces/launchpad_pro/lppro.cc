@@ -77,7 +77,7 @@ using namespace Gtkmm2ext;
 
 #define NOVATION          0x1235
 #define LAUNCHPADPROMK3   0x0123
-static const std::vector<MIDI::byte> sysex_header ({ 0xf0, 0x00, 0x20, 0x29, 0x2, 0xe });
+static const std::vector<int> sysex_header ({ 0xf0, 0x00, 0x20, 0x29, 0x2, 0xe });
 static int first_fader = 0x9;
 
 const LaunchPadPro::PadID LaunchPadPro::all_pad_ids[] = {
@@ -584,7 +584,7 @@ LaunchPadPro::set_device_mode (DeviceMode m)
 void
 LaunchPadPro::handle_midi_sysex (MIDI::Parser& parser, MIDI::byte* raw_bytes, size_t sz)
 {
-	MidiByteArray m (sz, raw_bytes);
+	MidiByteArray m = MidiByteArray::copy (sz, raw_bytes);
 	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("Sysex, %1 bytes parser %2 %s\n", sz, &parser, m));
 
 	if (&parser != _daw_in_port->parser()) {

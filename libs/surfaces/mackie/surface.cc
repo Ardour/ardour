@@ -86,20 +86,20 @@ using namespace ArdourSurface::MACKIE_NAMESPACE;
 // The MCU sysex header.4th byte Will be overwritten
 // when we get an incoming sysex that identifies
 // the device type
-static MidiByteArray mackie_sysex_hdr  (5, MIDI::sysex, 0x0, 0x0, 0x66, 0x14);
+static MidiByteArray mackie_sysex_hdr  ({MIDI::sysex, 0x0, 0x0, 0x66, 0x14});
 
 // The MCU extender sysex header.4th byte Will be overwritten
 // when we get an incoming sysex that identifies
 // the device type
-static MidiByteArray mackie_sysex_hdr_xt  (5, MIDI::sysex, 0x0, 0x0, 0x66, 0x15);
+static MidiByteArray mackie_sysex_hdr_xt  ({MIDI::sysex, 0x0, 0x0, 0x66, 0x15});
 
 //QCON
 // The MCU sysex header for QCon Control surface
-static MidiByteArray mackie_sysex_hdr_qcon  (5, MIDI::sysex, 0x0, 0x0, 0x66, 0x14);
+static MidiByteArray mackie_sysex_hdr_qcon  ({MIDI::sysex, 0x0, 0x0, 0x66, 0x14});
 
 // The MCU sysex header for QCon Control - extender
 // The extender differs from Mackie by 4th bit - it's same like for main control surface (for display)
-static MidiByteArray mackie_sysex_hdr_xt_qcon  (5, MIDI::sysex, 0x0, 0x0, 0x66, 0x14);
+static MidiByteArray mackie_sysex_hdr_xt_qcon  ({MIDI::sysex, 0x0, 0x0, 0x66, 0x14});
 
 
 static MidiByteArray empty_midi_byte_array;
@@ -580,7 +580,7 @@ Surface::master_meter_changed ()
 		/* we can use up to 13 segments */
 
 		segment = lrintf ((result.second/115.0) * 13.0);
-		write (MidiByteArray (2, 0xd1, (i<<4) | segment));
+		write (MidiByteArray ({0xd1, static_cast<int>(i<<4) | segment}));
 	}
 }
 
@@ -621,7 +621,7 @@ Surface::master_display (uint32_t line_number, const std::string& line)
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("master display: line %1 = %2\n", line_number, line));
 
-	retval <<  MidiByteArray (5, MIDI::sysex, 0x0, 0x0, 0x67, 0x15);
+	retval <<  MidiByteArray ({MIDI::sysex, 0x0, 0x0, 0x67, 0x15});
 	// code for display
 	retval << 0x13;
 
@@ -654,12 +654,12 @@ MidiByteArray
 Surface::blank_master_display (uint32_t line_number)
 {
 	if (line_number == 0) {
-		return MidiByteArray (15, MIDI::sysex, 0x0, 0x0, 0x67, 0x15, 0x13, 0x31
-                      , 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, MIDI::eox);
+		return MidiByteArray ({MIDI::sysex, 0x0, 0x0, 0x67, 0x15, 0x13, 0x31
+                      , 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, MIDI::eox});
 	}
 	else {
-		return MidiByteArray (15, MIDI::sysex, 0x0, 0x0, 0x67, 0x15, 0x13, 0x69
-                      , 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, MIDI::eox);
+		return MidiByteArray ({MIDI::sysex, 0x0, 0x0, 0x67, 0x15, 0x13, 0x69
+                      , 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, MIDI::eox});
 	}
 }
 
@@ -887,7 +887,7 @@ Surface::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* ev
 void
 Surface::handle_midi_sysex (MIDI::Parser &, MIDI::byte * raw_bytes, size_t count)
 {
-	MidiByteArray bytes (count, raw_bytes);
+	MidiByteArray bytes = MidiByteArray::copy (count, raw_bytes);
 
 	if (_mcp.device_info().no_handshake()) {
 		turn_it_on ();
@@ -1020,7 +1020,7 @@ Surface::host_connection_confirmation (const MidiByteArray & bytes)
 	}
 
 	// send version request
-	return MidiByteArray (2, 0x13, 0x00);
+	return MidiByteArray ({0x13, 0x00});
 }
 
 void
@@ -1115,8 +1115,8 @@ Surface::zero_all ()
 			current_display[1] = string();
 		}
 		if (_has_master_meter) {
-			_port->write (MidiByteArray (2, 0xd1, 0x00));
-			_port->write (MidiByteArray (2, 0xd1, 0x10));
+			_port->write (MidiByteArray ({0xd1, 0x00}));
+			_port->write (MidiByteArray ({0xd1, 0x10}));
 		}
 
 	}
@@ -1323,8 +1323,8 @@ Surface::show_two_char_display (const std::string & msg, const std::string & dot
 		return;
 	}
 
-	MidiByteArray right (3, 0xb0, 0x4b, 0x00);
-	MidiByteArray left (3, 0xb0, 0x4a, 0x00);
+	MidiByteArray right ({0xb0, 0x4b, 0x00});
+	MidiByteArray left ({0xb0, 0x4a, 0x00});
 
 	right[2] = translate_seven_segment (msg[0]) +  (dots[0] == '.' ? 0x40 : 0x00);
 	left[2] = translate_seven_segment (msg[1]) +  (dots[1] == '.' ? 0x40 : 0x00);
@@ -1374,7 +1374,7 @@ Surface::display_timecode (const std::string & timecode, const std::string & las
 		if (local_timecode[i] == last_timecode[i]) {
 			continue;
 		}
-		MidiByteArray retval (2, 0xb0, position);
+		MidiByteArray retval ({0xb0, position});
 		retval << translate_seven_segment (local_timecode[i]);
 		_port->write (retval);
 	}
@@ -1500,7 +1500,7 @@ void
 Surface::say_hello ()
 {
 	/* wakeup for Mackie Control */
-	MidiByteArray wakeup (7, MIDI::sysex, 0x00, 0x00, 0x66, 0x14, 0x00, MIDI::eox);
+	MidiByteArray wakeup ({MIDI::sysex, 0x00, 0x00, 0x66, 0x14, 0x00, MIDI::eox});
 	_port->write (wakeup);
 	wakeup[4] = 0x15; /* wakup Mackie XT */
 	_port->write (wakeup);
@@ -1634,7 +1634,7 @@ Surface::hui_heartbeat ()
 		return;
 	}
 
-	MidiByteArray msg (3, MIDI::on, 0x0, 0x0);
+	MidiByteArray msg ({MIDI::on, 0x0, 0x0});
 	_port->write (msg);
 }
 

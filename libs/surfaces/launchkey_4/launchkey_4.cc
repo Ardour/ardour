@@ -353,7 +353,7 @@ LaunchKey4::begin_using_device ()
 	/* get device model */
 
 	_data_required = true;
-	MidiByteArray device_inquiry (6, 0xf0, 0x7e, 0x7f, 0x06, 0x01, 0xf7);
+	MidiByteArray device_inquiry ({0xf0, 0x7e, 0x7f, 0x06, 0x01, 0xf7});
 	write (device_inquiry);
 
 	return 0;
@@ -2132,7 +2132,7 @@ LaunchKey4::set_display_target (DisplayTarget dt, int field, std::string const &
 void
 LaunchKey4::configure_display (DisplayTarget target, int config)
 {
-	MidiByteArray msg (9, 0xf0, 0x00, 0x29, 0xff, 0xff, 0x04, 0xff, 0xff, 0xf7);
+	MidiByteArray msg ({0xf0, 0x00, 0x29, 0xff, 0xff, 0x04, 0xff, 0xff, 0xf7});
 
 	msg[3] = (device_pid >> 8) & 0x7f;
 	msg[4] = device_pid & 0x7f;

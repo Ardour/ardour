@@ -187,7 +187,7 @@ class Push2 : public MIDISurface
 			, perma_color (LED::Black)
 		{}
 
-		MidiByteArray state_msg () const { return MidiByteArray (3, 0x90|_state, _extra, _color_index); }
+		MidiByteArray state_msg () const { return MidiByteArray ({0x90|_state, _extra, _color_index}); }
 
 		int coord () const { return (y * 8) + x; }
 		int note_number() const { return extra(); }
@@ -232,7 +232,7 @@ class Push2 : public MIDISurface
 			, long_press_method (long_press)
 		{}
 
-		MidiByteArray state_msg () const { return MidiByteArray (3, 0xb0|_state, _extra, _color_index); }
+		MidiByteArray state_msg () const { return MidiByteArray ({0xb0|_state, _extra, _color_index}); }
 		int controller_number() const { return extra(); }
 
 		ButtonID id;

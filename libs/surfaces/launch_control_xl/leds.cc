@@ -59,25 +59,25 @@ using namespace PBD;
 MidiByteArray
 LaunchControlXL::SelectButton::state_msg(bool light) const {
   uint8_t velocity = ( color() + flag() ) * light;
-  return MidiByteArray (11, 0xF0, 0x00, 0x20, 0x29, 0x02, 0x11, 0x78, lcxl->template_number(), index(), velocity, 0xF7);
+  return MidiByteArray ({0xF0, 0x00, 0x20, 0x29, 0x02, 0x11, 0x78, lcxl->template_number(), index(), velocity, 0xF7});
 }
 
 MidiByteArray
 LaunchControlXL::TrackButton::state_msg(bool light) const {
   uint8_t velocity = ( color() + flag() ) * light;
-  return MidiByteArray (11, 0xF0, 0x00, 0x20, 0x29, 0x02, 0x11, 0x78, lcxl->template_number(), index(), velocity, 0xF7);
+  return MidiByteArray ({0xF0, 0x00, 0x20, 0x29, 0x02, 0x11, 0x78, lcxl->template_number(), index(), velocity, 0xF7});
 
 }
 
 MidiByteArray
 LaunchControlXL::TrackStateButton::state_msg(bool light) const {
   uint8_t velocity = ( color() + flag() ) * light;
-  return MidiByteArray (11, 0xF0, 0x00, 0x20, 0x29, 0x02, 0x11, 0x78, lcxl->template_number(), index(), velocity, 0xF7);
+  return MidiByteArray ({0xF0, 0x00, 0x20, 0x29, 0x02, 0x11, 0x78, lcxl->template_number(), index(), velocity, 0xF7});
 
 }
 
 MidiByteArray
 LaunchControlXL::Knob::state_msg(bool light) const {
   uint8_t velocity = ( color() + flag() ) * light;
-  return MidiByteArray (11, 0xF0, 0x00, 0x20, 0x29, 0x02, 0x11, 0x78, lcxl->template_number(), index(), velocity, 0xF7);
+  return MidiByteArray ({0xF0, 0x00, 0x20, 0x29, 0x02, 0x11, 0x78, lcxl->template_number(), index(), velocity, 0xF7});
 }

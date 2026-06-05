@@ -68,5 +68,5 @@ Fader::update_message ()
 	last_update_position = posi;
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("generate fader message for position %1 (%2)\n", position, posi));
-	return MidiByteArray  (3, 0xe0 + id(), posi & 0x7f, posi >> 7);
+	return MidiByteArray  ({0xe0 + id(), posi & 0x7f, posi >> 7});
 }

@@ -436,7 +436,7 @@ LaunchControlXL::do_request (LaunchControlRequest * req)
 void
 LaunchControlXL::reset(uint8_t chan)
 {
-	MidiByteArray msg (3, 176 + chan, 0, 0); // turn off all leds, reset buffer settings and duty cycle
+	MidiByteArray msg ({176 + chan, 0, 0}); // turn off all leds, reset buffer settings and duty cycle
 
 	write(msg);
 }
@@ -535,8 +535,8 @@ LaunchControlXL::handle_midi_sysex (MIDI::Parser&, MIDI::byte* raw_bytes, size_t
 		return;
 	}
 
-	MidiByteArray msg (sz, raw_bytes);
-	MidiByteArray lcxl_sysex_header (6, 0xF0, 0x00, 0x20, 0x29, 0x02, 0x11);
+	MidiByteArray msg = MidiByteArray::copy (sz, raw_bytes);
+	MidiByteArray lcxl_sysex_header ({0xF0, 0x00, 0x20, 0x29, 0x02, 0x11});
 
 	if (!lcxl_sysex_header.compare_n (msg, 6)) {
 		return;
@@ -1049,7 +1049,7 @@ LaunchControlXL::filter_stripables(StripableList& strips) const
 void
 LaunchControlXL::switch_template (uint8_t t)
 {
-	MidiByteArray msg (9, 0xf0, 0x00, 0x20, 0x29, 0x02, 0x11, 0x77, t, 0xf7);
+	MidiByteArray msg ({0xf0, 0x00, 0x20, 0x29, 0x02, 0x11, 0x77, t, 0xf7});
 	write (msg);
 }
 

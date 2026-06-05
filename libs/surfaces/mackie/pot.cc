@@ -90,7 +90,7 @@ Pot::set (float val, bool onoff, Mode mode)
 	/* outbound LED message requires 0x20 to be added to the LED's id
 	 */
 
-	return MidiByteArray (3, 0xb0, 0x20 + id(), msg);
+	return MidiByteArray ({0xb0, 0x20 + id(), msg});
 
 }
 

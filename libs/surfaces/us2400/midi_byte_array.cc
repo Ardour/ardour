@@ -27,35 +27,20 @@
 #include <iomanip>
 #include <stdexcept>
 
-MidiByteArray::MidiByteArray (size_t size, MIDI::byte array[])
-  : std::vector<MIDI::byte>()
+MidiByteArray::MidiByteArray (const std::vector<int>& vec)
 {
-	for  (size_t i = 0; i < size; ++i)
-	{
-		push_back (array[i]);
+	for (size_t i = 0; i < vec.size(); ++i) {
+		push_back (static_cast<MIDI::byte>(vec[i]));
 	}
 }
 
-MidiByteArray::MidiByteArray (size_t count, MIDI::byte first, ...)
-  : vector<MIDI::byte>()
+MidiByteArray MidiByteArray::copy (size_t count, const MIDI::byte* arr)
 {
-	push_back (first);
-	va_list var_args;
-	va_start (var_args, first);
-	for  (size_t i = 1; i < count; ++i)
-	{
-		MIDI::byte b = va_arg (var_args, int);
-		push_back (b);
-	}
-	va_end (var_args);
-}
-
-
-void MidiByteArray::copy (size_t count, MIDI::byte * arr)
-{
+	MidiByteArray result;
 	for (size_t i = 0; i < count; ++i) {
-		push_back (arr[i]);
+		result.push_back (arr[i]);
 	}
+	return result;
 }
 
 MidiByteArray & operator <<  (MidiByteArray & mba, const MIDI::byte & b)

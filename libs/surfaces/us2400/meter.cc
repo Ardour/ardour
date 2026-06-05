@@ -103,12 +103,12 @@ Meter::send_update (Surface& surface, float dB)
 	if (def > 100.0f) {
 		if (!overload_on) {
 			overload_on = true;
-			surface.write (MidiByteArray (2, 0xd0, (id() << 4) | 0xe));
+			surface.write (MidiByteArray ({0xd0, (id() << 4) | 0xe}));
 		}
 	} else {
 		if (overload_on) {
 			overload_on = false;
-			surface.write (MidiByteArray (2, 0xd0, (id() << 4) | 0xf));
+			surface.write (MidiByteArray ({0xd0, (id() << 4) | 0xf}));
 		}
 	}
 
@@ -126,11 +126,11 @@ Meter::send_update (Surface& surface, float dB)
 	last_update_segment = segment;
 
 
-	surface.write (MidiByteArray (2, 0xd0, (id()<<4) | segment));
+	surface.write (MidiByteArray ({0xd0, (id()<<4) | segment}));
 }
 
 MidiByteArray
 Meter::zero ()
 {
-	return MidiByteArray (2, 0xD0, (id()<<4 | 0));
+	return MidiByteArray ({0xD0, (id()<<4 | 0)});
 }

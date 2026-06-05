@@ -76,13 +76,13 @@ Meter::send_update (Surface& surface, float dB)
 	if (result.first) {
 		if (!overload_on) {
 			overload_on = true;
-			surface.write (MidiByteArray (2, 0xd0, (id() << 4) | 0xe));
+			surface.write (MidiByteArray ({0xd0, (id() << 4) | 0xe}));
 
 		}
 	} else {
 		if (overload_on) {
 			overload_on = false;
-			surface.write (MidiByteArray (2, 0xd0, (id() << 4) | 0xf));
+			surface.write (MidiByteArray ({0xd0, (id() << 4) | 0xf}));
 		}
 	}
 
@@ -90,13 +90,13 @@ Meter::send_update (Surface& surface, float dB)
 
 	int segment = lrintf ((result.second/115.0) * 13.0);
 
-	surface.write (MidiByteArray (2, 0xd0, (id()<<4) | segment));
+	surface.write (MidiByteArray ({0xd0, (id()<<4) | segment}));
 }
 
 MidiByteArray
 Meter::zero ()
 {
-	return MidiByteArray (2, 0xD0, (id()<<4 | 0));
+	return MidiByteArray ({0xD0, (id()<<4 | 0)});
 }
 
 std::pair<bool, float>

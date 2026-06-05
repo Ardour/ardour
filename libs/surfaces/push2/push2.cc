@@ -460,7 +460,7 @@ void
 Push2::init_touch_strip (bool shift)
 {
 	const int bits = (shift ? 0xc : 0x68);
-	const MidiByteArray msg (9, 0xf0, 0x00, 0x21, 0x1d, 0x01, 0x01, 0x17, bits, 0xf7);
+	const MidiByteArray msg ({0xf0, 0x00, 0x21, 0x1d, 0x01, 0x01, 0x17, bits, 0xf7});
 	write (msg);
 }
 
@@ -473,8 +473,8 @@ Push2::handle_midi_sysex (MIDI::Parser&, MIDI::byte* raw_bytes, size_t sz)
 		return;
 	}
 
-	MidiByteArray msg (sz, raw_bytes);
-	MidiByteArray push2_sysex_header (6, 0xF0, 0x00, 0x21, 0x1D, 0x01, 0x01);
+	MidiByteArray msg = MidiByteArray::copy (sz, raw_bytes);
+	MidiByteArray push2_sysex_header ({0xF0, 0x00, 0x21, 0x1D, 0x01, 0x01});
 
 	if (!push2_sysex_header.compare_n (msg, 6)) {
 		return;
@@ -1428,7 +1428,7 @@ Push2::get_color_index (Color rgba)
 		_color_map_free_list.pop();
 	}
 
-	MidiByteArray palette_msg (17,
+	MidiByteArray palette_msg ({
 	                           0xf0,
 	                           0x00 , 0x21, 0x1d, 0x01, 0x01, 0x03, /* reset palette header */
 	                           0x00, /* index = 7 */
@@ -1436,7 +1436,7 @@ Push2::get_color_index (Color rgba)
 	                           0x00, 0x00, /* g = 10 & 11 */
 	                           0x00, 0x00, /* b = 12 & 13 */
 	                           0x00, 0x00, /* w (a?) = 14 & 15*/
-	                           0xf7);
+	                           0xf7});
 	palette_msg[7] = index;
 	palette_msg[8] = r & 0x7f;
 	palette_msg[9] = (r & 0x80) >> 7;
@@ -1449,7 +1449,7 @@ Push2::get_color_index (Color rgba)
 
 	write (palette_msg);
 
-	MidiByteArray update_pallette_msg (8, 0xf0, 0x00, 0x21, 0x1d, 0x01, 0x01, 0x05, 0xF7);
+	MidiByteArray update_pallette_msg ({0xf0, 0x00, 0x21, 0x1d, 0x01, 0x01, 0x05, 0xF7});
 	write (update_pallette_msg);
 
 	_color_map[rgba] = index;
@@ -1545,14 +1545,14 @@ Push2::use_previous_layout ()
 void
 Push2::request_pressure_mode ()
 {
-	MidiByteArray msg (8, 0xF0, 0x00, 0x21, 0x1D, 0x01, 0x01, 0x1F, 0xF7);
+	MidiByteArray msg ({0xF0, 0x00, 0x21, 0x1D, 0x01, 0x01, 0x1F, 0xF7});
 	write (msg);
 }
 
 void
 Push2::set_pressure_mode (PressureMode pm)
 {
-	MidiByteArray msg (9, 0xF0, 0x00, 0x21, 0x1D, 0x01, 0x01, 0x1E, 0x0, 0xF7);
+	MidiByteArray msg ({0xF0, 0x00, 0x21, 0x1D, 0x01, 0x01, 0x1E, 0x0, 0xF7});
 
 	switch (pm) {
 	case AfterTouch:

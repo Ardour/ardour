@@ -1106,7 +1106,7 @@ Strip::display (uint32_t lcd_number, uint32_t line_number, const std::string& li
 		lcd_label_pitch = _lcd2_label_pitch;
 		max_char_count = lcd_label_pitch - 1;
 
-		retval <<  MidiByteArray (5, MIDI::sysex, 0x0, 0x0, 0x67, 0x15);
+		retval <<  MidiByteArray ({MIDI::sysex, 0x0, 0x0, 0x67, 0x15});
 		// code for display
 		retval << 0x13;
 

@@ -76,12 +76,12 @@ using namespace US2400;
 // The MCU sysex header.4th byte Will be overwritten
 // when we get an incoming sysex that identifies
 // the device type
-static MidiByteArray mackie_sysex_hdr  (5, MIDI::sysex, 0x0, 0x0, 0x66, 0x14);
+static MidiByteArray mackie_sysex_hdr  ({MIDI::sysex, 0x0, 0x0, 0x66, 0x14});
 
 // The MCU extender sysex header.4th byte Will be overwritten
 // when we get an incoming sysex that identifies
 // the device type
-static MidiByteArray mackie_sysex_hdr_xt  (5, MIDI::sysex, 0x0, 0x0, 0x66, 0x15);
+static MidiByteArray mackie_sysex_hdr_xt  ({MIDI::sysex, 0x0, 0x0, 0x66, 0x15});
 
 static MidiByteArray empty_midi_byte_array;
 
@@ -696,7 +696,7 @@ Surface::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* ev
 void
 Surface::handle_midi_sysex (MIDI::Parser &, MIDI::byte * raw_bytes, size_t count)
 {
-	MidiByteArray bytes (count, raw_bytes);
+	MidiByteArray bytes = MidiByteArray::copy (count, raw_bytes);
 
 	/* always save the device type ID so that our outgoing sysex messages
 	 * are correct
@@ -806,7 +806,7 @@ Surface::host_connection_confirmation (const MidiByteArray & bytes)
 	}
 
 	// send version request
-	return MidiByteArray (2, 0x13, 0x00);
+	return MidiByteArray ({0x13, 0x00});
 }
 
 void
@@ -992,7 +992,7 @@ void
 Surface::say_hello ()
 {
 	/* wakeup for Mackie Control */
-	MidiByteArray wakeup (7, MIDI::sysex, 0x00, 0x00, 0x66, 0x14, 0x00, MIDI::eox);
+	MidiByteArray wakeup ({MIDI::sysex, 0x00, 0x00, 0x66, 0x14, 0x00, MIDI::eox});
 	_port->write (wakeup);
 	wakeup[4] = 0x15; /* wakup Mackie XT */
 	_port->write (wakeup);
@@ -1099,7 +1099,7 @@ Surface::hui_heartbeat ()
 		return;
 	}
 
-	MidiByteArray msg (3, MIDI::on, 0x0, 0x0);
+	MidiByteArray msg ({MIDI::on, 0x0, 0x0});
 	_port->write (msg);
 }
 

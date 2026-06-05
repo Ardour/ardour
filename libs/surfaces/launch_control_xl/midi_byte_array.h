@@ -35,7 +35,7 @@ namespace MIDI {
 	MidiByteArray buf;
 	buf << mba;
 
-	MidiByteArray direct( 3, 0xf0, 0x00, 0xf7 );
+	MidiByteArray direct({0xf0, 0x00, 0xf7});
 
 	cout << mba << endl;
 	cout << buf << endl;
@@ -46,19 +46,14 @@ namespace MIDI {
 class MidiByteArray : public std::vector<MIDI::byte>
 {
 public:
-	MidiByteArray() : std::vector<MIDI::byte>() {}
+	MidiByteArray () = default;
 
-	MidiByteArray( size_t count, MIDI::byte array[] );
+	MidiByteArray (const std::vector<int>& array);
 
 	bool compare_n (const MidiByteArray& other, MidiByteArray::size_type len) const;
 
-	/**
-		Accepts a preceding count, and then a list of bytes
-	*/
-	MidiByteArray( size_t count, MIDI::byte first, ... );
-
 	/// copy the given number of bytes from the given array
-	void copy( size_t count, MIDI::byte arr[] );
+	static MidiByteArray copy (size_t count, const MIDI::byte* arr);
 };
 
 /// append the given byte to the end of the array
