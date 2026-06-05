@@ -680,7 +680,6 @@ def build(bld):
     obj.uselib       = 'UUID FLAC FONTCONFIG GTHREAD OGG PANGOMM CURL DL CANVAS FFTW3F LO TAGLIB XML LILV RUBBERBAND AUBIO LRDF ARCHIVE VAMPSDK VAMPHOSTSDK GLIBMM GIOMM PANGOFT2 LIBPNG LIBJPEG'
 
     if bld.env['build_target'] == 'msvc':
-        obj.env['LIB_LO'] = ['liblo']
         obj.use += ['liblua']
         obj.uselib += ' PANGOCAIRO GDI32'
         obj.lib = ['getopt']
