@@ -20,6 +20,7 @@
 #pragma once
 
 #include <inttypes.h>
+#include <stdint.h>
 
 #include "midi++/libmidi_visibility.h"
 
@@ -35,7 +36,7 @@ namespace MIDI {
 	typedef int64_t  samplecnt_t;
 	typedef uint32_t pframes_t;
 
-	enum eventType {
+	enum eventType : uint8_t {
 	    none = 0x0,
 	    raw = 0xF4, /* undefined in MIDI spec */
 	    any = 0xF5, /* undefined in MIDI spec */
