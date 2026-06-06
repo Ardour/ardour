@@ -1499,7 +1499,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			, _ignore_view_change (0)
 			, _protocol_change (0)
 		{
-			int scale = UIConfiguration::instance ().get_font_scale() / 102400;
+			float scale = UIConfiguration::instance ().get_ui_scale();
 
 			// Active Scroller
 			active_heading.add_to_page (this);
