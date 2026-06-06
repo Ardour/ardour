@@ -71,8 +71,6 @@ Meter::send_update (Surface& surface, float dB)
 {
 	std::pair<bool,float> result = calculate_meter_over_and_deflection(dB);
 
-	MidiByteArray msg;
-
 	if (result.first) {
 		if (!overload_on) {
 			overload_on = true;

@@ -572,8 +572,6 @@ Surface::master_meter_changed ()
 		float dB = _master_stripable->peak_meter()->meter_level (i, ARDOUR::MeterPeak);
 		std::pair<bool,float> result = Meter::calculate_meter_over_and_deflection(dB);
 
-		MidiByteArray msg;
-
 		/* we can use up to 13 segments */
 
 		segment = lrintf ((result.second/115.0) * 13.0);
