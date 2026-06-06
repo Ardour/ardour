@@ -473,8 +473,8 @@ Push2::handle_midi_sysex (MIDI::Parser&, MIDI::byte* raw_bytes, size_t sz)
 		return;
 	}
 
-	MidiByteArray msg = MidiByteArray::copy (sz, raw_bytes);
-	MidiByteArray push2_sysex_header ({0xF0, 0x00, 0x21, 0x1D, 0x01, 0x01});
+	const MidiByteArray msg = MidiByteArray::copy (sz, raw_bytes);
+	const MidiByteArray push2_sysex_header ({0xF0, 0x00, 0x21, 0x1D, 0x01, 0x01});
 
 	if (!push2_sysex_header.compare_n (msg, 6)) {
 		return;
@@ -1449,7 +1449,7 @@ Push2::get_color_index (Color rgba)
 
 	write (palette_msg);
 
-	MidiByteArray update_pallette_msg ({0xf0, 0x00, 0x21, 0x1d, 0x01, 0x01, 0x05, 0xF7});
+	const MidiByteArray update_pallette_msg ({0xf0, 0x00, 0x21, 0x1d, 0x01, 0x01, 0x05, 0xF7});
 	write (update_pallette_msg);
 
 	_color_map[rgba] = index;
@@ -1545,7 +1545,7 @@ Push2::use_previous_layout ()
 void
 Push2::request_pressure_mode ()
 {
-	MidiByteArray msg ({0xF0, 0x00, 0x21, 0x1D, 0x01, 0x01, 0x1F, 0xF7});
+	const MidiByteArray msg ({0xF0, 0x00, 0x21, 0x1D, 0x01, 0x01, 0x1F, 0xF7});
 	write (msg);
 }
 

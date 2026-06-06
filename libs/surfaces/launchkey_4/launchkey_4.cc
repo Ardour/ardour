@@ -353,7 +353,7 @@ LaunchKey4::begin_using_device ()
 	/* get device model */
 
 	_data_required = true;
-	MidiByteArray device_inquiry ({0xf0, 0x7e, 0x7f, 0x06, 0x01, 0xf7});
+	const MidiByteArray device_inquiry ({0xf0, 0x7e, 0x7f, 0x06, 0x01, 0xf7});
 	write (device_inquiry);
 
 	return 0;
@@ -418,11 +418,7 @@ LaunchKey4::finish_begin_using_device ()
 void
 LaunchKey4::set_daw_mode (bool yn)
 {
-	MidiByteArray msg;
-
-	msg.push_back (0x9f);
-	msg.push_back (0xc);
-	msg.push_back (yn ? 0x7f : 0x0);
+	const MidiByteArray msg ({0x9f, 0xc, yn ? 0x7f : 0x0});
 	daw_write (msg);
 
 	if (yn) {
@@ -2082,18 +2078,16 @@ LaunchKey4::set_pad_function (PadFunction f)
 void
 LaunchKey4::select_display_target (DisplayTarget dt)
 {
-	MidiByteArray msg;
-
-	msg.push_back (0xf0);
-	msg.push_back (0x0);
-	msg.push_back (0x20);
-	msg.push_back (0x29);
-	msg.push_back ((device_pid >> 8) & 0x7f);
-	msg.push_back (device_pid & 0x7f);
-	msg.push_back (0x4);
-	msg.push_back (dt);
-	msg.push_back (0x7f);
-	msg.push_back (0xf7);
+	const MidiByteArray msg ({0xf0,
+	                          0x0,
+	                          0x20,
+	                          0x29,
+	                          (device_pid >> 8) & 0x7f,
+	                          device_pid & 0x7f,
+	                          0x4,
+	                          dt,
+	                          0x7f,
+	                          0xf7});
 
 	daw_write (msg);
 }
@@ -2107,17 +2101,16 @@ LaunchKey4::set_plugin_encoder_name (int encoder, int field, std::string const &
 void
 LaunchKey4::set_display_target (DisplayTarget dt, int field, std::string const & str, bool display)
 {
-	MidiByteArray msg;
-
-	msg.push_back (0xf0);
-	msg.push_back (0x0);
-	msg.push_back (0x20);
-	msg.push_back (0x29);
-	msg.push_back ((device_pid >> 8) & 0x7f);
-	msg.push_back (device_pid & 0x7f);
-	msg.push_back (0x6);
-	msg.push_back (dt);
-	msg.push_back (display ? ((1<<6) | (field & 0x7f)) : (field & 0x7f));
+	MidiByteArray msg (
+	  {0xf0,
+	   0x0,
+	   0x20,
+	   0x29,
+	   (device_pid >> 8) & 0x7f,
+	   device_pid & 0x7f,
+	   0x6,
+	   dt,
+	   display ? ((1 << 6) | (field & 0x7f)) : (field & 0x7f)});
 
 	for (auto c : str) {
 		msg.push_back (c & 0x7f);
@@ -2132,13 +2125,14 @@ LaunchKey4::set_display_target (DisplayTarget dt, int field, std::string const &
 void
 LaunchKey4::configure_display (DisplayTarget target, int config)
 {
-	MidiByteArray msg ({0xf0, 0x00, 0x29, 0xff, 0xff, 0x04, 0xff, 0xff, 0xf7});
-
-	msg[3] = (device_pid >> 8) & 0x7f;
-	msg[4] = device_pid & 0x7f;
-
-	msg[6] = target;
-	msg[7] = config & 0x7f;
+	const MidiByteArray msg ({0xf0,
+	                          0x00,
+	                          0x29,
+	                          (device_pid >> 8) & 0x7f,
+	                          device_pid & 0x7f,
+	                          0x04,
+	                          target,
+	                          config & 0x7f});
 
 	daw_write (msg);
 }

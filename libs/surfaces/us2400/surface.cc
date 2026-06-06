@@ -1097,7 +1097,7 @@ Surface::hui_heartbeat ()
 		return;
 	}
 
-	MidiByteArray msg ({MIDI::on, 0x0, 0x0});
+	const MidiByteArray msg ({MIDI::on, 0x0, 0x0});
 	_port->write (msg);
 }
 

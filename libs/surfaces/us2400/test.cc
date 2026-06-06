@@ -18,7 +18,7 @@ namespace MIDI {
 
 int main()
 {
-	MidiByteArray bytes( 4, 0xf0, 0x01, 0x03, 0x7f );
+	const MidiByteArray bytes({0xf0, 0x01, 0x03, 0x7f});
 	cout << bytes << endl;
 	return 0;
 }

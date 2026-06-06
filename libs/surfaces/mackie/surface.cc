@@ -965,14 +965,12 @@ calculate_challenge_response (MidiByteArray::iterator begin, MidiByteArray::iter
 	back_insert_iterator<MidiByteArray> back  (l);
 	copy (begin, end, back);
 
-	MidiByteArray retval;
-
 	// this is how to calculate the response to the challenge.
 	// from the Logic docs.
-	retval <<  (0x7f &  (l[0] +  (l[1] ^ 0xa) - l[3]));
-	retval <<  (0x7f &  ( (l[2] >> l[3]) ^  (l[0] + l[3])));
-	retval <<  (0x7f &  ((l[3] -  (l[2] << 2)) ^  (l[0] | l[1])));
-	retval <<  (0x7f &  (l[1] - l[2] +  (0xf0 ^  (l[3] << 4))));
+	const MidiByteArray retval ({0x7f & (l[0] + (l[1] ^ 0xa) - l[3]),
+	                             0x7f & ((l[2] >> l[3]) ^ (l[0] + l[3])),
+	                             0x7f & ((l[3] - (l[2] << 2)) ^ (l[0] | l[1])),
+	                             0x7f & (l[1] - l[2] + (0xf0 ^ (l[3] << 4)))});
 
 	return retval;
 }
@@ -1318,11 +1316,15 @@ Surface::show_two_char_display (const std::string & msg, const std::string & dot
 		return;
 	}
 
-	MidiByteArray right ({0xb0, 0x4b, 0x00});
-	MidiByteArray left ({0xb0, 0x4a, 0x00});
+	const MidiByteArray right (
+	  {0xb0,
+	   0x4b,
+	   translate_seven_segment (msg[0]) + (dots[0] == '.' ? 0x40 : 0x00)});
 
-	right[2] = translate_seven_segment (msg[0]) +  (dots[0] == '.' ? 0x40 : 0x00);
-	left[2] = translate_seven_segment (msg[1]) +  (dots[1] == '.' ? 0x40 : 0x00);
+	const MidiByteArray left (
+	  {0xb0,
+	   0x4a,
+	   translate_seven_segment (msg[1]) + (dots[1] == '.' ? 0x40 : 0x00)});
 
 	_port->write (right);
 	_port->write (left);
@@ -1369,8 +1371,8 @@ Surface::display_timecode (const std::string & timecode, const std::string & las
 		if (local_timecode[i] == last_timecode[i]) {
 			continue;
 		}
-		MidiByteArray retval ({0xb0, position});
-		retval << translate_seven_segment (local_timecode[i]);
+		const MidiByteArray retval (
+		  {0xb0, position, translate_seven_segment (local_timecode[i])});
 		_port->write (retval);
 	}
 }
@@ -1629,7 +1631,7 @@ Surface::hui_heartbeat ()
 		return;
 	}
 
-	MidiByteArray msg ({MIDI::on, 0x0, 0x0});
+	const MidiByteArray msg ({MIDI::on, 0x0, 0x0});
 	_port->write (msg);
 }
 
@@ -1724,10 +1726,9 @@ Surface::display_colors_on_p1m_v1m (const std::array<uint8_t, 24>& rgb_values) c
 	/* Icon P1-M, P1-NANO and V1-M color SysEx: F0 00 02 4E 16 14 [8×(R G B)] F7
 	 * rgb_values: 24 bytes (8 strips × 3 RGB, each 0-127 / 0x00-0x7F)
 	*/
-	MidiByteArray midi_msg;
-	midi_msg << MIDI::sysex
-		<< 0x00 << 0x02 << 0x4E    // iCON manufacturer
-		<< 0x16 << 0x14;           // color command
+	MidiByteArray midi_msg({MIDI::sysex,
+	                        0x00, 0x02, 0x4E, // iCON manufacturer
+	                        0x16, 0x14});     // color command
 
 	for (uint8_t b : rgb_values) {
 		midi_msg << b;
