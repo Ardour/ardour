@@ -602,8 +602,6 @@ TempoPoint::superclock_at (Temporal::Beats const & qn) const
 
 		const double log_expr = superclocks_per_quarter_note() * _omega * DoubleableBeats (qn - _quarters).to_double();
 
-		// std::cerr << "logexpr " << log_expr << " from " << superclocks_per_quarter_note() << " * " << _omega << " * " << (qn - _quarters) << std::endl;
-
 		if (log_expr < -1.) {
 
 			/* The overwhelmingly likely reason for arriving here
@@ -629,8 +627,6 @@ TempoPoint::superclock_at (Temporal::Beats const & qn) const
 
 		} else {
 			r = _sclock + llrint (log1p (log_expr) / _omega);
-
-			// std::cerr << "r = " << _sclock << " + " << log1p (log_expr) / _omega << " => " << r << std::endl;
 
 			if (r < 0) {
 				std::cerr << "CASE 2: scpqn = " << superclocks_per_quarter_note() << std::endl;
@@ -4350,7 +4346,6 @@ TempoMap::stretch_tempo (TempoPoint& focus, double tempo_value)
 	// const double end_scpqn = focus.superclocks_per_quarter_note();
 	double scpqn = focus.superclocks_per_quarter_note ();
 	double new_npm;
-	int cnt = 0;
 
 	reset_starting_at (prev->sclock());;
 	return;
@@ -4398,15 +4393,9 @@ TempoMap::stretch_tempo (TempoPoint& focus, double tempo_value)
 		prev->set_end_npm (new_npm);
 		prev->compute_omega_from_next_tempo (focus);
 		err = prev->superclock_at (focus.beats()) - focus.sclock();
-		++cnt;
 	}
 
-	// std::cerr << "that took " << cnt << " iterations to get to < 1 sample\n";
-	// std::cerr << "final focus: " << focus << std::endl;
-	// std::cerr << "final prev: " << *prev << std::endl;
-
 	reset_starting_at (prev->sclock());
-	// dump (std::cerr);
 }
 
 #else
@@ -4611,14 +4600,11 @@ TempoMap::solve_ramped_twist (TempoPoint& earlier, TempoPoint& later)
 		err = earlier.superclock_at (later.beats()) - later.sclock();
 
 		if (cnt > 20000) {
-			// std::cerr << "nn: " << new_end_npm << " err " << err << " @ " << cnt << "solve_ramped_twist FAILED\n";
 			return false;
 		}
 
 		++cnt;
 	}
-
-	// std::cerr << "that took " << cnt << " iterations to get to < 1 sample\n";
 
 	return true;
 }
@@ -4664,7 +4650,6 @@ TempoMap::solve_constant_twist (TempoPoint& earlier, TempoPoint& later)
 		err = earlier.superclock_at (later.beats()) - later.sclock();
 
 		if (cnt > 20000) {
-			// std::cerr << "nn: " << new_npm << " err " << err << " @ " << cnt << "solve_constant_twist FAILED\n";
 			return false;
 		}
 

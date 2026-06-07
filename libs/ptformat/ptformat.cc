@@ -1118,7 +1118,7 @@ struct mchunk {
 
 bool
 PTFFormat::parsemidi(void) {
-	uint32_t i, j, k, n, rindex, tindex, mindex, count, rawindex;
+	uint32_t i, j, k, n, rindex, tindex, count, rawindex;
 	uint64_t n_midi_events, zero_ticks, start, offset, length, start2, stop2;
 	uint64_t midi_pos, midi_len, max_pos, region_pos;
 	uint8_t midi_velocity, midi_note;
@@ -1208,7 +1208,6 @@ PTFFormat::parsemidi(void) {
 	for (vector<PTFFormat::block_t>::iterator b = blocks.begin();
 			b != blocks.end(); ++b) {
 		if (b->content_type == 0x262c) {
-			mindex = 0;
 			for (vector<PTFFormat::block_t>::iterator c = b->child.begin();
 					c != b->child.end(); ++c) {
 				if (c->content_type == 0x262b) {
@@ -1247,7 +1246,6 @@ PTFFormat::parsemidi(void) {
 									stop2 = signedval;
 									j += 16;
 									//nn = u_endian_read4(&_ptfunxored[j], is_bigendian);
-									//verbose_printf("COMPOUND %s : c(%d) r(%d) ?(%d) ?(%d) (%llu %llu)(%llu %llu %llu)\n", str, mindex, rawindex, n, nn, start2, stop2, start, offset, length);
 									count++;
 								}
 							}
@@ -1261,8 +1259,6 @@ PTFFormat::parsemidi(void) {
 								r.length = mc.maxlen;
 								r.midi = mc.chunk;
 								_midiregions.push_back(r);
-								verbose_printf("%s : MIDI region mr(%d) ?(%d) (%lu %lu %lu)\n", regionname.c_str(), mindex, n, start, offset, length);
-								mindex++;
 							}
 						}
 					}
