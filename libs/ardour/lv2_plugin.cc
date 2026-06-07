@@ -2848,7 +2848,7 @@ LV2Plugin::handle_property_change (const uint32_t key, const LV2_Atom* value)
 {
 	if (_property_values.find (key) != _property_values.end ()) {
 		if (value->type == _uri_map.urids.atom_Bool) {
-			const float* val      = (const float*)LV2_ATOM_BODY_CONST (value);
+			const int32_t* val    = (const int32_t*)LV2_ATOM_BODY_CONST (value);
 			_property_values[key] = Variant (static_cast<bool> (*val));
 		} else if (value->type == _uri_map.urids.atom_Float) {
 			const float* val      = (const float*)LV2_ATOM_BODY_CONST (value);
