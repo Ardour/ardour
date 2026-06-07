@@ -2843,6 +2843,30 @@ write_position(LV2_Atom_Forge*     forge,
 	                       (const uint8_t*)(atom + 1));
 }
 
+void
+LV2Plugin::handle_property_change (const uint32_t key, const LV2_Atom* value)
+{
+	if (_property_values.find (key) != _property_values.end ()) {
+		if (value->type == _uri_map.urids.atom_Bool) {
+			const float* val      = (const float*)LV2_ATOM_BODY_CONST (value);
+			_property_values[key] = Variant (static_cast<bool> (*val));
+		} else if (value->type == _uri_map.urids.atom_Float) {
+			const float* val      = (const float*)LV2_ATOM_BODY_CONST (value);
+			_property_values[key] = Variant (*val);
+		} else if (value->type == _uri_map.urids.atom_Path) {
+			const char* path      = (const char*)LV2_ATOM_BODY_CONST (value);
+			_property_values[key] = Variant (Variant::PATH, path);
+		}
+
+		// TODO: This should emit the control's Changed signal
+		PropertyChanged (key, _property_values[key]);
+	} else {
+#ifndef NDEBUG
+		std::cerr << "warning: patch:Set for unknown property" << std::endl;
+#endif
+	}
+}
+
 int
 LV2Plugin::connect_and_run(BufferSet& bufs,
 		samplepos_t start, samplepos_t end, double speed,
@@ -3286,10 +3310,10 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 
 				// Intercept patch change messages to emit PropertyChanged signal
 				if ((flags & PORT_PATCHMSG)) {
-					LV2_Atom* atom = (LV2_Atom*)(data - sizeof(LV2_Atom));
+					const LV2_Atom* atom = (const LV2_Atom*)(data - sizeof(LV2_Atom));
 					if (atom->type == _uri_map.urids.atom_Blank ||
 					    atom->type == _uri_map.urids.atom_Object) {
-						LV2_Atom_Object* obj = (LV2_Atom_Object*)atom;
+						const LV2_Atom_Object* obj = (const LV2_Atom_Object*)atom;
 						if (obj->body.otype == _uri_map.urids.patch_Set) {
 							const LV2_Atom* property = NULL;
 							const LV2_Atom* value    = NULL;
@@ -3299,33 +3323,8 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 							                    0);
 
 							if (property && value && property->type == _uri_map.urids.atom_URID) {
-								const uint32_t prop_id  = ((const LV2_Atom_URID*)property)->body;
-								if (_property_values.find (prop_id) != _property_values.end()) {
-									if (value->type == _uri_map.urids.atom_Path) {
-										const char* path          = (const char*)LV2_ATOM_BODY_CONST(value);
-										_property_values[prop_id] = Variant(Variant::PATH, path);
-									}
-									else if (value->type == _uri_map.urids.atom_Float) {
-										const float* val          = (const float*)LV2_ATOM_BODY_CONST(value);
-										_property_values[prop_id] = Variant(Variant::FLOAT, *val);
-									}
-									else if (value->type == _uri_map.urids.atom_Bool) {
-										const float* val          = (const float*)LV2_ATOM_BODY_CONST(value);
-										_property_values[prop_id] = Variant(Variant::BOOL, *val);
-									}
-									// TODO add support for other props (Int, Bool, ..)
-
-									// TODO: This should emit the control's Changed signal
-									PropertyChanged(prop_id, _property_values[prop_id]);
-								} else {
-#ifndef NDEBUG
-									std::cerr << "warning: patch:Set for unknown property" << std::endl;
-#endif
-								}
-							} else {
-#ifndef NDEBUG
-								std::cerr << "warning: patch:Set for unsupported property" << std::endl;
-#endif
+								const uint32_t key = ((const LV2_Atom_URID*)property)->body;
+								handle_property_change(key, value);
 							}
 						}
 					}

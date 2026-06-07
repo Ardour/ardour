@@ -38,6 +38,11 @@
 #include "ardour/uri_map.h"
 #include "ardour/worker.h"
 
+#ifdef HAVE_LV2_1_18_6
+#include <lv2/atom/atom.h>
+#else
+#include <lv2/lv2plug.in/ns/ext/atom/atom.h>
+#endif
 
 #ifdef LV2_EXTENDED // -> needs to eventually go upstream to lv2plug.in
 #include "ardour/lv2_extensions.h"
@@ -292,6 +297,8 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	typedef std::map<uint32_t, AutomationCtrlPtr> AutomationCtrlMap;
 	AutomationCtrlMap _ctrl_map;
 	AutomationCtrlPtr get_automation_control (uint32_t);
+
+	void handle_property_change (const uint32_t key, const LV2_Atom* value);
 
 	/// Message send to/from UI via ports
 	struct UIMessage {
