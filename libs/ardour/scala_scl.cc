@@ -47,12 +47,16 @@ read_scl (std::ifstream& input_file)
 	*/
 
 	int non_commnets_processed = 0;
+#ifdef SCALA_STRICT
 	unsigned long entries = 0;
+#endif
 	int numerator, denominator;
 	std::string buffer;
 	std::smatch match, trimmed;
 	scale scala_scale;
+#ifdef SCALA_STRICT
 	bool description_parsed = false ;
+#endif
 
 #ifdef SCALA_STRICT
 	std::regex COMMENT_REGEX = std::regex("^!.*");
@@ -72,11 +76,10 @@ read_scl (std::ifstream& input_file)
 				// a final linefeed at the end of the file.
 				break;
 			}
-#endif
 			if (non_commnets_processed == 0){
 				description_parsed = true;
 			}
-
+#endif
 			non_commnets_processed = non_commnets_processed + 1;
 
 		} else {
@@ -86,12 +89,16 @@ read_scl (std::ifstream& input_file)
 			if (non_commnets_processed == 0) {
 				// First non-comment is the description. Can be ignored
 				non_commnets_processed = non_commnets_processed + 1;
+#ifdef SCALA_STRICT
 				description_parsed = true;
+#endif
 				continue;
 			}
 			else if (non_commnets_processed == 1){
 				// Second non-comment line containers the number of entries.
+#ifdef SCALA_STRICT
 				entries  = std::stoul(entry);
+#endif
 				non_commnets_processed = non_commnets_processed + 1;
 				continue;
 			}
