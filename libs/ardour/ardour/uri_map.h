@@ -64,6 +64,8 @@ public:
 
 		uint32_t atom_Chunk;
 		uint32_t atom_Path;
+		uint32_t atom_String;
+		uint32_t atom_URI;
 		uint32_t atom_Sequence;
 		uint32_t atom_eventTransfer;
 		uint32_t atom_URID;

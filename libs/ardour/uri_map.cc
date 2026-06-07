@@ -40,6 +40,8 @@ URIMap::URIDs::init(URIMap& uri_map)
 	// Use string literals here instead of LV2 defines to avoid LV2 dependency
 	atom_Chunk          = uri_map.uri_to_id("http://lv2plug.in/ns/ext/atom#Chunk");
 	atom_Path           = uri_map.uri_to_id("http://lv2plug.in/ns/ext/atom#Path");
+	atom_String         = uri_map.uri_to_id("http://lv2plug.in/ns/ext/atom#String");
+	atom_URI            = uri_map.uri_to_id("http://lv2plug.in/ns/ext/atom#URI");
 	atom_Sequence       = uri_map.uri_to_id("http://lv2plug.in/ns/ext/atom#Sequence");
 	atom_eventTransfer  = uri_map.uri_to_id("http://lv2plug.in/ns/ext/atom#eventTransfer");
 	atom_URID           = uri_map.uri_to_id("http://lv2plug.in/ns/ext/atom#URID");
