@@ -3124,7 +3124,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				                (const uint8_t*)(atom + 1))) {
 					error << "Failed to write data to LV2 event buffer\n";
 				}
-				/* Intercept patch:Set messages from GUIs (custom,
+				/* Intercept patch:Set and patch::Put messages from GUIs (custom,
 				 * or generic via LV2Plugin::set_property).
 				 */
 				else if (atom->type == _uri_map.urids.atom_Blank ||
@@ -3143,6 +3143,22 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 							const uint32_t prop_id = ((const LV2_Atom_URID*)property)->body;
 							if (_property_values.find (prop_id) != _property_values.end()) {
 								Plugin::state_changed ();
+							}
+						}
+					} else if (obj->body.otype == _uri_map.urids.patch_Put) {
+						const LV2_Atom_URID*	subject = nullptr;
+						const LV2_Atom_Object*	body    = nullptr;
+						lv2_atom_object_get(obj,
+											_uri_map.urids.patch_subject, &subject,
+											_uri_map.urids.patch_body,    &body,
+											0);
+
+						if (body && !subject) { // Put with no subject is for the plugin
+							LV2_ATOM_OBJECT_FOREACH (body, p) {
+								if (_property_values.find (p->key) != _property_values.end()) {
+									Plugin::state_changed ();
+									break;
+								}
 							}
 						}
 					}
@@ -3340,6 +3356,19 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 							if (property && value && property->type == _uri_map.urids.atom_URID) {
 								const uint32_t key = ((const LV2_Atom_URID*)property)->body;
 								handle_property_change(key, value);
+							}
+						} else if (obj->body.otype == _uri_map.urids.patch_Put) {
+							const LV2_Atom_URID*   subject = nullptr;
+							const LV2_Atom_Object* body    = nullptr;
+							lv2_atom_object_get(obj,
+												_uri_map.urids.patch_subject, &subject,
+												_uri_map.urids.patch_body,    &body,
+												0);
+
+							if (body && !subject) { // Put with no subject is for the plugin
+								LV2_ATOM_OBJECT_FOREACH (body, p) {
+									handle_property_change(p->key, &p->value);
+								}
 							}
 						}
 					}

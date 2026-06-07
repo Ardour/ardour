@@ -91,8 +91,11 @@ public:
 		uint32_t time_speed;
 		uint32_t time_scale;
 		uint32_t patch_Get;
+		uint32_t patch_Put;
 		uint32_t patch_Set;
+		uint32_t patch_body;
 		uint32_t patch_property;
+		uint32_t patch_subject;
 		uint32_t patch_value;
 		uint32_t state_StateChanged;
 #ifdef LV2_EXTENDED
