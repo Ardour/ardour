@@ -98,7 +98,7 @@ AutomationRegionView::create_line (std::shared_ptr<ARDOUR::AutomationList> list)
 {
 	_line = std::shared_ptr<EditorAutomationLine> (new MidiAutomationLine(
 				ARDOUR::EventTypeMap::instance().to_symbol(list->parameter()),
-				trackview, *get_canvas_frame(), list,
+				trackview, *this, *get_canvas_frame(), list,
 				std::dynamic_pointer_cast<ARDOUR::MidiRegion> (_region),
 				_parameter));
 	_line->set_colors();
