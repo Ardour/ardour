@@ -322,7 +322,7 @@ don't have any samples, just leave this setting as it is.\n\n\
 
 	Gtkmm2ext::add_volume_shortcuts (*clip_lib_chooser);
 	clip_lib_chooser->set_title (_("Default sample library location"));
-	clip_lib_chooser->set_current_folder (ARDOUR::platform_default_clip_library_dir());
+	clip_lib_chooser->set_current_folder (ARDOUR::clip_library_dir(true));
 	clip_lib_chooser->signal_selection_changed().connect (sigc::mem_fun (*this, &NewUserWizard::clip_lib_changed));
 	clip_lib_chooser->show ();
 
