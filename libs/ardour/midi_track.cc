@@ -1014,6 +1014,22 @@ MidiTrack::realtime_handle_transport_stopped ()
 {
 	Route::realtime_handle_transport_stopped ();
 	_disk_reader->resolve_tracker (_immediate_events, 0);
+
+	for (uint8_t channel = 0; channel <= 0xF; channel++) {
+
+		uint8_t ev[3] = { ((uint8_t) (MIDI_CMD_CONTROL | channel)), MIDI_CTL_SUSTAIN, 0 };
+
+		/* we need to send all notes off AND turn the
+		 * sustain/damper pedal off to handle synths
+		 * that prioritize sustain over AllNotesOff
+		 */
+
+		_immediate_events.write (0, Evoral::MIDI_EVENT, 3, ev);
+
+		ev[1] = MIDI_CTL_ALL_NOTES_OFF;
+
+		_immediate_events.write (0, Evoral::MIDI_EVENT, 3, ev);
+	}
 }
 
 void
