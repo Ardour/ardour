@@ -282,7 +282,30 @@ int main (int argc, char *argv[])
 		 * Setting "LANG" "LC_CTYPE" or "LC_ALL" to "C" will break various aspects,
 		 * but at least try to not translate some other system messages.
 		 */
-		Glib::setenv ("LC_MESSAGES", "C", true);
+		const char* p = g_getenv ("ARDOUR_LOCALE_DEBUG");
+		int nls_debug = 0x04;
+		if (p && *p) {
+			nls_debug = atoi (p);
+		}
+
+		if (nls_debug & 0x01) {
+			std::cerr << "Setting LC_ALL = C\n";
+			Glib::setenv ("LC_ALL", "C", true);
+		}
+		if (nls_debug & 0x02) {
+			std::cerr << "Setting LANG = C\n";
+			Glib::setenv ("LANG", "C", true);
+		}
+		if (nls_debug & 0x04) {
+			std::cerr << "Setting LC_MESSAGES = C\n";
+			Glib::setenv ("LC_MESSAGES", "C", true);
+		}
+		if (nls_debug & 0x08) {
+			std::cerr << "Calling setlocale\n";
+			if (!setlocale (LC_ALL, "")) {
+				std::cerr << "localization call failed\n";
+			}
+		}
 	}
 #endif
 
