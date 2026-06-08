@@ -1455,6 +1455,52 @@ GenericMidiControlProtocol::lookup_controllable (const string & str, MIDIControl
 			}
 		}
 	}
+	else if (path[1] == X_("deesser") && path.size() == 3) {
+		if (path[2] == X_("enable")) {
+			c = s->mapped_control (DeEss_Enable);
+		}
+		else if (path[2] == X_("hishelf")) {
+			c = s->mapped_control (DeEss_HiShelf);
+		}
+		else if (path[2] == X_("threshold")) {
+			c = s->mapped_control (DeEss_Threshold);
+		}
+		else if (path[2] == X_("attack")) {
+			c = s->mapped_control (DeEss_Attack);
+		}
+		else if (path[2] == X_("ess_depth")) {
+			c = s->mapped_control (DeEss_EssDepth);
+		}
+		else if (path[2] == X_("ess_freq")) {
+			c = s->mapped_control (DeEss_EssFreq);
+		}
+		else if (path[2] == X_("ess_solo")) {
+			c = s->mapped_control (DeEss_EssSolo);
+		}
+		else if (path[2] == X_("hi_depth")) {
+			c = s->mapped_control (DeEss_HiDepth);
+		}
+		else if (path[2] == X_("hi_freq")) {
+			c = s->mapped_control (DeEss_HiFreq);
+		}
+		else if (path[2] == X_("hi_solo")) {
+			c = s->mapped_control (DeEss_HiSolo);
+		}
+	}
+	else if (path[1] == X_("denoiser") && path.size() == 3) {
+		if (path[2] == X_("enable")) {
+			c = s->mapped_control (Denoise_Enable);
+		}
+		else if (path[2] == X_("threshold")) {
+			c = s->mapped_control (Denoise_Threshold);
+		}
+		else if (path[2] == X_("depth_low")) {
+			c = s->mapped_control (Denoise_DepthLow);
+		}
+		else if (path[2] == X_("depth_high")) {
+			c = s->mapped_control (Denoise_DepthHigh);
+		}
+	}
 	else if (path[1] == X_("tape"))
 	{
 		if (path.size() == 3)
