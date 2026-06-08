@@ -5190,7 +5190,8 @@ dispatch_tracks_tool_call (ARDOUR::Session& session, const std::string& tool_nam
 static std::string
 handle_plugin_tool_call (ARDOUR::Session& session, PBD::EventLoop* event_loop, const std::string& tool_name, const pt::ptree& root, const std::string& id)
 {
-	ARDOUR::Session& _session = session;
+	ARDOUR::Session& _session    = session;
+	PBD::EventLoop*  _event_loop = event_loop;
 
 	if (tool_name == "plugin/list_available") {
 		const std::string search           = root.get<std::string> ("params.arguments.search", "");
