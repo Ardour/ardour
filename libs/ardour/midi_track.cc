@@ -1014,7 +1014,6 @@ MidiTrack::realtime_handle_transport_stopped ()
 {
 	Route::realtime_handle_transport_stopped ();
 	_disk_reader->resolve_tracker (_immediate_events, 0);
-	_disk_reader->resolve_tracker (_user_immediate_events, 0);
 }
 
 void
