@@ -109,7 +109,13 @@ VelocityDisplay::line_extended (ArdourCanvas::Duple const & from, ArdourCanvas::
 {
 	std::vector<GhostEvent*> affected_lollis;
 
-	lollis_between (from.x, to.x, affected_lollis);
+	if (from.x < to.x) {
+		/* rightward, "later" motion */
+		lollis_between (from.x, to.x, affected_lollis);
+	} else {
+		/* leftward, "earlier" motion */
+		lollis_between (to.x, from.x, affected_lollis);
+	}
 
 	if (affected_lollis.empty()) {
 		return false;
