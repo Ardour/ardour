@@ -1425,7 +1425,6 @@ Editor::which_canvas_cursor(ItemType type) const
 		*/
 
 		switch (type) {
-		case GainLineItem:
 		case ControlPointItem:
 			cursor = _cursors->fader;
 			break;

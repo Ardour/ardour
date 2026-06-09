@@ -1001,10 +1001,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 	case MouseDraw:
 		switch (item_type) {
-		case GainLineItem:
-			_drags->set (new LineDrag (*this, item, [&](GdkEvent* ev,timepos_t const & pos, double y) { line_drag_click (ev, pos, y); }), event);
-			return true;
-
 		case ControlPointItem:
 			_drags->set (new ControlPointDrag (*this, item), event);
 			return true;
@@ -1098,6 +1094,8 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				break;
 			}
 
+		case GainLineItem:
+			/* fallthrough */
 		case EditorAutomationLineItem:
 			{
 				RegionView* rv;
