@@ -7508,46 +7508,30 @@ FreehandLineDrag<OrderedPointList,OrderedPoint>::maybe_add_point (GdkEvent* ev, 
 	/* determine current drawing direction */
 
 	int current_direction = 0;
-	if (timeline_x != edge_x) {
-		current_direction = timeline_x > edge_x ? 1 : -1;
+	if (timeline_x > edge_x) {
+		current_direction = 1;
+	} else if (timeline_x < edge_x) {
+		current_direction = -1;
 	}
 
 	/* Make sure we can't change direction once it's been determined
 	 * Except for straight line mode that's bidirectionnal but only
 	 * if no other points have been drawn already.
 	 */
-	if (direction == 0) {
+	if (direction == 0 || (straight_line && dragging_line->get().size() < 3)) {
 		direction = current_direction;
-	} else if (current_direction != direction && !(straight_line && dragging_line->get().size() < 3)) {
+	} else if (current_direction != 0 && direction != 0 && current_direction != direction) {
 		return;
 	}
 
-	if (direction > 0) {
-		if (x < r.width() && (straight_line || (timeline_x > edge_x) || (timeline_x == edge_x && ev->motion.y != last_pointer_y()))) {
-
-			if (straight_line && dragging_line->get().size() > 1) {
-				pop_point = true;
-			}
-
-			add_point = true;
-		}
-
-
-	} else if (direction < 0) {
-		if (x >= 0. && (straight_line || (timeline_x < edge_x) || (timeline_x == edge_x && ev->motion.y != last_pointer_y()))) {
-
-			if (straight_line && dragging_line->get().size() > 1) {
-				pop_point = true;
-			}
-
-			add_point = true;
-		}
-	}
-
-	if (straight_line) {
+	if (current_direction == 0 || straight_line) {
 		if (dragging_line->get().size() > 1) {
 			pop_point = true;
 		}
+		add_point = true;
+	} else if (direction > 0 && x < r.width()) {
+		add_point = true;
+	} else if (direction < 0 && x >= 0.) {
 		add_point = true;
 	}
 
