@@ -984,6 +984,7 @@ SessionDialog::setup_demo_sessions ()
 
 	demo_author.set_alignment (Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER);
 	demo_license.set_alignment (Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER);
+	demo_license.signal_activate_link().connect ([](std::string const& url) { return PBD::open_uri (url); }, false);
 
 	demo_description.set_wrap_mode (Gtk::WRAP_WORD);
 	demo_description.set_editable (false);
@@ -1545,8 +1546,13 @@ SessionDialog::demo_session_selected ()
 	string athr = (*row)[demo_columns.author];
 	demo_name_entry.set_text (name);
 	demo_author.set_text (athr);
-	demo_license.set_text (lcns);
+	demo_license.set_markup (lcns);
 	demo_description.get_buffer()->set_text (desc);
+
+	if (lcns.find ("<a href=") != lcns.npos) {
+		demo_license.property_track_visited_links() = false;
+	}
+
 }
 
 void
