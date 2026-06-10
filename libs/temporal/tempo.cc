@@ -854,10 +854,23 @@ TempoMetric::bbt_at_superclock (superclock_t sc) const
 	return BBT_Argument (ref, _meter->bbt_add (reference_point->bbt(), bbt_offset));
 }
 
+Beats
+TempoMetric::quarters_at (BBT_Time const & bbt) const
+{
+	if (_tempo->bbt() == bbt) {
+		return _tempo->beats ();
+	}
+	return _meter->quarters_at (bbt);
+}
+
 superclock_t
 TempoMetric::superclock_at (BBT_Time const & bbt) const
 {
 	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("get quarters for %1 = %2 using %3\n", bbt, _meter->quarters_at (bbt), *this));
+	if (_tempo->bbt() == bbt) {
+		DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("tempo matched bbt, use it for superclocks %1\n", *_tempo));
+		return _tempo->sclock();
+	}
 	return _tempo->superclock_at (_meter->quarters_at (bbt));
 }
 

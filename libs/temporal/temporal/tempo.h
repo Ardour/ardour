@@ -459,7 +459,7 @@ class LIBTEMPORAL_API TempoMetric
 
 	superclock_t superclock_at (Beats const & qn) const { return _tempo->superclock_at (qn); }
 	samplepos_t  sample_at (Beats const & qn) const { return _tempo->sample_at (qn); }
-	Beats        quarters_at (BBT_Time const & bbt) const { return _meter->quarters_at (bbt); }
+	Beats        quarters_at (BBT_Time const & bbt) const;
 	BBT_Argument     bbt_at (Beats const & beats) const { return BBT_Argument (reftime(), _meter->bbt_at (beats)); }
 
 	superclock_t superclocks_per_note_type () const { return _tempo->superclocks_per_note_type (); }
