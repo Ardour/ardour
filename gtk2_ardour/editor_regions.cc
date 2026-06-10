@@ -140,6 +140,9 @@ EditorRegions::selection_changed ()
 void
 EditorRegions::set_selected (RegionSelection& regions)
 {
+	if (!_display.get_model ()) {
+		return;
+	}
 	for (RegionSelection::iterator i = regions.begin (); i != regions.end (); ++i) {
 		std::shared_ptr<Region> r ((*i)->region ());
 
