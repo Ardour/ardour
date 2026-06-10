@@ -585,7 +585,7 @@ TempoPoint::superclock_at (Temporal::Beats const & qn) const
 	} else {
 		/* positive */
 		if (qn < _quarters) {
-			std::cerr << "\n\nLOGIC FAIL sc @ " << qn << " using " << *this << std::endl;
+			std::cerr << "\n\nusing " << *this << " for " << qn << "\nLOGIC FAIL sc @ " << qn << " using " << *this << std::endl;
 			PBD::stacktrace (std::cerr, 19);
 		}
 		TEMPO_MAP_ASSERT (qn >= _quarters);
