@@ -1125,7 +1125,7 @@ TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy, b
 }
 
 void
-TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool ripple, std::string suggested_name)
+TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool ripple, std::string suggested_name, bool with_bbt_marker)
 {
 	if (cb.empty()) {
 		return;
