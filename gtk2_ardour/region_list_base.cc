@@ -385,7 +385,7 @@ RegionListBase::regions_changed (std::shared_ptr<RegionList> rl, const PropertyC
 	for (RegionList::const_iterator i = rl->begin (); i != rl->end (); ++i) {
 		std::shared_ptr<Region> r = *i;
 
-		RegionRowMap::iterator              map_it = region_row_map.find (r);
+		RegionRowMap::iterator            map_it = region_row_map.find (r);
 		std::shared_ptr<ARDOUR::Playlist> pl     = r->playlist ();
 
 		bool is_on_active_playlist = pl && _session && _session->playlist_is_active (pl);
