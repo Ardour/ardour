@@ -103,6 +103,12 @@ PBD::new_debug_bit (const char* name)
 }
 
 void
+PBD::set_debug_bits (DebugBits db)
+{
+	debug_bits = db;
+}
+
+void
 PBD::debug_only_print (const char* prefix, string str)
 {
 	if ((PBD::debug_bits & DEBUG::ThreadName).any()) {
