@@ -1135,10 +1135,9 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 		shift (position, cb.duration());
 	}
 
-	/* We need to look these up first, before we change the map */
-	const timepos_t end_position = position + cb.duration();
-	const Tempo end_tempo = tempo_at (end_position);
-	const Meter end_meter = meter_at (end_position);
+	timepos_t end_position;
+	Tempo end_tempo (120,4);
+	Meter end_meter (4,4);
 
 	/* iterate over _points since they are already in sclock order, and we
 	 * won't need to post-sort the way we would if we handled tempos,
@@ -1149,9 +1148,12 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 	Beats           pos_beats = quarters_at (position);
 	bool            ignored;
 	bool            replaced;
-	MusicTimePoint* mtp;
-	superclock_t    s;
+	MusicTimePoint* mtp = nullptr;
+	superclock_t    s = 0;
 	std::string     name;
+	superclock_t    start_position = position.superclocks();
+	superclock_t    bbt_ref = 0;
+	BBT_Offset      off;
 
 	/* Do not try to put a BBT marker at absolute zero or anywhere on a bar */
 
@@ -1163,7 +1165,17 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 			name = string_compose (X_("%1>"), suggested_name);
 		}
 
-		mtp = new MusicTimePoint (*this, position.superclocks(), pos_beats, pos_bbt, tempo_at (position), meter_at (position), name);
+		pos_bbt = metric_at (position).round_up_to_bar (pos_bbt);
+		pos_beats = quarters_at (BBT_Argument (pos_bbt));
+		start_position = superclock_at (BBT_Argument (position.superclocks(), pos_bbt));
+		bbt_ref = start_position;
+
+		/* We need to look these up first, before we change the map */
+		end_position = timepos_t::from_superclock (start_position) + cb.duration();
+		end_tempo = tempo_at (end_position);
+		end_meter = meter_at (end_position);
+
+		mtp = new MusicTimePoint (*this, start_position, pos_beats, pos_bbt, tempo_at (start_position), meter_at (start_position), name);
 
 		core_add_bartime (mtp, replaced);
 
@@ -1174,16 +1186,27 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 		}
 
 		reset_starting_at (position.superclocks());
+
+	} else {
+		end_position = timepos_t::from_superclock (start_position) + cb.duration();
+		end_tempo = tempo_at (end_position);
+		end_meter = meter_at (end_position);
 	}
 
+	off = pos_bbt;
+	off.bars--;
+	off.beats--;
+
+
+	TempoPoint const * tp = nullptr;
+	MeterPoint const * mp = &meter_at (position);
+
 	for (auto const & p : cb.points()) {
-		TempoPoint const * tp;
-		MeterPoint const * mp;
-		MusicTimePoint const * mtp;
+		MusicTimePoint const * mtp = nullptr;
 		Beats b;
 		BBT_Time bb;
 
-		s = p.sclock() + position.superclocks();
+		s = p.sclock() + start_position;
 		b = quarters_at_superclock (s);
 
 		if ((mtp = dynamic_cast<MusicTimePoint const *> (&p))) {
@@ -1195,7 +1218,8 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 			 * to be. Do we paste the precise same BBT markers, or
 			 * do we shift by the paste position
 			 */
-			bb = p.bbt ();
+			assert (mp);
+			bb = mp->bbt_add (p.bbt (), off);
 
 			MusicTimePoint *ntp = new MusicTimePoint (*this, s, b, bb, *tp, *mp, mtp->name());
 			core_add_bartime (ntp, replaced);
@@ -1206,47 +1230,64 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 				core_add_point (ntp);
 			}
 
+			mp = ntp;
+
 		} else {
 
+			assert (mp);
+			bb = mp->bbt_add (p.bbt(), off);
+
 			if ((tp = dynamic_cast<TempoPoint const *> (&p))) {
-				TempoPoint *ntp = new TempoPoint (*this, *tp, s, b, p.bbt());
+				TempoPoint *ntp = new TempoPoint (*this, *tp, s, b, bb);
 				core_add_tempo (ntp, replaced);
 				if (!replaced) {
 					core_add_point (ntp);
 				}
 			} else if ((mp = dynamic_cast<MeterPoint const *> (&p))) {
-				MeterPoint *ntp = new MeterPoint (*this, *mp, s, b, p.bbt());
+				MeterPoint *ntp = new MeterPoint (*this, *mp, s, b, bb);
 				core_add_meter (ntp, replaced);
 				if (!replaced) {
 					core_add_point (ntp);
 				}
+				mp = ntp;
 			}
 		}
 
 		reset_starting_at (s);
 	}
 
-	pos_beats = quarters_at (end_position);
-	pos_beats += Beats (1, 0);
-	timepos_t ep (timepos_t::from_superclock (superclock_at (pos_beats)));
-	pos_bbt = bbt_at (ep);
+	if (end_position.superclocks() == s) {
+		/* some tempo or meter at end already */
+		return;
+	}
 
-	if (pos_bbt.ticks != 0 || pos_bbt.beats != 1) {
+	if (with_bbt_marker) {
+		pos_beats = quarters_at (end_position);
+		pos_beats += Beats (1, 0);
+		superclock_t ep = superclock_at (pos_beats);
+		pos_bbt = bbt_at (ep);
 
-		/* Not on first beat of a beat */
+		if (pos_bbt.ticks != 0 || pos_bbt.beats != 1) {
 
-		if (suggested_name.empty()) {
-			name = _("<paste");
-		} else {
-			name = string_compose (X_("<%1"), suggested_name);
-		}
+			/* Not on first beat of a beat */
 
-		mtp = new MusicTimePoint (*this,  ep.superclocks(), pos_beats, pos_bbt, end_tempo, end_meter, name);
-		core_add_bartime (mtp, replaced);
-		if (!replaced) {
-			core_add_tempo (mtp, ignored);
-			core_add_meter (mtp, ignored);
-			core_add_point (mtp);
+			pos_bbt = metric_at (end_position).round_up_to_bar (pos_bbt);
+			pos_beats = quarters_at (BBT_Argument (bbt_ref, pos_bbt));
+			ep = superclock_at (pos_beats);
+
+			if (suggested_name.empty()) {
+				name = _("<paste");
+			} else {
+				name = string_compose (X_("<%1"), suggested_name);
+			}
+
+			mtp = new MusicTimePoint (*this,  ep, pos_beats, pos_bbt, end_tempo, end_meter, name);
+			core_add_bartime (mtp, replaced);
+			if (!replaced) {
+				core_add_tempo (mtp, ignored);
+				core_add_meter (mtp, ignored);
+				core_add_point (mtp);
+			}
 		}
 
 		reset_starting_at (s);
