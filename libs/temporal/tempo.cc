@@ -3345,7 +3345,7 @@ TempoMap::fill_grid_by_walking (TempoMapPoints& ret, Points::const_iterator& p_i
 		 * audio time positions
 		 */
 
-		DEBUG_TRACE (DEBUG::Grid, string_compose ("get quarters for %1 from %2\n", bbt, metric));
+		DEBUG_TRACE (DEBUG::Grid, string_compose ("get quarters for %1 from %2 = %3\n", bbt, metric, metric.quarters_at (bbt)));
 		beats = metric.quarters_at (bbt);
 
 		/* we have a candidate grid point (start,beats,bbt). It might
