@@ -1125,7 +1125,7 @@ TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy, b
 }
 
 void
-TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool ripple, std::string suggested_name, bool with_bbt_marker)
+TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool ripple, std::string suggested_name, bool with_end_bbt_marker)
 {
 	if (cb.empty()) {
 		return;
@@ -1261,7 +1261,23 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 		return;
 	}
 
-	if (with_bbt_marker) {
+	if (with_end_bbt_marker) {
+
+		/* first check there are points beyond the last one we added */
+
+		bool marker_required = false;
+
+		for (auto & p : _points) {
+			if (p.sclock() > s) {
+				marker_required = true;
+				break;
+			}
+		}
+
+		if (!marker_required) {
+			return;
+		}
+
 		pos_beats = quarters_at (end_position);
 		pos_beats += Beats (1, 0);
 		superclock_t ep = superclock_at (pos_beats);
