@@ -1828,6 +1828,8 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 	midi_inspector->set_region (_session, nullptr);
 
 	if (!region) {
+		/* make sure note names can be used */
+		prh->instrument_info_change ();
 		return;
 	}
 
