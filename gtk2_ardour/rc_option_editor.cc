@@ -2559,7 +2559,7 @@ RCOptionEditor::RCOptionEditor ()
 			sigc::mem_fun (*_rc_config, &RCConfiguration::set_implicit_selection_op_groups)
 			);
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-			_("<b>When enabled</b> all selected tracks are assumed to be in a group. Operations like toggling solo, mute or changing gain are synchronized."));
+			_("<b>When enabled</b> all selected tracks are assumed to be in a group. Operations like toggling solo, mute or changing gain are synchronized in the Mixer GUI (control surfaces are not affected)."));
 
 	add_option (_("General"), bo);
 
