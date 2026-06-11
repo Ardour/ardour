@@ -2641,6 +2641,10 @@ Pianoroll::instrument_info () const
 	EC_LOCAL_TEMPO_SCOPE;
 
 	if (!_active_view || !_active_view->midi_track()) {
+		/* use CueEditor::_track instead */
+		if (_track) {
+			return &std::dynamic_pointer_cast<MidiTrack> (_track)->instrument_info();
+		}
 		return nullptr;
 	}
 
