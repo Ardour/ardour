@@ -537,6 +537,10 @@ RecorderUI::parameter_changed (string const& p)
 		} else {
 			_rec_group_tabs->hide ();
 		}
+	} else if (p == "extra-ui-extents-time") {
+		if (_session) {
+			gui_extents_changed ();
+		}
 	}
 }
 
