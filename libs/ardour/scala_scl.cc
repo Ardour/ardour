@@ -90,7 +90,9 @@ read_scl (std::ifstream& input_file)
 				// First non-comment is the description. Can be ignored
 				non_commnets_processed = non_commnets_processed + 1;
 				scala_scale.name = entry;
+#ifdef SCALA_STRICT
 				description_parsed = true;
+#endif
 				continue;
 			}
 			else if (non_commnets_processed == 1){
