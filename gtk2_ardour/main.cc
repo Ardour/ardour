@@ -283,25 +283,33 @@ int main (int argc, char *argv[])
 		 * but at least try to not translate some other system messages.
 		 */
 		const char* p = g_getenv ("ARDOUR_LOCALE_DEBUG");
-		int nls_debug = 0x04;
+		int nls_debug = 0x06;
 		if (p && *p) {
 			nls_debug = atoi (p);
 		}
 
 		if (nls_debug & 0x01) {
+#ifndef NDEBUG
 			std::cerr << "Setting LC_ALL = C\n";
+#endif
 			Glib::setenv ("LC_ALL", "C", true);
 		}
 		if (nls_debug & 0x02) {
+#ifndef NDEBUG
 			std::cerr << "Setting LANG = C\n";
+#endif
 			Glib::setenv ("LANG", "C", true);
 		}
 		if (nls_debug & 0x04) {
+#ifndef NDEBUG
 			std::cerr << "Setting LC_MESSAGES = C\n";
+#endif
 			Glib::setenv ("LC_MESSAGES", "C", true);
 		}
 		if (nls_debug & 0x08) {
+#ifndef NDEBUG
 			std::cerr << "Calling setlocale\n";
+#endif
 			if (!setlocale (LC_ALL, "")) {
 				std::cerr << "localization call failed\n";
 			}
