@@ -39,7 +39,7 @@ ScaleDialog::fill_maps ()
 		{ _("Absolute Pitch (Hz)"), ARDOUR::AbsolutePitch },
 		{ _("Semitone Steps") ,ARDOUR::SemitoneSteps },
 		{ _("Whole Tone Steps"), ARDOUR::WholeToneSteps },
-		{ _("Ratio steps"), ARDOUR::RatioSteps },
+		{ _("Ratio Steps"), ARDOUR::RatioSteps },
 		{ _("Ratios from root"), ARDOUR::RatioFromRoot },
 		{ _("MIDI Note Numbers"), ARDOUR::MidiNote },
 		};
@@ -136,6 +136,9 @@ ScaleDialog::ScaleDialog ()
 	vbox->set_border_width (6);
 	vbox->set_spacing (12);
 	vbox->show_all ();
+
+	add_button (_("Cancel"), Gtk::RESPONSE_CANCEL);
+	add_button (_("OK"), Gtk::RESPONSE_OK);
 
 	step_packer.set_spacing (12);
 	pack_steps ();
