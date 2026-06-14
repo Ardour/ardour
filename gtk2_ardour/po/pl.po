@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: gtk2_ardour\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-06-15 17:35+0200\n"
-"PO-Revision-Date: 2026-06-15 17:59+0200\n"
+"PO-Revision-Date: 2026-06-15 18:41+0200\n"
 "Last-Translator: Krzysztof Gajdemski <songo@debian.org.pl>\n"
 "Language-Team: Polish <songo@debian.org.pl>\n"
 "Language: pl\n"
@@ -792,7 +792,7 @@ msgid ""
 "hidden monitor sends."
 msgstr ""
 "Szyny „foldback” używane są w charakterze wyjść odsłuchowych.\n"
-"Zasilane są z niewidocznych w schemacie połączeń wysyłek. "
+"Zasilane są z niewidocznych w schemacie połączeń wysyłek."
 
 #: add_route_dialog.cc:171 add_route_dialog.cc:1139
 #: duplicate_routes_dialog.cc:58 duplicate_routes_dialog.cc:223
@@ -4566,43 +4566,43 @@ msgstr "1/128 nuty"
 
 #: editing_context.cc:90 quantize_dialog.cc:48
 msgid "1/3 (8th triplet)"
-msgstr "1/3 (triola ósemkowa)"
+msgstr "1/3 (triola 8)"
 
 #: editing_context.cc:91 quantize_dialog.cc:49
 msgid "1/6 (16th triplet)"
-msgstr "1/6 (triola szesnastkowa)"
+msgstr "1/6 (triola 16)"
 
 #: editing_context.cc:92 quantize_dialog.cc:50
 msgid "1/12 (32nd triplet)"
-msgstr "1/12 (triola trzydziestodwójkowa)"
+msgstr "1/12 (triola 32)"
 
 #: editing_context.cc:93
 msgid "1/24 (64th triplet)"
-msgstr "1/24 (triola sześćdziesięcioczwórkowa)"
+msgstr "1/24 (triola 64)"
 
 #: editing_context.cc:94 quantize_dialog.cc:52
 msgid "1/5 (8th quintuplet)"
-msgstr "1/5 (kwintola ósemkowa)"
+msgstr "1/5 (kwintola 8)"
 
 #: editing_context.cc:95 quantize_dialog.cc:53
 msgid "1/10 (16th quintuplet)"
-msgstr "1/10 (kwintola szesnastkowa)"
+msgstr "1/10 (kwintola 16)"
 
 #: editing_context.cc:96 quantize_dialog.cc:54
 msgid "1/20 (32nd quintuplet)"
-msgstr "1/20 (kwintola trzydziestodwójkowa)"
+msgstr "1/20 (kwintola 32)"
 
 #: editing_context.cc:97 quantize_dialog.cc:56
 msgid "1/7 (8th septuplet)"
-msgstr "1/7 (septola ósemkowa)"
+msgstr "1/7 (septola 8)"
 
 #: editing_context.cc:98 quantize_dialog.cc:57
 msgid "1/14 (16th septuplet)"
-msgstr "1/14 (septola szesnastkowa)"
+msgstr "1/14 (septola 16)"
 
 #: editing_context.cc:99 quantize_dialog.cc:58
 msgid "1/28 (32nd septuplet)"
-msgstr "1/28 (septola trzydziestodwójkowa)"
+msgstr "1/28 (septola 32)"
 
 #: editing_context.cc:101 editing_context.cc:126
 msgid "MinSec"
@@ -4671,7 +4671,7 @@ msgstr "Głowica"
 
 #: editing_context.cc:137 editor.cc:189 editor_actions.cc:556
 msgid "Mouse"
-msgstr "Mysz"
+msgstr "Myszka"
 
 #: editing_context.cc:138
 msgid "Edit point"
@@ -15491,11 +15491,11 @@ msgstr "Próg (ticks)"
 
 #: quantize_dialog.cc:85
 msgid "Snap note start"
-msgstr "Przyciąganie początku nuty"
+msgstr "Przyc. pocz. nuty"
 
 #: quantize_dialog.cc:86
 msgid "Snap note end"
-msgstr "Przyciąganie końca nuty"
+msgstr "Przyc. końc. nuty"
 
 #: rc_option_editor.cc:105 rc_option_editor.cc:106 rc_option_editor.cc:1895
 msgid "Browse..."
@@ -18836,15 +18836,15 @@ msgstr "przesłuchaj ten region"
 
 #: region_editor.cc:127
 msgid "Sync point (relative to region)"
-msgstr "Punkt synchronizacji (relatywnie do regionu)"
+msgstr "Pkt synchr. (relatywnie)"
 
 #: region_editor.cc:129
 msgid "Sync point (absolute)"
-msgstr "Punkt synchronizacji (bezwzględnie)"
+msgstr "Pkt synchr. (bezwzględnie)"
 
 #: region_editor.cc:131
 msgid "File start"
-msgstr "Początek pliku"
+msgstr "Początek"
 
 #: region_editor.cc:133
 msgid "Region Effects"
