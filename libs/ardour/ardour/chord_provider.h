@@ -36,7 +36,7 @@ class LIBARDOUR_API ChordProvider
 
 	typedef std::vector<int> Intervals;
 
-	virtual bool get_midi_chord (int root_pitch, Intervals& pitches) const = 0;
+	virtual bool get_midi_chord (int root_pitch, Intervals& pitches, bool& arpeggiate) const = 0;
 
 	struct ChordInfo {
 		Intervals intervals;

@@ -9674,9 +9674,9 @@ Editor::drop_selected_chord (std::vector<int> which_notes)
 }
 
 bool
-Editor::get_midi_chord (int root_pitch, std::vector<int>& pitches) const
+Editor::get_midi_chord (int root_pitch, std::vector<int>& pitches, bool& arpeggiate) const
 {
-	return _midi_inspector->chord_box->get_midi_chord (root_pitch, pitches);
+	return _midi_inspector->chord_box->get_midi_chord (root_pitch, pitches, arpeggiate);
 }
 
 Quantize*

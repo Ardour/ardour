@@ -966,8 +966,9 @@ MidiView::create_note_at (timepos_t const & source_relative_start, double y, Tem
 	}
 
 	std::vector<int> pitches;
+	bool arpeggiate = false;
 
-	if (_editing_context.get_midi_chord (note, pitches)) {
+	if (_editing_context.get_midi_chord (note, pitches, arpeggiate)) {
 
 		list<Evoral::event_id_t> to_be_selected;
 		start_note_diff_command(_("add chord"), control_reversible_command);
@@ -976,6 +977,9 @@ MidiView::create_note_at (timepos_t const & source_relative_start, double y, Tem
 			const std::shared_ptr<NoteType> new_note (new NoteType (chan, t, length, p, velocity));
 			note_diff_add_note (new_note, true, false);
 			to_be_selected.push_back (new_note->id());
+			if (arpeggiate) {
+				t += length;
+			}
 		}
 
 		apply_note_diff (!control_reversible_command);

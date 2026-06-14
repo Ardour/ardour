@@ -194,7 +194,7 @@ class Pianoroll : public CueEditor
 	void remove_automation_lane (Evoral::Parameter const & param);
 	void clear_automation_lane (Evoral::Parameter const & param);
 
-	bool get_midi_chord (int root_pitch, std::vector<int>& pitches) const;
+	bool get_midi_chord (int root_pitch, std::vector<int>& pitches, bool& arpeggiate) const;
 
 	void our_midi_view_selection_changed ();
 	void set_inspector_visibility (bool);

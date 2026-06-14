@@ -531,7 +531,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 
 	virtual Gtk::Menu* get_single_region_context_menu ();
 
-	bool get_midi_chord (int root_pitch, std::vector<int>& pitches) const { return false; }
+	bool get_midi_chord (int root_pitch, std::vector<int>& pitches, bool& arpeggiate) const { return false; }
 	Glib::RefPtr<Gtk::RadioAction> draw_chord_action (int num);
 	Glib::RefPtr<Gtk::RadioAction> no_chord_action () { return _no_chord_action; }
 

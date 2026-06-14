@@ -1580,7 +1580,7 @@ private:
 	void replace_chord (std::vector<int> intervals);
 	void invert_selected_chord (bool up);
 	void drop_selected_chord (std::vector<int> which_notes);
-	bool get_midi_chord (int root_pitch, std::vector<int>& pitches) const;
+	bool get_midi_chord (int root_pitch, std::vector<int>& pitches, bool& arpeggiate) const;
 	void midi_view_selection_changed (SimpleMidiNoteSelection& selection);
 
 protected:
