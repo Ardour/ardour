@@ -22,6 +22,7 @@
 
 #include <ytkmm/box.h>
 #include <ytkmm/textview.h>
+#include <ytkmm/scrolledwindow.h>
 
 #include "ardour/route.h"
 
@@ -42,10 +43,11 @@ private:
 	void comment_changed ();
 	void commit_change ();
 
-	Gtk::TextView _comment_area;
-	Gtk::VBox     _vbox;
-	BoolOption*   _bo;
-	bool          _ignore_change;
+	Gtk::TextView       _comment_area;
+	Gtk::ScrolledWindow _scroller;
+	Gtk::VBox           _vbox;
+	BoolOption*         _bo;
+	bool                _ignore_change;
 
 	std::shared_ptr<ARDOUR::Route> _route;
 	PBD::ScopedConnectionList      _connections;
