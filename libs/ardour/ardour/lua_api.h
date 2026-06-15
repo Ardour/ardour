@@ -443,6 +443,25 @@ namespace ARDOUR { namespace LuaAPI {
 	 *  working around the commented-out EventPtr.buffer() binding. */
 	std::string event_buffer (std::shared_ptr<Evoral::Event<Temporal::Beats> >);
 
+	/** Import a Standard MIDI File, creating one new MIDI track per SMF
+	 *  track and placing the imported region at the session start.
+	 *
+	 *  This is the GTK-free distillation of the GUI's Editor::do_import
+	 *  (import_files + add_sources + finish_bringing_in_material), so it
+	 *  works both headless (ardour6/9-lua) and from in-GUI Lua scripts.
+	 *
+	 *  @param s              target session
+	 *  @param path           path to the .mid / .midi file
+	 *  @param with_tempo_map import the SMF tempo map into the session
+	 *  @param with_markers   import SMF markers / text meta-events
+	 *  @param split_channels create a track per channel rather than per SMF track
+	 *  @return the list of newly created MIDI tracks (empty on failure)
+	 */
+	std::list<std::shared_ptr<ARDOUR::MidiTrack> >
+		import_midi (ARDOUR::Session*, std::string const& path,
+		             bool with_tempo_map = true, bool with_markers = true,
+		             bool split_channels = false);
+
 } } /* namespace */
 
 namespace ARDOUR { namespace LuaOSC {

@@ -635,6 +635,7 @@ def build(bld):
             create_ardour_test_program(bld, obj.includes, 'unit-test-fpu', 'test_fpu', ['test/fpu_test.cc'])
             #create_ardour_test_program(bld, obj.includes, 'unit-test-tempo', 'test_tempo', ['test/tempo_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'unit-test-lua_script', 'test_lua_script', ['test/lua_script_test.cc'])
+            create_ardour_test_program(bld, obj.includes, 'unit-test-lua_api_import', 'test_lua_api_import', ['test/lua_api_import_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'unit-test-midi_clock', 'test_midi_clock', ['test/midi_clock_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'unit-test-resampled_source', 'test_resampled_source', ['test/resampled_source_test.cc'])
             #create_ardour_test_program(bld, obj.includes, 'unit-test-samplewalk_to_beats', 'test_samplewalk_to_beats', ['test/samplewalk_to_beats_test.cc'])
@@ -657,6 +658,7 @@ def build(bld):
             'test/fpu_test.cc',
             #'test/tempo_test.cc',
             'test/lua_script_test.cc',
+            'test/lua_api_import_test.cc',
             'test/midi_clock_test.cc',
             'test/resampled_source_test.cc',
             #'test/samplewalk_to_beats_test.cc',
