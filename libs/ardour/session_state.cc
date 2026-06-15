@@ -1474,7 +1474,9 @@ Session::import_route_state (const string& path, std::map<PBD::ID, PBD::ID> cons
 				}
 
 				if (r) {
-					r->import_state (*rxml, from_this_session);
+					PBD::ID id;
+					rxml->get_property ("id", id);
+					r->import_state (*rxml, from_this_session && id == r->id());
 				} else if (allow_import_route_state (*rxml, version)) {
 					/* invalid ID (e.g. 0, -1 (int64_t max) -> new track */
 					if (pi.flags () & special_pi) {

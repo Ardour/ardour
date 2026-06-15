@@ -3280,7 +3280,10 @@ Route::import_state (const XMLNode& node, bool use_pbd_ids, bool processor_only)
 						pi->sidechain_input ()->changed.connect_same_thread (*pi, std::bind (&Route::sidechain_change_handler, this, _1));
 					}
 					new_processors.push_back (processor);
-					processor_state.add_child_copy (*child);
+					/* state is set correctly, only insert at right position */
+					XMLNode* proc = new XMLNode (*child);
+					proc->set_property ("id", processor->id());
+					processor_state.add_child_nocopy (*proc);
 				} else {
 					/* processor was found, reuse it */
 					reuse.push_back (id);
