@@ -29,17 +29,30 @@
 #include "ardour/audiofilesource.h"
 #include "ardour/audiosource.h"
 #include "ardour/internal_send.h"
+#include "ardour/import_status.h"
 #include "ardour/lua_api.h"
 #include "ardour/luaproc.h"
 #include "ardour/luascripting.h"
+#include "ardour/midi_region.h"
+#include "ardour/midi_track.h"
+#include "ardour/playlist.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/plugin_manager.h"
+#include "ardour/profile.h"
+#include "ardour/rc_configuration.h"
 #include "ardour/readable.h"
 #include "ardour/region_factory.h"
 #include "ardour/simple_export.h"
+#include "ardour/smf_source.h"
 #include "ardour/source_factory.h"
 #include "ardour/uri_map.h"
+
+#include "temporal/tempo.h"
+
+#include "evoral/SMF.h"
+
+#include <glibmm/fileutils.h>
 
 #include "LuaBridge/LuaBridge.h"
 
@@ -1204,6 +1217,162 @@ LuaAPI::event_buffer (std::shared_ptr<Evoral::Event<Temporal::Beats> > ev)
 		return std::string ();
 	}
 	return std::string (reinterpret_cast<const char*> (ev->buffer ()), ev->size ());
+}
+
+std::list<std::shared_ptr<MidiTrack> >
+LuaAPI::import_midi (Session* s, std::string const& path,
+                     bool with_tempo_map, bool with_markers, bool split_channels)
+{
+	std::list<std::shared_ptr<MidiTrack> > new_tracks;
+
+	if (!s) {
+		PBD::error << _("LuaAPI::import_midi: no session") << endmsg;
+		return new_tracks;
+	}
+	if (!SMFSource::safe_midi_file_extension (path)) {
+		PBD::error << string_compose (_("LuaAPI::import_midi: \"%1\" is not a MIDI file"), path) << endmsg;
+		return new_tracks;
+	}
+	if (!Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
+		PBD::error << string_compose (_("LuaAPI::import_midi: \"%1\" does not exist"), path) << endmsg;
+		return new_tracks;
+	}
+
+	/* import at the session start, in beat (music) time */
+	timepos_t pos (Temporal::Beats (0, 0));
+
+	/* 1. optional tempo-map import
+	 *    (GTK-free copy of Editor::import_smf_tempo_map)
+	 */
+	if (with_tempo_map) {
+		Evoral::SMF smf;
+		if (smf.open (path, 1, false) == 0) {
+			bool provided = false;
+			Temporal::TempoMap::WritableSharedPtr new_map (smf.tempo_map (provided));
+			if (provided) {
+				Temporal::TempoMap::WritableSharedPtr wmap = Temporal::TempoMap::write_copy ();
+				Temporal::TempoMapCutBuffer* tmcb = new_map->copy (
+					timepos_t::zero (Temporal::AudioTime),
+					timepos_t::from_superclock (new_map->duration (Temporal::AudioTime).superclocks ()));
+				if (tmcb && !tmcb->empty ()) {
+					wmap->paste (*tmcb, pos, false, _("import"));
+					Temporal::TempoMap::update (wmap);
+					delete tmcb;
+				} else {
+					Temporal::TempoMap::abort_update ();
+					delete tmcb;
+				}
+			}
+			smf.close ();
+		}
+	}
+
+	/* 2. run the import engine: creates Sources + whole-file Regions.
+	 *    import_files only reads the base ImportStatus fields.
+	 */
+	ImportStatus status;
+	status.paths.push_back (path);
+	status.quality                 = SrcBest;
+	status.replace_existing_source = false;
+	status.split_midi_channels     = split_channels;
+	status.import_markers          = with_markers;
+	status.midi_track_name_source  = SMFFileAndTrackName;
+	status.current                 = 1;
+	status.total                   = 1;
+	status.freeze                  = false;
+	status.done                    = false;
+	status.cancel                  = false;
+	status.progress                = 0;
+	status.all_done                = false;
+
+	{
+		/* avoid periodic saves churning while we import */
+		Session::StateProtector sp (s);
+		s->import_files (status);
+	}
+	status.all_done = true;
+
+	if (status.cancel || status.sources.empty ()) {
+		PBD::error << string_compose (_("LuaAPI::import_midi: no sources imported from \"%1\""), path) << endmsg;
+		return new_tracks;
+	}
+
+	/* 3. place each imported source on a fresh MIDI track
+	 *    (GTK-free distillation of Editor::add_sources +
+	 *     finish_bringing_in_material, the ImportAsTrack / MIDI case)
+	 */
+	int n = 0;
+	for (auto const& src : status.sources) {
+		if (src->empty ()) {
+			continue;
+		}
+
+		std::shared_ptr<FileSource> fs = std::dynamic_pointer_cast<FileSource> (src);
+
+		std::string region_name = src->name ();
+		std::string base        = fs ? PBD::basename_nosuffix (fs->path ()) : PBD::basename_nosuffix (path);
+		std::string track_name  = string_compose ("%1-t%2", base, n + 1);
+
+		/* keep region names unique without depending on the GUI bump helper */
+		if (RegionFactory::region_by_name (region_name)) {
+			std::string root = region_name;
+			int suffix = 1;
+			do {
+				region_name = string_compose ("%1.%2", root, ++suffix);
+			} while (RegionFactory::region_by_name (region_name));
+		}
+
+		/* a zero-length source would create a degenerate region; clamp it */
+		timepos_t len = src->length ();
+		if (len.is_zero ()) {
+			len = timepos_t (Temporal::Beats (1, 0));
+		}
+
+		PropertyList plist;
+		plist.add (ARDOUR::Properties::start,      timepos_t (Temporal::BeatTime));
+		plist.add (ARDOUR::Properties::length,     len);
+		plist.add (ARDOUR::Properties::name,       region_name);
+		plist.add (ARDOUR::Properties::layer,      0);
+		plist.add (ARDOUR::Properties::whole_file, true);
+		plist.add (ARDOUR::Properties::external,   true);
+		plist.add (ARDOUR::Properties::opaque,     true);
+
+		SourceList just_one;
+		just_one.push_back (src);
+		std::shared_ptr<Region> r = RegionFactory::create (just_one, plist);
+
+		std::list<std::shared_ptr<MidiTrack> > mt = s->new_midi_track (
+			ChanCount (DataType::MIDI, 1),
+			ChanCount (DataType::MIDI, 1),
+			Config->get_strict_io () || Profile->get_mixbus (),
+			std::shared_ptr<PluginInfo> (),
+			(Plugin::PresetRecord*) 0,
+			std::shared_ptr<RouteGroup> (),
+			1,
+			track_name,
+			PresentationInfo::max_order,
+			Normal,
+			true);
+
+		if (mt.empty ()) {
+			PBD::error << string_compose (_("LuaAPI::import_midi: could not create track for \"%1\""), region_name) << endmsg;
+			continue;
+		}
+
+		std::shared_ptr<MidiTrack> track = mt.front ();
+		if (Config->get_strict_io ()) {
+			track->set_strict_io (true);
+		}
+		track->set_name (track_name);
+
+		std::shared_ptr<Playlist> playlist = track->playlist ();
+		playlist->add_region (r, pos);
+
+		new_tracks.push_back (track);
+		++n;
+	}
+
+	return new_tracks;
 }
 
 /* ****************************************************************************/
