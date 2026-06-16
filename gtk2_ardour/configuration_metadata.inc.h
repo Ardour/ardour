@@ -120,6 +120,7 @@ UIConfiguration::build_metadata ()
 	VAR_META (X_("waveform-shape"), _("waveform"), _("rectified"), _("half"), _("shape"), _("display"),  NULL);
 	VAR_META (X_("widget-prelight"), _("highlight"), _("mouse"), _("prelight"), _("hover"), _("indicate"),  NULL);
 	VAR_META (X_("drag-sensitivity"), _("drag"), _("sensitivity"), _("sensitive"), _("move"), _("threshold"),  NULL);
+	VAR_META (X_("region-edit-disposition"), _("region"), _("edit"), _("editing"), _("window"), _("windows"), _("pianoroll"), _("editor"), _("pane"), _("bottom"), _("lower"),  NULL);
 	VAR_META (X_("auto-play"), _("transport"), _("autoplay"), _("automatically"), _("play"),  NULL);
 	VAR_META (X_("auto-return"), _("transport"), _("autoreturn"), _("automatically"), _("return"), _("go"), _("back"),  NULL);
 	VAR_META (X_("count-in"), _("transport"), _("count"), _("in"), _("count-in"),  NULL);

@@ -277,6 +277,8 @@
   drag sensitivity sensitive move threshold
 [region-edit-disposition]
   region edit editing window windows pianoroll editor pane bottom lower
+[use-cross-cursor]
+  cross crosscursor cross-cursor MIDI cursor 
 
 [SECTION:Session]
 
