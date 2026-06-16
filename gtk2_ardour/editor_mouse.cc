@@ -1105,8 +1105,8 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 					_drags->set (new AutomationDrawDrag (*this, rv->get_canvas_group(), *r, true, Temporal::AudioTime,
 														 [&](GdkEvent* ev, timepos_t const & pos) { return rb_click (ev, pos); }), event);
 					break;
-				 }
-				 /* fallthrough */
+				}
+				[[fallthrough]]; 
 			 }
 		case AutomationTrackItem:
 			{
