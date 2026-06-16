@@ -151,7 +151,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session, std::string cons
 	DeviceInfo::reload_device_info ();
 	DeviceProfile::reload_device_profiles ();
 
-	set_device (config, true);
+	set_device_info (config);
 
 	for (int i = 0; i < 9; i++) {
 		_last_bank[i] = 0;
