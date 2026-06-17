@@ -533,7 +533,7 @@ OSCGlobalObserver::extra_check ()
 		last_punchin = session->config.get_punch_in();
 		_osc.float_message (X_("/toggle_punch_in"), last_punchin.value () ? 1.f : 0.f, addr);
 	}
-	if (!last_punchin || last_punchout.value () != (uint32_t) session->config.get_punch_out()) {
+	if (!last_punchout || last_punchout.value () != (uint32_t) session->config.get_punch_out()) {
 		last_punchout = session->config.get_punch_out();
 		_osc.float_message (X_("/toggle_punch_out"), last_punchout.value () ? 1.f : 0.f, addr);
 	}
