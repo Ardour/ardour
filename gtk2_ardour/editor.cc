@@ -696,6 +696,11 @@ Editor::Editor ()
 	add_notebook_page (_("Groups"), _("Track & Bus Groups"), _route_groups->widget ());
 	add_notebook_page (_("Marks"), _("Ranges & Marks"), _locations->widget ());
 
+	/* Don't want to create adjustments for this, and C++ API doesn't allow
+	 * a ScrolledWindow without specified adjustments (unlike the C
+	 * one). So ... fall back to C API.
+	 */
+
 	Gtk::ScrolledWindow* sw = wrap (GTK_SCROLLED_WINDOW (gtk_scrolled_window_new (nullptr, nullptr)));
 	sw->set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	sw->add (*_midi_inspector);
