@@ -35,6 +35,7 @@
 #include "ardour/luascripting.h"
 #include "ardour/midi_region.h"
 #include "ardour/midi_track.h"
+#include "ardour/location.h"
 #include "ardour/playlist.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
@@ -1370,6 +1371,31 @@ LuaAPI::import_midi (Session* s, std::string const& path,
 
 		new_tracks.push_back (track);
 		++n;
+	}
+
+	/* 4. add the SMF section markers (0x06 Marker meta-events) as session
+	 *    timeline Location markers, so "Part A", "Part B", ... appear on the
+	 *    ruler. We read them straight from the SMF (across all tracks) and
+	 *    filter to type 0x06 only -- not lyrics/text -- so the ruler is not
+	 *    flooded. Regions are imported at the session start, so a marker's
+	 *    musical position maps directly to its session position.
+	 */
+	if (with_markers) {
+		Evoral::SMF smf;
+		if (smf.open (path, 1, false) == 0) {
+			smf.load_markers ();
+			Locations* locs = s->locations ();
+			const double ppqn = (double) smf.ppqn ();
+			for (auto const& m : smf.markers ()) {
+				if (m.meta_type != 0x06) {
+					continue;
+				}
+				timepos_t mpos (Temporal::Beats::from_double (m.time_pulses / ppqn));
+				Location* loc = new Location (*s, mpos, mpos, m.text, Location::IsMark);
+				locs->add (loc, false);
+			}
+			smf.close ();
+		}
 	}
 
 	return new_tracks;

@@ -840,7 +840,7 @@ SMF::load_markers ()
 					continue;
 				}
 
-				_markers.push_back (MarkerAt (marker, event->time_pulses));
+				_markers.push_back (MarkerAt (marker, event->time_pulses, event->midi_buffer[1]));
 			}
 		}
 	}
