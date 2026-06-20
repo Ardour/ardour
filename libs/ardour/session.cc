@@ -111,6 +111,7 @@
 
 #include "ardour/rt_safe_delete.h"
 #include "ardour/silentfilesource.h"
+#include "ardour/scale.h"
 #include "ardour/send.h"
 #include "ardour/selection.h"
 #include "ardour/session.h"
@@ -376,7 +377,7 @@ Session::Session (AudioEngine &eng,
 	_seek_counter.store (0);
 	_butler_seek_counter.store (0);
 
-	ScaleProvider::set_key (MusicalKey (60, ARDOUR::MusicalMode (ARDOUR::MusicalMode::IonianMajor)));
+	ScaleProvider::set_key (new MusicalKey (60, std::string (_("Major"))));
 
 	created_with = string_compose ("%1 %2", PROGRAM_NAME, revision);
 

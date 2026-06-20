@@ -47,6 +47,7 @@
 #include "ardour/operations.h"
 #include "ardour/quantize.h"
 #include "ardour/session.h"
+#include "ardour/scale.h"
 #include "ardour/strum.h"
 
 #include "evoral/Parameter.h"
