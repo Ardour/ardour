@@ -48,8 +48,10 @@ class Push2Menu : public ArdourCanvas::Container
 
 	void set_wrap (bool);
 	void set_active (uint32_t index);
+	void set_active_text (std::string const &);
 
 	uint32_t active () const { return _active; }
+	std::string active_text() const;
 	uint32_t items() const { return _displays.size(); }
 
 	uint32_t rows() const { return _nrows; }
