@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -28,28 +29,9 @@
 
 namespace ARDOUR {
 
-enum MusicalModeType {
-	AbsolutePitch,
-	SemitoneSteps,
-	WholeToneSteps,
-	RatioSteps,
-	RatioFromRoot,
-	MidiNote,
-};
-
-enum MusicalModeCulture {
-	WesternEurope12TET,
-	Byzantine,
-	Maqams,
-	Hindustani,
-	Carnatic,
-	SEAsia,
-	China
-};
-
-class LIBARDOUR_API MusicalMode {
-   public:
-
+class LIBARDOUR_API MusicalMode
+{
+  public:
 	enum Name {
 		IonianMajor,
 		AeolianMinor,
@@ -90,38 +72,53 @@ class LIBARDOUR_API MusicalMode {
 		Algerian
 	};
 
-	MusicalMode (std::string const & name, MusicalModeType type, std::vector<float> const & elements);
+	/* In theory we should be able to overload the singuler name, but at
+	   least gcc is unable to resolve whether a single std::string as the
+	   second argument is meant to be an initializer list or not. So we
+	   provide two versions, one plural one singular.
+
+	   The singular version should be used where there is only one accepted
+	   name for a scale; the plural (initializer list) version should be
+	   used where there is more than one.
+	*/
+	static void register_scale (TuningSystem, std::string const &, MusicalModeType, std::vector<float> const &);
+	static void register_scales (TuningSystem, std::vector<std::string> const &, MusicalModeType, std::vector<float> const &);
+
+	MusicalMode (TuningSystem, std::string const & name, MusicalModeType type, std::vector<float> const & elements);
 	MusicalMode (MusicalMode const & other);
-	MusicalMode (MusicalMode::Name);
+	MusicalMode (std::string const & name);
 	MusicalMode (std::ifstream& file); /* Read from a Scala file */
+	virtual ~MusicalMode() {}
 
 	MusicalMode operator= (MusicalMode const & other);
 
-	std::string name() const { return _name; }
+	virtual std::string name() const { return _name; }
+	TuningSystem tuning() const { return _tuning; }
 	MusicalModeType type() const { return _type; }
 	int size() const { return _elements.size(); }
 	std::vector<float> const & elements() const { return _elements; }
+	int ring_id () const;
 
-	std::vector<float> pitches_from_root (float root, int steps) const;
 	std::vector<int> as_midi (int scale_root) const;
 	void set_name (std::string const & str);
 
 	PBD::Signal<void()> NameChanged;
 	PBD::Signal<void()> Changed;
 
+	static std::multimap<TuningSystem,MusicalMode> scales_by_tuning;
+	static std::map<std::string,MusicalMode> scales_by_name;
+	static std::map<int,MusicalMode> scales_by_id;
+
    protected:
+        TuningSystem _tuning;
+	mutable int _ring_id;
 	std::string _name;
 	MusicalModeType _type;
 	std::vector<float> _elements;
 
-	void fill (Name);
-
-	std::vector<float> absolute_pitch_pitches_from_root (float root, int steps) const;
-	std::vector<float> semitone_steps_pitches_from_root (float root, int steps) const;
-	std::vector<float> wholetone_steps_pitches_from_root (float root, int steps) const;
-	std::vector<float> ratio_steps_pitches_from_root (float root, int steps) const;
-	std::vector<float> ratio_from_root_pitches_from_root (float root, int steps) const;
-	std::vector<float> midi_note_pitches_from_root (float root, int steps) const;
+	static std::map<TuningSystem,int> tone_equivalent_ratio;
+	static std::map<TuningSystem,int> tones_per_equivalent;
+	static void init ();
 
 	std::vector<int> absolute_pitch_as_midi (int root) const;
 	std::vector<int> semitone_steps_as_midi (int root) const;
