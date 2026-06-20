@@ -37,15 +37,18 @@ class ScaleDialog : public ArdourDialog
 	ScaleDialog ();
 	~ScaleDialog ();
 
-	void set (ARDOUR::MusicalKey const &);
-	ARDOUR::MusicalKey get() const;
+	void set (ARDOUR::MusicalKey const *);
+	ARDOUR::MusicalKey* get() const;
+
+	void set_tuning (ARDOUR::TuningSystem);
 
   private:
 	static std::map<ARDOUR::MusicalModeType,std::string> type_string_map;
 	static std::map<std::string,ARDOUR::MusicalModeType> string_type_map;
 	static void fill_maps ();
 
-	ARDOUR::MusicalKey _key;
+	ARDOUR::TuningSystem _tuning;
+	ARDOUR::MusicalKey const * _key;
 
 	struct StepEntry : public Gtk::Entry {
 		StepEntry (int idx) : index (idx) {}
@@ -68,13 +71,17 @@ class ScaleDialog : public ArdourDialog
 	Gtk::FileChooserButton scala_file_button;
 	Gtk::Button clear_button;
 
-	ArdourWidgets::ArdourDropdown culture_dropdown;
+	ArdourWidgets::ArdourDropdown tuning_dropdown;
 	ArdourWidgets::ArdourDropdown root_dropdown;
 	ArdourWidgets::ArdourDropdown mode_dropdown;
 	Gtk::HBox root_mode_box;
 	Gtk::VBox named_scale_box;
 
 	void pack_steps ();
-	void fill_dropdowns (ARDOUR::MusicalModeCulture);
+	void fill_dropdowns (ARDOUR::TuningSystem);
 	void set_type (ARDOUR::MusicalModeType);
+
+	ARDOUR::MusicalKey* we12tet_get() const;
+	void we12tet_set (ARDOUR::MusicalKey const *);
+
 };
