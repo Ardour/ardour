@@ -1392,7 +1392,7 @@ AudioRegionView::create_waves ()
 }
 
 void
-AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
+AudioRegionView::create_one_wave (uint32_t which, bool direct)
 {
 	//cerr << "AudioRegionView::create_one_wave() called which: " << which << " this: " << this << endl;//DEBUG
 	RouteTimeAxisView& atv (*(dynamic_cast<RouteTimeAxisView*>(&trackview))); // ick
