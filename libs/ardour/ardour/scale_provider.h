@@ -45,7 +45,7 @@ class LIBARDOUR_API ScaleProvider : public virtual PBD::Stateful {
 		/* by default, ignore time since there's only 1 answer */
 		return key();
 	}
-	void set_key (MusicalKey const &);
+	void set_key (MusicalKey const *);
 
 	static void make_property_quarks ();
 

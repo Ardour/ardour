@@ -58,10 +58,10 @@ ScaleProvider::parent_prop_change (PBD::PropertyChange const & pc)
 }
 
 void
-ScaleProvider::set_key (MusicalKey const & k)
+ScaleProvider::set_key (MusicalKey const * k)
 {
 	delete _key;
-	_key = new MusicalKey (k);
+	_key = k;
 	send_change (Properties::musical_mode);
 }
 
@@ -96,7 +96,7 @@ void
 ScaleProvider::set_key_enforcement_policy (KeyEnforcementPolicy kep)
 {
 	_key_enforcement_policy = kep;
-	PropertyChanged (Properties::key_enforcement);
+	send_change (Properties::key_enforcement);
 }
 
 KeyEnforcementPolicy
