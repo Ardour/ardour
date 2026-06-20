@@ -628,7 +628,14 @@ RouteTimeAxisView::edit_scale ()
 	}
 
 	ScaleDialog sd;
-	sd.set (*_route->key());
+
+	std::cerr << "set scale dialog to " << _route->key();
+	if (_route->key()) {
+		std::cerr << ' ' << _route->key()->name() << std::endl;
+	}
+	std::cerr << std::endl;
+
+	sd.set (_route->key());
 
 	sd.present ();
 
@@ -636,6 +643,7 @@ RouteTimeAxisView::edit_scale ()
 
 	switch (response) {
 	case RESPONSE_OK:
+		_route->set_key (sd.get());
 		break;
 	default:
 		return;
@@ -663,7 +671,6 @@ RouteTimeAxisView::build_display_menu ()
 
 	MenuList& items = display_menu->items();
 
-	// Awaiting expanded/complete scale support
 	items.push_back (MenuElem (_("Scale..."), sigc::mem_fun (*this, &RouteTimeAxisView::edit_scale)));
 
 	/* now fill it with our stuff */

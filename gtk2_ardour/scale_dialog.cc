@@ -16,9 +16,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "scale_dialog.h"
+#include "ytkmm/stock.h"
 
 #include "gtkmm2ext/utils.h"
+
+#include "scale_dialog.h"
 
 #include "pbd/i18n.h"
 
@@ -52,7 +54,8 @@ ScaleDialog::fill_maps ()
 
 ScaleDialog::ScaleDialog ()
 	: ArdourDialog (_("Scale Editor"))
-	, _key (60, ARDOUR::MusicalMode (ARDOUR::MusicalMode::IonianMajor))
+	, _tuning (ARDOUR::TwelveTone)
+	, _key (nullptr)
 	, name_label (_("Name"))
 	, type_label (_("Type"))
 	, step_adjustment (7, 1, 56, 1, 8)
@@ -65,22 +68,16 @@ ScaleDialog::ScaleDialog ()
 		fill_maps ();
 	}
 
+	using namespace Gtk;
 	using namespace Gtk::Menu_Helpers;
 
-	culture_dropdown.add_menu_elem (MenuElem (_("Western Europe (12TET)"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::fill_dropdowns), ARDOUR::WesternEurope12TET)));
-	culture_dropdown.add_menu_elem (MenuElem (_("Byzantine"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::fill_dropdowns), ARDOUR::Byzantine)));
-	culture_dropdown.add_menu_elem (MenuElem (_("Maqams"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::fill_dropdowns), ARDOUR::Maqams)));
-	culture_dropdown.add_menu_elem (MenuElem (_("Hindustani"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::fill_dropdowns), ARDOUR::Hindustani)));
-	culture_dropdown.add_menu_elem (MenuElem (_("Carnatic"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::fill_dropdowns), ARDOUR::Carnatic)));
-	culture_dropdown.add_menu_elem (MenuElem (_("SE Asian Archipelago"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::fill_dropdowns), ARDOUR::SEAsia)));
-	culture_dropdown.add_menu_elem (MenuElem (_("China"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::fill_dropdowns), ARDOUR::China)));
-
-	culture_dropdown.set_active (0); 
+	tuning_dropdown.add_menu_elem (MenuElem (_("Twelve Tone"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::fill_dropdowns), ARDOUR::TwelveTone)));
+	tuning_dropdown.set_active (0);
 
 	root_mode_box.pack_start (root_dropdown, true, false);
 	root_mode_box.pack_start (mode_dropdown, true, false);
 
-	named_scale_box.pack_start (culture_dropdown, false, false);
+	named_scale_box.pack_start (tuning_dropdown, false, false);
 	named_scale_box.pack_start (root_mode_box, false, false);
 
 	type_dropdown.add_menu_elem (MenuElem (_("Absolute Pitch (Hz)"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), ARDOUR::AbsolutePitch)));
@@ -128,7 +125,6 @@ ScaleDialog::ScaleDialog ()
 	vbox->pack_start (steps_box, false, false);
 	vbox->pack_start (step_packer, false, false);
 
-
 	Gtk::HBox* clear_box (manage (new Gtk::HBox));
 	clear_box->pack_start (clear_button, true, false);
 	vbox->pack_start (*clear_box, false, false);
@@ -142,6 +138,10 @@ ScaleDialog::ScaleDialog ()
 
 	step_packer.set_spacing (12);
 	pack_steps ();
+
+	add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	add_button (Stock::OK, RESPONSE_OK);
+
 }
 
 ScaleDialog::~ScaleDialog ()
@@ -149,21 +149,75 @@ ScaleDialog::~ScaleDialog ()
 }
 
 void
-ScaleDialog ::set (ARDOUR::MusicalKey const & key)
+ScaleDialog::set_tuning (ARDOUR::TuningSystem c)
 {
-	_key = key;
-
-	pack_steps ();
-}
-
-ARDOUR::MusicalKey
-ScaleDialog::get() const
-{
-	return ARDOUR::MusicalKey (1.0, ARDOUR::MusicalMode (ARDOUR::MusicalMode::Dorian));
+	_tuning = c;
+	tuning_dropdown.set_active ((int) c);
 }
 
 void
-ScaleDialog::fill_dropdowns (ARDOUR::MusicalModeCulture culture)
+ScaleDialog::set (ARDOUR::MusicalKey const * key)
+{
+	using namespace ARDOUR;
+
+	switch (_tuning) {
+	case TwelveTone:
+		we12tet_set (key);
+		break;
+	}
+}
+
+ARDOUR::MusicalKey*
+ScaleDialog::get() const
+{
+	using namespace ARDOUR;
+
+	switch (_tuning) {
+	case TwelveTone:
+		return we12tet_get ();
+	}
+
+	return nullptr;
+}
+
+void
+ScaleDialog::we12tet_set (ARDOUR::MusicalKey const * key)
+{
+	std::cerr << "we12tet set\n";
+
+	if (!key) {
+		mode_dropdown.set_active (0);
+		std::cerr << "a\n";
+	} else {
+		mode_dropdown.set_active (key->type() + 1);
+		root_dropdown.set_active (key->root() + 4);
+		std::cerr << "b, mode should show " << key->type() + 1 << " actual " << mode_dropdown.get_active_row_number()
+		          << " root " << key->root() + 4 << " actual " << root_dropdown.get_active_row_number()
+		          << std::endl;
+	}
+
+	_key = key;
+	pack_steps ();
+}
+
+ARDOUR::MusicalKey*
+ScaleDialog::we12tet_get() const
+{
+	std::string mode = mode_dropdown.get_active ();
+
+	if (mode.empty()) {
+		return nullptr;
+	}
+
+	int root_index = root_dropdown.get_active_row_number ();
+	int root_midi_note = root_index - 4; /* A is first in list, but 0 is C */
+
+	/* XXX this leaks. Probably need a "None" value for a MusicalKey */
+	return new ARDOUR::MusicalKey (root_midi_note, mode);
+}
+
+void
+ScaleDialog::fill_dropdowns (ARDOUR::TuningSystem tuning)
 {
 	using namespace Gtk::Menu_Helpers;
 	using namespace ARDOUR;
@@ -171,8 +225,9 @@ ScaleDialog::fill_dropdowns (ARDOUR::MusicalModeCulture culture)
 	root_dropdown.clear_items ();
 	mode_dropdown.clear_items ();
 
-	switch (culture) {
-	case WesternEurope12TET:
+	switch (tuning) {
+	case TwelveTone:
+		std::cerr << "Filling 12TET dropdowns\n";
 		root_dropdown.add_menu_elem (MenuElem (_("A")));
 		root_dropdown.add_menu_elem (MenuElem (_("A#")));
 		root_dropdown.add_menu_elem (MenuElem (_("B")));
@@ -185,59 +240,30 @@ ScaleDialog::fill_dropdowns (ARDOUR::MusicalModeCulture culture)
 		root_dropdown.add_menu_elem (MenuElem (_("F#")));
 		root_dropdown.add_menu_elem (MenuElem (_("G")));
 		root_dropdown.add_menu_elem (MenuElem (_("G#")));
-
-		/* Must match enum order */
-
-		mode_dropdown.add_menu_elem (MenuElem (_("Major (Ionian)")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Minor (Aeolian)")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Dorian")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Harmonic Minor")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Melodic Minor Ascending")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Melodic Minor Descending")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Phrygian")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Lydian")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Mixolydian")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Locrian")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Pentatonic Major")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Pentatonic Minor")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Chromatic")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Blues")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Neapolitan Minor")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Neapolitan Major")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Oriental")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Double Harmonic")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Enigmatic")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Hungarian Minor")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Hungarian Major")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Spanish 8 Tone")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Hungarian Gypsy")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Overtone")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Leading Whole Tone")));
-
-		root_dropdown.set_active (0);
-		mode_dropdown.set_active (0);
-		break;
-	case Byzantine:
-		break;
-	case Maqams:
-		break;
-	case Hindustani:
-		break;
-	case Carnatic:
-		break;
-	case SEAsia:
-		break;
-	case China:
 		break;
 	}
+
+	for (auto const & [tune,scale]: MusicalMode::scales_by_tuning) {
+		if (tune != tuning) {
+			continue;
+		}
+		mode_dropdown.add_menu_elem (MenuElem (scale.name()));
+	}
+
+	root_dropdown.set_active (0);
+	mode_dropdown.set_active (0);
 }
 
 void
 ScaleDialog::pack_steps ()
 {
-	Gtkmm2ext::container_clear (step_packer);
+	Gtkmm2ext::container_clear (step_packer, true);
 
-	for (int n = 0; n < _key.size(); ++n) {
+	if (!_key) {
+		return;
+	}
+
+	for (int n = 0; n < _key->size(); ++n) {
 		Gtk::HBox* hb (manage (new Gtk::HBox));
 		Gtk::HBox* ihb (manage (new Gtk::HBox));
 		Gtk::Label* label (manage (new Gtk::Label));
