@@ -375,7 +375,7 @@ class Push2 : public MIDISurface
 	 */
 	void set_pad_scale_in_key (int                       root,
 	                           int                       octave,
-	                           ARDOUR::MusicalMode::Name mode,
+	                           std::string const & mode,
 	                           NoteGridOrigin            origin,
 	                           int                       ideal_vertical_semitones);
 
@@ -400,20 +400,20 @@ class Push2 : public MIDISurface
 	 */
 	void set_pad_scale_chromatic (int                       root,
 	                              int                       octave,
-	                              ARDOUR::MusicalMode::Name mode,
+	                              std::string const & mode,
 	                              NoteGridOrigin            origin,
 	                              int                       vertical_semitones);
 
 	void set_pad_scale (int                       root,
 	                    int                       octave,
-	                    ARDOUR::MusicalMode::Name mode,
+	                    std::string const & mode,
 	                    NoteGridOrigin            origin,
 	                    RowInterval               row_interval,
 	                    bool                      inkey);
 
 	PBD::Signal<void()> ScaleChange;
 
-	ARDOUR::MusicalMode::Name mode() const { return  _mode; }
+	std::string const & mode() const { return  _mode; }
 	NoteGridOrigin note_grid_origin() { return _note_grid_origin; }
 	RowInterval row_interval() const { return _row_interval; }
 	int scale_root() const { return _scale_root; }
@@ -630,7 +630,7 @@ class Push2 : public MIDISurface
 
 	void stripable_selection_changed ();
 
-	ARDOUR::MusicalMode::Name _mode;
+	std::string       _mode;
 	NoteGridOrigin    _note_grid_origin;
 	RowInterval       _row_interval;
 	int               _scale_root;

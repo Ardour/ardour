@@ -669,7 +669,7 @@ ScaleLayout::show_root_state ()
 		}
 	}
 
-	_scale_menu->set_active ((uint32_t) _p2.mode ());
+	_scale_menu->set_active_text (_p2.mode ());
 
 	show_fixed_state ();
 }
@@ -694,7 +694,7 @@ ScaleLayout::show_fixed_state ()
 void
 ScaleLayout::mode_changed ()
 {
-	MusicalMode::Name m = (MusicalMode::Name) _scale_menu->active();
+	std::string m = _scale_menu->active_text();
 	_p2.set_pad_scale (_p2.scale_root (),
 	                   _p2.root_octave (),
 	                   m,
