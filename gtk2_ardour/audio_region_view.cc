@@ -1490,7 +1490,13 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 		LayerDisplay layer_display;
 		if (trackview.get_gui_property ("layer-display", layer_display)) {
 			update_coverage_frame (layer_display);
-	  }
+		}
+
+		/* ensure trim handles stay on top when waveviews are added after init */
+		if (!direct) {
+			if (frame_handle_start) frame_handle_start->raise_to_top();
+			if (frame_handle_end) frame_handle_end->raise_to_top();
+		}
 	}
 
 	/* channel wave created, don't hook into peaks ready anymore */
