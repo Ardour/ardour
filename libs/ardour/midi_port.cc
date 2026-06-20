@@ -31,6 +31,7 @@
 #include "ardour/debug.h"
 #include "ardour/midi_buffer.h"
 #include "ardour/midi_port.h"
+#include "ardour/scale.h"
 #include "ardour/session.h"
 
 #include "pbd/i18n.h"

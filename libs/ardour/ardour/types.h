@@ -1046,6 +1046,20 @@ enum VST3KnobMode {
 	VST3KnobLinearMode
 };
 
+enum MusicalModeType {
+	AbsolutePitch,
+	SemitoneSteps,
+	WholeToneSteps,
+	RatioSteps,
+	RatioFromRoot,
+	MidiNote,
+};
+
+enum TuningSystem {
+	TwelveTone,
+};
+
+
 } // namespace ARDOUR
 
 /* for now, break the rules and use "using" to make this "global" */

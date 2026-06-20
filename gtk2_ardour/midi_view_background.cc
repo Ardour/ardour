@@ -28,6 +28,7 @@
 #include "canvas/rect_set.h"
 
 #include "ardour/midi_track.h"
+#include "ardour/scale.h"
 
 #include "keyboard.h"
 #include "midi_view_background.h"

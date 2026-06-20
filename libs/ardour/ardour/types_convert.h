@@ -28,7 +28,6 @@
 
 #include "ardour/types.h"
 #include "ardour/data_type.h"
-#include "ardour/scale.h"
 
 /* NOTE: when adding types to this file, you must add four functions:
 
@@ -94,8 +93,6 @@ DEFINE_ENUM_CONVERT(ARDOUR::LoopFadeChoice)
 DEFINE_ENUM_CONVERT(ARDOUR::CueBehavior)
 DEFINE_ENUM_CONVERT(ARDOUR::VST3KnobMode)
 DEFINE_ENUM_CONVERT(ARDOUR::ColorMode)
-
-DEFINE_ENUM_CONVERT(ARDOUR::MusicalMode::Name)
 
 template <>
 inline bool to_string (ARDOUR::AnyTime const & at, std::string & str)
