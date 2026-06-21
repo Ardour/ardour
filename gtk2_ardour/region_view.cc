@@ -778,14 +778,14 @@ RegionView::make_name () const
 
 	// XXX nice to have some good icons for this
 	if (_region->position_time_domain() == Temporal::BeatTime) {
-		str += u8"\u266B"; // BEAMED EIGHTH NOTES
+		str += u8"\u266B "; // BEAMED EIGHTH NOTES
 	}
 
 	if (_region->locked()) {
-		str += u8"\u2629"; // CROSS OF JERUSALEM
+		str += u8"\u2629 "; // CROSS OF JERUSALEM
 		str += _region->name();
 	} else if (_region->position_locked()) {
-		str += u8"\u21B9"; // LEFTWARDS ARROW TO BAR OVER RIGHTWARDS ARROW TO BAR
+		str += u8"\u21B9 "; // LEFTWARDS ARROW TO BAR OVER RIGHTWARDS ARROW TO BAR
 		str += _region->name();
 	} else if (_region->video_locked()) {
 		str += '[';
@@ -796,7 +796,7 @@ RegionView::make_name () const
 	}
 
 	if (_region->muted()) {
-		str = std::string(u8"\U0001F507") + str; // SPEAKER WITH CANCELLATION STROKE
+		str = std::string(u8"\U0001F507 ") + str; // SPEAKER WITH CANCELLATION STROKE
 	}
 	if (_region->has_region_fx()) {
 		str = str + " (Fx)";
