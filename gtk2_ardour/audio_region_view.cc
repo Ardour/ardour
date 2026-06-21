@@ -612,13 +612,13 @@ AudioRegionView::set_height (gdouble height)
 
 	if (_fx_line) {
 
-		if ((height / nchans) < NAME_HIGHLIGHT_THRESH) {
-			_fx_line->hide ();
+		if (!UIConfiguration::instance().get_show_name_highlight() || (height < NAME_HIGHLIGHT_THRESH)) {
+			_fx_line->set_height (height - 2);
 		} else {
-			update_envelope_visibility ();
+			_fx_line->set_height ((uint32_t) rint (height - NAME_HIGHLIGHT_SIZE) - 2);
 		}
+		update_envelope_visibility ();
 
-		_fx_line->set_height ((uint32_t) rint (height - NAME_HIGHLIGHT_SIZE) - 2);
 	}
 
 	reset_fade_shapes ();
@@ -627,10 +627,10 @@ AudioRegionView::set_height (gdouble height)
 	samplepos_t position = _region->position_sample();
 	list<std::pair<samplepos_t, ArdourCanvas::Line*> >::iterator l;
 	double y1;
-	if (_height >= NAME_HIGHLIGHT_THRESH) {
-		y1 = _height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 1;
-	} else {
+	if (!UIConfiguration::instance().get_show_name_highlight() || (_height < NAME_HIGHLIGHT_THRESH)) {
 		y1 = _height - 1;
+	} else {
+		y1 = _height - NAME_HIGHLIGHT_SIZE - 1;
 	}
 	for (l = feature_lines.begin(); l != feature_lines.end(); ++l) {
 		float pos_x = trackview.editor().sample_to_pixel((*l).first - position);
