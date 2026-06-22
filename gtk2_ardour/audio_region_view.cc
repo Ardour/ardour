@@ -600,14 +600,8 @@ AudioRegionView::set_height (gdouble height)
 	}
 
 	if (_fx_line) {
-
-		if (!UIConfiguration::instance().get_show_name_highlight() || (height < NAME_HIGHLIGHT_THRESH)) {
-			_fx_line->set_height (height - 2);
-		} else {
-			_fx_line->set_height (_effective_height - 2);
-		}
+		_fx_line->set_height (_effective_height - 2);
 		update_envelope_visibility ();
-
 	}
 
 	reset_fade_shapes ();
