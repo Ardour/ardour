@@ -48,7 +48,7 @@ class ScaleDialog : public ArdourDialog
 	static void fill_maps ();
 
 	ARDOUR::TuningSystem _tuning;
-	ARDOUR::MusicalKey const * _key;
+	std::unique_ptr<ARDOUR::MusicalKey> _key;
 
 	struct StepEntry : public Gtk::Entry {
 		StepEntry (int idx) : index (idx) {}
@@ -60,6 +60,7 @@ class ScaleDialog : public ArdourDialog
 	Gtk::Label name_label;
 	Gtk::HBox type_box;
 	Gtk::Label type_label;
+	Gtk::Label tuning_label;
 	Gtk::Entry name_entry;
 	Gtk::Adjustment step_adjustment;
 	Gtk::Label steps_label;
@@ -76,12 +77,12 @@ class ScaleDialog : public ArdourDialog
 	ArdourWidgets::ArdourDropdown mode_dropdown;
 	Gtk::HBox root_mode_box;
 	Gtk::VBox named_scale_box;
+	bool ignore_set;
 
 	void pack_steps ();
 	void fill_dropdowns (ARDOUR::TuningSystem);
 	void set_type (ARDOUR::MusicalModeType);
 
-	ARDOUR::MusicalKey* we12tet_get() const;
-	void we12tet_set (ARDOUR::MusicalKey const *);
-
+	ARDOUR::MusicalKey* twelvetone_get() const;
+	void                twelvetone_set (ARDOUR::MusicalKey const &);
 };

@@ -18,7 +18,11 @@
 
 #include "ytkmm/stock.h"
 
+#include "pbd/unwind.h"
+
 #include "gtkmm2ext/utils.h"
+
+#include "ardour/parameter_descriptor.h"
 
 #include "scale_dialog.h"
 
@@ -27,23 +31,24 @@
 std::map<ARDOUR::MusicalModeType,std::string> ScaleDialog::type_string_map;
 std::map<std::string,ARDOUR::MusicalModeType> ScaleDialog::string_type_map;
 
+using namespace ARDOUR;
 
 void
 ScaleDialog::fill_maps ()
 {
 	struct stpair {
-		stpair (char const * const s, ARDOUR::MusicalModeType t) : str (s), type (t) {}
+		stpair (char const * const s, MusicalModeType t) : str (s), type (t) {}
 		char const * const str;
-		ARDOUR::MusicalModeType type;
+		MusicalModeType type;
 	};
 
 	std::vector<stpair> pairs = {
-		{ _("Absolute Pitch (Hz)"), ARDOUR::AbsolutePitch },
-		{ _("Semitone Steps") ,ARDOUR::SemitoneSteps },
-		{ _("Whole Tone Steps"), ARDOUR::WholeToneSteps },
-		{ _("Ratio Steps"), ARDOUR::RatioSteps },
-		{ _("Ratios from root"), ARDOUR::RatioFromRoot },
-		{ _("MIDI Note Numbers"), ARDOUR::MidiNote },
+		{ _("Absolute Pitch (Hz)"), AbsolutePitch },
+		{ _("Semitone Steps") ,SemitoneSteps },
+		{ _("Whole Tone Steps"), WholeToneSteps },
+		{ _("Ratio Steps"), RatioSteps },
+		{ _("Ratios from root"), RatioFromRoot },
+		{ _("MIDI Note Numbers"), MidiNote },
 		};
 
 	for (auto const & p : pairs) {
@@ -54,15 +59,17 @@ ScaleDialog::fill_maps ()
 
 ScaleDialog::ScaleDialog ()
 	: ArdourDialog (_("Scale Editor"))
-	, _tuning (ARDOUR::TwelveTone)
+	, _tuning (TwelveTone)
 	, _key (nullptr)
 	, name_label (_("Name"))
 	, type_label (_("Type"))
+	, tuning_label (_("Tuning System"))
 	, step_adjustment (7, 1, 56, 1, 8)
 	, steps_label (_("Pitches"))
 	, step_spinner (step_adjustment)
 	, scala_label (_("Load a Scala file"))
 	, clear_button (_("Remove scale"))
+	, ignore_set (false)
 {
 	if (type_string_map.empty()) {
 		fill_maps ();
@@ -71,21 +78,28 @@ ScaleDialog::ScaleDialog ()
 	using namespace Gtk;
 	using namespace Gtk::Menu_Helpers;
 
-	tuning_dropdown.add_menu_elem (MenuElem (_("Twelve Tone"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::fill_dropdowns), ARDOUR::TwelveTone)));
+	Gtk::HBox* inner_tuning_box (manage (new Gtk::HBox));
+	inner_tuning_box->set_spacing (12);
+	inner_tuning_box->set_border_width (12);
+
+	tuning_dropdown.add_menu_elem (MenuElem (_("Twelve Tone"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::fill_dropdowns), TwelveTone)));
 	tuning_dropdown.set_active (0);
 
-	root_mode_box.pack_start (root_dropdown, true, false);
-	root_mode_box.pack_start (mode_dropdown, true, false);
+	inner_tuning_box->pack_start (tuning_label, false, false);
+	inner_tuning_box->pack_start (tuning_dropdown, true, true);
 
-	named_scale_box.pack_start (tuning_dropdown, false, false);
+	root_mode_box.pack_start (root_dropdown, false, false);
+	root_mode_box.pack_start (mode_dropdown, true, true);
+
+	named_scale_box.pack_start (*inner_tuning_box, false, false);
 	named_scale_box.pack_start (root_mode_box, false, false);
 
-	type_dropdown.add_menu_elem (MenuElem (_("Absolute Pitch (Hz)"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), ARDOUR::AbsolutePitch)));
-	type_dropdown.add_menu_elem (MenuElem (_("Semitone Steps"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), ARDOUR::SemitoneSteps)));
-	type_dropdown.add_menu_elem (MenuElem (_("Whole Tone Steps"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), ARDOUR::WholeToneSteps)));
-	type_dropdown.add_menu_elem (MenuElem (_("Ratio steps"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), ARDOUR::RatioSteps)));
-	type_dropdown.add_menu_elem (MenuElem (_("Ratios from root"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), ARDOUR::RatioFromRoot)));
-	type_dropdown.add_menu_elem (MenuElem (_("MIDI Note Numbers"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), ARDOUR::MidiNote)));
+	type_dropdown.add_menu_elem (MenuElem (_("Absolute Pitch (Hz)"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), AbsolutePitch)));
+	type_dropdown.add_menu_elem (MenuElem (_("Semitone Steps"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), SemitoneSteps)));
+	type_dropdown.add_menu_elem (MenuElem (_("Whole Tone Steps"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), WholeToneSteps)));
+	type_dropdown.add_menu_elem (MenuElem (_("Ratio steps"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), RatioSteps)));
+	type_dropdown.add_menu_elem (MenuElem (_("Ratios from root"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), RatioFromRoot)));
+	type_dropdown.add_menu_elem (MenuElem (_("MIDI Note Numbers"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), MidiNote)));
 
 	type_dropdown.set_active (_("Semitone Steps"));
 
@@ -118,10 +132,11 @@ ScaleDialog::ScaleDialog ()
 	scala_file_button.set_current_folder (Glib::get_home_dir());
 
 	Gtk::VBox* vbox (get_vbox());
-	vbox->pack_start (name_packer, false, false);
 	vbox->pack_start (named_scale_box, false, false);
 	vbox->pack_start (scala_box, false, false);
 	vbox->pack_start (type_box, false, false);
+	vbox->pack_start (name_packer, false, false);
+
 	vbox->pack_start (steps_box, false, false);
 	vbox->pack_start (step_packer, false, false);
 
@@ -132,9 +147,6 @@ ScaleDialog::ScaleDialog ()
 	vbox->set_border_width (6);
 	vbox->set_spacing (12);
 	vbox->show_all ();
-
-	add_button (_("Cancel"), Gtk::RESPONSE_CANCEL);
-	add_button (_("OK"), Gtk::RESPONSE_OK);
 
 	step_packer.set_spacing (12);
 	pack_steps ();
@@ -149,59 +161,73 @@ ScaleDialog::~ScaleDialog ()
 }
 
 void
-ScaleDialog::set_tuning (ARDOUR::TuningSystem c)
+ScaleDialog::set_tuning (TuningSystem c)
 {
 	_tuning = c;
 	tuning_dropdown.set_active ((int) c);
 }
 
 void
-ScaleDialog::set (ARDOUR::MusicalKey const * key)
+ScaleDialog::set (MusicalKey const * key)
 {
 	using namespace ARDOUR;
 
+	if (ignore_set) {
+		return;
+	}
+
+	PBD::Unwinder<bool> uw (ignore_set, true);
+
+	if (!key) {
+		_key = nullptr;
+		mode_dropdown.set_active (0);
+		return;
+	}
+
 	switch (_tuning) {
 	case TwelveTone:
-		we12tet_set (key);
+		twelvetone_set (*key);
 		break;
 	}
 }
 
-ARDOUR::MusicalKey*
+void
+ScaleDialog::twelvetone_set (MusicalKey const & key)
+{
+	if (!_key) {
+		_key.reset (new MusicalKey (key));
+	} else {
+		*_key = key;
+	}
+
+	mode_dropdown.set_active (key.mode_name());
+	std::vector<int> notes_in_alpha_order ({ 9, 10, 11, 0, 1, 2, 3, 4, 5, 6, 7, 8});
+	int i = 0;
+
+	for (auto n : notes_in_alpha_order) {
+		if (n == key.root()) {
+			root_dropdown.set_active (i);
+			break;
+		}
+		++i;
+	}
+}
+
+MusicalKey*
 ScaleDialog::get() const
 {
 	using namespace ARDOUR;
 
 	switch (_tuning) {
 	case TwelveTone:
-		return we12tet_get ();
+		return twelvetone_get ();
 	}
 
 	return nullptr;
 }
 
-void
-ScaleDialog::we12tet_set (ARDOUR::MusicalKey const * key)
-{
-	std::cerr << "we12tet set\n";
-
-	if (!key) {
-		mode_dropdown.set_active (0);
-		std::cerr << "a\n";
-	} else {
-		mode_dropdown.set_active (key->type() + 1);
-		root_dropdown.set_active (key->root() + 4);
-		std::cerr << "b, mode should show " << key->type() + 1 << " actual " << mode_dropdown.get_active_row_number()
-		          << " root " << key->root() + 4 << " actual " << root_dropdown.get_active_row_number()
-		          << std::endl;
-	}
-
-	_key = key;
-	pack_steps ();
-}
-
-ARDOUR::MusicalKey*
-ScaleDialog::we12tet_get() const
+MusicalKey*
+ScaleDialog::twelvetone_get() const
 {
 	std::string mode = mode_dropdown.get_active ();
 
@@ -210,14 +236,15 @@ ScaleDialog::we12tet_get() const
 	}
 
 	int root_index = root_dropdown.get_active_row_number ();
-	int root_midi_note = root_index - 4; /* A is first in list, but 0 is C */
+	std::vector<int> notes_in_alpha_order ({ 9, 10, 11, 0, 1, 2, 3, 4, 5, 6, 7, 8});
+	int root_midi_note = notes_in_alpha_order[root_index];
 
 	/* XXX this leaks. Probably need a "None" value for a MusicalKey */
-	return new ARDOUR::MusicalKey (root_midi_note, mode);
+	return new MusicalKey (root_midi_note, mode);
 }
 
 void
-ScaleDialog::fill_dropdowns (ARDOUR::TuningSystem tuning)
+ScaleDialog::fill_dropdowns (TuningSystem tuning)
 {
 	using namespace Gtk::Menu_Helpers;
 	using namespace ARDOUR;
@@ -225,29 +252,21 @@ ScaleDialog::fill_dropdowns (ARDOUR::TuningSystem tuning)
 	root_dropdown.clear_items ();
 	mode_dropdown.clear_items ();
 
+	std::vector<int> notes_in_alpha_order ({ 9, 10, 11, 0, 1, 2, 3, 4, 5, 6, 7, 8});
+
 	switch (tuning) {
 	case TwelveTone:
-		std::cerr << "Filling 12TET dropdowns\n";
-		root_dropdown.add_menu_elem (MenuElem (_("A")));
-		root_dropdown.add_menu_elem (MenuElem (_("A#")));
-		root_dropdown.add_menu_elem (MenuElem (_("B")));
-		root_dropdown.add_menu_elem (MenuElem (_("C")));
-		root_dropdown.add_menu_elem (MenuElem (_("C#")));
-		root_dropdown.add_menu_elem (MenuElem (_("D")));
-		root_dropdown.add_menu_elem (MenuElem (_("D#")));
-		root_dropdown.add_menu_elem (MenuElem (_("E")));
-		root_dropdown.add_menu_elem (MenuElem (_("F")));
-		root_dropdown.add_menu_elem (MenuElem (_("F#")));
-		root_dropdown.add_menu_elem (MenuElem (_("G")));
-		root_dropdown.add_menu_elem (MenuElem (_("G#")));
+		for (auto n : notes_in_alpha_order) {
+			root_dropdown.add_menu_elem (MenuElem (ParameterDescriptor::midi_note_name (n, true, false, true), [this,n]() { MusicalMode mode (_key ? *_key : MusicalMode (_("Major")));  MusicalKey k (n, mode); set (&k); }));
+		}
 		break;
 	}
 
-	for (auto const & [tune,scale]: MusicalMode::scales_by_tuning) {
+	for (auto const & [tune,mode]: MusicalMode::scales_by_tuning) {
 		if (tune != tuning) {
 			continue;
 		}
-		mode_dropdown.add_menu_elem (MenuElem (scale.name()));
+		mode_dropdown.add_menu_elem (MenuElem (mode.name(), [this,mode]() { float root = _key ? _key->root() : 64; MusicalKey k (root, mode); set (&k); }));
 	}
 
 	root_dropdown.set_active (0);
@@ -285,6 +304,6 @@ ScaleDialog::pack_steps ()
 }
 
 void
-ScaleDialog::set_type (ARDOUR::MusicalModeType t)
+ScaleDialog::set_type (MusicalModeType t)
 {
 }
