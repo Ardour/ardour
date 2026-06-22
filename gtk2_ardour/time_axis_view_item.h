@@ -222,6 +222,7 @@ protected:
 	bool frame_handle_crossing (GdkEvent*, ArdourCanvas::Rectangle*);
 
 	double _height;
+	double _effective_height;
 	Visibility visibility;
 	std::string fill_color_name;
 	bool _recregion;
