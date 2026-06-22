@@ -2460,11 +2460,16 @@ MackieControlProtocol::stripable_selection_changed ()
 		std::shared_ptr<Stripable> ss = ControlProtocol::first_selected_stripable ();
 		if (ss) {
 			if (!is_mapped (ss)) {
-				/* Sane order values start at 1, due to master
-				   etc. not really being ordered in any particular
-				   way (so zero is a kind of sentinel value).
+#ifdef MIXBUS
+				switch_banks (ss->presentation_info().order(), false);
+#else
+				/* In Ardour, sane order values start at 1, due
+				   to master etc. not really being ordered in
+				   any particular way (so zero is a kind of
+				   sentinel value).
 				*/
 				switch_banks (ss->presentation_info().order() - 1, false);
+#endif
 			}
 		}
 	}
