@@ -135,8 +135,8 @@ class LIBARDOUR_API MusicalKey : public MusicalMode
 	MusicalKey (float root, MusicalMode const &);
 	MusicalKey (MusicalKey const & other);
 
-	MusicalKey operator= (MusicalKey const & other);
-
+	std::string name() const;
+	std::string mode_name() const;
 	float root() const { return _root; }
 	float nth (unsigned int n) const;
 	bool  in_key (int midi_note) const;

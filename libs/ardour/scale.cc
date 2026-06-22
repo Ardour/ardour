@@ -440,15 +440,6 @@ MusicalKey::MusicalKey (MusicalKey const & other)
 {
 }
 
-MusicalKey
-MusicalKey::operator= (MusicalKey const & other)
-{
-	MusicalMode::operator= (other);
-	_root = other._root;
-
-	return *this;
-}
-
 float
 MusicalKey::nth (unsigned n) const
 {
@@ -611,4 +602,16 @@ MusicalKey::conform_midi_note (int midi_note, KeyEnforcementPolicy key_enforcmen
 	}
 
 	return new_note;
+}
+
+std::string
+MusicalKey::name() const
+{
+	return string_compose (_("%1 %2"), _root + 'A', mode_name());
+}
+
+std::string
+MusicalKey::mode_name() const
+{
+	return MusicalMode::name();
 }
