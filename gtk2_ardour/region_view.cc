@@ -601,9 +601,9 @@ RegionView::update_cue_markers ()
 			mark->set_points_color ("region mark");
 			mark->set_show_line (true);
 			/* make sure the line has a clean end, before the frame
-			   of the region view
+			   of the region view or name frame
 			*/
-			mark->set_line_height (trackview.current_height() - (1.5 * UIConfiguration::instance ().get_ui_scale ()));
+			mark->set_line_height (_effective_height - 1);
 			mark->the_item().raise_to_top ();
 
 			if (show_cue_markers) {
@@ -965,7 +965,7 @@ RegionView::set_height (double h)
 	}
 
 	for (auto& _cue_marker : _cue_markers) {
-		_cue_marker->view_marker->set_line_height (h - (1.5 * UIConfiguration::instance ().get_ui_scale ()));
+		_cue_marker->view_marker->set_line_height (_effective_height - 1);
 	}
 }
 
