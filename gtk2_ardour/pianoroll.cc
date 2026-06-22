@@ -1893,6 +1893,13 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 
 	region_dropdown.set_active (region->name());
 	midi_inspector->set_region (_session, _active_view->midi_region());
+
+	if (automation_lanes.empty()) {
+		/* if no automation lane is added, partition_height() is not called
+		 * and we might end up with the wrong prh width
+		 */
+		partition_height ();
+	}
 }
 
 void
