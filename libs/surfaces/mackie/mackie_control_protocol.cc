@@ -242,54 +242,6 @@ MackieControlProtocol::stripable_is_locked_to_strip (std::shared_ptr<Stripable> 
 	return false;
 }
 
-// predicate for sort call in get_sorted_stripables
-struct StripableByPresentationOrder
-{
-	bool operator () (const std::shared_ptr<Stripable> & a, const std::shared_ptr<Stripable> & b) const
-	{
-		return a->presentation_info().order() < b->presentation_info().order();
-	}
-
-	bool operator () (const Stripable & a, const Stripable & b) const
-	{
-		return a.presentation_info().order() < b.presentation_info().order();
-	}
-
-	bool operator () (const Stripable * a, const Stripable * b) const
-	{
-		return a->presentation_info().order() < b->presentation_info().order();
-	}
-};
-
-struct mcpStripableSorter
-{
-	bool operator () (const std::shared_ptr<Stripable> & a, const std::shared_ptr<Stripable> & b) const
-	{
-		if (!(a->presentation_info().special() || b->presentation_info().special() ||
-		      a->is_foldbackbus() || b->is_foldbackbus())) {
-			return a->presentation_info().order() < b->presentation_info().order();
-		}
-
-		int cmp_a = 0;
-		int cmp_b = 0;
-
-		if (a->is_foldbackbus ())     { cmp_a = 1; }
-		if (b->is_foldbackbus ())     { cmp_b = 1; }
-		if (a->is_master ())          { cmp_a = 2; }
-		if (b->is_master ())          { cmp_b = 2; }
-		if (a->is_monitor ())         { cmp_a = 3; }
-		if (b->is_monitor ())         { cmp_b = 3; }
-		if (a->is_surround_master ()) { cmp_a = 4; }
-		if (b->is_surround_master ()) { cmp_b = 4; }
-
-		if (cmp_a == cmp_b) {
-			return a->presentation_info().order() < b->presentation_info().order();
-		} else {
-			return cmp_a < cmp_b;
-		}
-	}
-};
-
 MackieControlProtocol::Sorted
 MackieControlProtocol::get_sorted_stripables()
 {
@@ -377,7 +329,7 @@ MackieControlProtocol::get_sorted_stripables()
 		}
 	}
 
-	sort (sorted.begin(), sorted.end(), mcpStripableSorter());
+	sort (sorted.begin(), sorted.end(), Stripable::Sorter (true));
 	return sorted;
 }
 
