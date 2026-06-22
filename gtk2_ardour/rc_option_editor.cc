@@ -3348,7 +3348,7 @@ These settings will only take effect after %1 is restarted.\n\
 
 	add_option (_("Appearance/Regions"),
 	     new BoolComboOption (
-		     "show-region-gain-envelopes",
+		     "show-region-gain",
 		     _("Show gain envelopes in audio regions"),
 		     _("in all modes"),
 		     _("only in Draw and Internal Edit modes"),

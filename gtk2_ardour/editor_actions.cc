@@ -1282,8 +1282,6 @@ Editor::parameter_changed (std::string p)
 		if (tact->get_active () != s) {
 			tact->set_active (s);
 		}
-	} else if (p == "show-region-gain") {
-		set_gain_envelope_visibility ();
 	} else if (p == "skip-playback") {
 		Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("toggle-skip-playback"));
 		bool s = Config->get_skip_playback ();

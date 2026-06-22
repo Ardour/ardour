@@ -5667,6 +5667,8 @@ Editor::ui_parameter_changed (string parameter)
 		update_ruler_visibility ();
 	} else if (parameter == "use-cross-cursor") {
 		maybe_enable_cross_cursor ();
+	} else if (parameter == "show-region-gain") {
+		set_gain_envelope_visibility ();
 	}
 }
 
