@@ -119,7 +119,7 @@ idle_notify_engine_stopped ()
 	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("Window", "toggle-audio-midi-setup");
 
 	MessageDialog msg (
-	    _("The current operation is not possible because of an error communicating with the audio hardware."),
+	    _("The audio engine needs to be running for this operation. See Menu > Window > Audio/MIDI Setup"),
 	    false, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_NONE, true);
 
 	msg.add_button (_("Cancel"), Gtk::RESPONSE_CANCEL);
