@@ -31,10 +31,14 @@
 
 #include "ardour_dialog.h"
 
+namespace ArdourWidgets {
+	class Bracelet;
+}
+
 class ScaleDialog : public ArdourDialog
 {
   public:
-	ScaleDialog ();
+	ScaleDialog (std::string const & provider_name);
 	~ScaleDialog ();
 
 	void set (ARDOUR::MusicalKey const *);
@@ -47,6 +51,7 @@ class ScaleDialog : public ArdourDialog
 	static std::map<std::string,ARDOUR::MusicalModeType> string_type_map;
 	static void fill_maps ();
 
+	std::string provider;
 	ARDOUR::TuningSystem _tuning;
 	std::unique_ptr<ARDOUR::MusicalKey> _key;
 
@@ -61,7 +66,6 @@ class ScaleDialog : public ArdourDialog
 	Gtk::HBox type_box;
 	Gtk::Label type_label;
 	Gtk::Label tuning_label;
-	Gtk::Entry name_entry;
 	Gtk::Adjustment step_adjustment;
 	Gtk::Label steps_label;
 	Gtk::SpinButton step_spinner;
@@ -78,6 +82,8 @@ class ScaleDialog : public ArdourDialog
 	Gtk::HBox root_mode_box;
 	Gtk::VBox named_scale_box;
 	bool ignore_set;
+
+	ArdourWidgets::Bracelet* bracelet;
 
 	void pack_steps ();
 	void fill_dropdowns (ARDOUR::TuningSystem);
