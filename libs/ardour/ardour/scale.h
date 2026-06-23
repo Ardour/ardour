@@ -134,6 +134,7 @@ class LIBARDOUR_API MusicalKey : public MusicalMode
 {
     public:
 	MusicalKey (float root, MusicalMode const &);
+	MusicalKey (float root, std::string const &);
 	MusicalKey (MusicalKey const & other);
 
 	std::string name() const;
