@@ -1701,17 +1701,17 @@ msgstr "중지된 경우 마지막 플레이백 시작으로 반환"
 
 #: ardour_ui2.cc:94
 msgid ""
-"<b>Layered</b>, new recordings will be added as regions on a layer atop "
+"<b>Layered</b>: New recordings will be added as regions on a layer atop "
 "existing regions.\n"
-"<b>SoundOnSound</b>, behaves like <i>Layered</i>, except underlying regions "
+"<b>SoundOnSound</b>: Behaves like <i>Layered</i>, except underlying regions "
 "will be audible.\n"
-"<b>Non Layered</b>, the underlying region will be spliced and replaced with "
+"<b>Non Layered</b>: The underlying region will be spliced and replaced with "
 "the newly recorded region."
 msgstr ""
-"<b>Layered</b>, 새 녹음은 기존 영역 위에 레이어에 영역으로 추가됩니다.\n"
-"<b>SoundOnSound</b>, 기본 영역을 들을 수 있다는 점을 제외하면 <i>Layered</i>"
+"<b>Layered</b>: 새 녹음은 기존 영역 위에 레이어에 영역으로 추가됩니다.\n"
+"<b>SoundOnSound</b>: 기본 영역을 들을 수 있다는 점을 제외하면 <i>Layered</i>"
 "처럼 동작합니다.\n"
-"<b>Non Layered</b>, 기본 영역이 접합되고 새로 녹음된 영역으로 교체됩니다."
+"<b>Non Layered</b>: 기본 영역이 접합되고 새로 녹음된 영역으로 교체됩니다."
 
 #: ardour_ui2.cc:95
 msgid "Playhead follows Range tool clicks, and Range selections"
