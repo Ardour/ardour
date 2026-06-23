@@ -83,6 +83,9 @@ Searchpath::add_directory (const std::string& directory_path)
 	if (directory_path.empty()) {
 		return;
 	}
+	if (contains (directory_path)) {
+		return;
+	}
 	for (vector<std::string>::const_iterator i = begin(); i != end(); ++i) {
 		if (poor_mans_glob (*i) == poor_mans_glob(directory_path)) {
 			return;
@@ -175,6 +178,21 @@ Searchpath::contains (const string& path) const
 	std::vector<std::string>::const_iterator i = find(begin(), end(), path);
 
 	if (i == end()) {
+#ifdef PLATFORM_WINDOWS
+		i = find_if(begin(), end(), [&path](const string& rhs)
+		{
+			return equal(path.begin(), path.end(), rhs.begin(), rhs.end(), [](char l, char r)
+				{
+					return l == r
+						|| (l == '\\' && r == '/')
+						|| (l == '/' && r == '\\');
+				}
+			);
+		});
+		if(i != end()) {
+			return true;
+		}
+#endif
 		return false;
 	}
 	return true;

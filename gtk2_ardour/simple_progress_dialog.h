@@ -32,6 +32,7 @@ public:
 	SimpleProgressDialog (std::string title, const Glib::SignalProxy0< void >::SlotType & cancel)
 		: MessageDialog (title, false, Gtk::MESSAGE_OTHER, Gtk::BUTTONS_NONE, true)
 	{
+		set_position (UIConfiguration::instance().get_default_window_position());
 		get_vbox()->set_size_request(400,-1);
 		set_title (title);
 		pbar = manage (new Gtk::ProgressBar());
