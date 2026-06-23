@@ -785,18 +785,27 @@ Pianoroll::maybe_update ()
 void
 Pianoroll::position_playhead_cursor (samplepos_t pos)
 {
-	Temporal::TempoMap::SharedPtr global_tempo_map (Temporal::TempoMap::global_fetch());
-	Temporal::TempoMap::SharedPtr local_tempo_map (Temporal::TempoMap::use());
+	samplepos_t spos;
 
-	/* find out the beat time represented by pos in the global map,
-	 * convert back to sample position with the local map
-	 */
+	if (_active_view && _active_view->midi_region()) {
 
-	pos = local_tempo_map->sample_at (global_tempo_map->quarters_at (timepos_t (pos)));
+		Temporal::TempoMap::SharedPtr global_tempo_map (Temporal::TempoMap::global_fetch());
+		Temporal::TempoMap::SharedPtr local_tempo_map (Temporal::TempoMap::use());
 
-	/* Do the same for the source position */
+		/* find out the beat time represented by pos in the global map,
+		 * convert back to sample position with the local map
+		 */
 
-	samplepos_t spos = local_tempo_map->sample_at (global_tempo_map->quarters_at (_active_view->midi_region()->source_position()));
+		pos = local_tempo_map->sample_at (global_tempo_map->quarters_at (timepos_t (pos)));
+
+		/* Do the same for the source position */
+
+		spos = local_tempo_map->sample_at (global_tempo_map->quarters_at (_active_view->midi_region()->source_position()));
+
+	} else {
+
+		spos = pos;
+	}
 
 	if (pos < spos) {
 		_playhead_cursor->set_position (0);
