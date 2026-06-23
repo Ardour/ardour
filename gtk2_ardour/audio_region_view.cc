@@ -1267,10 +1267,12 @@ AudioRegionView::update_envelope_visibility ()
 			_fx_line->remove_visibility (EditorAutomationLine::ControlPoints);
 		}
 		_fx_line->canvas_group().raise_to_top ();
+		_fx_line->canvas_group().set_ignore_events (false);
 	} else if (UIConfiguration::instance().get_show_region_gain() || trackview.editor().current_mouse_mode() == Editing::MouseRange ) {
 		_fx_line->add_visibility (EditorAutomationLine::Line);
 		_fx_line->remove_visibility (EditorAutomationLine::ControlPoints);
 		_fx_line->canvas_group().raise_to_top ();
+		_fx_line->canvas_group().set_ignore_events (true);
 	} else {
 		_fx_line->set_visibility (EditorAutomationLine::VisibleAspects(0));
 	}
