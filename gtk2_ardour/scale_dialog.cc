@@ -20,11 +20,13 @@
 
 #include "pbd/unwind.h"
 
-#include "gtkmm2ext/utils.h"
-
 #include "ardour/parameter_descriptor.h"
 
+#include "gtkmm2ext/utils.h"
+#include "widgets/bracelet.h"
+
 #include "scale_dialog.h"
+#include "ui_config.h"
 
 #include "pbd/i18n.h"
 
@@ -57,11 +59,11 @@ ScaleDialog::fill_maps ()
 	}
 }
 
-ScaleDialog::ScaleDialog ()
+ScaleDialog::ScaleDialog (std::string const & provider_name)
 	: ArdourDialog (_("Scale Editor"))
+	, provider (provider_name)
 	, _tuning (TwelveTone)
 	, _key (nullptr)
-	, name_label (_("Name"))
 	, type_label (_("Type"))
 	, tuning_label (_("Tuning System"))
 	, step_adjustment (7, 1, 56, 1, 8)
@@ -91,9 +93,6 @@ ScaleDialog::ScaleDialog ()
 	root_mode_box.pack_start (root_dropdown, false, false);
 	root_mode_box.pack_start (mode_dropdown, true, true);
 
-	named_scale_box.pack_start (*inner_tuning_box, false, false);
-	named_scale_box.pack_start (root_mode_box, false, false);
-
 	type_dropdown.add_menu_elem (MenuElem (_("Absolute Pitch (Hz)"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), AbsolutePitch)));
 	type_dropdown.add_menu_elem (MenuElem (_("Pitch Class"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), PitchClass)));
 	type_dropdown.add_menu_elem (MenuElem (_("Whole Tone Steps"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), WholeToneSteps)));
@@ -107,13 +106,15 @@ ScaleDialog::ScaleDialog ()
 	inner_type_box->set_spacing (12);
 	type_box.pack_start (*inner_type_box, true, false);
 
-	Gtk::HBox* inner_name_box (manage (new Gtk::HBox));
-
+	Gtk::VBox* inner_name_box (manage (new Gtk::VBox));
+	name_label.set_markup (string_compose (_("Current Scale for \n<span size=\"large\" weight=\"bold\">%1</span>"), Gtkmm2ext::markup_escape_text (provider)));
 	inner_name_box->pack_start (name_label, false, false);
-	inner_name_box->pack_start (name_entry, false, false);
+	inner_name_box->pack_start (root_mode_box, false, false);
 	inner_name_box->set_spacing (12);
 
-	name_packer.pack_start (*inner_name_box, true, false);
+	Gtk::HBox* clear_box (manage (new Gtk::HBox));
+	clear_button.signal_clicked().connect ([this]() { response (Gtk::RESPONSE_REJECT); });
+	clear_box->pack_start (clear_button, true, false);
 
 	Gtk::HBox* inner_step_box (manage (new Gtk::HBox));
 	inner_step_box->pack_start (steps_label, false, false);
@@ -130,17 +131,12 @@ ScaleDialog::ScaleDialog ()
 	scala_file_button.set_current_folder (Glib::get_home_dir());
 
 	Gtk::VBox* vbox (get_vbox());
+	vbox->pack_start (*inner_name_box, false, false);
 	vbox->pack_start (named_scale_box, false, false);
-	vbox->pack_start (scala_box, false, false);
-	vbox->pack_start (type_box, false, false);
-	vbox->pack_start (name_packer, false, false);
-
-	vbox->pack_start (steps_box, false, false);
-	vbox->pack_start (step_packer, false, false);
-
-	Gtk::HBox* clear_box (manage (new Gtk::HBox));
-	clear_box->pack_start (clear_button, true, false);
 	vbox->pack_start (*clear_box, false, false);
+	vbox->pack_start (*inner_tuning_box, false, false);
+	vbox->pack_start (step_packer, false, false);
+	vbox->pack_start (scala_box, false, false);
 
 	vbox->set_border_width (6);
 	vbox->set_spacing (12);
@@ -156,6 +152,7 @@ ScaleDialog::ScaleDialog ()
 
 ScaleDialog::~ScaleDialog ()
 {
+	delete bracelet;
 }
 
 void
@@ -176,17 +173,24 @@ ScaleDialog::set (MusicalKey const * key)
 
 	PBD::Unwinder<bool> uw (ignore_set, true);
 
+	std::cerr << "SD key set to " << key << std::endl;
+
 	if (!key) {
 		_key = nullptr;
 		mode_dropdown.set_active (0);
+		std::cerr << "now showing no key\n";
 		return;
+
 	}
+
 
 	switch (_tuning) {
 	case TwelveTone:
 		twelvetone_set (*key);
 		break;
 	}
+
+	type_dropdown.set_active (type_string_map[_key->type()]);;
 }
 
 void
@@ -275,30 +279,23 @@ void
 ScaleDialog::pack_steps ()
 {
 	Gtkmm2ext::container_clear (step_packer, true);
+	bracelet = nullptr;
 
 	if (!_key) {
 		return;
 	}
 
-	for (int n = 0; n < _key->size(); ++n) {
-		Gtk::HBox* hb (manage (new Gtk::HBox));
-		Gtk::HBox* ihb (manage (new Gtk::HBox));
-		Gtk::Label* label (manage (new Gtk::Label));
-		char buf[64];
-		snprintf (buf, sizeof (buf), "%d", n);
-		label->set_text (buf);
+	bracelet = new ArdourWidgets::Bracelet (MusicalMode::tones_per_equivalent[_tuning]);
+	bracelet->set_size_request (200, 200);
+	bracelet->set_outline_color (UIConfiguration::instance().color ("border color"));
+	bracelet->set_fill_color (UIConfiguration::instance().color ("theme:bg"));
 
-		StepEntry* se = manage (new StepEntry (n));
-		Gtkmm2ext::set_size_request_to_display_given_text (*se, "abcdef", 2, 6);
-
-		ihb->pack_start (*label, false, false);
-		ihb->pack_start (*se, false, false);
-		ihb->set_spacing (6);
-		hb->pack_start (*ihb, true, false);
-
-		step_packer.pack_start (*hb, false, false);
-		hb->show_all ();
+	for (auto e : _key->elements()) {
+		bracelet->fill (e);
 	}
+
+	step_packer.pack_start (*bracelet, true, true);
+	bracelet->show ();
 }
 
 void
