@@ -149,9 +149,11 @@ MusicalMode::MusicalMode (TuningSystem ts, std::string const & name, MusicalMode
 	, _ring_id (0)
 	, _name (name)
 	, _type (type)
-	, _elements (elements)
 {
 	init ();
+
+	_elements.push_back (0); /* root */
+	_elements.insert (_elements.end(), elements.begin(), elements.end());
 }
 
 MusicalMode::MusicalMode (MusicalMode const & other)
