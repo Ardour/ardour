@@ -52,6 +52,14 @@ SerializedRCUManager<TempoMap> TempoMap::_map_mgr (0);
 thread_local TempoMap::SharedPtr TempoMap::_tempo_map_p;
 PBD::Signal<void()> TempoMap::MapChanged;
 
+#ifdef COMPILER_MINGW
+TempoMap::SharedPtr&
+TempoMap::_tempo_map_ref ()
+{
+	return _tempo_map_p;
+}
+#endif
+
 #ifndef NDEBUG
 #define TEMPO_MAP_ASSERT(expr) TempoMap::map_assert(expr, #expr, __FILE__, __LINE__)
 #else
