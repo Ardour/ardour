@@ -41,7 +41,7 @@
 using namespace std;
 
 string ARDOUR_COMMAND_LINE::session_name = "";
-string ARDOUR_COMMAND_LINE::backend_client_name = PBD::downcase(PROGRAM_NAME);
+string ARDOUR_COMMAND_LINE::backend_session_id = PBD::downcase(PROGRAM_NAME);
 bool  ARDOUR_COMMAND_LINE::show_key_actions = false;
 bool  ARDOUR_COMMAND_LINE::show_actions = false;
 bool ARDOUR_COMMAND_LINE::no_splash = false;
@@ -72,7 +72,7 @@ print_help (const char *execname)
 		<< _("  -A, --actions               Print all possible menu action names\n")
 		<< _("  -b, --bindings              Display all current key bindings\n")
 		<< _("  -B, --bypass-plugins        Bypass all plugins in an existing session\n")
-		<< _("  -c, --name <name>           Use a specific backend client name, default is ardour\n")
+		<< _("  -c, --name <session-id>     Specify audio backend client session id, default is ardour\n")
 		<< _("  -d, --disable-plugins       Disable all plugins (safe mode)\n")
 #ifndef NDEBUG
 		<< _("  -D, --debug <options>       Set debug flags. Use \"-D list\" to see available options\n")
@@ -218,7 +218,7 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 			break;
 
 		case 'c':
-			backend_client_name = optarg;
+			backend_session_id = optarg;
 			break;
 
 		case 'k':

@@ -48,7 +48,7 @@ using namespace PBD;
 
 static const char* localedir = LOCALEDIR;
 
-static string             backend_client_name;
+static string             backend_session_id;
 static CrossThreadChannel xthread (true);
 static TestReceiver       test_receiver;
 
@@ -72,7 +72,7 @@ load_session (string dir, string state)
 
 	AudioEngine* engine = AudioEngine::create ();
 
-	if (!engine->set_backend (backend_name, backend_client_name, "")) {
+	if (!engine->set_backend (backend_name, backend_session_id, "")) {
 		std::cerr << "Cannot set Audio/MIDI engine backend\n";
 		exit (EXIT_FAILURE);
 	}
@@ -172,7 +172,7 @@ main (int argc, char* argv[])
 
 	bool try_hw_optimization = true;
 
-	backend_client_name = PBD::downcase (std::string (PROGRAM_NAME));
+	backend_session_id = PBD::downcase (std::string (PROGRAM_NAME));
 
 	int c;
 	while ((c = getopt_long (argc, argv, optstring, longopts, (int*)0)) != EOF) {
@@ -191,7 +191,7 @@ main (int argc, char* argv[])
 				break;
 
 			case 'c':
-				backend_client_name = optarg;
+				backend_session_id = optarg;
 				break;
 
 			case 'B':
