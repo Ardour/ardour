@@ -1577,8 +1577,6 @@ AudioRegionView::entered ()
 
 	hovered = true;
 
-	update_envelope_visibility();
-
 	if ((trackview.editor().current_mouse_mode() == Editing::MouseObject)) {
 		if (start_xfade_rect) {
 			start_xfade_rect->set_outline (true);
@@ -1612,7 +1610,12 @@ AudioRegionView::entered ()
 				fade_out_trim_handle->hide ();
 			}
 		}
-	} else {  //this happens when we switch tools; if we switch away from Grab mode,  hide all the fade handles
+	} else {
+		update_envelope_visibility();
+
+		/* this happens when we switch tools
+		 * if we switch away from Grab mode, hide all the fade handles
+		 */
 		if (fade_in_handle)       { fade_in_handle->hide(); }
 		if (fade_out_handle)      { fade_out_handle->hide(); }
 		if (fade_in_trim_handle)  { fade_in_trim_handle->hide(); }
@@ -1630,7 +1633,9 @@ AudioRegionView::exited ()
 
 	hovered = false;
 
-	update_envelope_visibility();
+	if ((trackview.editor().current_mouse_mode() != Editing::MouseObject)) {
+		update_envelope_visibility();
+	}
 
 	if (fade_in_handle)       { fade_in_handle->hide(); }
 	if (fade_out_handle)      { fade_out_handle->hide(); }
