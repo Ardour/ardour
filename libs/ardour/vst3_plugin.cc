@@ -1345,7 +1345,11 @@ VST3PI::VST3PI (std::shared_ptr<ARDOUR::VST3PluginModule> m, std::string unique_
 	int32 n_params = _controller->getParameterCount ();
 	DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3 parameter count: %1\n", n_params));
 
+#if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
 	Glib::RefPtr<Glib::Regex> dpf_midi_CC = Glib::Regex::create ("MIDI Ch\\. [0-9]+ CC [0-9]+");
+#else
+	std::regex dpf_midi_CC ("MIDI Ch\\. [0-9]+ CC [0-9]+");
+#endif
 
 	for (int32 i = 0; i < n_params; ++i) {
 		Vst::ParameterInfo pi;
@@ -1360,7 +1364,12 @@ VST3PI::VST3PI (std::shared_ptr<ARDOUR::VST3PluginModule> m, std::string unique_
 			/* Some JUCE plugins add 16 * 128 automatable MIDI CC parameters */
 			continue;
 		}
-		if (dpf_midi_CC->match (tchar_to_ustring (pi.title))) {
+#if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
+		if (dpf_midi_CC->match (tchar_to_ustring (pi.title)))
+#else
+		if (std::regex_search (tchar_to_utf8 (pi.title), dpf_midi_CC))
+#endif
+		{
 			/* DPF plugins also adds automatable MIDI CC parameters "MIDI Ch. %d CC %d" */
 			continue;
 		}
