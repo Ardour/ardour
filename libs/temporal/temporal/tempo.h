@@ -753,6 +753,12 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	typedef std::shared_ptr<TempoMap> WritableSharedPtr;
   private:
 	static thread_local SharedPtr _tempo_map_p;
+#ifdef COMPILER_MINGW
+/*  Due to Native TLS recently being added to MSYS2 MINGW, errors
+    can come from thread_local variables during external linkage.
+    See https://github.com/msys2/MINGW-packages/issues/29272 */
+	static LIBTEMPORAL_API SharedPtr& _tempo_map_ref ();
+#endif
 	static SerializedRCUManager<TempoMap> _map_mgr;
 	static bool fetch_condition ();
   public:
@@ -762,9 +768,16 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
   public:
 	LIBTEMPORAL_API static void init ();
 
+#ifndef COMPILER_MINGW
 	LIBTEMPORAL_API static void      update_thread_tempo_map() { _tempo_map_p = _map_mgr.reader(); }
 	LIBTEMPORAL_API static SharedPtr use() { assert (_tempo_map_p); return _tempo_map_p; }
 	LIBTEMPORAL_API static SharedPtr fetch() { assert (fetch_condition()); update_thread_tempo_map(); return _tempo_map_p; }
+#else
+	LIBTEMPORAL_API static void      update_thread_tempo_map() { _tempo_map_ref() = _map_mgr.reader(); }
+	LIBTEMPORAL_API static SharedPtr use() { assert (_tempo_map_ref()); return _tempo_map_ref(); }
+	LIBTEMPORAL_API static SharedPtr fetch() { assert (fetch_condition()); update_thread_tempo_map(); return _tempo_map_ref(); }
+#endif
+
 	/* No fetch condition for this, to be used only in association with LocalTempoMapScope */
 	LIBTEMPORAL_API static SharedPtr global_fetch() { return _map_mgr.reader(); }
 
@@ -778,7 +791,11 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	 * can be used on either a write_copy()'ed map, or one obtained via the
 	 * RCU reader() method.
 	 */
+#ifndef COMPILER_MINGW
 	LIBTEMPORAL_API static void      set (SharedPtr new_map) { _tempo_map_p = new_map; }
+#else
+	LIBTEMPORAL_API static void      set (SharedPtr new_map) { _tempo_map_ref() = new_map; }
+#endif
 
 	/* API for typical tempo map changes */
 
