@@ -44,7 +44,7 @@ ScaleDialog::fill_maps ()
 
 	std::vector<stpair> pairs = {
 		{ _("Absolute Pitch (Hz)"), AbsolutePitch },
-		{ _("Semitone Steps") ,SemitoneSteps },
+		{ _("Pitch Class"), PitchClass },
 		{ _("Whole Tone Steps"), WholeToneSteps },
 		{ _("Ratio Steps"), RatioSteps },
 		{ _("Ratios from root"), RatioFromRoot },
@@ -95,13 +95,11 @@ ScaleDialog::ScaleDialog ()
 	named_scale_box.pack_start (root_mode_box, false, false);
 
 	type_dropdown.add_menu_elem (MenuElem (_("Absolute Pitch (Hz)"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), AbsolutePitch)));
-	type_dropdown.add_menu_elem (MenuElem (_("Semitone Steps"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), SemitoneSteps)));
+	type_dropdown.add_menu_elem (MenuElem (_("Pitch Class"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), PitchClass)));
 	type_dropdown.add_menu_elem (MenuElem (_("Whole Tone Steps"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), WholeToneSteps)));
 	type_dropdown.add_menu_elem (MenuElem (_("Ratio steps"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), RatioSteps)));
 	type_dropdown.add_menu_elem (MenuElem (_("Ratios from root"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), RatioFromRoot)));
 	type_dropdown.add_menu_elem (MenuElem (_("MIDI Note Numbers"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), MidiNote)));
-
-	type_dropdown.set_active (_("Semitone Steps"));
 
 	Gtk::HBox* inner_type_box (manage (new Gtk::HBox));
 	inner_type_box->pack_start (type_label, false, false);
