@@ -377,7 +377,7 @@ Session::Session (AudioEngine &eng,
 	_seek_counter.store (0);
 	_butler_seek_counter.store (0);
 
-	ScaleProvider::set_key (new MusicalKey (60, std::string (_("Major"))));
+	ScaleProvider::set_key (new MusicalKey (60, _("Major")));
 
 	created_with = string_compose ("%1 %2", PROGRAM_NAME, revision);
 
