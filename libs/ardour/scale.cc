@@ -65,43 +65,43 @@ MusicalMode::init ()
 
 	/* Actual scales */
 
-	register_scales (TwelveTone, { _("Major"), _("Ionian") }, SemitoneSteps, {  2 , 4 , 5 , 7 , 9 , 11 });
-	register_scales (TwelveTone, { _("Minor"), _("Aeolian") }, SemitoneSteps, {  2 , 3 , 5 , 7 , 8 , 10 });
-	register_scale (TwelveTone, _("Dorian"), SemitoneSteps, { 2 , 3 , 4 , 6 , 8 , 9 , 11 });
-	register_scale (TwelveTone, _("Harmonic Minor"), SemitoneSteps, { 2 , 3 , 5 , 7 , 10 , 11 });
-	register_scale (TwelveTone, _("Blues"), SemitoneSteps, { 2 , 3 , 5 , 6 , 7 , 9 , 10 , 11 });
-	register_scale (TwelveTone, _("Melodic Minor Ascending"), SemitoneSteps, { 2 , 3 , 5 , 7 , 9 , 11 });
-	register_scale (TwelveTone, _("Melodic Minor Descending"), SemitoneSteps, { 2 , 4 , 5 , 7 , 9 , 10 });
-	register_scale (TwelveTone, _("Phrygian"), SemitoneSteps, { 1 , 3 , 5 , 7 , 8 , 10 });
-	register_scale (TwelveTone, _("Lydian"), SemitoneSteps, { 2 , 4 , 6 , 7 , 9 , 11 });
-	register_scale (TwelveTone, _("Mixolydian"), SemitoneSteps, { 2 , 4 , 5 , 7 , 9 , 10 });
-	register_scale (TwelveTone, _("Locrian"), SemitoneSteps, { 1 , 3 , 4 , 6 , 8 , 10 });
-	register_scale (TwelveTone, _("Pentatonic Major"), SemitoneSteps, {  2 , 4 , 5 , 7 });
-	register_scale (TwelveTone, _("Pentatonic Minor"), SemitoneSteps, { 3 , 5 , 7 , 10 });
-	register_scale (TwelveTone, _("Chromatic"), SemitoneSteps, { 1 , 2 , 3 , 4 , 5 , 6 , 7 , 8 , 9 , 10 , 11 });
-	register_scale (TwelveTone, _("Neapolitan Minor"), SemitoneSteps, { 1 , 3 , 5 , 5 , 8 , 11 });
-	register_scale (TwelveTone, _("Neapolitan Major"), SemitoneSteps, { 1 , 3 , 5 , 7 , 9 , 11 });
-	register_scale (TwelveTone, _("Oriental"), SemitoneSteps, {1 , 4 , 5 , 6 , 9 , 10 });
-	register_scale (TwelveTone, _("Double Harmonic"), SemitoneSteps, { 1 , 3, 5, 7, 8, 11 });
-	register_scale (TwelveTone, _("Enigmatic"), SemitoneSteps, { 1 , 4 , 6 , 8 , 10 , 11 });
-	register_scale (TwelveTone, _("Hirajoshi"), SemitoneSteps, { 2 , 3 , 7 , 8 });
-	register_scale (TwelveTone, _("Hungarian Minor"), SemitoneSteps, { 2 , 3 , 6 , 7 , 8 , 11 });
-	register_scale (TwelveTone, _("Hungarian Major"), SemitoneSteps, { 2 , 4 , 6 , 7 , 8 , 10 });
-	register_scale (TwelveTone, _("Kumoi"), SemitoneSteps, { 1 , 5 , 7 , 8 });
-	register_scale (TwelveTone, _("Iwato"), SemitoneSteps, { 1 , 5 , 6 , 10 });
-	register_scale (TwelveTone, _("Hindu"), SemitoneSteps, { 2 , 4 , 5 , 7 , 8 , 10 });
-	register_scale (TwelveTone, _("Spanish 8 Tone"), SemitoneSteps, { 1 , 3 , 4 , 5 , 6 , 8 , 10 });
-	register_scale (TwelveTone, _("Pelog"), SemitoneSteps, { 1 , 3 , 7 , 10 });
-	register_scale (TwelveTone, _("Hungarian Gypsy"), SemitoneSteps, { 2 , 3 , 6 , 7 , 8 , 10 });
-	register_scale (TwelveTone, _("Overtone"), SemitoneSteps, { 2 , 4 , 6 , 7 , 9 , 10 });
-	register_scale (TwelveTone, _("Leading Semitone"), SemitoneSteps, { 2 , 4 , 6 , 8 , 10 , 11 });
-	register_scale (TwelveTone, _("Arabian"), SemitoneSteps, { 2 , 4 , 5 , 6 , 8 , 10 });
-	register_scale (TwelveTone, _("Balinese"), SemitoneSteps, { 1 , 3 , 7 , 8 });
-	register_scale (TwelveTone, _("Gypsy"), SemitoneSteps, { 2, 3, 6, 7, 8, 10 });
-	register_scale (TwelveTone, _("Mohammedan"), SemitoneSteps, { 2 , 3 , 5 , 7 , 8 , 11 });
-	register_scale (TwelveTone, _("Javanese"), SemitoneSteps, { 1 , 3 , 5 , 7 , 9 , 10 });
-	register_scale (TwelveTone, _("Persian"), SemitoneSteps, { 1 , 4 , 5 , 6 , 8 , 11 });
-	register_scale (TwelveTone, _("Algerian"), SemitoneSteps, { 2 , 3, 5, 6, 7, 8, 11 });
+	register_scales (TwelveTone, { _("Major"), _("Ionian") }, PitchClass, {  2 , 4 , 5 , 7 , 9 , 11 });
+	register_scales (TwelveTone, { _("Minor"), _("Aeolian") }, PitchClass, {  2 , 3 , 5 , 7 , 8 , 10 });
+	register_scale (TwelveTone, _("Dorian"), PitchClass, { 2 , 3 , 4 , 6 , 8 , 9 , 11 });
+	register_scale (TwelveTone, _("Harmonic Minor"), PitchClass, { 2 , 3 , 5 , 7 , 10 , 11 });
+	register_scale (TwelveTone, _("Blues"), PitchClass, { 2 , 3 , 5 , 6 , 7 , 9 , 10 , 11 });
+	register_scale (TwelveTone, _("Melodic Minor Ascending"), PitchClass, { 2 , 3 , 5 , 7 , 9 , 11 });
+	register_scale (TwelveTone, _("Melodic Minor Descending"), PitchClass, { 2 , 4 , 5 , 7 , 9 , 10 });
+	register_scale (TwelveTone, _("Phrygian"), PitchClass, { 1 , 3 , 5 , 7 , 8 , 10 });
+	register_scale (TwelveTone, _("Lydian"), PitchClass, { 2 , 4 , 6 , 7 , 9 , 11 });
+	register_scale (TwelveTone, _("Mixolydian"), PitchClass, { 2 , 4 , 5 , 7 , 9 , 10 });
+	register_scale (TwelveTone, _("Locrian"), PitchClass, { 1 , 3 , 4 , 6 , 8 , 10 });
+	register_scale (TwelveTone, _("Pentatonic Major"), PitchClass, {  2 , 4 , 5 , 7 });
+	register_scale (TwelveTone, _("Pentatonic Minor"), PitchClass, { 3 , 5 , 7 , 10 });
+	register_scale (TwelveTone, _("Chromatic"), PitchClass, { 1 , 2 , 3 , 4 , 5 , 6 , 7 , 8 , 9 , 10 , 11 });
+	register_scale (TwelveTone, _("Neapolitan Minor"), PitchClass, { 1 , 3 , 5 , 5 , 8 , 11 });
+	register_scale (TwelveTone, _("Neapolitan Major"), PitchClass, { 1 , 3 , 5 , 7 , 9 , 11 });
+	register_scale (TwelveTone, _("Oriental"), PitchClass, {1 , 4 , 5 , 6 , 9 , 10 });
+	register_scale (TwelveTone, _("Double Harmonic"), PitchClass, { 1 , 3, 5, 7, 8, 11 });
+	register_scale (TwelveTone, _("Enigmatic"), PitchClass, { 1 , 4 , 6 , 8 , 10 , 11 });
+	register_scale (TwelveTone, _("Hirajoshi"), PitchClass, { 2 , 3 , 7 , 8 });
+	register_scale (TwelveTone, _("Hungarian Minor"), PitchClass, { 2 , 3 , 6 , 7 , 8 , 11 });
+	register_scale (TwelveTone, _("Hungarian Major"), PitchClass, { 2 , 4 , 6 , 7 , 8 , 10 });
+	register_scale (TwelveTone, _("Kumoi"), PitchClass, { 1 , 5 , 7 , 8 });
+	register_scale (TwelveTone, _("Iwato"), PitchClass, { 1 , 5 , 6 , 10 });
+	register_scale (TwelveTone, _("Hindu"), PitchClass, { 2 , 4 , 5 , 7 , 8 , 10 });
+	register_scale (TwelveTone, _("Spanish 8 Tone"), PitchClass, { 1 , 3 , 4 , 5 , 6 , 8 , 10 });
+	register_scale (TwelveTone, _("Pelog"), PitchClass, { 1 , 3 , 7 , 10 });
+	register_scale (TwelveTone, _("Hungarian Gypsy"), PitchClass, { 2 , 3 , 6 , 7 , 8 , 10 });
+	register_scale (TwelveTone, _("Overtone"), PitchClass, { 2 , 4 , 6 , 7 , 9 , 10 });
+	register_scale (TwelveTone, _("Leading Semitone"), PitchClass, { 2 , 4 , 6 , 8 , 10 , 11 });
+	register_scale (TwelveTone, _("Arabian"), PitchClass, { 2 , 4 , 5 , 6 , 8 , 10 });
+	register_scale (TwelveTone, _("Balinese"), PitchClass, { 1 , 3 , 7 , 8 });
+	register_scale (TwelveTone, _("Gypsy"), PitchClass, { 2, 3, 6, 7, 8, 10 });
+	register_scale (TwelveTone, _("Mohammedan"), PitchClass, { 2 , 3 , 5 , 7 , 8 , 11 });
+	register_scale (TwelveTone, _("Javanese"), PitchClass, { 1 , 3 , 5 , 7 , 9 , 10 });
+	register_scale (TwelveTone, _("Persian"), PitchClass, { 1 , 4 , 5 , 6 , 8 , 11 });
+	register_scale (TwelveTone, _("Algerian"), PitchClass, { 2 , 3, 5, 6, 7, 8, 11 });
 }
 
 void
@@ -221,7 +221,7 @@ MusicalMode::ring_id () const
 		_ring_id = -1;
 		break;
 
-	case SemitoneSteps:
+	case PitchClass:
 		for (auto e : _elements) {
 			int interval = int (floor (e));
 			intervals_included[interval] = true;
@@ -291,8 +291,8 @@ MusicalMode::as_midi (int scale_root) const
 	switch (_type) {
 	case AbsolutePitch:
 		return absolute_pitch_as_midi (scale_root);
-	case SemitoneSteps:
-		return semitone_steps_as_midi (scale_root);
+	case PitchClass:
+		return pitch_class_as_midi (scale_root);
 	case WholeToneSteps:
 		return wholetone_steps_as_midi (scale_root);
 	case RatioSteps:
@@ -340,7 +340,7 @@ MusicalMode::midi_note_as_midi (int root) const
 }
 
 std::vector<int>
-MusicalMode::semitone_steps_as_midi (int scale_root) const
+MusicalMode::pitch_class_as_midi (int scale_root) const
 {
 	std::vector<int> midi_notes;
 

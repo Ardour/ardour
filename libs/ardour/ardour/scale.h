@@ -122,7 +122,7 @@ class LIBARDOUR_API MusicalMode
 	static void init ();
 
 	std::vector<int> absolute_pitch_as_midi (int root) const;
-	std::vector<int> semitone_steps_as_midi (int root) const;
+	std::vector<int> pitch_class_as_midi (int root) const;
 	std::vector<int> wholetone_steps_as_midi (int root) const;
 	std::vector<int> ratio_steps_as_midi (int root) const;
 	std::vector<int> ratio_from_root_as_midi (int root) const;
