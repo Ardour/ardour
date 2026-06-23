@@ -109,6 +109,9 @@ class LIBARDOUR_API MusicalMode
 	static std::map<std::string,MusicalMode> scales_by_name;
 	static std::map<int,MusicalMode> scales_by_id;
 
+	static std::map<TuningSystem,int> tone_equivalent_ratio;
+	static std::map<TuningSystem,int> tones_per_equivalent;
+
    protected:
         TuningSystem _tuning;
 	mutable int _ring_id;
@@ -116,8 +119,6 @@ class LIBARDOUR_API MusicalMode
 	MusicalModeType _type;
 	std::vector<float> _elements;
 
-	static std::map<TuningSystem,int> tone_equivalent_ratio;
-	static std::map<TuningSystem,int> tones_per_equivalent;
 	static void init ();
 
 	std::vector<int> absolute_pitch_as_midi (int root) const;
