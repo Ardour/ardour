@@ -434,6 +434,12 @@ MusicalKey::MusicalKey (float root, MusicalMode const & sc)
 {
 }
 
+MusicalKey::MusicalKey (float root, std::string const & mode_name)
+	: MusicalMode (mode_name)
+	, _root (root)
+{
+}
+
 MusicalKey::MusicalKey (MusicalKey const & other)
 	: MusicalMode (other)
 	, _root (other._root)
