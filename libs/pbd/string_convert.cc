@@ -143,28 +143,30 @@ bool string_to_uint64 (const std::string& str, uint64_t& val)
 	return true;
 }
 
-template <class FloatType>
-static bool
-_string_to_infinity (const std::string& str, FloatType& val)
+bool string_to_float (const std::string& str, float& val, std::function<bool(const float&)> filter)
 {
-	if (!g_ascii_strncasecmp (str.c_str (), X_ ("inf"), str.length ()) ||
-	    !g_ascii_strncasecmp (str.c_str (), X_ ("+inf"), str.length ()) ||
-	    !g_ascii_strncasecmp (str.c_str (), X_ ("INFINITY"), str.length ()) ||
-	    !g_ascii_strncasecmp (str.c_str (), X_ ("+INFINITY"), str.length ())) {
-		val = std::numeric_limits<FloatType>::infinity ();
-		return true;
-	} else if (!g_ascii_strncasecmp (str.c_str (), X_ ("-inf"), str.length ()) ||
-	           !g_ascii_strncasecmp (str.c_str (), X_ ("-INFINITY"), str.length ())) {
-		val = -std::numeric_limits<FloatType>::infinity ();
+	auto inner_filter = [filter = std::move(filter)](const double& value) {
+		return filter((float) value);
+	};
+
+	double tmp;
+
+	if (string_to_double (str, tmp, inner_filter)) {
+		val = (float)tmp;
 		return true;
 	}
+
 	return false;
 }
 
-bool
-_string_to_double (const std::string& str, double& val)
+bool string_to_float (const std::string& str, float& val)
 {
-	val = g_ascii_strtod (str.c_str (), NULL);
+	return string_to_float (str, val, [](const float&) { return true; });
+}
+
+bool string_to_double (const std::string& str, double& val, std::function<bool(const double&)> filter)
+{
+	double tmp = g_ascii_strtod (str.c_str (), NULL);
 
 	// It is possible that the conversion was successful and another thread
 	// has set errno meanwhile but as most conversions are currently not
@@ -175,35 +177,34 @@ _string_to_double (const std::string& str, double& val)
 		// contents so returning false here should not have any impact...
 		return false;
 	}
+
+	// We've eskewed all other tests for infinite values except here, and it's
+	// worth elaborating why.
+    //
+	// We had a list of fixed strings that we tested against (`inf`, `INFINITY`,
+	// ...), but all of those values are non-numerical values which are not
+	// supported by g_ascii_strtod and would fail with ERANGE above.
+	//
+	// There are values that g_ascii_strtod supports which we did not catch
+	// before (very specifically NaN). Instead of matching the internal
+	// representation of g_ascii_strtod we opt to reject the output.
+	if (!std::isfinite(tmp)) {
+		DEBUG_SCONVERT (string_compose ("string_to_double tried to produce non-finite value for %1", str));
+		return false;
+	}
+
+	if (!filter(tmp)) {
+		DEBUG_SCONVERT (string_compose ("string_to_double value rejected by filter for %1", str));
+		return false;
+	}
+
+	val = tmp;
 	return true;
-}
-
-bool string_to_float (const std::string& str, float& val)
-{
-	double tmp;
-	if (_string_to_double (str, tmp)) {
-		val = (float)tmp;
-		return true;
-	}
-
-	if (_string_to_infinity (str, val)) {
-		return true;
-	}
-
-	return false;
 }
 
 bool string_to_double (const std::string& str, double& val)
 {
-	if (_string_to_double (str, val)) {
-		return true;
-	}
-
-	if (_string_to_infinity (str, val)) {
-		return true;
-	}
-
-	return false;
+	return string_to_double (str, val, [](const double&) { return true; });
 }
 
 bool bool_to_string (bool val, std::string& str)
@@ -306,17 +307,23 @@ bool uint64_to_string (uint64_t val, std::string& str)
 	return true;
 }
 
+/**
+ * Fixate some non-finite floating point values to preferred representations.
+ */
 template <class FloatType>
 static bool
-_infinity_to_string (FloatType val, std::string& str)
+_non_finite_to_string (FloatType val, std::string& str)
 {
-	if (val == std::numeric_limits<FloatType>::infinity ()) {
-		str = "inf";
+	if (std::isinf(val)) {
+		str = val < 0.0 ? "-inf" : "inf";
 		return true;
-	} else if (val == -std::numeric_limits<FloatType>::infinity ()) {
-		str = "-inf";
+	} else if (std::isnan (val)) {
+		str = "nan";
 		return true;
 	}
+
+	// NB: We still fall through to _double_to_string for denormal values and
+	// let it handle them as-it-sees-fit. They will *likely* flush to zero.
 	return false;
 }
 
@@ -330,13 +337,14 @@ _double_to_string (double val, std::string& str)
 	if (d_cstr == NULL) {
 		return false;
 	}
+
 	str = d_cstr;
 	return true;
 }
 
 bool float_to_string (float val, std::string& str)
 {
-	if (_infinity_to_string (val, str)) {
+	if (_non_finite_to_string (val, str)) {
 		return true;
 	}
 
@@ -350,7 +358,7 @@ bool float_to_string (float val, std::string& str)
 
 bool double_to_string (double val, std::string& str)
 {
-	if (_infinity_to_string (val, str)) {
+	if (_non_finite_to_string (val, str)) {
 		return true;
 	}
 

@@ -20,6 +20,7 @@
 #define PBD_STRING_CONVERT_H
 
 #include <string>
+#include <functional>
 #include <stdint.h>
 
 #include "pbd/libpbd_visibility.h"
@@ -64,8 +65,10 @@ LIBPBD_API bool string_to_int64 (const std::string& str, int64_t& val);
 
 LIBPBD_API bool string_to_uint64 (const std::string& str, uint64_t& val);
 
+LIBPBD_API bool string_to_float (const std::string& str, float& val, std::function<bool(const float&)> filter);
 LIBPBD_API bool string_to_float (const std::string& str, float& val);
 
+LIBPBD_API bool string_to_double (const std::string& str, double& val, std::function<bool(const double&)> filter);
 LIBPBD_API bool string_to_double (const std::string& str, double& val);
 
 template <class T>
@@ -217,13 +220,34 @@ inline bool string_to (const std::string& str, uint64_t& val)
 template <class T>
 inline bool string_to (const std::string& str, float& val)
 {
-	return string_to_float (str, val);
+	return string_to_float (str, val, [](auto) { return true; });
 }
 
 template <class T>
 inline bool string_to (const std::string& str, double& val)
 {
-	return string_to_double (str, val);
+	return string_to_double (str, val, [](auto) { return true; });
+}
+
+template <class T, class Filter>
+inline T string_to_if (const std::string& str, T& val, Filter filter)
+{
+	// This will cause a compile time error if this function is ever
+	// instantiated, which is useful to catch unintended conversions
+	typename T::STRING_TO_OR_REJECT_TEMPLATE_NOT_DEFINED_FOR_THIS_TYPE invalid_type;
+	return T();
+}
+
+template <class T, class Filter>
+inline bool string_to_if (const std::string& str, float& val, Filter filter)
+{
+	return string_to_float (str, val, filter);
+}
+
+template <class T, class Filter>
+inline bool string_to_if (const std::string& str, double& val, Filter filter)
+{
+	return string_to_double (str, val, filter);
 }
 
 ////////////////////////////////////////////////////////////////
@@ -349,7 +373,7 @@ inline int8_t string_to (const std::string& str)
 {
 	int16_t tmp;
 	string_to_int16 (str, tmp);
-	return (int8_t) tmp;
+	return (int8_t)tmp;
 }
 
 template <>

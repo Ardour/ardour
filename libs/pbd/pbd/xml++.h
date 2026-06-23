@@ -171,6 +171,10 @@ public:
 
 	bool get_property (const char* name, std::string& value) const;
 
+	/**
+	 * This is a variant of get_property that is implemented for all types,
+	 * including floats and doubles, that rejects missing or invalid values.
+	 */
 	template <class T>
 	bool get_property (const char* name, T& value) const
 	{
@@ -180,6 +184,23 @@ public:
 		}
 
 		return PBD::string_to<T> (prop->value (), value);
+	}
+
+	/**
+	 * A variant of get_property that is implemented for all types, including
+	 * floats and doubles, that rejects missing or invalid values, and applies a
+	 * filter before accepting a value.
+	 */
+	template <class T, class Filter>
+	bool get_property_if (const char* name, T& value, Filter filter) const
+	{
+		XMLProperty const* const prop = property (name);
+
+		if (!prop) {
+			return false;
+		}
+
+		return PBD::string_to_if<T, Filter> (prop->value (), value, filter);
 	}
 
 	void remove_property(const std::string&);

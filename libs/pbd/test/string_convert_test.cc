@@ -430,9 +430,10 @@ _test_infinity_conversion ()
 
 	for (std::vector<std::string>::const_iterator i = pos_inf_strings.begin ();
 	     i != pos_inf_strings.end (); ++i) {
-		FloatType pos_infinity_arg;
-		CPPUNIT_ASSERT (string_to<FloatType> (*i, pos_infinity_arg));
-		CPPUNIT_ASSERT_EQUAL (pos_infinity_arg, pos_infinity);
+		FloatType pos_infinity_arg = (FloatType) 42.0;
+		CPPUNIT_ASSERT (!string_to<FloatType> (*i, pos_infinity_arg));
+		// argument should not be modified
+		CPPUNIT_ASSERT_EQUAL (pos_infinity_arg, (FloatType) 42.0);
 	}
 
 	// Check string -> float for all supported string representations of "-INFINITY"
@@ -440,14 +441,44 @@ _test_infinity_conversion ()
 
 	for (std::vector<std::string>::const_iterator i = neg_inf_strings.begin ();
 	     i != neg_inf_strings.end (); ++i) {
-		FloatType neg_infinity_arg;
-		CPPUNIT_ASSERT (string_to<FloatType> (*i, neg_infinity_arg));
-		CPPUNIT_ASSERT_EQUAL (neg_infinity_arg, neg_infinity);
+		FloatType neg_infinity_arg = (FloatType) 42.0;
+		CPPUNIT_ASSERT (!string_to<FloatType> (*i, neg_infinity_arg));
+		// argument should not be modified
+		CPPUNIT_ASSERT_EQUAL (neg_infinity_arg, (FloatType) 42.0);
 	}
 
-	// Check round-trip equality
-	CPPUNIT_ASSERT_EQUAL (pos_infinity, string_to<FloatType> (to_string<FloatType> (pos_infinity)));
-	CPPUNIT_ASSERT_EQUAL (neg_infinity, string_to<FloatType> (to_string<FloatType> (neg_infinity)));
+	// Ensure that the to_string infinite representations are rejected while
+	// reading.
+	auto pos_inf_str = to_string<FloatType> (pos_infinity);
+	FloatType pos_inf_val = (FloatType) 42.0;
+	CPPUNIT_ASSERT (!string_to<FloatType> (pos_inf_str, pos_inf_val));
+	CPPUNIT_ASSERT_EQUAL (pos_inf_val, (FloatType) 42.0);
+
+	auto neg_inf_str = to_string<FloatType> (neg_infinity);
+	FloatType neg_inf_val = (FloatType) 42.0;
+	CPPUNIT_ASSERT (!string_to<FloatType> (neg_inf_str, neg_inf_val));
+	CPPUNIT_ASSERT_EQUAL (neg_inf_val, (FloatType) 42.0);
+}
+
+static const std::string QUIET_NAN_STR ("nan");
+
+template <class FloatType>
+void
+_test_nan_conversion ()
+{
+	const FloatType nan_value = numeric_limits<FloatType>::quiet_NaN ();
+
+	// Check float -> string
+	string str;
+	CPPUNIT_ASSERT (to_string<FloatType> (nan_value, str));
+	CPPUNIT_ASSERT_EQUAL (QUIET_NAN_STR, str);
+
+	// Ensure that the to_string NaN representations are rejected while
+	// reading.
+	auto nan_str = to_string<FloatType> (nan_value);
+	FloatType nan_val = (FloatType) 42.0;
+	CPPUNIT_ASSERT (!string_to<FloatType> (nan_str, nan_val));
+	CPPUNIT_ASSERT_EQUAL (nan_val, (FloatType) 42.0);
 }
 
 static const std::string MAX_FLOAT_WIN ("3.4028234663852886e+038");
@@ -512,6 +543,7 @@ _test_float_conversion ()
 #endif
 
 	_test_infinity_conversion<float>();
+	_test_nan_conversion<float>();
 }
 
 void
@@ -555,6 +587,7 @@ _test_double_conversion ()
 	CPPUNIT_ASSERT_EQUAL (min, string_to<double>(to_string<double> (min)));
 
 	_test_infinity_conversion<double>();
+	_test_nan_conversion<double>();
 }
 
 void

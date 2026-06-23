@@ -92,12 +92,13 @@ Tempo::Tempo (XMLNode const & node)
 {
 	TEMPO_MAP_ASSERT (node.name() == xml_node_name);
 
+	if (node.get_property_if (X_("npm"), _npm, [](auto v) { return v != 0.0; })) {
+		_superclocks_per_note_type = double_npm_to_scpn (_npm);
+	}
 
-	node.get_property (X_("npm"), _npm);
-	node.get_property (X_("enpm"), _enpm);
-
-	_superclocks_per_note_type = double_npm_to_scpn (_npm);
-	_end_superclocks_per_note_type = double_npm_to_scpn (_enpm);
+	if (node.get_property_if (X_("enpm"), _enpm, [](auto v) { return v != 0.0; })) {
+		_end_superclocks_per_note_type = double_npm_to_scpn (_enpm);
+	}
 
 	if (!node.get_property (X_("note-type"), _note_type)) {
 		throw failed_constructor ();
@@ -164,11 +165,13 @@ Tempo::set_state (XMLNode const & node, int /*version*/)
 		return -1;
 	}
 
-	node.get_property (X_("npm"), _npm);
-	node.get_property (X_("enpm"), _enpm);
+	if (node.get_property_if (X_("npm"), _npm, [](auto v) { return v != 0.0; })) {
+		_superclocks_per_note_type = double_npm_to_scpn (_npm);
+	}
 
-	_superclocks_per_note_type = double_npm_to_scpn (_npm);
-	_end_superclocks_per_note_type = double_npm_to_scpn (_enpm);
+	if (node.get_property_if (X_("enpm"), _enpm, [](auto v) { return v != 0.0; })) {
+		_end_superclocks_per_note_type = double_npm_to_scpn (_enpm);
+	}
 
 	node.get_property (X_("note-type"), _note_type);
 
