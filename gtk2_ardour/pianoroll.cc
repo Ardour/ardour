@@ -2071,19 +2071,23 @@ Pianoroll::AutomationLane::AutomationLane (Evoral::Parameter const & param, Pian
 	int close_x_size = label->height();
 
 	label->set_position (ArdourCanvas::Duple (spacing * 2 + close_x_size, spacing));
-
 	label_separator->set_outline_color(UIConfiguration::instance().color ("track separator"));
 	label_separator->set (ArdourCanvas::Duple (0., 0.), ArdourCanvas::Duple (pr.prh->x1(), 0.));
 
 	close_x->set (ArdourCanvas::Rect (spacing, spacing, spacing + close_x_size, spacing + close_x_size));
 	close_x->set_outline_color (UIConfiguration::instance().color (X_("gtk_foreground")));
 
+	int label_width = pr.prh->get().width() - spacing * 3 - close_x_size;
+
 	if (clear_button) {
 		clear_button->text()->set_color (UIConfiguration::instance().color (X_("gtk_foreground")));
 		clear_button->set_highlight (true);
 		clear_button->set_padding (2 * scale);
 		clear_button->set_position (ArdourCanvas::Duple (pr.prh->get().width() - (clear_button->size().x + spacing), spacing));
+		label_width -= spacing + clear_button->size().x;
 	}
+
+	label->clamp_width (label_width);
 }
 
 Pianoroll::AutomationLane::~AutomationLane ()
