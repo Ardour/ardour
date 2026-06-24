@@ -717,7 +717,7 @@ def build(bld):
         obj.source += [ 'lv2_plugin_ui.cc' ]
         obj.use += [ 'SUIL' ]
 
-    if bld.is_defined('HAVE_FFTW35F') and bld.env['build_target'] != 'mingw' and bld.env['build_target'] != 'msvc':
+    if bld.is_defined('HAVE_FFTW35F') and not (bld.env['build_target'] == 'mingw' and sys.platform != 'win32') and bld.env['build_target'] != 'msvc':
         bld.env['LIB_FFTW3F'] += ['fftw3f_threads']
 
     if bld.is_defined('NEED_INTL'):
