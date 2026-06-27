@@ -806,18 +806,21 @@ RegionSlipContentsDrag::motion (GdkEvent* event, bool first_move)
 void
 RegionSlipContentsDrag::finished (GdkEvent*, bool movement_occurred)
 {
-	if (movement_occurred) {
-		/*finish reversible cmd*/
-		for (auto & sd: draggables) {
-			editing_context.session ()->add_command (new StatefulDiffCommand (sd->region ()));
-			sd->drag_end ();
-		}
-		editing_context.commit_reversible_command ();
+	if (!movement_occurred) {
+		aborted (movement_occurred);
+		return;
 	}
+
+	for (auto & sd: draggables) {
+		editing_context.add_command (new StatefulDiffCommand (sd->region ()));
+		sd->drag_end ();
+	}
+
+	editing_context.commit_reversible_command ();
 }
 
 void
-RegionSlipContentsDrag::aborted (bool movement_occurred)
+RegionSlipContentsDrag::aborted (bool)
 {
 	/* ToDo: revert to the original region properties */
 	editing_context.abort_reversible_command ();
