@@ -341,7 +341,7 @@ AudioClipEditor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* eve
 		if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::slip_contents_modifier ())) {
 			std::list<SlipDraggable*> sdl;
 			sdl.push_back (this);
-			_drags->add (new RegionSlipContentsDrag (*this, item, this, sdl, Temporal::AudioTime));
+			_drags->set (new RegionSlipContentsDrag (*this, item, this, sdl, Temporal::AudioTime), event);
 			return true;
 		}
 		break;
@@ -636,7 +636,7 @@ void
 AudioClipEditor::region_changed (const PBD::PropertyChange& what_changed)
 {
 	EC_LOCAL_TEMPO_SCOPE;
-	std::cerr << "ACE: region changed\n";
+	position_lines ();
 }
 
 void
