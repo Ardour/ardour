@@ -134,13 +134,6 @@ DragManager::abort ()
 }
 
 void
-DragManager::add (Drag* d)
-{
-	d->set_manager (this);
-	_drags.push_back (d);
-}
-
-void
 DragManager::set (Drag* d, GdkEvent* e, Gdk::Cursor* c)
 {
 	d->set_manager (this);

@@ -891,7 +891,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 					if (!clicked_regionview->region()->locked() && (Config->get_edit_mode() != Lock)) {
 						std::list<RegionView*> rvl (selection->regions.by_layer());
 						std::list<SlipDraggable*> sdl (rvl.begin(), rvl.end());
-						_drags->add (new RegionSlipContentsDrag (*this, item, clicked_regionview, sdl, drag_time_domain (clicked_regionview->region())));
+						_drags->set (new RegionSlipContentsDrag (*this, item, clicked_regionview, sdl, drag_time_domain (clicked_regionview->region())), event);
 					}
 				} else if (ArdourKeyboard::indicates_copy (event->button.state)) {
 					add_region_drag (item, event, clicked_regionview, true);
@@ -901,8 +901,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 					add_region_drag (item, event, clicked_regionview, false);
 				}
 
-
-				_drags->start_grab (event);
 				return true;
 				break;
 
@@ -2199,7 +2197,7 @@ Editor::track_height_step_timeout ()
 }
 
 void
-Editor::add_region_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* region_view, bool copy)
+Editor::add_region_drag (ArdourCanvas::Item* item, GdkEvent* event, RegionView* region_view, bool copy)
 {
 	assert (region_view);
 
@@ -2209,11 +2207,11 @@ Editor::add_region_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* region
 
 	assert (!_drags->active ());
 
-	_drags->add (new RegionMoveDrag (*this, item, region_view, selection->regions.by_layer(), copy, drag_time_domain (region_view->region())));
+	_drags->set (new RegionMoveDrag (*this, item, region_view, selection->regions.by_layer(), copy, drag_time_domain (region_view->region())), event);
 }
 
 void
-Editor::add_region_brush_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* region_view)
+Editor::add_region_brush_drag (ArdourCanvas::Item* item, GdkEvent* event, RegionView* region_view)
 {
 	assert (region_view);
 
@@ -2228,7 +2226,7 @@ Editor::add_region_brush_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* 
 	}
 
 	std::list<RegionView*> empty;
-	_drags->add (new RegionBrushDrag (*this, item, region_view, empty, drag_time_domain (region_view->region())));
+	_drags->set (new RegionBrushDrag (*this, item, region_view, empty, drag_time_domain (region_view->region())), event);
 }
 
 /** Start a grab where a time range is selected, track(s) are selected, and the

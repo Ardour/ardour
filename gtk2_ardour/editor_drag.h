@@ -101,7 +101,6 @@ public:
 	bool motion_handler (GdkEvent *, bool);
 	bool mid_drag_key_event (GdkEventKey*);
 	void abort ();
-	void add (Drag *);
 	void set (Drag *, GdkEvent *, Gdk::Cursor* c = MouseCursors::invalid_cursor());
 	void start_grab (GdkEvent *, Gdk::Cursor* c = MouseCursors::invalid_cursor());
 	bool end_grab (GdkEvent *);
