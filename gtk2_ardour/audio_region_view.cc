@@ -1900,7 +1900,7 @@ AudioRegionView::show_xfades ()
 void
 AudioRegionView::drag_start ()
 {
-	RegionView::drag_start ();
+	TimeAxisViewItem::drag_start ();
 
 	//we used to hide xfades here.  I don't see the point with the new model, but we can re-implement if needed
 }

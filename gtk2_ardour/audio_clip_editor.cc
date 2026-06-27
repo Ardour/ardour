@@ -265,6 +265,8 @@ AudioClipEditor::build_canvas ()
 	end_line->Event.connect (sigc::bind (sigc::mem_fun (*this, &AudioClipEditor::end_line_event_handler), end_line));
 	// loop_line->Event.connect (sigc::bind (sigc::mem_fun (*this, &AudioClipEditor::line_event_handler), loop_line));
 
+	data_group->Event.connect (sigc::mem_fun (*this, &AudioClipEditor::data_group_event_handler));
+
 	/* hide lines until there is a region */
 
 	// line_container->hide ();
@@ -273,6 +275,14 @@ AudioClipEditor::build_canvas ()
 
 	set_colors ();
 }
+
+bool
+AudioClipEditor::data_group_event_handler (GdkEvent* ev)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+	return typed_event (data_group, ev, WaveItem);
+}
+
 bool
 AudioClipEditor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
@@ -326,6 +336,15 @@ AudioClipEditor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* eve
 		return true;
 		break;
 	}
+
+	case WaveItem:
+		if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::slip_contents_modifier ())) {
+			std::list<SlipDraggable*> sdl;
+			sdl.push_back (this);
+			_drags->add (new RegionSlipContentsDrag (*this, item, this, sdl, Temporal::AudioTime));
+			return true;
+		}
+		break;
 
 	default:
 		break;
@@ -617,7 +636,7 @@ void
 AudioClipEditor::region_changed (const PBD::PropertyChange& what_changed)
 {
 	EC_LOCAL_TEMPO_SCOPE;
-
+	std::cerr << "ACE: region changed\n";
 }
 
 void

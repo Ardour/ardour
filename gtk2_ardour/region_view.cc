@@ -1147,11 +1147,7 @@ RegionView::thaw_after_trim ()
 void
 RegionView::move_contents (timecnt_t const & distance)
 {
-	if (_region->locked()) {
-		return;
-	}
 	_region->move_start (distance);
-	region_changed (PropertyChange (ARDOUR::Properties::start));
 }
 
 void

@@ -68,7 +68,7 @@ namespace ArdourWaveView
 class StartBoundaryRect;
 class EndBoundaryRect;
 
-class AudioClipEditor :  public CueEditor
+class AudioClipEditor :  public CueEditor, public SlipDraggable
 {
 public:
 	AudioClipEditor (std::string const &, bool with_transport = false);
@@ -82,6 +82,10 @@ public:
 	void region_changed (const PBD::PropertyChange& what_changed);
 
 	bool key_press (GdkEventKey*);
+
+	void drag_start() {}
+	void drag_end() {}
+	std::shared_ptr<ARDOUR::Region> region() const { return _region; }
 
 	/* EditingContext API. As of July 2025, we do not implement most of
 	 * these
@@ -172,6 +176,7 @@ public:
 	bool event_handler (GdkEvent* ev);
 	bool start_line_event_handler (GdkEvent* ev, StartBoundaryRect*);
 	bool end_line_event_handler (GdkEvent* ev, EndBoundaryRect*);
+	bool data_group_event_handler (GdkEvent* ev);
 	void drop_waves ();
 	void set_wave_heights ();
 	void set_spp_from_length (ARDOUR::samplecnt_t);

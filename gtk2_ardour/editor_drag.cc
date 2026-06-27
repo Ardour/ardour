@@ -769,8 +769,10 @@ RegionDrag::add_stateful_diff_commands_for_playlists (PlaylistSet const& playlis
 	}
 }
 
-RegionSlipContentsDrag::RegionSlipContentsDrag (Editor& e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const& v, TimeDomain td)
-	: RegionDrag (e, i, p, v, td)
+RegionSlipContentsDrag::RegionSlipContentsDrag (EditingContext& e, ArdourCanvas::Item* i, SlipDraggable* p, list<SlipDraggable*> const& v, TimeDomain td)
+	: Drag (e, i, td, nullptr, true)
+	, _primary (p)
+	, draggables (v)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RegionSlipContentsDrag\n");
 }
@@ -787,18 +789,15 @@ RegionSlipContentsDrag::motion (GdkEvent* event, bool first_move)
 	if (first_move) {
 		/*prepare reversible cmd*/
 		editing_context.begin_reversible_command (_("Slip Contents"));
-		for (list<DraggingView>::iterator i = _views.begin (); i != _views.end (); ++i) {
-			RegionView* rv = i->view;
-			rv->region ()->clear_changes ();
-
-			rv->drag_start (); // this allows the region to draw itself 'transparently' while we drag it
+		for (auto & sd : draggables) {
+			sd->region ()->clear_changes ();
+			sd->drag_start (); // this allows the region to draw itself 'transparently' while we drag it
 		}
 
 	} else {
-		for (list<DraggingView>::iterator i = _views.begin (); i != _views.end (); ++i) {
-			RegionView* rv       = i->view;
-			timecnt_t   slippage = adjusted_current_time (event, false).distance (last_pointer_time ());
-			rv->move_contents (slippage);
+		for (auto & sd : draggables) {
+			timecnt_t  slippage = adjusted_current_time (event, false).distance (last_pointer_time ());
+			sd->region()->move_start (slippage);
 		}
 		show_verbose_cursor_time (_primary->region ()->start ());
 	}
@@ -809,11 +808,9 @@ RegionSlipContentsDrag::finished (GdkEvent*, bool movement_occurred)
 {
 	if (movement_occurred) {
 		/*finish reversible cmd*/
-		for (list<DraggingView>::iterator i = _views.begin (); i != _views.end (); ++i) {
-			RegionView* rv = i->view;
-			editing_context.session ()->add_command (new StatefulDiffCommand (rv->region ()));
-
-			rv->drag_end ();
+		for (auto & sd: draggables) {
+			editing_context.session ()->add_command (new StatefulDiffCommand (sd->region ()));
+			sd->drag_end ();
 		}
 		editing_context.commit_reversible_command ();
 	}

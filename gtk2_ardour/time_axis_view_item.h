@@ -30,7 +30,9 @@
 #include <pangomm/fontdescription.h>
 #include "ardour/types.h"
 #include "pbd/signals.h"
+
 #include "selectable.h"
+#include "slipdraggable.h"
 
 class TimeAxisView;
 
@@ -49,7 +51,7 @@ using ARDOUR::samplecnt_t;
  * Base class for items that may appear upon a TimeAxisView.
  */
 
-class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
+class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList, public SlipDraggable
 {
 public:
 	virtual ~TimeAxisViewItem();
@@ -92,8 +94,8 @@ public:
 
 	double get_samples_per_pixel () const;
 
-	virtual void drag_start();
-	virtual void drag_end();
+	void drag_start();
+	void drag_end();
 	bool dragging() const { return _dragging; }
 
 	virtual void visual_layer_on_top() {}
