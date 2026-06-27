@@ -29,6 +29,7 @@
 #include "widgets/eventboxext.h"
 
 #include "cue_editor.h"
+#include "slipdraggable.h"
 
 namespace Gtk {
 	class Widget;
@@ -77,7 +78,7 @@ struct ControllerControls : public Gtk::HBox {
 	void set_editing (bool);
 };
 
-class Pianoroll : public CueEditor
+class Pianoroll : public CueEditor, public SlipDraggable
 {
   public:
 	enum EditingPolicy {
@@ -122,6 +123,10 @@ class Pianoroll : public CueEditor
 	void remove_regions ();
 	void remove_region (std::shared_ptr<ARDOUR::Region>);
 	void set_region (std::shared_ptr<ARDOUR::Region>);
+
+	void drag_start() {}
+	void drag_end() {}
+	std::shared_ptr<ARDOUR::Region> region() const { return _region; }
 
 	double max_extents_scale() const { return 1.2; }
 	void set_samples_per_pixel (samplecnt_t);
@@ -220,6 +225,8 @@ class Pianoroll : public CueEditor
 	bool leave_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool key_press_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool key_release_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
+
+	bool data_group_event_handler (GdkEvent* ev);
 
 	void escape ();
 	void session_going_away ();

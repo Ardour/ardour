@@ -589,6 +589,8 @@ Pianoroll::build_canvas ()
 	data_group = new ArdourCanvas::Container (hv_scroll_group);
 	CANVAS_DEBUG_NAME (data_group, "cue data group");
 
+	data_group->Event.connect (sigc::mem_fun (*this, &Pianoroll::data_group_event_handler));
+
 	// add a background color to match the main editor pianoroll look
 	ArdourCanvas::Rectangle* bg_rect = new ArdourCanvas::Rectangle (data_group, ArdourCanvas::Rect (0., 0., ArdourCanvas::COORD_MAX,  ArdourCanvas::COORD_MAX));
 	bg_rect->set_fill_color(UIConfiguration::instance().color_mod ("midi track base", "midi track base"));
@@ -634,6 +636,13 @@ Pianoroll::build_canvas ()
 
 	_toolbox.pack_start (_canvas_viewport, true, true);
 	_toolbox.reorder_child (_canvas_viewport, 1);
+}
+
+bool
+Pianoroll::data_group_event_handler (GdkEvent* ev)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+	return typed_event (data_group, ev, StreamItem);
 }
 
 void
@@ -1134,6 +1143,15 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 
 	Editing::MouseMode mouse_mode = current_mouse_mode();
 	switch (item_type) {
+	case StreamItem:
+		if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::slip_contents_modifier ())) {
+			std::list<SlipDraggable*> sdl;
+			sdl.push_back (this);
+			_drags->set (new RegionSlipContentsDrag (*this, item, this, sdl, Temporal::AudioTime), event);
+			return true;
+		}
+		return false;
+
 	case NoteItem:
 		/* Existing note: allow trimming/motion */
 		if ((note = reinterpret_cast<NoteBase*> (item->get_data ("notebase")))) {
