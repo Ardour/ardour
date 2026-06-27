@@ -3803,6 +3803,9 @@ TriggerBox::setup_arm_info_bounds (SlotArmInfo& ai, samplepos_t now, Trigger& sl
 		ai.end_samples = timepos_t (ai.end_beats).samples();
 	}
 
+	/* Always record slightly more than we need to allow for alignment adjustment */
+	ai.end_samples += _capture_offset + _playback_offset;
+
 	ReCountIn (&slot); /* EMIT SIGNAL */
 }
 
@@ -6006,14 +6009,15 @@ TriggerBoxThread::build_audio_source (AudioTrigger* t, Temporal::timecnt_t const
 
 	fs = std::dynamic_pointer_cast<FileSource> (sources.front());
 	assert (fs);
-	/* now build region */
+
+	/* now build the whole-file region */
 
 	PropertyList plist;
 
 	std::string region_name = region_name_from_path (fs->path(), true, false);
 
-	plist.add (ARDOUR::Properties::start, timecnt_t (Temporal::BeatTime));
-	plist.add (ARDOUR::Properties::length, sources.front()->length ());
+	plist.add (ARDOUR::Properties::start, samplepos_t (0));
+	plist.add (ARDOUR::Properties::length, sources.front()->length ().samples());
 	plist.add (ARDOUR::Properties::name, region_name);
 	plist.add (ARDOUR::Properties::layer, 0);
 	plist.add (ARDOUR::Properties::whole_file, true);
@@ -6023,7 +6027,22 @@ TriggerBoxThread::build_audio_source (AudioTrigger* t, Temporal::timecnt_t const
 	std::shared_ptr<Region> whole = RegionFactory::create (sources, plist);
 	/* ... and use a discrete copy as the region for the slot/trigger */
 	PropertyList plist2;
+
+	samplecnt_t capture_adjust;
+
+	switch (trk->alignment_style()) {
+	case CaptureTime:
+		capture_adjust = 0;
+		break;
+	case ExistingMaterial:
+		capture_adjust = t->box().capture_offset() + t->box().playback_offset();
+		break;
+	}
+
+	plist2.add (ARDOUR::Properties::start, capture_adjust);
+	plist2.add (ARDOUR::Properties::length, sources.front()->length ().samples() - capture_adjust);
 	plist2.add (ARDOUR::Properties::whole_file, false);
+
 	std::shared_ptr<Region> copy (RegionFactory::create (whole, plist2));
 
 	t->set_region_in_worker_thread_from_capture (copy);
