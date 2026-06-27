@@ -6096,7 +6096,26 @@ TriggerBoxThread::build_midi_source (MIDITrigger* t, Temporal::timecnt_t const &
 	std::shared_ptr<Region> whole = RegionFactory::create (sources, plist);
 	/* ... and insert a discrete copy into the playlist*/
 	PropertyList plist2;
+
+	samplecnt_t capture_adjust;
+
+	switch (trk->alignment_style()) {
+	case CaptureTime:
+		capture_adjust = 0;
+		break;
+	case ExistingMaterial:
+		capture_adjust = t->box().capture_offset() + t->box().playback_offset();
+		break;
+	}
+
+	samplepos_t len = sources.front()->length ().samples() - capture_adjust;
+	Temporal::Beats cab (Temporal::TempoMap::use()->scwalk_to_quarters (Temporal::samples_to_superclock (pos.superclocks(), TEMPORAL_SAMPLE_RATE), Temporal::samples_to_superclock (capture_adjust, TEMPORAL_SAMPLE_RATE)));
+	Temporal::Beats lb (Temporal::TempoMap::use()->scwalk_to_quarters (Temporal::samples_to_superclock (pos.superclocks(), TEMPORAL_SAMPLE_RATE), Temporal::samples_to_superclock (len, TEMPORAL_SAMPLE_RATE)));
+
+	plist2.add (ARDOUR::Properties::start, cab);
+	plist2.add (ARDOUR::Properties::length, lb);
 	plist2.add (ARDOUR::Properties::whole_file, false);
+
 	std::shared_ptr<Region> copy (RegionFactory::create (whole, plist2));
 
 	t->set_region_in_worker_thread_from_capture (copy);
