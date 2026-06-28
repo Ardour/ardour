@@ -358,16 +358,9 @@ SMF::read_event(uint32_t* delta_t, uint32_t* bufsize, uint8_t** buf, event_id_t*
 
 						if (smf_extract_vlq (&event->midi_buffer[4+lenlen], event->midi_buffer_length-(4+lenlen), &id, &idlen) == 0) {
 							*note_id = id;
-							return 0;
 						}
 					}
 				}
-
-				/* We do not return sequencer-specific events
-				 * that are not known to us.
-				 */
-
-				return 0;
 			}
 
 			is_meta = true;
@@ -433,6 +426,8 @@ SMF::is_meta (uint8_t const* buf, uint32_t size)
 		case 0x05: /* lyric */
 		case 0x06: /* marker */
 		case 0x07: /* cue point */
+		case 0x08: /* program name (RP-019) */
+		case 0x09: /* device name (RP-019) */
 		case 0x20: /* channel prefix */
 		case 0x2f: /* end of track */
 		case 0x51: /* set tempo */
@@ -767,69 +762,86 @@ SMF::nth_tempo (size_t n) const
 void
 SMF::load_markers ()
 {
-	if (!_smf_track) {
+	if (!_smf) {
 		return;
 	}
 
 	PBD::Mutex::Lock lm (_smf_lock);
 
-	if (_smf_track) {
-		_smf_track->next_event_number = std::min(_smf_track->number_of_events, (size_t)1);
-	}
+	/* markers (and other text meta-events) can live on any track, so scan
+	 * every track rather than just the currently-selected _smf_track. In a
+	 * type-1 file the section markers are typically on the first track while
+	 * later tracks hold the accompaniment, so reading only one track misses
+	 * them.
+	 */
+	for (int trk = 1; trk <= _smf->number_of_tracks; ++trk) {
 
-	smf_event_t* event;
+		smf_track_t* smf_track = smf_get_track_by_number (_smf, trk);
+		if (!smf_track) {
+			continue;
+		}
+		smf_track->next_event_number = std::min(smf_track->number_of_events, (size_t)1);
 
-	while ((event = smf_track_get_next_event(_smf_track)) != NULL) {
-		/* compare to smf_event_decode_metadata, smf_event_decode_textual */
-		bool allow_empty = false;
-		if (smf_event_is_metadata(event)) {
-			string name;
-			switch (event->midi_buffer[1]) {
-				case 0x05:
-					name = "Lyric:";
-					break;
-				case 0x06:
-					name = "Marker:";
-					break;
-				case 0x07:
-					name = "Cue Point:";
-					allow_empty = true;
-					break;
-				case 0x01: // "Text:"
-					/* fallthtough */
-				case 0x02: // "Copyright:"
-					/* fallthtough */
-				case 0x03: // "Sequence/Track Name:"
-					/* fallthtough */
-				case 0x04: // "Instrument:"
-					/* fallthtough */
-				case 0x08: // "Program Name:"
-					/* fallthtough */
-				case 0x09: // "Device (Port) Name:"
-					/* fallthtough */
-				default:
+		smf_event_t* event;
+
+		while ((event = smf_track_get_next_event(smf_track)) != NULL) {
+			/* compare to smf_event_decode_metadata, smf_event_decode_textual */
+			bool allow_empty = false;
+			if (smf_event_is_metadata(event)) {
+				string name;
+				switch (event->midi_buffer[1]) {
+					case 0x05:
+						name = "Lyric:";
+						break;
+					case 0x06:
+						name = "Marker:";
+						break;
+					case 0x07:
+						name = "Cue Point:";
+						allow_empty = true;
+						break;
+					case 0x01:
+						name = "Text:";
+						break;
+					case 0x02:
+						name = "Copyright:";
+						break;
+					case 0x03:
+						name = "Track Name:";
+						break;
+					case 0x04:
+						name = "Instrument:";
+						break;
+					case 0x08:
+						name = "Program Name:";
+						break;
+					case 0x09:
+						name = "Device Name:";
+						break;
+					default:
+						continue;
+				}
+
+				char const * txt = smf_event_decode (event);
+
+				if (!txt) {
 					continue;
+				}
+
+				string marker (txt);
+
+				if (marker.find (name) == 0) {
+					marker = marker.substr (name.length ());
+				}
+
+				PBD::strip_whitespace_edges (marker);
+
+				if (marker.empty () && !allow_empty) {
+					continue;
+				}
+
+				_markers.push_back (MarkerAt (marker, event->time_pulses, event->midi_buffer[1]));
 			}
-
-			char const * txt = smf_event_decode (event);
-
-			if (!txt) {
-				continue;
-			}
-
-			string marker (txt);
-
-			if (marker.find (name) == 0) {
-				marker = marker.substr (name.length ());
-			}
-
-			PBD::strip_whitespace_edges (marker);
-
-			if (marker.empty () && !allow_empty) {
-				continue;
-			}
-
-			_markers.push_back (MarkerAt (marker, event->time_pulses));
 		}
 	}
 }
