@@ -140,6 +140,7 @@ ExportProfileManager::load_profile ()
 	} else {
 		XMLNode empty_node (xml_node_name);
 		set_state (empty_node);
+		update_ranges ();
 	}
 }
 
