@@ -38,7 +38,7 @@ function factory ()
 			if mloc:name():sub(1, MIXER_SCENE_MARKER_PREFIX:len()) == MIXER_SCENE_MARKER_PREFIX then
 				-- the marker name begins with MIXER_SCENE_MARKER_PREFIX: get the remainder of the name (should be a number)
 				local msNum = tonumber(mloc:name():sub(MIXER_SCENE_MARKER_PREFIX:len() + 1))
-				if msNum and msNum >= 1 and msNum <= 8 then
+				if msNum and msNum >= 1 then
 					Session:apply_nth_mixer_scene(msNum - 1)
 				end
 			end
