@@ -45,6 +45,29 @@ using namespace PBD;
 using namespace Gtk;
 using namespace std;
 
+uint8_t
+get_preferred_midi_channel_from_chn_mask (uint16_t chn_mask)
+{
+	int chn_cnt = 0;
+	uint8_t channel = 0;
+
+	/* pick the highest selected channel, unless all channels are selected,
+	 * which is interpreted to mean channel 1 (zero)
+	 */
+
+	for (uint16_t i = 0; i < 16; ++i) {
+		if (chn_mask & (1<<i)) {
+			channel = i;
+			chn_cnt++;
+		}
+	}
+
+	if (chn_cnt == 16) {
+		channel = 0;
+	}
+
+	return channel;
+}
 
 void
 build_controller_menu (Gtk::Menu& menu, InstrumentInfo const & instrument_info, uint16_t channel_mask,
