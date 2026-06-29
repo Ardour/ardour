@@ -3920,7 +3920,6 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 		ai->pre_start_beats = now_beats;
 	}
 
-	now_beats -= ai->pre_start_beats;
 	Temporal::Beats count_in_beats = ai->start_beats - now_beats;
 
 	if (count_in_beats < Temporal::Beats()) {
