@@ -757,7 +757,7 @@ class LIBARDOUR_API TriggerBoxThread
 
 	void set_region (TriggerBox&, uint32_t slot, std::shared_ptr<Region>);
 	void request_delete_trigger (Trigger* t);
-	void request_build_source (Trigger* t, Temporal::timecnt_t const & duration, Temporal::timepos_t const &);
+	void request_build_source (Trigger* t, Temporal::timecnt_t const & duration, Temporal::timepos_t const &, samplecnt_t pre_capture);
 
 	void summon();
 	void stop();
@@ -787,6 +787,7 @@ class LIBARDOUR_API TriggerBoxThread
 		Trigger* trigger;
 		Temporal::timecnt_t duration;
 		Temporal::timepos_t position;
+		samplecnt_t pre_capture;
 
 		void* operator new (size_t);
 		void  operator delete (void* ptr, size_t);
@@ -801,9 +802,9 @@ class LIBARDOUR_API TriggerBoxThread
 	CrossThreadChannel _xthread;
 	void queue_request (Request*);
 	void delete_trigger (Trigger*);
-	void build_source (Trigger*, Temporal::timecnt_t const & duration, Temporal::timepos_t const &);
-	void build_midi_source (MIDITrigger*, Temporal::timecnt_t const &, Temporal::timepos_t const &);
-	void build_audio_source (AudioTrigger*, Temporal::timecnt_t const &, Temporal::timepos_t const &);
+	void build_source (Trigger*, Temporal::timecnt_t const & duration, Temporal::timepos_t const &, samplecnt_t pre_capture);
+	void build_midi_source (MIDITrigger*, Temporal::timecnt_t const &, Temporal::timepos_t const &, samplecnt_t pre_capture);
+	void build_audio_source (AudioTrigger*, Temporal::timecnt_t const &, Temporal::timepos_t const &, samplecnt_t pre_capture);
 };
 
 struct CueRecord {
@@ -826,6 +827,8 @@ struct SlotArmInfo {
 
 	Trigger* slot;
 	Temporal::Beats start_beats;
+	Temporal::Beats pre_start_beats;
+	samplepos_t pre_start_samples;
 	samplepos_t start_samples;
 	Temporal::Beats end_beats;
 	samplepos_t end_samples;
@@ -1065,7 +1068,7 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 		void* ptr;
 		int32_t slot;
 
-		Request (Type t) : type (t) {}
+		Request (Type t) : type (t) { /* other fields flled by caller */ }
 
 		static PBD::MultiAllocSingleReleasePool* pool;
 		static void init_pool();
