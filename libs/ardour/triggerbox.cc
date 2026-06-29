@@ -2589,8 +2589,6 @@ MIDITrigger::captured (SlotArmInfo& ai)
 
 	samplecnt_t pre_capture = ai.start_samples - ai.pre_start_samples;
 
-	std::cerr << "captured " << pre_capture << " before start\n";
-
 	/* Move ownership of the MIDI buffer from the SlotArmInfo (where it was
 	 * captured) to our own rt_midibuffer pointer.
 	 */
@@ -3916,13 +3914,12 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 	if (did_start_recording) {
 		ai->pre_start_samples = start_sample;
 		ai->pre_start_beats = TempoMap::use()->quarters_at (start_sample);
-		std::cerr << "noticed potential to start recording at " << start_sample << " w/actual start " << ai->start_samples << std::endl;
 	}
 
 	if (ai->start_samples >= start_sample && ai->start_samples < end_sample) {
 		/* Only send signal as we pass through the "real" start */
 		RecEnableChanged(); /* EMIT SIGNAL */
-		std::cerr << "Hit start @ " << ai->start_samples << " within " << start_sample << " ... " << end_sample << " nf " << nframes << std::endl;
+		// std::cerr << "Hit start @ " << ai->start_samples << " within " << start_sample << " ... " << end_sample << " nf " << nframes << std::endl;
 	}
 
 	if ((ai->end_samples != 0) && (start_sample <= ai->end_samples && ai->end_samples < end_sample)) {
@@ -6079,7 +6076,6 @@ TriggerBoxThread::build_midi_source (MIDITrigger* t, Temporal::timecnt_t const &
 		}
 		ms->mark_streaming_write_completed (lock, duration);
 		ms->load_model (lock);
-		std::cerr << "wrote " << nevents << " to new MIDI source\n";
 	}
 
 	/* now build region */
