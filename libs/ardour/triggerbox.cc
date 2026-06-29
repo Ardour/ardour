@@ -3638,6 +3638,7 @@ SlotArmInfo::reset (Trigger& s)
 	delete stretcher;
 	stretcher = nullptr;
 	count_in_beats = Temporal::Beats ();
+	pre_start_beats = Temporal::Beats ();
 	pre_start_samples = 0;
 	start_samples = 0;
 	end_samples = 0;
