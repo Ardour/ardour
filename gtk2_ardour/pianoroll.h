@@ -344,9 +344,6 @@ class Pianoroll : public CueEditor, public SlipDraggable
 
 	void manage_possible_header (Gtk::Allocation& alloc);
 
-	void show_count_in (std::string const &);
-	void hide_count_in ();
-
 	void instant_save ();
 	void parameter_changed (std::string param);
 	void set_from_rsu (RegionUISettings&);

@@ -136,14 +136,10 @@ public:
 
 	bool idle_data_captured ();
 
-	void set_overlay_text (std::string const &);
-	void hide_overlay_text ();
-	void show_overlay_text ();
 	void instant_save ();
 
  private:
 	ArdourCanvas::Container*         line_container;
-	ArdourCanvas::Text* overlay_text;
 	StartBoundaryRect*               start_line;
 	EndBoundaryRect*                 end_line;
 	ArdourCanvas::Line*              loop_line;

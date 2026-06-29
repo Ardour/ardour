@@ -2817,26 +2817,6 @@ Pianoroll::manage_possible_header (Gtk::Allocation& alloc)
 }
 
 void
-Pianoroll::show_count_in (std::string const & str)
-{
-	EC_LOCAL_TEMPO_SCOPE;
-
-	if (_active_view) {
-		_active_view->set_overlay_text (str);
-	}
-}
-
-void
-Pianoroll::hide_count_in ()
-{
-	EC_LOCAL_TEMPO_SCOPE;
-
-	if (_active_view) {
-		_active_view->hide_overlay_text ();
-	}
-}
-
-void
 Pianoroll::set_from_rsu (RegionUISettings& region_ui_settings)
 {
 	assert (_active_view);

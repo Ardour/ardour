@@ -146,9 +146,14 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner
 
 	void set_horizontal_position (double);
 
+	void set_overlay_text (std::string const &);
+	void hide_overlay_text ();
+	void show_overlay_text ();
+
   protected:
 	ArdourCanvas::GtkCanvasViewport _canvas_viewport;
 	ArdourCanvas::GtkCanvas& _canvas;
+	ArdourCanvas::Text* overlay_text;
 	ARDOUR::TriggerReference ref;
 	std::shared_ptr<ARDOUR::Region> _region;
 	std::shared_ptr<ARDOUR::Track>  _track;
@@ -253,13 +258,13 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner
 
 	virtual void manage_possible_header (Gtk::Allocation&) {}
 
-	sigc::connection count_in_connection;
+	PBD::ScopedConnection count_in_connection;
 	Temporal::Beats count_in_to;
 
-	void count_in (Temporal::timepos_t, unsigned int);
+	void count_in (Temporal::Beats);
 	void maybe_set_count_in ();
-	virtual void show_count_in (std::string const &) = 0;
-	virtual void hide_count_in () = 0;
+	void show_count_in (std::string const &);
+	void hide_count_in ();
 
 	void data_captured (samplecnt_t);
 	virtual bool idle_data_captured () = 0;

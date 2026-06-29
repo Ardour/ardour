@@ -51,6 +51,7 @@ CueEditor::CueEditor (std::string const & name, bool with_transport)
 	, HistoryOwner (name)
 	, _canvas_viewport (horizontal_adjustment, vertical_adjustment)
 	, _canvas (*_canvas_viewport.canvas ())
+	, overlay_text (nullptr)
 	, with_transport_controls (with_transport)
 	, length_label (_("Record:"))
 	, solo_button (S_("Solo|S"))
@@ -751,7 +752,6 @@ CueEditor::rec_enable_change ()
 		return;
 	}
 
-	count_in_connection.disconnect ();
 	setup_record_blink ();
 
 	switch (ref.box()->record_enabled()) {
@@ -1543,26 +1543,11 @@ CueEditor::maybe_set_count_in ()
 
 	count_in_connection.disconnect ();
 
-	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
-	bool valid;
-	count_in_to = ref.box()->start_time (valid);
-
-	if (!valid) {
-		return;
-	}
-
-	samplepos_t audible (_session->audible_sample());
-	Temporal::Beats const & a_q (tmap->quarters_at_sample (audible));
-
-	if ((count_in_to - a_q).get_beats() == 0) {
-		return;
-	}
-
-	count_in_connection = ARDOUR_UI::Clock.connect (sigc::bind (sigc::mem_fun (*this, &CueEditor::count_in),  ARDOUR_UI::clock_signal_interval()));
+	TriggerBox::CountIn.connect (count_in_connection, invalidator (*this), [this](Temporal::Beats b) { count_in (b); }, gui_context());
 }
 
 void
-CueEditor::count_in (Temporal::timepos_t audible, unsigned int clock_interval_msecs)
+CueEditor::count_in (Temporal::Beats count_in)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
@@ -1574,27 +1559,15 @@ CueEditor::count_in (Temporal::timepos_t audible, unsigned int clock_interval_ms
 		return;
 	}
 
-	TempoMapPoints grid_points;
-	TempoMap::SharedPtr tmap (TempoMap::use());
-	Temporal::Beats audible_beats = tmap->quarters_at_sample (audible.samples());
-
-	if (audible_beats >= count_in_to) {
-		/* passed the count_in_to time */
-		hide_count_in ();
+	if (count_in <= Temporal::Beats()) {
+		hide_overlay_text ();
 		count_in_connection.disconnect ();
 		return;
 	}
 
-	Temporal::Beats current_delta = count_in_to - audible_beats;
-
-	if (current_delta.get_beats() < 1) {
-		hide_count_in ();
-		count_in_connection.disconnect ();
-		return;
-	}
-
-	std::string str (string_compose ("%1", current_delta.get_beats()));
-	show_count_in (str);
+	char buf[8];
+	snprintf (buf, sizeof (buf), "%" PRId64, count_in.get_beats());
+	set_overlay_text (buf);
 }
 
 bool
@@ -2039,3 +2012,50 @@ CueEditor::set_horizontal_position (double pos)
 	EditingContext::set_horizontal_position (pos);
 	instant_save ();
 }
+
+void
+CueEditor::set_overlay_text (std::string const & str)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	if (!overlay_text) {
+		overlay_text = new ArdourCanvas::Text (no_scroll_group);
+		Pango::FontDescription font ("Sans 200");
+		overlay_text->set_font_description (font);
+		overlay_text->set_color (0xff000088);
+		overlay_text->set ("0"); /* not shown, used for positioning math */
+		overlay_text->set_position (ArdourCanvas::Duple ((_visible_canvas_width / 2.0) - (overlay_text->text_width()/2.), (_visible_canvas_height / 2.0) - (overlay_text->text_height() / 2.)));
+	}
+
+	overlay_text->set (str);
+	show_overlay_text ();
+}
+
+void
+CueEditor::show_overlay_text ()
+{
+	if (overlay_text) {
+		overlay_text->show ();
+	}
+}
+
+void
+CueEditor::hide_overlay_text ()
+{
+	if (overlay_text) {
+		overlay_text->hide ();
+	}
+}
+
+void
+CueEditor::show_count_in (std::string const & str)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+}
+
+void
+CueEditor::hide_count_in ()
+{
+	EC_LOCAL_TEMPO_SCOPE;
+}
+
