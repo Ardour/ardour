@@ -70,7 +70,7 @@ using std::min;
 void
 AudioClipEditor::ClipMetric::get_marks (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t lower, int64_t upper, int maxchars) const
 {
-	ace.metric_get_minsec (marks, lower, upper, maxchars);
+	ace.metric_get_bbt (marks, lower, upper, maxchars);
 }
 
 AudioClipEditor::AudioClipEditor (std::string const & name, bool with_transport)
@@ -106,9 +106,9 @@ AudioClipEditor::set_action_defaults ()
 
 	CueEditor::set_action_defaults ();
 
-	if (grid_actions[Editing::GridTypeMinSec]) {
-		grid_actions[Editing::GridTypeMinSec]->set_active (false);
-		grid_actions[Editing::GridTypeMinSec]->set_active (true);
+	if (grid_actions[Editing::GridTypeBeat]) {
+		grid_actions[Editing::GridTypeBeat]->set_active (false);
+		grid_actions[Editing::GridTypeBeat]->set_active (true);
 	}
 }
 
@@ -215,14 +215,14 @@ AudioClipEditor::build_canvas ()
 	n_timebars = 0;
 
 	clip_metric = new ClipMetric (*this);
-	main_ruler = new ArdourCanvas::Ruler (h_scroll_group, clip_metric, ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, timebar_height));
-	main_ruler->set_font_description (UIConfiguration::instance ().get_SmallerFont ());
-	main_ruler->set_fill_color (UIConfiguration::instance().color ("ruler base"));
-	main_ruler->set_outline_color (UIConfiguration::instance().color ("ruler text"));
-	CANVAS_DEBUG_NAME (main_ruler, "audio clip ruler");
+	bbt_ruler = new ArdourCanvas::Ruler (h_scroll_group, clip_metric, ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, timebar_height));
+	bbt_ruler->set_font_description (UIConfiguration::instance ().get_SmallerFont ());
+	bbt_ruler->set_fill_color (UIConfiguration::instance().color ("ruler base"));
+	bbt_ruler->set_outline_color (UIConfiguration::instance().color ("ruler text"));
+	CANVAS_DEBUG_NAME (bbt_ruler, "audio clip ruler");
 	n_timebars++;
 
-	main_ruler->Event.connect (sigc::mem_fun (*this, &CueEditor::ruler_event));
+	bbt_ruler->Event.connect (sigc::mem_fun (*this, &CueEditor::ruler_event));
 
 	data_group = new ArdourCanvas::Container (hv_scroll_group);
 	CANVAS_DEBUG_NAME (data_group, "cue data group");
@@ -566,7 +566,7 @@ AudioClipEditor::canvas_allocate (Gtk::Allocation& alloc)
 	_track_canvas_width = _visible_canvas_width;
 
 	position_lines ();
-	update_fixed_rulers ();
+	update_tempo_based_rulers ();
 
 	set_wave_heights ();
 
@@ -832,7 +832,7 @@ AudioClipEditor::which_canvas_cursor (ItemType type) const
 }
 
 void
-AudioClipEditor::compute_fixed_ruler_scale ()
+AudioClipEditor::update_tempo_based_rulers ()
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
@@ -840,15 +840,9 @@ AudioClipEditor::compute_fixed_ruler_scale ()
 		return;
 	}
 
-	set_minsec_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
-	main_ruler->set_range (_leftmost_sample, _leftmost_sample + current_page_samples());
-}
-
-void
-AudioClipEditor::update_fixed_rulers ()
-{
-	EC_LOCAL_TEMPO_SCOPE;
-	compute_fixed_ruler_scale ();
+	clip_metric->units_per_pixel = samples_per_pixel;
+	compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
+	bbt_ruler->set_range (_leftmost_sample, _leftmost_sample+current_page_samples());
 }
 
 void
@@ -861,10 +855,10 @@ AudioClipEditor::grid_type_chosen (Editing::GridType gt)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	if (gt != Editing::GridTypeMinSec && grid_actions[gt] && grid_actions[gt]->get_active()) {
-		assert (grid_actions[Editing::GridTypeMinSec]);
-		grid_actions[Editing::GridTypeMinSec]->set_active (false);
-		grid_actions[Editing::GridTypeMinSec]->set_active (true);
+	if (gt != Editing::GridTypeBeat && grid_actions[gt] && grid_actions[gt]->get_active()) {
+		assert (grid_actions[Editing::GridTypeBeat]);
+		grid_actions[Editing::GridTypeBeat]->set_active (false);
+		grid_actions[Editing::GridTypeBeat]->set_active (true);
 	}
 }
 

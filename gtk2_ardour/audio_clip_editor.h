@@ -144,7 +144,7 @@ public:
 	EndBoundaryRect*                 end_line;
 	ArdourCanvas::Line*              loop_line;
 	ArdourCanvas::Container*         ruler_container;
-	ArdourCanvas::Ruler*             main_ruler;
+	ArdourCanvas::Ruler*             bbt_ruler;
 
 	class ClipMetric : public ArdourCanvas::Ruler::Metric
 	{
@@ -201,10 +201,9 @@ public:
 
 	void load_shared_bindings ();
 
-	void compute_fixed_ruler_scale ();
-	void update_fixed_rulers ();
+	void update_tempo_based_rulers ();
 
-	void update_rulers () { update_fixed_rulers(); }
+	void update_rulers () { update_tempo_based_rulers(); }
 	void set_action_defaults ();
 
 	void snap_mode_chosen (Editing::SnapMode);
