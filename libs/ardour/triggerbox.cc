@@ -673,8 +673,8 @@ Trigger::get_state () const
 	 * properties could be overwritten
 	 */
 
-	for (OwnedPropertyList::iterator i = _properties->begin(); i != _properties->end(); ++i) {
-		i->second->get_value (*node);
+	for (auto const & [id,prop] : *_properties) {
+		prop->get_value (*node);
 	}
 
 	node->set_property (X_("index"), _index);
@@ -2944,12 +2944,12 @@ MIDITrigger::set_state (const XMLNode& node, int version)
 
 	if (patches_node) {
 		XMLNodeList const & children = patches_node->children();
-		for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
-			if ((*i)->name() == X_("PatchChange")) {
+		for (auto const & child : children) {
+			if (child->name() == X_("PatchChange")) {
 				int c, p, b;
-				if ((*i)->get_property (X_("channel"), c) &&
-				    (*i)->get_property (X_("program"), p) &&
-				    (*i)->get_property (X_("bank"), b)) {
+				if (child->get_property (X_("channel"), c) &&
+				    child->get_property (X_("program"), p) &&
+				    child->get_property (X_("bank"), b)) {
 					_patch_change[c] = Evoral::PatchChange<MidiBuffer::TimeType> (0, c, p, b);
 				}
 			}
@@ -3044,12 +3044,12 @@ MIDITrigger::estimate_midi_patches ()
 
 		/* thirdly, apply the patches from the file itself (if it has any) */
 		std::shared_ptr<MidiModel> model = smfs->model();
-		for (MidiModel::PatchChanges::const_iterator i = model->patch_changes().begin(); i != model->patch_changes().end(); ++i) {
-			if ((*i)->is_set()) {
-				int chan = (*i)->channel();  /* behavior is undefined for SMF's with multiple patch changes. I'm not sure that we care */
-				_patch_change[chan].set_channel ((*i)->channel());
-				_patch_change[chan].set_bank((*i)->bank());
-				_patch_change[chan].set_program((*i)->program());
+		for (auto const & patch : model->patch_changes()) {
+			if (patch->is_set()) {
+				int chan = patch->channel();  /* behavior is undefined for SMF's with multiple patch changes. I'm not sure that we care */
+				_patch_change[chan].set_channel (patch->channel());
+				_patch_change[chan].set_bank (patch->bank());
+				_patch_change[chan].set_program (patch->program());
 			}
 		}
 
@@ -5692,7 +5692,7 @@ TriggerBox::set_state (const XMLNode& node, int version)
 	{
 		PBD::RWLock::WriterLock lm (trigger_lock);
 
-		for (XMLNodeList::const_iterator t = tchildren.begin(); t != tchildren.end(); ++t) {
+		for (auto const & tchild : tchildren) {
 			TriggerPtr trig;
 
 			/* Note use of a custom delete function. We cannot
@@ -5704,11 +5704,11 @@ TriggerBox::set_state (const XMLNode& node, int version)
 			if (_data_type == DataType::AUDIO) {
 				trig.reset (new AudioTrigger (all_triggers.size(), *this), Trigger::request_trigger_delete);
 				all_triggers.push_back (trig);
-				trig->set_state (**t, version);
+				trig->set_state (*tchild, version);
 			} else if (_data_type == DataType::MIDI) {
 				trig.reset (new MIDITrigger (all_triggers.size(), *this), Trigger::request_trigger_delete);
 				all_triggers.push_back (trig);
-				trig->set_state (**t, version);
+				trig->set_state (*tchild, version);
 			}
 			if (trig->playable ()) {
 				_active_slots++;
