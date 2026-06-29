@@ -751,7 +751,8 @@ AudioClipEditor::maybe_update ()
 		} else {
 
 			if (playing_trigger->active ()) {
-				if (playing_trigger->the_region()) {
+				std::shared_ptr<AudioRegion> r (std::dynamic_pointer_cast<AudioRegion> (playing_trigger->the_region()));
+				if (r) {
 
 					/* We can't know the precise sample
 					 * position because we may be
@@ -760,7 +761,7 @@ AudioClipEditor::maybe_update ()
 					std::shared_ptr<ARDOUR::AudioTrigger> at (std::dynamic_pointer_cast<AudioTrigger> (playing_trigger));
 					if (at) {
 						const double f = playing_trigger->position_as_fraction ();
-						_playhead_cursor->set_position (playing_trigger->the_region()->start().samples() + (f * at->data_length()));
+						_playhead_cursor->set_position (r->start().samples() + (f * r->length().samples()));
 					}
 				}
 			} else {
