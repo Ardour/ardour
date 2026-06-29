@@ -3637,6 +3637,7 @@ SlotArmInfo::reset (Trigger& s)
 	midi_buf = nullptr;
 	delete stretcher;
 	stretcher = nullptr;
+	count_in_beats = Temporal::Beats ();
 	pre_start_samples = 0;
 	start_samples = 0;
 	end_samples = 0;
@@ -3655,6 +3656,7 @@ CueRecords TriggerBox::cue_records (256);
 std::atomic<bool> TriggerBox::_cue_recording (false);
 PBD::Signal<void()> TriggerBox::CueRecordingChanged;
 PBD::Signal<void(Trigger const *)> TriggerBox::RegionCaptured;
+PBD::Signal<void(Temporal::Beats)> TriggerBox::CountIn;
 bool TriggerBox::roll_requested = false;
 bool TriggerBox::_learning = false;
 TriggerBox::CustomMidiMap TriggerBox::_custom_midi_map;
@@ -3868,6 +3870,9 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 		ai->tracker.track (buf.begin(), buf.end());
 	}
 
+	TempoMap::SharedPtr tmap (TempoMap::use());
+	Beats now_beats = tmap->quarters_at (timepos_t (start_sample));
+
 	if (!ai->slot->armed()) {
 		/* since _arm_info is set, we have been capturing for a slot,
 		   but now the slot is no longer armed.
@@ -3884,8 +3889,6 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 			BBT_Argument t_bbt;
 			Beats t_beats;
 			samplepos_t t_samples;
-			TempoMap::SharedPtr tmap (TempoMap::use());
-			Beats now_beats = tmap->quarters_at (timepos_t (start_sample));
 
 			ai->slot->compute_quantized_transition (start_sample, now_beats, std::numeric_limits<Beats>::max(),
 			                                       t_bbt, t_beats, t_samples, tmap, ai->slot->quantization());
@@ -3913,7 +3916,25 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 
 	if (did_start_recording) {
 		ai->pre_start_samples = start_sample;
-		ai->pre_start_beats = TempoMap::use()->quarters_at (start_sample);
+		ai->pre_start_beats = now_beats;
+	}
+
+	now_beats -= ai->pre_start_beats;
+	Temporal::Beats count_in_beats = ai->start_beats - now_beats;
+
+	if (count_in_beats < Temporal::Beats()) {
+		/* passed the start */
+		count_in_beats = Temporal::Beats ();
+	} else {
+		count_in_beats = count_in_beats.round_up_to_beat ();
+	}
+
+	if (count_in_beats != ai->count_in_beats) {
+		if (count_in_beats < Temporal::Beats()) {
+			count_in_beats = Temporal::Beats();
+		}
+		CountIn (count_in_beats); /* EMIT SIGNAL */
+		ai->count_in_beats = count_in_beats;
 	}
 
 	if (ai->start_samples >= start_sample && ai->start_samples < end_sample) {

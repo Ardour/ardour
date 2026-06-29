@@ -828,6 +828,7 @@ struct SlotArmInfo {
 	Trigger* slot;
 	Temporal::Beats start_beats;
 	Temporal::Beats pre_start_beats;
+	Temporal::Beats count_in_beats;
 	samplepos_t pre_start_samples;
 	samplepos_t start_samples;
 	Temporal::Beats end_beats;
@@ -864,6 +865,7 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 	PBD::Signal<void(Trigger const *)> ReCountIn;
 	static PBD::Signal<void()> TriggerRecEnableChanged;
 	static PBD::Signal<void(Trigger const *)> RegionCaptured;
+	static PBD::Signal<void(Temporal::Beats)> CountIn;
 
 	void arm_from_another_thread (Trigger& slot, samplepos_t, uint32_t chans, Temporal::BBT_Offset const &);
 	void setup_arm_info_bounds (SlotArmInfo& ai, samplepos_t, Trigger& slot, Temporal::BBT_Offset const & duration);
