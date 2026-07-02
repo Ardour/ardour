@@ -150,6 +150,8 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner
 	void hide_overlay_text ();
 	void show_overlay_text ();
 
+	void set_ruler_shift (samplecnt_t);
+
   protected:
 	ArdourCanvas::GtkCanvasViewport _canvas_viewport;
 	ArdourCanvas::GtkCanvas& _canvas;
@@ -289,4 +291,6 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner
 
 	void initialize_region_ui_settings (RegionUISettings&);
 	void add_region_ui_settings (PBD::ID const &, RegionUISettings&);
+
+	samplecnt_t ruler_shift;
 };

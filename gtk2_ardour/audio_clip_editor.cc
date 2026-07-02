@@ -453,6 +453,9 @@ AudioClipEditor::position_lines ()
 	start_line->set (ArdourCanvas::Rect (0., 0., start_x1, _visible_canvas_height));
 	end_line->set_position (ArdourCanvas::Duple (end_x0, 0.));
 	end_line->set (ArdourCanvas::Rect (0., 0., ArdourCanvas::COORD_MAX, _visible_canvas_height));
+
+	set_ruler_shift (_region->start().samples());
+	update_tempo_based_rulers ();
 }
 
 void
@@ -545,6 +548,8 @@ AudioClipEditor::set_region (std::shared_ptr<Region> region)
 	state_connection.disconnect ();
 
 	PBD::PropertyChange interesting_stuff;
+	interesting_stuff.add (ARDOUR::Properties::start);
+	interesting_stuff.add (ARDOUR::Properties::length);
 	region_changed (interesting_stuff);
 
 	region->PropertyChanged.connect (state_connection, invalidator (*this), std::bind (&AudioClipEditor::region_changed, this, _1), gui_context ());
@@ -635,7 +640,15 @@ void
 AudioClipEditor::region_changed (const PBD::PropertyChange& what_changed)
 {
 	EC_LOCAL_TEMPO_SCOPE;
-	position_lines ();
+
+	PBD::PropertyChange interesting_stuff;
+
+	interesting_stuff.add (ARDOUR::Properties::start);
+	interesting_stuff.add (ARDOUR::Properties::length);
+
+	if (what_changed.contains (interesting_stuff)) {
+		position_lines ();
+	}
 }
 
 void

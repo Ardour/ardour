@@ -58,7 +58,9 @@ CueEditor::CueEditor (std::string const & name, bool with_transport)
 	, zoom_in_allocate (false)
 	, timebar_height (std::max (13., ceil (17. * UIConfiguration::instance().get_ui_scale())))
 	, n_timebars (0)
+	, data_capture_duration (0)
 	, _scroll_drag (false)
+	, ruler_shift (0)
 {
 	_canvas_hscrollbar = manage (new Gtk::HScrollbar (horizontal_adjustment));
 	_canvas_hscrollbar->show ();
@@ -1958,6 +1960,19 @@ CueEditor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, sample
 
 		break;
 	}
+
+	if (ruler_shift) {
+		for (auto & m : marks) {
+			m.position += ruler_shift;
+		}
+	}
+
+}
+
+void
+CueEditor::set_ruler_shift (samplepos_t s)
+{
+	ruler_shift = s;
 }
 
 void
