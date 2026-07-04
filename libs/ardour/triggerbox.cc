@@ -339,8 +339,9 @@ void
 Trigger::disarm ()
 {
 	if (_armed) {
+		std::cerr << "slot disarmed\n";
 		_armed = false;
-		_box.disarm ();
+		// _box.disarm ();
 		ArmChanged(); /* EMIT SIGNAL */
 		TriggerArmChanged (this);
 	}
