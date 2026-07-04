@@ -3812,9 +3812,10 @@ TriggerBox::setup_arm_info_bounds (SlotArmInfo& ai, samplepos_t now, Trigger& sl
 		ai.end_beats = sb.beats ();
 		ai.end_samples = timepos_t (ai.end_beats).samples();
 	}
-
-	/* Always record slightly more than we need to allow for alignment adjustment */
-	ai.end_samples += _capture_offset + _playback_offset;
+	if (ai.end_samples) {
+		/* Always record slightly more than we need to allow for alignment adjustment */
+		ai.end_samples += _capture_offset + _playback_offset;
+	}
 
 	ReCountIn (&slot); /* EMIT SIGNAL */
 }
@@ -3896,6 +3897,8 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 			                                       t_bbt, t_beats, t_samples, tmap, ai->slot->quantization());
 			ai->end_samples = t_samples;
 			ai->end_beats = t_beats;
+			/* Always record slightly more than we need to allow for alignment adjustment */
+			ai->end_samples += _capture_offset + _playback_offset;
 		}
 	}
 
