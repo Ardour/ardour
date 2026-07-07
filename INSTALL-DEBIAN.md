@@ -31,6 +31,19 @@ development headers:
 sudo apt install libjpeg-dev
 ```
 
+If configure stops at `Checking for 'jack' >= 1.9.10 : not found`, install JACK
+development files:
+
+```sh
+sudo apt install libjack-jackd2-dev
+```
+
+Or build without JACK support:
+
+```sh
+scripts/debian-local-install.sh --backends alsa,pulseaudio
+```
+
 ## Build And Install For Your User
 
 This installs into `~/.local/ardour-source` by default and does not overwrite a

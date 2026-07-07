@@ -109,6 +109,25 @@ EOF
     exit 1
 fi
 
+case ",$backends," in
+    *,jack,*)
+        if ! pkg-config --exists jack; then
+            cat >&2 <<'EOF'
+missing required pkg-config dependency: jack >= 1.9.10
+
+Install JACK development files, then rerun this script:
+
+  sudo apt install libjack-jackd2-dev
+
+Or build without JACK:
+
+  scripts/debian-local-install.sh --backends alsa,pulseaudio
+EOF
+            exit 1
+        fi
+        ;;
+esac
+
 if [ "$clean" -eq 1 ]; then
     python3 ./waf distclean
 fi
