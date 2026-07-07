@@ -782,7 +782,7 @@ Trigger::region_property_change (PropertyChange const & what_changed)
 	}
 
 	if (what_changed.contains (Properties::start) || what_changed.contains (Properties::length)) {
-		bounds_changed (_region->start(), _region->end(), _region->length());
+		bounds_changed (_region->start(), _region->start() + _region->length(), _region->length());
 	}
 }
 
@@ -2390,7 +2390,7 @@ AudioTrigger::check_edit_swap (timepos_t const & time, bool playing, BufferSet& 
 		}
 	}
 
-	/* Switch over data, which spans region->start() to region->end() aka
+	/* Switch over data, which spans region->start() to the end of the region aka
 	 * region->start() + region->length()
 	 */
 
@@ -3127,7 +3127,7 @@ MIDITrigger::set_region_in_worker_thread (std::shared_ptr<Region> r)
 	_model->ContentsChanged.connect_same_thread (content_connection, std::bind (&MIDITrigger::model_contents_changed, this));
 
 	_play_start = _region->start().beats ();
-	_play_end = _region->end().beats ();
+	_play_end = _region->start().beats () + _region->length().beats();
 	_loop_start = _play_start;
 	_loop_end = _play_end;
 	data_length = _play_end - _play_start;

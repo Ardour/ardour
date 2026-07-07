@@ -470,13 +470,13 @@ MidiPlaylist::combine (RegionList const & rl, std::shared_ptr<Track> trk)
 		if (r->position() < earliest) {
 			earliest = r->position();
 		}
-		if (r->end() > latest) {
-			latest = r->end();
+		if (r->end_position() > latest) {
+			latest = r->end_position();
 		}
 		/* We need to explicit set the end, to terminate any MIDI notes
 		 * that extend beyond the end of the region at the region boundary.
 		 */
-		new_region->set_length_unchecked (earliest.distance (r->end()));
+		new_region->set_length_unchecked (earliest.distance (r->end_position()));
 		new_region->merge (std::dynamic_pointer_cast<MidiRegion> (r));
 		remove_region_internal (r, rwl.thawlist);
 	}

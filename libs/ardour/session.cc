@@ -4836,7 +4836,7 @@ Session::playlist_region_added (std::weak_ptr<Region> w)
 
 	/* If so, update the session range markers */
 	if (!in.empty ()) {
-		maybe_update_session_range (r->position (), r->end ());
+		maybe_update_session_range (r->position (), r->end_position ());
 	}
 }
 
