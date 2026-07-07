@@ -832,7 +832,7 @@ Editor::set_selected_regionview_from_click (bool press, SelectionOperation op)
 				if ((*i)->region()->position() < first_pos) {
 					first_pos = (*i)->region()->position();
 				}
-				if ((*i)->region()->end() > last_pos) {
+				if ((*i)->region()->end_position() > last_pos) {
 					last_pos = (*i)->region()->nt_last();
 				}
 			}

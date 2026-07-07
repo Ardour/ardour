@@ -940,7 +940,7 @@ Editor::build_region_boundary_cache ()
 						rpos = r->position();
 						break;
 					case End:
-						rpos = r->end();
+						rpos = r->end_position();
 						break;
 					case SyncPoint:
 						rpos = r->sync_position ();
@@ -989,7 +989,7 @@ Editor::find_next_region (timepos_t const & pos, RegionPoint point, int32_t dir,
 			break;
 
 		case End:
-			rpos = r->end ();
+			rpos = r->end_position ();
 			break;
 
 		case SyncPoint:
@@ -1875,8 +1875,8 @@ Editor::get_selection_extents (timepos_t &start, timepos_t &end) const
 				start = (*i)->region()->position();
 			}
 
-			if ((*i)->region()->end() > end) {
-				end = (*i)->region()->end();
+			if ((*i)->region()->end_position() > end) {
+				end = (*i)->region()->end_position();
 			}
 		}
 
@@ -2138,7 +2138,7 @@ Editor::add_locations_from_region ()
 
 		std::shared_ptr<Region> region = (*i)->region ();
 
-		Location *location = new Location (*_session, region->position(), region->end(), region->name(), Location::IsRangeMarker);
+		Location *location = new Location (*_session, region->position(), region->end_position(), region->name(), Location::IsRangeMarker);
 
 		_session->locations()->add (location, true);
 		commit = true;
@@ -2925,8 +2925,8 @@ Editor::play_selected_region ()
 		if ((*i)->region()->position() < start) {
 			start = (*i)->region()->position();
 		}
-		if ((*i)->region()->end() > end) {
-			end = (*i)->region()->end();
+		if ((*i)->region()->end_position() > end) {
+			end = (*i)->region()->end_position();
 		}
 	}
 
@@ -3320,7 +3320,7 @@ Editor::separate_under_selected_regions ()
 		}
 
 		//Partition on the region bounds
-		playlist->partition ((*rl)->position().decrement(), (*rl)->end(), true);
+		playlist->partition ((*rl)->position().decrement(), (*rl)->end_position(), true);
 
 		//Re-add region that was just removed due to the partition operation
 		playlist->add_region ((*rl), (*rl)->position());
@@ -3772,8 +3772,8 @@ Editor::trim_region (bool front)
 			delta = where.distance (region->position());
 			region->trim_front (where);
 		} else {
-			old_pos = region->end();
-			delta = region->end().distance (where);
+			old_pos = region->end_position();
+			delta = region->end_position().distance (where);
 			region->trim_end (where);
 		}
 
@@ -3923,7 +3923,7 @@ Editor::trim_to_region(bool forward)
 				continue;
 			}
 
-			region->trim_front (next_region->end());
+			region->trim_front (next_region->end_position());
 			arv->region_changed (ARDOUR::bounds_change);
 		}
 
@@ -7193,7 +7193,7 @@ Editor::set_tempo_from_region ()
 
 	RegionView* rv = rs.front();
 
-	define_one_bar (rv->region()->position(), rv->region()->end(), _("region"));
+	define_one_bar (rv->region()->position(), rv->region()->end_position(), _("region"));
 }
 
 void
@@ -7467,7 +7467,7 @@ Editor::split_region_at_points (std::shared_ptr<Region> r, AnalysisFeatureList& 
 	PropertyList plist (r->derive_properties ());
 
 	plist.add (ARDOUR::Properties::start, r->start() + pos);
-	plist.add (ARDOUR::Properties::length, (r->position() + pos).distance (r->end()));
+	plist.add (ARDOUR::Properties::length, (r->position() + pos).distance (r->end_position()));
 	plist.add (ARDOUR::Properties::name, new_name);
 	plist.add (ARDOUR::Properties::layer, 0);
 

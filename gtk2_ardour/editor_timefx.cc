@@ -112,7 +112,7 @@ Editor::time_stretch (RegionSelection& regions, Temporal::ratio_t const & ratio,
 		timepos_t newpos;
 
 		if (fixed_end)
-			newpos = regions.front()->region()->end().earlier(stretch.results[0]->length());
+			newpos = regions.front()->region()->end_position().earlier(stretch.results[0]->length());
 		else
 			newpos = regions.front()->region()->position();
 
@@ -435,7 +435,7 @@ Editor::do_timefx (bool fixed_end)
 
 			playlist->clear_changes ();
 			if (fixed_end)
-				playlist->replace_region (region, new_region, region->end ().earlier(new_region->length ()));
+				playlist->replace_region (region, new_region, region->end_position ().earlier(new_region->length ()));
 			else
 				playlist->replace_region (region, new_region, region->position());
 

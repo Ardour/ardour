@@ -3465,7 +3465,7 @@ MidiView::note_dropped (NoteBase *, timecnt_t const & d_qn, int8_t dnote, bool c
 
 	if (_midi_region) {
 		Temporal::Beats lno (_midi_region->source_beats_to_absolute_time (last_note_off).beats());
-		if (lno > _midi_region->end().beats()) {
+		if (lno > _midi_region->end_position().beats()) {
 			if (_midi_region->playlist()) {
 				_midi_region->playlist()->clear_owned_changes ();
 			}
@@ -3562,7 +3562,7 @@ MidiView::get_end_position_pixels()
 	if (!_midi_region) {
 		return 0.;
 	}
-	return _editing_context.time_to_pixel (_midi_region->end());
+	return _editing_context.time_to_pixel (_midi_region->end_position());
 }
 
 void
@@ -4223,7 +4223,7 @@ MidiView::_duplicate_notes (int times)
 
 	if (_midi_region) {
 		Temporal::Beats lno (_midi_region->source_beats_to_absolute_time (last_note_time + delta).beats());
-		if (lno > _midi_region->end().beats()) {
+		if (lno > _midi_region->end_position().beats()) {
 			apply_note_diff (true, true);
 			_midi_region->playlist()->clear_owned_changes ();
 			_midi_region->trim_end (timepos_t (lno));

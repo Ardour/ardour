@@ -2718,7 +2718,7 @@ void
 TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 {
 	timepos_t const region_start  = _primary->region ()->position ();
-	timepos_t const region_end    = _primary->region ()->end ();
+	timepos_t const region_end    = _primary->region ()->end_position ();
 	timecnt_t const region_length = _primary->region ()->length ();
 
 	timepos_t const pf = adjusted_current_time (event);
@@ -2938,10 +2938,10 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 			show_verbose_cursor_time (rv->region ()->position ());
 			break;
 		case EndTrim:
-			show_verbose_cursor_duration (rv->region ()->position (), rv->region ()->end ());
+			show_verbose_cursor_duration (rv->region ()->position (), rv->region ()->end_position ());
 			break;
 	}
-	show_view_preview ((_operation == StartTrim ? rv->region ()->position () : rv->region ()->end ()));
+	show_view_preview ((_operation == StartTrim ? rv->region ()->position () : rv->region ()->end_position ()));
 }
 
 void
@@ -5389,8 +5389,8 @@ TimeFXDrag::motion (GdkEvent* event, bool)
 	pf.shift_earlier (snap_delta (event->button.state));
 
 	if (_dragging_start) {
-		if (pf < rv->region ()->end ()) {
-			rv->get_time_axis_view ().show_timestretch (pf, rv->region ()->end (), layers, layer);
+		if (pf < rv->region ()->end_position ()) {
+			rv->get_time_axis_view ().show_timestretch (pf, rv->region ()->end_position (), layers, layer);
 
 		}
 	} else {
@@ -5434,11 +5434,11 @@ TimeFXDrag::finished (GdkEvent* event, bool movement_occurred)
 	timecnt_t newlen;
 
 	if (_dragging_start) {
-		if (adjusted_pos > _primary->region ()->end ()) {
+		if (adjusted_pos > _primary->region ()->end_position ()) {
 			/* forwards drag of the right edge - not usable */
 			return;
 		}
-		newlen = _primary->region ()->end ().distance (adjusted_pos);
+		newlen = _primary->region ()->end_position ().distance (adjusted_pos);
 	} else {
 		if (adjusted_pos < _primary->region ()->position ()) {
 			/* backwards drag of the left edge - not usable */

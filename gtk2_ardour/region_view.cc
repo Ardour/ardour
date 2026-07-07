@@ -1081,7 +1081,7 @@ RegionView::trim_front (timepos_t const & new_bound, bool no_overlap)
 
 		bool regions_touching = false;
 
-		if (region_left && (pos == region_left->end())) {
+		if (region_left && (pos == region_left->end_position())) {
 			regions_touching = true;
 		}
 
@@ -1120,7 +1120,7 @@ RegionView::trim_end (timepos_t const & new_bound, bool no_overlap)
 
 		/* Only trim region on the right if the last sample has gone beyond the right region's first sample. */
 		if (region_right && (region_right->position() < _region->nt_last() || regions_touching)) {
-			region_right->trim_front (_region->end());
+			region_right->trim_front (_region->end_position());
 		}
 
 		region_changed (ARDOUR::bounds_change);

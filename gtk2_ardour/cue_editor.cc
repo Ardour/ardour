@@ -610,7 +610,7 @@ CueEditor::loop_button_press (GdkEventButton* ev)
 	if (_session->get_play_loop()) {
 		_session->request_play_loop (false);
 	} else {
-		PublicEditor::instance().set_loop_range (_region->position(), _region->end(), _("loop region"));
+		PublicEditor::instance().set_loop_range (_region->position(), _region->end_position(), _("loop region"));
 		_session->request_play_loop (true);
 	}
 
