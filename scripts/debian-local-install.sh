@@ -98,6 +98,17 @@ need pkg-config
 need gcc
 need g++
 
+if [ ! -f /usr/include/jpeglib.h ]; then
+    cat >&2 <<'EOF'
+missing required header: jpeglib.h
+
+Install the Debian JPEG development package, then rerun this script:
+
+  sudo apt install libjpeg-dev
+EOF
+    exit 1
+fi
+
 if [ "$clean" -eq 1 ]; then
     python3 ./waf distclean
 fi

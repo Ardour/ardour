@@ -24,6 +24,13 @@ sudo apt install build-essential python3 pkg-config git
 If `apt build-dep ardour` says source repositories are disabled, enable `deb-src`
 entries for your Debian release in APT, then run `sudo apt update` again.
 
+If configure stops at `Checking for header jpeglib.h : no`, install the JPEG
+development headers:
+
+```sh
+sudo apt install libjpeg-dev
+```
+
 ## Build And Install For Your User
 
 This installs into `~/.local/ardour-source` by default and does not overwrite a
