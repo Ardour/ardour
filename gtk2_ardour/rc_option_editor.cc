@@ -2685,8 +2685,12 @@ RCOptionEditor::RCOptionEditor ()
 					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_icon_set),
 					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_icon_set)
 					);
-			for (vector<string>::const_iterator i = icon_sets.begin (); i != icon_sets.end (); ++i) {
-				io->add (*i, *i);
+			for (auto const& i : icon_sets) {
+				if (i == X_("default")) {
+					io->add (i, _("default"));
+				} else {
+					io->add (i, i);
+				}
 			}
 			add_option (_("Appearance"), io);
 		}
