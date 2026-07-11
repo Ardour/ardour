@@ -91,6 +91,8 @@ public:
 	int connect (std::string const &);
 	int disconnect (std::string const &);
 
+	void initial_v2_connection (std::string const &);
+
 	/* connection by Port* */
 	bool connected_to (Port *) const;
 	virtual int connect (Port *);
