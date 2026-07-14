@@ -95,6 +95,7 @@ Pianoroll::Pianoroll (std::string const & name, bool with_transport, bool expand
 	, bg (nullptr)
 	, _active_view (nullptr)
 	, bbt_metric (*this)
+	, _visible_channel (0)
 	, ignore_channel_changes (false)
 	, xcursor (nullptr)
 	, midi_inspector (nullptr)
