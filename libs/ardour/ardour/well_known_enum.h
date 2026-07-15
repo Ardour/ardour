@@ -85,6 +85,7 @@ enum WellKnownCtrl : int
 	Denoise_Threshold,
 	Denoise_DepthLow,
 	Denoise_DepthHigh,
+	Denoise_Makeup,
 
 	Master_Limiter_Enable,
 };
