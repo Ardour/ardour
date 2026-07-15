@@ -620,6 +620,9 @@ for exe in $executables; do
 	if test "x$changes" != "x" ; then
 		install_name_tool $changes $EXE
 	fi
+	if [ x$DEBUG = xT ]; then
+		dsymutil $EXE
+	fi
 done
 
 echo "Fixing up library names ..."
@@ -661,6 +664,11 @@ for libdir in $Frameworks $Surfaces $Panners $Backends $Frameworks/LV2/* $GTK_EN
 
 		base=`basename $dylib`
 		install_name_tool -id @executable_path/../lib$libbase/$base $dylib
+
+		if [ x$DEBUG = xT ]; then
+			dsymutil $dylib
+		fi
+
 	done
 done
 
