@@ -1500,6 +1500,9 @@ GenericMidiControlProtocol::lookup_controllable (const string & str, MIDIControl
 		else if (path[2] == X_("depth_high")) {
 			c = s->mapped_control (Denoise_DepthHigh);
 		}
+		else if (path[2] == X_("makeup_gain")) {
+			c = s->mapped_control (Denoise_Makeup);
+		}
 	}
 	else if (path[1] == X_("tape"))
 	{

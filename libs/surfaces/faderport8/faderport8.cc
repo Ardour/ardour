@@ -1402,6 +1402,7 @@ FaderPort8::build_well_known_processor_ctrls (std::shared_ptr<Stripable> s, int 
 			PUSH_BACK_NON_NULL ("Threshold", s->mapped_control (Denoise_Threshold));
 			PUSH_BACK_NON_NULL ("Low Depth", s->mapped_control (Denoise_DepthLow));
 			PUSH_BACK_NON_NULL ("Hi DEpth", s->mapped_control (Denoise_DepthHigh));
+			PUSH_BACK_NON_NULL ("Makeup", s->mapped_control (Denoise_Makeup));
 			break;
 		default:
 			assert (0);
