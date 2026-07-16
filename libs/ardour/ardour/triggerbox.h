@@ -534,7 +534,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 		return audio_run<true> (bufs, start_sample, end_sample, start, end, nframes, dest_offset, bpm, quantize_offset);
 	}
 
-	bool playable() const { return data.length || _region; }
+	bool playable() const { return data_length() || _region; }
 
 	StretchMode stretch_mode() const { return _stretch_mode; }
 	void set_stretch_mode (StretchMode);
@@ -567,27 +567,49 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	void start_and_roll_to (samplepos_t start, samplepos_t position, uint32_t cnt);
 
 	bool stretching () const;
-	uint32_t channels () const { return data.size(); }
+	uint32_t channels () const { return data.n_channels(); }
 
 	RubberBand::RubberBandStretcher* alloc_stretcher () const;
 
-	struct AudioData : std::vector<Sample*> {
-		samplecnt_t length;
-		samplecnt_t capacity;
-
-		AudioData () : length (0), capacity (0) {}
+	class AudioData : private std::vector<Sample*> {
+	  public:
+		AudioData () : _length (0), capacity (0), read_offset (0) {}
 		~AudioData ();
+
 		AudioData& operator= (AudioData& other); /* really move semantics */
+
+		Sample const * audio_data (size_type channel) const { return at (channel) + read_offset; }
+		Sample * writable_audio_data (size_type channel) const { return at (channel) + read_offset; }
+
+		Sample const * raw_audio_data (size_type channel) const { return at (channel); }
+		Sample * writable_raw_audio_data (size_type channel) { return at (channel); }
+
+		samplecnt_t length() const { return _length - read_offset; }
+		samplecnt_t raw_length() const { return _length; }
+
+		void set_length (samplecnt_t len) { _length = len; }
+
+		size_type n_channels() const { return size(); }
 
 		samplecnt_t append (Sample const * src, samplecnt_t cnt, uint32_t chan);
 		void alloc (samplecnt_t cnt, uint32_t nchans);
-		void reset () { length = 0; }
+		void reset () { _length = 0; read_offset = 0; }
 		void drop ();
+		void clear () { return std::vector<Sample*>::clear (); }
+
+		void set_read_offset (samplecnt_t offset) { read_offset = offset; };
+
+	  private:
+		samplecnt_t _length;
+		samplecnt_t capacity;
+		samplecnt_t read_offset;
+
 	};
 
-
-	Sample const * audio_data (size_t n) const;
-	size_t data_length() const { return data.length; }
+	Sample const * audio_data (size_t chn) const { return data.audio_data (chn); }
+	Sample const * raw_audio_data (size_t chn) const { return data.raw_audio_data (chn); }
+	samplecnt_t data_length() const { return data.length(); }
+	samplecnt_t raw_data_length() const { return data.raw_length(); }
 
 	struct AudioPendingSwap : public PendingSwap {
 		AudioData audio_data;

@@ -1438,12 +1438,14 @@ AudioTrigger::AudioData::operator= (AudioTrigger::AudioData& other)
 	for (auto & sample_ptr : other) {
 		push_back (sample_ptr);
 	}
-	length = other.length;
+	_length = other._length;
 	capacity = other.capacity;
+	read_offset = 0;
 
 	other.clear (); /* Not drop, because we've stolen the data buffers */
-	other.length = 0;
+	other._length = 0;
 	other.capacity = 0;
+	other.read_offset = 0;
 
 	return *this;
 }
@@ -1463,9 +1465,9 @@ AudioTrigger::AudioData::alloc (samplecnt_t cnt, uint32_t nchans)
 	for (uint32_t n = 0; n < nchans; ++n) {
 		push_back (new Sample[cnt]);
 	}
-	length = 0;
+	_length = 0;
 	capacity = cnt;
-
+	read_offset = 0;
 }
 
 samplecnt_t
@@ -1474,12 +1476,12 @@ AudioTrigger::AudioData::append (Sample const * src, samplecnt_t cnt, uint32_t c
 	if (chan >= size()) {
 		return -1;
 	}
-	if (length >= capacity) {
+	if (_length >= capacity) {
 		return -1;
 	}
-	samplecnt_t to_copy = std::min (cnt, (capacity - length));
-	memcpy (at(chan) + length, src, cnt * sizeof (Sample));
-	length += cnt;
+	samplecnt_t to_copy = std::min (cnt, (capacity - _length));
+	memcpy (at (chan) + _length, src, cnt * sizeof (Sample));
+	_length += cnt;
 	return to_copy;
 }
 
@@ -1500,16 +1502,6 @@ AudioTrigger::~AudioTrigger ()
 {
 	data.drop ();
 	delete _stretcher;
-}
-
-Sample const *
-AudioTrigger::audio_data (size_t n) const
-{
-	if (n < data.size()) {
-		return data[n];
-	}
-
-	return nullptr;
 }
 
 void
@@ -1536,7 +1528,7 @@ AudioTrigger::set_segment_tempo (double t)
 		/*special case: we're told the file has no defined tempo.
 		 * this can happen from crazy user input (0 beat length or somesuch), or if estimate_tempo() fails entirely
 		 * in either case, we need to make a sensible _beatcnt, and that means we need a tempo */
-		const double seconds = (double) data.length  / _box.session().sample_rate();
+		const double seconds = (double) data_length()  / _box.session().sample_rate();
 		double beats = ceil(4. * 120. * (seconds/60.0));  //how many (rounded up) 16th-notes would this be at 120bpm?
 		beats /= 4.;  //convert to quarter notes
 		t = beats / (seconds/60); /* our operating tempo. note that _estimated_tempo probably retains the 0bpm */
@@ -1547,7 +1539,7 @@ AudioTrigger::set_segment_tempo (double t)
 		_segment_tempo = t;
 
 		/*beatcnt is a derived property from segment tempo and the file's length*/
-		const double seconds = (double) data.length  / _box.session().sample_rate();
+		const double seconds = (double) data_length()  / _box.session().sample_rate();
 		_beatcnt = _segment_tempo * (seconds/60.0);
 
 		/*initialize follow_length to match the length of the clip */
@@ -1572,8 +1564,8 @@ void
 AudioTrigger::set_segment_beatcnt (double count)
 {
 	//given a beatcnt from the user, we use the data length to re-calc tempo internally
-	// ... TODO:  provide a graphical trimmer to give the user control of data.length by dragging the start and end of the sample.
-	const double seconds = (double) data.length  / _box.session().sample_rate();
+	// ... TODO:  provide a graphical trimmer to give the user control of data_length() by dragging the start and end of the sample.
+	const double seconds = (double) data_length()  / _box.session().sample_rate();
 	double tempo = count / (seconds/60.0);
 
 	set_segment_tempo(tempo);
@@ -1661,7 +1653,7 @@ AudioTrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal:
 
            Things that affect these values:
 
-           data.length : how many samples there are in the data  (AudioTime / samples)
+           data_length : how many samples there are in the data  (AudioTime / samples)
            _follow_length : the (user specified) time after the start of the trigger when the follow action should take effect
            _use_follow_length : whether to use the follow_length value, or the clip's natural length
            _beatcnt : the expected duration of the trigger, based on analysis of its tempo .. can be overridden by the user later
@@ -1683,10 +1675,10 @@ AudioTrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal:
 	samplepos_t end_by_beats = tmap->sample_at (tmap->bbt_walk (transition_bba, beat_length));
 
 	/* These are non-tempo-sensitive, and represent data-centric sample counts. */
-	samplepos_t end_by_data_length = transition_sample + data.length;
+	samplepos_t end_by_data_length = transition_sample + data_length();
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 computing end with fl %2 bc %3 dl %4 EDL %5\n", index(),
-	                                              _follow_length, bc.str(), data.length, end_by_data_length));
+	                                              _follow_length, bc.str(), data_length(), end_by_data_length));
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 @ %2 / %3 / %4 ends: FL %5 BC %6 from %7 DL %8\n",
 	                                              index(), transition_sample, transition_beats, transition_bbt,
@@ -1835,7 +1827,7 @@ AudioTrigger::set_region_in_worker_thread_internal (std::shared_ptr<Region> r, b
 void
 AudioTrigger::estimate_tempo ()
 {
-	ARDOUR::estimate_audio_tempo_region (_region, data[0], data.length, _box.session().sample_rate(), _estimated_tempo, _meter, _beatcnt);
+	ARDOUR::estimate_audio_tempo_region (_region, audio_data (0), data_length(), _box.session().sample_rate(), _estimated_tempo, _meter, _beatcnt);
 	/* initialize our follow_length to match the beatcnt ... user can later change this value to have the clip end sooner or later than its data length */
 	set_follow_length (Temporal::BBT_Offset ( 0, floor (_beatcnt), 0));
 }
@@ -1845,7 +1837,7 @@ AudioTrigger::probably_oneshot () const
 {
 	assert (_segment_tempo != 0.);
 
-	if ((data.length < (_box.session().sample_rate()/2)) ||  //less than 1/2 second
+	if ((data_length() < (_box.session().sample_rate()/2)) ||  //less than 1/2 second
 	    (_segment_tempo > 140) ||                            //minibpm thinks this is really fast
 	    (_segment_tempo < 60)) {                             //minibpm thinks this is really slow
 		return true;
@@ -1908,7 +1900,7 @@ AudioTrigger::setup_stretcher ()
 void
 AudioTrigger::captured (SlotArmInfo& ai)
 {
-	if (ai.audio_buf.length == 0) {
+	if (ai.audio_buf.raw_length() == 0) {
 		/* Nothing captured */
 		disarm ();
 		return;
@@ -1916,35 +1908,31 @@ AudioTrigger::captured (SlotArmInfo& ai)
 
 	samplecnt_t pre_capture = ai.start_samples - ai.pre_start_samples;
 
-	data.clear ();
+	data = ai.audio_buf; /* move semantics */
+	data.set_read_offset (pre_capture);
 
-	data.length = ai.audio_buf.length;
-	data.capacity = ai.audio_buf.capacity;
-
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 captured a total of %3\n", _box.order(), _index, data.length));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 captured a total of %3\n", _box.order(), _index, raw_data_length()));
 
 	/* This AudioBuffer does not own any data, it is just a shell to make
 	   using Amp::apply_gain() possible.
 	*/
 	AudioBuffer buf (0);
-	const samplecnt_t fade_duration = std::min (_box.session().sample_rate()/1000, data.length/2);
+	const samplecnt_t fade_duration = std::min (_box.session().sample_rate()/1000, data_length()/2);
+	const samplecnt_t data_len = data_length();
 
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("apply fade in/out over %1\n", fade_duration));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("apply fade in/out over %1 of %2\n", fade_duration, data_len));
 
-	for (auto & s : ai.audio_buf) {
-		data.push_back (s);
-		buf.set_data (s, data.length);
+	for (size_t chn = 0; chn < data.n_channels(); ++chn) {
+		buf.set_data (data.writable_audio_data (chn), data_len);
 		Amp::apply_gain (buf,  _box.session().sample_rate(), fade_duration, 0., 1., 0);
-		Amp::apply_gain (buf,  _box.session().sample_rate(), fade_duration, 1., 0., data.length - fade_duration);
+		Amp::apply_gain (buf,  _box.session().sample_rate(), fade_duration, 1., 0., data_len - fade_duration);
 	}
-
-	ai.audio_buf.clear (); /* data now owned by us, not SlotArmInfo */
 
 	/* follow length will get set when we build the region, and
 	   call estimate_tempo(), which hopefully happens before
 	   this finishes playing.
 	*/
-	set_length (timecnt_t (data.length));
+	set_length (timecnt_t (data_length()));
 
 	/* adopt the previously allocated stretcher, with a ratio of 1.0 (no stretch) */
 
@@ -1954,7 +1942,8 @@ AudioTrigger::captured (SlotArmInfo& ai)
 
 	_box.queue_explict (index());
 
-	TriggerBox::worker->request_build_source (this, timecnt_t (data.length), timepos_t (ai.start_beats), pre_capture);
+	/* duration value is irrelevant */
+	TriggerBox::worker->request_build_source (this, timecnt_t (0), timepos_t (ai.start_beats), pre_capture);
 
 	disarm ();
 }
@@ -1969,11 +1958,16 @@ AudioTrigger::load_data (std::shared_ptr<AudioRegion> ar, AudioData& audio_data)
 
 		audio_data.alloc (len, nchans);
 
+		/* Note: alloc() reset read-offset for audio_data, so
+		 * audio_data() and raw_audio_data() are the same at this
+		 * point.
+		 */
+
 		for (uint32_t n = 0; n < nchans; ++n) {
-			ar->read (audio_data[n], 0, len, n);
+			ar->read (audio_data.writable_audio_data (n), 0, len, n);
 		}
 
-		audio_data.length = len;
+		audio_data.set_length (len);
 
 	} catch (...) {
 		audio_data.drop ();
@@ -2146,10 +2140,10 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 					 * the end of the region
 					 */
 
-					float** in = (float**)alloca(nchans * sizeof (float*));
+					float const ** in = (float const **)alloca (nchans * sizeof (float*));
 
 					for (uint32_t chn = 0; chn < nchans; ++chn) {
-						in[chn] = data[chn % data.size ()] + read_index;
+						in[chn] = audio_data (chn % data.n_channels ()) + read_index;
 					}
 
 #ifndef NDEBUG
@@ -2244,9 +2238,9 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 
 			for (uint32_t chn = 0; chn < bufs.count().n_audio(); ++chn) {
 
-				uint32_t channel = chn %  data.size();
+				uint32_t channel = chn %  data.n_channels();
 				AudioBuffer& buf (bufs.get_audio (chn));
-				Sample* src = do_stretch ? bufp[channel] : (data[channel] + read_index);
+				Sample const * src = do_stretch ? bufp[channel] : (audio_data (channel) + read_index);
 
 				gain_t gain;
 
@@ -3963,11 +3957,11 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 		/* AUDIO */
 
 		for (size_t n = 0; n < n_buffers; ++n) {
-			assert (ai->audio_buf.size() >= n);
+			assert (n < ai->audio_buf.n_channels());
 			AudioBuffer& buf (bufs.get_audio (n));
 			ai->audio_buf.append (buf.data(), nframes, n);
 		}
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: append another %2 frames to reach %3\n", _order, nframes, ai->audio_buf.length));
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: append another %2 frames to reach %3\n", _order, nframes, ai->audio_buf.length()));
 	}
 
 	n_buffers = bufs.count().n_midi();
@@ -6004,7 +5998,7 @@ TriggerBoxThread::build_source (Trigger* t, Temporal::timecnt_t const & duration
 }
 
 void
-TriggerBoxThread::build_audio_source (AudioTrigger* t, Temporal::timecnt_t const & duration, Temporal::timepos_t const & pos, samplecnt_t pre_capture)
+TriggerBoxThread::build_audio_source (AudioTrigger* t, Temporal::timecnt_t const & /*duration*/, Temporal::timepos_t const & pos, samplecnt_t pre_capture)
 {
 	Track* trk = static_cast<Track*> (t->box().owner());
 	SourceList sources;
@@ -6016,7 +6010,7 @@ TriggerBoxThread::build_audio_source (AudioTrigger* t, Temporal::timecnt_t const
 
 	size_t n = 0;
 	for (auto & src : sources) {
-		std::dynamic_pointer_cast<AudioSource>(src)->write (t->audio_data (n), t->data_length());
+		std::dynamic_pointer_cast<AudioSource>(src)->write (t->raw_audio_data (n), t->raw_data_length());
 		++n;
 	}
 
@@ -6024,7 +6018,7 @@ TriggerBoxThread::build_audio_source (AudioTrigger* t, Temporal::timecnt_t const
 
 	SegmentDescriptor segment;
 	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
-	segment.set_extent (0, t->data_length());
+	segment.set_extent (0, t->raw_data_length());
 	segment.set_tempo (tmap->tempo_at (pos));
 	segment.set_meter (tmap->meter_at (pos));
 
