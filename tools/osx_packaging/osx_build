@@ -621,7 +621,7 @@ for exe in $executables; do
 		install_name_tool $changes $EXE
 	fi
 	if [ x$DEBUG = xT ]; then
-		dsymutil $EXE
+		dsymutil -q $EXE
 	fi
 done
 
@@ -666,7 +666,7 @@ for libdir in $Frameworks $Surfaces $Panners $Backends $Frameworks/LV2/* $GTK_EN
 		install_name_tool -id @executable_path/../lib$libbase/$base $dylib
 
 		if [ x$DEBUG = xT ]; then
-			dsymutil $dylib
+			dsymutil -q $dylib
 		fi
 
 	done
