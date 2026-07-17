@@ -517,7 +517,7 @@ LaunchKey4::input_port_name () const
 	default:
 		break;
 	}
-	return X_(":Launchpad X MK3.*MIDI (In|2)");
+	return X_(":Launchkey MK4.*MIDI (In|2)");
 }
 
 std::string
@@ -531,7 +531,7 @@ LaunchKey4::output_port_name () const
 		break;
 	}
 
-	return X_(":Launchpad X MK3.*MIDI (Out|2)");
+	return X_(":Launchkey MK4.*MIDI (Out|2)");
 }
 
 void
