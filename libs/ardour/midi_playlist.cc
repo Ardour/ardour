@@ -403,10 +403,13 @@ MidiPlaylist::render (MidiChannelFilter* filter)
 					timepos_t t (ev->time());
 
 					if (ev->event_type () == Evoral::NO_EVENT) {
+
 						/* reached region bound of an opaque region above this region. */
 						DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("resolve notes in %1 at boundary @ %2\n", mr->name(), ev->time()));
 						mtr.resolve_state (evlist, slist, ev->time());
+
 					} else if (region_is_audible_at_locked (mr, t)) {
+
 						/* no opaque region above this event */
 						DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("region %1 is audible for event %2\n", mr->name(), *ev));
 						uint8_t* evbuf = ev->buffer();
@@ -437,6 +440,7 @@ MidiPlaylist::render (MidiChannelFilter* filter)
 					} else {
 						/* there is an opaque region above this event, skip this event. */
 					}
+
 					delete ev;
 				}
 			}
