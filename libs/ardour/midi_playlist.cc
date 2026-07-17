@@ -358,8 +358,9 @@ MidiPlaylist::render (MidiChannelFilter* filter)
 
 		DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\t%1 layered regions to read\n", regs.size()));
 #ifndef NDEBUG
-		for (auto & r : regs) {
-			DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\t\t%1 on layer %2\n", r->name(), r->layer()));
+		/* debug print in same (layer) order that we will process them in */
+		for (auto r = regs.rbegin(); r != regs.rend(); ++r) {
+			DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\t\t%1 on layer %2\n", (*r)->name(), (*r)->layer()));
 		}
 #endif
 		std::vector<samplepos_t> bounds;
