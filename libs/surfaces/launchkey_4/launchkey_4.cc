@@ -90,6 +90,7 @@ using namespace Gtkmm2ext;
 #define LAUNCHKEY4_37        0x0144
 #define LAUNCHKEY4_49        0x0145
 #define LAUNCHKEY4_61        0x0146
+#define LAUNCHKEY4_88        0x0147
 
 static int first_fader = 0x9;
 static const int PAD_COLUMNS = 8;
@@ -118,6 +119,7 @@ LaunchKey4::match_usb (uint16_t vendor, uint16_t device)
 	case LAUNCHKEY4_37:
 	case LAUNCHKEY4_49:
 	case LAUNCHKEY4_61:
+	case LAUNCHKEY4_88:
 		last_detected = device;
 		return true;
 	}
@@ -631,6 +633,7 @@ LaunchKey4::handle_midi_sysex (MIDI::Parser& parser, MIDI::byte* raw_bytes, size
 		case LAUNCHKEY4_37:
 		case LAUNCHKEY4_49:
 		case LAUNCHKEY4_61:
+		case LAUNCHKEY4_88:
 			device_pid = 0x0214;
 			break;
 		default:
