@@ -383,10 +383,13 @@ MidiPlaylist::render (MidiChannelFilter* filter)
 				top = false;
 			} else {
 				Evoral::EventList<samplepos_t> tmp;
+				DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("actually render %1\n", mr->name()));
 				mr->render (tmp, 0, _note_mode, filter);
+				DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("render generated %1 events\n", tmp.size()));
 
 				/* insert region-bound markers of opaque regions above */
 				for (auto const& p : bounds) {
+					DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("add bounds event at %1\n", p));
 					tmp.write (p, Evoral::NO_EVENT, 0, 0);
 				}
 				tmp.sort (cmp);
@@ -394,11 +397,14 @@ MidiPlaylist::render (MidiChannelFilter* filter)
 				MidiStateTracker mtr;
 				Evoral::EventList<samplepos_t> const slist (evlist);
 
+				DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("process %1 combined events + boundaries\n", tmp.size()));
+
 				for (auto & ev : tmp) {
 					timepos_t t (ev->time());
 
 					if (ev->event_type () == Evoral::NO_EVENT) {
 						/* reached region bound of an opaque region above this region. */
+						DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("resolve notes in %1 at boundary @ %2\n", mr->name(), ev->time()));
 						mtr.resolve_state (evlist, slist, ev->time());
 					} else if (region_is_audible_at_locked (mr, t)) {
 						/* no opaque region above this event */
@@ -407,6 +413,7 @@ MidiPlaylist::render (MidiChannelFilter* filter)
 						if (3 == ev->size() && (evbuf[0] & 0xf0) == MIDI_CMD_NOTE_OFF && !mtr.active (evbuf[1], evbuf[0] & 0x0f)) {
 							; /* skip note off */
 						} else {
+							DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("merge event %1\n", *ev));
 							evlist.write (ev->time(), ev->event_type(), ev->size(), evbuf);
 							mtr.track (evbuf);
 						}
@@ -418,6 +425,7 @@ MidiPlaylist::render (MidiChannelFilter* filter)
 			}
 
 			if (mr->opaque ()) {
+				DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("insert bounds event at %1 for %2\n", mr->position().samples(), mr->name()));
 				bounds.push_back (mr->position ().samples ());
 			}
 
