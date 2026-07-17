@@ -411,7 +411,8 @@ MidiPlaylist::render (MidiChannelFilter* filter)
 						DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("region %1 is audible for event %2\n", mr->name(), *ev));
 						uint8_t* evbuf = ev->buffer();
 						if (3 == ev->size() && (evbuf[0] & 0xf0) == MIDI_CMD_NOTE_OFF && !mtr.active (evbuf[1], evbuf[0] & 0x0f)) {
-							; /* skip note off */
+							/* already resolved by a region boundary */
+							DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("skip note off %1 since it is already resolved by boundary\n", *ev));
 						} else {
 							DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("merge event %1\n", *ev));
 							evlist.write (ev->time(), ev->event_type(), ev->size(), evbuf);
