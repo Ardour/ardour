@@ -1183,6 +1183,14 @@ typedef std::set<std::shared_ptr<Source> > SourceSet;
 bool
 Session::export_route_state (std::shared_ptr<RouteList> rl, const string& path, bool with_sources)
 {
+	if (actively_recording ()) {
+		/* on windows soruce files are closed for copy, and there may or may not
+		 * be the occassional Process Lock for plugin state save.
+		 */
+		error << _("Cannot export state while recording") << endmsg;
+		return false;
+	}
+
 	if (Glib::file_test (path, Glib::FILE_TEST_EXISTS))  {
 		remove_directory (path);
 	}
@@ -4045,6 +4053,11 @@ Session::close_all_sources ()
 int
 Session::cleanup_sources (CleanupReport& rep)
 {
+	if (actively_recording ()) {
+		error << _("Cannot clean up session while recording") << endmsg;
+		return -1;
+	}
+
 	// FIXME: needs adaptation to midi
 
 	std::set<std::shared_ptr<Source> > dead_sources;
@@ -5062,7 +5075,7 @@ Session::rename (const std::string& new_name)
 		error << _("Cannot rename read-only session.") << endmsg;
 		return 0; // don't show "messed up" warning
 	}
-	if (record_status() == Recording) {
+	if (actively_recording ()) {
 		error << _("Cannot rename session while recording") << endmsg;
 		return 0; // don't show "messed up" warning
 	}
