@@ -47,7 +47,6 @@ ScaleDialog::fill_maps ()
 	std::vector<stpair> pairs = {
 		{ _("Absolute Pitch (Hz)"), AbsolutePitch },
 		{ _("Pitch Class"), PitchClass },
-		{ _("Whole Tone Steps"), WholeToneSteps },
 		{ _("Ratio Steps"), RatioSteps },
 		{ _("Ratios from root"), RatioFromRoot },
 		{ _("MIDI Note Numbers"), MidiNote },
@@ -98,7 +97,6 @@ ScaleDialog::ScaleDialog (std::string const & provider_name)
 
 	type_dropdown.add_menu_elem (MenuElem (_("Absolute Pitch (Hz)"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), AbsolutePitch)));
 	type_dropdown.add_menu_elem (MenuElem (_("Pitch Class"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), PitchClass)));
-	type_dropdown.add_menu_elem (MenuElem (_("Whole Tone Steps"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), WholeToneSteps)));
 	type_dropdown.add_menu_elem (MenuElem (_("Ratio steps"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), RatioSteps)));
 	type_dropdown.add_menu_elem (MenuElem (_("Ratios from root"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), RatioFromRoot)));
 	type_dropdown.add_menu_elem (MenuElem (_("MIDI Note Numbers"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), MidiNote)));
