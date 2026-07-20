@@ -432,12 +432,28 @@ MusicalKey::MusicalKey (float root, MusicalMode const & sc)
 	: MusicalMode (sc)
 	, _root (root)
 {
+	/* Not sure this is conceptually correct. We haven't specified what the
+	   units of "root" are to the caller.
+	*/
+	switch (_tuning) {
+	case TwelveTone:
+		_root = int (_root) % 12;
+		break;
+	}
 }
 
 MusicalKey::MusicalKey (float root, std::string const & mode_name)
 	: MusicalMode (mode_name)
 	, _root (root)
 {
+	/* Not sure this is conceptually correct. We haven't specified what the
+	   units of "root" are to the caller.
+	*/
+	switch (_tuning) {
+	case TwelveTone:
+		_root = int (_root) % 12;
+		break;
+	}
 }
 
 MusicalKey::MusicalKey (MusicalKey const & other)
