@@ -72,6 +72,7 @@ ScaleDialog::ScaleDialog (std::string const & provider_name)
 	, scala_label (_("Load a Scala file"))
 	, clear_button (_("Remove scale"))
 	, ignore_set (false)
+	, bracelet (nullptr)
 {
 	if (type_string_map.empty()) {
 		fill_maps ();
@@ -92,6 +93,8 @@ ScaleDialog::ScaleDialog (std::string const & provider_name)
 
 	root_mode_box.pack_start (root_dropdown, false, false);
 	root_mode_box.pack_start (mode_dropdown, true, true);
+
+	mode_dropdown.menu().signal_selection_done ().connect (sigc::mem_fun (*this, &ScaleDialog::mode_changed));
 
 	type_dropdown.add_menu_elem (MenuElem (_("Absolute Pitch (Hz)"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), AbsolutePitch)));
 	type_dropdown.add_menu_elem (MenuElem (_("Pitch Class"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), PitchClass)));
@@ -147,12 +150,17 @@ ScaleDialog::ScaleDialog (std::string const & provider_name)
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	add_button (Stock::OK, RESPONSE_OK);
-
 }
 
 ScaleDialog::~ScaleDialog ()
 {
 	delete bracelet;
+}
+
+void
+ScaleDialog::mode_changed ()
+{
+	pack_steps ();
 }
 
 void
@@ -173,16 +181,12 @@ ScaleDialog::set (MusicalKey const * key)
 
 	PBD::Unwinder<bool> uw (ignore_set, true);
 
-	std::cerr << "SD key set to " << key << std::endl;
-
 	if (!key) {
 		_key = nullptr;
 		mode_dropdown.set_active (0);
-		std::cerr << "now showing no key\n";
 		return;
 
 	}
-
 
 	switch (_tuning) {
 	case TwelveTone:
@@ -213,6 +217,8 @@ ScaleDialog::twelvetone_set (MusicalKey const & key)
 		}
 		++i;
 	}
+
+	pack_steps ();
 }
 
 MusicalKey*
@@ -224,7 +230,6 @@ ScaleDialog::get() const
 	case TwelveTone:
 		return twelvetone_get ();
 	}
-
 	return nullptr;
 }
 
@@ -278,14 +283,18 @@ ScaleDialog::fill_dropdowns (TuningSystem tuning)
 void
 ScaleDialog::pack_steps ()
 {
-	Gtkmm2ext::container_clear (step_packer, true);
-	bracelet = nullptr;
+	if (!bracelet) {
+		bracelet = new ArdourWidgets::Bracelet (MusicalMode::tones_per_equivalent[_tuning]);
+		step_packer.pack_start (*bracelet, true, true);
+		bracelet->show ();
+	} else {
+		bracelet->clear ();
+	}
 
 	if (!_key) {
 		return;
 	}
 
-	bracelet = new ArdourWidgets::Bracelet (MusicalMode::tones_per_equivalent[_tuning]);
 	bracelet->set_size_request (200, 200);
 	bracelet->set_outline_color (UIConfiguration::instance().color ("border color"));
 	bracelet->set_fill_color (UIConfiguration::instance().color ("theme:bg"));
@@ -293,10 +302,8 @@ ScaleDialog::pack_steps ()
 	for (auto e : _key->elements()) {
 		bracelet->fill (e);
 	}
-
-	step_packer.pack_start (*bracelet, true, true);
-	bracelet->show ();
 }
+
 
 void
 ScaleDialog::set_type (MusicalModeType t)

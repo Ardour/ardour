@@ -88,6 +88,7 @@ class ScaleDialog : public ArdourDialog
 	void pack_steps ();
 	void fill_dropdowns (ARDOUR::TuningSystem);
 	void set_type (ARDOUR::MusicalModeType);
+	void mode_changed ();
 
 	ARDOUR::MusicalKey* twelvetone_get() const;
 	void                twelvetone_set (ARDOUR::MusicalKey const &);
