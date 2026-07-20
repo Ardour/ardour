@@ -90,7 +90,7 @@ class LIBARDOUR_API MusicalMode
 	MusicalMode (std::ifstream& file); /* Read from a Scala file */
 	virtual ~MusicalMode() {}
 
-	MusicalMode operator= (MusicalMode const & other);
+	MusicalMode& operator= (MusicalMode const & other);
 
 	virtual std::string name() const { return _name; }
 	TuningSystem tuning() const { return _tuning; }
@@ -105,9 +105,9 @@ class LIBARDOUR_API MusicalMode
 	PBD::Signal<void()> NameChanged;
 	PBD::Signal<void()> Changed;
 
-	static std::multimap<TuningSystem,MusicalMode> scales_by_tuning;
-	static std::map<std::string,MusicalMode> scales_by_name;
-	static std::map<int,MusicalMode> scales_by_id;
+	static std::multimap<TuningSystem,MusicalMode> modes_by_tuning;
+	static std::map<std::string,MusicalMode> modes_by_name;
+	static std::map<int,MusicalMode> modes_by_id;
 
 	static std::map<TuningSystem,int> tone_equivalent_ratio;
 	static std::map<TuningSystem,int> tones_per_equivalent;

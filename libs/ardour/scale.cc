@@ -34,9 +34,9 @@
 using namespace ARDOUR;
 using namespace PBD;
 
-std::multimap<TuningSystem,MusicalMode> MusicalMode::scales_by_tuning;
-std::map<std::string,MusicalMode> MusicalMode::scales_by_name;
-std::map<int,MusicalMode> MusicalMode::scales_by_id;
+std::multimap<TuningSystem,MusicalMode> MusicalMode::modes_by_tuning;
+std::map<std::string,MusicalMode> MusicalMode::modes_by_name;
+std::map<int,MusicalMode> MusicalMode::modes_by_id;
 
 std::map<TuningSystem,int> MusicalMode::tone_equivalent_ratio;
 std::map<TuningSystem,int> MusicalMode::tones_per_equivalent;
@@ -108,16 +108,16 @@ void
 MusicalMode::register_scale (TuningSystem ts, std::string const & name, MusicalModeType type, std::vector<float> const & ints)
 {
 	MusicalMode mm (ts, name, type, ints);
-	scales_by_tuning.insert (std::make_pair (ts, mm));
-	scales_by_name.insert (std::make_pair (name, mm));
+	modes_by_tuning.insert (std::make_pair (ts, mm));
+	modes_by_name.insert (std::make_pair (name, mm));
 	int id = mm.ring_id ();
 
 	if (id > 0) {
-		auto ret = scales_by_id.find (id);
-		if (ret != scales_by_id.end()) {
+		auto ret = modes_by_id.find (id);
+		if (ret != modes_by_id.end()) {
 			std::cerr << "trying to insert " << name << " but ring ID matches " << ret->second.name() << std::endl;
 		} else {
-			scales_by_id.insert (std::make_pair (id, mm));
+			modes_by_id.insert (std::make_pair (id, mm));
 		}
 	}
 }
@@ -127,19 +127,19 @@ MusicalMode::register_scales (TuningSystem ts, std::vector<std::string> const & 
 {
 	assert (!names.empty());
 	MusicalMode mm (ts, names.front(), type, ints);
-	scales_by_tuning.insert (std::make_pair (ts, mm));
+	modes_by_tuning.insert (std::make_pair (ts, mm));
 	for (auto const & nom : names) {
-		scales_by_name.insert (std::make_pair (nom, mm));
+		modes_by_name.insert (std::make_pair (nom, mm));
 	}
 
 	int id = mm.ring_id ();
 
 	if (id > 0) {
-		auto ret = scales_by_id.find (id);
-		if (ret != scales_by_id.end()) {
+		auto ret = modes_by_id.find (id);
+		if (ret != modes_by_id.end()) {
 			std::cerr << "trying to insert " << names.front() << " but ring ID matches " << ret->second.name() << std::endl;
 		} else {
-			scales_by_id.insert (std::make_pair (id, mm));
+			modes_by_id.insert (std::make_pair (id, mm));
 		}
 	}
 }
@@ -170,8 +170,8 @@ MusicalMode::MusicalMode (std::string const & name)
 {
 	init ();
 
-	auto ret = scales_by_name.find (name);
-	if (ret == scales_by_name.end()) {
+	auto ret = modes_by_name.find (name);
+	if (ret == modes_by_name.end()) {
 		throw failed_constructor();
 	}
 
@@ -182,6 +182,8 @@ MusicalMode::MusicalMode (std::ifstream& file)
 	: _ring_id (0)
 {
 	init ();
+
+	/* XXXX need to set tuning system */
 
 	try {
 		scala::scale scl (scala::read_scl (file));
