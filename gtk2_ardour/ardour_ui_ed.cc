@@ -260,6 +260,8 @@ ARDOUR_UI::install_actions ()
 
 	act = ActionManager::register_action (main_actions, X_("ExportStrips"), _("Save Mixer Strips..."), sigc::mem_fun (*this, &ARDOUR_UI::export_strips));
 	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::write_sensitive_actions.push_back (act);
+	ActionManager::rec_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (main_actions, X_("ImportStrips"), _("Import Mixer Strips..."), sigc::mem_fun (*this, &ARDOUR_UI::import_strips));
 	ActionManager::session_sensitive_actions.push_back (act);

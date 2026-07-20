@@ -104,6 +104,10 @@ out:
 void
 StripExportDialog::export_strips ()
 {
+	if (_session->actively_recording ()) {
+		return;
+	}
+
 	if (_path.empty ()) {
 		return;
 	}
