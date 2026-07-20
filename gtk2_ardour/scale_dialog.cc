@@ -264,7 +264,7 @@ ScaleDialog::fill_dropdowns (TuningSystem tuning)
 		break;
 	}
 
-	for (auto const & [tune,mode]: MusicalMode::scales_by_tuning) {
+	for (auto const & [tune,mode]: MusicalMode::modes_by_tuning) {
 		if (tune != tuning) {
 			continue;
 		}
