@@ -89,6 +89,7 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>&            
 	, _is_end((t == std::numeric_limits<Time>::max()) || seq.empty())
 	, _note_iter(seq.notes().end())
 	, _sysex_iter(seq.sysexes().end())
+	, _meta_event_iter(seq.meta_events().end())
 	, _patch_change_iter(seq.patch_changes().end())
 	, _control_iter(_control_iters.end())
 	, _force_discrete (force_discrete)
@@ -122,6 +123,16 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>&            
 		}
 	}
 	assert(_sysex_iter == seq.sysexes().end() || (*_sysex_iter)->time() >= t);
+
+	// Find first meta event at or after t
+	for (typename Sequence<Time>::MetaEvents::const_iterator i = seq.meta_events().begin();
+	     i != seq.meta_events().end(); ++i) {
+		if ((*i)->time() >= t) {
+			_meta_event_iter = i;
+			break;
+		}
+	}
+	assert(_meta_event_iter == seq.meta_events().end() || (*_meta_event_iter)->time() >= t);
 
 	// Find first patch event at or after t
 	for (typename Sequence<Time>::PatchChanges::const_iterator i = seq.patch_changes().begin(); i != seq.patch_changes().end(); ++i) {
@@ -236,6 +247,7 @@ Sequence<Time>::const_iterator::invalidate(bool preserve_active_notes)
 	if (_seq) {
 		_note_iter = _seq->notes().end();
 		_sysex_iter = _seq->sysexes().end();
+		_meta_event_iter = _seq->meta_events().end();
 		_patch_change_iter = _seq->patch_changes().end();
 		_active_patch_change_message = 0;
 	}
@@ -291,6 +303,14 @@ Sequence<Time>::const_iterator::choose_next(Time earliest_t)
 		}
 	}
 
+	/* Meta events: sent after sysex at the same time */
+	if (_meta_event_iter != _seq->meta_events().end()) {
+		if (_type == NIL || (*_meta_event_iter)->time() < earliest_t) {
+			_type      = META_EVENT;
+			earliest_t = (*_meta_event_iter)->time();
+		}
+	}
+
 	return earliest_t;
 }
 
@@ -314,6 +334,10 @@ Sequence<Time>::const_iterator::set_event()
 		DEBUG_TRACE(DEBUG::Sequence, "iterator = sysex\n");
 		_event->assign (*(*_sysex_iter));
 		break;
+	case META_EVENT:
+		DEBUG_TRACE(DEBUG::Sequence, "iterator = meta event\n");
+		_event->assign (*(*_meta_event_iter));
+		break;
 	case CONTROL:
 		DEBUG_TRACE(DEBUG::Sequence, "iterator = control\n");
 		_seq->control_to_midi_event(_event, *_control_iter);
@@ -332,7 +356,7 @@ Sequence<Time>::const_iterator::set_event()
 		_type   = NIL;
 		_is_end = true;
 	} else {
-		assert(midi_event_is_valid(_event->buffer(), _event->size()));
+		assert(_type == META_EVENT || midi_event_is_valid(_event->buffer(), _event->size()));
 	}
 }
 
@@ -354,7 +378,8 @@ Sequence<Time>::const_iterator::operator++()
 	           || ev.is_pitch_bender()
 	           || ev.is_channel_pressure()
 	           || ev.is_poly_pressure()
-	           || ev.is_sysex()) ) {
+	           || ev.is_sysex()
+	           || ev.is_smf_meta_event()) ) {
 		cerr << "WARNING: Unknown event (type " << _type << "): " << hex
 		     << int(ev.buffer()[0]) << int(ev.buffer()[1]) << int(ev.buffer()[2]) << endl;
 	}
@@ -400,6 +425,9 @@ Sequence<Time>::const_iterator::operator++()
 		break;
 	case SYSEX:
 		++_sysex_iter;
+		break;
+	case META_EVENT:
+		++_meta_event_iter;
 		break;
 	case PATCH_CHANGE:
 		++_active_patch_change_message;
@@ -449,6 +477,7 @@ Sequence<Time>::const_iterator::operator=(const const_iterator& other)
 	_is_end        = other._is_end;
 	_note_iter     = other._note_iter;
 	_sysex_iter    = other._sysex_iter;
+	_meta_event_iter = other._meta_event_iter;
 	_patch_change_iter = other._patch_change_iter;
 	_control_iters = other._control_iters;
 	_force_discrete = other._force_discrete;
@@ -517,6 +546,11 @@ Sequence<Time>::Sequence(const Sequence<Time>& other)
 	for (typename SysExes::const_iterator i = other._sysexes.begin(); i != other._sysexes.end(); ++i) {
 		std::shared_ptr<Event<Time> > n (new Event<Time> (**i, true));
 		_sysexes.insert (n);
+	}
+
+	for (typename MetaEvents::const_iterator i = other._meta_events.begin(); i != other._meta_events.end(); ++i) {
+		std::shared_ptr<Event<Time> > n (new Event<Time> (**i, true));
+		_meta_events.insert (n);
 	}
 
 	for (typename PatchChanges::const_iterator i = other._patch_changes.begin(); i != other._patch_changes.end(); ++i) {
@@ -628,6 +662,7 @@ Sequence<Time>::clear()
 	WriteLock lock(write_lock());
 	_notes.clear();
 	_sysexes.clear ();
+	_meta_events.clear ();
 	_patch_changes.clear ();
 	for (Controls::iterator li = _controls.begin(); li != _controls.end(); ++li)
 		li->second->list()->clear();
@@ -948,7 +983,7 @@ Sequence<Time>::append (const Event<Time>& ev, event_id_t evid)
 	assert(_notes.empty() || ev.time() >= (*_notes.rbegin())->time());
 	assert(_writing);
 
-	if (!midi_event_is_valid(ev.buffer(), ev.size())) {
+	if (!ev.is_smf_meta_event() && !midi_event_is_valid(ev.buffer(), ev.size())) {
 		std::cerr << "WARNING: Sequence ignoring illegal MIDI event (size " << ev.size() << "): ";
 		std::cerr << std::hex;
 		for (size_t n = 0; n < ev.size(); ++n) {
@@ -972,6 +1007,8 @@ Sequence<Time>::append (const Event<Time>& ev, event_id_t evid)
 		append_note_off_unlocked (ev);
 	} else if (ev.is_sysex()) {
 		append_sysex_unlocked(ev, evid);
+	} else if (ev.is_smf_meta_event()) {
+		append_meta_event_unlocked(ev, evid);
 	} else if (ev.is_cc() && (ev.cc_number() == MIDI_CTL_MSB_BANK || ev.cc_number() == MIDI_CTL_LSB_BANK)) {
 		/* note bank numbers in our _bank[] array, so that we can write an event when the program change arrives */
 		if (ev.cc_number() == MIDI_CTL_MSB_BANK) {
@@ -1146,6 +1183,23 @@ Sequence<Time>::append_sysex_unlocked(const Event<Time>& ev, event_id_t /* evid 
 	std::shared_ptr< Event<Time> > event(new Event<Time>(ev, true));
 	/* XXX sysex events should use IDs */
 	_sysexes.insert(event);
+	update_duration_unlocked (ev.time());
+}
+
+template<typename Time>
+void
+Sequence<Time>::append_meta_event_unlocked(const Event<Time>& ev, event_id_t /* evid */)
+{
+#ifdef DEBUG_SEQUENCE
+	cerr << this << " MetaEvent @ " << ev.time() << " \t= \t [ " << hex;
+	for (size_t i=0; i < ev.size(); ++i) {
+		cerr << int(ev.buffer()[i]) << " ";
+	} cerr << "]" << endl;
+#endif
+
+	std::shared_ptr< Event<Time> > event(new Event<Time>(ev, true));
+	/* XXX meta events should use IDs */
+	_meta_events.insert(event);
 	update_duration_unlocked (ev.time());
 }
 
