@@ -197,6 +197,18 @@ MusicalMode::MusicalMode (std::ifstream& file)
 	}
 }
 
+MusicalMode&
+MusicalMode::operator= (MusicalMode const & other)
+{
+	_tuning = other._tuning;
+	_ring_id = other._ring_id;
+	_name = other._name;
+	_type = other._type;
+	_elements = other._elements;
+
+	return *this;
+}
+
 int
 MusicalMode::ring_id () const
 {
@@ -248,30 +260,16 @@ MusicalMode::ring_id () const
 
 	int mult = 1;
 
-	std::cerr << _name << ' ';
 	for (auto yn : intervals_included) {
 		if (yn) {
-			std::cerr << '1';
 			_ring_id += mult;
-		} else {
-			std::cerr << '0';
 		}
 		mult *= 2;
 	}
-	std::cerr << " = " << _ring_id << std::endl;
 
 	_ring_id += (tpe << 16);
 
 	return _ring_id;
-}
-
-MusicalMode
-MusicalMode::operator= (MusicalMode const & other)
-{
-	_name = other._name;
-	_elements = other._elements;
-
-	return *this;
 }
 
 void
