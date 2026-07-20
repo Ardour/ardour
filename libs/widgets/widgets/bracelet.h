@@ -35,6 +35,8 @@ public:
 	void fill (std::vector<int> const & steps);
 	void clear ();
 
+	int steps() const { return _steps; }
+
 	void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
 
 	void set_fill_color (int);
