@@ -465,12 +465,13 @@ MusicalKey::MusicalKey (MusicalKey const & other)
 float
 MusicalKey::nth (unsigned n) const
 {
-	if (n >= _elements.size()) {
-		return -1.0f;
+	switch (_type) {
+	case PitchClass:
+		return _root + _elements[n%_elements.size()];
+		break;
 	}
 
-#pragma GCC warning "warning paul you need to fix this"
-	return 99;
+	return -1.f;
 }
 
 bool
