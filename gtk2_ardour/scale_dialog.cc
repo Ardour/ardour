@@ -287,6 +287,12 @@ ScaleDialog::pack_steps ()
 		bracelet = new ArdourWidgets::Bracelet (MusicalMode::tones_per_equivalent[_tuning]);
 		step_packer.pack_start (*bracelet, true, true);
 		bracelet->show ();
+	} else if (bracelet->steps() != MusicalMode::tones_per_equivalent[_tuning]) {
+		step_packer.remove (*bracelet);
+		delete bracelet;
+		bracelet = new ArdourWidgets::Bracelet (MusicalMode::tones_per_equivalent[_tuning]);
+		step_packer.pack_start (*bracelet, true, true);
+		bracelet->show ();
 	} else {
 		bracelet->clear ();
 	}
