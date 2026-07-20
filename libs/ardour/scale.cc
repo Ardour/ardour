@@ -250,13 +250,6 @@ MusicalMode::ring_id () const
 			intervals_included[interval] = true;
 		}
 		break;
-
-	case WholeToneSteps:
-		for (auto e : _elements) {
-			int interval = int (floor (e * 2));
-			intervals_included[interval] = true;
-		}
-		break;
 	}
 
 
@@ -295,8 +288,6 @@ MusicalMode::as_midi (int scale_root) const
 		return absolute_pitch_as_midi (scale_root);
 	case PitchClass:
 		return pitch_class_as_midi (scale_root);
-	case WholeToneSteps:
-		return wholetone_steps_as_midi (scale_root);
 	case RatioSteps:
 		return ratio_steps_as_midi (scale_root);
 	case RatioFromRoot:

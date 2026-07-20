@@ -1049,7 +1049,6 @@ enum VST3KnobMode {
 enum MusicalModeType {
 	AbsolutePitch,
 	PitchClass,
-	WholeToneSteps,
 	RatioSteps,
 	RatioFromRoot,
 	MidiNote,
