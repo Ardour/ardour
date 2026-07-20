@@ -479,11 +479,6 @@ MusicalKey::in_key (int midi_note) const
 {
 	if (_midi_notes.empty()) {
 		_midi_notes = as_midi (_root);
-		std::cerr << name() << ": ";
-		for (auto n : _midi_notes) {
-			std::cerr << n << ' ';
-		}
-		std::cerr << std::endl;
 	}
 
 	return (std::find (_midi_notes.begin(), _midi_notes.end(), midi_note) != _midi_notes.end());
@@ -494,11 +489,6 @@ MusicalKey::lower_midi_note (int midi_note) const
 {
 	if (_midi_notes.empty()) {
 		_midi_notes = as_midi (_root);
-		std::cerr << name() << ": ";
-		for (auto n : _midi_notes) {
-			std::cerr << n << ' ';
-		}
-		std::cerr << std::endl;
 	}
 
 	assert (!_midi_notes.empty());
@@ -528,11 +518,6 @@ MusicalKey::higher_midi_note (int midi_note) const
 {
 	if (_midi_notes.empty()) {
 		_midi_notes = as_midi (_root);
-		std::cerr << name() << ": ";
-		for (auto n : _midi_notes) {
-			std::cerr << n << ' ';
-		}
-		std::cerr << std::endl;
 	}
 
 	assert (!_midi_notes.empty());
@@ -559,11 +544,6 @@ MusicalKey::closest_midi_note (int midi_note) const
 {
 	if (_midi_notes.empty()) {
 		_midi_notes = as_midi (_root);
-		std::cerr << name() << ": ";
-		for (auto n : _midi_notes) {
-			std::cerr << n << ' ';
-		}
-		std::cerr << std::endl;
 	}
 
 	assert (!_midi_notes.empty());
