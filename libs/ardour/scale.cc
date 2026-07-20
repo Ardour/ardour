@@ -158,7 +158,7 @@ MusicalMode::MusicalMode (TuningSystem ts, std::string const & name, MusicalMode
 
 MusicalMode::MusicalMode (MusicalMode const & other)
 	: _tuning (other._tuning)
-	, _ring_id (0)
+	, _ring_id (other._ring_id)
 	, _name (other._name)
 	, _type (other._type)
 	, _elements (other._elements)
