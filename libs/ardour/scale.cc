@@ -610,7 +610,7 @@ MusicalKey::conform_midi_note (int midi_note, KeyEnforcementPolicy key_enforcmen
 std::string
 MusicalKey::name() const
 {
-	return string_compose (_("%1 %2"), _root + 'A', mode_name());
+	return string_compose (_("%1 %2"), (char) (_root + 'C'), mode_name());
 }
 
 std::string
