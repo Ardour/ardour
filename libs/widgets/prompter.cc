@@ -112,7 +112,7 @@ Prompter::set_default_text (std::string const& txt)
 {
 	default_text = txt;
 	resetButton.show ();
-	resetButton.signal_clicked ().connect (sigc::track_object([this] { entry.set_text (default_text);}, *this));
+	resetButton.signal_clicked ().connect (sigc::track_obj([this] { entry.set_text (default_text);}, *this));
 	resetButton.set_sensitive (entry.get_text() != default_text);
 }
 
