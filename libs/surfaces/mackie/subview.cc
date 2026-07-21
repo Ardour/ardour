@@ -504,6 +504,23 @@ void DynamicsSubview::init_params() {
 	std::shared_ptr<AutomationControl> gfrc = _subview_stripable->mapped_control (Gate_KeyFilterFreq);
 	std::shared_ptr<AutomationControl> glc = _subview_stripable->mapped_control (Gate_KeyListen);
 
+	std::shared_ptr<AutomationControl> sec = _subview_stripable->mapped_control (DeEss_Enable);
+	std::shared_ptr<AutomationControl> shhc = _subview_stripable->mapped_control (DeEss_HiShelf);
+	std::shared_ptr<AutomationControl> stc = _subview_stripable->mapped_control (DeEss_Threshold);
+	std::shared_ptr<AutomationControl> sac = _subview_stripable->mapped_control (DeEss_Attack);
+	std::shared_ptr<AutomationControl> ssdc = _subview_stripable->mapped_control (DeEss_EssDepth);
+	std::shared_ptr<AutomationControl> ssfc = _subview_stripable->mapped_control (DeEss_EssFreq);
+	std::shared_ptr<AutomationControl> sssc = _subview_stripable->mapped_control (DeEss_EssSolo);
+	std::shared_ptr<AutomationControl> shdc = _subview_stripable->mapped_control (DeEss_HiDepth);
+	std::shared_ptr<AutomationControl> shfc = _subview_stripable->mapped_control (DeEss_HiFreq);
+	std::shared_ptr<AutomationControl> shsc = _subview_stripable->mapped_control (DeEss_HiSolo);
+
+	std::shared_ptr<AutomationControl> nec = _subview_stripable->mapped_control (Denoise_Enable);
+	std::shared_ptr<AutomationControl> nlc = _subview_stripable->mapped_control (Denoise_DepthLow);
+	std::shared_ptr<AutomationControl> nhc = _subview_stripable->mapped_control (Denoise_DepthHigh);
+	std::shared_ptr<AutomationControl> ntc = _subview_stripable->mapped_control (Denoise_Threshold);
+	std::shared_ptr<AutomationControl> nmc = _subview_stripable->mapped_control (Denoise_Makeup);
+
 	/* we will control the global_strip_position-th available parameter, from the list in the
 	 * order shown above.
 	 */
@@ -534,6 +551,23 @@ void DynamicsSubview::init_params() {
 	if (gfc) { available.push_back (std::make_pair (gfc, "GSdChn")); }
 	if (gfrc) { available.push_back (std::make_pair (gfrc, "GFreq")); }
 	if (glc) { available.push_back (std::make_pair (glc, "GList")); }
+
+	if (sec) { available.push_back (std::make_pair (sec, "Ess")); }
+	if (shhc) { available.push_back (std::make_pair (shhc, "EsHi")); }
+	if (stc) { available.push_back (std::make_pair (stc, "EsThsh")); }
+	if (sac) { available.push_back (std::make_pair (sac, "EsAttk")); }
+	if (ssdc) { available.push_back (std::make_pair (ssdc, "EsSDph")); }
+	if (ssfc) { available.push_back (std::make_pair (ssfc, "EsSFrq")); }
+	if (sssc) { available.push_back (std::make_pair (sssc, "EsSSol")); }
+	if (shdc) { available.push_back (std::make_pair (shdc, "EsHDph")); }
+	if (shfc) { available.push_back (std::make_pair (shfc, "EsHFrq")); }
+	if (shsc) { available.push_back (std::make_pair (shsc, "EsHSol")); }
+
+	if (nec) { available.push_back (std::make_pair (nec, "DNoise")); }
+	if (nlc) { available.push_back (std::make_pair (nlc, "DNLo")); }
+	if (nhc) { available.push_back (std::make_pair (nhc, "DNHi")); }
+	if (ntc) { available.push_back (std::make_pair (ntc, "DNTh")); }
+	if (nmc) { available.push_back (std::make_pair (nmc, "DNMkp")); }
 
 	if (available.size() <= _current_bank + 1) {
 		_current_bank = available.size() - 1;
