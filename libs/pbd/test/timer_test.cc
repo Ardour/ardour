@@ -422,7 +422,7 @@ TimerTest::_testTimers ()
 	m_context = Glib::MainContext::create ();
 
 	PBD::StandardTimer second_timer (second_timer_ms (), m_context);
-	sigc::connection second_connection = second_timer.connect (sigc::mem_fun (this, &TimerTest::on_second_timeout));
+	sigc::connection second_connection = second_timer.connect (sigc::mem_fun (*this, &TimerTest::on_second_timeout));
 
 	if (m_connect_idle) {
 		connect_idle_handler ();
@@ -431,17 +431,17 @@ TimerTest::_testTimers ()
 	}
 
 	PBD::StandardTimer fast_timer (fast_timer_ms (), m_context);
-	sigc::connection fast_connection = fast_timer.connect (sigc::mem_fun (this, &TimerTest::on_fast_timeout));
+	sigc::connection fast_connection = fast_timer.connect (sigc::mem_fun (*this, &TimerTest::on_fast_timeout));
 
 	reset_timing_run_main();
 
 	PBD::StandardTimer rapid1_timer (rapid1_timer_ms (), m_context);
-	sigc::connection rapid1_connection = rapid1_timer.connect (sigc::mem_fun (this, &TimerTest::on_rapid1_timeout));
+	sigc::connection rapid1_connection = rapid1_timer.connect (sigc::mem_fun (*this, &TimerTest::on_rapid1_timeout));
 
 	reset_timing_run_main();
 
 	PBD::StandardTimer rapid2_timer (rapid2_timer_ms (), m_context);
-	sigc::connection rapid2_connection = rapid2_timer.connect (sigc::mem_fun (this, &TimerTest::on_rapid2_timeout));
+	sigc::connection rapid2_connection = rapid2_timer.connect (sigc::mem_fun (*this, &TimerTest::on_rapid2_timeout));
 
 	reset_timing_run_main();
 }

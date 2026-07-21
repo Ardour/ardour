@@ -582,7 +582,7 @@ FaderPort8::start_midi_handling ()
 	 * port, the relevant thread will invoke our ::midi_input_handler()
 	 * method, which will read the data, and invoke the parser.
 	 */
-	_input_port->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (this, &FaderPort8::midi_input_handler), std::weak_ptr<AsyncMIDIPort> (_input_port)));
+	_input_port->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (*this, &FaderPort8::midi_input_handler), std::weak_ptr<AsyncMIDIPort> (_input_port)));
 	_input_port->xthread().attach (main_loop()->get_context());
 }
 

@@ -133,7 +133,7 @@ PersistentTooltip::show ()
 		_window->set_name (X_("ContrastingPopup"));
 		_window->set_position (WIN_POS_MOUSE);
 		_window->set_decorated (false);
-		_window->signal_realize().connect (mem_fun (this, &PersistentTooltip::realized));
+		_window->signal_realize().connect (mem_fun (*this, &PersistentTooltip::realized));
 
 		_label = manage (new Label);
 		_label->modify_font (_font);
