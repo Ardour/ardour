@@ -75,6 +75,7 @@ class ScaleDialog : public ArdourDialog
 	Gtk::Label scala_label;
 	Gtk::FileChooserButton scala_file_button;
 	Gtk::Button clear_button;
+	Gtk::Label clear_label;
 
 	ArdourWidgets::ArdourDropdown tuning_dropdown;
 	ArdourWidgets::ArdourDropdown root_dropdown;

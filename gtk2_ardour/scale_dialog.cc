@@ -69,7 +69,6 @@ ScaleDialog::ScaleDialog (std::string const & provider_name)
 	, steps_label (_("Pitches"))
 	, step_spinner (step_adjustment)
 	, scala_label (_("Load a Scala file"))
-	, clear_button (_("Remove scale"))
 	, ignore_set (false)
 	, bracelet (nullptr)
 {
@@ -83,6 +82,10 @@ ScaleDialog::ScaleDialog (std::string const & provider_name)
 	Gtk::HBox* inner_tuning_box (manage (new Gtk::HBox));
 	inner_tuning_box->set_spacing (12);
 	inner_tuning_box->set_border_width (12);
+
+	clear_label.set_markup (string_compose ("<span size=\"large\">%1</span>", _("Remove Scale")));
+	clear_button.add (clear_label);
+	clear_label.set_padding (12, 12);
 
 	tuning_dropdown.add_menu_elem (MenuElem (_("Twelve Tone"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::fill_dropdowns), TwelveTone)));
 	tuning_dropdown.set_active (0);
@@ -108,9 +111,11 @@ ScaleDialog::ScaleDialog (std::string const & provider_name)
 	type_box.pack_start (*inner_type_box, true, false);
 
 	Gtk::VBox* inner_name_box (manage (new Gtk::VBox));
-	name_label.set_markup (string_compose (_("Current Scale for \n<span size=\"large\" weight=\"bold\">%1</span>"), Gtkmm2ext::markup_escape_text (provider)));
+	Gtk::Label* pre_label (manage (new Gtk::Label (_("Current Scale for"))));
+	pre_label->set_alignment (0.5);
+	name_label.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", Gtkmm2ext::markup_escape_text (provider)));
+	inner_name_box->pack_start (*pre_label, false, false);
 	inner_name_box->pack_start (name_label, false, false);
-	inner_name_box->pack_start (root_mode_box, false, false);
 	inner_name_box->set_spacing (12);
 
 	Gtk::HBox* clear_box (manage (new Gtk::HBox));
@@ -133,9 +138,10 @@ ScaleDialog::ScaleDialog (std::string const & provider_name)
 
 	Gtk::VBox* vbox (get_vbox());
 	vbox->pack_start (*inner_name_box, false, false);
+	vbox->pack_start (*inner_tuning_box, false, false);
+	vbox->pack_start (root_mode_box, false, false);
 	vbox->pack_start (named_scale_box, false, false);
 	vbox->pack_start (*clear_box, false, false);
-	vbox->pack_start (*inner_tuning_box, false, false);
 	vbox->pack_start (step_packer, false, false);
 	vbox->pack_start (scala_box, false, false);
 
