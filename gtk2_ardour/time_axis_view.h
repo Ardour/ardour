@@ -68,6 +68,9 @@ namespace ARDOUR {
 
 namespace Gtk {
 	class Menu;
+	namespace Menu_Helpers {
+		class MenuList;
+	}
 }
 
 namespace ArdourCanvas {
@@ -231,6 +234,8 @@ public:
 	Children get_child_list () const;
 
 	static uint32_t preset_height (Height);
+
+	virtual void add_scale_related_menu_items (Gtk::Menu_Helpers::MenuList&) {}
 
 protected:
 	static Glib::RefPtr<Gtk::SizeGroup> controls_meters_size_group;

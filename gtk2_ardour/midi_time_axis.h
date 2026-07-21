@@ -117,6 +117,8 @@ public:
 	void entered ();
 	void exited ();
 
+	void add_scale_related_menu_items (Gtk::Menu_Helpers::MenuList&);
+
 protected:
 	void start_step_editing ();
 	void stop_step_editing ();
