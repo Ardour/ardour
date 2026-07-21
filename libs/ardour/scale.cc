@@ -135,11 +135,11 @@ MusicalMode::register_scales (TuningSystem ts, std::vector<std::string> const & 
 	int id = mm.ring_id ();
 
 	if (id > 0) {
-		auto ret = modes_by_id.find (id);
-		if (ret != modes_by_id.end()) {
-			std::cerr << "trying to insert " << names.front() << " but ring ID matches " << ret->second.name() << std::endl;
-		} else {
-			modes_by_id.insert (std::make_pair (id, mm));
+		auto ret = modes_by_id.insert (std::make_pair (id, mm));
+
+		if (!ret.second) {
+			auto e = modes_by_id.find (id);
+			std::cerr << "trying to insert " << names.front() << " but ring ID matches " << e->second.name() << std::endl;
 		}
 	}
 }
