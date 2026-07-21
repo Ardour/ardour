@@ -188,7 +188,7 @@ TriggerClipPicker::TriggerClipPicker ()
 	_view.set_headers_visible (false);  //TODO: show headers when we have size/tags/etc
 	_view.set_reorderable (false);
 	_view.get_selection ()->set_mode (SELECTION_MULTIPLE);
-	_view.signal_realize().connect (mem_fun (this, &TriggerClipPicker::on_theme_changed));
+	_view.signal_realize().connect (mem_fun (*this, &TriggerClipPicker::on_theme_changed));
 
 	_view.ensure_style ();
 	on_theme_changed ();

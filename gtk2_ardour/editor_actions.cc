@@ -440,7 +440,7 @@ Editor::register_actions ()
 	ActionManager::time_selection_sensitive_actions.push_back (act);
 
 	toggle_reg_sens (editor_actions, "toggle-log-window", _("Log"),
-			sigc::mem_fun (ARDOUR_UI::instance(), &ARDOUR_UI::toggle_errors));
+			sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::toggle_errors));
 
 	reg_sens (editor_actions, "alternate-tab-to-transient-forwards", _("Move to Next Transient"), sigc::bind (sigc::mem_fun(*this, &Editor::tab_to_transient), true));
 	reg_sens (editor_actions, "alternate-tab-to-transient-backwards", _("Move to Previous Transient"), sigc::bind (sigc::mem_fun(*this, &Editor::tab_to_transient), false));

@@ -347,7 +347,7 @@ LoudnessDialog::LoudnessDialog (Session* s, TimelineRange const& ar, bool as)
 	_loudness_graph.signal_expose_event ().connect (sigc::mem_fun (*this, &LoudnessDialog::graph_expose_event));
 
 	/* connect signals */
-	_cancel_button->signal_clicked ().connect (sigc::mem_fun (this, &LoudnessDialog::cancel_analysis));
+	_cancel_button->signal_clicked ().connect (sigc::mem_fun (*this, &LoudnessDialog::cancel_analysis));
 	_dbfs_spinbutton.signal_value_changed ().connect (mem_fun (*this, &LoudnessDialog::update_settings));
 	_dbtp_spinbutton.signal_value_changed ().connect (mem_fun (*this, &LoudnessDialog::update_settings));
 	_lufs_i_spinbutton.signal_value_changed ().connect (mem_fun (*this, &LoudnessDialog::update_settings));

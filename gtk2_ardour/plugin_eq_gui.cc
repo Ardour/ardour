@@ -232,7 +232,7 @@ void
 PluginEqGui::start_updating ()
 {
 	if (!_update_connection.connected() && get_visible()) {
-		_update_connection = Glib::signal_timeout().connect (sigc::mem_fun (this, &PluginEqGui::timeout_callback), 250, Glib::PRIORITY_DEFAULT_IDLE);
+		_update_connection = Glib::signal_timeout().connect (sigc::mem_fun (*this, &PluginEqGui::timeout_callback), 250, Glib::PRIORITY_DEFAULT_IDLE);
 	}
 }
 
@@ -247,11 +247,11 @@ PluginEqGui::on_show ()
 	Gtk::Widget *toplevel = get_toplevel ();
 	if (toplevel) {
 		if (!_window_unmap_connection.connected ()) {
-			_window_unmap_connection = toplevel->signal_unmap().connect (sigc::mem_fun (this, &PluginEqGui::stop_updating));
+			_window_unmap_connection = toplevel->signal_unmap().connect (sigc::mem_fun (*this, &PluginEqGui::stop_updating));
 		}
 
 		if (!_window_map_connection.connected ()) {
-			_window_map_connection = toplevel->signal_map().connect (sigc::mem_fun (this, &PluginEqGui::start_updating));
+			_window_map_connection = toplevel->signal_map().connect (sigc::mem_fun (*this, &PluginEqGui::start_updating));
 		}
 	}
 }

@@ -41,9 +41,9 @@ VST3X11PluginUI::VST3X11PluginUI (std::shared_ptr<PlugInsertBase> pib, std::shar
 {
 	pack_start (_gui_widget, true, true);
 
-	_gui_widget.signal_realize().connect (mem_fun (this, &VST3X11PluginUI::view_realized));
-	_gui_widget.signal_size_request ().connect (mem_fun (this, &VST3X11PluginUI::view_size_request));
-	_gui_widget.signal_size_allocate ().connect (mem_fun (this, &VST3X11PluginUI::view_size_allocate));
+	_gui_widget.signal_realize().connect (mem_fun (*this, &VST3X11PluginUI::view_realized));
+	_gui_widget.signal_size_request ().connect (mem_fun (*this, &VST3X11PluginUI::view_size_request));
+	_gui_widget.signal_size_allocate ().connect (mem_fun (*this, &VST3X11PluginUI::view_size_allocate));
 	_gui_widget.signal_scroll_event ().connect (sigc::mem_fun (*this, &VST3X11PluginUI::forward_scroll_event), false);
 
 #if 0

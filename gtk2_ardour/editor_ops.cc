@@ -6143,7 +6143,7 @@ Editor::set_gain_envelope_visibility ()
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		AudioTimeAxisView* v = dynamic_cast<AudioTimeAxisView*>(*i);
 		if (v) {
-			v->audio_view()->foreach_regionview (sigc::mem_fun (this, &Editor::set_region_gain_visibility));
+			v->audio_view()->foreach_regionview (sigc::mem_fun (*this, &Editor::set_region_gain_visibility));
 		}
 	}
 }

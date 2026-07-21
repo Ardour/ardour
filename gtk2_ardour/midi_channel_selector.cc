@@ -66,13 +66,13 @@ MidiChannelSelector::MidiChannelSelector(int n_rows, int n_columns, int start_ro
 			_buttons[row][column].add(_button_labels[row][column]);
 			_buttons[row][column].signal_toggled().connect(
 				sigc::bind(
-					sigc::mem_fun(this, &MidiChannelSelector::button_toggled),
+					sigc::mem_fun(*this, &MidiChannelSelector::button_toggled),
 					&_buttons[row][column],
 					channel_nr - 1));
 			_buttons[row][column].set_widget_name (X_("MidiChannelSelectorButton"));
 
 			_buttons[row][column].signal_button_release_event().connect(
-                                sigc::mem_fun(this, &MidiChannelSelector::was_clicked), false);
+                                sigc::mem_fun(*this, &MidiChannelSelector::was_clicked), false);
 
 			int table_row    = start_row + row;
 			int table_column = start_column + column;
@@ -159,19 +159,19 @@ MidiMultipleChannelSelector::MidiMultipleChannelSelector(ChannelMode mode, uint1
 {
 	_select_all.add(*manage(new Label(_("All"))));
 	_select_all.signal_clicked().connect(
-			sigc::bind(sigc::mem_fun(this, &MidiMultipleChannelSelector::select_all), true));
+			sigc::bind(sigc::mem_fun(*this, &MidiMultipleChannelSelector::select_all), true));
 
 	_select_none.add(*manage(new Label(_("None"))));
 	_select_none.signal_clicked().connect(
-			sigc::bind(sigc::mem_fun(this, &MidiMultipleChannelSelector::select_all), false));
+			sigc::bind(sigc::mem_fun(*this, &MidiMultipleChannelSelector::select_all), false));
 
 	_invert_selection.add(*manage(new Label(_("Invert"))));
 	_invert_selection.signal_clicked().connect(
-			sigc::mem_fun(this, &MidiMultipleChannelSelector::invert_selection));
+			sigc::mem_fun(*this, &MidiMultipleChannelSelector::invert_selection));
 
 	_force_channel.add(*manage(new Label(_("Force"))));
 	_force_channel.signal_toggled().connect(
-			sigc::mem_fun(this, &MidiMultipleChannelSelector::force_channels_button_toggled));
+			sigc::mem_fun(*this, &MidiMultipleChannelSelector::force_channels_button_toggled));
 
 	set_homogeneous(false);
 	attach(*manage(new VSeparator()), 4, 5, 0, 4, SHRINK, FILL, 0, 0);

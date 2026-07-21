@@ -94,13 +94,13 @@ SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_
 
 	/* No string translation because these don't show anywhere */
 	new_session_action = Action::create (X_("New"));
-	action_group->add (new_session_action, sigc::mem_fun (this, &SessionDialog::new_button_choice_action));
+	action_group->add (new_session_action, sigc::mem_fun (*this, &SessionDialog::new_button_choice_action));
 	recent_session_action = Action::create (X_("Recent"));
-	action_group->add (recent_session_action, sigc::mem_fun (this, &SessionDialog::recent_button_choice_action));
+	action_group->add (recent_session_action, sigc::mem_fun (*this, &SessionDialog::recent_button_choice_action));
 	existing_session_action = Action::create (X_("Open"));
-	action_group->add (existing_session_action, sigc::mem_fun (this, &SessionDialog::existing_button_choice_action));
+	action_group->add (existing_session_action, sigc::mem_fun (*this, &SessionDialog::existing_button_choice_action));
 	demo_session_action = Action::create (X_("DemoSessions"));
-	action_group->add (demo_session_action, sigc::mem_fun (this, &SessionDialog::demo_button_choice_action));
+	action_group->add (demo_session_action, sigc::mem_fun (*this, &SessionDialog::demo_button_choice_action));
 
 	set_position (WIN_POS_CENTER);
 	get_vbox()->set_spacing (6);
@@ -604,7 +604,7 @@ SessionDialog::setup_existing_box ()
 
 	Gtkmm2ext::add_volume_shortcuts (existing_session_chooser);
 
-	existing_session_chooser.signal_selection_changed().connect (mem_fun (this, &SessionDialog::existing_file_selected));
+	existing_session_chooser.signal_selection_changed().connect (mem_fun (*this, &SessionDialog::existing_file_selected));
 	existing_session_chooser.signal_file_activated().connect (sigc::mem_fun (*this, &SessionDialog::existing_file_activated));
 }
 

@@ -2138,7 +2138,7 @@ public:
 	{
 		/* Watch for changes made by the user to our members */
 		_visibility_group->VisibilityChanged.connect_same_thread (
-			_visibility_group_connection, sigc::bind (&VisibilityOption::changed, this)
+			_visibility_group_connection, sigc::mem_fun (*this, &VisibilityOption::changed)
 			);
 	}
 

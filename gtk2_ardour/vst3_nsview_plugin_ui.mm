@@ -57,12 +57,12 @@ VST3NSViewPluginUI::VST3NSViewPluginUI (std::shared_ptr<PlugInsertBase> pib, std
 	pack_start (_gui_widget, true, true);
 
 	_gui_widget.add_events (Gdk::VISIBILITY_NOTIFY_MASK | Gdk::EXPOSURE_MASK);
-	_gui_widget.signal_realize().connect (mem_fun (this, &VST3NSViewPluginUI::view_realized));
-	_gui_widget.signal_visibility_notify_event ().connect (mem_fun (this, &VST3NSViewPluginUI::view_visibility_notify));
-	_gui_widget.signal_size_request ().connect (mem_fun (this, &VST3NSViewPluginUI::view_size_request));
-	_gui_widget.signal_size_allocate ().connect (mem_fun (this, &VST3NSViewPluginUI::view_size_allocate));
-	_gui_widget.signal_map ().connect (mem_fun (this, &VST3NSViewPluginUI::view_map));
-	_gui_widget.signal_unmap ().connect (mem_fun (this, &VST3NSViewPluginUI::view_unmap));
+	_gui_widget.signal_realize().connect (mem_fun (*this, &VST3NSViewPluginUI::view_realized));
+	_gui_widget.signal_visibility_notify_event ().connect (mem_fun (*this, &VST3NSViewPluginUI::view_visibility_notify));
+	_gui_widget.signal_size_request ().connect (mem_fun (*this, &VST3NSViewPluginUI::view_size_request));
+	_gui_widget.signal_size_allocate ().connect (mem_fun (*this, &VST3NSViewPluginUI::view_size_allocate));
+	_gui_widget.signal_map ().connect (mem_fun (*this, &VST3NSViewPluginUI::view_map));
+	_gui_widget.signal_unmap ().connect (mem_fun (*this, &VST3NSViewPluginUI::view_unmap));
 	_gui_widget.signal_scroll_event ().connect (sigc::mem_fun (*this, &VST3NSViewPluginUI::forward_scroll_event), false);
 
 	//vst->LoadPresetProgram.connect (_program_connection, invalidator (*this), std::bind (&VST3NSViewPluginUI::set_program, this), gui_context());

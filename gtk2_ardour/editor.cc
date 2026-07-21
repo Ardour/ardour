@@ -443,7 +443,7 @@ Editor::Editor ()
 
 	initialize_canvas ();
 
-	CairoWidget::set_focus_handler (sigc::mem_fun (ARDOUR_UI::instance(), &ARDOUR_UI::reset_focus));
+	CairoWidget::set_focus_handler (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::reset_focus));
 
 	_summary = new EditorSummary (*this);
 

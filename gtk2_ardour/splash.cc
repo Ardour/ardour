@@ -263,7 +263,7 @@ Splash::expose (GdkEventExpose* ev)
 
 	if (expose_is_the_one) {
 		idle_connection = Glib::signal_idle().connect (
-				sigc::mem_fun (this, &Splash::idle_after_expose),
+				sigc::mem_fun (*this, &Splash::idle_after_expose),
 				GDK_PRIORITY_REDRAW+2);
 	}
 

@@ -985,7 +985,7 @@ TriggerPage::register_actions ()
 		const std::string action_name  = string_compose ("trigger-cue-%1", n);
 		const std::string display_name = string_compose (_("Trigger Cue %1"), cue_marker_name (n));
 
-		ActionManager::register_action (trigger_actions, action_name.c_str (), display_name.c_str (), sigc::bind (sigc::mem_fun (ARDOUR_UI::instance(), &ARDOUR_UI::trigger_cue_row), n));
+		ActionManager::register_action (trigger_actions, action_name.c_str (), display_name.c_str (), sigc::bind (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::trigger_cue_row), n));
 	}
 
 	for (int32_t c = 0; c < 16; ++c) {
@@ -993,13 +993,13 @@ TriggerPage::register_actions ()
 			const std::string action_name  = string_compose ("trigger-slot-%1-%2", c, n);
 			const std::string display_name = string_compose (_("Trigger Slot %1/%2"), c, cue_marker_name (n));
 
-			ActionManager::register_action (trigger_actions, action_name.c_str (), display_name.c_str (), sigc::bind (sigc::mem_fun (ARDOUR_UI::instance(), &ARDOUR_UI::trigger_slot), c, n));
+			ActionManager::register_action (trigger_actions, action_name.c_str (), display_name.c_str (), sigc::bind (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::trigger_slot), c, n));
 		}
 
-		ActionManager::register_action (trigger_actions, string_compose ("stop-cues-%1-now", c).c_str(), string_compose (_("Stop Cues %1"), c).c_str(), sigc::bind (sigc::mem_fun (ARDOUR_UI::instance(), &ARDOUR_UI::stop_cues), c, true));
-		ActionManager::register_action (trigger_actions, string_compose ("stop-cues-%1-soon", c).c_str(), string_compose (_("Stop Cues %1"), c).c_str(), sigc::bind (sigc::mem_fun (ARDOUR_UI::instance(), &ARDOUR_UI::stop_cues), c, false));
+		ActionManager::register_action (trigger_actions, string_compose ("stop-cues-%1-now", c).c_str(), string_compose (_("Stop Cues %1"), c).c_str(), sigc::bind (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::stop_cues), c, true));
+		ActionManager::register_action (trigger_actions, string_compose ("stop-cues-%1-soon", c).c_str(), string_compose (_("Stop Cues %1"), c).c_str(), sigc::bind (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::stop_cues), c, false));
 	}
 
-	ActionManager::register_action (trigger_actions, X_("stop-all-cues-now"), _("Stop all cues now"), sigc::bind (sigc::mem_fun (ARDOUR_UI::instance(), &ARDOUR_UI::stop_all_cues), true));
-	ActionManager::register_action (trigger_actions, X_("stop-all-cues-soon"), _("Stop all cues soon"), sigc::bind (sigc::mem_fun (ARDOUR_UI::instance(), &ARDOUR_UI::stop_all_cues), false));
+	ActionManager::register_action (trigger_actions, X_("stop-all-cues-now"), _("Stop all cues now"), sigc::bind (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::stop_all_cues), true));
+	ActionManager::register_action (trigger_actions, X_("stop-all-cues-soon"), _("Stop all cues soon"), sigc::bind (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::stop_all_cues), false));
 }

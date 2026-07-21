@@ -461,13 +461,13 @@ AUPluginUI::AUPluginUI (std::shared_ptr<PlugInsertBase> pib)
 
 	low_box.add_events (Gdk::VISIBILITY_NOTIFY_MASK | Gdk::EXPOSURE_MASK);
 
-	low_box.signal_realize().connect (mem_fun (this, &AUPluginUI::lower_box_realized));
-	low_box.signal_visibility_notify_event ().connect (mem_fun (this, &AUPluginUI::lower_box_visibility_notify));
+	low_box.signal_realize().connect (mem_fun (*this, &AUPluginUI::lower_box_realized));
+	low_box.signal_visibility_notify_event ().connect (mem_fun (*this, &AUPluginUI::lower_box_visibility_notify));
 	if (au_view) {
-		low_box.signal_size_request ().connect (mem_fun (this, &AUPluginUI::lower_box_size_request));
-		low_box.signal_size_allocate ().connect (mem_fun (this, &AUPluginUI::lower_box_size_allocate));
-		low_box.signal_map ().connect (mem_fun (this, &AUPluginUI::lower_box_map));
-		low_box.signal_unmap ().connect (mem_fun (this, &AUPluginUI::lower_box_unmap));
+		low_box.signal_size_request ().connect (mem_fun (*this, &AUPluginUI::lower_box_size_request));
+		low_box.signal_size_allocate ().connect (mem_fun (*this, &AUPluginUI::lower_box_size_allocate));
+		low_box.signal_map ().connect (mem_fun (*this, &AUPluginUI::lower_box_map));
+		low_box.signal_unmap ().connect (mem_fun (*this, &AUPluginUI::lower_box_unmap));
 	}
 }
 

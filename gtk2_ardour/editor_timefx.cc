@@ -331,9 +331,9 @@ Editor::time_fx (RegionList& regions, Temporal::ratio_t ratio, bool pitching, bo
 	current_timefx->first_delete.disconnect();
 
 	current_timefx->first_cancel = current_timefx->cancel_button->signal_clicked().connect
-		(sigc::mem_fun (current_timefx, &TimeFXDialog::cancel_in_progress));
+		(sigc::mem_fun (*current_timefx, &TimeFXDialog::cancel_in_progress));
 	current_timefx->first_delete = current_timefx->signal_delete_event().connect
-		(sigc::mem_fun (current_timefx, &TimeFXDialog::delete_in_progress));
+		(sigc::mem_fun (*current_timefx, &TimeFXDialog::delete_in_progress));
 
 
 	if (pthread_create_and_store ("timefx", &current_timefx->request.thread, timefx_thread, current_timefx)) {
