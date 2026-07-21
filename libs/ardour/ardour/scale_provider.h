@@ -57,6 +57,8 @@ class LIBARDOUR_API ScaleProvider : public virtual PBD::Stateful {
 	virtual void set_key_enforcement_policy (KeyEnforcementPolicy kep);
 	KeyEnforcementPolicy key_enforcement_policy() const;
 
+	ScaleProvider const * scale_provider_origin() const;
+
   private:
 	ScaleProvider* _parent;
 	MusicalKey const * _key;

@@ -79,6 +79,20 @@ ScaleProvider::key () const
 	return nullptr;
 }
 
+ScaleProvider const *
+ScaleProvider::scale_provider_origin () const
+{
+	if (_key) {
+		return this;
+	}
+
+	if (_parent) {
+		return _parent->scale_provider_origin ();
+	}
+
+	return nullptr;
+}
+
 XMLNode&
 ScaleProvider::get_state () const
 {
