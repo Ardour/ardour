@@ -25,7 +25,7 @@ using namespace ARDOUR;
 using namespace ArdourSurface;
 
 static ControlProtocol*
-new_osc_protocol (Session* s, void* config)
+new_osc_protocol (Session* s, std::string const & config)
 {
 	OSC* osc = new OSC (*s, Config->get_osc_port());
 

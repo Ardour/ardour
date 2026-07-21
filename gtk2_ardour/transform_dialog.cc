@@ -83,7 +83,7 @@ TransformDialog::TransformDialog(Gtk::Window& parent)
 	_property_combo.pack_start(_model.property_cols.label);
 	_property_combo.set_active(1);
 	_property_combo.signal_changed().connect(
-		sigc::mem_fun(this, &TransformDialog::property_changed));
+		sigc::mem_fun(*this, &TransformDialog::property_changed));
 
 	Gtk::HBox* property_hbox = Gtk::manage(new Gtk::HBox);
 	property_hbox->pack_start(*Gtk::manage(new Gtk::Label(_("Set "))), false, false);
@@ -123,7 +123,7 @@ TransformDialog::ValueChooser::ValueChooser(const Model& model)
 	source_combo.set_model(model.source_list);
 	source_combo.pack_start(model.source_cols.label);
 	source_combo.signal_changed().connect(
-		sigc::mem_fun(this, &TransformDialog::ValueChooser::source_changed));
+		sigc::mem_fun(*this, &TransformDialog::ValueChooser::source_changed));
 
 	property_combo.set_model(model.property_list);
 	property_combo.pack_start(model.property_cols.label);

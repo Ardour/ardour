@@ -622,10 +622,10 @@ MusicalKey::operator= (MusicalKey const & other)
 }
 
 float
-MusicalKey::nth (int n) const
+MusicalKey::nth (unsigned n) const
 {
 	if (n >= _elements.size()) {
-		return -1;
+		return -1.0f;
 	}
 
 #pragma GCC warning "warning paul you need to fix this"

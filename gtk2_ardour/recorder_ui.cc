@@ -153,7 +153,7 @@ RecorderUI::RecorderUI ()
 	_meter_area.set_spacing (0);
 	_meter_area.pack_start (_meter_table, true, true);
 	_meter_area.signal_size_request().connect (sigc::mem_fun (*this, &RecorderUI::meter_area_size_request));
-	_meter_area.signal_size_allocate ().connect (mem_fun (this, &RecorderUI::meter_area_size_allocate));
+	_meter_area.signal_size_allocate ().connect (mem_fun (*this, &RecorderUI::meter_area_size_allocate));
 	_meter_scroller.add (_meter_area);
 	_meter_scroller.set_policy (POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 
@@ -536,6 +536,10 @@ RecorderUI::parameter_changed (string const& p)
 			_rec_group_tabs->show ();
 		} else {
 			_rec_group_tabs->hide ();
+		}
+	} else if (p == "extra-ui-extents-time") {
+		if (_session) {
+			gui_extents_changed ();
 		}
 	}
 }

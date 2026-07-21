@@ -35,11 +35,8 @@ Table::Table (Canvas* canvas)
 	: Rectangle (canvas)
 	, padding ({ 0 })
 	, margin ({ 0 })
-	, collapse_on_hide (false)
 	, row_homogenous (true)
 	, col_homogenous (true)
-	, draw_hgrid (false)
-	, draw_vgrid (false)
 {
 	set_layout_sensitive (true);
 }
@@ -48,11 +45,8 @@ Table::Table (Item* item)
 	: Rectangle (item)
 	, padding ({ 0 })
 	, margin ({ 0 })
-	, collapse_on_hide (false)
 	, row_homogenous (true)
 	, col_homogenous (true)
-	, draw_hgrid (false)
-	, draw_vgrid (false)
 {
 	set_layout_sensitive (true);
 }

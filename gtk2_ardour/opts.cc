@@ -22,7 +22,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#if defined COMPILER_MSVC && defined WAF_BUILD
+#include "msvc/getopt.h"
+#else
 #include <getopt.h>
+#endif
 #include <string.h>
 #include <iostream>
 #include <cstdlib>

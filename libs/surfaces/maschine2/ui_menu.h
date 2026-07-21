@@ -65,7 +65,6 @@ class Maschine2Menu : public ArdourCanvas::Container
 		void encoder_changed (int);
 
 		M2EncoderInterface* _ctrl;
-		PBD::EventLoop* _eventloop;
 		PBD::ScopedConnection encoder_connection;
 
 		std::vector<ArdourCanvas::Text*> _displays;

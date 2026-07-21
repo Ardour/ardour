@@ -43,9 +43,9 @@ VST3HWNDPluginUI::VST3HWNDPluginUI (std::shared_ptr<PlugInsertBase> pib, std::sh
 
 	pack_start (_gui_widget, true, true);
 
-	_gui_widget.signal_realize().connect (mem_fun (this, &VST3HWNDPluginUI::view_realized));
-	_gui_widget.signal_size_request ().connect (mem_fun (this, &VST3HWNDPluginUI::view_size_request));
-	_gui_widget.signal_size_allocate ().connect (mem_fun (this, &VST3HWNDPluginUI::view_size_allocate));
+	_gui_widget.signal_realize().connect (mem_fun (*this, &VST3HWNDPluginUI::view_realized));
+	_gui_widget.signal_size_request ().connect (mem_fun (*this, &VST3HWNDPluginUI::view_size_request));
+	_gui_widget.signal_size_allocate ().connect (mem_fun (*this, &VST3HWNDPluginUI::view_size_allocate));
 	_gui_widget.signal_scroll_event ().connect (sigc::mem_fun (*this, &VST3HWNDPluginUI::forward_scroll_event), false);
 
 	_gui_widget.show ();

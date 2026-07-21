@@ -713,7 +713,7 @@ PatchChangeWidget::audition ()
 	assert (!_audition_note_on);
 	_audition_note_num = _audition_start_spin.get_value_as_int ();
 
-	_note_queue_connection = Glib::signal_timeout ().connect (sigc::bind (sigc::mem_fun (&PatchChangeWidget::audition_next), this), 250);
+	_note_queue_connection = Glib::signal_timeout ().connect (sigc::mem_fun(*this, &PatchChangeWidget::audition_next), 250);
 }
 
 bool

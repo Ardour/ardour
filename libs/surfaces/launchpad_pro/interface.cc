@@ -30,7 +30,7 @@ using namespace PBD;
 using namespace ArdourSurface;
 
 static ControlProtocol*
-new_lppro (Session* s, void* config)
+new_lppro (Session* s, std::string const & config)
 {
 	LaunchPadPro * p2 = 0;
 

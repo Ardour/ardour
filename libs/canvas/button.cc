@@ -40,7 +40,6 @@ Button::Button (Canvas* canvas, double w, double h, Pango::FontDescription const
 	, _label (new Text (this))
 	, prelight (false)
 	, highlight (false)
-	, clicking (false)
 {
 	_label->set_font_description (font_description);
 	init ();
@@ -52,7 +51,6 @@ Button::Button (Item* parent, double w, double h, Pango::FontDescription const &
 	, _label (new Text (this))
 	, prelight (false)
 	, highlight (false)
-	, clicking (false)
 {
 	_label->set_font_description (font_description);
 	init ();
@@ -65,7 +63,6 @@ Button::Button (Canvas* canvas, std::string const & str, Pango::FontDescription 
 	, _label (new Text (this))
 	, prelight (false)
 	, highlight (false)
-	, clicking (false)
 {
 	_label->set_font_description (font_description);
 	_label->set (str);
@@ -79,7 +76,6 @@ Button::Button (Item* parent, std::string const & str, Pango::FontDescription co
 	, _label (new Text (this))
 	, prelight (false)
 	, highlight (false)
-	, clicking (false)
 {
 	_label->set_font_description (font_description);
 	_label->set (str);

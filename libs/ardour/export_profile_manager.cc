@@ -140,6 +140,7 @@ ExportProfileManager::load_profile ()
 	} else {
 		XMLNode empty_node (xml_node_name);
 		set_state (empty_node);
+		update_ranges ();
 	}
 }
 
@@ -635,16 +636,16 @@ ExportProfileManager::save_format_to_disk (ExportFormatSpecPtr format)
 		if (Glib::path_get_dirname (it->second) != export_config_dir) {
 			/* Write new file */
 
-			XMLTree tree (new_path);
+			XMLTree tree;
 			tree.set_root (&format->get_state ());
-			tree.write ();
+			tree.write (new_path);
 
 		} else {
 			/* Update file and rename if necessary */
 
-			XMLTree tree (it->second);
+			XMLTree tree;
 			tree.set_root (&format->get_state ());
-			tree.write ();
+			tree.write (it->second);
 
 			if (new_name != Glib::path_get_basename (it->second)) {
 				if (g_rename (it->second.c_str (), new_path.c_str ()) != 0) {
@@ -657,9 +658,9 @@ ExportProfileManager::save_format_to_disk (ExportFormatSpecPtr format)
 
 	} else {
 		/* Write new file */
-		XMLTree tree (new_path);
+		XMLTree tree;
 		tree.set_root (&format->get_state ());
-		tree.write ();
+		tree.write (new_path);
 	}
 
 	return new_path;

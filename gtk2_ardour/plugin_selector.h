@@ -163,6 +163,7 @@ private:
 	void btn_add_clicked();
 	void btn_remove_clicked();
 	void added_list_selection_changed();
+	int name_sorter (Gtk::TreeModel::iterator a, Gtk::TreeModel::iterator b) const;
 	void added_row_clicked(GdkEventButton* event);
 	void display_selection_changed();
 	void btn_apply_clicked();

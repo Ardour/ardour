@@ -134,13 +134,6 @@ DragManager::abort ()
 }
 
 void
-DragManager::add (Drag* d)
-{
-	d->set_manager (this);
-	_drags.push_back (d);
-}
-
-void
 DragManager::set (Drag* d, GdkEvent* e, Gdk::Cursor* c)
 {
 	d->set_manager (this);
@@ -769,8 +762,10 @@ RegionDrag::add_stateful_diff_commands_for_playlists (PlaylistSet const& playlis
 	}
 }
 
-RegionSlipContentsDrag::RegionSlipContentsDrag (Editor& e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const& v, TimeDomain td)
-	: RegionDrag (e, i, p, v, td)
+RegionSlipContentsDrag::RegionSlipContentsDrag (EditingContext& e, ArdourCanvas::Item* i, SlipDraggable* p, list<SlipDraggable*> const& v, TimeDomain td)
+	: Drag (e, i, td, nullptr, true)
+	, _primary (p)
+	, draggables (v)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RegionSlipContentsDrag\n");
 }
@@ -787,18 +782,15 @@ RegionSlipContentsDrag::motion (GdkEvent* event, bool first_move)
 	if (first_move) {
 		/*prepare reversible cmd*/
 		editing_context.begin_reversible_command (_("Slip Contents"));
-		for (list<DraggingView>::iterator i = _views.begin (); i != _views.end (); ++i) {
-			RegionView* rv = i->view;
-			rv->region ()->clear_changes ();
-
-			rv->drag_start (); // this allows the region to draw itself 'transparently' while we drag it
+		for (auto & sd : draggables) {
+			sd->region ()->clear_changes ();
+			sd->drag_start (); // this allows the region to draw itself 'transparently' while we drag it
 		}
 
 	} else {
-		for (list<DraggingView>::iterator i = _views.begin (); i != _views.end (); ++i) {
-			RegionView* rv       = i->view;
-			timecnt_t   slippage = adjusted_current_time (event, false).distance (last_pointer_time ());
-			rv->move_contents (slippage);
+		for (auto & sd : draggables) {
+			timecnt_t  slippage = adjusted_current_time (event, false).distance (last_pointer_time ());
+			sd->region()->move_start (slippage);
 		}
 		show_verbose_cursor_time (_primary->region ()->start ());
 	}
@@ -807,20 +799,21 @@ RegionSlipContentsDrag::motion (GdkEvent* event, bool first_move)
 void
 RegionSlipContentsDrag::finished (GdkEvent*, bool movement_occurred)
 {
-	if (movement_occurred) {
-		/*finish reversible cmd*/
-		for (list<DraggingView>::iterator i = _views.begin (); i != _views.end (); ++i) {
-			RegionView* rv = i->view;
-			editing_context.session ()->add_command (new StatefulDiffCommand (rv->region ()));
-
-			rv->drag_end ();
-		}
-		editing_context.commit_reversible_command ();
+	if (!movement_occurred) {
+		aborted (movement_occurred);
+		return;
 	}
+
+	for (auto & sd: draggables) {
+		editing_context.add_command (new StatefulDiffCommand (sd->region ()));
+		sd->drag_end ();
+	}
+
+	editing_context.commit_reversible_command ();
 }
 
 void
-RegionSlipContentsDrag::aborted (bool movement_occurred)
+RegionSlipContentsDrag::aborted (bool)
 {
 	/* ToDo: revert to the original region properties */
 	editing_context.abort_reversible_command ();
@@ -2725,7 +2718,7 @@ void
 TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 {
 	timepos_t const region_start  = _primary->region ()->position ();
-	timepos_t const region_end    = _primary->region ()->end ();
+	timepos_t const region_end    = _primary->region ()->end_position ();
 	timecnt_t const region_length = _primary->region ()->length ();
 
 	timepos_t const pf = adjusted_current_time (event);
@@ -2945,10 +2938,10 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 			show_verbose_cursor_time (rv->region ()->position ());
 			break;
 		case EndTrim:
-			show_verbose_cursor_duration (rv->region ()->position (), rv->region ()->end ());
+			show_verbose_cursor_duration (rv->region ()->position (), rv->region ()->end_position ());
 			break;
 	}
-	show_view_preview ((_operation == StartTrim ? rv->region ()->position () : rv->region ()->end ()));
+	show_view_preview ((_operation == StartTrim ? rv->region ()->position () : rv->region ()->end_position ()));
 }
 
 void
@@ -5396,8 +5389,8 @@ TimeFXDrag::motion (GdkEvent* event, bool)
 	pf.shift_earlier (snap_delta (event->button.state));
 
 	if (_dragging_start) {
-		if (pf < rv->region ()->end ()) {
-			rv->get_time_axis_view ().show_timestretch (pf, rv->region ()->end (), layers, layer);
+		if (pf < rv->region ()->end_position ()) {
+			rv->get_time_axis_view ().show_timestretch (pf, rv->region ()->end_position (), layers, layer);
 
 		}
 	} else {
@@ -5441,11 +5434,11 @@ TimeFXDrag::finished (GdkEvent* event, bool movement_occurred)
 	timecnt_t newlen;
 
 	if (_dragging_start) {
-		if (adjusted_pos > _primary->region ()->end ()) {
+		if (adjusted_pos > _primary->region ()->end_position ()) {
 			/* forwards drag of the right edge - not usable */
 			return;
 		}
-		newlen = _primary->region ()->end ().distance (adjusted_pos);
+		newlen = _primary->region ()->end_position ().distance (adjusted_pos);
 	} else {
 		if (adjusted_pos < _primary->region ()->position ()) {
 			/* backwards drag of the left edge - not usable */
@@ -7508,46 +7501,30 @@ FreehandLineDrag<OrderedPointList,OrderedPoint>::maybe_add_point (GdkEvent* ev, 
 	/* determine current drawing direction */
 
 	int current_direction = 0;
-	if (timeline_x != edge_x) {
-		current_direction = timeline_x > edge_x ? 1 : -1;
+	if (timeline_x > edge_x) {
+		current_direction = 1;
+	} else if (timeline_x < edge_x) {
+		current_direction = -1;
 	}
 
 	/* Make sure we can't change direction once it's been determined
 	 * Except for straight line mode that's bidirectionnal but only
 	 * if no other points have been drawn already.
 	 */
-	if (direction == 0) {
+	if (direction == 0 || (straight_line && dragging_line->get().size() < 3)) {
 		direction = current_direction;
-	} else if (current_direction != direction && !(straight_line && dragging_line->get().size() < 3)) {
+	} else if (current_direction != 0 && direction != 0 && current_direction != direction) {
 		return;
 	}
 
-	if (direction > 0) {
-		if (x < r.width() && (straight_line || (timeline_x > edge_x) || (timeline_x == edge_x && ev->motion.y != last_pointer_y()))) {
-
-			if (straight_line && dragging_line->get().size() > 1) {
-				pop_point = true;
-			}
-
-			add_point = true;
-		}
-
-
-	} else if (direction < 0) {
-		if (x >= 0. && (straight_line || (timeline_x < edge_x) || (timeline_x == edge_x && ev->motion.y != last_pointer_y()))) {
-
-			if (straight_line && dragging_line->get().size() > 1) {
-				pop_point = true;
-			}
-
-			add_point = true;
-		}
-	}
-
-	if (straight_line) {
+	if (current_direction == 0 || straight_line) {
 		if (dragging_line->get().size() > 1) {
 			pop_point = true;
 		}
+		add_point = true;
+	} else if (direction > 0 && x < r.width()) {
+		add_point = true;
+	} else if (direction < 0 && x >= 0.) {
 		add_point = true;
 	}
 

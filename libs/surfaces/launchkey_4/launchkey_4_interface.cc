@@ -36,7 +36,7 @@ using namespace PBD;
 using namespace ArdourSurface::LAUNCHPAD_NAMESPACE;
 
 static ControlProtocol*
-new_lk4 (Session* s, void* config)
+new_lk4 (Session* s, std::string const & config)
 {
 	LaunchKey4 * lk4 = nullptr;
 

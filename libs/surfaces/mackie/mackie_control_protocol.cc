@@ -118,7 +118,7 @@ const int MACKIE_NAMESPACE::MackieControlProtocol::MAIN_MODIFIER_MASK = (MackieC
 
 MACKIE_NAMESPACE::MackieControlProtocol* MACKIE_NAMESPACE::MackieControlProtocol::_instance = 0;
 
-MackieControlProtocol::MackieControlProtocol (Session& session, std::string* config)
+MackieControlProtocol::MackieControlProtocol (Session& session, std::string const & config)
 #ifdef UF8
 	: ControlProtocol (session, _("SSL 360: UF8 UF1"))
 #else
@@ -151,9 +151,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session, std::string* con
 	DeviceInfo::reload_device_info ();
 	DeviceProfile::reload_device_profiles ();
 
-	if (config) {
-		set_device(*config, true);
-	}
+	set_device_info (config);
 
 	for (int i = 0; i < 9; i++) {
 		_last_bank[i] = 0;
@@ -244,54 +242,6 @@ MackieControlProtocol::stripable_is_locked_to_strip (std::shared_ptr<Stripable> 
 	return false;
 }
 
-// predicate for sort call in get_sorted_stripables
-struct StripableByPresentationOrder
-{
-	bool operator () (const std::shared_ptr<Stripable> & a, const std::shared_ptr<Stripable> & b) const
-	{
-		return a->presentation_info().order() < b->presentation_info().order();
-	}
-
-	bool operator () (const Stripable & a, const Stripable & b) const
-	{
-		return a.presentation_info().order() < b.presentation_info().order();
-	}
-
-	bool operator () (const Stripable * a, const Stripable * b) const
-	{
-		return a->presentation_info().order() < b->presentation_info().order();
-	}
-};
-
-struct mcpStripableSorter
-{
-	bool operator () (const std::shared_ptr<Stripable> & a, const std::shared_ptr<Stripable> & b) const
-	{
-		if (!(a->presentation_info().special() || b->presentation_info().special() ||
-		      a->is_foldbackbus() || b->is_foldbackbus())) {
-			return a->presentation_info().order() < b->presentation_info().order();
-		}
-
-		int cmp_a = 0;
-		int cmp_b = 0;
-
-		if (a->is_foldbackbus ())     { cmp_a = 1; }
-		if (b->is_foldbackbus ())     { cmp_b = 1; }
-		if (a->is_master ())          { cmp_a = 2; }
-		if (b->is_master ())          { cmp_b = 2; }
-		if (a->is_monitor ())         { cmp_a = 3; }
-		if (b->is_monitor ())         { cmp_b = 3; }
-		if (a->is_surround_master ()) { cmp_a = 4; }
-		if (b->is_surround_master ()) { cmp_b = 4; }
-
-		if (cmp_a == cmp_b) {
-			return a->presentation_info().order() < b->presentation_info().order();
-		} else {
-			return cmp_a < cmp_b;
-		}
-	}
-};
-
 MackieControlProtocol::Sorted
 MackieControlProtocol::get_sorted_stripables()
 {
@@ -379,7 +329,7 @@ MackieControlProtocol::get_sorted_stripables()
 		}
 	}
 
-	sort (sorted.begin(), sorted.end(), mcpStripableSorter());
+	sort (sorted.begin(), sorted.end(), Stripable::Sorter (true));
 	return sorted;
 }
 
@@ -1000,7 +950,7 @@ MackieControlProtocol::create_surfaces ()
 
 			/* async MIDI port */
 
-			asp->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (this, &MackieControlProtocol::midi_input_handler), &input_port));
+			asp->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (*this, &MackieControlProtocol::midi_input_handler), &input_port));
 			asp->xthread().attach (main_loop()->get_context());
 
 		} else {
@@ -2462,11 +2412,16 @@ MackieControlProtocol::stripable_selection_changed ()
 		std::shared_ptr<Stripable> ss = ControlProtocol::first_selected_stripable ();
 		if (ss) {
 			if (!is_mapped (ss)) {
-				/* Sane order values start at 1, due to master
-				   etc. not really being ordered in any particular
-				   way (so zero is a kind of sentinel value).
+#ifdef MIXBUS
+				switch_banks (ss->presentation_info().order(), false);
+#else
+				/* In Ardour, sane order values start at 1, due
+				   to master etc. not really being ordered in
+				   any particular way (so zero is a kind of
+				   sentinel value).
 				*/
 				switch_banks (ss->presentation_info().order() - 1, false);
+#endif
 			}
 		}
 	}

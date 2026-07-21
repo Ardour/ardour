@@ -336,6 +336,8 @@ Session::post_engine_init ()
 
 		ControlProtocolManager::instance().set_session (this);
 
+		_butler->delegate (std::bind (&Session::probe_ctrl_surfaces, this));
+
 		/* This must be done after the ControlProtocolManager set_session above,
 		   as it will set states for ports which the ControlProtocolManager creates.
 		*/
@@ -1181,6 +1183,14 @@ typedef std::set<std::shared_ptr<Source> > SourceSet;
 bool
 Session::export_route_state (std::shared_ptr<RouteList> rl, const string& path, bool with_sources)
 {
+	if (actively_recording ()) {
+		/* on windows soruce files are closed for copy, and there may or may not
+		 * be the occassional Process Lock for plugin state save.
+		 */
+		error << _("Cannot export state while recording") << endmsg;
+		return false;
+	}
+
 	if (Glib::file_test (path, Glib::FILE_TEST_EXISTS))  {
 		remove_directory (path);
 	}
@@ -1472,7 +1482,9 @@ Session::import_route_state (const string& path, std::map<PBD::ID, PBD::ID> cons
 				}
 
 				if (r) {
-					r->import_state (*rxml, from_this_session);
+					PBD::ID id;
+					rxml->get_property ("id", id);
+					r->import_state (*rxml, from_this_session && id == r->id());
 				} else if (allow_import_route_state (*rxml, version)) {
 					/* invalid ID (e.g. 0, -1 (int64_t max) -> new track */
 					if (pi.flags () & special_pi) {
@@ -4041,6 +4053,11 @@ Session::close_all_sources ()
 int
 Session::cleanup_sources (CleanupReport& rep)
 {
+	if (actively_recording ()) {
+		error << _("Cannot clean up session while recording") << endmsg;
+		return -1;
+	}
+
 	// FIXME: needs adaptation to midi
 
 	std::set<std::shared_ptr<Source> > dead_sources;
@@ -5058,7 +5075,7 @@ Session::rename (const std::string& new_name)
 		error << _("Cannot rename read-only session.") << endmsg;
 		return 0; // don't show "messed up" warning
 	}
-	if (record_status() == Recording) {
+	if (actively_recording ()) {
 		error << _("Cannot rename session while recording") << endmsg;
 		return 0; // don't show "messed up" warning
 	}

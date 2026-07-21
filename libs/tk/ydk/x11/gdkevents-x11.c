@@ -187,6 +187,9 @@ refcounted_ungrab_server (Display *xdisplay)
 void
 _gdk_x11_events_init_screen (GdkScreen *screen)
 {
+  if (g_getenv ("GDK_NO_XSETTINGS"))
+    return;
+
   GdkScreenX11 *screen_x11 = GDK_SCREEN_X11 (screen);
 
   /* Keep a flag to avoid extra notifies that we don't need
@@ -3150,6 +3153,9 @@ gdk_screen_get_setting (GdkScreen   *screen,
   g_return_val_if_fail (GDK_IS_SCREEN (screen), FALSE);
   
   screen_x11 = GDK_SCREEN_X11 (screen);
+
+  if (!screen_x11->xsettings_client)
+    return FALSE;
 
   for (i = 0; i < GDK_SETTINGS_N_ELEMENTS(); i++)
     if (strcmp (GDK_SETTINGS_GDK_NAME (i), name) == 0)

@@ -272,7 +272,7 @@ LaunchPadPro::begin_using_device ()
 	AsyncMIDIPort* asp;
 
 	asp = dynamic_cast<AsyncMIDIPort*> (_daw_in_port);
-	asp->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (this, &MIDISurface::midi_input_handler), _daw_in_port));
+	asp->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (*this, &MIDISurface::midi_input_handler), _daw_in_port));
 	asp->xthread().attach (main_loop()->get_context());
 
 	light_logo ();

@@ -140,7 +140,7 @@ class LIBARDOUR_API MusicalKey : public MusicalMode
 	MusicalKey operator= (MusicalKey const & other);
 
 	float root() const { return _root; }
-	float nth (int n) const;
+	float nth (unsigned n) const;
 
    private:
 	float _root;

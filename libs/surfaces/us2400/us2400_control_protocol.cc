@@ -802,7 +802,7 @@ US2400Protocol::create_surfaces ()
 
 			/* async MIDI port */
 
-			asp->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (this, &US2400Protocol::midi_input_handler), &input_port));
+			asp->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (*this, &US2400Protocol::midi_input_handler), &input_port));
 			asp->xthread().attach (main_loop()->get_context());
 
 		}

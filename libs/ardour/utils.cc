@@ -790,7 +790,7 @@ ARDOUR::compute_sha1_of_file (std::string path)
 }
 
 bool
-ARDOUR::estimate_audio_tempo_region (std::shared_ptr<Region> region, Sample* data, samplecnt_t data_length, samplecnt_t sample_rate, double& qpm, Temporal::Meter& meter, double& beatcount)
+ARDOUR::estimate_audio_tempo_region (std::shared_ptr<Region> region, Sample const * data, samplecnt_t data_length, samplecnt_t sample_rate, double& qpm, Temporal::Meter& meter, double& beatcount)
 {
 	assert (region->source());
 
@@ -810,7 +810,7 @@ ARDOUR::estimate_audio_tempo_region (std::shared_ptr<Region> region, Sample* dat
 }
 
 bool
-ARDOUR::estimate_audio_tempo_source (TimelineRange const & range, std::shared_ptr<Source> source, Sample* data, samplecnt_t data_length, samplecnt_t sample_rate, double& qpm, Temporal::Meter& meter, double& beatcount)
+ARDOUR::estimate_audio_tempo_source (TimelineRange const & range, std::shared_ptr<Source> source, Sample const * data, samplecnt_t data_length, samplecnt_t sample_rate, double& qpm, Temporal::Meter& meter, double& beatcount)
 {
 	using namespace Temporal;
 	TempoMap::SharedPtr tm (TempoMap::use());

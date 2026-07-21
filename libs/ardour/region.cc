@@ -1726,8 +1726,8 @@ Region::overlap_equivalent (std::shared_ptr<const Region> other) const
 bool
 Region::enclosed_equivalent (std::shared_ptr<const Region> other) const
 {
-	return ((position() >= other->position() && end() <= other->end()) ||
-	        (position() <= other->position() && end() >= other->end()));
+	return ((position() >= other->position() && end_position() <= other->end_position()) ||
+	        (position() <= other->position() && end_position() >= other->end_position()));
 }
 
 bool
@@ -2288,11 +2288,19 @@ Region::position_time_domain() const
 }
 
 timepos_t
-Region::end() const
+Region::end_position() const
 {
 	/* one day we might want to enforce _position, _start and _length (or
 	   some combination thereof) all being in the same time domain.
 	*/
+
+	/* This looks a bit strange until you recall that _length.val() is a
+	   timecnt_t, which has a position AND a duration, and can thus calculate
+	   its own "end". The return value is the (exclusive) end of the region
+	   **on the tineline** (i.e. based on the position that is a part of
+	   the timecnt_t).
+	*/
+
 	return _length.val().end();
 }
 

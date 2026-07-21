@@ -22,6 +22,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string>
 
 namespace PBD {
 
@@ -174,6 +175,15 @@ inline bool
 naturally_less (const char* a, const char* b)
 {
 	return natcmp (a, b) < 0;
+}
+
+inline bool
+naturally_less (const std::string& a, const std::string& b)
+{
+	const char* cstr_a = a.c_str();
+	const char* cstr_b = b.c_str();
+
+	return naturally_less (cstr_a, cstr_b);
 }
 
 } // namespace PBD

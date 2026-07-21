@@ -119,7 +119,7 @@ idle_notify_engine_stopped ()
 	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("Window", "toggle-audio-midi-setup");
 
 	MessageDialog msg (
-	    _("The current operation is not possible because of an error communicating with the audio hardware."),
+	    _("The audio engine needs to be running for this operation. See Menu > Window > Audio/MIDI Setup"),
 	    false, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_NONE, true);
 
 	msg.add_button (_("Cancel"), Gtk::RESPONSE_CANCEL);
@@ -435,7 +435,7 @@ ARDOUR_UI_UTILS::get_icon_sets ()
 	spath.add_subdirectory_to_paths ("icons");
 	vector<string> r;
 
-	r.push_back (_("default"));
+	r.push_back (X_("default"));
 
 	for (vector<string>::iterator s = spath.begin (); s != spath.end (); ++s) {
 		vector<string> entries;
@@ -464,7 +464,7 @@ ARDOUR_UI_UTILS::get_icon_path (const char* cname, string icon_set, bool is_imag
 
 	Searchpath spath (ARDOUR::ardour_data_search_path ());
 
-	if (!icon_set.empty () && icon_set != _("default")) {
+	if (!icon_set.empty () && icon_set != X_("default")) {
 		/* add "icons/icon_set" but .. not allowed to add both of these at once */
 		spath.add_subdirectory_to_paths ("icons");
 		spath.add_subdirectory_to_paths (icon_set);
@@ -482,7 +482,7 @@ ARDOUR_UI_UTILS::get_icon_path (const char* cname, string icon_set, bool is_imag
 	}
 
 	if (is_image && data_file_path.empty ()) {
-		if (!icon_set.empty () && icon_set != _("default")) {
+		if (!icon_set.empty () && icon_set != X_("default")) {
 			warning << string_compose (_("icon \"%1\" not found for icon set \"%2\", fallback to default"), cname, icon_set) << endmsg;
 		}
 

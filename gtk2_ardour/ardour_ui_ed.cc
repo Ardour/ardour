@@ -247,10 +247,12 @@ ARDOUR_UI::install_actions ()
 
 	act = ActionManager::register_action (main_actions, X_("Archive"), _("Archive..."), sigc::mem_fun(*this, &ARDOUR_UI::archive_session));
 	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::rec_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (main_actions, X_("Rename"), _("Rename..."), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::rename_session), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
+	ActionManager::rec_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (main_actions, X_("SaveTemplate"), _("Create Session Template..."),  sigc::mem_fun(*this, &ARDOUR_UI::save_template));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -260,9 +262,13 @@ ARDOUR_UI::install_actions ()
 
 	act = ActionManager::register_action (main_actions, X_("ExportStrips"), _("Save Mixer Strips..."), sigc::mem_fun (*this, &ARDOUR_UI::export_strips));
 	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::write_sensitive_actions.push_back (act);
+	ActionManager::rec_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (main_actions, X_("ImportStrips"), _("Import Mixer Strips..."), sigc::mem_fun (*this, &ARDOUR_UI::import_strips));
 	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::write_sensitive_actions.push_back (act);
+	ActionManager::rec_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (main_actions, X_("Metadata"), _("Metadata"));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -456,26 +462,26 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (transport_actions, X_("primary-clock-timecode"), _("Timecode"), sigc::bind (sigc::mem_fun(primary_clock, &AudioClock::set_mode), AudioClock::Timecode));
+	act = ActionManager::register_action (transport_actions, X_("primary-clock-timecode"), _("Timecode"), sigc::bind (sigc::mem_fun(*primary_clock, &AudioClock::set_mode), AudioClock::Timecode));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (transport_actions, X_("primary-clock-bbt"), _("Bars & Beats"), sigc::bind (sigc::mem_fun(primary_clock, &AudioClock::set_mode), AudioClock::BBT));
+	act = ActionManager::register_action (transport_actions, X_("primary-clock-bbt"), _("Bars & Beats"), sigc::bind (sigc::mem_fun(*primary_clock, &AudioClock::set_mode), AudioClock::BBT));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (transport_actions, X_("primary-clock-minsec"), _("Minutes & Seconds"), sigc::bind (sigc::mem_fun(primary_clock, &AudioClock::set_mode), AudioClock::MinSec));
+	act = ActionManager::register_action (transport_actions, X_("primary-clock-minsec"), _("Minutes & Seconds"), sigc::bind (sigc::mem_fun(*primary_clock, &AudioClock::set_mode), AudioClock::MinSec));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (transport_actions, X_("primary-clock-seconds"), _("Seconds"), sigc::bind (sigc::mem_fun(primary_clock, &AudioClock::set_mode), AudioClock::Seconds));
+	act = ActionManager::register_action (transport_actions, X_("primary-clock-seconds"), _("Seconds"), sigc::bind (sigc::mem_fun(*primary_clock, &AudioClock::set_mode), AudioClock::Seconds));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (transport_actions, X_("primary-clock-samples"), _("Samples"), sigc::bind (sigc::mem_fun(primary_clock, &AudioClock::set_mode), AudioClock::Samples));
+	act = ActionManager::register_action (transport_actions, X_("primary-clock-samples"), _("Samples"), sigc::bind (sigc::mem_fun(*primary_clock, &AudioClock::set_mode), AudioClock::Samples));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (transport_actions, X_("secondary-clock-timecode"), _("Timecode"), sigc::bind (sigc::mem_fun(secondary_clock, &AudioClock::set_mode), AudioClock::Timecode));
+	act = ActionManager::register_action (transport_actions, X_("secondary-clock-timecode"), _("Timecode"), sigc::bind (sigc::mem_fun(*secondary_clock, &AudioClock::set_mode), AudioClock::Timecode));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (transport_actions, X_("secondary-clock-bbt"), _("Bars & Beats"), sigc::bind (sigc::mem_fun(secondary_clock, &AudioClock::set_mode), AudioClock::BBT));
+	act = ActionManager::register_action (transport_actions, X_("secondary-clock-bbt"), _("Bars & Beats"), sigc::bind (sigc::mem_fun(*secondary_clock, &AudioClock::set_mode), AudioClock::BBT));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (transport_actions, X_("secondary-clock-minsec"), _("Minutes & Seconds"), sigc::bind (sigc::mem_fun(secondary_clock, &AudioClock::set_mode), AudioClock::MinSec));
+	act = ActionManager::register_action (transport_actions, X_("secondary-clock-minsec"), _("Minutes & Seconds"), sigc::bind (sigc::mem_fun(*secondary_clock, &AudioClock::set_mode), AudioClock::MinSec));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (transport_actions, X_("secondary-clock-seconds"), _("Seconds"), sigc::bind (sigc::mem_fun(secondary_clock, &AudioClock::set_mode), AudioClock::Seconds));
+	act = ActionManager::register_action (transport_actions, X_("secondary-clock-seconds"), _("Seconds"), sigc::bind (sigc::mem_fun(*secondary_clock, &AudioClock::set_mode), AudioClock::Seconds));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (transport_actions, X_("secondary-clock-samples"), _("Samples"), sigc::bind (sigc::mem_fun(secondary_clock, &AudioClock::set_mode), AudioClock::Samples));
+	act = ActionManager::register_action (transport_actions, X_("secondary-clock-samples"), _("Samples"), sigc::bind (sigc::mem_fun(*secondary_clock, &AudioClock::set_mode), AudioClock::Samples));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_toggle_action (transport_actions, X_("SessionMonitorIn"), _("All Input"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_session_monitoring_in));
@@ -669,76 +675,76 @@ ARDOUR_UI::install_dependent_actions ()
 	 * to be accessible from anywhere as actions.
 	 */
 
-	act = ActionManager::register_action (common_actions, "alternate-jump-forward-to-mark", _("Jump to Next Mark"), sigc::mem_fun(editor, &PublicEditor::jump_forward_to_mark));
+	act = ActionManager::register_action (common_actions, "alternate-jump-forward-to-mark", _("Jump to Next Mark"), sigc::mem_fun(*editor, &PublicEditor::jump_forward_to_mark));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, "alternate-jump-backward-to-mark", _("Jump to Previous Mark"), sigc::mem_fun(editor, &PublicEditor::jump_backward_to_mark));
-	ActionManager::session_sensitive_actions.push_back (act);
-
-	act = ActionManager::register_action (common_actions, "set-session-start-from-playhead", _("Set Session Start from Playhead"), sigc::mem_fun(editor, &PublicEditor::set_session_start_from_playhead));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, "set-session-end-from-playhead", _("Set Session End from Playhead"), sigc::mem_fun(editor, &PublicEditor::set_session_end_from_playhead));
+	act = ActionManager::register_action (common_actions, "alternate-jump-backward-to-mark", _("Jump to Previous Mark"), sigc::mem_fun(*editor, &PublicEditor::jump_backward_to_mark));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (common_actions, "toggle-location-at-playhead", _("Toggle Mark at Playhead"), sigc::mem_fun(editor, &PublicEditor::toggle_location_at_playhead_cursor));
+	act = ActionManager::register_action (common_actions, "set-session-start-from-playhead", _("Set Session Start from Playhead"), sigc::mem_fun(*editor, &PublicEditor::set_session_start_from_playhead));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, "add-location-from-playhead", _("Add Mark from Playhead"), sigc::mem_fun(editor, &PublicEditor::add_location_from_playhead_cursor));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, "alternate-add-location-from-playhead", _("Add Mark from Playhead"), sigc::mem_fun(editor, &PublicEditor::add_location_from_playhead_cursor));
+	act = ActionManager::register_action (common_actions, "set-session-end-from-playhead", _("Set Session End from Playhead"), sigc::mem_fun(*editor, &PublicEditor::set_session_end_from_playhead));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (common_actions, "remove-location-from-playhead", _("Remove Mark at Playhead"), sigc::mem_fun(editor, &PublicEditor::remove_location_at_playhead_cursor));
+	act = ActionManager::register_action (common_actions, "toggle-location-at-playhead", _("Toggle Mark at Playhead"), sigc::mem_fun(*editor, &PublicEditor::toggle_location_at_playhead_cursor));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, "alternate-remove-location-from-playhead", _("Remove Mark at Playhead"), sigc::mem_fun(editor, &PublicEditor::remove_location_at_playhead_cursor));
+	act = ActionManager::register_action (common_actions, "add-location-from-playhead", _("Add Mark from Playhead"), sigc::mem_fun(*editor, &PublicEditor::add_location_from_playhead_cursor));
 	ActionManager::session_sensitive_actions.push_back (act);
-
-	act = ActionManager::register_action (common_actions, "add-section-from-playhead", _("Add Arrangement Mark at Playhead"), sigc::mem_fun(editor, &PublicEditor::add_section_from_playhead));
-	ActionManager::session_sensitive_actions.push_back (act);
-
-	act = ActionManager::register_action (common_actions, "add-bbt-from-playhead", _("Add BBT Marker from Playhead"), sigc::mem_fun(editor, &PublicEditor::add_bbt_marker_at_playhead_cursor));
+	act = ActionManager::register_action (common_actions, "alternate-add-location-from-playhead", _("Add Mark from Playhead"), sigc::mem_fun(*editor, &PublicEditor::add_location_from_playhead_cursor));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (common_actions, "nudge-next-forward", _("Nudge Next Later"), sigc::bind (sigc::mem_fun(editor, &PublicEditor::nudge_forward), true, false));
+	act = ActionManager::register_action (common_actions, "remove-location-from-playhead", _("Remove Mark at Playhead"), sigc::mem_fun(*editor, &PublicEditor::remove_location_at_playhead_cursor));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, "nudge-next-backward", _("Nudge Next Earlier"), sigc::bind (sigc::mem_fun(editor, &PublicEditor::nudge_backward), true, false));
-	ActionManager::session_sensitive_actions.push_back (act);
-
-	act = ActionManager::register_action (common_actions, "nudge-playhead-forward", _("Nudge Playhead Forward"), sigc::bind (sigc::mem_fun(editor, &PublicEditor::nudge_forward), false, true));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, "nudge-playhead-backward", _("Nudge Playhead Backward"), sigc::bind (sigc::mem_fun(editor, &PublicEditor::nudge_backward), false, true));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, "playhead-forward-to-grid", _("Playhead to Next Grid"), sigc::mem_fun(editor, &PublicEditor::playhead_forward_to_grid));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, "playhead-backward-to-grid", _("Playhead to Previous Grid"), sigc::mem_fun(editor, &PublicEditor::playhead_backward_to_grid));
+	act = ActionManager::register_action (common_actions, "alternate-remove-location-from-playhead", _("Remove Mark at Playhead"), sigc::mem_fun(*editor, &PublicEditor::remove_location_at_playhead_cursor));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (common_actions, "start-range-from-playhead", _("Start Range from Playhead"), sigc::bind (sigc::mem_fun(editor, &PublicEditor::keyboard_selection_begin), Editing::EDIT_IGNORE_MOUSE ));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, "finish-range-from-playhead", _("Finish Range from Playhead"), sigc::bind (sigc::mem_fun(editor, &PublicEditor::keyboard_selection_finish), false, Editing::EDIT_IGNORE_MOUSE ));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, "start-range", _("Start Range"), sigc::bind (sigc::mem_fun(editor, &PublicEditor::keyboard_selection_begin), Editing::EDIT_IGNORE_NONE));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, "finish-range", _("Finish Range"), sigc::bind (sigc::mem_fun(editor, &PublicEditor::keyboard_selection_finish), false, Editing::EDIT_IGNORE_NONE));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, "start-punch-range", _("Start Punch Range"), sigc::mem_fun(editor, &PublicEditor::set_punch_start_from_edit_point));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, "finish-punch-range", _("Finish Punch Range"), sigc::mem_fun(editor, &PublicEditor::set_punch_end_from_edit_point));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, "start-loop-range", _("Start Loop Range"), sigc::mem_fun(editor, &PublicEditor::set_loop_start_from_edit_point));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, "finish-loop-range", _("Finish Loop Range"), sigc::mem_fun(editor, &PublicEditor::set_loop_end_from_edit_point));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, "alt-start-range", _("Start Range"), sigc::bind (sigc::mem_fun(editor, &PublicEditor::keyboard_selection_begin), Editing::EDIT_IGNORE_NONE));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, "alt-finish-range", _("Finish Range"), sigc::bind (sigc::mem_fun(editor, &PublicEditor::keyboard_selection_finish), false, Editing::EDIT_IGNORE_NONE));
+	act = ActionManager::register_action (common_actions, "add-section-from-playhead", _("Add Arrangement Mark at Playhead"), sigc::mem_fun(*editor, &PublicEditor::add_section_from_playhead));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (common_actions, "select-all-visible-lanes", _("Select All Visible Lanes"), sigc::mem_fun(editor, &PublicEditor::select_all_visible_lanes));
+	act = ActionManager::register_action (common_actions, "add-bbt-from-playhead", _("Add BBT Marker from Playhead"), sigc::mem_fun(*editor, &PublicEditor::add_bbt_marker_at_playhead_cursor));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, "select-all-tracks", _("Select All Tracks"), sigc::mem_fun(editor, &PublicEditor::select_all_tracks));
+
+	act = ActionManager::register_action (common_actions, "nudge-next-forward", _("Nudge Next Later"), sigc::bind (sigc::mem_fun(*editor, &PublicEditor::nudge_forward), true, false));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, "deselect-all", _("Deselect All"), sigc::mem_fun(editor, &PublicEditor::deselect_all));
+	act = ActionManager::register_action (common_actions, "nudge-next-backward", _("Nudge Next Earlier"), sigc::bind (sigc::mem_fun(*editor, &PublicEditor::nudge_backward), true, false));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, "invert-selection", _("Invert Selection"), sigc::mem_fun(editor, &PublicEditor::invert_selection));
+
+	act = ActionManager::register_action (common_actions, "nudge-playhead-forward", _("Nudge Playhead Forward"), sigc::bind (sigc::mem_fun(*editor, &PublicEditor::nudge_forward), false, true));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (common_actions, "nudge-playhead-backward", _("Nudge Playhead Backward"), sigc::bind (sigc::mem_fun(*editor, &PublicEditor::nudge_backward), false, true));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (common_actions, "playhead-forward-to-grid", _("Playhead to Next Grid"), sigc::mem_fun(*editor, &PublicEditor::playhead_forward_to_grid));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (common_actions, "playhead-backward-to-grid", _("Playhead to Previous Grid"), sigc::mem_fun(*editor, &PublicEditor::playhead_backward_to_grid));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (common_actions, "start-range-from-playhead", _("Start Range from Playhead"), sigc::bind (sigc::mem_fun(*editor, &PublicEditor::keyboard_selection_begin), Editing::EDIT_IGNORE_MOUSE ));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (common_actions, "finish-range-from-playhead", _("Finish Range from Playhead"), sigc::bind (sigc::mem_fun(*editor, &PublicEditor::keyboard_selection_finish), false, Editing::EDIT_IGNORE_MOUSE ));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (common_actions, "start-range", _("Start Range"), sigc::bind (sigc::mem_fun(*editor, &PublicEditor::keyboard_selection_begin), Editing::EDIT_IGNORE_NONE));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (common_actions, "finish-range", _("Finish Range"), sigc::bind (sigc::mem_fun(*editor, &PublicEditor::keyboard_selection_finish), false, Editing::EDIT_IGNORE_NONE));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (common_actions, "start-punch-range", _("Start Punch Range"), sigc::mem_fun(*editor, &PublicEditor::set_punch_start_from_edit_point));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (common_actions, "finish-punch-range", _("Finish Punch Range"), sigc::mem_fun(*editor, &PublicEditor::set_punch_end_from_edit_point));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (common_actions, "start-loop-range", _("Start Loop Range"), sigc::mem_fun(*editor, &PublicEditor::set_loop_start_from_edit_point));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (common_actions, "finish-loop-range", _("Finish Loop Range"), sigc::mem_fun(*editor, &PublicEditor::set_loop_end_from_edit_point));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (common_actions, "alt-start-range", _("Start Range"), sigc::bind (sigc::mem_fun(*editor, &PublicEditor::keyboard_selection_begin), Editing::EDIT_IGNORE_NONE));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (common_actions, "alt-finish-range", _("Finish Range"), sigc::bind (sigc::mem_fun(*editor, &PublicEditor::keyboard_selection_finish), false, Editing::EDIT_IGNORE_NONE));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (common_actions, "select-all-visible-lanes", _("Select All Visible Lanes"), sigc::mem_fun(*editor, &PublicEditor::select_all_visible_lanes));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (common_actions, "select-all-tracks", _("Select All Tracks"), sigc::mem_fun(*editor, &PublicEditor::select_all_tracks));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (common_actions, "deselect-all", _("Deselect All"), sigc::mem_fun(*editor, &PublicEditor::deselect_all));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (common_actions, "invert-selection", _("Invert Selection"), sigc::mem_fun(*editor, &PublicEditor::invert_selection));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (transport_actions, X_("solo-selection"), _("Solo Selection"), sigc::bind (sigc::mem_fun(*editor, &PublicEditor::play_solo_selection), true));

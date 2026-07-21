@@ -34,11 +34,13 @@ using namespace std;
 MidiAutomationLine::MidiAutomationLine (
 	const std::string&                      name,
 	TimeAxisView&                           tav,
+	RegionView&                             rv,
 	ArdourCanvas::Item&                     parent,
 	std::shared_ptr<ARDOUR::AutomationList> list,
 	std::shared_ptr<ARDOUR::MidiRegion>     region,
 	Evoral::Parameter                       parameter)
 	: EditorAutomationLine (name, tav, parent, list, parameter)
+	, _rv (rv)
 	, _region (region)
 	, _parameter (parameter)
 {

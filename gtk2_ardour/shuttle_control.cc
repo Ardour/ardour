@@ -155,8 +155,8 @@ ShuttleControl::ShuttleControl ()
 	pattern               = 0;
 	shine_pattern         = 0;
 	last_shuttle_request  = 0;
-	last_speed_displayed  = -99999999;
-	last_shuttle_fract    = -99999999;
+	last_speed_displayed  = -99999999.0f;
+	last_shuttle_fract    = -99999999.0f;
 	shuttle_grabbed       = false;
 	shuttle_speed_on_grab = 0;
 	shuttle_fract         = 0.0;
@@ -770,8 +770,8 @@ ShuttleControl::parameter_changed (std::string p)
 		map_transport_state ();
 	} else if (p == "shuttle-max-speed") {
 		shuttle_max_speed    = Config->get_shuttle_max_speed ();
-		last_speed_displayed = -99999999;
-		last_shuttle_fract = -99999999;
+		last_speed_displayed = -99999999.0f;
+		last_shuttle_fract = -99999999.0f;
 		map_transport_state ();
 		use_shuttle_fract (true);
 		delete shuttle_context_menu;

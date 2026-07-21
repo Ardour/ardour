@@ -161,9 +161,9 @@ ALoudnessPresets::~ALoudnessPresets ()
 	}
 	std::string fn = Glib::build_filename (ARDOUR::user_config_directory (), "loudness-presets");
 	if (have_presets) {
-		XMLTree tree (fn);
+		XMLTree tree;
 		tree.set_root (root);
-		tree.write();
+		tree.write (fn);
 	} else {
 		delete root;
 		::g_unlink (fn.c_str ());

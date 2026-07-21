@@ -941,15 +941,15 @@ void
 Session::port_registry_changed()
 {
 	setup_bundles ();
-	_butler->delegate (std::bind (&Session::probe_ctrl_surfaces, this));
+
+	if (_engine.running() && !deletion_in_progress () && ControlProtocolManager::instance().session()) {
+		_butler->delegate (std::bind (&Session::probe_ctrl_surfaces, this));
+	}
 }
 
 void
 Session::probe_ctrl_surfaces()
 {
-	if (!_engine.running() || deletion_in_progress ()) {
-		return;
-	}
 	ControlProtocolManager::instance ().probe_midi_control_protocols ();
 }
 
@@ -4836,7 +4836,7 @@ Session::playlist_region_added (std::weak_ptr<Region> w)
 
 	/* If so, update the session range markers */
 	if (!in.empty ()) {
-		maybe_update_session_range (r->position (), r->end ());
+		maybe_update_session_range (r->position (), r->end_position ());
 	}
 }
 

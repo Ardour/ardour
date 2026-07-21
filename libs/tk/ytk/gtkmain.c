@@ -655,8 +655,16 @@ gettext_initialization (void)
   setlocale_initialization ();
 
 #ifdef ENABLE_NLS
-  bindtextdomain (GETTEXT_PACKAGE, GTK_LOCALEDIR);
-  bindtextdomain (GETTEXT_PACKAGE "-properties", GTK_LOCALEDIR);
+  const gchar *env_string = g_getenv ("GTK_LOCALEDIR");;
+  if (env_string != NULL) {
+	  /* bundle environment */
+	  bindtextdomain (GETTEXT_PACKAGE, env_string);
+	  bindtextdomain (GETTEXT_PACKAGE "-properties", env_string);
+	  env_string = NULL;
+  } else {
+	  bindtextdomain (GETTEXT_PACKAGE, GTK_LOCALEDIR);
+	  bindtextdomain (GETTEXT_PACKAGE "-properties", GTK_LOCALEDIR);
+  }
 #    ifdef HAVE_BIND_TEXTDOMAIN_CODESET
   bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
   bind_textdomain_codeset (GETTEXT_PACKAGE "-properties", "UTF-8");

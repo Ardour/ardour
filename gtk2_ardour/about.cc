@@ -662,7 +662,7 @@ About::About ()
 
 	Gtk::Button *btn = static_cast<Gtk::Button*>(get_widget_for_response(Gtk::RESPONSE_CANCEL));
 	if (btn) {
-		btn->signal_clicked().connect(sigc::mem_fun(static_cast<Gtk::Window*>(this), &Gtk::Window::hide));
+		btn->signal_clicked().connect(sigc::mem_fun(*static_cast<Gtk::Window*>(this), &Gtk::Window::hide));
 	}
 	set_url_hook (sigc::ptr_fun(&About::launch_homepage));
 }

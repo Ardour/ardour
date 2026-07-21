@@ -3,7 +3,7 @@
 <MIDINameDocument>
   <Author>Digidesign</Author>
   <MasterDeviceNames>
-    <Manufacturer>E-mu</Manufacturer>
+    <Manufacturer>E-mu Systems</Manufacturer>
     <Model>Orbit 3</Model>
     <CustomDeviceMode Name="Default">
       <ChannelNameSetAssignments>

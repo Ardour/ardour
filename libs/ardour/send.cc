@@ -429,7 +429,7 @@ Send::set_state (const XMLNode& node, int version)
 }
 
 int
-Send::set_state_2X (const XMLNode& node, int /* version */)
+Send::set_state_2X (const XMLNode& node, int version)
 {
 	/* use the IO's name for the name of the send */
 	XMLNodeList const & children = node.children ();
@@ -441,6 +441,18 @@ Send::set_state_2X (const XMLNode& node, int /* version */)
 
 	if (i == children.end()) {
 		return -1;
+	}
+
+	/* in A2, active state is stored in the Redirect node */
+	bool a;
+	if ((*i)->get_property (X_("active"), a)) {
+		if (_active != a) {
+			if (a) {
+				activate ();
+			} else {
+				deactivate ();
+			}
+		}
 	}
 
 	XMLNodeList const & grand_children = (*i)->children ();
@@ -459,6 +471,13 @@ Send::set_state_2X (const XMLNode& node, int /* version */)
 	}
 
 	set_name (prop->value ());
+
+	double gain;
+	if ((*j)->get_property (X_("gain"), gain)) {
+		gain_control()->set_value_unchecked (gain);
+	}
+
+	IOProcessor::set_state (*(*i), version);
 
 	return 0;
 }

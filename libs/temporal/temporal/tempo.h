@@ -459,7 +459,7 @@ class LIBTEMPORAL_API TempoMetric
 
 	superclock_t superclock_at (Beats const & qn) const { return _tempo->superclock_at (qn); }
 	samplepos_t  sample_at (Beats const & qn) const { return _tempo->sample_at (qn); }
-	Beats        quarters_at (BBT_Time const & bbt) const { return _meter->quarters_at (bbt); }
+	Beats        quarters_at (BBT_Time const & bbt) const;
 	BBT_Argument     bbt_at (Beats const & beats) const { return BBT_Argument (reftime(), _meter->bbt_at (beats)); }
 
 	superclock_t superclocks_per_note_type () const { return _tempo->superclocks_per_note_type (); }
@@ -753,6 +753,12 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	typedef std::shared_ptr<TempoMap> WritableSharedPtr;
   private:
 	static thread_local SharedPtr _tempo_map_p;
+#ifdef MINGW_NATIVE_TLS
+  /* Due to Native TLS recently being added, errors come from
+     thread_local variables during external linkage.
+     See https://github.com/msys2/MINGW-packages/issues/29272 */
+	static LIBTEMPORAL_API SharedPtr& _tempo_map_ref ();
+#endif
 	static SerializedRCUManager<TempoMap> _map_mgr;
 	static bool fetch_condition ();
   public:
@@ -762,9 +768,15 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
   public:
 	LIBTEMPORAL_API static void init ();
 
+#ifndef MINGW_NATIVE_TLS
 	LIBTEMPORAL_API static void      update_thread_tempo_map() { _tempo_map_p = _map_mgr.reader(); }
 	LIBTEMPORAL_API static SharedPtr use() { assert (_tempo_map_p); return _tempo_map_p; }
 	LIBTEMPORAL_API static SharedPtr fetch() { assert (fetch_condition()); update_thread_tempo_map(); return _tempo_map_p; }
+#else
+	LIBTEMPORAL_API static void      update_thread_tempo_map() { _tempo_map_ref() = _map_mgr.reader(); }
+	LIBTEMPORAL_API static SharedPtr use() { assert (_tempo_map_ref()); return _tempo_map_ref(); }
+	LIBTEMPORAL_API static SharedPtr fetch() { assert (fetch_condition()); update_thread_tempo_map(); return _tempo_map_ref(); }
+#endif
 	/* No fetch condition for this, to be used only in association with LocalTempoMapScope */
 	LIBTEMPORAL_API static SharedPtr global_fetch() { return _map_mgr.reader(); }
 
@@ -778,7 +790,11 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	 * can be used on either a write_copy()'ed map, or one obtained via the
 	 * RCU reader() method.
 	 */
+#ifndef MINGW_NATIVE_TLS
 	LIBTEMPORAL_API static void      set (SharedPtr new_map) { _tempo_map_p = new_map; }
+#else
+	LIBTEMPORAL_API static void      set (SharedPtr new_map) { _tempo_map_ref() = new_map; }
+#endif
 
 	/* API for typical tempo map changes */
 
@@ -898,7 +914,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	LIBTEMPORAL_API TempoMapCutBuffer* cut (timepos_t const & start, timepos_t const & end, bool ripple);
 	LIBTEMPORAL_API TempoMapCutBuffer* copy (timepos_t const & start, timepos_t const & end);
-	LIBTEMPORAL_API void paste (TempoMapCutBuffer const &, timepos_t const & position, bool ripple, std::string = std::string());
+	LIBTEMPORAL_API void paste (TempoMapCutBuffer const &, timepos_t const & position, bool ripple, std::string = std::string(), bool with_bbt_marker = true);
 
 	LIBTEMPORAL_API void shift (timepos_t const & at, BBT_Offset const & by);
 	LIBTEMPORAL_API void shift (timepos_t const & at, timecnt_t const & by);

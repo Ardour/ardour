@@ -889,7 +889,9 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 				if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::slip_contents_modifier ())) {
 					if (!clicked_regionview->region()->locked() && (Config->get_edit_mode() != Lock)) {
-						_drags->add (new RegionSlipContentsDrag (*this, item, clicked_regionview, selection->regions.by_layer(), drag_time_domain (clicked_regionview->region())));
+						std::list<RegionView*> rvl (selection->regions.by_layer());
+						std::list<SlipDraggable*> sdl (rvl.begin(), rvl.end());
+						_drags->set (new RegionSlipContentsDrag (*this, item, clicked_regionview, sdl, drag_time_domain (clicked_regionview->region())), event);
 					}
 				} else if (ArdourKeyboard::indicates_copy (event->button.state)) {
 					add_region_drag (item, event, clicked_regionview, true);
@@ -899,8 +901,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 					add_region_drag (item, event, clicked_regionview, false);
 				}
 
-
-				_drags->start_grab (event);
 				return true;
 				break;
 
@@ -1001,10 +1001,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 	case MouseDraw:
 		switch (item_type) {
-		case GainLineItem:
-			_drags->set (new LineDrag (*this, item, [&](GdkEvent* ev,timepos_t const & pos, double y) { line_drag_click (ev, pos, y); }), event);
-			return true;
-
 		case ControlPointItem:
 			_drags->set (new ControlPointDrag (*this, item), event);
 			return true;
@@ -1098,8 +1094,20 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				break;
 			}
 
-		case EditorAutomationLineItem:
+		case GainLineItem:
 			/* fallthrough */
+		case EditorAutomationLineItem:
+			{
+				RegionView* rv;
+				if ((rv = dynamic_cast<RegionView*> (clicked_regionview))) {
+					/* MidiAutomationLine */
+					ArdourCanvas::Rectangle* r = dynamic_cast<ArdourCanvas::Rectangle*> (rv->get_canvas_frame());
+					_drags->set (new AutomationDrawDrag (*this, rv->get_canvas_group(), *r, true, Temporal::AudioTime,
+														 [&](GdkEvent* ev, timepos_t const & pos) { return rb_click (ev, pos); }), event);
+					break;
+				}
+				[[fallthrough]]; 
+			 }
 		case AutomationTrackItem:
 			{
 				AutomationTimeAxisView* atv = static_cast<AutomationTimeAxisView*> (item->get_data ("trackview"));
@@ -2189,7 +2197,7 @@ Editor::track_height_step_timeout ()
 }
 
 void
-Editor::add_region_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* region_view, bool copy)
+Editor::add_region_drag (ArdourCanvas::Item* item, GdkEvent* event, RegionView* region_view, bool copy)
 {
 	assert (region_view);
 
@@ -2199,11 +2207,11 @@ Editor::add_region_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* region
 
 	assert (!_drags->active ());
 
-	_drags->add (new RegionMoveDrag (*this, item, region_view, selection->regions.by_layer(), copy, drag_time_domain (region_view->region())));
+	_drags->set (new RegionMoveDrag (*this, item, region_view, selection->regions.by_layer(), copy, drag_time_domain (region_view->region())), event);
 }
 
 void
-Editor::add_region_brush_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* region_view)
+Editor::add_region_brush_drag (ArdourCanvas::Item* item, GdkEvent* event, RegionView* region_view)
 {
 	assert (region_view);
 
@@ -2218,7 +2226,7 @@ Editor::add_region_brush_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* 
 	}
 
 	std::list<RegionView*> empty;
-	_drags->add (new RegionBrushDrag (*this, item, region_view, empty, drag_time_domain (region_view->region())));
+	_drags->set (new RegionBrushDrag (*this, item, region_view, empty, drag_time_domain (region_view->region())), event);
 }
 
 /** Start a grab where a time range is selected, track(s) are selected, and the

@@ -19,7 +19,12 @@
 #include <cstdlib>
 #include <cstdio>
 #include <ctype.h>
+#if defined COMPILER_MSVC && defined WAF_BUILD
+#undef _POSIX_SOURCE
+#include "msvc/getopt.h"
+#else
 #include <getopt.h>
+#endif
 #include <iostream>
 #include <string>
 

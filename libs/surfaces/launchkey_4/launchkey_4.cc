@@ -90,6 +90,7 @@ using namespace Gtkmm2ext;
 #define LAUNCHKEY4_37        0x0144
 #define LAUNCHKEY4_49        0x0145
 #define LAUNCHKEY4_61        0x0146
+#define LAUNCHKEY4_88        0x0147
 
 static int first_fader = 0x9;
 static const int PAD_COLUMNS = 8;
@@ -118,6 +119,7 @@ LaunchKey4::match_usb (uint16_t vendor, uint16_t device)
 	case LAUNCHKEY4_37:
 	case LAUNCHKEY4_49:
 	case LAUNCHKEY4_61:
+	case LAUNCHKEY4_88:
 		last_detected = device;
 		return true;
 	}
@@ -515,7 +517,7 @@ LaunchKey4::input_port_name () const
 	default:
 		break;
 	}
-	return X_(":Launchpad X MK3.*MIDI (In|2)");
+	return X_(":Launchkey MK4.*MIDI (In|2)");
 }
 
 std::string
@@ -529,7 +531,7 @@ LaunchKey4::output_port_name () const
 		break;
 	}
 
-	return X_(":Launchpad X MK3.*MIDI (Out|2)");
+	return X_(":Launchkey MK4.*MIDI (Out|2)");
 }
 
 void
@@ -631,6 +633,7 @@ LaunchKey4::handle_midi_sysex (MIDI::Parser& parser, MIDI::byte* raw_bytes, size
 		case LAUNCHKEY4_37:
 		case LAUNCHKEY4_49:
 		case LAUNCHKEY4_61:
+		case LAUNCHKEY4_88:
 			device_pid = 0x0214;
 			break;
 		default:
@@ -1199,7 +1202,7 @@ LaunchKey4::connect_daw_ports ()
 	AsyncMIDIPort* asp;
 
 	asp = dynamic_cast<AsyncMIDIPort*> (_daw_in_port);
-	asp->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (this, &MIDISurface::midi_input_handler), _daw_in_port));
+	asp->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (*this, &MIDISurface::midi_input_handler), _daw_in_port));
 	asp->xthread().attach (main_loop()->get_context());
 }
 

@@ -37,5 +37,4 @@ private:
 	ControlPoint* point_;
 	Gtk::Entry value_;
 	Gtk::CheckButton toggle_all_;
-	bool all_selected_points_;
 };

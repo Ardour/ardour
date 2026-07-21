@@ -534,7 +534,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 		return audio_run<true> (bufs, start_sample, end_sample, start, end, nframes, dest_offset, bpm, quantize_offset);
 	}
 
-	bool playable() const { return data.length || _region; }
+	bool playable() const { return data_length() || _region; }
 
 	StretchMode stretch_mode() const { return _stretch_mode; }
 	void set_stretch_mode (StretchMode);
@@ -567,27 +567,49 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	void start_and_roll_to (samplepos_t start, samplepos_t position, uint32_t cnt);
 
 	bool stretching () const;
-	uint32_t channels () const { return data.size(); }
+	uint32_t channels () const { return data.n_channels(); }
 
 	RubberBand::RubberBandStretcher* alloc_stretcher () const;
 
-	struct AudioData : std::vector<Sample*> {
-		samplecnt_t length;
-		samplecnt_t capacity;
-
-		AudioData () : length (0), capacity (0) {}
+	class AudioData : private std::vector<Sample*> {
+	  public:
+		AudioData () : _length (0), capacity (0), read_offset (0) {}
 		~AudioData ();
+
 		AudioData& operator= (AudioData& other); /* really move semantics */
+
+		Sample const * audio_data (size_type channel) const { return at (channel) + read_offset; }
+		Sample * writable_audio_data (size_type channel) const { return at (channel) + read_offset; }
+
+		Sample const * raw_audio_data (size_type channel) const { return at (channel); }
+		Sample * writable_raw_audio_data (size_type channel) { return at (channel); }
+
+		samplecnt_t length() const { return _length - read_offset; }
+		samplecnt_t raw_length() const { return _length; }
+
+		void set_length (samplecnt_t len) { _length = len; }
+
+		size_type n_channels() const { return size(); }
 
 		samplecnt_t append (Sample const * src, samplecnt_t cnt, uint32_t chan);
 		void alloc (samplecnt_t cnt, uint32_t nchans);
-		void reset () { length = 0; }
+		void reset () { _length = 0; read_offset = 0; }
 		void drop ();
+		void clear () { return std::vector<Sample*>::clear (); }
+
+		void set_read_offset (samplecnt_t offset) { read_offset = offset; };
+
+	  private:
+		samplecnt_t _length;
+		samplecnt_t capacity;
+		samplecnt_t read_offset;
+
 	};
 
-
-	Sample const * audio_data (size_t n) const;
-	size_t data_length() const { return data.length; }
+	Sample const * audio_data (size_t chn) const { return data.audio_data (chn); }
+	Sample const * raw_audio_data (size_t chn) const { return data.raw_audio_data (chn); }
+	samplecnt_t data_length() const { return data.length(); }
+	samplecnt_t raw_data_length() const { return data.raw_length(); }
 
 	struct AudioPendingSwap : public PendingSwap {
 		AudioData audio_data;
@@ -757,7 +779,7 @@ class LIBARDOUR_API TriggerBoxThread
 
 	void set_region (TriggerBox&, uint32_t slot, std::shared_ptr<Region>);
 	void request_delete_trigger (Trigger* t);
-	void request_build_source (Trigger* t, Temporal::timecnt_t const & duration, Temporal::timepos_t const &);
+	void request_build_source (Trigger* t, Temporal::timecnt_t const & duration, Temporal::timepos_t const &, samplecnt_t pre_capture);
 
 	void summon();
 	void stop();
@@ -787,6 +809,7 @@ class LIBARDOUR_API TriggerBoxThread
 		Trigger* trigger;
 		Temporal::timecnt_t duration;
 		Temporal::timepos_t position;
+		samplecnt_t pre_capture;
 
 		void* operator new (size_t);
 		void  operator delete (void* ptr, size_t);
@@ -801,9 +824,9 @@ class LIBARDOUR_API TriggerBoxThread
 	CrossThreadChannel _xthread;
 	void queue_request (Request*);
 	void delete_trigger (Trigger*);
-	void build_source (Trigger*, Temporal::timecnt_t const & duration, Temporal::timepos_t const &);
-	void build_midi_source (MIDITrigger*, Temporal::timecnt_t const &, Temporal::timepos_t const &);
-	void build_audio_source (AudioTrigger*, Temporal::timecnt_t const &, Temporal::timepos_t const &);
+	void build_source (Trigger*, Temporal::timecnt_t const & duration, Temporal::timepos_t const &, samplecnt_t pre_capture);
+	void build_midi_source (MIDITrigger*, Temporal::timecnt_t const &, Temporal::timepos_t const &, samplecnt_t pre_capture);
+	void build_audio_source (AudioTrigger*, Temporal::timecnt_t const &, Temporal::timepos_t const &, samplecnt_t pre_capture);
 };
 
 struct CueRecord {
@@ -826,6 +849,9 @@ struct SlotArmInfo {
 
 	Trigger* slot;
 	Temporal::Beats start_beats;
+	Temporal::Beats pre_start_beats;
+	Temporal::Beats count_in_beats;
+	samplepos_t pre_start_samples;
 	samplepos_t start_samples;
 	Temporal::Beats end_beats;
 	samplepos_t end_samples;
@@ -861,6 +887,7 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 	PBD::Signal<void(Trigger const *)> ReCountIn;
 	static PBD::Signal<void()> TriggerRecEnableChanged;
 	static PBD::Signal<void(Trigger const *)> RegionCaptured;
+	static PBD::Signal<void(Temporal::Beats)> CountIn;
 
 	void arm_from_another_thread (Trigger& slot, samplepos_t, uint32_t chans, Temporal::BBT_Offset const &);
 	void setup_arm_info_bounds (SlotArmInfo& ai, samplepos_t, Trigger& slot, Temporal::BBT_Offset const & duration);
@@ -1065,7 +1092,7 @@ class LIBARDOUR_API TriggerBox : public Processor, public std::enable_shared_fro
 		void* ptr;
 		int32_t slot;
 
-		Request (Type t) : type (t) {}
+		Request (Type t) : type (t) { /* other fields flled by caller */ }
 
 		static PBD::MultiAllocSingleReleasePool* pool;
 		static void init_pool();

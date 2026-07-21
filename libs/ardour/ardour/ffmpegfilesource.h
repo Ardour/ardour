@@ -53,7 +53,6 @@ protected:
 
 private:
 	mutable FFMPEGFileImportableSource _ffmpeg;
-	int _channel;
 };
 
 }

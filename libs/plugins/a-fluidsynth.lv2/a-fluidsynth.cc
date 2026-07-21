@@ -1004,7 +1004,7 @@ restore (LV2_Handle                  instance,
 
 	value = retrieve (handle, self->afs_tuning, &size, &type, &valflags);
 	if (value && size == sizeof (LV2_Atom_Vector_Body) + 128 * sizeof (double) && type == self->atom_Vector) {
-		memcpy (self->queue_tuning, LV2_ATOM_BODY (value), 128 * sizeof (double));
+		memcpy (self->queue_tuning, LV2_ATOM_BODY_CONST (value), 128 * sizeof (double));
 		self->queue_retune = true;
 	}
 
@@ -1069,12 +1069,11 @@ mn_file (LV2_Handle instance)
 	pf ("      </AvailableForChannels>\n");
 	pf ("      <UsesControlNameList Name=\"Controls\"/>\n");
 
-	int bn = 1;
 	pthread_mutex_lock (&self->bp_lock);
 	const BPMap& ps (self->presets);
 	pthread_mutex_unlock (&self->bp_lock);
 
-	for (BPMap::const_iterator i = ps.begin (); i != ps.end (); ++i, ++bn) {
+	for (BPMap::const_iterator i = ps.begin (); i != ps.end (); ++i) {
 		pf ("      <PatchBank Name=\"Patch Bank %d\">\n", i->first);
 		if (i->second.size () > 0) {
 			pf ("        <MIDICommands>\n");

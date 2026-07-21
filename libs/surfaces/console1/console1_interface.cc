@@ -25,7 +25,7 @@ using namespace ARDOUR;
 using namespace ArdourSurface;
 
 static ControlProtocol*
-new_console1 (Session* s, void* config)
+new_console1 (Session* s, std::string const & config)
 {
 	Console1* console1 = 0;
 

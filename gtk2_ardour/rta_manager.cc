@@ -373,6 +373,7 @@ void
 RTAManager::RTA::route_io_changed ()
 {
 	if (_analyzers.size () != delivery ()->input_streams ().n_audio ()) {
+		// TODO remove this RTA when init fails.
 		init ();
 	}
 }
@@ -412,7 +413,7 @@ RTAManager::RTA::run ()
 {
 	bool have_new_data = false;
 
-	while (true) {
+	while (_ringbuffers) {
 		for (auto& rb : *_ringbuffers) {
 			if (rb->read_space () < _stepsize) {
 				goto out;

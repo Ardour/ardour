@@ -50,6 +50,7 @@ def options(opt):
     pass
 
 def configure(conf):
+    autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP2_12_1', atleast_version='2.12.1', mandatory=False)
     autowaf.check_pkg(conf, 'cairomm-1.0', uselib_store='CAIROMM', atleast_version='1.8.4')
 
 def build(bld):

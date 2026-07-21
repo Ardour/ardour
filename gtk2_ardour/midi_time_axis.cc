@@ -111,7 +111,6 @@ using namespace Editing;
 using namespace std;
 
 // Minimum height at which a control is displayed
-static const uint32_t MIDI_CONTROLS_BOX_MIN_HEIGHT = 160;
 static const uint32_t KEYBOARD_MIN_HEIGHT = 130;
 
 #define DEFAULT_MIDNAM_MODEL (X_("Generic"))
@@ -1548,7 +1547,7 @@ void
 MidiTimeAxisView::get_per_region_note_selection (list<pair<PBD::ID, set<std::shared_ptr<Evoral::Note<Temporal::Beats> > > > >& selection)
 {
 	_view->foreach_regionview (
-		sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::get_per_region_note_selection_region_view), sigc::ref(selection)));
+		sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::get_per_region_note_selection_region_view), std::ref(selection)));
 }
 
 void

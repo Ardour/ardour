@@ -70,12 +70,11 @@ using std::min;
 void
 AudioClipEditor::ClipMetric::get_marks (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t lower, int64_t upper, int maxchars) const
 {
-	ace.metric_get_minsec (marks, lower, upper, maxchars);
+	ace.metric_get_bbt (marks, lower, upper, maxchars);
 }
 
 AudioClipEditor::AudioClipEditor (std::string const & name, bool with_transport)
 	: CueEditor (name, with_transport)
-	, overlay_text (nullptr)
 	, clip_metric (nullptr)
 	, scroll_fraction (0)
 {
@@ -107,9 +106,9 @@ AudioClipEditor::set_action_defaults ()
 
 	CueEditor::set_action_defaults ();
 
-	if (grid_actions[Editing::GridTypeMinSec]) {
-		grid_actions[Editing::GridTypeMinSec]->set_active (false);
-		grid_actions[Editing::GridTypeMinSec]->set_active (true);
+	if (grid_actions[Editing::GridTypeBeat]) {
+		grid_actions[Editing::GridTypeBeat]->set_active (false);
+		grid_actions[Editing::GridTypeBeat]->set_active (true);
 	}
 }
 
@@ -216,14 +215,14 @@ AudioClipEditor::build_canvas ()
 	n_timebars = 0;
 
 	clip_metric = new ClipMetric (*this);
-	main_ruler = new ArdourCanvas::Ruler (h_scroll_group, clip_metric, ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, timebar_height));
-	main_ruler->set_font_description (UIConfiguration::instance ().get_SmallerFont ());
-	main_ruler->set_fill_color (UIConfiguration::instance().color ("ruler base"));
-	main_ruler->set_outline_color (UIConfiguration::instance().color ("ruler text"));
-	CANVAS_DEBUG_NAME (main_ruler, "audio clip ruler");
+	bbt_ruler = new ArdourCanvas::Ruler (h_scroll_group, clip_metric, ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, timebar_height));
+	bbt_ruler->set_font_description (UIConfiguration::instance ().get_SmallerFont ());
+	bbt_ruler->set_fill_color (UIConfiguration::instance().color ("ruler base"));
+	bbt_ruler->set_outline_color (UIConfiguration::instance().color ("ruler text"));
+	CANVAS_DEBUG_NAME (bbt_ruler, "audio clip ruler");
 	n_timebars++;
 
-	main_ruler->Event.connect (sigc::mem_fun (*this, &CueEditor::ruler_event));
+	bbt_ruler->Event.connect (sigc::mem_fun (*this, &CueEditor::ruler_event));
 
 	data_group = new ArdourCanvas::Container (hv_scroll_group);
 	CANVAS_DEBUG_NAME (data_group, "cue data group");
@@ -265,6 +264,8 @@ AudioClipEditor::build_canvas ()
 	end_line->Event.connect (sigc::bind (sigc::mem_fun (*this, &AudioClipEditor::end_line_event_handler), end_line));
 	// loop_line->Event.connect (sigc::bind (sigc::mem_fun (*this, &AudioClipEditor::line_event_handler), loop_line));
 
+	data_group->Event.connect (sigc::mem_fun (*this, &AudioClipEditor::data_group_event_handler));
+
 	/* hide lines until there is a region */
 
 	// line_container->hide ();
@@ -273,6 +274,14 @@ AudioClipEditor::build_canvas ()
 
 	set_colors ();
 }
+
+bool
+AudioClipEditor::data_group_event_handler (GdkEvent* ev)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+	return typed_event (data_group, ev, WaveItem);
+}
+
 bool
 AudioClipEditor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
@@ -326,6 +335,15 @@ AudioClipEditor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* eve
 		return true;
 		break;
 	}
+
+	case WaveItem:
+		if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::slip_contents_modifier ())) {
+			std::list<SlipDraggable*> sdl;
+			sdl.push_back (this);
+			_drags->set (new RegionSlipContentsDrag (*this, item, this, sdl, Temporal::AudioTime), event);
+			return true;
+		}
+		break;
 
 	default:
 		break;
@@ -435,6 +453,9 @@ AudioClipEditor::position_lines ()
 	start_line->set (ArdourCanvas::Rect (0., 0., start_x1, _visible_canvas_height));
 	end_line->set_position (ArdourCanvas::Duple (end_x0, 0.));
 	end_line->set (ArdourCanvas::Rect (0., 0., ArdourCanvas::COORD_MAX, _visible_canvas_height));
+
+	set_ruler_shift (_region->start().samples());
+	update_tempo_based_rulers ();
 }
 
 void
@@ -527,6 +548,8 @@ AudioClipEditor::set_region (std::shared_ptr<Region> region)
 	state_connection.disconnect ();
 
 	PBD::PropertyChange interesting_stuff;
+	interesting_stuff.add (ARDOUR::Properties::start);
+	interesting_stuff.add (ARDOUR::Properties::length);
 	region_changed (interesting_stuff);
 
 	region->PropertyChanged.connect (state_connection, invalidator (*this), std::bind (&AudioClipEditor::region_changed, this, _1), gui_context ());
@@ -548,7 +571,7 @@ AudioClipEditor::canvas_allocate (Gtk::Allocation& alloc)
 	_track_canvas_width = _visible_canvas_width;
 
 	position_lines ();
-	update_fixed_rulers ();
+	update_tempo_based_rulers ();
 
 	set_wave_heights ();
 
@@ -618,6 +641,14 @@ AudioClipEditor::region_changed (const PBD::PropertyChange& what_changed)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
+	PBD::PropertyChange interesting_stuff;
+
+	interesting_stuff.add (ARDOUR::Properties::start);
+	interesting_stuff.add (ARDOUR::Properties::length);
+
+	if (what_changed.contains (interesting_stuff)) {
+		position_lines ();
+	}
 }
 
 void
@@ -689,54 +720,6 @@ AudioClipEditor::end_write ()
 
 }
 
-void
-AudioClipEditor::set_overlay_text (std::string const & str)
-{
-	EC_LOCAL_TEMPO_SCOPE;
-
-	if (!overlay_text) {
-		overlay_text = new ArdourCanvas::Text (no_scroll_group);
-		Pango::FontDescription font ("Sans 200");
-		overlay_text->set_font_description (font);
-		overlay_text->set_color (0xff000088);
-		overlay_text->set ("0"); /* not shown, used for positioning math */
-		overlay_text->set_position (ArdourCanvas::Duple ((_visible_canvas_width / 2.0) - (overlay_text->text_width()/2.), (_visible_canvas_height / 2.0) - (overlay_text->text_height() / 2.)));
-	}
-
-	overlay_text->set (str);
-	show_overlay_text ();
-}
-
-void
-AudioClipEditor::show_overlay_text ()
-{
-	if (overlay_text) {
-		overlay_text->show ();
-	}
-}
-
-void
-AudioClipEditor::hide_overlay_text ()
-{
-	if (overlay_text) {
-		overlay_text->hide ();
-	}
-}
-
-void
-AudioClipEditor::show_count_in (std::string const & str)
-{
-	EC_LOCAL_TEMPO_SCOPE;
-	set_overlay_text (str);
-}
-
-void
-AudioClipEditor::hide_count_in ()
-{
-	EC_LOCAL_TEMPO_SCOPE;
-	hide_overlay_text ();
-}
-
 bool
 AudioClipEditor::idle_data_captured ()
 {
@@ -781,7 +764,8 @@ AudioClipEditor::maybe_update ()
 		} else {
 
 			if (playing_trigger->active ()) {
-				if (playing_trigger->the_region()) {
+				std::shared_ptr<AudioRegion> r (std::dynamic_pointer_cast<AudioRegion> (playing_trigger->the_region()));
+				if (r) {
 
 					/* We can't know the precise sample
 					 * position because we may be
@@ -790,7 +774,7 @@ AudioClipEditor::maybe_update ()
 					std::shared_ptr<ARDOUR::AudioTrigger> at (std::dynamic_pointer_cast<AudioTrigger> (playing_trigger));
 					if (at) {
 						const double f = playing_trigger->position_as_fraction ();
-						_playhead_cursor->set_position (playing_trigger->the_region()->start().samples() + (f * at->data_length()));
+						_playhead_cursor->set_position (r->start().samples() + (f * r->length().samples()));
 					}
 				}
 			} else {
@@ -861,7 +845,7 @@ AudioClipEditor::which_canvas_cursor (ItemType type) const
 }
 
 void
-AudioClipEditor::compute_fixed_ruler_scale ()
+AudioClipEditor::update_tempo_based_rulers ()
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
@@ -869,15 +853,9 @@ AudioClipEditor::compute_fixed_ruler_scale ()
 		return;
 	}
 
-	set_minsec_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
-	main_ruler->set_range (_leftmost_sample, _leftmost_sample + current_page_samples());
-}
-
-void
-AudioClipEditor::update_fixed_rulers ()
-{
-	EC_LOCAL_TEMPO_SCOPE;
-	compute_fixed_ruler_scale ();
+	clip_metric->units_per_pixel = samples_per_pixel;
+	compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
+	bbt_ruler->set_range (_leftmost_sample, _leftmost_sample+current_page_samples());
 }
 
 void
@@ -890,10 +868,10 @@ AudioClipEditor::grid_type_chosen (Editing::GridType gt)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	if (gt != Editing::GridTypeMinSec && grid_actions[gt] && grid_actions[gt]->get_active()) {
-		assert (grid_actions[Editing::GridTypeMinSec]);
-		grid_actions[Editing::GridTypeMinSec]->set_active (false);
-		grid_actions[Editing::GridTypeMinSec]->set_active (true);
+	if (gt != Editing::GridTypeBeat && grid_actions[gt] && grid_actions[gt]->get_active()) {
+		assert (grid_actions[Editing::GridTypeBeat]);
+		grid_actions[Editing::GridTypeBeat]->set_active (false);
+		grid_actions[Editing::GridTypeBeat]->set_active (true);
 	}
 }
 

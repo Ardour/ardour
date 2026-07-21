@@ -40,7 +40,7 @@ def build(bld):
             obj.uselib += ' GDI32'
             obj.linkflags += bld.env['compiler_flags_dict']['mwindows']
             if bld.env['build_target'] == 'msvc':
-                obj.lib = ['getopt', 'ole32']
+                obj.lib = ['ole32']
                 obj.defines.append('LIBARDOUR_DLL_EXPORTS')
 
         if re.search ("bsd", sys.platform) != None:
@@ -69,8 +69,6 @@ def build(bld):
             pass
         elif bld.env['build_target'] == 'mingw' or bld.env['build_target'] == 'msvc':
             obj.linkflags += bld.env['compiler_flags_dict']['mwindows']
-            if bld.env['build_target'] == 'msvc':
-                obj.lib = ['getopt']
 
         obj.includes  = [ '../pbd/', '../ardour/', '.' ]
         obj.defines = [

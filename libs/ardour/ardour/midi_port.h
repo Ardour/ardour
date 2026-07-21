@@ -71,6 +71,8 @@ class LIBARDOUR_API MidiPort : public Port {
 	PBD::Signal<void(int)> NoteOn;
 	PBD::Signal<void(int)> NoteOff;
 
+	static bool sysex_midi_io_may_be_broken;
+
 protected:
 	friend class PortManager;
 

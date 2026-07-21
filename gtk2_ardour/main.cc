@@ -1,14 +1,14 @@
 /*
  * Copyright (C) 2005-2006 Taybin Rutkin <taybin@taybin.com>
  * Copyright (C) 2005-2007 Doug McLain <doug@nostar.net>
- * Copyright (C) 2005-2019 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2005-2026 Paul Davis <paul@linuxaudiosystems.com>
  * Copyright (C) 2006-2011 David Robillard <d@drobilla.net>
  * Copyright (C) 2006-2015 Tim Mayberry <mojofunk@gmail.com>
  * Copyright (C) 2006 Nick Mainsbridge <mainsbridge@gmail.com>
  * Copyright (C) 2007-2012 Carl Hetherington <carl@carlh.net>
  * Copyright (C) 2008-2009 Hans Baier <hansfbaier@googlemail.com>
  * Copyright (C) 2013-2017 John Emmas <john@creativepost.co.uk>
- * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2013-2026 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -282,7 +282,38 @@ int main (int argc, char *argv[])
 		 * Setting "LANG" "LC_CTYPE" or "LC_ALL" to "C" will break various aspects,
 		 * but at least try to not translate some other system messages.
 		 */
-		Glib::setenv ("LC_MESSAGES", "C", true);
+		const char* p = g_getenv ("ARDOUR_LOCALE_DEBUG");
+		int nls_debug = 0x06;
+		if (p && *p) {
+			nls_debug = atoi (p);
+		}
+
+		if (nls_debug & 0x01) {
+#ifndef NDEBUG
+			std::cerr << "Setting LC_ALL = C\n";
+#endif
+			Glib::setenv ("LC_ALL", "C", true);
+		}
+		if (nls_debug & 0x02) {
+#ifndef NDEBUG
+			std::cerr << "Setting LANG = C\n";
+#endif
+			Glib::setenv ("LANG", "C", true);
+		}
+		if (nls_debug & 0x04) {
+#ifndef NDEBUG
+			std::cerr << "Setting LC_MESSAGES = C\n";
+#endif
+			Glib::setenv ("LC_MESSAGES", "C", true);
+		}
+		if (nls_debug & 0x08) {
+#ifndef NDEBUG
+			std::cerr << "Calling setlocale\n";
+#endif
+			if (!setlocale (LC_ALL, "")) {
+				std::cerr << "localization call failed\n";
+			}
+		}
 	}
 #endif
 

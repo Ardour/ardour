@@ -16,6 +16,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
 #include "midi_byte_array.h"
 
 #include <iostream>
@@ -26,8 +27,6 @@
 #include <cstdarg>
 #include <iomanip>
 #include <stdexcept>
-
-using namespace std;
 
 MidiByteArray::MidiByteArray (size_t size, MIDI::byte array[])
   : std::vector<MIDI::byte>()
@@ -68,21 +67,21 @@ MidiByteArray & operator <<  (MidiByteArray & mba, const MIDI::byte & b)
 
 MidiByteArray & operator <<  (MidiByteArray & mba, const MidiByteArray & barr)
 {
-	back_insert_iterator<MidiByteArray> bit (mba);
+	std::back_insert_iterator<MidiByteArray> bit (mba);
 	copy (barr.begin(), barr.end(), bit);
 	return mba;
 }
 
-ostream & operator <<  (ostream & os, const MidiByteArray & mba)
+std::ostream & operator <<  (std::ostream & os, const MidiByteArray & mba)
 {
 	os << "[";
 	char fill = os.fill('0');
 	for (MidiByteArray::const_iterator it = mba.begin(); it != mba.end(); ++it) {
 		if  (it != mba.begin()) os << " ";
-		os << hex << setw(2) << (int)*it;
+		os << std::hex << std::setw(2) << (int)*it;
 	}
 	os.fill (fill);
-	os << dec;
+	os << std::dec;
 	os << "]";
 	return os;
 }

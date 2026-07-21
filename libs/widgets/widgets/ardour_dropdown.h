@@ -96,7 +96,7 @@ private:
 			LblMenuItem* mmi = manage (new LblMenuItem (action->get_short_label(), action->get_label()));
 			child_->unreference ();
 			set_child (mmi);
-			child_->signal_activate ().connect (sigc::mem_fun (action.get(), &Gtk::Action::activate));
+			child_->signal_activate ().connect (sigc::mem_fun (*action.get(), &Gtk::Action::activate));
 			child_->show ();
 		}
 	};

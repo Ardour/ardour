@@ -916,8 +916,14 @@ IO::set_port_state_2X (const XMLNode& node, int /*version*/, bool in)
 					if (p != string::npos) {
 						ports[x].replace (p, 4, "/audio_out");
 					}
-					if (NULL != nth(i).get())
+					if (!nth(i).get()) {
+						continue;
+					}
+					if (_session.inital_connect_or_deletion_in_progress ()) {
+						nth(i)->initial_v2_connection (ports[x]);
+					} else{
 						nth(i)->connect (ports[x]);
+					}
 				}
 			}
 
@@ -948,9 +954,7 @@ IO::set_port_state_2X (const XMLNode& node, int /*version*/, bool in)
 
 			if ((n = parse_io_string (str.substr (start, end - start), ports)) < 0) {
 				error << string_compose(_("IO: bad output string in XML node \"%1\""), str) << endmsg;
-
 				return -1;
-
 			} else if (n > 0) {
 
 				for (int x = 0; x < n; ++x) {
@@ -959,8 +963,14 @@ IO::set_port_state_2X (const XMLNode& node, int /*version*/, bool in)
 					if (p != string::npos) {
 						ports[x].replace (p, 3, "/audio_in");
 					}
-					if (NULL != nth(i).get())
+					if (!nth(i).get()) {
+						continue;
+					}
+					if (_session.inital_connect_or_deletion_in_progress ()) {
+						nth(i)->initial_v2_connection (ports[x]);
+					}  else {
 						nth(i)->connect (ports[x]);
+					}
 				}
 			}
 

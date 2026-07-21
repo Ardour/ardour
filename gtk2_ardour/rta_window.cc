@@ -749,6 +749,10 @@ RTAWindow::darea_expose_event (GdkEventExpose* ev)
 
 	cr->set_line_width (1.5);
 	for (auto const& r : rta) {
+		if (r.analyzers ().empty ()) {
+			continue;
+		}
+
 		const int n_bins = r.analyzers ().front ()->fftlen ();
 		color_t   color;
 

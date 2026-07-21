@@ -164,8 +164,7 @@ ControlProtocolManager::set_session (Session* s)
 
 	for (auto const& p : _control_protocol_info) {
 		if (p->requested) {
-			std::string* config = new std::string(p->config);
-			(void)activate (*p, config);
+			(void)activate (*p, p->config);
 		}
 	}
 
@@ -205,7 +204,7 @@ ControlProtocolManager::set_session (Session* s)
 }
 
 int
-ControlProtocolManager::activate (ControlProtocolInfo& cpi, void* config)
+ControlProtocolManager::activate (ControlProtocolInfo& cpi, std::string const & config)
 {
 	PBD::RWLock::WriterLock lm (_protocols_lock);
 	ControlProtocol*        cp;
@@ -290,7 +289,7 @@ ControlProtocolManager::drop_protocols ()
 }
 
 ControlProtocol*
-ControlProtocolManager::instantiate (ControlProtocolInfo& cpi, void* config)
+ControlProtocolManager::instantiate (ControlProtocolInfo& cpi, std::string const & config)
 {
 	/* CALLER MUST HOLD LOCK */
 
@@ -302,7 +301,7 @@ ControlProtocolManager::instantiate (ControlProtocolInfo& cpi, void* config)
 		cpi.descriptor = get_descriptor (cpi.path);
 	}
 
-	DEBUG_TRACE (DEBUG::ControlProtocols, string_compose ("instantiating %1\n", cpi.name));
+	DEBUG_TRACE (DEBUG::ControlProtocols, string_compose ("instantiating %1 as [%2]\n", cpi.name, config));
 
 	if (cpi.descriptor == 0) {
 		error << string_compose (_("control protocol name \"%1\" has no descriptor"), cpi.name) << endmsg;
@@ -311,8 +310,11 @@ ControlProtocolManager::instantiate (ControlProtocolInfo& cpi, void* config)
 
 	DEBUG_TRACE (DEBUG::ControlProtocols, string_compose ("initializing %1\n", cpi.name));
 
+	cpi.config = config;
+
 	if ((cpi.protocol = cpi.descriptor->initialize (_session, config)) == 0) {
 		error << string_compose (_("control protocol name \"%1\" could not be initialized"), cpi.name) << endmsg;
+		cpi.config = string();
 		return 0;
 	}
 
@@ -564,8 +566,7 @@ ControlProtocolManager::set_state (const XMLNode& node, int session_specific_sta
 					cpi->state->set_property (X_("session-state"), session_specific_state ? true : false);
 					cpi->config = config;
 					if (_session) {
-						std::string* conf = new std::string(config);
-						instantiate (*cpi, conf);
+						instantiate (*cpi, config);
 					} else {
 						cpi->requested = true;
 					}
@@ -658,7 +659,18 @@ ControlProtocolManager::probe_midi_control_protocols ()
 
 		if (!active && found) {
 			cpi->automatic = true;
-			activate (*cpi, {});
+
+			string device_config;
+
+			if (cpi->config.empty()) {
+				auto en = cpi->descriptor->enumerate ();
+				if (!en.empty()) {
+					if (!en.begin()->second.empty()) {
+						device_config = en.begin()->second.front();
+					}
+				}
+			}
+			activate (*cpi, device_config);
 		} else if (active && cpi->automatic && !found) {
 			cpi->automatic = false;
 			deactivate (*cpi);

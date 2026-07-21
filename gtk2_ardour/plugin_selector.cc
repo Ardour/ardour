@@ -48,6 +48,7 @@
 
 #include "pbd/convert.h"
 #include "pbd/tokenizer.h"
+#include "pbd/natsort.h"
 
 #include "ardour/utils.h"
 #include "ardour/rc_configuration.h"
@@ -131,6 +132,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 
 	// setting a sort-column prevents re-ordering via Drag/Drop
 	plugin_model->set_sort_column (plugin_columns.name.index(), Gtk::SORT_ASCENDING);
+	plugin_model->set_sort_func (plugin_columns.name.index (), sigc::mem_fun(*this, &PluginSelector::name_sorter));
 
 	plugin_display.set_name("PluginSelectorDisplay");
 	plugin_display.signal_row_activated().connect_notify (sigc::mem_fun(*this, &PluginSelector::row_activated));
@@ -765,6 +767,15 @@ PluginSelector::display_selection_changed()
 		btn_add->set_sensitive (false);
 	}
 	tag_entry_connection.unblock ();
+}
+
+int
+PluginSelector::name_sorter (Gtk::TreeModel::iterator a, Gtk::TreeModel::iterator b) const
+{
+	std::string const& n1 = (*a)[plugin_columns.name];
+	std::string const& n2 = (*b)[plugin_columns.name];
+
+	return PBD::natcmp (n1.c_str(), n2.c_str());
 }
 
 void

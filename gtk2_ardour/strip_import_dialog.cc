@@ -415,12 +415,12 @@ StripImportDialog::refill_import_table ()
 
 	Glib::RefPtr<SizeGroup> col_size_group (SizeGroup::create (SIZE_GROUP_HORIZONTAL));
 
-	l = manage (new Label (string_compose ("<b>%1</b>", _("Local Track/Bus"))));
+	l = manage (new Label (string_compose ("<b>%1</b>", _("Target Track/Bus"))));
 	l->set_use_markup ();
 	_strip_table.attach (*l, 0, 1, 0, 1, Gtk::FILL, Gtk::SHRINK);
 	col_size_group->add_widget (*l);
 
-	l = manage (new Label (string_compose ("<b>%1</b>", _("External State"))));
+	l = manage (new Label (string_compose ("<b>%1</b>", _("Source Track/Bus"))));
 	l->set_use_markup ();
 	_strip_table.attach (*l, 2, 3, 0, 1, Gtk::FILL, Gtk::SHRINK);
 	col_size_group->add_widget (*l);

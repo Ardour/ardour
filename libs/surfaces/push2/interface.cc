@@ -30,7 +30,7 @@ using namespace PBD;
 using namespace ArdourSurface;
 
 static ControlProtocol*
-new_push2 (Session* s, void* config)
+new_push2 (Session* s, std::string const & config)
 {
 	Push2 * p2 = 0;
 
@@ -38,6 +38,7 @@ new_push2 (Session* s, void* config)
 		p2 = new Push2 (*s);
 		/* do not set active here - wait for set_state() */
 	}
+
 	catch (std::exception & e) {
 		error << "Error instantiating Push2 support: " << e.what() << endmsg;
 		delete p2;

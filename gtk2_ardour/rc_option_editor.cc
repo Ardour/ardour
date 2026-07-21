@@ -1499,7 +1499,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			, _ignore_view_change (0)
 			, _protocol_change (0)
 		{
-			int scale = UIConfiguration::instance ().get_font_scale() / 102400;
+			float scale = UIConfiguration::instance ().get_ui_scale();
 
 			// Active Scroller
 			active_heading.add_to_page (this);
@@ -1608,6 +1608,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 
 		void set_state_from_config ()
 		{
+			_ignore_view_change++;
 			devices_store->clear ();
 			std::unordered_set<std::string> manufacturers;
 
@@ -1653,13 +1654,13 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 					}
 				}
 			}
+			_ignore_view_change--;
 		}
 
 	private:
 
-		class ControlSurfacesModelColumns : public TreeModelColumnRecord
-	{
-		public:
+		class ControlSurfacesModelColumns : public TreeModelColumnRecord {
+		  public:
 
 			ControlSurfacesModelColumns ()
 			{
@@ -1675,36 +1676,76 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			TreeModelColumn<ControlProtocolInfo*> protocol_info;
 			TreeModelColumn<bool> is_device;
 			TreeModelColumn<bool> has_editor;
-	};
+		};
+
+		void update_active_view_for (ControlProtocolInfo* cpi, bool enabled) {
+			_ignore_view_change++;
+			if (enabled) {
+				TreeModel::Row device = *(active_store->append ());
+				device[devices_model.name] = cpi->config;
+				device[devices_model.enabled] = true;
+				device[devices_model.protocol_info] = cpi;
+				device[devices_model.has_editor] = cpi->protocol->has_editor ();
+			} else {
+				TreeModel::Children rows = active_store->children();
+
+				for (TreeModel::Children::iterator x = rows.begin(); x != rows.end();) {
+					string const active_name ((*x)[active_model.name]);
+					if (active_name == cpi->config) {
+						x = active_store->erase(x);
+					} else {
+						++x;
+					}
+				}
+			}
+			_ignore_view_change--;
+		}
 
 		void protocol_status_changed (ControlProtocolInfo* cpi) {
 			/* find the row */
 			TreeModel::Children manufacturers = devices_store->children();
 
-			for (const auto& manufacturer : manufacturers) {
-				string* devices_name = new string((*manufacturer)[devices_model.name]);
+			/* First scan the treestore for cases of
+			 * 1-manufacturer-1-device-name to look for cpi->config
+			 * (the device name the protocol was just configured to
+			 * activate or deactivate.
+			 */
 
-				if (cpi->config == *devices_name) {
+			for (const auto& manufacturer : manufacturers) {
+				string const devices_name ((*manufacturer)[devices_model.name]);
+
+				if (cpi->config == devices_name) {
 					_protocol_change++;
-					(*manufacturer)[devices_model.enabled] = 0 != cpi->protocol;
+					_ignore_view_change++;
+					bool enabled = (bool) cpi->protocol;
+					(*manufacturer)[devices_model.enabled] = enabled;
+					update_active_view_for (cpi, enabled);
+					_ignore_view_change--;
 					_protocol_change--;
-					goto endloop;
+					return;
 				}
+
+				/* Now scan for matching devices in the cases
+				 * of 1-manufacturer-N-devices for a
+				 * cpi->config device name match.
+				 */
 
 				TreeModel::Children devices = manufacturer->children();
 
 				for (const auto& device : devices) {
-					string* devices_name = new string((*device)[devices_model.name]);
-					if (cpi->config == *devices_name) {
+					string const devices_name ((*device)[devices_model.name]);
+					if (cpi->config == devices_name) {
 						_protocol_change++;
-						(*device)[devices_model.enabled] = 0 != cpi->protocol;
+						_ignore_view_change++;
+						bool enabled = (bool) cpi->protocol;
+						(*device)[devices_model.enabled] = enabled;
+						update_active_view_for (cpi, enabled);
+						_ignore_view_change--;
 						_protocol_change--;
-						goto endloop;
+						return;
 					}
 				}
 			}
-
-			endloop: {}
 		}
 
 		void active_view_changed (TreeModel::Path const &, TreeModel::iterator const & i)
@@ -1720,30 +1761,28 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 				return;
 			}
 
-			bool const is_enabled = r[devices_model.enabled];
+			ControlProtocolManager& m = ControlProtocolManager::instance ();
+			bool const should_be_enabled = r[active_model.enabled];
+			bool const currently_enabled = (cpi->protocol != 0);
 
-			if (!is_enabled) {
-				TreeModel::Children manufacturers = devices_store->children();
-				string* active_name = new string(r[active_model.name]);
-
-				for (const auto& manufacturer : manufacturers) {
-					TreeModel::Children devices = manufacturer->children();
-					string* devices_name = new string((*manufacturer)[devices_model.name]);
-					if (*active_name == *devices_name) {
-						(*manufacturer)[devices_model.enabled] = 0;
-						goto endloop;
-					}
-
-					for (const auto& device : devices) {
-						string* devices_name = new string((*device)[devices_model.name]);
-						if (*active_name == *devices_name) {
-							(*device)[devices_model.enabled] = 0;
-							goto endloop;
-						}
-					}
+			if (should_be_enabled) {
+				if (currently_enabled) {
+					m.deactivate (*cpi);
+					/* ports don't vanish instantly, ya' know! */
+					Glib::usleep (500);
 				}
-
-				endloop: {}
+				string const name (r[active_model.name]);
+				if (m.activate (*cpi, name)) {
+					_ignore_view_change++;
+					r[active_model.enabled] = false;
+					_ignore_view_change--;
+				}
+			} else {
+				if (m.deactivate (*cpi)) {
+					_ignore_view_change++;
+					r[active_model.enabled] = true;
+					_ignore_view_change--;
+				}
 			}
 		}
 
@@ -1761,63 +1800,27 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			}
 
 			ControlProtocolManager& m = ControlProtocolManager::instance ();
-			bool const was_enabled = (cpi->protocol != 0);
-			bool const is_enabled = r[devices_model.enabled];
-			string* name = new string(r[devices_model.name]);
+			bool const should_be_enabled = r[devices_model.enabled];
+			bool const currently_enabled = (cpi->protocol != 0);
 
-			if (is_enabled) {
-				if (was_enabled) {
-					TreeModel::Children rows = active_store->children();
-
-					for (TreeModel::Children::iterator x = rows.begin(); x != rows.end();) {
-						string* active_name = new string((*x)[active_model.name]);
-						if (cpi == (*x)[active_model.protocol_info] && *name != *active_name) {
-							TreeModel::Children::iterator temp = x;
-							++temp;
-							(*x)[active_model.enabled] = 0;
-							x = temp;
-						} else {
-							++x;
-						}
-					}
-
-					if (!_protocol_change) { m.deactivate (*cpi); }
+			if (should_be_enabled) {
+				if (currently_enabled) {
+					m.deactivate (*cpi);
+					/* ports don't vanish instantly, ya' know! */
+					Glib::usleep (500);
 				}
-
-				if (!_protocol_change) { m.activate (*cpi, (void*)name); }
-
-				TreeModel::Row device = *(active_store->append ());
-
-				device[devices_model.name] = *name;
-				device[devices_model.enabled] = is_enabled;
-				device[devices_model.protocol_info] = cpi;
-				device[devices_model.has_editor] = cpi->protocol->has_editor ();
-
-				for (auto const& i : m.control_protocol_infos ()) {
-					if (cpi->protocol == i->protocol) {
-						i->config = *name;
-					}
+				string const name (r[devices_model.name]);
+				if (m.activate (*cpi, name)) {
+					std::cerr << "failed\n";
+					_ignore_view_change++;
+					r[devices_model.enabled] = false;
+					_ignore_view_change--;
 				}
 			} else {
-				if (was_enabled) {
-					ControlProtocolManager::instance().deactivate (*cpi);
-				}
-
-				TreeModel::Children rows = active_store->children();
-
-				for (TreeModel::Children::iterator x = rows.begin(); x != rows.end();) {
-					string* active_name = new string((*x)[active_model.name]);
-					if (*active_name == *name) {
-						x = active_store->erase(x);
-					} else {
-						++x;
-					}
-				}
-
-				for (auto const& i : m.control_protocol_infos ()) {
-					if (cpi->protocol == i->protocol) {
-						i->config = {};
-					}
+				if (m.deactivate (*cpi)) {
+					_ignore_view_change++;
+					r[devices_model.enabled] = true;
+					_ignore_view_change--;
 				}
 			}
 		}
@@ -1880,8 +1883,6 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 		PBD::ScopedConnection protocol_status_connection;
 		uint32_t _ignore_view_change;
 		uint32_t _protocol_change;
-		Gtk::Button* active_edit_button;
-		Gtk::Button* devices_edit_button;
 };
 
 class VideoTimelineOptions : public OptionEditorMiniPage
@@ -2137,7 +2138,7 @@ public:
 	{
 		/* Watch for changes made by the user to our members */
 		_visibility_group->VisibilityChanged.connect_same_thread (
-			_visibility_group_connection, sigc::bind (&VisibilityOption::changed, this)
+			_visibility_group_connection, sigc::mem_fun (*this, &VisibilityOption::changed)
 			);
 	}
 
@@ -2558,7 +2559,7 @@ RCOptionEditor::RCOptionEditor ()
 			sigc::mem_fun (*_rc_config, &RCConfiguration::set_implicit_selection_op_groups)
 			);
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-			_("<b>When enabled</b> all selected tracks are assumed to be in a group. Operations like toggling solo, mute or changing gain are synchronized."));
+			_("<b>When enabled</b> all selected tracks are assumed to be in a group. Operations like toggling solo, mute or changing gain are synchronized in the Mixer GUI (control surfaces are not affected)."));
 
 	add_option (_("General"), bo);
 
@@ -2684,8 +2685,12 @@ RCOptionEditor::RCOptionEditor ()
 					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_icon_set),
 					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_icon_set)
 					);
-			for (vector<string>::const_iterator i = icon_sets.begin (); i != icon_sets.end (); ++i) {
-				io->add (*i, *i);
+			for (auto const& i : icon_sets) {
+				if (i == X_("default")) {
+					io->add (i, _("default"));
+				} else {
+					io->add (i, i);
+				}
 			}
 			add_option (_("Appearance"), io);
 		}
@@ -3347,7 +3352,7 @@ These settings will only take effect after %1 is restarted.\n\
 
 	add_option (_("Appearance/Regions"),
 	     new BoolComboOption (
-		     "show-region-gain-envelopes",
+		     "show-region-gain",
 		     _("Show gain envelopes in audio regions"),
 		     _("in all modes"),
 		     _("only in Draw and Internal Edit modes"),
@@ -3707,6 +3712,14 @@ These settings will only take effect after %1 is restarted.\n\
 		            _("Show velocity horizontally inside notes"),
 		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_note_bars_for_velocity),
 		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_note_bars_for_velocity)
+		            ));
+
+	add_option (_("Appearance/Editor"),
+	            new BoolOption (
+		            "use-cross-cursor",
+		            _("Use cross-cursor when editing MIDI"),
+		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_cross_cursor),
+		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_cross_cursor)
 		            ));
 
 	auto midi_color_mode = new ComboOption<ARDOUR::ColorMode> (
@@ -5062,7 +5075,7 @@ These settings will only take effect after %1 is restarted.\n\
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_auto_analyse_audio)
 		     ));
 
-	add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Realtime Analyzer"))); 
+	add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Realtime Analyzer")));
 
 	ComboOption<uint32_t>* rta = new ComboOption<uint32_t> (
 	  "max-active-rta",

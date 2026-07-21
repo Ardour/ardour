@@ -37,14 +37,14 @@ using namespace ArdourSurface;
 using namespace ArdourSurface::MACKIE_NAMESPACE;
 
 static ControlProtocol*
-new_uf8_protocol (Session* s, void* config)
+new_uf8_protocol (Session* s, std::string const & config)
 {
 	MackieControlProtocol* mcp = 0;
 
 	DEBUG_TRACE (DEBUG::MackieControl, "making uf8-protocol");
 
 	try {
-		mcp = new MackieControlProtocol (*s, static_cast<std::string*>(config));
+		mcp = new MackieControlProtocol (*s, config);
 		/* do not set active here - wait for set_state() */
 	}
 	catch (exception & e) {

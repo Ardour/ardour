@@ -32,7 +32,7 @@ using namespace std;
 using namespace ArdourSurface;
 
 static ControlProtocol*
-new_launch_control_xl (Session* s, void* config)
+new_launch_control_xl (Session* s, std::string const & config)
 {
 	LaunchControlXL * lcxl = 0;
 

@@ -220,7 +220,7 @@ CC121::start_midi_handling ()
 	 * method, which will read the data, and invoke the parser.
 	 */
 
-	_input_port->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (this, &CC121::midi_input_handler), _input_port));
+	_input_port->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (*this, &CC121::midi_input_handler), _input_port));
 	_input_port->xthread().attach (main_loop()->get_context());
 }
 

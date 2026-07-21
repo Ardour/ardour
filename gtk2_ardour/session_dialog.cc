@@ -94,13 +94,13 @@ SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_
 
 	/* No string translation because these don't show anywhere */
 	new_session_action = Action::create (X_("New"));
-	action_group->add (new_session_action, sigc::mem_fun (this, &SessionDialog::new_button_choice_action));
+	action_group->add (new_session_action, sigc::mem_fun (*this, &SessionDialog::new_button_choice_action));
 	recent_session_action = Action::create (X_("Recent"));
-	action_group->add (recent_session_action, sigc::mem_fun (this, &SessionDialog::recent_button_choice_action));
+	action_group->add (recent_session_action, sigc::mem_fun (*this, &SessionDialog::recent_button_choice_action));
 	existing_session_action = Action::create (X_("Open"));
-	action_group->add (existing_session_action, sigc::mem_fun (this, &SessionDialog::existing_button_choice_action));
+	action_group->add (existing_session_action, sigc::mem_fun (*this, &SessionDialog::existing_button_choice_action));
 	demo_session_action = Action::create (X_("DemoSessions"));
-	action_group->add (demo_session_action, sigc::mem_fun (this, &SessionDialog::demo_button_choice_action));
+	action_group->add (demo_session_action, sigc::mem_fun (*this, &SessionDialog::demo_button_choice_action));
 
 	set_position (WIN_POS_CENTER);
 	get_vbox()->set_spacing (6);
@@ -604,7 +604,7 @@ SessionDialog::setup_existing_box ()
 
 	Gtkmm2ext::add_volume_shortcuts (existing_session_chooser);
 
-	existing_session_chooser.signal_selection_changed().connect (mem_fun (this, &SessionDialog::existing_file_selected));
+	existing_session_chooser.signal_selection_changed().connect (mem_fun (*this, &SessionDialog::existing_file_selected));
 	existing_session_chooser.signal_file_activated().connect (sigc::mem_fun (*this, &SessionDialog::existing_file_activated));
 }
 
@@ -984,6 +984,7 @@ SessionDialog::setup_demo_sessions ()
 
 	demo_author.set_alignment (Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER);
 	demo_license.set_alignment (Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER);
+	demo_license.signal_activate_link().connect ([](std::string const& url) { return PBD::open_uri (url); }, false);
 
 	demo_description.set_wrap_mode (Gtk::WRAP_WORD);
 	demo_description.set_editable (false);
@@ -1545,8 +1546,13 @@ SessionDialog::demo_session_selected ()
 	string athr = (*row)[demo_columns.author];
 	demo_name_entry.set_text (name);
 	demo_author.set_text (athr);
-	demo_license.set_text (lcns);
+	demo_license.set_markup (lcns);
 	demo_description.get_buffer()->set_text (desc);
+
+	if (lcns.find ("<a href=") != lcns.npos) {
+		demo_license.property_track_visited_links() = false;
+	}
+
 }
 
 void

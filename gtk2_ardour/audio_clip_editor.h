@@ -68,7 +68,7 @@ namespace ArdourWaveView
 class StartBoundaryRect;
 class EndBoundaryRect;
 
-class AudioClipEditor :  public CueEditor
+class AudioClipEditor :  public CueEditor, public SlipDraggable
 {
 public:
 	AudioClipEditor (std::string const &, bool with_transport = false);
@@ -82,6 +82,10 @@ public:
 	void region_changed (const PBD::PropertyChange& what_changed);
 
 	bool key_press (GdkEventKey*);
+
+	void drag_start() {}
+	void drag_end() {}
+	std::shared_ptr<ARDOUR::Region> region() const { return _region; }
 
 	/* EditingContext API. As of July 2025, we do not implement most of
 	 * these
@@ -132,19 +136,15 @@ public:
 
 	bool idle_data_captured ();
 
-	void set_overlay_text (std::string const &);
-	void hide_overlay_text ();
-	void show_overlay_text ();
 	void instant_save ();
 
  private:
 	ArdourCanvas::Container*         line_container;
-	ArdourCanvas::Text* overlay_text;
 	StartBoundaryRect*               start_line;
 	EndBoundaryRect*                 end_line;
 	ArdourCanvas::Line*              loop_line;
 	ArdourCanvas::Container*         ruler_container;
-	ArdourCanvas::Ruler*             main_ruler;
+	ArdourCanvas::Ruler*             bbt_ruler;
 
 	class ClipMetric : public ArdourCanvas::Ruler::Metric
 	{
@@ -172,6 +172,7 @@ public:
 	bool event_handler (GdkEvent* ev);
 	bool start_line_event_handler (GdkEvent* ev, StartBoundaryRect*);
 	bool end_line_event_handler (GdkEvent* ev, EndBoundaryRect*);
+	bool data_group_event_handler (GdkEvent* ev);
 	void drop_waves ();
 	void set_wave_heights ();
 	void set_spp_from_length (ARDOUR::samplecnt_t);
@@ -200,10 +201,9 @@ public:
 
 	void load_shared_bindings ();
 
-	void compute_fixed_ruler_scale ();
-	void update_fixed_rulers ();
+	void update_tempo_based_rulers ();
 
-	void update_rulers () { update_fixed_rulers(); }
+	void update_rulers () { update_tempo_based_rulers(); }
 	void set_action_defaults ();
 
 	void snap_mode_chosen (Editing::SnapMode);

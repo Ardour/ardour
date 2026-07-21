@@ -616,7 +616,7 @@ MidiRegion::merge (std::shared_ptr<MidiRegion const> other_region)
 	new_model->end_write (Evoral::Sequence<Temporal::Beats>::ResolveStuckNotes, length().beats());
 	midi_source()->set_model (sl, new_model);
 
-	set_length (max (length(), position().distance (other_region->end())));
+	set_length (max (length(), position().distance (other_region->end_position())));
 }
 
 void

@@ -93,8 +93,12 @@ namespace {
 	const char * const alsa_raw_midi_driver_name = X_("alsarawmidi");
 	const char * const alsaseq_midi_driver_name = X_("seq");
 	const char * const alsaraw_midi_driver_name = X_("raw");
+#if (defined PLATFORM_WINDOWS && defined HAVE_PORTAUDIO)
 	const char * const winmme_midi_driver_name = X_("winmme");
+#endif
+#ifdef __APPLE__
 	const char * const coremidi_midi_driver_name = X_("coremidi");
+#endif
 
 	// this should probably be translated
 	const char * const default_device_name = X_("Default");

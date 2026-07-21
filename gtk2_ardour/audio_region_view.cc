@@ -513,12 +513,7 @@ AudioRegionView::reset_width_dependent_items (double pixel_width)
 
 	AnalysisFeatureList::const_iterator i;
 	list<std::pair<samplepos_t, ArdourCanvas::Line*> >::iterator l;
-	double y1;
-	if (_height >= NAME_HIGHLIGHT_THRESH) {
-		y1 = _height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 1;
-	} else {
-		y1 = _height - 1;
-	}
+	double y1 = _effective_height - 1;
 	for (i = analysis_features.begin(), l = feature_lines.begin(); i != analysis_features.end() && l != feature_lines.end(); ++i, ++l) {
 		float x_pos = trackview.editor().sample_to_pixel ((*i) - position);
 		(*l).first = *i;
@@ -584,13 +579,7 @@ AudioRegionView::set_height (gdouble height)
 
 	if (!tmp_waves.empty () || !waves.empty ()) {
 
-		gdouble ht;
-
-		if (!UIConfiguration::instance().get_show_name_highlight() || (height < NAME_HIGHLIGHT_THRESH)) {
-			ht = height / (double) nchans;
-		} else {
-			ht = (height - NAME_HIGHLIGHT_SIZE) / (double) nchans;
-		}
+		gdouble ht = _effective_height / (double) nchans;
 
 		uint32_t wcnt = waves.size();
 		for (uint32_t n = 0; n < wcnt; ++n) {
@@ -611,14 +600,8 @@ AudioRegionView::set_height (gdouble height)
 	}
 
 	if (_fx_line) {
-
-		if ((height / nchans) < NAME_HIGHLIGHT_THRESH) {
-			_fx_line->hide ();
-		} else {
-			update_envelope_visibility ();
-		}
-
-		_fx_line->set_height ((uint32_t) rint (height - NAME_HIGHLIGHT_SIZE) - 2);
+		_fx_line->set_height (_effective_height - 2);
+		update_envelope_visibility ();
 	}
 
 	reset_fade_shapes ();
@@ -626,12 +609,8 @@ AudioRegionView::set_height (gdouble height)
 	/* Update heights for any feature lines */
 	samplepos_t position = _region->position_sample();
 	list<std::pair<samplepos_t, ArdourCanvas::Line*> >::iterator l;
-	double y1;
-	if (_height >= NAME_HIGHLIGHT_THRESH) {
-		y1 = _height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 1;
-	} else {
-		y1 = _height - 1;
-	}
+	double y1 = _effective_height - 1;
+
 	for (l = feature_lines.begin(); l != feature_lines.end(); ++l) {
 		float pos_x = trackview.editor().sample_to_pixel((*l).first - position);
 		(*l).second->set (ArdourCanvas::Duple (pos_x, 2.0),
@@ -698,14 +677,6 @@ AudioRegionView::reset_fade_in_shape_width (std::shared_ptr<AudioRegion> ar, sam
 		return;
 	}
 
-	double effective_height;
-
-	if (_height >= NAME_HIGHLIGHT_THRESH) {
-		effective_height = _height - NAME_HIGHLIGHT_SIZE;
-	} else {
-		effective_height = _height;
-	}
-
 	/* points *MUST* be in anti-clockwise order */
 
 	Points points;
@@ -718,12 +689,12 @@ AudioRegionView::reset_fade_in_shape_width (std::shared_ptr<AudioRegion> ar, sam
 
 	for (x = list->begin(), pi = 0; x != list->end(); ++x, ++pi) {
 		points[pi].x = (*x)->when.scale (Temporal::ratio_t (pwidth, length)).samples();
-		points[pi].y = effective_height - ((*x)->value * (effective_height - 1.));
+		points[pi].y = _effective_height - ((*x)->value * (_effective_height - 1.));
 	}
 
 	/* draw the line */
 
-	redraw_start_xfade_to (ar, width, points, effective_height, handle_left);
+	redraw_start_xfade_to (ar, width, points, _effective_height, handle_left);
 
 	/* ensure trim handle stays on top */
 	if (frame_handle_start) {
@@ -784,14 +755,6 @@ AudioRegionView::reset_fade_out_shape_width (std::shared_ptr<AudioRegion> ar, sa
 		return;
 	}
 
-	double effective_height;
-
-	effective_height = _height;
-
-	if (UIConfiguration::instance().get_show_name_highlight() && effective_height >= NAME_HIGHLIGHT_THRESH) {
-		effective_height -= NAME_HIGHLIGHT_SIZE;
-	}
-
 	/* points *MUST* be in anti-clockwise order */
 
 	Points points;
@@ -805,12 +768,12 @@ AudioRegionView::reset_fade_out_shape_width (std::shared_ptr<AudioRegion> ar, sa
 	for (x = list->begin(), pi = 0; x != list->end(); ++x, ++pi) {
 		const double p = (*x)->when.scale(Temporal::ratio_t(pwidth, length)).samples();
 		points[pi].x = _pixel_width - pwidth + p;
-		points[pi].y = effective_height - ((*x)->value * (effective_height - 1.));
+		points[pi].y = _effective_height - ((*x)->value * (_effective_height - 1.));
 	}
 
 	/* draw the line */
 
-	redraw_end_xfade_to (ar, width, points, effective_height, handle_right, pwidth);
+	redraw_end_xfade_to (ar, width, points, _effective_height, handle_right, pwidth);
 
 	/* ensure trim handle stays on top */
 	if (frame_handle_end) {
@@ -1163,7 +1126,7 @@ AudioRegionView::set_region_gain_line ()
 	}
 	const string line_name = _region->name() + ":gain";
 	_fx_line.reset (new AudioRegionGainLine (line_name, *this, *group, audio_region()->envelope()));
-	_fx_line->set_height ((uint32_t) rint (height() - NAME_HIGHLIGHT_SIZE) - 2);
+	_fx_line->set_height (_effective_height - 2);
 	_fx_line->reset ();
 	_region_fx_connection.disconnect ();
 	bool changed = _rfx_id != PBD::ID (0) || _rdx_param != UINT32_MAX;
@@ -1181,7 +1144,7 @@ AudioRegionView::set_region_fx_line (std::shared_ptr<AutomationControl> ac, std:
 {
 	const string line_name = _region->name () + ":" + rfx->describe_parameter (Evoral::Parameter (PluginAutomation, 0, param_id));
 	_fx_line.reset (new RegionFxLine (line_name, *this, *group, ac));
-	_fx_line->set_height ((uint32_t) rint (height() - NAME_HIGHLIGHT_SIZE) - 2);
+	_fx_line->set_height (_effective_height - 2);
 	_fx_line->reset ();
 
 	rfx->DropReferences.connect (_region_fx_connection, invalidator (*this), std::bind (&AudioRegionView::set_region_gain_line, this), gui_context ());
@@ -1304,10 +1267,12 @@ AudioRegionView::update_envelope_visibility ()
 			_fx_line->remove_visibility (EditorAutomationLine::ControlPoints);
 		}
 		_fx_line->canvas_group().raise_to_top ();
+		_fx_line->canvas_group().set_ignore_events (false);
 	} else if (UIConfiguration::instance().get_show_region_gain() || trackview.editor().current_mouse_mode() == Editing::MouseRange ) {
 		_fx_line->add_visibility (EditorAutomationLine::Line);
 		_fx_line->remove_visibility (EditorAutomationLine::ControlPoints);
 		_fx_line->canvas_group().raise_to_top ();
+		_fx_line->canvas_group().set_ignore_events (true);
 	} else {
 		_fx_line->set_visibility (EditorAutomationLine::VisibleAspects(0));
 	}
@@ -1392,7 +1357,7 @@ AudioRegionView::create_waves ()
 }
 
 void
-AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
+AudioRegionView::create_one_wave (uint32_t which, bool direct)
 {
 	//cerr << "AudioRegionView::create_one_wave() called which: " << which << " this: " << this << endl;//DEBUG
 	RouteTimeAxisView& atv (*(dynamic_cast<RouteTimeAxisView*>(&trackview))); // ick
@@ -1407,16 +1372,7 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 	uint32_t nchans = atv.track()->n_channels().n_audio();
 	uint32_t n;
 	uint32_t nwaves = std::min (nchans, audio_region()->n_channels());
-	gdouble ht;
-
-	/* compare to set_height(), use _height as set by streamview (child_height),
-	 * not trackview.current_height() to take stacked layering into acconnt
-	 */
-	if (!UIConfiguration::instance().get_show_name_highlight() || (_height < NAME_HIGHLIGHT_THRESH)) {
-		ht = _height / (double) nchans;
-	} else {
-		ht = (_height - NAME_HIGHLIGHT_SIZE) / (double) nchans;
-	}
+	gdouble ht = _effective_height / (double) nchans;
 
 	/* first waveview starts at 1.0, not 0.0 since that will overlap the frame */
 	gdouble yoff = which * ht;
@@ -1490,7 +1446,13 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 		LayerDisplay layer_display;
 		if (trackview.get_gui_property ("layer-display", layer_display)) {
 			update_coverage_frame (layer_display);
-	  }
+		}
+
+		/* ensure trim handles stay on top when waveviews are added after init */
+		if (!direct) {
+			if (frame_handle_start) frame_handle_start->raise_to_top();
+			if (frame_handle_end) frame_handle_end->raise_to_top();
+		}
 	}
 
 	/* channel wave created, don't hook into peaks ready anymore */
@@ -1514,7 +1476,6 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev, b
 		return;
 	}
 
-	uint32_t before_p, after_p;
 	double mx = ev->button.x;
 	double my = ev->button.y;
 
@@ -1618,8 +1579,6 @@ AudioRegionView::entered ()
 
 	hovered = true;
 
-	update_envelope_visibility();
-
 	if ((trackview.editor().current_mouse_mode() == Editing::MouseObject)) {
 		if (start_xfade_rect) {
 			start_xfade_rect->set_outline (true);
@@ -1653,7 +1612,12 @@ AudioRegionView::entered ()
 				fade_out_trim_handle->hide ();
 			}
 		}
-	} else {  //this happens when we switch tools; if we switch away from Grab mode,  hide all the fade handles
+	} else {
+		update_envelope_visibility();
+
+		/* this happens when we switch tools
+		 * if we switch away from Grab mode, hide all the fade handles
+		 */
 		if (fade_in_handle)       { fade_in_handle->hide(); }
 		if (fade_out_handle)      { fade_out_handle->hide(); }
 		if (fade_in_trim_handle)  { fade_in_trim_handle->hide(); }
@@ -1671,7 +1635,9 @@ AudioRegionView::exited ()
 
 	hovered = false;
 
-	update_envelope_visibility();
+	if ((trackview.editor().current_mouse_mode() != Editing::MouseObject)) {
+		update_envelope_visibility();
+	}
 
 	if (fade_in_handle)       { fade_in_handle->hide(); }
 	if (fade_out_handle)      { fade_out_handle->hide(); }
@@ -1825,12 +1791,7 @@ AudioRegionView::transients_changed ()
 	samplepos_t first = _region->first_sample();
 	samplepos_t last = _region->last_sample();
 
-	double y1;
-	if (_height >= NAME_HIGHLIGHT_THRESH) {
-		y1 = _height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 1;
-	} else {
-		y1 = _height - 1;
-	}
+	double y1 = _effective_height - 1;
 
 	while (feature_lines.size() < analysis_features.size()) {
 		ArdourCanvas::Line* canvas_item = new ArdourCanvas::Line(group);
@@ -1939,7 +1900,7 @@ AudioRegionView::show_xfades ()
 void
 AudioRegionView::drag_start ()
 {
-	RegionView::drag_start ();
+	TimeAxisViewItem::drag_start ();
 
 	//we used to hide xfades here.  I don't see the point with the new model, but we can re-implement if needed
 }

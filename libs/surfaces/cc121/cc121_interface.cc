@@ -26,7 +26,7 @@ using namespace ARDOUR;
 using namespace ArdourSurface;
 
 static ControlProtocol*
-new_cc121_midi_protocol (Session* s, void* config)
+new_cc121_midi_protocol (Session* s, std::string const & config)
 {
 	CC121* fp;
 

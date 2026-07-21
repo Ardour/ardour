@@ -60,7 +60,7 @@ public:
 
 class GenericMidiControlProtocol : public ARDOUR::ControlProtocol, public AbstractUI<GenericMIDIRequest> {
 public:
-	GenericMidiControlProtocol (ARDOUR::Session&, std::string* config);
+	GenericMidiControlProtocol (ARDOUR::Session&, std::string const & config);
 	virtual ~GenericMidiControlProtocol();
 
 	void do_request (GenericMIDIRequest*);

@@ -51,7 +51,7 @@ ControlPoint::ControlPoint (AutomationLine& al)
 	_item->set_fill_color (UIConfiguration::instance().color ("control point fill"));
 	_item->set_outline_color (UIConfiguration::instance().color ("control point outline"));
 	_item->set_data ("control_point", this);
-	_item->Event.connect (sigc::mem_fun (this, &ControlPoint::event_handler));
+	_item->Event.connect (sigc::mem_fun (*this, &ControlPoint::event_handler));
 
 	hide ();
 }

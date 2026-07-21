@@ -2754,6 +2754,7 @@ LuaBindings::common (lua_State* L)
 		.addConst ("Denoise_Threshold", ARDOUR::WellKnownCtrl(Denoise_Threshold))
 		.addConst ("Denoise_DepthLow", ARDOUR::WellKnownCtrl(Denoise_DepthLow))
 		.addConst ("Denoise_DepthHigh", ARDOUR::WellKnownCtrl(Denoise_DepthHigh))
+		.addConst ("Denoise_Makeup", ARDOUR::WellKnownCtrl(Denoise_Makeup))
 		.addConst ("Master_Limiter_Enable", ARDOUR::WellKnownCtrl(Master_Limiter_Enable))
 		.endNamespace ()
 
