@@ -243,7 +243,7 @@ public:
    * with <tt>main_level&nbsp;=&nbsp;1</tt>.
    * @code
    * bool thisclass::mymethod() { return false; }
-   * Gtk::Main::signal_quit().connect(sigc::mem_fun(this, &thisclass::mymethod));
+   * Gtk::Main::signal_quit().connect(sigc::mem_fun (*this, &thisclass::mymethod));
    * @endcode
    * @return bool - @c false means callback is removed, @c true means
    * it'll be called again the next the main loop quits.
