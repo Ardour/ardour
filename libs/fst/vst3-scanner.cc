@@ -18,7 +18,11 @@
 
 #include <cstdlib>
 #include <cstdio>
+#if defined COMPILER_MSVC && defined WAF_BUILD
+#include "msvc/getopt.h"
+#else
 #include <getopt.h>
+#endif
 #include <iostream>
 #include <string>
 

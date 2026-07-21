@@ -682,7 +682,6 @@ def build(bld):
     if bld.env['build_target'] == 'msvc':
         obj.use += ['liblua']
         obj.uselib += ' PANGOCAIRO GDI32'
-        obj.lib = ['getopt']
         obj.defines += ['NOMINMAX']
 
     if False and bld.is_defined('USE_EXTERNAL_LIBS'):

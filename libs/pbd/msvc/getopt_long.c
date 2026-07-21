@@ -43,7 +43,11 @@
 
 #ifdef PLATFORM_WINDOWS
 #ifdef COMPILER_MSVC
+#ifdef WAF_BUILD
+#define GETOPT_API __declspec(dllexport)
+#else
 #include "pbd/msvc_pbd.h"  // Defines 'GETOPT_API'
+#endif
 #endif
 /* Windows needs warnx().  We change the definition though:
  *  1. (another) global is defined, opterrmsg, which holds the error message

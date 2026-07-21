@@ -31,8 +31,12 @@
  * SUCH DAMAGE.
  */
 
-#ifdef COMPILER_MSVC
+#if defined COMPILER_MSVC
+#ifdef WAF_BUILD
+#define GETOPT_API __declspec(dllexport)
+#else
 #include "pbd/msvc_pbd.h"
+#endif
 #endif
 #include "getopt.h"
 #include <stdio.h>
