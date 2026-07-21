@@ -21,6 +21,7 @@
 
 #include <memory>
 
+#define ABSTRACT_UI_EXPORTS
 #include "pbd/abstract_ui.h"
 #include "pbd/mutex.h"
 
