@@ -114,7 +114,7 @@ ArdourDropdown::get_active () const
 			if (m) {
 				return m->label();
 			}
-			return std::string();
+			return i.get_label();
 		}
 	}
 	return std::string();
