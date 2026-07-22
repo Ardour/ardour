@@ -3404,14 +3404,17 @@ MidiView::note_dropped (NoteBase *, timecnt_t const & d_qn, int8_t dnote, bool c
 			uint8_t original_pitch = sel->note()->note();
 			uint8_t new_pitch      = original_pitch + dnote - highest_note_difference;
 
-
 			if (new_time < Temporal::Beats()) {
 				continue;
 			}
 
-			if ((mt->key_enforcement_policy() & NoInsert) && (key && !key->in_key (new_pitch))) {
+			int conformed_pitch = key->conform_midi_note (new_pitch, mt->key_enforcement_policy());
+
+			if (conformed_pitch < 0) {
 				continue;
 			}
+
+			new_pitch = (conformed_pitch & 0x7f);
 
 			last_note_off = std::max (last_note_off, new_time + sel->note()->length());
 
@@ -3458,9 +3461,13 @@ MidiView::note_dropped (NoteBase *, timecnt_t const & d_qn, int8_t dnote, bool c
 				continue;
 			}
 
-			if ((mt->key_enforcement_policy() & NoInsert) && (key && !key->in_key (new_pitch))) {
+			int conformed_pitch = key->conform_midi_note (new_pitch, mt->key_enforcement_policy());
+
+			if (conformed_pitch < 0) {
 				continue;
 			}
+
+			new_pitch = (conformed_pitch & 0xf7);
 
 			copy_event->note()->set_time (new_time);
 			last_note_off = std::max (last_note_off, copy_event->note()->end_time());
