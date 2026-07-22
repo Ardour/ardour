@@ -574,6 +574,12 @@ MusicalKey::closest_midi_note (int midi_note) const
 int
 MusicalKey::conform_midi_note (int midi_note, KeyEnforcementPolicy key_enforcment_policy) const
 {
+	bool ok = in_key (midi_note);
+
+	if (ok) {
+		return midi_note;
+	}
+
 	if (key_enforcment_policy & NoInsert) {
 		DEBUG_TRACE (DEBUG::MidiIO, string_compose ("dropped note %1 due to key enforcement policy for %2\n", midi_note, name()));
 		return -1;
@@ -584,17 +590,15 @@ MusicalKey::conform_midi_note (int midi_note, KeyEnforcementPolicy key_enforcmen
 	if (key_enforcment_policy & ForceNearest) {
 		int old = midi_note;
 		new_note = closest_midi_note (midi_note);
-		std::cerr << string_compose ("mutated note %1 to %2 due to key enforcement policy for %2\n", new_note, old, name());
+		std::cerr << string_compose ("mutated note to %1 from %2 due to key enforcement policy for %2\n", new_note, old, name());
 	} else if (key_enforcment_policy & ForceLower) {
 		int old = midi_note;
 		new_note = lower_midi_note (midi_note);
-		std::cerr << string_compose ("mutated note %1 to %2 due to key enforcement policy for %2\n", new_note, old, name());
+		std::cerr << string_compose ("mutated note to %1 from %2 due to key enforcement policy for %2\n", new_note, old, name());
 	} else if (key_enforcment_policy & ForceHigher) {
 		int old = midi_note;
 		new_note = higher_midi_note (midi_note);
-		std::cerr << string_compose ("mutated note %1 to %2 due to key enforcement policy for %2\n", new_note, old, name());
-	} else {
-		new_note = midi_note;
+		std::cerr << string_compose ("mutated note to %1 from %2 due to key enforcement policy for %2\n", new_note, old, name());
 	}
 
 	return new_note;
