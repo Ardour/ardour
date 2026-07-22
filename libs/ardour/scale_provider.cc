@@ -34,6 +34,7 @@ void
 ScaleProvider::make_property_quarks ()
 {
 	Properties::musical_mode.property_id = g_quark_from_static_string (X_("musical-mode"));
+	Properties::key_enforcement.property_id = g_quark_from_static_string (X_("key-enforcement"));
 }
 
 ScaleProvider::ScaleProvider (ScaleProvider* parent)
