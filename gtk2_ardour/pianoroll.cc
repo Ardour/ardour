@@ -1854,6 +1854,7 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 	_update_connection.disconnect ();
 	selection_connection.disconnect ();
 	midi_inspector->set_region (_session, nullptr);
+	bg->disconnect_property_changes ();
 
 	if (!region) {
 		/* make sure note names can be used */
@@ -1876,6 +1877,7 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 
 	_active_view = rvm->second;
 	CueEditor::set_track (_active_view->midi_track());
+	bg->connect_property_changes ();
 
 	set_sensitivities ();
 

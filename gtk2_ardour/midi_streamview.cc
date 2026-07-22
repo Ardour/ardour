@@ -85,6 +85,8 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 
 	UIConfiguration::instance().ColorsChanged.connect(sigc::mem_fun(*this, &MidiStreamView::color_handler));
 	UIConfiguration::instance().ParameterChanged.connect(sigc::mem_fun(*this, &MidiStreamView::parameter_changed));
+
+	MidiViewBackground::connect_property_changes ();
 }
 
 MidiStreamView::~MidiStreamView ()

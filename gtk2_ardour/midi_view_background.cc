@@ -30,6 +30,7 @@
 #include "ardour/midi_track.h"
 #include "ardour/scale.h"
 
+#include "gui_thread.h"
 #include "keyboard.h"
 #include "midi_view_background.h"
 #include "ui_config.h"
@@ -53,6 +54,7 @@ MidiViewBackground::MidiViewBackground (ArdourCanvas::Item* parent, EditingConte
 	, _color_mode (UIConfiguration::instance().get_default_midi_note_color_mode())
 	, _visibility_note_range (ContentsRange)
 	, note_range_set (false)
+	, kep_menu_hack (nullptr)
 {
 	CANVAS_DEBUG_NAME (_note_lines, "MVB note lines");
 	_note_lines->lower_to_bottom();
@@ -72,6 +74,7 @@ MidiViewBackground::MidiViewBackground (ArdourCanvas::Item* parent, EditingConte
 
 MidiViewBackground::~MidiViewBackground()
 {
+	delete kep_menu_hack;
 }
 
 void
@@ -165,6 +168,7 @@ void
 MidiViewBackground::setup_note_lines()
 {
 	if (updates_suspended()) {
+		std::cerr << "US\n";
 		return;
 	}
 
@@ -492,6 +496,15 @@ MidiViewBackground::build_key_enforcement_menu ()
 	last_check_item->set_active (kep & ARDOUR::NoInsert);
 	last_check_item->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiViewBackground::toggle_key_enforcement_policy), ARDOUR::NoInsert, last_check_item));
 
+	items.push_back (RadioMenuElem (group, _("No scale-based editing")));
+	last_radio_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_radio_item->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiViewBackground::toggle_key_enforcement_policy), ARDOUR::KeyEnforcementPolicy (0), last_radio_item));
+	last_radio_item->set_active (true);
+
+	/* we just turned the "no scale based editing" button on; the remaining
+	 * setup may change that to reflect the actual setting.
+	 */
+
 	items.push_back (RadioMenuElem (group, _("Force note edits of non-scale notes to next lower note")));
 	last_radio_item = dynamic_cast<RadioMenuItem*>(&items.back());
 	last_radio_item->set_active (kep & ARDOUR::ForceLower);
@@ -506,6 +519,8 @@ MidiViewBackground::build_key_enforcement_menu ()
 	last_radio_item = dynamic_cast<RadioMenuItem*>(&items.back());
 	last_radio_item->set_active (kep & ARDOUR::ForceNearest);
 	last_radio_item->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiViewBackground::toggle_key_enforcement_policy), ARDOUR::ForceNearest, last_radio_item));
+
+
 	return menu;
 }
 
@@ -530,4 +545,27 @@ MidiViewBackground::toggle_key_enforcement_policy (ARDOUR::KeyEnforcementPolicy 
 	}
 }
 
+void
+MidiViewBackground::connect_property_changes ()
+{
+	midi_track()->PropertyChanged.connect (track_property_connection, invalidator (*this), [this](PBD::PropertyChange const & change) { property_change (change); }, gui_context());
+}
 
+void
+MidiViewBackground::disconnect_property_changes ()
+{
+	track_property_connection.disconnect ();
+}
+
+void
+MidiViewBackground::property_change (PBD::PropertyChange const & change)
+{
+	PBD::PropertyChange of_interest;
+
+	of_interest.add (ARDOUR::Properties::key_enforcement);
+	of_interest.add (ARDOUR::Properties::musical_mode);
+
+	if (change.contains (of_interest)) {
+		setup_note_lines ();
+	}
+}

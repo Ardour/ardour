@@ -47,6 +47,7 @@ namespace ArdourCanvas {
 
 namespace Gtk {
 	class Menu;
+	class MenuItem;
 	class CheckMenuItem;
 }
 
@@ -144,6 +145,9 @@ class MidiViewBackground : public virtual ViewBackground
 	void toggle_key_enforcement_policy (ARDOUR::KeyEnforcementPolicy kepb, Gtk::CheckMenuItem* item);
 	void setup_note_lines();
 
+	void connect_property_changes ();
+	void disconnect_property_changes ();
+
   protected:
 	EditingContext&           _editing_context;
 	bool                      _range_dirty;
@@ -157,6 +161,8 @@ class MidiViewBackground : public virtual ViewBackground
 	ARDOUR::ColorMode         _color_mode;
 	VisibleNoteRange          _visibility_note_range;
 	bool                       note_range_set;
+	Gtk::MenuItem*             kep_menu_hack;
+	PBD::ScopedConnection      track_property_connection;
 
 	void color_handler ();
 	void parameter_changed (std::string const &);
@@ -166,6 +172,7 @@ class MidiViewBackground : public virtual ViewBackground
 	virtual bool updates_suspended() const { return false; }
 
 	void sync_data_and_visual_range ();
+	void property_change (PBD::PropertyChange const &);
 };
 
 

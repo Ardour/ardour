@@ -234,6 +234,7 @@ ScaleDialog::get() const
 	case TwelveTone:
 		return twelvetone_get ();
 	}
+	std::cerr << "Fell thru\n";
 	return nullptr;
 }
 
