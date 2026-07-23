@@ -116,6 +116,7 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner
 	void catch_pending_show_region ();
 
 	std::pair<Temporal::timepos_t,Temporal::timepos_t> max_zoom_extent() const;
+	std::pair<Temporal::timepos_t,Temporal::timepos_t> get_context_extent() const;
 
 	void full_zoom_clicked();
 	void zoom_to_show (std::pair<Temporal::timepos_t,Temporal::timepos_t> const &);

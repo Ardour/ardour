@@ -942,7 +942,7 @@ Pianoroll::canvas_allocate (Gtk::Allocation alloc)
 	if (zoom_in_allocate) {
 
 		if (!_active_view || !maybe_set_from_rsu (_active_view->midi_region()->id())) {
-			zoom_to_show (max_zoom_extent());
+			zoom_to_show (get_context_extent());
 		}
 		if (_region) {
 			/* XXXX */
@@ -1907,7 +1907,7 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 
 	if (!_active_view || !maybe_set_from_rsu (_active_view->midi_region()->id())) {
 		/* Compute zoom level to show entire source plus some margin if possible */
-		zoom_to_show (max_zoom_extent());
+		zoom_to_show (get_context_extent());
 	}
 
 	if (region_view_map.size() > 1) {
@@ -2585,7 +2585,7 @@ Pianoroll::set_session (ARDOUR::Session* s)
 	}
 
 	if (_session) {
-		zoom_to_show (max_zoom_extent());
+		zoom_to_show (get_context_extent());
 	}
 }
 
