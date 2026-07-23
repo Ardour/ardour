@@ -4835,7 +4835,7 @@ Editor::add_stripables (StripableList& sl)
 	 * than just VCAs
 	 */
 
-	if (!new_selection.empty()) {
+	if (!new_selection.empty() && !ARDOUR_UI::instance()->loading_session ()) {
 		selection->set (new_selection);
 		begin_selection_op_history();
 	}
