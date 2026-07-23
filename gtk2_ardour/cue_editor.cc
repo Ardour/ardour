@@ -1237,6 +1237,33 @@ CueEditor::max_zoom_extent() const
 	EC_LOCAL_TEMPO_SCOPE;
 
 	if (_region) {
+		int ZOOM_LEVEL = 2; /* zoom out to 2x the length of the region, so that we can see the whole region and some context around it */
+
+		Temporal::Beats len;
+
+		if (show_source) {
+			len = _region->source()->length().beats() * ZOOM_LEVEL;
+			if (len != Temporal::Beats()) {
+				return std::make_pair (timepos_t (Temporal::Beats()), timepos_t (len));
+			}
+		} else {
+			len = _region->length().beats() * ZOOM_LEVEL;
+			if (len != Temporal::Beats()) {
+				return std::make_pair (timepos_t (_region->start().beats()), timepos_t (_region->start().beats() + len));
+			}
+		}
+	}
+
+	// default
+	return std::make_pair (Temporal::timepos_t (Temporal::Beats()), Temporal::timepos_t (Temporal::Beats (32, 0)));
+}
+
+std::pair<Temporal::timepos_t,Temporal::timepos_t>
+CueEditor::get_context_extent() const
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	if (_region) {
 
 		Temporal::Beats len;
 
@@ -1277,7 +1304,7 @@ CueEditor::full_zoom_clicked()
 
 	/* XXXX NEED LOCAL TEMPO MAP */
 
-	std::pair<Temporal::timepos_t,Temporal::timepos_t> dur (max_zoom_extent());
+	std::pair<Temporal::timepos_t,Temporal::timepos_t> dur (get_context_extent());
 	samplecnt_t s = dur.second.samples() - dur.first.samples();
 	reposition_and_zoom (0,  (s / (double) _visible_canvas_width));
 }
