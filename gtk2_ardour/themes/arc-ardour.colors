@@ -304,6 +304,7 @@
     <ColorAlias name="piano roll black" alias="arc-black"/>
     <ColorAlias name="piano roll black outline" alias="arc-background-dark"/>
     <ColorAlias name="piano roll white" alias="arc-white"/>
+    <ColorAlias name="piano roll offkey" alias="neutral:midground"/>
     <ColorAlias name="pianoroll: insensitive bender line" alias="arc-background-dark"/>
     <ColorAlias name="pianoroll: insensitive expression line" alias="arc-background-dark"/>
     <ColorAlias name="pianoroll: insensitive modulation line" alias="arc-background-dark"/>
