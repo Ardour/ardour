@@ -60,6 +60,7 @@ struct degree {
 
 struct scale {
 
+	std::string name;
 	std::vector <degree> degrees;
 
 	scale () {

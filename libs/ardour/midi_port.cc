@@ -31,6 +31,7 @@
 #include "ardour/debug.h"
 #include "ardour/midi_buffer.h"
 #include "ardour/midi_port.h"
+#include "ardour/scale.h"
 #include "ardour/session.h"
 
 #include "pbd/i18n.h"
@@ -45,6 +46,7 @@ bool MidiPort::sysex_midi_io_may_be_broken = false;
 
 MidiPort::MidiPort (const std::string& name, PortFlags flags)
 	: Port (name, DataType::MIDI, flags)
+	, _scale_provider (nullptr)
 	, _resolve_required (false)
 	, _input_active (true)
 	, _data_fetched_for_cycle (false)
@@ -104,6 +106,7 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 
 		void* buffer = port_engine.get_buffer (_port_handle, nframes);
 		const pframes_t event_count = port_engine.get_midi_event_count (buffer);
+		MusicalKey const * key (_scale_provider ? _scale_provider->key() : nullptr);
 
 		/* suck all MIDI events for this cycle of nframes from
 		   the MIDI port buffer into our MidiBuffer.
@@ -114,12 +117,31 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 			pframes_t timestamp;
 			size_t size;
 			uint8_t const* buf;
+			int note_number;
 
 			port_engine.midi_event_get (timestamp, size, &buf, buffer, i);
 
 			if (buf[0] == 0xfe) {
 				/* throw away active sensing */
 				continue;
+			}
+
+			uint8_t status = buf[0] & 0xf0;
+
+			if ((size == 3) && ((status == MIDI_CMD_NOTE_ON) || (status == MIDI_CMD_NOTE_OFF))) {
+
+				note_number = buf[1];
+
+				if (key && !key->in_key (buf[1])) {
+
+					int new_note = key->conform_midi_note (note_number, _scale_provider->key_enforcement_policy());
+
+					if (new_note < 0) {
+						continue;
+					} else {
+						note_number = new_note;
+					}
+				}
 			}
 
 			timestamp = floor (timestamp * resample_ratio ());
@@ -157,20 +179,30 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 			timestamp -= _global_port_buffer_offset;
 
 			if (size == 3) {
-				if (((buf[0] & 0xF0) == 0x90) && (buf[2] != 0)) {
-					NoteOn (buf[1]);
-				} else if (((buf[0] & 0xF0) == 0x80) || (((buf[0] & 0xF0) == 0x90) && (buf[2] == 0))) {
-					NoteOff (buf[1]);
+				if ((status == 0x90) && (buf[2] != 0)) {
+					NoteOn (note_number);
+				} else if ((status == 0x80) || ((status == 0x90) && (buf[2] == 0))) {
+					NoteOff (note_number);
 				}
 			}
 
-			if ((buf[0] & 0xF0) == 0x90 && buf[2] == 0) {
-				/* normalize note on with velocity 0 to proper note off */
+
+			if ((status == 0x80) || (status == 0x90)) {
+
 				uint8_t ev[3];
-				ev[0] = 0x80 | (buf[0] & 0x0F);  /* note off */
-				ev[1] = buf[1];
-				ev[2] = 0x40;  /* default velocity */
-				_buffer->push_back (timestamp, Evoral::LIVE_MIDI_EVENT, size, ev);
+
+				if ((status == 0x90) && buf[2] == 0) {
+					/* normalize note on with velocity 0 to proper note off */
+					ev[0] = 0x80 | (buf[0] & 0x0F);  /* note off */
+					ev[1] = note_number;
+					ev[2] = 0x40;  /* default off velocity */
+					_buffer->push_back (timestamp, Evoral::LIVE_MIDI_EVENT, size, ev);
+				} else {
+					ev[0] = status | (buf[0] & 0x0F); /* note on or off */
+					ev[1] = note_number;              /* possibly mutated note number */
+					ev[2] = buf[2];
+					_buffer->push_back (timestamp, Evoral::LIVE_MIDI_EVENT, size, ev);
+				}
 			} else {
 				if (buf[0] == MIDI_CMD_COMMON_SYSEX) {
 					if (sysex_midi_io_may_be_broken) {
@@ -468,4 +500,10 @@ MidiPort::add_shadow_port (string const & name, MidiFilter mf)
 	_shadow_port->set_private_latency_range (latency, false);
 
 	return 0;
+}
+
+void
+MidiPort::set_scale_provider (ScaleProvider* sp)
+{
+	_scale_provider = sp;
 }

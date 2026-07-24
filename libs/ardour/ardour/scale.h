@@ -18,37 +18,21 @@
 
 #pragma once
 
+#include <map>
 #include <string>
 #include <vector>
 
 #include "pbd/signals.h"
+#include "pbd/xml++.h"
 
 #include "ardour/libardour_visibility.h"
+#include "ardour/types.h"
 
 namespace ARDOUR {
 
-enum MusicalModeType {
-	AbsolutePitch,
-	SemitoneSteps,
-	WholeToneSteps,
-	RatioSteps,
-	RatioFromRoot,
-	MidiNote,
-};
-
-enum MusicalModeCulture {
-	WesternEurope12TET,
-	Byzantine,
-	Maqams,
-	Hindustani,
-	Carnatic,
-	SEAsia,
-	China
-};
-
-class LIBARDOUR_API MusicalMode {
-   public:
-
+class LIBARDOUR_API MusicalMode
+{
+  public:
 	enum Name {
 		IonianMajor,
 		AeolianMinor,
@@ -89,41 +73,63 @@ class LIBARDOUR_API MusicalMode {
 		Algerian
 	};
 
-	MusicalMode (std::string const & name, MusicalModeType type, std::vector<float> const & elements);
+	/* In theory we should be able to overload the singuler name, but at
+	   least gcc is unable to resolve whether a single std::string as the
+	   second argument is meant to be an initializer list or not. So we
+	   provide two versions, one plural one singular.
+
+	   The singular version should be used where there is only one accepted
+	   name for a scale; the plural (initializer list) version should be
+	   used where there is more than one.
+	*/
+	static void register_scale (TuningSystem, std::string const &, MusicalModeType, std::vector<float> const &);
+	static void register_scales (TuningSystem, std::vector<std::string> const &, MusicalModeType, std::vector<float> const &);
+
+	MusicalMode (TuningSystem, std::string const & name, MusicalModeType type, std::vector<float> const & elements);
 	MusicalMode (MusicalMode const & other);
-	MusicalMode (MusicalMode::Name);
+	MusicalMode (std::string const & name);
 	MusicalMode (std::ifstream& file); /* Read from a Scala file */
+	MusicalMode (XMLNode const &);
 
-	MusicalMode operator= (MusicalMode const & other);
+	virtual ~MusicalMode() {}
 
-	std::string name() const { return _name; }
+	MusicalMode& operator= (MusicalMode const & other);
+
+	virtual std::string name() const { return _name; }
+	TuningSystem tuning() const { return _tuning; }
 	MusicalModeType type() const { return _type; }
 	int size() const { return _elements.size(); }
 	std::vector<float> const & elements() const { return _elements; }
+	int ring_id () const;
 
-	std::vector<float> pitches_from_root (float root, int steps) const;
 	std::vector<int> as_midi (int scale_root) const;
 	void set_name (std::string const & str);
 
 	PBD::Signal<void()> NameChanged;
 	PBD::Signal<void()> Changed;
 
+	static std::multimap<TuningSystem,MusicalMode> modes_by_tuning;
+	static std::map<std::string,MusicalMode> modes_by_name;
+	static std::map<int,MusicalMode> modes_by_id;
+
+	static std::map<TuningSystem,int> tone_equivalent_ratio;
+	static std::map<TuningSystem,int> tones_per_equivalent;
+
+	XMLNode& get_state () const;
+	int set_state (XMLNode const &);
+	static char const * xml_node_name;
+
    protected:
+        TuningSystem _tuning;
+	mutable int _ring_id;
 	std::string _name;
 	MusicalModeType _type;
 	std::vector<float> _elements;
 
-	void fill (Name);
-
-	std::vector<float> absolute_pitch_pitches_from_root (float root, int steps) const;
-	std::vector<float> semitone_steps_pitches_from_root (float root, int steps) const;
-	std::vector<float> wholetone_steps_pitches_from_root (float root, int steps) const;
-	std::vector<float> ratio_steps_pitches_from_root (float root, int steps) const;
-	std::vector<float> ratio_from_root_pitches_from_root (float root, int steps) const;
-	std::vector<float> midi_note_pitches_from_root (float root, int steps) const;
+	static void init ();
 
 	std::vector<int> absolute_pitch_as_midi (int root) const;
-	std::vector<int> semitone_steps_as_midi (int root) const;
+	std::vector<int> pitch_class_as_midi (int root) const;
 	std::vector<int> wholetone_steps_as_midi (int root) const;
 	std::vector<int> ratio_steps_as_midi (int root) const;
 	std::vector<int> ratio_from_root_as_midi (int root) const;
@@ -135,16 +141,26 @@ class LIBARDOUR_API MusicalKey : public MusicalMode
 {
     public:
 	MusicalKey (float root, MusicalMode const &);
+	MusicalKey (float root, std::string const &);
+	MusicalKey (XMLNode const &);
 	MusicalKey (MusicalKey const & other);
 
-	MusicalKey operator= (MusicalKey const & other);
-
+	std::string name() const;
+	std::string mode_name() const;
 	float root() const { return _root; }
-	float nth (unsigned n) const;
+	float nth (unsigned int n) const;
+	bool  in_key (int midi_note) const;
+	int   closest_midi_note (int midi_note) const;
+	int   lower_midi_note (int midi_note) const;
+	int   higher_midi_note (int midi_note) const;
+	int   conform_midi_note (int midi_note, ARDOUR::KeyEnforcementPolicy) const;
+
+	XMLNode& get_state () const;
+	int set_state (XMLNode const &);
 
    private:
 	float _root;
-
+	mutable std::vector<int> _midi_notes;
 };
 
 } // namespace

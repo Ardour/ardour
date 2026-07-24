@@ -45,6 +45,12 @@ namespace ArdourCanvas {
 	class RectSet;
 }
 
+namespace Gtk {
+	class Menu;
+	class MenuItem;
+	class CheckMenuItem;
+}
+
 class EditingContext;
 
 /** A class that provides various context for a MidiVieww:
@@ -135,6 +141,13 @@ class MidiViewBackground : public virtual ViewBackground
 	uint8_t highest_data_note() const { return _data_note_max; }
 	uint8_t lowest_data_note() const { return _data_note_min; }
 
+	Gtk::Menu* build_key_enforcement_menu ();
+	void toggle_key_enforcement_policy (ARDOUR::KeyEnforcementPolicy kepb, Gtk::CheckMenuItem* item);
+	void setup_note_lines();
+
+	void connect_property_changes ();
+	void disconnect_property_changes ();
+
   protected:
 	EditingContext&           _editing_context;
 	bool                      _range_dirty;
@@ -148,16 +161,18 @@ class MidiViewBackground : public virtual ViewBackground
 	ARDOUR::ColorMode         _color_mode;
 	VisibleNoteRange          _visibility_note_range;
 	bool                       note_range_set;
+	Gtk::MenuItem*             kep_menu_hack;
+	PBD::ScopedConnection      track_property_connection;
 
 	void color_handler ();
 	void parameter_changed (std::string const &);
 	void note_range_adjustment_changed();
-	void setup_note_lines();
 	void update_contents_height ();
 	virtual void apply_note_range_to_children () = 0;
 	virtual bool updates_suspended() const { return false; }
 
 	void sync_data_and_visual_range ();
+	void property_change (PBD::PropertyChange const &);
 };
 
 

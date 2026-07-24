@@ -211,7 +211,7 @@ protected:
 	void reset_processor_automation_curves ();
 
 	void take_name_changed (void *src);
-	void route_property_changed (const PBD::PropertyChange&);
+	virtual void route_property_changed (const PBD::PropertyChange&);
 	void route_active_changed ();
 	bool name_entry_changed (std::string const&);
 

@@ -56,6 +56,7 @@ public:
 	Gtk::Menu& menu () { return _menu; }
 
 	void set_active (std::string const& text);
+	std::string get_active () const;
 
 	void set_active (int);
 	int get_active_row_number () const;

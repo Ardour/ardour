@@ -63,7 +63,7 @@ ChordBox::ChordBox (EditingContext& ec)
 	, inversion_label (_("Inversions"))
 	, drop_label (_("Drop Notes"))
 	, _root (0)
-	, _culture (WesternEurope12TET)
+	, _tuning (TwelveTone)
 {
 	using namespace Gtk;
 	using namespace Menu_Helpers;
@@ -74,20 +74,14 @@ ChordBox::ChordBox (EditingContext& ec)
 	}
 
 	/* these must match the enum decl order */
-	culture_button.add_menu_elem (MenuElem (_("Western 12TET"), [this]() { set_culture (WesternEurope12TET); }));
-	culture_button.add_menu_elem (MenuElem (_("Byzantine"), [this]() { set_culture (Byzantine); }));
-	culture_button.add_menu_elem (MenuElem (_("Maqams"), [this]() { set_culture (Maqams); }));;
-	culture_button.add_menu_elem (MenuElem (_("Hindustani"), [this]() { set_culture (Hindustani); }));;
-	culture_button.add_menu_elem (MenuElem (_("Carnatic"), [this]() { set_culture (Carnatic); }));;
-	culture_button.add_menu_elem (MenuElem (_("SEAsia"), [this]() { set_culture (SEAsia); }));;
-	culture_button.add_menu_elem (MenuElem (_("China"), [this]() { set_culture (China); }));
+	tuning_button.add_menu_elem (MenuElem (_("Twelve Tone"), [this]() { set_tuning (TwelveTone); }));
 
-	pack_start (culture_button, false, false);
+	pack_start (tuning_button, false, false);
 	/* Until this does something, don't show it */
-	// culture_button.show ();
-	culture_button.hide ();
-	culture_button.set_no_show_all ();
-	culture_button.set_active (0);
+	// tuning_button.show ();
+	tuning_button.hide ();
+	tuning_button.set_no_show_all ();
+	tuning_button.set_active (0);
 
 	set_border_width (12);
 	set_spacing (6);
@@ -100,32 +94,20 @@ ChordBox::~ChordBox ()
 }
 
 void
-ChordBox::set_culture (MusicalModeCulture culture)
+ChordBox::set_tuning (TuningSystem tuning)
 {
-	if (culture_button.get_active_row_number() != (int) culture) {
-		culture_button.set_active ((int) culture);
+	if (tuning_button.get_active_row_number() != (int) tuning) {
+		tuning_button.set_active ((int) tuning);
 	}
 
-	_culture = culture;
+	_tuning = tuning;
 
-	switch (_culture) {
-	case WesternEurope12TET:
-		if (western_vbox.children().empty()) {
-			build_western ();
+	switch (_tuning) {
+	case TwelveTone:
+		if (twelvetone_vbox.children().empty()) {
+			build_twelvetone ();
 		}
-		pack (western_vbox);
-		break;
-	case Byzantine:
-		break;
-	case Maqams:
-		break;
-	case Hindustani:
-		break;
-	case Carnatic:
-		break;
-	case SEAsia:
-		break;
-	case China:
+		pack (twelvetone_vbox);
 		break;
 	}
 }
@@ -134,10 +116,10 @@ ChordBox::set_culture (MusicalModeCulture culture)
 void
 ChordBox::pack (Gtk::Widget& widget)
 {
-	if (western_vbox.get_parent()) {
-		remove (western_vbox);
+	if (twelvetone_vbox.get_parent()) {
+		remove (twelvetone_vbox);
 	}
-	/* Other culture boxes go here */
+	/* Other tuning boxes go here */
 
 	pack_start (widget, false, false);
 }
@@ -269,7 +251,7 @@ ChordBox::fill_table (Gtk::Table& table, std::vector<std::string> const & names,
 }
 
 void
-ChordBox::build_western ()
+ChordBox::build_twelvetone ()
 {
 	using namespace Gtk;
 	using namespace Menu_Helpers;
@@ -347,23 +329,23 @@ ChordBox::build_western ()
 
 	name_display.modify_font (UIConfiguration::instance().get_BigBoldFont());
 
-	western_vbox.pack_start (name_display, false, false);
-	western_vbox.pack_start (triad_label, false, false);
-	western_vbox.pack_start (triad_table, false, false);
-	western_vbox.pack_start (tetrad_label, false, false);
-	western_vbox.pack_start (tetrad_table, false, false);
-	western_vbox.pack_start (ext_label, false, false);
-	western_vbox.pack_start (ext_table, false, false);
-	western_vbox.pack_start (inversion_label, false, false);
-	western_vbox.pack_start (inversion_table, false, false);
-	western_vbox.pack_start (drop_label, false, false);
-	western_vbox.pack_start (drop_table, false, false);
-	western_vbox.pack_start (arpeggiate_button, false, false);
+	twelvetone_vbox.pack_start (name_display, false, false);
+	twelvetone_vbox.pack_start (triad_label, false, false);
+	twelvetone_vbox.pack_start (triad_table, false, false);
+	twelvetone_vbox.pack_start (tetrad_label, false, false);
+	twelvetone_vbox.pack_start (tetrad_table, false, false);
+	twelvetone_vbox.pack_start (ext_label, false, false);
+	twelvetone_vbox.pack_start (ext_table, false, false);
+	twelvetone_vbox.pack_start (inversion_label, false, false);
+	twelvetone_vbox.pack_start (inversion_table, false, false);
+	twelvetone_vbox.pack_start (drop_label, false, false);
+	twelvetone_vbox.pack_start (drop_table, false, false);
+	twelvetone_vbox.pack_start (arpeggiate_button, false, false);
 
-	western_vbox.show_all ();
-	western_vbox.set_spacing (6);
+	twelvetone_vbox.show_all ();
+	twelvetone_vbox.set_spacing (6);
 
-	pack_start (western_vbox);
+	pack_start (twelvetone_vbox);
 }
 
 void

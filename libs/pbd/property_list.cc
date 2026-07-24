@@ -95,3 +95,16 @@ std::operator<< (std::ostream& os, PropertyChange const & pc)
 	pc.dump (os);
 	return os;
 }
+
+void
+PropertyChange::dump (std::ostream& out) const
+{
+	 int n = 0;
+	 for (auto const & what_changed : *this) {
+		 if (n > 0) {
+			 out << ',' ;
+		 }
+		 out << g_quark_to_string (what_changed);
+		 ++n;
+	 }
+}

@@ -224,6 +224,21 @@ Push2Menu::render (Rect const& area, Cairo::RefPtr<Cairo::Context> context) cons
 }
 
 void
+Push2Menu::set_active_text (std::string const & str)
+{
+	int n = 0;
+
+	for (auto const & d : _displays) {
+		if (d->text() == str) {
+			set_active (n);
+			break;
+		}
+
+		++n;
+	}
+}
+
+void
 Push2Menu::set_active (uint32_t index)
 {
 	if (!parent() || (index == _active)) {
@@ -266,6 +281,16 @@ Push2Menu::set_active (uint32_t index)
 	}
 
 	ActiveChanged (); /* EMIT SIGNAL */
+}
+
+std::string
+Push2Menu::active_text() const
+{
+	if (_active >= _displays.size()) {
+		return std::string();
+	}
+
+	return _displays[_active]->text();
 }
 
 void

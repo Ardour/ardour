@@ -639,15 +639,18 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			// Pump entire port buffer into the ring buffer (TODO: split cycles?)
 			MidiBuffer& buf    = bufs.get_midi (0);
 			MidiTrack* mt = dynamic_cast<MidiTrack*>(&_track);
-			MidiChannelFilter* filter = mt ? &mt->capture_filter() : 0;
+			MidiChannelFilter* filter (mt ? &mt->capture_filter() : nullptr);
 
 			assert (buf.size() == 0 || _midi_buf);
 
 			for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
-				Evoral::Event<MidiBuffer::TimeType> ev (*i, false);
+
+				Evoral::Event<MidiBuffer::TimeType> ev (*i, false); /* Evoral::Event<T> without its own buffer, we reuse the data buffer */
+
 				if (ev.time() + rec_offset > rec_nframes) {
 					break;
 				}
+
 #ifndef NDEBUG
 				if (DEBUG_ENABLED(DEBUG::MidiIO)) {
 					const uint8_t* __data = ev.buffer();
@@ -699,6 +702,14 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				if (!filter || !filter->filter(ev.buffer(), ev.size())) {
 					if (_midi_buf->write (event_time, ev.event_type(), ev.size(), ev.buffer()) == ev.size()) {
 						cnt++;
+
+						/* Copy this data into our GUI feed buffer and tell the GUI
+						 * that it can read it if it likes.
+						 */
+
+						samplepos_t mpos = (*i).time() + start_sample - _accumulated_capture_offset;
+						_gui_feed_fifo.write (mpos, Evoral::MIDI_EVENT, (*i).size(), (*i).buffer());
+
 					} else {
 						/* what? */
 					}
@@ -706,21 +717,6 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			}
 
 			_samples_pending_write.fetch_add ((int) nframes);
-
-			if (buf.size() != 0) {
-				/* Copy this data into our GUI feed buffer and tell the GUI
-				 * that it can read it if it likes.
-				*/
-				for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
-					/* This may fail if buf is larger than _gui_feed_fifo, but it's not really
-					 * the end of the world if it does.
-					 */
-					samplepos_t mpos = (*i).time() + start_sample - _accumulated_capture_offset;
-					if (mpos >= _first_recordable_sample) {
-						_gui_feed_fifo.write (mpos, Evoral::MIDI_EVENT, (*i).size(), (*i).buffer());
-					}
-				}
-			}
 
 			if (cnt) {
 				DataRecorded (_midi_write_source); /* EMIT SIGNAL */

@@ -751,6 +751,16 @@ MidiTimeAxisView::append_extra_display_menu_items ()
 }
 
 void
+MidiTimeAxisView::add_scale_related_menu_items (Gtk::Menu_Helpers::MenuList& items)
+{
+	using namespace Menu_Helpers;
+
+	if (midi_view()) {
+		items.push_back (MenuElem (_("Key Enforcement"), *(midi_view()->build_key_enforcement_menu())));
+	}
+}
+
+void
 MidiTimeAxisView::toggle_restore_pgm_on_load ()
 {
 	midi_track ()->set_restore_pgm_on_load (!midi_track ()->restore_pgm_on_load ());
@@ -1808,6 +1818,21 @@ MidiTimeAxisView::get_regions_with_selected_data (RegionSelection& rs)
 }
 
 void
+MidiTimeAxisView::route_property_changed (PBD::PropertyChange const & what_changed)
+{
+	RouteTimeAxisView::route_property_changed (what_changed);
+
+	PBD::PropertyChange our_interests;
+
+	our_interests.add (Properties::musical_mode);
+	our_interests.add (Properties::key_enforcement);
+
+	if (what_changed.contains (our_interests)) {
+		dynamic_cast<MidiStreamView*> (_view)->setup_note_lines ();
+	}
+}
+
+void
 MidiTimeAxisView::create_velocity_automation_child (Evoral::Parameter const &, bool show)
 {
 	std::shared_ptr<AutomationControl> c = midi_track()->velocity_control();
@@ -1858,4 +1883,3 @@ MidiTimeAxisView::exited ()
 	TimeAxisView::exited();
 	_editor.disable_midi_bindings ();
 }
-

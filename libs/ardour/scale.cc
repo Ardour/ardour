@@ -16,38 +16,187 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <algorithm>
 #include <cmath>
 #include <fstream>
+#include <sstream>
 
+#include "pbd/compose.h"
+#include "pbd/debug.h"
 #include "pbd/enumwriter.h"
 #include "pbd/failed_constructor.h"
 
+#include "ardour/debug.h"
 #include "ardour/scale.h"
 #include "ardour/scala_file.h"
+#include "ardour/types_convert.h"
+
+#include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 
-MusicalMode::MusicalMode (std::string const & name, MusicalModeType type, std::vector<float> const & elements)
-	: _name (name)
-	, _type (type)
-	, _elements (elements)
+std::multimap<TuningSystem,MusicalMode> MusicalMode::modes_by_tuning;
+std::map<std::string,MusicalMode> MusicalMode::modes_by_name;
+std::map<int,MusicalMode> MusicalMode::modes_by_id;
+
+std::map<TuningSystem,int> MusicalMode::tone_equivalent_ratio;
+std::map<TuningSystem,int> MusicalMode::tones_per_equivalent;
+
+char const * MusicalMode::xml_node_name = X_("musical-mode");
+
+void
+MusicalMode::init ()
 {
+	if (!tone_equivalent_ratio.empty()) {
+		/* already initialized */
+		return;
+	}
+
+	/* Frequency ratio considered to be an "equivalent" pitch. Most musical
+	 * cultures use 2.0 (the octave), but there are some examples (most in
+	 * experimental music) that use 3.0 (the tritave).
+	 */
+
+	tone_equivalent_ratio[TwelveTone] = 2;
+
+	/* Number of tones the "equivalent pitch" ratio is divided into. This
+	 * number does not imply any particular kind of division. "12" could
+	 * mean just intonation or equal-tempered or anything else.
+	 */
+
+	tones_per_equivalent[TwelveTone] = 12;
+
+
+	/* Actual scales */
+
+	register_scales (TwelveTone, { _("Major"), _("Ionian") }, PitchClass, {  2 , 4 , 5 , 7 , 9 , 11 });
+	register_scales (TwelveTone, { _("Minor"), _("Aeolian") }, PitchClass, {  2 , 3 , 5 , 7 , 8 , 10 });
+	register_scale (TwelveTone, _("Dorian"), PitchClass, { 2 , 3 , 4 , 6 , 8 , 9 , 11 });
+	register_scale (TwelveTone, _("Harmonic Minor"), PitchClass, { 2 , 3 , 5 , 7 , 10 , 11 });
+	register_scale (TwelveTone, _("Blues"), PitchClass, { 2 , 3 , 5 , 6 , 7 , 9 , 10 , 11 });
+	register_scale (TwelveTone, _("Melodic Minor Ascending"), PitchClass, { 2 , 3 , 5 , 7 , 9 , 11 });
+	register_scale (TwelveTone, _("Melodic Minor Descending"), PitchClass, { 2 , 4 , 5 , 7 , 9 , 10 });
+	register_scale (TwelveTone, _("Phrygian"), PitchClass, { 1 , 3 , 5 , 7 , 8 , 10 });
+	register_scale (TwelveTone, _("Lydian"), PitchClass, { 2 , 4 , 6 , 7 , 9 , 11 });
+	register_scale (TwelveTone, _("Mixolydian"), PitchClass, { 2 , 4 , 5 , 7 , 9 , 10 });
+	register_scale (TwelveTone, _("Locrian"), PitchClass, { 1 , 3 , 4 , 6 , 8 , 10 });
+	register_scale (TwelveTone, _("Pentatonic Major"), PitchClass, {  2 , 4 , 5 , 7 });
+	register_scale (TwelveTone, _("Pentatonic Minor"), PitchClass, { 3 , 5 , 7 , 10 });
+	register_scale (TwelveTone, _("Chromatic"), PitchClass, { 1 , 2 , 3 , 4 , 5 , 6 , 7 , 8 , 9 , 10 , 11 });
+	register_scale (TwelveTone, _("Neapolitan Minor"), PitchClass, { 1 , 3 , 5 , 5 , 8 , 11 });
+	register_scale (TwelveTone, _("Neapolitan Major"), PitchClass, { 1 , 3 , 5 , 7 , 9 , 11 });
+	register_scale (TwelveTone, _("Oriental"), PitchClass, {1 , 4 , 5 , 6 , 9 , 10 });
+	register_scale (TwelveTone, _("Double Harmonic"), PitchClass, { 1 , 3, 5, 7, 8, 11 });
+	register_scale (TwelveTone, _("Enigmatic"), PitchClass, { 1 , 4 , 6 , 8 , 10 , 11 });
+	register_scale (TwelveTone, _("Hirajoshi"), PitchClass, { 2 , 3 , 7 , 8 });
+	register_scale (TwelveTone, _("Hungarian Minor"), PitchClass, { 2 , 3 , 6 , 7 , 8 , 11 });
+	register_scale (TwelveTone, _("Hungarian Major"), PitchClass, { 2 , 4 , 6 , 7 , 8 , 10 });
+	register_scale (TwelveTone, _("Kumoi"), PitchClass, { 1 , 5 , 7 , 8 });
+	register_scale (TwelveTone, _("Iwato"), PitchClass, { 1 , 5 , 6 , 10 });
+	register_scale (TwelveTone, _("Hindu"), PitchClass, { 2 , 4 , 5 , 7 , 8 , 10 });
+	register_scale (TwelveTone, _("Spanish 8 Tone"), PitchClass, { 1 , 3 , 4 , 5 , 6 , 8 , 10 });
+	register_scale (TwelveTone, _("Pelog"), PitchClass, { 1 , 3 , 7 , 10 });
+	register_scale (TwelveTone, _("Hungarian Gypsy"), PitchClass, { 2 , 3 , 6 , 7 , 8 , 10 });
+	register_scale (TwelveTone, _("Overtone"), PitchClass, { 2 , 4 , 6 , 7 , 9 , 10 });
+	register_scale (TwelveTone, _("Leading Semitone"), PitchClass, { 2 , 4 , 6 , 8 , 10 , 11 });
+	register_scale (TwelveTone, _("Arabian"), PitchClass, { 2 , 4 , 5 , 6 , 8 , 10 });
+	register_scale (TwelveTone, _("Balinese"), PitchClass, { 1 , 3 , 7 , 8 });
+	register_scale (TwelveTone, _("Gypsy"), PitchClass, { 2, 3, 6, 7, 8, 10 });
+	register_scale (TwelveTone, _("Mohammedan"), PitchClass, { 2 , 3 , 5 , 7 , 8 , 11 });
+	register_scale (TwelveTone, _("Javanese"), PitchClass, { 1 , 3 , 5 , 7 , 9 , 10 });
+	register_scale (TwelveTone, _("Persian"), PitchClass, { 1 , 4 , 5 , 6 , 8 , 11 });
+	register_scale (TwelveTone, _("Algerian"), PitchClass, { 2 , 3, 5, 6, 7, 8, 11 });
+}
+
+void
+MusicalMode::register_scale (TuningSystem ts, std::string const & name, MusicalModeType type, std::vector<float> const & ints)
+{
+	MusicalMode mm (ts, name, type, ints);
+	modes_by_tuning.insert (std::make_pair (ts, mm));
+	modes_by_name.insert (std::make_pair (name, mm));
+	int id = mm.ring_id ();
+
+	if (id > 0) {
+		auto ret = modes_by_id.find (id);
+		if (ret != modes_by_id.end()) {
+			std::cerr << "trying to insert " << name << " but ring ID matches " << ret->second.name() << std::endl;
+		} else {
+			modes_by_id.insert (std::make_pair (id, mm));
+		}
+	}
+}
+
+void
+MusicalMode::register_scales (TuningSystem ts, std::vector<std::string> const & names, MusicalModeType type, std::vector<float> const & ints)
+{
+	assert (!names.empty());
+	MusicalMode mm (ts, names.front(), type, ints);
+	modes_by_tuning.insert (std::make_pair (ts, mm));
+	for (auto const & nom : names) {
+		modes_by_name.insert (std::make_pair (nom, mm));
+	}
+
+	int id = mm.ring_id ();
+
+	if (id > 0) {
+		auto ret = modes_by_id.insert (std::make_pair (id, mm));
+
+		if (!ret.second) {
+			auto e = modes_by_id.find (id);
+			std::cerr << "trying to insert " << names.front() << " but ring ID matches " << e->second.name() << std::endl;
+		}
+	}
+}
+
+MusicalMode::MusicalMode (TuningSystem ts, std::string const & name, MusicalModeType type, std::vector<float> const & elements)
+	: _tuning (ts)
+	, _ring_id (0)
+	, _name (name)
+	, _type (type)
+{
+	init ();
+
+	_elements.push_back (0); /* root */
+	_elements.insert (_elements.end(), elements.begin(), elements.end());
 }
 
 MusicalMode::MusicalMode (MusicalMode const & other)
-	: _name (other._name)
+	: _tuning (other._tuning)
+	, _ring_id (other._ring_id)
+	, _name (other._name)
 	, _type (other._type)
 	, _elements (other._elements)
 {
+	init ();
 }
 
-MusicalMode::MusicalMode (MusicalMode::Name name)
+MusicalMode::MusicalMode (std::string const & name)
 {
-	fill (name);
+	init ();
+
+	auto ret = modes_by_name.find (name);
+	if (ret == modes_by_name.end()) {
+		throw failed_constructor();
+	}
+
+	*this = ret->second;
+}
+
+MusicalMode::MusicalMode (XMLNode const & node)
+{
+	if (set_state (node)) {
+		throw failed_constructor ();
+	}
 }
 
 MusicalMode::MusicalMode (std::ifstream& file)
+	: _ring_id (0)
 {
+	init ();
+
+	/* XXXX need to set tuning system */
+
 	try {
 		scala::scale scl (scala::read_scl (file));
 
@@ -62,13 +211,134 @@ MusicalMode::MusicalMode (std::ifstream& file)
 	}
 }
 
-MusicalMode
+MusicalMode&
 MusicalMode::operator= (MusicalMode const & other)
 {
+	_tuning = other._tuning;
+	_ring_id = other._ring_id;
 	_name = other._name;
+	_type = other._type;
 	_elements = other._elements;
 
 	return *this;
+}
+
+XMLNode&
+MusicalMode::get_state () const
+{
+	XMLNode* node = new XMLNode (xml_node_name);
+	node->set_property (X_("tuning"), _tuning);
+	node->set_property (X_("ring"), _ring_id);
+	node->set_property (X_("type"), _type);
+	node->set_property (X_("name"), _name);
+
+	std::stringstream ss;
+	for (auto n: _elements) {
+		ss << n << ',';
+	}
+	std::string str (ss.str());
+	str.pop_back(); /* remove final comma */
+	node->set_property (X_("elements"), str);
+
+	return *node;
+}
+
+int
+MusicalMode::set_state (XMLNode const & node)
+{
+	if (node.name() != xml_node_name) {
+		return -1;
+	}
+
+	if (!node.get_property (X_("tuning"), _tuning)) {
+		return -1;
+	}
+	if (!node.get_property (X_("ring"), _ring_id)) {
+		return -1;
+	}
+	if (!node.get_property (X_("type"), _type)) {
+		return -1;
+	}
+	if (!node.get_property (X_("name"), _name)) {
+		return -1;
+	}
+
+	std::string str;
+	if (!node.get_property (X_("elements"), str)) {
+		return -1;
+	}
+
+	std::stringstream ss;
+	ss << str;
+
+	std::vector<float> el;
+	while (ss) {
+		float n;
+		char comma;
+		ss >> n;
+		ss >> comma;
+		el.push_back (n);
+	}
+
+	_elements = el;
+
+	return 0;
+}
+
+int
+MusicalMode::ring_id () const
+{
+	if (_ring_id != 0) {
+		return _ring_id;
+	}
+
+	auto ret = tones_per_equivalent.find (_tuning);
+
+	if (ret == tones_per_equivalent.end()) {
+		return -1;
+	}
+
+	int tpe = ret->second;
+	std::vector<bool> intervals_included;
+	intervals_included.assign (tpe, false);
+	intervals_included[0] = 1; /* root note always included */
+
+	switch (_type) {
+	case AbsolutePitch:
+	case RatioSteps:
+	case RatioFromRoot:
+		/* Must use name to look up this scale */
+		_ring_id = -1;
+		break;
+
+	case PitchClass:
+		for (auto e : _elements) {
+			int interval = int (floor (e));
+			intervals_included[interval] = true;
+		}
+		break;
+
+	case MidiNote:
+		for (auto e : _elements) {
+			int interval = int (floor (e));
+			intervals_included[interval] = true;
+		}
+		break;
+	}
+
+
+	int mult = 1;
+
+	for (auto yn : intervals_included) {
+		if (yn) {
+			_ring_id += mult;
+		}
+		mult *= 2;
+	}
+
+	_ring_id += (tpe << 16);
+
+	return _ring_id;
 }
 
 void
@@ -78,381 +348,8 @@ MusicalMode::set_name (std::string const & str)
 	NameChanged(); /* EMIT SIGNAL */
 }
 
-std::vector<float>
-MusicalMode::pitches_from_root (float root, int steps) const
-{
-	switch (_type) {
-	case AbsolutePitch:
-		return absolute_pitch_pitches_from_root (root, steps);
-	case SemitoneSteps:
-		return semitone_steps_pitches_from_root (root, steps);
-	case WholeToneSteps:
-		return wholetone_steps_pitches_from_root (root, steps);
-	case RatioSteps:
-		return ratio_steps_pitches_from_root (root, steps);
-	case RatioFromRoot:
-		return ratio_from_root_pitches_from_root (root, steps);
-	case MidiNote:
-		return midi_note_pitches_from_root (root, steps);
-	}
 
-	/*NOTREACHED*/
-	return std::vector<float> ();
-}
-
-std::vector<float>
-MusicalMode::midi_note_pitches_from_root (float root, int steps) const
-{
-	std::vector<float> pitches;
-	return pitches;
-}
-
-std::vector<float>
-MusicalMode::absolute_pitch_pitches_from_root (float root, int steps) const
-{
-	std::vector<float> pitches;
-	return pitches;
-}
-
-std::vector<float>
-MusicalMode::semitone_steps_pitches_from_root (float root, int steps) const
-{
-	std::vector<float> pitches;
-	return pitches;
-}
-
-std::vector<float>
-MusicalMode::wholetone_steps_pitches_from_root (float root, int steps) const
-{
-	std::vector<float> pitches;
-	return pitches;
-}
-
-std::vector<float>
-MusicalMode::ratio_steps_pitches_from_root (float root, int steps) const
-{
-	std::vector<float> pitches;
-	return pitches;
-}
-
-std::vector<float>
-MusicalMode::ratio_from_root_pitches_from_root (float root, int steps) const
-{
-	std::vector<float> pitches;
-	return pitches;
-}
-
-void
-MusicalMode::fill (Name nom)
-{
-	_elements.clear ();
-	_type = WholeToneSteps;
-	_name = enum_2_string (nom);
-
-	/* scales/modes as distances from root, expressed
-	   in fractional whole tones.
-	*/
-
-	switch (nom) {
-	case Dorian:
-		_elements.push_back (1.0);
-		_elements.push_back (1.5);
-		_elements.push_back (2.0);
-		_elements.push_back (3.0);
-		_elements.push_back (4.0);
-		_elements.push_back (4.5);
-		_elements.push_back (5.5);
-		break;
-	case IonianMajor:
-		_elements.push_back (1.0);
-		_elements.push_back (2.0);
-		_elements.push_back (2.5);
-		_elements.push_back (3.5);
-		_elements.push_back (4.5);
-		_elements.push_back (5.5);
-		break;
-	case AeolianMinor:
-		_elements.push_back (1.0);
-		_elements.push_back (1.5);
-		_elements.push_back (2.5);
-		_elements.push_back (3.5);
-		_elements.push_back (4.0);
-		_elements.push_back (5.0);
-		break;
-	case HarmonicMinor:
-		_elements.push_back (1.0);
-		_elements.push_back (1.5);
-		_elements.push_back (2.5);
-		_elements.push_back (3.5);
-		_elements.push_back (5.0);
-		_elements.push_back (5.5);
-		break;
-	case  BluesScale:
-		_elements.push_back (1.0);
-		_elements.push_back (1.5);
-		_elements.push_back (2.5);
-		_elements.push_back (3);
-		_elements.push_back (3.5);
-		_elements.push_back (4.5);
-		_elements.push_back (5.0);
-		_elements.push_back (5.5);
-		break;
-	case MelodicMinorAscending:
-		_elements.push_back (1.0);
-		_elements.push_back (1.5);
-		_elements.push_back (2.5);
-		_elements.push_back (3.5);
-		_elements.push_back (4.5);
-		_elements.push_back (5.5);
-		break;
-	case MelodicMinorDescending:
-		_elements.push_back (1.0);
-		_elements.push_back (2.0);
-		_elements.push_back (2.5);
-		_elements.push_back (3.5);
-		_elements.push_back (4.5);
-		_elements.push_back (5.0);
-		break;
-	case Phrygian:
-		_elements.push_back (0.5);
-		_elements.push_back (1.5);
-		_elements.push_back (2.5);
-		_elements.push_back (3.5);
-		_elements.push_back (4.0);
-		_elements.push_back (5.0);
-		break;
-	case Lydian:
-		_elements.push_back (1.0);
-		_elements.push_back (2.0);
-		_elements.push_back (3.0);
-		_elements.push_back (3.5);
-		_elements.push_back (4.5);
-		_elements.push_back (5.5);
-		break;
-	case Mixolydian:
-		_elements.push_back (1.0);
-		_elements.push_back (2.0);
-		_elements.push_back (2.5);
-		_elements.push_back (3.5);
-		_elements.push_back (4.5);
-		_elements.push_back (5.0);
-		break;
-	case Locrian:
-		_elements.push_back (0.5);
-		_elements.push_back (1.5);
-		_elements.push_back (2.0);
-		_elements.push_back (3.0);
-		_elements.push_back (4.0);
-		_elements.push_back (5.0);
-		break;
-	case PentatonicMajor:
-		_elements.push_back (1.0);
-		_elements.push_back (2.0);
-		_elements.push_back (2.5);
-		_elements.push_back (3.5);
-		break;
-	case PentatonicMinor:
-		_elements.push_back (1.5);
-		_elements.push_back (2.5);
-		_elements.push_back (3.5);
-		_elements.push_back (5.0);
-		break;
-	case  Chromatic:
-		_elements.push_back (0.5);
-		_elements.push_back (1.0);
-		_elements.push_back (1.5);
-		_elements.push_back (2.0);
-		_elements.push_back (2.5);
-		_elements.push_back (3.0);
-		_elements.push_back (3.5);
-		_elements.push_back (4.0);
-		_elements.push_back (4.5);
-		_elements.push_back (5.0);
-		_elements.push_back (5.5);
-		break;
-	case  NeapolitanMinor:
-		_elements.push_back (0.5);
-		_elements.push_back (1.5);
-		_elements.push_back (2.5);
-		_elements.push_back (2.5);
-		_elements.push_back (4.0);
-		_elements.push_back (5.5);
-		break;
-	case  NeapolitanMajor:
-		_elements.push_back (0.5);
-		_elements.push_back (1.5);
-		_elements.push_back (2.5);
-		_elements.push_back (3.5);
-		_elements.push_back (4.5);
-		_elements.push_back (5.5);
-		break;
-	case  Oriental:
-		_elements.push_back (0.5);
-		_elements.push_back (2.0);
-		_elements.push_back (2.5);
-		_elements.push_back (3.0);
-		_elements.push_back (4.5);
-		_elements.push_back (5.0);
-		break;
-	case  DoubleHarmonic:
-		_elements.push_back (0.5);
-		_elements.push_back (2.0);
-		_elements.push_back (2.5);
-		_elements.push_back (3.5);
-		_elements.push_back (4.0);
-		_elements.push_back (5.5);
-		break;
-	case  Enigmatic:
-		_elements.push_back (0.5);
-		_elements.push_back (2.0);
-		_elements.push_back (3.0);
-		_elements.push_back (4.0);
-		_elements.push_back (5.0);
-		_elements.push_back (5.5);
-		break;
-	case  Hirajoshi:
-		_elements.push_back (1.0);
-		_elements.push_back (1.5);
-		_elements.push_back (3.5);
-		_elements.push_back (4.0);
-		break;
-	case  HungarianMinor:
-		_elements.push_back (1.0);
-		_elements.push_back (1.5);
-		_elements.push_back (3.0);
-		_elements.push_back (3.5);
-		_elements.push_back (4.0);
-		_elements.push_back (5.5);
-		break;
-	case  HungarianMajor:
-		_elements.push_back (1.0);
-		_elements.push_back (2.0);
-		_elements.push_back (3.0);
-		_elements.push_back (3.5);
-		_elements.push_back (4.0);
-		_elements.push_back (5.0);
-		break;
-	case  Kumoi:
-		_elements.push_back (0.5);
-		_elements.push_back (2.5);
-		_elements.push_back (3.5);
-		_elements.push_back (4.0);
-		break;
-	case  Iwato:
-		_elements.push_back (0.5);
-		_elements.push_back (2.5);
-		_elements.push_back (3.0);
-		_elements.push_back (5.0);
-		break;
-	case  Hindu:
-		_elements.push_back (1.0);
-		_elements.push_back (2.0);
-		_elements.push_back (2.5);
-		_elements.push_back (3.5);
-		_elements.push_back (4.0);
-		_elements.push_back (5.0);
-		break;
-	case  Spanish8Tone:
-		_elements.push_back (0.5);
-		_elements.push_back (1.5);
-		_elements.push_back (2.0);
-		_elements.push_back (2.5);
-		_elements.push_back (3.0);
-		_elements.push_back (4.0);
-		_elements.push_back (5.0);
-		break;
-	case  Pelog:
-		_elements.push_back (0.5);
-		_elements.push_back (1.5);
-		_elements.push_back (3.5);
-		_elements.push_back (5.0);
-		break;
-	case  HungarianGypsy:
-		_elements.push_back (1.0);
-		_elements.push_back (1.5);
-		_elements.push_back (3.0);
-		_elements.push_back (3.5);
-		_elements.push_back (4.0);
-		_elements.push_back (5.0);
-		break;
-	case  Overtone:
-		_elements.push_back (1.0);
-		_elements.push_back (2.0);
-		_elements.push_back (3.0);
-		_elements.push_back (3.5);
-		_elements.push_back (4.5);
-		_elements.push_back (5.0);
-		break;
-	case  LeadingWholeTone:
-		_elements.push_back (1.0);
-		_elements.push_back (2.0);
-		_elements.push_back (3.0);
-		_elements.push_back (4.0);
-		_elements.push_back (5.0);
-		_elements.push_back (5.5);
-		break;
-	case  Arabian:
-		_elements.push_back (1.0);
-		_elements.push_back (2.0);
-		_elements.push_back (2.5);
-		_elements.push_back (3.0);
-		_elements.push_back (4.0);
-		_elements.push_back (5.0);
-		break;
-	case  Balinese:
-		_elements.push_back (0.5);
-		_elements.push_back (1.5);
-		_elements.push_back (3.5);
-		_elements.push_back (4.0);
-		break;
-	case  Gypsy:
-		_elements.push_back (0.5);
-		_elements.push_back (2.0);
-		_elements.push_back (2.5);
-		_elements.push_back (3.5);
-		_elements.push_back (4.0);
-		_elements.push_back (5.5);
-		break;
-	case  Mohammedan:
-		_elements.push_back (1.0);
-		_elements.push_back (1.5);
-		_elements.push_back (2.5);
-		_elements.push_back (3.5);
-		_elements.push_back (4.0);
-		_elements.push_back (5.5);
-		break;
-	case  Javanese:
-		_elements.push_back (0.5);
-		_elements.push_back (1.5);
-		_elements.push_back (2.5);
-		_elements.push_back (3.5);
-		_elements.push_back (4.5);
-		_elements.push_back (5.0);
-		break;
-	case  Persian:
-		_elements.push_back (0.5);
-		_elements.push_back (2.0);
-		_elements.push_back (2.5);
-		_elements.push_back (3.0);
-		_elements.push_back (4.0);
-		_elements.push_back (5.5);
-		break;
-	case  Algerian:
-		_elements.push_back (1.0);
-		_elements.push_back (1.5);
-		_elements.push_back (3.0);
-		_elements.push_back (3.5);
-		_elements.push_back (4.0);
-		_elements.push_back (5.5);
-		_elements.push_back (6.0);
-		_elements.push_back (7.0);
-		_elements.push_back (7.5);
-		_elements.push_back (8.5);
-		break;
-	}
-}
-
-/** Return a sorted vector of all notes in a musical mode.
+/** Return a sorted vector of all MIDI notes in a musical mode.
  *
  * The returned vector has every possible MIDI note number (0 through 127
  * inclusive) that is in the mode in any octave.
@@ -463,10 +360,8 @@ MusicalMode::as_midi (int scale_root) const
 	switch (_type) {
 	case AbsolutePitch:
 		return absolute_pitch_as_midi (scale_root);
-	case SemitoneSteps:
-		return semitone_steps_as_midi (scale_root);
-	case WholeToneSteps:
-		return wholetone_steps_as_midi (scale_root);
+	case PitchClass:
+		return pitch_class_as_midi (scale_root);
 	case RatioSteps:
 		return ratio_steps_as_midi (scale_root);
 	case RatioFromRoot:
@@ -512,11 +407,11 @@ MusicalMode::midi_note_as_midi (int root) const
 }
 
 std::vector<int>
-MusicalMode::semitone_steps_as_midi (int scale_root) const
+MusicalMode::pitch_class_as_midi (int scale_root) const
 {
 	std::vector<int> midi_notes;
 
-	int root = scale_root - 12;
+	int root = (scale_root % 12) - 12;
 
 	// Repeatedly loop through the intervals in an octave
 	for (std::vector<float>::const_iterator i = _elements.begin ();;) {
@@ -552,7 +447,7 @@ MusicalMode::wholetone_steps_as_midi (int scale_root) const
 {
 	std::vector<int> midi_notes;
 
-	int root = scale_root - 12;
+	int root = (scale_root % 12) - 12;
 
 	// Repeatedly loop through the intervals in an octave
 	for (std::vector<float>::const_iterator i = _elements.begin ();;) {
@@ -604,6 +499,28 @@ MusicalKey::MusicalKey (float root, MusicalMode const & sc)
 	: MusicalMode (sc)
 	, _root (root)
 {
+	/* Not sure this is conceptually correct. We haven't specified what the
+	   units of "root" are to the caller.
+	*/
+	switch (_tuning) {
+	case TwelveTone:
+		_root = int (_root) % 12;
+		break;
+	}
+}
+
+MusicalKey::MusicalKey (float root, std::string const & mode_name)
+	: MusicalMode (mode_name)
+	, _root (root)
+{
+	/* Not sure this is conceptually correct. We haven't specified what the
+	   units of "root" are to the caller.
+	*/
+	switch (_tuning) {
+	case TwelveTone:
+		_root = int (_root) % 12;
+		break;
+	}
 }
 
 MusicalKey::MusicalKey (MusicalKey const & other)
@@ -612,22 +529,191 @@ MusicalKey::MusicalKey (MusicalKey const & other)
 {
 }
 
-MusicalKey
-MusicalKey::operator= (MusicalKey const & other)
+MusicalKey::MusicalKey (XMLNode const & node)
+	: MusicalMode (node)
 {
-	MusicalMode::operator= (other);
-	_root = other._root;
-
-	return *this;
+	if (!node.get_property (X_("root"), _root)) {
+		throw failed_constructor ();
+	}
 }
 
 float
 MusicalKey::nth (unsigned n) const
 {
-	if (n >= _elements.size()) {
-		return -1.0f;
+	switch (_type) {
+	case PitchClass:
+		return _root + _elements[n%_elements.size()];
+		break;
 	}
 
-#pragma GCC warning "warning paul you need to fix this"
-	return 99;
+	return -1.f;
+}
+
+bool
+MusicalKey::in_key (int midi_note) const
+{
+	if (_midi_notes.empty()) {
+		_midi_notes = as_midi (_root);
+	}
+
+	return (std::find (_midi_notes.begin(), _midi_notes.end(), midi_note) != _midi_notes.end());
+}
+
+int
+MusicalKey::lower_midi_note (int midi_note) const
+{
+	if (_midi_notes.empty()) {
+		_midi_notes = as_midi (_root);
+	}
+
+	assert (!_midi_notes.empty());
+
+	if (midi_note < _midi_notes.front()) {
+		return _midi_notes.front();
+	}
+
+	if (midi_note > _midi_notes.back()) {
+		return _midi_notes.back();
+	}
+
+	auto lb = std::lower_bound (_midi_notes.begin(), _midi_notes.end(), midi_note);
+
+	assert (lb != _midi_notes.end()); /* addressed in previous conditionals */
+	assert (lb != _midi_notes.begin()); /* addressed in previous conditionals */
+
+	--lb;
+
+	/* *lb could equal midi_note or be lower than it */
+
+	return *lb;
+}
+
+int
+MusicalKey::higher_midi_note (int midi_note) const
+{
+	if (_midi_notes.empty()) {
+		_midi_notes = as_midi (_root);
+	}
+
+	assert (!_midi_notes.empty());
+
+	if (midi_note < _midi_notes.front()) {
+		return _midi_notes.front();
+	}
+
+	if (midi_note > _midi_notes.back()) {
+		return _midi_notes.back();
+	}
+
+	auto ub = std::upper_bound (_midi_notes.begin(), _midi_notes.end(), midi_note);
+
+	assert (ub != _midi_notes.end()); /* addressed in previous conditionals */
+
+	/* *ub must be > midi_note */
+
+	return *ub;
+}
+
+int
+MusicalKey::closest_midi_note (int midi_note) const
+{
+	if (_midi_notes.empty()) {
+		_midi_notes = as_midi (_root);
+	}
+
+	assert (!_midi_notes.empty());
+
+	if (midi_note < _midi_notes.front()) {
+		return _midi_notes.front();
+	}
+
+	if (midi_note > _midi_notes.back()) {
+		return _midi_notes.back();
+	}
+
+	auto lb = std::lower_bound (_midi_notes.begin(), _midi_notes.end(), midi_note);
+
+	assert (lb != _midi_notes.end()); /* addressed in previous conditionals */
+	assert (lb != _midi_notes.begin()); /* addressed in previous conditionals */
+
+	if (midi_note == *lb) {
+		return midi_note;
+	}
+
+	/* lower bound did not equal midi_note, so it must be lower */
+
+	int prev = *lb;
+	++lb;
+	int next = *lb;
+
+	if ((midi_note - prev) < (next - midi_note)) {
+		return prev;
+	}
+
+	return next;
+}
+
+int
+MusicalKey::conform_midi_note (int midi_note, KeyEnforcementPolicy key_enforcment_policy) const
+{
+	bool ok = in_key (midi_note);
+
+	if (ok) {
+		return midi_note;
+	}
+
+	if (key_enforcment_policy & NoInsert) {
+		DEBUG_TRACE (DEBUG::MidiIO, string_compose ("dropped note %1 due to key enforcement policy for %2\n", midi_note, name()));
+		return -1;
+	}
+
+	int new_note;
+
+	if (key_enforcment_policy & ForceNearest) {
+		int old = midi_note;
+		new_note = closest_midi_note (midi_note);
+		std::cerr << string_compose ("mutated note to %1 from %2 due to key enforcement policy for %2\n", new_note, old, name());
+	} else if (key_enforcment_policy & ForceLower) {
+		int old = midi_note;
+		new_note = lower_midi_note (midi_note);
+		std::cerr << string_compose ("mutated note to %1 from %2 due to key enforcement policy for %2\n", new_note, old, name());
+	} else if (key_enforcment_policy & ForceHigher) {
+		int old = midi_note;
+		new_note = higher_midi_note (midi_note);
+		std::cerr << string_compose ("mutated note to %1 from %2 due to key enforcement policy for %2\n", new_note, old, name());
+	}
+
+	return new_note;
+}
+
+std::string
+MusicalKey::name() const
+{
+	return string_compose (_("%1 %2"), (char) (_root + 'C'), mode_name());
+}
+
+std::string
+MusicalKey::mode_name() const
+{
+	return MusicalMode::name();
+}
+
+XMLNode&
+MusicalKey::get_state () const
+{
+	XMLNode& node (MusicalMode::get_state());
+	node.set_property (X_("root"), _root);
+	return node;
+}
+
+int
+MusicalKey::set_state (XMLNode const & node)
+{
+	if (MusicalMode::set_state (node)) {
+		return -1;
+	}
+
+	node.get_property (X_("root"), _root);
+
+	return 0;
 }

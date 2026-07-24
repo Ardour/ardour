@@ -85,6 +85,8 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 
 	UIConfiguration::instance().ColorsChanged.connect(sigc::mem_fun(*this, &MidiStreamView::color_handler));
 	UIConfiguration::instance().ParameterChanged.connect(sigc::mem_fun(*this, &MidiStreamView::parameter_changed));
+
+	MidiViewBackground::connect_property_changes ();
 }
 
 MidiStreamView::~MidiStreamView ()
@@ -279,8 +281,7 @@ MidiStreamView::redisplay_track ()
 	_range_dirty = false;
 	_data_note_min = 127;
 	_data_note_max = 0;
-	_trackview.track()->playlist()->foreach_region(
-		sigc::mem_fun (*this, &StreamView::update_contents_metrics));
+	_trackview.track()->playlist()->foreach_region (sigc::mem_fun (*this, &StreamView::update_contents_metrics));
 
 	// No notes, use default range
 	if (!_range_dirty) {

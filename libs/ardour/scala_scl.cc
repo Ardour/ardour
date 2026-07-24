@@ -85,10 +85,11 @@ read_scl (std::ifstream& input_file)
 		} else {
 			// Extract the part after optional leading whitespace and before an optional space and label
 			std::regex_search(buffer, trimmed, std::regex("([ \t]*)([^ \t]*)(.*)"));
-			std::string entry = trimmed[2];
+			std::string entry = trimmed[2]; /* Might be empty */
 			if (non_commnets_processed == 0) {
 				// First non-comment is the description. Can be ignored
 				non_commnets_processed = non_commnets_processed + 1;
+				scala_scale.name = entry;
 #ifdef SCALA_STRICT
 				description_parsed = true;
 #endif

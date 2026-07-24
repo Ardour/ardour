@@ -27,6 +27,7 @@ widgets_sources = [
         'ardour_spinner.cc',
         'barcontroller.cc',
         'binding_proxy.cc',
+        'bracelet.cc',
         'eventboxext.cc',
         'choice.cc',
         'fader_widget.cc',

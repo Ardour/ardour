@@ -16,32 +16,40 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "scale_dialog.h"
+#include "ytkmm/stock.h"
+
+#include "pbd/unwind.h"
+
+#include "ardour/parameter_descriptor.h"
 
 #include "gtkmm2ext/utils.h"
+#include "widgets/bracelet.h"
+
+#include "scale_dialog.h"
+#include "ui_config.h"
 
 #include "pbd/i18n.h"
 
 std::map<ARDOUR::MusicalModeType,std::string> ScaleDialog::type_string_map;
 std::map<std::string,ARDOUR::MusicalModeType> ScaleDialog::string_type_map;
 
+using namespace ARDOUR;
 
 void
 ScaleDialog::fill_maps ()
 {
 	struct stpair {
-		stpair (char const * const s, ARDOUR::MusicalModeType t) : str (s), type (t) {}
+		stpair (char const * const s, MusicalModeType t) : str (s), type (t) {}
 		char const * const str;
-		ARDOUR::MusicalModeType type;
+		MusicalModeType type;
 	};
 
 	std::vector<stpair> pairs = {
-		{ _("Absolute Pitch (Hz)"), ARDOUR::AbsolutePitch },
-		{ _("Semitone Steps") ,ARDOUR::SemitoneSteps },
-		{ _("Whole Tone Steps"), ARDOUR::WholeToneSteps },
-		{ _("Ratio steps"), ARDOUR::RatioSteps },
-		{ _("Ratios from root"), ARDOUR::RatioFromRoot },
-		{ _("MIDI Note Numbers"), ARDOUR::MidiNote },
+		{ _("Absolute Pitch (Hz)"), AbsolutePitch },
+		{ _("Pitch Class"), PitchClass },
+		{ _("Ratio Steps"), RatioSteps },
+		{ _("Ratios from root"), RatioFromRoot },
+		{ _("MIDI Note Numbers"), MidiNote },
 		};
 
 	for (auto const & p : pairs) {
@@ -50,47 +58,51 @@ ScaleDialog::fill_maps ()
 	}
 }
 
-ScaleDialog::ScaleDialog ()
+ScaleDialog::ScaleDialog (std::string const & provider_name)
 	: ArdourDialog (_("Scale Editor"))
-	, _key (440.0, ARDOUR::MusicalMode (ARDOUR::MusicalMode::IonianMajor))
-	, name_label (_("Name"))
+	, provider (provider_name)
+	, _tuning (TwelveTone)
+	, _key (nullptr)
 	, type_label (_("Type"))
+	, tuning_label (_("Tuning System"))
 	, step_adjustment (7, 1, 56, 1, 8)
 	, steps_label (_("Pitches"))
 	, step_spinner (step_adjustment)
 	, scala_label (_("Load a Scala file"))
-	, clear_button (_("Remove scale"))
+	, ignore_set (false)
+	, bracelet (nullptr)
 {
 	if (type_string_map.empty()) {
 		fill_maps ();
 	}
 
+	using namespace Gtk;
 	using namespace Gtk::Menu_Helpers;
 
-	culture_dropdown.add_menu_elem (MenuElem (_("Western Europe (12TET)"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::fill_dropdowns), ARDOUR::WesternEurope12TET)));
-	culture_dropdown.add_menu_elem (MenuElem (_("Byzantine"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::fill_dropdowns), ARDOUR::Byzantine)));
-	culture_dropdown.add_menu_elem (MenuElem (_("Maqams"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::fill_dropdowns), ARDOUR::Maqams)));
-	culture_dropdown.add_menu_elem (MenuElem (_("Hindustani"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::fill_dropdowns), ARDOUR::Hindustani)));
-	culture_dropdown.add_menu_elem (MenuElem (_("Carnatic"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::fill_dropdowns), ARDOUR::Carnatic)));
-	culture_dropdown.add_menu_elem (MenuElem (_("SE Asian Archipelago"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::fill_dropdowns), ARDOUR::SEAsia)));
-	culture_dropdown.add_menu_elem (MenuElem (_("China"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::fill_dropdowns), ARDOUR::China)));
+	Gtk::HBox* inner_tuning_box (manage (new Gtk::HBox));
+	inner_tuning_box->set_spacing (12);
+	inner_tuning_box->set_border_width (12);
 
-	culture_dropdown.set_active (0); 
+	clear_label.set_markup (string_compose ("<span size=\"large\">%1</span>", _("Remove Scale")));
+	clear_button.add (clear_label);
+	clear_label.set_padding (12, 12);
 
-	root_mode_box.pack_start (root_dropdown, true, false);
-	root_mode_box.pack_start (mode_dropdown, true, false);
+	tuning_dropdown.add_menu_elem (MenuElem (_("Twelve Tone"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::fill_dropdowns), TwelveTone)));
+	tuning_dropdown.set_active (0);
 
-	named_scale_box.pack_start (culture_dropdown, false, false);
-	named_scale_box.pack_start (root_mode_box, false, false);
+	inner_tuning_box->pack_start (tuning_label, false, false);
+	inner_tuning_box->pack_start (tuning_dropdown, true, true);
 
-	type_dropdown.add_menu_elem (MenuElem (_("Absolute Pitch (Hz)"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), ARDOUR::AbsolutePitch)));
-	type_dropdown.add_menu_elem (MenuElem (_("Semitone Steps"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), ARDOUR::SemitoneSteps)));
-	type_dropdown.add_menu_elem (MenuElem (_("Whole Tone Steps"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), ARDOUR::WholeToneSteps)));
-	type_dropdown.add_menu_elem (MenuElem (_("Ratio steps"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), ARDOUR::RatioSteps)));
-	type_dropdown.add_menu_elem (MenuElem (_("Ratios from root"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), ARDOUR::RatioFromRoot)));
-	type_dropdown.add_menu_elem (MenuElem (_("MIDI Note Numbers"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), ARDOUR::MidiNote)));
+	root_mode_box.pack_start (root_dropdown, false, false);
+	root_mode_box.pack_start (mode_dropdown, true, true);
 
-	type_dropdown.set_active (_("Semitone Steps"));
+	mode_dropdown.menu().signal_selection_done ().connect (sigc::mem_fun (*this, &ScaleDialog::mode_changed));
+
+	type_dropdown.add_menu_elem (MenuElem (_("Absolute Pitch (Hz)"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), AbsolutePitch)));
+	type_dropdown.add_menu_elem (MenuElem (_("Pitch Class"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), PitchClass)));
+	type_dropdown.add_menu_elem (MenuElem (_("Ratio steps"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), RatioSteps)));
+	type_dropdown.add_menu_elem (MenuElem (_("Ratios from root"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), RatioFromRoot)));
+	type_dropdown.add_menu_elem (MenuElem (_("MIDI Note Numbers"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), MidiNote)));
 
 	Gtk::HBox* inner_type_box (manage (new Gtk::HBox));
 	inner_type_box->pack_start (type_label, false, false);
@@ -98,13 +110,17 @@ ScaleDialog::ScaleDialog ()
 	inner_type_box->set_spacing (12);
 	type_box.pack_start (*inner_type_box, true, false);
 
-	Gtk::HBox* inner_name_box (manage (new Gtk::HBox));
-
+	Gtk::VBox* inner_name_box (manage (new Gtk::VBox));
+	Gtk::Label* pre_label (manage (new Gtk::Label (_("Current Scale for"))));
+	pre_label->set_alignment (0.5);
+	name_label.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", Gtkmm2ext::markup_escape_text (provider)));
+	inner_name_box->pack_start (*pre_label, false, false);
 	inner_name_box->pack_start (name_label, false, false);
-	inner_name_box->pack_start (name_entry, false, false);
 	inner_name_box->set_spacing (12);
 
-	name_packer.pack_start (*inner_name_box, true, false);
+	Gtk::HBox* clear_box (manage (new Gtk::HBox));
+	clear_button.signal_clicked().connect ([this]() { response (Gtk::RESPONSE_REJECT); });
+	clear_box->pack_start (clear_button, true, false);
 
 	Gtk::HBox* inner_step_box (manage (new Gtk::HBox));
 	inner_step_box->pack_start (steps_label, false, false);
@@ -121,17 +137,13 @@ ScaleDialog::ScaleDialog ()
 	scala_file_button.set_current_folder (Glib::get_home_dir());
 
 	Gtk::VBox* vbox (get_vbox());
-	vbox->pack_start (name_packer, false, false);
+	vbox->pack_start (*inner_name_box, false, false);
+	vbox->pack_start (*inner_tuning_box, false, false);
+	vbox->pack_start (root_mode_box, false, false);
 	vbox->pack_start (named_scale_box, false, false);
-	vbox->pack_start (scala_box, false, false);
-	vbox->pack_start (type_box, false, false);
-	vbox->pack_start (steps_box, false, false);
-	vbox->pack_start (step_packer, false, false);
-
-
-	Gtk::HBox* clear_box (manage (new Gtk::HBox));
-	clear_box->pack_start (clear_button, true, false);
 	vbox->pack_start (*clear_box, false, false);
+	vbox->pack_start (step_packer, false, false);
+	vbox->pack_start (scala_box, false, false);
 
 	vbox->set_border_width (6);
 	vbox->set_spacing (12);
@@ -139,28 +151,112 @@ ScaleDialog::ScaleDialog ()
 
 	step_packer.set_spacing (12);
 	pack_steps ();
+
+	add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	add_button (Stock::OK, RESPONSE_OK);
 }
 
 ScaleDialog::~ScaleDialog ()
 {
+	delete bracelet;
 }
 
 void
-ScaleDialog ::set (ARDOUR::MusicalKey const & key)
+ScaleDialog::mode_changed ()
 {
-	_key = key;
+	pack_steps ();
+}
+
+void
+ScaleDialog::set_tuning (TuningSystem c)
+{
+	_tuning = c;
+	tuning_dropdown.set_active ((int) c);
+}
+
+void
+ScaleDialog::set (MusicalKey const * key)
+{
+	using namespace ARDOUR;
+
+	if (ignore_set) {
+		return;
+	}
+
+	PBD::Unwinder<bool> uw (ignore_set, true);
+
+	if (!key) {
+		_key = nullptr;
+		mode_dropdown.set_active (0);
+		return;
+
+	}
+
+	switch (_tuning) {
+	case TwelveTone:
+		twelvetone_set (*key);
+		break;
+	}
+
+	type_dropdown.set_active (type_string_map[_key->type()]);;
+}
+
+void
+ScaleDialog::twelvetone_set (MusicalKey const & key)
+{
+	if (!_key) {
+		_key.reset (new MusicalKey (key));
+	} else {
+		*_key = key;
+	}
+
+	mode_dropdown.set_active (key.mode_name());
+	std::vector<int> notes_in_alpha_order ({ 9, 10, 11, 0, 1, 2, 3, 4, 5, 6, 7, 8});
+	int i = 0;
+
+	for (auto n : notes_in_alpha_order) {
+		if (n == key.root()) {
+			root_dropdown.set_active (i);
+			break;
+		}
+		++i;
+	}
 
 	pack_steps ();
 }
 
-ARDOUR::MusicalKey
+MusicalKey*
 ScaleDialog::get() const
 {
-	return ARDOUR::MusicalKey (1.0, ARDOUR::MusicalMode (ARDOUR::MusicalMode::Dorian));
+	using namespace ARDOUR;
+
+	switch (_tuning) {
+	case TwelveTone:
+		return twelvetone_get ();
+	}
+	std::cerr << "Fell thru\n";
+	return nullptr;
+}
+
+MusicalKey*
+ScaleDialog::twelvetone_get() const
+{
+	std::string mode = mode_dropdown.get_active ();
+
+	if (mode.empty()) {
+		return nullptr;
+	}
+
+	int root_index = root_dropdown.get_active_row_number ();
+	std::vector<int> notes_in_alpha_order ({ 9, 10, 11, 0, 1, 2, 3, 4, 5, 6, 7, 8});
+	int root_midi_note = notes_in_alpha_order[root_index];
+
+	/* XXX this leaks. Probably need a "None" value for a MusicalKey */
+	return new MusicalKey (root_midi_note, mode);
 }
 
 void
-ScaleDialog::fill_dropdowns (ARDOUR::MusicalModeCulture culture)
+ScaleDialog::fill_dropdowns (TuningSystem tuning)
 {
 	using namespace Gtk::Menu_Helpers;
 	using namespace ARDOUR;
@@ -168,94 +264,59 @@ ScaleDialog::fill_dropdowns (ARDOUR::MusicalModeCulture culture)
 	root_dropdown.clear_items ();
 	mode_dropdown.clear_items ();
 
-	switch (culture) {
-	case WesternEurope12TET:
-		root_dropdown.add_menu_elem (MenuElem (_("A")));
-		root_dropdown.add_menu_elem (MenuElem (_("A#")));
-		root_dropdown.add_menu_elem (MenuElem (_("B")));
-		root_dropdown.add_menu_elem (MenuElem (_("C")));
-		root_dropdown.add_menu_elem (MenuElem (_("C#")));
-		root_dropdown.add_menu_elem (MenuElem (_("D")));
-		root_dropdown.add_menu_elem (MenuElem (_("D#")));
-		root_dropdown.add_menu_elem (MenuElem (_("E")));
-		root_dropdown.add_menu_elem (MenuElem (_("F")));
-		root_dropdown.add_menu_elem (MenuElem (_("F#")));
-		root_dropdown.add_menu_elem (MenuElem (_("G")));
-		root_dropdown.add_menu_elem (MenuElem (_("G#")));
+	std::vector<int> notes_in_alpha_order ({ 9, 10, 11, 0, 1, 2, 3, 4, 5, 6, 7, 8});
 
-		/* Must match enum order */
-
-		mode_dropdown.add_menu_elem (MenuElem (_("Major (Ionian)")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Minor (Aeolian)")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Dorian")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Harmonic Minor")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Melodic Minor Ascending")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Melodic Minor Descending")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Phrygian")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Lydian")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Mixolydian")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Locrian")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Pentatonic Major")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Pentatonic Minor")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Chromatic")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Blues")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Neapolitan Minor")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Neapolitan Major")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Oriental")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Double Harmonic")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Enigmatic")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Hungarian Minor")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Hungarian Major")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Spanish 8 Tone")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Hungarian Gypsy")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Overtone")));
-		mode_dropdown.add_menu_elem (MenuElem (_("Leading Whole Tone")));
-
-		root_dropdown.set_active (0);
-		mode_dropdown.set_active (0);
-		break;
-	case Byzantine:
-		break;
-	case Maqams:
-		break;
-	case Hindustani:
-		break;
-	case Carnatic:
-		break;
-	case SEAsia:
-		break;
-	case China:
+	switch (tuning) {
+	case TwelveTone:
+		for (auto n : notes_in_alpha_order) {
+			root_dropdown.add_menu_elem (MenuElem (ParameterDescriptor::midi_note_name (n, true, false, true), [this,n]() { MusicalMode mode (_key ? *_key : MusicalMode (_("Major")));  MusicalKey k (n, mode); set (&k); }));
+		}
 		break;
 	}
+
+	for (auto const & [tune,mode]: MusicalMode::modes_by_tuning) {
+		if (tune != tuning) {
+			continue;
+		}
+		mode_dropdown.add_menu_elem (MenuElem (mode.name(), [this,mode]() { float root = _key ? _key->root() : 64; MusicalKey k (root, mode); set (&k); }));
+	}
+
+	root_dropdown.set_active (0);
+	mode_dropdown.set_active (0);
 }
 
 void
 ScaleDialog::pack_steps ()
 {
-	Gtkmm2ext::container_clear (step_packer);
+	if (!bracelet) {
+		bracelet = new ArdourWidgets::Bracelet (MusicalMode::tones_per_equivalent[_tuning]);
+		step_packer.pack_start (*bracelet, true, true);
+		bracelet->show ();
+	} else if (bracelet->steps() != MusicalMode::tones_per_equivalent[_tuning]) {
+		step_packer.remove (*bracelet);
+		delete bracelet;
+		bracelet = new ArdourWidgets::Bracelet (MusicalMode::tones_per_equivalent[_tuning]);
+		step_packer.pack_start (*bracelet, true, true);
+		bracelet->show ();
+	} else {
+		bracelet->clear ();
+	}
 
-	for (int n = 0; n < _key.size(); ++n) {
-		Gtk::HBox* hb (manage (new Gtk::HBox));
-		Gtk::HBox* ihb (manage (new Gtk::HBox));
-		Gtk::Label* label (manage (new Gtk::Label));
-		char buf[64];
-		snprintf (buf, sizeof (buf), "%d", n);
-		label->set_text (buf);
+	if (!_key) {
+		return;
+	}
 
-		StepEntry* se = manage (new StepEntry (n));
-		Gtkmm2ext::set_size_request_to_display_given_text (*se, "abcdef", 2, 6);
+	bracelet->set_size_request (200, 200);
+	bracelet->set_outline_color (UIConfiguration::instance().color ("border color"));
+	bracelet->set_fill_color (UIConfiguration::instance().color ("theme:bg"));
 
-		ihb->pack_start (*label, false, false);
-		ihb->pack_start (*se, false, false);
-		ihb->set_spacing (6);
-		hb->pack_start (*ihb, true, false);
-
-		step_packer.pack_start (*hb, false, false);
-		hb->show_all ();
+	for (auto e : _key->elements()) {
+		bracelet->fill (e);
 	}
 }
 
+
 void
-ScaleDialog::set_type (ARDOUR::MusicalModeType t)
+ScaleDialog::set_type (MusicalModeType t)
 {
 }

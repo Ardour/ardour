@@ -212,7 +212,7 @@ private:
 	sampleoffset_t        _declick_offs;
 	bool                  _declick_enabled;
 	MidiNoteTracker      _tracker;
-	MidiNoteTracker      _locate_tracker;
+	MidiStateTracker     _locate_tracker;
 	std::optional<bool> _last_read_reversed;
 	std::optional<bool> _last_read_loop;
 

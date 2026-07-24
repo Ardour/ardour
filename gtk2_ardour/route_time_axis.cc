@@ -627,15 +627,23 @@ RouteTimeAxisView::edit_scale ()
 		return;
 	}
 
-	ScaleDialog sd;
-	sd.set (*_route->key());
+	ScaleDialog sd (_route->name());
+
+	sd.set (_route->key());
 
 	sd.present ();
 
 	int response = sd.run ();
 
 	switch (response) {
+	case RESPONSE_OK:
+		_route->set_key (sd.get());
 		break;
+	case RESPONSE_REJECT:
+		_route->set_key (nullptr);
+		break;
+	default:
+		return;
 	}
 }
 
@@ -659,9 +667,6 @@ RouteTimeAxisView::build_display_menu ()
 	bool active = _route->active ();
 
 	MenuList& items = display_menu->items();
-
-	// Awaiting expanded/complete scale support
-	// items.push_back (MenuElem (_("Scale..."), sigc::mem_fun (*this, &RouteTimeAxisView::edit_scale)));
 
 	/* now fill it with our stuff */
 	if (active) {
@@ -819,6 +824,11 @@ RouteTimeAxisView::build_display_menu ()
 		items.push_back (MenuElem (_("Playlist"), *playlist_action_menu));
 		items.back().set_sensitive (_editor.get_selection().tracks.size() <= 1);
 	}
+
+	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Scale..."), sigc::mem_fun (*this, &RouteTimeAxisView::edit_scale)));
+	add_scale_related_menu_items (items);
+	items.push_back (SeparatorElem());
 
 	{
 		std::shared_ptr<MidiTrack> mt (std::dynamic_pointer_cast<MidiTrack> (_route));

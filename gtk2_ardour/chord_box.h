@@ -42,7 +42,7 @@ class ChordBox : public Gtk::VBox, public ARDOUR::ChordProvider
 	ChordBox (EditingContext&);
 	~ChordBox();
 
-	void set_culture (ARDOUR::MusicalModeCulture);
+	void set_tuning (ARDOUR::TuningSystem);
 
 	typedef std::vector<int> IntervalSet;
 
@@ -57,7 +57,7 @@ class ChordBox : public Gtk::VBox, public ARDOUR::ChordProvider
 	EditingContext& editing_context;
 	void pack (Gtk::Widget&);
 
-	ArdourWidgets::ArdourDropdown culture_button;
+	ArdourWidgets::ArdourDropdown tuning_button;
 	Gtk::Label name_display;
 
 	void refill_tables ();
@@ -80,9 +80,9 @@ class ChordBox : public Gtk::VBox, public ARDOUR::ChordProvider
 	Gtk::Label inversion_label;
 	Gtk::Label drop_label;
 
-	Gtk::VBox western_vbox;
+	Gtk::VBox twelvetone_vbox;
 
-	void build_western ();
+	void build_twelvetone ();
 
 	void tet12_replace_chord (std::string const &);
 	bool tet12_edit_chord (GdkEventButton*, size_t n, int chord_size);
@@ -90,9 +90,7 @@ class ChordBox : public Gtk::VBox, public ARDOUR::ChordProvider
 	void tet12_invert_chord (bool);
 	void tet12_drop_chord (std::vector<int> const &);
 
-	/* end western */
-
 	int _root;
-	ARDOUR::MusicalModeCulture _culture;
+	ARDOUR::TuningSystem _tuning;
 	PBD::ScopedConnection chord_connection;
 };

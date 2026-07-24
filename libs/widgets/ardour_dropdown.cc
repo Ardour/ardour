@@ -99,6 +99,26 @@ ArdourDropdown::get_active_row_number () const
 	return -1;
 }
 
+std::string
+ArdourDropdown::get_active () const
+{
+	const MenuItem* current_active = _menu.get_active();
+
+	if (!current_active) {
+		return std::string();
+	}
+
+	for (auto const& i : _menu.items ()) {
+		if (&i == current_active) {
+			LblMenuItem const* m = dynamic_cast<LblMenuItem const*> (&i);
+			if (m) {
+				return m->label();
+			}
+			return i.get_label();
+		}
+	}
+	return std::string();
+}
 void
 ArdourDropdown::set_active (std::string const& text)
 {
