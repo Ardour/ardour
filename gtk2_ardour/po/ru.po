@@ -1147,11 +1147,11 @@ msgstr ""
 
 #: application_bar.cc:430
 msgid ""
-"<b>Layered</b>, new recordings will be added as regions on a layer atop "
+"<b>Layered</b>: New recordings will be added as regions on a layer atop "
 "existing regions.\n"
-"<b>Non Layered</b>, the underlying region will be spliced and replaced with "
+"<b>Non Layered</b>: The underlying region will be spliced and replaced with "
 "the newly recorded region.\n"
-"<b>SoundOnSound</b>, behaves like <i>Layered</i>, except underlying regions "
+"<b>SoundOnSound</b>: Behaves like <i>Layered</i>, except underlying regions "
 "will be audible."
 msgstr ""
 
