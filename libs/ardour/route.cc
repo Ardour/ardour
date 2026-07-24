@@ -91,6 +91,7 @@
 #include "ardour/revision.h"
 #include "ardour/route.h"
 #include "ardour/route_group.h"
+#include "ardour/scale.h"
 #include "ardour/send.h"
 #include "ardour/session.h"
 #include "ardour/solo_control.h"
@@ -2682,6 +2683,11 @@ Route::state (bool save_template) const
 		node->add_child_nocopy (_pannable->get_state ());
 	}
 
+	MusicalKey const * key = this->key();
+	if (key) {
+		node->add_child_nocopy (key->get_state());
+	}
+
 	{
 		PBD::RWLock::ReaderLock lm (_processor_lock);
 		for (auto const & p : _processors) {
@@ -2818,6 +2824,13 @@ Route::set_state (const XMLNode& node, int version)
 			}
 		} else if (child->name() == Slavable::xml_node_name) {
 			Slavable::set_state (*child, version);
+		} else if (child->name() == MusicalMode::xml_node_name) {
+			try {
+				MusicalKey* key = new MusicalKey (*child);
+				set_key (key);
+			} catch (...) {
+				std::cerr << "failed to create musical key from XML\n";
+			}
 		}
 	}
 

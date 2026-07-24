@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <cmath>
 #include <fstream>
+#include <sstream>
 
 #include "pbd/compose.h"
 #include "pbd/debug.h"
@@ -28,6 +29,7 @@
 #include "ardour/debug.h"
 #include "ardour/scale.h"
 #include "ardour/scala_file.h"
+#include "ardour/types_convert.h"
 
 #include "pbd/i18n.h"
 
@@ -41,10 +43,13 @@ std::map<int,MusicalMode> MusicalMode::modes_by_id;
 std::map<TuningSystem,int> MusicalMode::tone_equivalent_ratio;
 std::map<TuningSystem,int> MusicalMode::tones_per_equivalent;
 
+char const * MusicalMode::xml_node_name = X_("musical-mode");
+
 void
 MusicalMode::init ()
 {
 	if (!tone_equivalent_ratio.empty()) {
+		/* already initialized */
 		return;
 	}
 
@@ -178,6 +183,13 @@ MusicalMode::MusicalMode (std::string const & name)
 	*this = ret->second;
 }
 
+MusicalMode::MusicalMode (XMLNode const & node)
+{
+	if (set_state (node)) {
+		throw failed_constructor ();
+	}
+}
+
 MusicalMode::MusicalMode (std::ifstream& file)
 	: _ring_id (0)
 {
@@ -209,6 +221,68 @@ MusicalMode::operator= (MusicalMode const & other)
 	_elements = other._elements;
 
 	return *this;
+}
+
+XMLNode&
+MusicalMode::get_state () const
+{
+	XMLNode* node = new XMLNode (xml_node_name);
+	node->set_property (X_("tuning"), _tuning);
+	node->set_property (X_("ring"), _ring_id);
+	node->set_property (X_("type"), _type);
+	node->set_property (X_("name"), _name);
+
+	std::stringstream ss;
+	for (auto n: _elements) {
+		ss << n << ',';
+	}
+	std::string str (ss.str());
+	str.pop_back(); /* remove final comma */
+	node->set_property (X_("elements"), str);
+
+	return *node;
+}
+
+int
+MusicalMode::set_state (XMLNode const & node)
+{
+	if (node.name() != xml_node_name) {
+		return -1;
+	}
+
+	if (!node.get_property (X_("tuning"), _tuning)) {
+		return -1;
+	}
+	if (!node.get_property (X_("ring"), _ring_id)) {
+		return -1;
+	}
+	if (!node.get_property (X_("type"), _type)) {
+		return -1;
+	}
+	if (!node.get_property (X_("name"), _name)) {
+		return -1;
+	}
+
+	std::string str;
+	if (!node.get_property (X_("elements"), str)) {
+		return -1;
+	}
+
+	std::stringstream ss;
+	ss << str;
+
+	std::vector<float> el;
+	while (ss) {
+		float n;
+		char comma;
+		ss >> n;
+		ss >> comma;
+		el.push_back (n);
+	}
+
+	_elements = el;
+
+	return 0;
 }
 
 int
@@ -455,6 +529,14 @@ MusicalKey::MusicalKey (MusicalKey const & other)
 {
 }
 
+MusicalKey::MusicalKey (XMLNode const & node)
+	: MusicalMode (node)
+{
+	if (!node.get_property (X_("root"), _root)) {
+		throw failed_constructor ();
+	}
+}
+
 float
 MusicalKey::nth (unsigned n) const
 {
@@ -614,4 +696,24 @@ std::string
 MusicalKey::mode_name() const
 {
 	return MusicalMode::name();
+}
+
+XMLNode&
+MusicalKey::get_state () const
+{
+	XMLNode& node (MusicalMode::get_state());
+	node.set_property (X_("root"), _root);
+	return node;
+}
+
+int
+MusicalKey::set_state (XMLNode const & node)
+{
+	if (MusicalMode::set_state (node)) {
+		return -1;
+	}
+
+	node.get_property (X_("root"), _root);
+
+	return 0;
 }

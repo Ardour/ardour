@@ -171,7 +171,9 @@ setup_enum_writer ()
 	DSP::PerceptualAnalyzer::Speed _DSPAnalyzerSpeed;
 	DSP::PerceptualAnalyzer::Warp _DSPAnalyzerWarp;
 	KeyEnforcementPolicy _KeyEnforcementPolicy;
-	
+	TuningSystem _TuningSystem;
+	MusicalModeType _MusicalModeType;
+
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_ENUM(e) i.push_back (e); s.push_back (#e)
@@ -951,6 +953,16 @@ setup_enum_writer ()
  	REGISTER_ENUM (ForceHigher);
  	REGISTER_ENUM (ForceNearest);
 	REGISTER_BITS (_KeyEnforcementPolicy);
+
+	REGISTER_ENUM (TwelveTone);
+	REGISTER (_TuningSystem);
+
+	REGISTER_ENUM (AbsolutePitch);
+	REGISTER_ENUM (PitchClass);
+	REGISTER_ENUM (RatioSteps);
+	REGISTER_ENUM (RatioFromRoot);
+	REGISTER_ENUM (MidiNote);
+	REGISTER (_MusicalModeType);
 }
 
 

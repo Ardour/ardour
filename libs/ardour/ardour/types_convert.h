@@ -93,6 +93,9 @@ DEFINE_ENUM_CONVERT(ARDOUR::LoopFadeChoice)
 DEFINE_ENUM_CONVERT(ARDOUR::CueBehavior)
 DEFINE_ENUM_CONVERT(ARDOUR::VST3KnobMode)
 DEFINE_ENUM_CONVERT(ARDOUR::ColorMode)
+DEFINE_ENUM_CONVERT(ARDOUR::KeyEnforcementPolicy)
+DEFINE_ENUM_CONVERT(ARDOUR::TuningSystem)
+DEFINE_ENUM_CONVERT(ARDOUR::MusicalModeType)
 
 template <>
 inline bool to_string (ARDOUR::AnyTime const & at, std::string & str)

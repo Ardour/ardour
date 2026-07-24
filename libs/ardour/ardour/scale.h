@@ -23,6 +23,7 @@
 #include <vector>
 
 #include "pbd/signals.h"
+#include "pbd/xml++.h"
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
@@ -88,6 +89,8 @@ class LIBARDOUR_API MusicalMode
 	MusicalMode (MusicalMode const & other);
 	MusicalMode (std::string const & name);
 	MusicalMode (std::ifstream& file); /* Read from a Scala file */
+	MusicalMode (XMLNode const &);
+
 	virtual ~MusicalMode() {}
 
 	MusicalMode& operator= (MusicalMode const & other);
@@ -112,6 +115,10 @@ class LIBARDOUR_API MusicalMode
 	static std::map<TuningSystem,int> tone_equivalent_ratio;
 	static std::map<TuningSystem,int> tones_per_equivalent;
 
+	XMLNode& get_state () const;
+	int set_state (XMLNode const &);
+	static char const * xml_node_name;
+
    protected:
         TuningSystem _tuning;
 	mutable int _ring_id;
@@ -135,6 +142,7 @@ class LIBARDOUR_API MusicalKey : public MusicalMode
     public:
 	MusicalKey (float root, MusicalMode const &);
 	MusicalKey (float root, std::string const &);
+	MusicalKey (XMLNode const &);
 	MusicalKey (MusicalKey const & other);
 
 	std::string name() const;
@@ -146,6 +154,9 @@ class LIBARDOUR_API MusicalKey : public MusicalMode
 	int   lower_midi_note (int midi_note) const;
 	int   higher_midi_note (int midi_note) const;
 	int   conform_midi_note (int midi_note, ARDOUR::KeyEnforcementPolicy) const;
+
+	XMLNode& get_state () const;
+	int set_state (XMLNode const &);
 
    private:
 	float _root;

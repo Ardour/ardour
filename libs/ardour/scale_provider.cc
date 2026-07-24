@@ -18,6 +18,7 @@
 
 #include "ardour/scale.h"
 #include "ardour/scale_provider.h"
+#include "ardour/types_convert.h"
 
 #include "pbd/i18n.h"
 
@@ -98,12 +99,27 @@ XMLNode&
 ScaleProvider::get_state () const
 {
 	XMLNode* node = new XMLNode (X_("ScaleProvider"));
+
+	if (_key) {
+		node->set_property (X_("Key"), _key->name());
+	}
+
+	node->set_property (X_("key-enforcement"), _key_enforcement_policy);
+
 	return *node;
 }
 
 int
-ScaleProvider::set_state (const XMLNode&, int version)
+ScaleProvider::set_state (const XMLNode& node, int /*version*/)
 {
+	XMLProperty const * keyname;
+
+	if ((keyname = node.property (X_("Key"))) != 0) {
+		_key = new MusicalKey (keyname->value());
+	}
+
+	node.get_property (X_("Key-enforcement"), _key_enforcement_policy);
+
 	return 0;
 }
 
