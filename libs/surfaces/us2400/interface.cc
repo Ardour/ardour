@@ -32,7 +32,7 @@ using namespace ArdourSurface;
 using namespace US2400;
 
 static ControlProtocol*
-new_us2400_protocol (Session* s, void* config)
+new_us2400_protocol (Session* s, std::string const & config)
 {
 	US2400Protocol* mcp = 0;
 

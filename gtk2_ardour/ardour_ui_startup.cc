@@ -586,7 +586,7 @@ ARDOUR_UI::starting ()
 
 	EngineControl* amd;
 	Timing amd_init;
-	info << "Detecting Audio/MIDI Devices" << endmsg;
+	info << _("Detecting Audio/MIDI Devices") << endmsg;
 	BootMessage (_("Detecting Audio/MIDI Devices..."));
 
 	amd_init.start();
@@ -597,7 +597,7 @@ ARDOUR_UI::starting ()
 		return -1;
 	}
 	amd_init.update();
-	info << string_compose ("Audio/MIDI Devices detection complete. Elapsed time: %1 uS", amd_init.elapsed()) << endmsg;
+	info << string_compose (_("Audio/MIDI Devices detection complete. Elapsed time: %1 ms"), amd_init.elapsed() / 1000) << endmsg;
 	BootMessage (_("Continuing Startup..."));
 
 	if (nsm_init ()) {

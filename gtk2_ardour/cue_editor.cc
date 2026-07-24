@@ -51,13 +51,16 @@ CueEditor::CueEditor (std::string const & name, bool with_transport)
 	, HistoryOwner (name)
 	, _canvas_viewport (horizontal_adjustment, vertical_adjustment)
 	, _canvas (*_canvas_viewport.canvas ())
+	, overlay_text (nullptr)
 	, with_transport_controls (with_transport)
 	, length_label (_("Record:"))
 	, solo_button (S_("Solo|S"))
 	, zoom_in_allocate (false)
 	, timebar_height (std::max (13., ceil (17. * UIConfiguration::instance().get_ui_scale())))
 	, n_timebars (0)
+	, data_capture_duration (0)
 	, _scroll_drag (false)
+	, ruler_shift (0)
 {
 	_canvas_hscrollbar = manage (new Gtk::HScrollbar (horizontal_adjustment));
 	_canvas_hscrollbar->show ();
@@ -607,7 +610,7 @@ CueEditor::loop_button_press (GdkEventButton* ev)
 	if (_session->get_play_loop()) {
 		_session->request_play_loop (false);
 	} else {
-		PublicEditor::instance().set_loop_range (_region->position(), _region->end(), _("loop region"));
+		PublicEditor::instance().set_loop_range (_region->position(), _region->end_position(), _("loop region"));
 		_session->request_play_loop (true);
 	}
 
@@ -751,7 +754,6 @@ CueEditor::rec_enable_change ()
 		return;
 	}
 
-	count_in_connection.disconnect ();
 	setup_record_blink ();
 
 	switch (ref.box()->record_enabled()) {
@@ -1543,26 +1545,11 @@ CueEditor::maybe_set_count_in ()
 
 	count_in_connection.disconnect ();
 
-	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
-	bool valid;
-	count_in_to = ref.box()->start_time (valid);
-
-	if (!valid) {
-		return;
-	}
-
-	samplepos_t audible (_session->audible_sample());
-	Temporal::Beats const & a_q (tmap->quarters_at_sample (audible));
-
-	if ((count_in_to - a_q).get_beats() == 0) {
-		return;
-	}
-
-	count_in_connection = ARDOUR_UI::Clock.connect (sigc::bind (sigc::mem_fun (*this, &CueEditor::count_in),  ARDOUR_UI::clock_signal_interval()));
+	TriggerBox::CountIn.connect (count_in_connection, invalidator (*this), [this](Temporal::Beats b) { count_in (b); }, gui_context());
 }
 
 void
-CueEditor::count_in (Temporal::timepos_t audible, unsigned int clock_interval_msecs)
+CueEditor::count_in (Temporal::Beats count_in)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
@@ -1574,27 +1561,15 @@ CueEditor::count_in (Temporal::timepos_t audible, unsigned int clock_interval_ms
 		return;
 	}
 
-	TempoMapPoints grid_points;
-	TempoMap::SharedPtr tmap (TempoMap::use());
-	Temporal::Beats audible_beats = tmap->quarters_at_sample (audible.samples());
-
-	if (audible_beats >= count_in_to) {
-		/* passed the count_in_to time */
-		hide_count_in ();
+	if (count_in <= Temporal::Beats()) {
+		hide_overlay_text ();
 		count_in_connection.disconnect ();
 		return;
 	}
 
-	Temporal::Beats current_delta = count_in_to - audible_beats;
-
-	if (current_delta.get_beats() < 1) {
-		hide_count_in ();
-		count_in_connection.disconnect ();
-		return;
-	}
-
-	std::string str (string_compose ("%1", current_delta.get_beats()));
-	show_count_in (str);
+	char buf[8];
+	snprintf (buf, sizeof (buf), "%" PRId64, count_in.get_beats());
+	set_overlay_text (buf);
 }
 
 bool
@@ -1816,80 +1791,6 @@ CueEditor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, sample
 		return;
 	}
 
-	/* we can accent certain lines depending on the user's Grid choice */
-	/* for example, even in a 4/4 meter we can draw a grid with triplet-feel */
-	/* and in this case you will want the accents on '3s' not '2s' */
-	uint32_t bbt_divisor = 2;
-
-	using namespace Editing;
-
-	switch (grid_type()) {
-	case GridTypeBeatDiv3:
-		bbt_divisor = 3;
-		break;
-	case GridTypeBeatDiv5:
-		bbt_divisor = 5;
-		break;
-	case GridTypeBeatDiv6:
-		bbt_divisor = 3;
-		break;
-	case GridTypeBeatDiv7:
-		bbt_divisor = 7;
-		break;
-	case GridTypeBeatDiv10:
-		bbt_divisor = 5;
-		break;
-	case GridTypeBeatDiv12:
-		bbt_divisor = 3;
-		break;
-	case GridTypeBeatDiv14:
-		bbt_divisor = 7;
-		break;
-	case GridTypeBeatDiv16:
-		break;
-	case GridTypeBeatDiv20:
-		bbt_divisor = 5;
-		break;
-	case GridTypeBeatDiv24:
-		bbt_divisor = 6;
-		break;
-	case GridTypeBeatDiv28:
-		bbt_divisor = 7;
-		break;
-	case GridTypeBeatDiv32:
-		break;
-	default:
-		bbt_divisor = 2;
-		break;
-	}
-
-	uint32_t bbt_beat_subdivision = 1;
-	switch (bbt_ruler_scale) {
-	case bbt_show_quarters:
-		bbt_beat_subdivision = 1;
-		break;
-	case bbt_show_eighths:
-		bbt_beat_subdivision = 1;
-		break;
-	case bbt_show_sixteenths:
-		bbt_beat_subdivision = 2;
-		break;
-	case bbt_show_thirtyseconds:
-		bbt_beat_subdivision = 4;
-		break;
-	case bbt_show_sixtyfourths:
-		bbt_beat_subdivision = 8;
-		break;
-	case bbt_show_onetwentyeighths:
-		bbt_beat_subdivision = 16;
-		break;
-	default:
-		bbt_beat_subdivision = 1;
-		break;
-	}
-
-	bbt_beat_subdivision *= bbt_divisor;
-
 	switch (bbt_ruler_scale) {
 
 	case bbt_show_many:
@@ -2059,6 +1960,19 @@ CueEditor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, sample
 
 		break;
 	}
+
+	if (ruler_shift) {
+		for (auto & m : marks) {
+			m.position += ruler_shift;
+		}
+	}
+
+}
+
+void
+CueEditor::set_ruler_shift (samplepos_t s)
+{
+	ruler_shift = s;
 }
 
 void
@@ -2113,3 +2027,50 @@ CueEditor::set_horizontal_position (double pos)
 	EditingContext::set_horizontal_position (pos);
 	instant_save ();
 }
+
+void
+CueEditor::set_overlay_text (std::string const & str)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	if (!overlay_text) {
+		overlay_text = new ArdourCanvas::Text (no_scroll_group);
+		Pango::FontDescription font ("Sans 200");
+		overlay_text->set_font_description (font);
+		overlay_text->set_color (0xff000088);
+		overlay_text->set ("0"); /* not shown, used for positioning math */
+		overlay_text->set_position (ArdourCanvas::Duple ((_visible_canvas_width / 2.0) - (overlay_text->text_width()/2.), (_visible_canvas_height / 2.0) - (overlay_text->text_height() / 2.)));
+	}
+
+	overlay_text->set (str);
+	show_overlay_text ();
+}
+
+void
+CueEditor::show_overlay_text ()
+{
+	if (overlay_text) {
+		overlay_text->show ();
+	}
+}
+
+void
+CueEditor::hide_overlay_text ()
+{
+	if (overlay_text) {
+		overlay_text->hide ();
+	}
+}
+
+void
+CueEditor::show_count_in (std::string const & str)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+}
+
+void
+CueEditor::hide_count_in ()
+{
+	EC_LOCAL_TEMPO_SCOPE;
+}
+

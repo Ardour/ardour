@@ -44,6 +44,8 @@ RouteCommentEditor::RouteCommentEditor (std::shared_ptr<Route> r)
 
 	set_skip_taskbar_hint (true);
 
+	_scroller.add (_comment_area);
+	_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	_comment_area.set_name ("MixerTrackCommentArea");
 	_comment_area.set_wrap_mode (WRAP_WORD);
 	_comment_area.set_editable (true);
@@ -59,7 +61,7 @@ RouteCommentEditor::RouteCommentEditor (std::shared_ptr<Route> r)
 	_route->comment_changed.connect (_connections, invalidator (*this), std::bind (&RouteCommentEditor::comment_changed, this), gui_context ());
 
 	Gtkmm2ext::container_clear (_vbox, false);
-	_vbox.pack_start (_comment_area);
+	_vbox.pack_start (_scroller);
 
 	delete _bo;
 	if (_route->is_master ()) {

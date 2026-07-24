@@ -67,6 +67,7 @@
 
 #include "application_bar.h"
 #include "ardour_dialog.h"
+#include "cross_cursor.h"
 #include "public_editor.h"
 #include "editing.h"
 #include "enums.h"
@@ -1579,7 +1580,7 @@ private:
 	void replace_chord (std::vector<int> intervals);
 	void invert_selected_chord (bool up);
 	void drop_selected_chord (std::vector<int> which_notes);
-	bool get_midi_chord (int root_pitch, std::vector<int>& pitches) const;
+	bool get_midi_chord (int root_pitch, std::vector<int>& pitches, bool& arpeggiate) const;
 	void midi_view_selection_changed (SimpleMidiNoteSelection& selection);
 
 protected:
@@ -2300,6 +2301,11 @@ private:
 	ARDOUR::Quantize* get_quantize_op ();
 	void midi_view_selection_changed (SimpleMidiNoteSelection selection);
 	sigc::connection midi_view_selection_connection;
+
+	CrossCursor* xcursor;
+	sigc::connection xcursor_connection;
+	void motion_track (ArdourCanvas::Duple const &);
+	void maybe_enable_cross_cursor ();
 
 	friend class RegionMoveDrag;
 	friend class TrimDrag;

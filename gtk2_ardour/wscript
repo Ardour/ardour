@@ -481,17 +481,17 @@ def enoify (major, minor):
             return "\\n\\\"Compact Forest Proposal\\\"" # 2001
         if minor >= 3 and minor <= 5:
             return "\\n\\\"Drawn from Life\\\"" # 2001 Collaborative
-        if minor == 6:
+        if minor >= 6 and minor <= 7:
             return "\\n\\\"Bell Studies for the Clock of the Long Now\\\"" # 2003
-        if minor == 7:
-            return "\\n\\\"The Equatorial Stars\\\"" # 2004 Collaborative
         if minor == 8:
-            return "\\n\\\"Another Day on Earth\\\"" # 2005
+            return "\\n\\\"The Equatorial Stars\\\"" # 2004 Collaborative
         if minor == 9:
-            return "\\n\\\"77 Million Paintings\\\"" # 2006
+            return "\\n\\\"Another Day on Earth\\\"" # 2005
         if minor == 10:
-            return "\\n\\\"Beyond Even\\\"" # 2007 Collaborative
+            return "\\n\\\"77 Million Paintings\\\"" # 2006
         if minor == 11:
+            return "\\n\\\"Beyond Even\\\"" # 2007 Collaborative
+        if minor == 12:
             return "\\n\\\"Making Space \\\"" # 2010
     return "\\\"\\\""
 
@@ -680,10 +680,8 @@ def build(bld):
     obj.uselib       = 'UUID FLAC FONTCONFIG GTHREAD OGG PANGOMM CURL DL CANVAS FFTW3F LO TAGLIB XML LILV RUBBERBAND AUBIO LRDF ARCHIVE VAMPSDK VAMPHOSTSDK GLIBMM GIOMM PANGOFT2 LIBPNG LIBJPEG'
 
     if bld.env['build_target'] == 'msvc':
-        obj.env['LIB_LO'] = ['liblo']
         obj.use += ['liblua']
         obj.uselib += ' PANGOCAIRO GDI32'
-        obj.lib = ['getopt']
         obj.defines += ['NOMINMAX']
 
     if False and bld.is_defined('USE_EXTERNAL_LIBS'):
@@ -718,7 +716,7 @@ def build(bld):
         obj.source += [ 'lv2_plugin_ui.cc' ]
         obj.use += [ 'SUIL' ]
 
-    if bld.is_defined('HAVE_FFTW35F') and bld.env['build_target'] != 'mingw' and bld.env['build_target'] != 'msvc':
+    if bld.is_defined('HAVE_FFTW35F') and not (bld.env['build_target'] == 'mingw' and sys.platform != 'win32') and bld.env['build_target'] != 'msvc':
         bld.env['LIB_FFTW3F'] += ['fftw3f_threads']
 
     if bld.is_defined('NEED_INTL'):
@@ -983,7 +981,10 @@ def build(bld):
     #
     # If you add or delete some ,bindings files, be sure to edit fmt_bindings too, or better yet,
     # hack fmt-bindings and this wscript file so that the list is defined here and passed in.
-    a_rule = 'perl %s/tools/fmt-bindings --platform="%s" --winkey="%s" --accelmap 1 ${SRC[0].abspath()} >${TGT}' % (bld.top_dir, sys.platform, bld.env['WINDOWS_KEY'] )
+    if sys.version_info[0] > 2:
+        a_rule = '%s %s/tools/fmt-bindings.py --platform="%s" --winkey="%s" --accelmap 1 ${SRC[0].abspath()} >${TGT}' % (sys.executable, bld.top_dir, sys.platform, bld.env['WINDOWS_KEY'])
+    else:
+        a_rule = 'perl %s/tools/fmt-bindings --platform="%s" --winkey="%s" --accelmap 1 ${SRC[0].abspath()} >${TGT}' % (bld.top_dir, sys.platform, bld.env['WINDOWS_KEY'] )
     for b in [ 'ardour' ] :
         obj = bld(
             target = b + '.keys',

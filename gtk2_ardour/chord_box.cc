@@ -56,6 +56,7 @@ DoubleButton::DoubleButton (ArdourWidgets::ArdourButton & left, ArdourWidgets::A
 
 ChordBox::ChordBox (EditingContext& ec)
 	: editing_context (ec)
+	, arpeggiate_button (_("Arpeggiate"))
 	, triad_label (_("3-Note Chords (Triads)"))
 	, tetrad_label (_("4-Note Chords (Tetrads)"))
 	, ext_label (_("Extended Chords"))
@@ -357,6 +358,7 @@ ChordBox::build_western ()
 	western_vbox.pack_start (inversion_table, false, false);
 	western_vbox.pack_start (drop_label, false, false);
 	western_vbox.pack_start (drop_table, false, false);
+	western_vbox.pack_start (arpeggiate_button, false, false);
 
 	western_vbox.show_all ();
 	western_vbox.set_spacing (6);
@@ -371,12 +373,14 @@ ChordBox::show_chord (std::string const & name)
 }
 
 bool
-ChordBox::get_midi_chord (int root_pitch, std::vector<int>& pitches) const
+ChordBox::get_midi_chord (int root_pitch, std::vector<int>& pitches, bool& arpeggiate) const
 {
 	std::string const & chord_name = editing_context.draw_chord_name ();
 	if (chord_name.empty()) {
 		return false;
 	}
+
+	arpeggiate = arpeggiate_button.get_active ();
 
 	for (auto const & ci : chord_info) {
 		if (ci.short_name == chord_name) {

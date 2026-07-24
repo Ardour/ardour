@@ -21,6 +21,8 @@
 #include "temporal/timeline.h"
 #include "temporal/tempo.h"
 
+#include "ardour/libardour_visibility.h"
+
 class XMLNode;
 
 namespace ARDOUR {
@@ -81,5 +83,9 @@ private:
 	Temporal::Meter _meter;
 };
 
+}
+
+namespace std {
+LIBARDOUR_API std::ostream& operator<<(std::ostream& str, ARDOUR::SegmentDescriptor const &);
 }
 

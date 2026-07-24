@@ -851,7 +851,9 @@ SMF::tempo_map (bool& provided) const
 	}
 
 	Meter last_meter (4, 4);
+	Temporal::Tempo last_tempo (120, 4);
 	bool have_initial_meter = false;
+	bool have_initial_tempo = false;
 	bool empty (true);
 	new_map->smf_begin ();
 
@@ -877,8 +879,11 @@ SMF::tempo_map (bool& provided) const
 			bbt = new_map->bbt_at (timepos_t (beats));
 		}
 
-		TempoPoint* tp = new TempoPoint (*new_map, tempo, sc, beats, bbt);
-		new_map->smf_add (*tp);
+		if (!have_initial_tempo || !(tempo == last_tempo)) {
+			TempoPoint* tp = new TempoPoint (*new_map, tempo, sc, beats, bbt);
+			new_map->smf_add (*tp);
+			have_initial_tempo = true;
+		}
 
 		if (!have_initial_meter || !(meter == last_meter)) {
 			MeterPoint* mp = new MeterPoint (*new_map, meter, sc, beats, bbt);
@@ -887,6 +892,7 @@ SMF::tempo_map (bool& provided) const
 		}
 
 		last_meter = meter;
+		last_tempo = tempo;
 		empty = false;
 	}
 	new_map->smf_end();

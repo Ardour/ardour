@@ -205,6 +205,13 @@ Port::insert_connection (std::string const& pn)
 }
 
 void
+Port::initial_v2_connection (std::string const & pn)
+{
+	PBD::RWLock::WriterLock lm (_connections_lock);
+	_int_connections.insert (pn);
+}
+
+void
 Port::erase_connection (std::string const& pn)
 {
 #if 1 // include external JACK clients

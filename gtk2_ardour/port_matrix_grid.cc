@@ -70,7 +70,6 @@ PortMatrixGrid::render (cairo_t* cr)
 	/* VERTICAL GRID LINES */
 
 	set_source_rgb (cr, grid_colour());
-	uint32_t N = 0;
 
 	for (PortGroup::BundleList::const_iterator i = column_bundles.begin(); i != column_bundles.end(); ++i) {
 
@@ -93,8 +92,6 @@ PortMatrixGrid::render (cairo_t* cr)
 			x += grid_spacing ();
 
 		}
-
-		++N;
 	}
 
 	if (_matrix->show_only_bundles ()) {
@@ -107,7 +104,6 @@ PortMatrixGrid::render (cairo_t* cr)
 
 	/* HORIZONTAL GRID LINES */
 
-	N = 0;
 	for (PortGroup::BundleList::const_iterator i = row_bundles.begin(); i != row_bundles.end(); ++i) {
 
 		cairo_set_line_width (cr, thick_grid_line_width());
@@ -129,8 +125,6 @@ PortMatrixGrid::render (cairo_t* cr)
 			y += grid_spacing ();
 
 		}
-
-		++N;
 	}
 
 	if (_matrix->show_only_bundles ()) {

@@ -95,6 +95,7 @@ Pianoroll::Pianoroll (std::string const & name, bool with_transport, bool expand
 	, bg (nullptr)
 	, _active_view (nullptr)
 	, bbt_metric (*this)
+	, _visible_channel (0)
 	, ignore_channel_changes (false)
 	, xcursor (nullptr)
 	, midi_inspector (nullptr)
@@ -139,7 +140,7 @@ Pianoroll::Pianoroll (std::string const & name, bool with_transport, bool expand
 	midi_inspector->chord_box->DropChord.connect ([this](std::vector<int> which_notes) { drop_selected_chord (which_notes); });
 
 	inspector_button.signal_clicked.connect (sigc::mem_fun (*this, &Pianoroll::inspector_button_clicked));
-	ArdourWidgets::set_tooltip (inspector_button, _("Expand/Collapse MIDI inspector"));
+	ArdourWidgets::set_tooltip (inspector_button, _("Expand/Collapse MIDI tools"));
 
 	build_upper_toolbar ();
 	build_grid_type_menu ();
@@ -589,6 +590,8 @@ Pianoroll::build_canvas ()
 	data_group = new ArdourCanvas::Container (hv_scroll_group);
 	CANVAS_DEBUG_NAME (data_group, "cue data group");
 
+	data_group->Event.connect (sigc::mem_fun (*this, &Pianoroll::data_group_event_handler));
+
 	// add a background color to match the main editor pianoroll look
 	ArdourCanvas::Rectangle* bg_rect = new ArdourCanvas::Rectangle (data_group, ArdourCanvas::Rect (0., 0., ArdourCanvas::COORD_MAX,  ArdourCanvas::COORD_MAX));
 	bg_rect->set_fill_color(UIConfiguration::instance().color_mod ("midi track base", "midi track base"));
@@ -634,6 +637,13 @@ Pianoroll::build_canvas ()
 
 	_toolbox.pack_start (_canvas_viewport, true, true);
 	_toolbox.reorder_child (_canvas_viewport, 1);
+}
+
+bool
+Pianoroll::data_group_event_handler (GdkEvent* ev)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+	return typed_event (data_group, ev, StreamItem);
 }
 
 void
@@ -785,18 +795,27 @@ Pianoroll::maybe_update ()
 void
 Pianoroll::position_playhead_cursor (samplepos_t pos)
 {
-	Temporal::TempoMap::SharedPtr global_tempo_map (Temporal::TempoMap::global_fetch());
-	Temporal::TempoMap::SharedPtr local_tempo_map (Temporal::TempoMap::use());
+	samplepos_t spos;
 
-	/* find out the beat time represented by pos in the global map,
-	 * convert back to sample position with the local map
-	 */
+	if (_active_view && _active_view->midi_region()) {
 
-	pos = local_tempo_map->sample_at (global_tempo_map->quarters_at (timepos_t (pos)));
+		Temporal::TempoMap::SharedPtr global_tempo_map (Temporal::TempoMap::global_fetch());
+		Temporal::TempoMap::SharedPtr local_tempo_map (Temporal::TempoMap::use());
 
-	/* Do the same for the source position */
+		/* find out the beat time represented by pos in the global map,
+		 * convert back to sample position with the local map
+		 */
 
-	samplepos_t spos = local_tempo_map->sample_at (global_tempo_map->quarters_at (_active_view->midi_region()->source_position()));
+		pos = local_tempo_map->sample_at (global_tempo_map->quarters_at (timepos_t (pos)));
+
+		/* Do the same for the source position */
+
+		spos = local_tempo_map->sample_at (global_tempo_map->quarters_at (_active_view->midi_region()->source_position()));
+
+	} else {
+
+		spos = pos;
+	}
 
 	if (pos < spos) {
 		_playhead_cursor->set_position (0);
@@ -1125,6 +1144,15 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 
 	Editing::MouseMode mouse_mode = current_mouse_mode();
 	switch (item_type) {
+	case StreamItem:
+		if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::slip_contents_modifier ())) {
+			std::list<SlipDraggable*> sdl;
+			sdl.push_back (this);
+			_drags->set (new RegionSlipContentsDrag (*this, item, this, sdl, Temporal::AudioTime), event);
+			return true;
+		}
+		return false;
+
 	case NoteItem:
 		/* Existing note: allow trimming/motion */
 		if ((note = reinterpret_cast<NoteBase*> (item->get_data ("notebase")))) {
@@ -1407,6 +1435,10 @@ Pianoroll::note_left ()
 void
 Pianoroll::motion_track (ArdourCanvas::Duple const & pos)
 {
+	if (!UIConfiguration::instance().get_use_cross_cursor()) {
+		return;
+	}
+
 	assert (xcursor);
 
 	if (!_drags->active()) {
@@ -1824,6 +1856,8 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 	midi_inspector->set_region (_session, nullptr);
 
 	if (!region) {
+		/* make sure note names can be used */
+		prh->instrument_info_change ();
 		return;
 	}
 
@@ -1887,6 +1921,13 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 
 	region_dropdown.set_active (region->name());
 	midi_inspector->set_region (_session, _active_view->midi_region());
+
+	if (automation_lanes.empty()) {
+		/* if no automation lane is added, partition_height() is not called
+		 * and we might end up with the wrong prh width
+		 */
+		partition_height ();
+	}
 }
 
 void
@@ -2049,19 +2090,23 @@ Pianoroll::AutomationLane::AutomationLane (Evoral::Parameter const & param, Pian
 	int close_x_size = label->height();
 
 	label->set_position (ArdourCanvas::Duple (spacing * 2 + close_x_size, spacing));
-
 	label_separator->set_outline_color(UIConfiguration::instance().color ("track separator"));
 	label_separator->set (ArdourCanvas::Duple (0., 0.), ArdourCanvas::Duple (pr.prh->x1(), 0.));
 
 	close_x->set (ArdourCanvas::Rect (spacing, spacing, spacing + close_x_size, spacing + close_x_size));
 	close_x->set_outline_color (UIConfiguration::instance().color (X_("gtk_foreground")));
 
+	int label_width = pr.prh->get().width() - spacing * 3 - close_x_size;
+
 	if (clear_button) {
 		clear_button->text()->set_color (UIConfiguration::instance().color (X_("gtk_foreground")));
 		clear_button->set_highlight (true);
 		clear_button->set_padding (2 * scale);
 		clear_button->set_position (ArdourCanvas::Duple (pr.prh->get().width() - (clear_button->size().x + spacing), spacing));
+		label_width -= spacing + clear_button->size().x;
 	}
+
+	label->clamp_width (label_width);
 }
 
 Pianoroll::AutomationLane::~AutomationLane ()
@@ -2637,6 +2682,10 @@ Pianoroll::instrument_info () const
 	EC_LOCAL_TEMPO_SCOPE;
 
 	if (!_active_view || !_active_view->midi_track()) {
+		/* use CueEditor::_track instead */
+		if (_track) {
+			return &std::dynamic_pointer_cast<MidiTrack> (_track)->instrument_info();
+		}
 		return nullptr;
 	}
 
@@ -2765,26 +2814,6 @@ Pianoroll::manage_possible_header (Gtk::Allocation& alloc)
 		prh->size_request (w, h);
 		alloc.set_width (alloc.get_width() - w);
 		alloc.set_x (alloc.get_x() + w);
-	}
-}
-
-void
-Pianoroll::show_count_in (std::string const & str)
-{
-	EC_LOCAL_TEMPO_SCOPE;
-
-	if (_active_view) {
-		_active_view->set_overlay_text (str);
-	}
-}
-
-void
-Pianoroll::hide_count_in ()
-{
-	EC_LOCAL_TEMPO_SCOPE;
-
-	if (_active_view) {
-		_active_view->hide_overlay_text ();
 	}
 }
 
@@ -3008,13 +3037,13 @@ Pianoroll::our_midi_view_selection_changed ()
 }
 
 bool
-Pianoroll::get_midi_chord (int root_pitch, std::vector<int>& pitches) const
+Pianoroll::get_midi_chord (int root_pitch, std::vector<int>& pitches, bool& arpeggiate) const
 {
 	if (!_active_view) {
 		return false;
 	}
 
-	return midi_inspector->chord_box->get_midi_chord (root_pitch, pitches);
+	return midi_inspector->chord_box->get_midi_chord (root_pitch, pitches, arpeggiate);
 }
 
 /*----*/

@@ -20,6 +20,8 @@
 
 #include "editor_automation_line.h"
 
+class RegionView;
+
 namespace ARDOUR {
 	class MidiRegion;
 }
@@ -30,7 +32,7 @@ namespace ARDOUR {
 class MidiAutomationLine : public EditorAutomationLine
 {
 public:
-	MidiAutomationLine (const std::string&, TimeAxisView&, ArdourCanvas::Item&,
+	MidiAutomationLine (const std::string&, TimeAxisView&, RegionView&, ArdourCanvas::Item&,
 	                    std::shared_ptr<ARDOUR::AutomationList>,
 	                    std::shared_ptr<ARDOUR::MidiRegion>,
 	                    Evoral::Parameter);
@@ -40,7 +42,10 @@ public:
 	virtual std::string get_verbose_cursor_string (double) const;
 	Temporal::timepos_t get_origin() const;
 
+	RegionView& region_view () { return _rv; }
+
 private:
+	RegionView&                         _rv;
 	std::shared_ptr<ARDOUR::MidiRegion> _region;
 	Evoral::Parameter _parameter;
 };

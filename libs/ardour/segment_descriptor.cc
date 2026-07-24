@@ -200,3 +200,11 @@ SegmentDescriptor::set_state (XMLNode const & node, int version)
 
 	return 0;
 }
+
+std::ostream&
+std::operator<<(std::ostream& str, SegmentDescriptor const & sd)
+{
+	str << "SD t: " << sd.tempo() << " m: " << sd.meter();
+	return str;
+}
+

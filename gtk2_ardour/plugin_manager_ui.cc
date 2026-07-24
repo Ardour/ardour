@@ -26,6 +26,7 @@
 
 #include "pbd/openuri.h"
 #include "pbd/unwind.h"
+#include "pbd/natsort.h"
 
 #include "ardour/types_convert.h"
 
@@ -146,6 +147,7 @@ PluginManagerUI::PluginManagerUI ()
 	plugin_display.set_name ("PluginSelectorDisplay");
 
 	plugin_model->set_sort_column (plugin_columns.name.index (), SORT_ASCENDING);
+	plugin_model->set_sort_func (plugin_columns.name.index (), sigc::mem_fun(*this, &PluginManagerUI::name_sorter));
 
 	plugin_display.get_selection ()->set_mode (SELECTION_SINGLE);
 	plugin_display.get_selection ()->signal_changed ().connect (sigc::mem_fun (*this, &PluginManagerUI::selection_changed));
@@ -669,6 +671,15 @@ PluginManagerUI::selection_changed ()
 	} else {
 		_btn_rescan_sel.set_sensitive (true);
 	}
+}
+
+int
+PluginManagerUI::name_sorter (Gtk::TreeModel::iterator a, Gtk::TreeModel::iterator b) const
+{
+	std::string const& n1 = (*a)[plugin_columns.name];
+	std::string const& n2 = (*b)[plugin_columns.name];
+
+	return PBD::natcmp (n1.c_str(), n2.c_str());
 }
 
 void

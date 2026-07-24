@@ -240,10 +240,10 @@ TemplateDialog::TemplateDialog (int page)
 	route_tm->TemplatesImported.connect (*this, invalidator (*this), std::bind (&SessionTemplateManager::init, session_tm), gui_context ());
 	strip_tm->TemplatesImported.connect (*this, invalidator (*this), std::bind (&StripStateManager::init, strip_tm), gui_context ());
 
-	signal_hide().connect (sigc::mem_fun (session_tm, &TemplateManager::handle_dirty_description));
-	signal_hide().connect (sigc::mem_fun (route_tm, &TemplateManager::handle_dirty_description));
-	nb->signal_switch_page().connect (sigc::hide (sigc::hide (sigc::mem_fun (session_tm, &TemplateManager::handle_dirty_description))));
-	nb->signal_switch_page().connect (sigc::hide (sigc::hide (sigc::mem_fun (route_tm, &TemplateManager::handle_dirty_description))));
+	signal_hide().connect (sigc::mem_fun (*session_tm, &TemplateManager::handle_dirty_description));
+	signal_hide().connect (sigc::mem_fun (*route_tm, &TemplateManager::handle_dirty_description));
+	nb->signal_switch_page().connect (sigc::hide (sigc::hide (sigc::mem_fun (*session_tm, &TemplateManager::handle_dirty_description))));
+	nb->signal_switch_page().connect (sigc::hide (sigc::hide (sigc::mem_fun (*route_tm, &TemplateManager::handle_dirty_description))));
 }
 
 TemplateManager::TemplateManager ()

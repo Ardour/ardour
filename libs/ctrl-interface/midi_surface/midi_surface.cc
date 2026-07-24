@@ -133,7 +133,7 @@ MIDISurface::ports_acquire ()
 	AsyncMIDIPort* asp;
 
 	asp = dynamic_cast<AsyncMIDIPort*> (_input_port);
-	asp->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (this, &MIDISurface::midi_input_handler), _input_port));
+	asp->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (*this, &MIDISurface::midi_input_handler), _input_port));
 	asp->xthread().attach (main_loop()->get_context());
 
 	return 0;

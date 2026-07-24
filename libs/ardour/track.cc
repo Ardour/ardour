@@ -1068,12 +1068,6 @@ Track::use_captured_midi_sources (SourceList& srcs, CaptureInfos const & capture
 
 	RecordMode rmode = _session.config.get_record_mode ();
 
-	samplecnt_t total_capture = 0;
-
-	for (total_capture = 0, ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
-		total_capture += (*ci)->samples;
-	}
-
 	/* we will want to be able to keep (over)writing the source
 	   but we don't want it to be removable. this also differs
 	   from the audio situation, where the source at this point

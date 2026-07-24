@@ -383,6 +383,7 @@ Editor::Editor ()
 	, _visible_marker_types (all_marker_types)
 	, _visible_range_types (all_range_types)
 	, _midi_inspector (nullptr)
+	, xcursor (nullptr)
 {
 	/* we are a singleton */
 
@@ -442,7 +443,7 @@ Editor::Editor ()
 
 	initialize_canvas ();
 
-	CairoWidget::set_focus_handler (sigc::mem_fun (ARDOUR_UI::instance(), &ARDOUR_UI::reset_focus));
+	CairoWidget::set_focus_handler (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::reset_focus));
 
 	_summary = new EditorSummary (*this);
 
@@ -694,7 +695,11 @@ Editor::Editor ()
 	add_notebook_page (_("Snaps"), _("Snapshots"), _snapshots->widget ());
 	add_notebook_page (_("Groups"), _("Track & Bus Groups"), _route_groups->widget ());
 	add_notebook_page (_("Marks"), _("Ranges & Marks"), _locations->widget ());
-	add_notebook_page (_("Inspector"), _("MIDI Inspector"), *_midi_inspector);
+
+	Gtk::ScrolledWindow* sw = wrap (GTK_SCROLLED_WINDOW (gtk_scrolled_window_new (nullptr, nullptr)));
+	sw->set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+	sw->add (*_midi_inspector);
+	add_notebook_page (_("MIDI Tools"), _("MIDI Tools"), *sw);
 
 	_notebook_tab2.set_index (4);
 
@@ -4743,7 +4748,30 @@ Editor::add_stripables (StripableList& sl)
 	std::shared_ptr<Route> r;
 	TrackViewList new_selection;
 	bool changed = false;
-	bool from_scratch = (track_views.size() == 0);
+	int32_t real_routes = 0;
+
+	/* Count the number of "normal" tracks & busses */
+
+	{
+		std::shared_ptr<RouteList const> rl (_session->get_routes());
+
+		for (auto const & r : *rl) {
+			if (r->is_normal_route()) {
+				real_routes++;
+			}
+		}
+	}
+
+	/* Session::get_routes() will include the ones we just added */
+
+	for (auto & s : sl) {
+		if (s->is_normal_route()) {
+			real_routes--;
+		}
+	}
+
+	bool from_scratch = (real_routes <= 0);
+	bool initial_selection = (from_scratch || _no_not_select_reimported_tracks);
 
 	sl.sort (Stripable::Sorter());
 
@@ -4784,7 +4812,11 @@ Editor::add_stripables (StripableList& sl)
 			}
 
 			track_views.push_back (rtv);
-			new_selection.push_back (rtv);
+			if (!initial_selection || new_selection.empty()) {
+				if (r->is_normal_route()) {
+					new_selection.push_back (rtv);
+				}
+			}
 
 			rtv->effective_gain_display ();
 
@@ -4803,7 +4835,7 @@ Editor::add_stripables (StripableList& sl)
 	 * than just VCAs
 	 */
 
-	if (!from_scratch && !_no_not_select_reimported_tracks && !new_selection.empty()) {
+	if (!new_selection.empty() && !ARDOUR_UI::instance()->loading_session ()) {
 		selection->set (new_selection);
 		begin_selection_op_history();
 	}
@@ -5633,6 +5665,10 @@ Editor::ui_parameter_changed (string parameter)
 		_track_canvas->request_redraw (_track_canvas->visible_area());
 	} else if (parameter == "show-selection-marker") {
 		update_ruler_visibility ();
+	} else if (parameter == "use-cross-cursor") {
+		maybe_enable_cross_cursor ();
+	} else if (parameter == "show-region-gain") {
+		set_gain_envelope_visibility ();
 	}
 }
 

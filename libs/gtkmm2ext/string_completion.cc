@@ -124,7 +124,7 @@ StringCompletion::match_anywhere (Glib::ustring const & str,  Gtk::TreeModel::co
 void
 StringCompletion::set_match_anywhere ()
 {
-	set_match_func (sigc::mem_fun (this, &StringCompletion::match_anywhere));
+	set_match_func (sigc::mem_fun (*this, &StringCompletion::match_anywhere));
 }
 
 void

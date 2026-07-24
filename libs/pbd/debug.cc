@@ -103,14 +103,20 @@ PBD::new_debug_bit (const char* name)
 }
 
 void
+PBD::set_debug_bits (DebugBits db)
+{
+	debug_bits = db;
+}
+
+void
 PBD::debug_only_print (const char* prefix, string str)
 {
 	if ((PBD::debug_bits & DEBUG::ThreadName).any()) {
-		printf ("0x%lx (%s) ", (intptr_t) DEBUG_THREAD_SELF, pthread_name());
+		printf ("0x%" PRIxPTR " (%s) ", (intptr_t) DEBUG_THREAD_SELF, pthread_name());
 	}
 
 	if ((PBD::debug_bits & DEBUG::DebugTimestamps).any()) {
-		printf ("%ld %s: %s", g_get_monotonic_time(), prefix, str.c_str());
+		printf ("%" PRId64 " %s: %s", g_get_monotonic_time(), prefix, str.c_str());
 	} else {
 		printf ("%s: %s", prefix, str.c_str());
 	}

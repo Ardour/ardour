@@ -150,7 +150,7 @@ int
 IOProcessor::set_state (const XMLNode& node, int version)
 {
 	if (version < 3000) {
-		return set_state_2X (node, version);
+		return IOProcessor::set_state_2X (node, version);
 	}
 
 	XMLProperty const * prop;
@@ -226,6 +226,19 @@ int
 IOProcessor::set_state_2X (const XMLNode& node, int version)
 {
 	_own_input = _own_output = true;
+
+	for (auto const& n : node.children ()) {
+		if (n->name() != "IO") {
+			continue;
+		}
+		XMLProperty const * prop;
+		if (_input && (prop = n->property ("inputs")) != 0 && !prop->value ().empty ()) {
+			_input->set_state_2X (*n, version, true);
+		}
+		if (_output && (prop = n->property ("outputs")) != 0 && !prop->value ().empty ()) {
+			_output->set_state_2X (*n, version, false);
+		}
+	}
 
 	Processor::set_state_2X (node, version);
 

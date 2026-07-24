@@ -47,6 +47,7 @@ private:
 	void refill ();
 	void maybe_refill (ArdourWidgets::ArdourButton*);
 	void selection_changed ();
+	int name_sorter (Gtk::TreeModel::iterator a, Gtk::TreeModel::iterator b) const;
 	void blacklist_changed (std::string const&);
 	void favorite_changed (std::string const&);
 	void hidden_changed (std::string const&);

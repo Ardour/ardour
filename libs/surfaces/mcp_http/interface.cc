@@ -24,7 +24,7 @@ using namespace ARDOUR;
 using namespace ArdourSurface;
 
 static ControlProtocol*
-new_mcp_http_protocol (Session* s, void* config)
+new_mcp_http_protocol (Session* s, std::string const & config)
 {
 	MCPHttp* surface = new MCPHttp (*s);
 

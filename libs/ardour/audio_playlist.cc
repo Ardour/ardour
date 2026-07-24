@@ -115,14 +115,14 @@ AudioPlaylist::AudioPlaylist (std::shared_ptr<const AudioPlaylist> other, timepo
 			if (timepos_t (end) > region->position() + region->fade_in()->back()->when) {
 				fade_in = region->fade_in()->back()->when.samples();  //end is after fade-in, preserve the fade-in
 			}
-			if (timepos_t (end) >= region->end().earlier (region->fade_out()->back()->when)) {
+			if (timepos_t (end) >= region->end_position().earlier (region->fade_out()->back()->when)) {
 				fade_out = region->fade_out()->back()->when.earlier (timepos_t (region->last_sample() - end)).samples();  //end is inside the fadeout, preserve the fades endpoint
 			}
 			break;
 		}
 
 		case Temporal::OverlapEnd: {
-			if (start < region->end().earlier (region->fade_out()->back()->when)) {  //start is before fade-out, preserve the fadeout
+			if (start < region->end_position().earlier (region->fade_out()->back()->when)) {  //start is before fade-out, preserve the fadeout
 				fade_out = region->fade_out()->back()->when.samples();
 			}
 			if (start < region->position() + region->fade_in()->back()->when) {

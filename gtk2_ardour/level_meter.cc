@@ -189,9 +189,8 @@ LevelMeterBase::parameter_changed (string p)
 
 	if (p == "meter-hold") {
 		vector<MeterInfo>::iterator i;
-		uint32_t n;
 
-		for (n = 0, i = meters.begin(); i != meters.end(); ++i, ++n) {
+		for (i = meters.begin(); i != meters.end(); ++i) {
 			(*i).meter->set_hold_count ((uint32_t) floor(UIConfiguration::instance().get_meter_hold()));
 		}
 	}
@@ -205,9 +204,8 @@ LevelMeterBase::parameter_changed (string p)
 	}
 	else if (p == "meter-peak") {
 		vector<MeterInfo>::iterator i;
-		uint32_t n;
 
-		for (n = 0, i = meters.begin(); i != meters.end(); ++i, ++n) {
+		for (i = meters.begin(); i != meters.end(); ++i) {
 			(*i).max_peak = minus_infinity();
 		}
 	}

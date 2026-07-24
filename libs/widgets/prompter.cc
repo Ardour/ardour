@@ -112,7 +112,11 @@ Prompter::set_default_text (std::string const& txt)
 {
 	default_text = txt;
 	resetButton.show ();
+#ifdef HAVE_SIGCPP2_12_1
+	resetButton.signal_clicked ().connect (sigc::track_object([this] { entry.set_text (default_text);}, *this));
+#else
 	resetButton.signal_clicked ().connect (sigc::track_obj([this] { entry.set_text (default_text);}, *this));
+#endif
 	resetButton.set_sensitive (entry.get_text() != default_text);
 }
 

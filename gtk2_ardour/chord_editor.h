@@ -46,7 +46,6 @@ class ChordEditor : public Gtk::VBox
 	int chord_size() const { return _chord_size; }
 
  private:
-	EditingContext& editing_context;
 	ARDOUR::ChordProvider& chord_provider;
 	int _chord_size;
 

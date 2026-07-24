@@ -972,7 +972,7 @@ Full information on all the above can be found on the support page at\n\
 "), PROGRAM_NAME, VERSIONSTRING));
 
 
-	current_dialog_connection = pre_release_dialog->signal_response().connect (sigc::bind (sigc::mem_fun (this, &StartupFSM::dialog_response_handler), PreReleaseDialog));
+	current_dialog_connection = pre_release_dialog->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &StartupFSM::dialog_response_handler), PreReleaseDialog));
 
 	pre_release_dialog->get_vbox()->set_border_width (12);
 	pre_release_dialog->get_vbox()->pack_start (*label, false, false, 12);

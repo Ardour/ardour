@@ -28,7 +28,7 @@ using namespace PBD;
 using namespace ArdourSurface;
 
 static ControlProtocol*
-new_maschine2 (Session* s, void* config)
+new_maschine2 (Session* s, std::string const & config)
 {
 	Maschine2* m2 = 0;
 

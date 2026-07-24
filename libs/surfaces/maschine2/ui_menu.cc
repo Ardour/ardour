@@ -46,10 +46,9 @@ using namespace Glib;
 using namespace ArdourSurface;
 using namespace ArdourCanvas;
 
-Maschine2Menu::Maschine2Menu (PBD::EventLoop* el, Item* parent, const std::vector<std::string>& s, double width)
+Maschine2Menu::Maschine2Menu (PBD::EventLoop*, Item* parent, const std::vector<std::string>& s, double width)
 	: Container (parent)
 	, _ctrl (0)
-	, _eventloop (el)
 	, _baseline (-1)
 	, _height (-1)
 	, _width (width)

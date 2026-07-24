@@ -87,6 +87,8 @@ EditorSummary::parameter_changed (string p)
 
 	if (p == "color-regions-using-track-color") {
 		set_background_dirty ();
+	} else if (p == "extra-ui-extents-time") {
+		set_background_dirty ();
 	}
 }
 

@@ -806,7 +806,7 @@ Dialog::Dialog (std::string const& title, luabridge::LuaRef lr)
 	Gtk::Table* table = Gtk::manage (new Gtk::Table ());
 	table->set_col_spacings (20);
 	table->set_row_spacings (8);
-	table->signal_size_request ().connect (sigc::mem_fun (this, &Dialog::table_size_request));
+	table->signal_size_request ().connect (sigc::mem_fun (*this, &Dialog::table_size_request));
 
 	_scroller.set_shadow_type(Gtk::SHADOW_NONE);
 	_scroller.set_border_width(0);

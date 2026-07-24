@@ -78,10 +78,11 @@ using namespace PBD;
 using namespace Glib;
 using namespace std;
 
-GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s, std::string* config)
+GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s, std::string const & config)
 	: ControlProtocol (s, _("Generic MIDI"))
 	, AbstractUI<GenericMIDIRequest> (name())
 	, connection_state (ConnectionState (0))
+	, _config (config)
 	, _motorised (false)
 	, _threshold (10)
 	, gui (0)
@@ -148,10 +149,6 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s, std::string*
 	                                                                      this);
 
 	reload_maps ();
-
-	if (config) {
-		_config = *config;
-	}
 }
 
 GenericMidiControlProtocol::~GenericMidiControlProtocol ()
@@ -832,11 +829,6 @@ GenericMidiControlProtocol::enumerate ()
 			return devices;
 		}
 
-		const XMLNodeList& children (root->children());
-		XMLNodeConstIterator citer;
-
-		MIDIControllable* mc;
-
 		DEBUG_TRACE (DEBUG::GenericMidi, "Getting manufacturers\n");
 		string manufacturer;
 		string name;
@@ -1463,6 +1455,55 @@ GenericMidiControlProtocol::lookup_controllable (const string & str, MIDIControl
 			}
 		}
 	}
+	else if (path[1] == X_("deesser") && path.size() == 3) {
+		if (path[2] == X_("enable")) {
+			c = s->mapped_control (DeEss_Enable);
+		}
+		else if (path[2] == X_("hishelf")) {
+			c = s->mapped_control (DeEss_HiShelf);
+		}
+		else if (path[2] == X_("threshold")) {
+			c = s->mapped_control (DeEss_Threshold);
+		}
+		else if (path[2] == X_("attack")) {
+			c = s->mapped_control (DeEss_Attack);
+		}
+		else if (path[2] == X_("ess_depth")) {
+			c = s->mapped_control (DeEss_EssDepth);
+		}
+		else if (path[2] == X_("ess_freq")) {
+			c = s->mapped_control (DeEss_EssFreq);
+		}
+		else if (path[2] == X_("ess_solo")) {
+			c = s->mapped_control (DeEss_EssSolo);
+		}
+		else if (path[2] == X_("hi_depth")) {
+			c = s->mapped_control (DeEss_HiDepth);
+		}
+		else if (path[2] == X_("hi_freq")) {
+			c = s->mapped_control (DeEss_HiFreq);
+		}
+		else if (path[2] == X_("hi_solo")) {
+			c = s->mapped_control (DeEss_HiSolo);
+		}
+	}
+	else if (path[1] == X_("denoiser") && path.size() == 3) {
+		if (path[2] == X_("enable")) {
+			c = s->mapped_control (Denoise_Enable);
+		}
+		else if (path[2] == X_("threshold")) {
+			c = s->mapped_control (Denoise_Threshold);
+		}
+		else if (path[2] == X_("depth_low")) {
+			c = s->mapped_control (Denoise_DepthLow);
+		}
+		else if (path[2] == X_("depth_high")) {
+			c = s->mapped_control (Denoise_DepthHigh);
+		}
+		else if (path[2] == X_("makeup_gain")) {
+			c = s->mapped_control (Denoise_Makeup);
+		}
+	}
 	else if (path[1] == X_("tape"))
 	{
 		if (path.size() == 3)
@@ -1796,7 +1837,7 @@ GenericMidiControlProtocol::start_midi_handling ()
 	 * method, which will read the data, and invoke the parser.
 	 */
 
-	_input_port->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (this, &GenericMidiControlProtocol::midi_input_handler), std::weak_ptr<AsyncMIDIPort> (_input_port)));
+	_input_port->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (*this, &GenericMidiControlProtocol::midi_input_handler), std::weak_ptr<AsyncMIDIPort> (_input_port)));
 	_input_port->xthread().attach (main_loop()->get_context());
 }
 

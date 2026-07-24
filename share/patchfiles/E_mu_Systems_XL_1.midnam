@@ -3,7 +3,7 @@
 <MIDINameDocument>
   <Author>Erik van den Hooven</Author>
   <MasterDeviceNames>
-    <Manufacturer>E-mu</Manufacturer>
+    <Manufacturer>E-mu Systems</Manufacturer>
     <Model>Xtream Lead 1</Model>
     <CustomDeviceMode Name="Default">
       <ChannelNameSetAssignments>

@@ -145,8 +145,8 @@ public:
 	timepos_t position ()  const { return _length.val().position(); }
 	timepos_t start ()     const { return _start.val(); }
 	timecnt_t length ()    const { return _length.val(); }
-	timepos_t end()        const;
-	timepos_t nt_last()    const { return end().decrement(); }
+	timepos_t end_position()        const;
+	timepos_t nt_last()    const { return end_position().decrement(); }
 
 	virtual timecnt_t tail () const { return timecnt_t (0); }
 

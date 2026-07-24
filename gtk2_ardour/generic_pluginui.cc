@@ -389,9 +389,9 @@ GenericPluginUI::build ()
 	if (!descs.empty()) {
 		/* Listen for property changes that are not notified normally because
 		 * AutomationControl has only support for numeric values currently.
-		 * The only case is Variant::PATH for now */
+		 * The only cases are Variant::PATH and Variant::STRING for now */
 		plugin->PropertyChanged.connect(*this, invalidator(*this),
-				std::bind(&GenericPluginUI::path_property_changed, this, _1, _2),
+				std::bind(&GenericPluginUI::string_property_changed, this, _1, _2),
 				gui_context());
 
 		/* and query current property value */
@@ -521,7 +521,7 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 			                     FILL|EXPAND, FILL);
 			button_row++;
 
-		} else if (cui->controller || cui->combo) {
+		} else if (cui->controller || cui->combo || cui->string_entry) {
 			// Get all of the controls into a list, so that
 			// we can lay them out a bit more nicely later.
 			cui_controls_list.push_back(cui);
@@ -817,6 +817,7 @@ GenericPluginUI::ControlUI::ControlUI (const Evoral::Parameter& p)
 	, automate_button (X_("")) // force creation of a label
 	, combo (0)
 	, file_button (0)
+	, string_entry (0)
 	, spin_box (0)
 	, display (0)
 	, hbox (0)
@@ -927,6 +928,19 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			 * the corresponding property changes. This doesn't go through the usual
 			 * AutomationControls, because they don't support non-numeric values. */
 			_filepath_controls.insert(std::make_pair(desc.key, control_ui->file_button));
+
+			return control_ui;
+		} else if (desc.datatype == Variant::STRING) {
+			// Like the above, but an Entry instead of FileChooserButton
+			control_ui->string_entry = manage(new Gtk::Entry());
+			control_ui->pack_start (control_ui->label, false, true);
+			control_ui->pack_start (*control_ui->string_entry, true, true);
+
+			control_ui->string_entry->signal_changed().connect(
+				sigc::bind(sigc::mem_fun(*this, &GenericPluginUI::set_string_property),
+				           desc, control_ui->string_entry));
+
+			_string_controls.insert(std::make_pair(desc.key, control_ui->string_entry));
 
 			return control_ui;
 		}
@@ -1344,17 +1358,25 @@ GenericPluginUI::set_path_property (const ParameterDescriptor& desc,
 }
 
 void
-GenericPluginUI::path_property_changed (uint32_t key, const Variant& value)
+GenericPluginUI::set_string_property (const ParameterDescriptor& desc,
+									  Gtk::Entry*                widget)
+{
+	plugin->set_property(desc.key, Variant(Variant::STRING, widget->get_text()));
+}
+
+void
+GenericPluginUI::string_property_changed (uint32_t key, const Variant& value)
 {
 	if (value.type () == Variant::PATH) {
 		FilePathControls::iterator c = _filepath_controls.find(key);
 		if (c != _filepath_controls.end()) {
 			c->second->set_filename(value.get_path());
-		} else {
-			std::cerr << "warning: property change for property with no control" << std::endl;
 		}
-	} else if (Variant::type_is_numeric (value.type ())) {
-		//printf ("Prop Change %d %f\n", key, value.to_double());
+	} else if (value.type () == Variant::STRING) {
+		StringControls::iterator c = _string_controls.find(key);
+		if (c != _string_controls.end()) {
+			c->second->set_text(value.get_string());
+		}
 	}
 }
 

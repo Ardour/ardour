@@ -76,7 +76,7 @@ class /*LIBAUDIOGRAPHER_API*/ Threader : public Source<T>, public Sink<T>
 		unsigned int outs = outputs.size();
 		(void) readers.fetch_add (outs);
 		for (unsigned int i = 0; i < outs; ++i) {
-			thread_pool.push (sigc::bind (sigc::mem_fun (this, &Threader::process_output), c, i));
+			thread_pool.push (sigc::bind (sigc::mem_fun (*this, &Threader::process_output), c, i));
 		}
 
 		wait();

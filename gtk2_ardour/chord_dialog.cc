@@ -49,7 +49,9 @@ ChordDialog::ChordDialog (EditingContext& ec, ChordProvider& cp, int chord_size)
 		}
 	}
 
-	sort (names.begin(), names.end(), PBD::naturally_less);
+	sort (names.begin(), names.end(), [](const char* a, const char* b) {
+		return PBD::naturally_less(a, b);
+	});
 
 	for (auto & n : names) {
 		chord_list.append_text (n);

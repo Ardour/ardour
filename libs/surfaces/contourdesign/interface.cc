@@ -35,7 +35,7 @@ using namespace PBD;
 using namespace ArdourSurface;
 
 static ControlProtocol*
-new_contourdesign_protocol (Session* s, void* config)
+new_contourdesign_protocol (Session* s, std::string const & config)
 {
 	ContourDesignControlProtocol* wmcp = new ContourDesignControlProtocol (*s);
 	wmcp->set_active (true);

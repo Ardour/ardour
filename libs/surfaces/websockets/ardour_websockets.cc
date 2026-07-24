@@ -25,6 +25,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#ifdef COMPILER_MSVC
+#define NOMINMAX
+#endif
+
 #include "ardour/session.h"
 
 #include "ardour_websockets.h"

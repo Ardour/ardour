@@ -545,6 +545,11 @@ void
 TimeAxisViewItem::set_height (double height)
 {
 	_height = height;
+	_effective_height = height;
+
+	if (height >= NAME_HIGHLIGHT_THRESH) {
+		_effective_height -= NAME_HIGHLIGHT_SIZE;
+	}
 
 	manage_name_highlight ();
 
@@ -594,8 +599,7 @@ TimeAxisViewItem::manage_name_highlight ()
 	if (name_highlight && wide_enough_for_name && high_enough_for_name) {
 
 		name_highlight->show();
-		// name_highlight->set_x_position (1.0);
-		name_highlight->set (ArdourCanvas::Rect (0.0, (double) _height - NAME_HIGHLIGHT_SIZE,  _width - 2.0, _height));
+		name_highlight->set (ArdourCanvas::Rect (1.0, _effective_height,  _width - 1.0, _height));
 
 	} else {
 		name_highlight->hide();

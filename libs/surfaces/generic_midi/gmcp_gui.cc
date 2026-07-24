@@ -141,23 +141,11 @@ GMCPGUI::GMCPGUI (GenericMidiControlProtocol& p)
 {
 	vector<string> popdowns;
 
-	for (list<GenericMidiControlProtocol::MapInfo>::iterator x = cp.map_info.begin(); x != cp.map_info.end(); ++x) {
-		popdowns.push_back (x->name);
-	}
-
-	sort (popdowns.begin(), popdowns.end(), less<string>());
-
-	popdowns.insert (popdowns.begin(), _("Reset All"));
-	popdowns.insert (popdowns.begin(), _("Drop Bindings"));
-
+	popdowns.push_back (cp.current_binding());
+	popdowns.push_back (_("Drop Map & Learned"));
+	popdowns.push_back (_("Drop Map bindings"));
 	set_popdown_strings (map_combo, popdowns);
-
-	if (cp.current_binding().empty()) {
-		map_combo.set_active_text (popdowns[0]);
-	} else {
-		map_combo.set_active_text (cp.current_binding());
-	}
-
+	map_combo.set_active_text (cp.current_binding());
 	map_combo.signal_changed().connect (sigc::mem_fun (*this, &GMCPGUI::binding_changed));
 
 	set_spacing (6);

@@ -4705,39 +4705,41 @@ msgstr "Triolet de croches"
 
 #: editing_context.cc:116
 msgid "1/6 Note"
-msgstr "Triolet de double-croches"
+msgstr "Triolet de doubles"
 
 #: editing_context.cc:117
 msgid "1/12 Note"
-msgstr "Triolet de triple-croches"
+msgstr "Triolet de triple"
 
 #: editing_context.cc:118
 msgid "1/24 Note"
-msgstr "Triolet de quadruple-croches"
+msgstr "Triolet de quadruple"
 
+# "de croches" iimplicite pour réduire la largeur minimale du selecteur dans l'interface
 #: editing_context.cc:119
 msgid "1/5 Note"
-msgstr "Quintolet de croches"
+msgstr "Quintolet"
 
+# voir commentaire pour '1/5 Note"
 #: editing_context.cc:120
 msgid "1/10 Note"
-msgstr "Quintolet de double-croches"
+msgstr "Quintolet de doubles"
 
 #: editing_context.cc:121
 msgid "1/20 Note"
-msgstr "Quintolet de triple-croches"
+msgstr "Quintolet de triples"
 
 #: editing_context.cc:122
 msgid "1/7 Note"
-msgstr "Septolet de croches"
+msgstr "Septolet"
 
 #: editing_context.cc:123
 msgid "1/14 Note"
-msgstr "Septolet de doubles-croches"
+msgstr "Septolet de doubles"
 
 #: editing_context.cc:124
 msgid "1/28 Note"
-msgstr "Septolet de triple-croches"
+msgstr "Septolet de triples"
 
 #: editing_context.cc:133 mono_panner_editor.cc:45
 msgid "Left"

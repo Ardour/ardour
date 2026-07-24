@@ -690,7 +690,6 @@ MiniTimeline::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	std::vector<LocationMarker>::const_iterator outside_left_marker = lm.end();
 	std::vector<LocationMarker>::const_iterator outside_right_marker = lm.end();
 	int rightmost_marker_right_edge = width * .5 + marker_width;
-	int id = 0;
 	int leftmost_marker_left_edge = width;
 
 	/* calculate positions of cue markers immediately before and inside my width*/
@@ -727,7 +726,7 @@ MiniTimeline::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	}
 
 	/* draw the location and cue markers */
-	for (std::vector<LocationMarker>::const_iterator l = lm.begin(); l != lm.end(); ++id) {
+	for (std::vector<LocationMarker>::const_iterator l = lm.begin(); l != lm.end();) {
 		const std::string& label = (*l).label;
 		const int cue_index = (*l).cue_index;
 		const samplepos_t when = (*l).when.samples();

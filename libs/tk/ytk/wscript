@@ -9,7 +9,7 @@ MINOR = '24'
 MICRO = '23'
 LIBYDK_VERSION = "%s.%s.%s" % (MAJOR, MINOR, MICRO)
 
-I18N_PACKAGE = 'libytk'
+I18N_PACKAGE = 'ytk'
 
 libytk_sources = [
     'fnmatch.c',
@@ -281,7 +281,7 @@ def build(bld):
                             'G_DISABLE_SINGLE_INCLUDES', 'DATK_DISABLE_SINGLE_INCLUDES', 'GDK_PIXBUF_DISABLE_SINGLE_INCLUDES', 'GTK_DISABLE_SINGLE_INCLUDES', 'GDK_PIXBUF_DISABLE_DEPRECATED',
                             'GTK_PRINT_BACKENDS="file,lpr"', 'GTK_PRINT_BACKEND_ENABLE_UNSUPPORTED', 'GTK_PRINT_PREVIEW_COMMAND=""', '_POSIX_C_SOURCE=200809L',
                             'GTK_VERSION="2.24.23"', 'GTK_BINARY_VERSION="2.10.0"', 'GTK_HOST="ardour"',
-                            'PACKAGE="' + I18N_PACKAGE + '"',
+                            'PACKAGE="' + I18N_PACKAGE + bld.env['MAJOR'] + '"',
                             'GETTEXT_PACKAGE="' + I18N_PACKAGE + bld.env['MAJOR'] + '"',
                             'GTK_DATA_PREFIX="' + bld.env['PREFIX'] + '"',
                             'GTK_SYSCONFDIR="' + bld.env['SYSCONFDIR'] + '"',

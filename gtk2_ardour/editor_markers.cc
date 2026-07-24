@@ -735,7 +735,7 @@ Editor::update_section_rects ()
 
 			std::string const color = bright ? "arrangement rect" : "arrangement rect alt";
 			rect->set_fill_color (UIConfiguration::instance().color (color));
-			rect->Event.connect (sigc::bind (sigc::mem_fun (this, &Editor::section_rect_event), l,  rect, color));
+			rect->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::section_rect_event), l,  rect, color));
 
 			Editor::LocationMarkers* markers = find_location_markers (l);
 			if (markers) {
@@ -1935,7 +1935,7 @@ Editor::edit_location (Location& loc, bool with_scene, bool with_command)
 		b3->pack_start (*channel, true, false);
 
 		use_scene_button = manage (new Gtk::CheckButton (_("Use scene change")));
-		use_scene_button->signal_toggled().connect  ([this,use_scene_button,program,bank,channel]() {
+		use_scene_button->signal_toggled().connect  ([use_scene_button,program,bank,channel]() {
 			bool s = use_scene_button->get_active();
 			program->set_sensitive (s);
 			bank->set_sensitive (s);

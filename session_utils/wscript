@@ -56,9 +56,6 @@ def build_ardour_util(bld, util):
     elif bld.env['build_target'] == 'mingw' or bld.env['build_target'] == 'msvc':
         obj.linkflags += bld.env['compiler_flags_dict']['mconsole']
 
-        if bld.env['build_target'] == 'msvc':
-            obj.lib = ['getopt']
-
     obj.includes += ['../libs']
 
     if bld.env['build_target'] == 'mingw' or bld.env['build_target'] == 'msvc':

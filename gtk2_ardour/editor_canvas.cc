@@ -291,8 +291,8 @@ Editor::initialize_canvas ()
 
 	_track_canvas->drag_dest_set (target_table);
 	_track_canvas->signal_drag_data_received().connect (sigc::mem_fun(*this, &Editor::track_canvas_drag_data_received));
-
 	_track_canvas_viewport->signal_size_allocate().connect (sigc::mem_fun(*this, &Editor::track_canvas_viewport_allocate));
+	maybe_enable_cross_cursor ();
 
 	initialize_rulers ();
 
@@ -340,6 +340,74 @@ Editor::track_canvas_viewport_size_allocated ()
 	redisplay_grid (false);
 	redisplay_track_views ();
 	_summary->set_overlays_dirty ();
+
+	if (!xcursor) {
+		xcursor = new CrossCursor (_track_canvas->root());
+		xcursor->set_line_width (5);
+		xcursor->set_outline_color (UIConfiguration::instance().color_mod ("verbose canvas cursor", "verbose canvas cursor"));
+		xcursor->hide (); /* for now, it will become visible on first motion */
+	}
+
+	xcursor->set_extents (_visible_canvas_width, _visible_canvas_height);
+}
+
+void
+Editor::maybe_enable_cross_cursor ()
+{
+	if (UIConfiguration::instance().get_use_cross_cursor()) {
+		xcursor_connection = _track_canvas->MouseMotion.connect ([this](ArdourCanvas::Duple const & pos) { motion_track (pos); });
+	} else {
+		xcursor_connection.disconnect ();
+	}
+}
+
+void
+Editor::motion_track (ArdourCanvas::Duple const & pos)
+{
+	if (!UIConfiguration::instance().get_use_cross_cursor()) {
+		return;
+	}
+
+	bool is_midi_track = dynamic_cast<MidiTimeAxisView*> (entered_track);
+	bool is_auto_track = dynamic_cast<AutomationTimeAxisView*> (entered_track);
+
+	if (!is_midi_track && !is_auto_track) {
+		xcursor->hide ();
+		return;
+	}
+
+	if (!is_auto_track && !internal_editing()) {
+		xcursor->hide ();
+		return;
+	}
+
+	assert (xcursor);
+
+	if (!_drags->active()) {
+		xcursor->hide ();
+		return;
+	}
+
+	if (_drags->dragging_lollipop()) {
+		xcursor->hide ();
+		return;
+	}
+
+	xcursor->show ();
+
+	ArdourCanvas::Duple xc (pos);
+
+	ArdourCanvas::Item const * bounds = _drags->drags().front()->bounding_item();
+
+	if (bounds) {
+		ArdourCanvas::Rect rect (bounds->item_to_window (bounds->bounding_box()));
+		xc.x = std::max (xc.x, rect.x0);
+		xc.x = std::min (xc.x, rect.x1);
+		xc.y = std::max (xc.y, rect.y0);
+		xc.y = std::min (xc.y, rect.y1);
+	}
+
+	xcursor->set_position (xc);
 }
 
 void
@@ -1357,7 +1425,6 @@ Editor::which_canvas_cursor(ItemType type) const
 		*/
 
 		switch (type) {
-		case GainLineItem:
 		case ControlPointItem:
 			cursor = _cursors->fader;
 			break;

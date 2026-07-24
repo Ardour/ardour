@@ -46,7 +46,7 @@ class ChordBox : public Gtk::VBox, public ARDOUR::ChordProvider
 
 	typedef std::vector<int> IntervalSet;
 
-	bool get_midi_chord (int root_pitch, IntervalSet& pitches) const;
+	bool get_midi_chord (int root_pitch, IntervalSet& pitches, bool& arpeggiate) const;
 	void show_chord (std::string const & name);
 
 	sigc::signal<void, IntervalSet> ReplaceChord;
@@ -72,6 +72,7 @@ class ChordBox : public Gtk::VBox, public ARDOUR::ChordProvider
 
 	Gtk::Table inversion_table;
 	Gtk::Table drop_table;
+	Gtk::CheckButton arpeggiate_button;
 
 	Gtk::Label triad_label;
 	Gtk::Label tetrad_label;

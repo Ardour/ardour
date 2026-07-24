@@ -25,12 +25,17 @@
 using namespace ARDOUR;
 
 static ControlProtocol*
-new_generic_midi_protocol (Session* s, void* config)
+new_generic_midi_protocol (Session* s, std::string const & config)
 {
 	GenericMidiControlProtocol* gmcp;
 
+	if (config.empty()) {
+		/* Generic MIDI requires a device name */
+		return nullptr;
+	}
+
 	try {
-		gmcp =  new GenericMidiControlProtocol (*s, static_cast<std::string*>(config));
+		gmcp =  new GenericMidiControlProtocol (*s, config);
 	} catch (failed_constructor& err) {
 		return 0;
 	}

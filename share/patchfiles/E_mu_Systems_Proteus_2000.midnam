@@ -3,7 +3,7 @@
 <MIDINameDocument>
   <Author>Digidesign</Author>
   <MasterDeviceNames>
-    <Manufacturer>E-mu</Manufacturer>
+    <Manufacturer>E-mu Systems</Manufacturer>
     <Model>Proteus 2000</Model>
     <CustomDeviceMode Name="Default">
       <ChannelNameSetAssignments>

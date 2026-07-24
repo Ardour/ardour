@@ -165,8 +165,8 @@ template<typename T> std::shared_ptr<AutomationControlList> stripable_list_to_co
 	return cl;
 }
 
-LIBARDOUR_API bool estimate_audio_tempo_region (std::shared_ptr<Region> region, Sample* data, samplecnt_t data_length, samplecnt_t sample_rate, double& qpm, Temporal::Meter& meter, double& beatcount);
-LIBARDOUR_API bool estimate_audio_tempo_source (TimelineRange const &, std::shared_ptr<Source>, Sample* data, samplecnt_t data_length, samplecnt_t sample_rate, double& qpm, Temporal::Meter& meter, double& beatcount);
+LIBARDOUR_API bool estimate_audio_tempo_region (std::shared_ptr<Region> region, Sample const * data, samplecnt_t data_length, samplecnt_t sample_rate, double& qpm, Temporal::Meter& meter, double& beatcount);
+LIBARDOUR_API bool estimate_audio_tempo_source (TimelineRange const &, std::shared_ptr<Source>, Sample const * data, samplecnt_t data_length, samplecnt_t sample_rate, double& qpm, Temporal::Meter& meter, double& beatcount);
 
 #if __APPLE__
 LIBARDOUR_API std::string CFStringRefToStdString(CFStringRef stringRef);

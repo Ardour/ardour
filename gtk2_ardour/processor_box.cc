@@ -750,7 +750,7 @@ ProcessorEntry::set_control_state (XMLNode const * node)
 		(*i)->set_state (node);
 	}
 
-	if (_plugin_display) {
+	if (node && _plugin_display) {
 		XMLNode* n = GUIObjectState::get_node (node, X_("InlineDisplay"));
 		if (!n) return;
 
@@ -1224,7 +1224,7 @@ ProcessorEntry::Control::add_state (XMLNode* node) const
 void
 ProcessorEntry::Control::set_state (XMLNode const * node)
 {
-	XMLNode* n = GUIObjectState::get_node (node, state_id ());
+	XMLNode* n = node ? GUIObjectState::get_node (node, state_id ()) : NULL;
 	if (n) {
 		bool visible;
 		if (n->get_property (X_("visible"), visible)) {
@@ -3227,11 +3227,9 @@ ProcessorBox::add_processor_to_display (std::weak_ptr<Processor> p)
 	}
 
 	/* Set up this entry's state from the GUIObjectState */
-	XMLNode* proc = entry_gui_object_state (e);
-	if (proc) {
-		e->set_control_state (proc);
-		update_gui_object_state (e); /* save updated state (InlineControl) */
-	}
+	XMLNode* proc = entry_gui_object_state (e); // may be NULL
+	e->set_control_state (proc); /* apply InlineControl */
+	update_gui_object_state (e); /* save updated state (InlineControl) */
 
 	if (plugin_insert
 #ifdef MIXBUS

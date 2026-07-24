@@ -26,7 +26,7 @@ using namespace ARDOUR;
 using namespace ArdourSurface;
 
 static ControlProtocol*
-new_ardour_websockets_protocol (Session* s, void* config)
+new_ardour_websockets_protocol (Session* s, std::string const & config)
 {
 	ArdourWebsockets* surface = new ArdourWebsockets (*s);
 

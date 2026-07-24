@@ -40,6 +40,8 @@ URIMap::URIDs::init(URIMap& uri_map)
 	// Use string literals here instead of LV2 defines to avoid LV2 dependency
 	atom_Chunk          = uri_map.uri_to_id("http://lv2plug.in/ns/ext/atom#Chunk");
 	atom_Path           = uri_map.uri_to_id("http://lv2plug.in/ns/ext/atom#Path");
+	atom_String         = uri_map.uri_to_id("http://lv2plug.in/ns/ext/atom#String");
+	atom_URI            = uri_map.uri_to_id("http://lv2plug.in/ns/ext/atom#URI");
 	atom_Sequence       = uri_map.uri_to_id("http://lv2plug.in/ns/ext/atom#Sequence");
 	atom_eventTransfer  = uri_map.uri_to_id("http://lv2plug.in/ns/ext/atom#eventTransfer");
 	atom_URID           = uri_map.uri_to_id("http://lv2plug.in/ns/ext/atom#URID");
@@ -65,8 +67,11 @@ URIMap::URIDs::init(URIMap& uri_map)
 	time_speed          = uri_map.uri_to_id("http://lv2plug.in/ns/ext/time#speed");
 	time_scale          = uri_map.uri_to_id("http://ardour.org/lv2/time#scale"); // XXX
 	patch_Get           = uri_map.uri_to_id("http://lv2plug.in/ns/ext/patch#Get");
+	patch_Put           = uri_map.uri_to_id("http://lv2plug.in/ns/ext/patch#Put");
 	patch_Set           = uri_map.uri_to_id("http://lv2plug.in/ns/ext/patch#Set");
+	patch_body          = uri_map.uri_to_id("http://lv2plug.in/ns/ext/patch#body");
 	patch_property      = uri_map.uri_to_id("http://lv2plug.in/ns/ext/patch#property");
+	patch_subject       = uri_map.uri_to_id("http://lv2plug.in/ns/ext/patch#subject");
 	patch_value         = uri_map.uri_to_id("http://lv2plug.in/ns/ext/patch#value");
 	state_StateChanged  = uri_map.uri_to_id("http://lv2plug.in/ns/ext/state#StateChanged"); // since LV2 1.15.1
 #ifdef LV2_EXTENDED

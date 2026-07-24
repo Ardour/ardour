@@ -897,7 +897,7 @@ Playlist::remove_gaps (timecnt_t const & gap_threshold, timecnt_t const & leave_
 				break;
 			}
 
-			timepos_t end_of_this_region = (*i)->end();
+			timepos_t end_of_this_region = (*i)->end_position();
 
 			if (end_of_this_region >= (*nxt)->position()) {
 				continue;

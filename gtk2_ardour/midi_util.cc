@@ -67,7 +67,6 @@ build_controller_menu (Gtk::Menu& menu, InstrumentInfo const & instrument_info, 
 		using namespace MIDI::Name;
 
 		unsigned n_items  = 0;
-		unsigned n_groups = 0;
 
 		/* keep track of CC numbers that are added */
 		uint16_t ctl_start = 1;
@@ -139,7 +138,6 @@ build_controller_menu (Gtk::Menu& menu, InstrumentInfo const & instrument_info, 
 									ctl_start, ctl_end), *ctl_menu));
 					ctl_menu = nullptr;
 					n_items  = 0;
-					++n_groups;
 				}
 			}
 		}

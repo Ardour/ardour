@@ -81,6 +81,7 @@ class MidiRegionView;
 class MidiView;
 class MeterMarker;
 class ArdourMarker;
+class SlipDraggable;
 class TempoMarker;
 class TempoCurve;
 class ControlPoint;
@@ -100,7 +101,6 @@ public:
 	bool motion_handler (GdkEvent *, bool);
 	bool mid_drag_key_event (GdkEventKey*);
 	void abort ();
-	void add (Drag *);
 	void set (Drag *, GdkEvent *, Gdk::Cursor* c = MouseCursors::invalid_cursor());
 	void start_grab (GdkEvent *, Gdk::Cursor* c = MouseCursors::invalid_cursor());
 	bool end_grab (GdkEvent *);
@@ -435,17 +435,21 @@ private:
 };
 
 /** Drag the Contents rather than the bounds of a region (i.e. Slip) */
-class RegionSlipContentsDrag : public RegionDrag
+class RegionSlipContentsDrag : public Drag
 {
-public:
-
-	RegionSlipContentsDrag (Editor&, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &, Temporal::TimeDomain td);
+  public:
+	RegionSlipContentsDrag (EditingContext&, ArdourCanvas::Item *, SlipDraggable*, std::list<SlipDraggable*> const &, Temporal::TimeDomain td);
 	virtual ~RegionSlipContentsDrag () {}
 
 	virtual void start_grab (GdkEvent *, Gdk::Cursor *);
 	virtual void motion (GdkEvent *, bool);
 	virtual void finished (GdkEvent *, bool);
 	virtual void aborted (bool);
+
+  protected:
+	SlipDraggable* _primary;
+	std::list<SlipDraggable*> draggables;
+
 };
 
 /** Brush on a region to repeat it */

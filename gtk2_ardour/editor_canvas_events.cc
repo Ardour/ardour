@@ -55,6 +55,7 @@
 #include "editor_automation_line.h"
 #include "automation_time_axis.h"
 #include "editor_automation_line.h"
+#include "midi_automation_line.h"
 #include "control_point.h"
 #include "editor_drag.h"
 #include "midi_time_axis.h"
@@ -669,10 +670,16 @@ Editor::canvas_line_event (GdkEvent *event, ArdourCanvas::Item* item, EditorAuto
 {
 	ItemType type;
 	RegionFxLine* rfl;
+	MidiAutomationLine* mal;
 	if ((rfl = dynamic_cast<RegionFxLine*> (al)) != 0) {
 		type = GainLineItem;
 		if (event->type == GDK_BUTTON_PRESS) {
 			clicked_regionview = &rfl->region_view ();
+		}
+	} else if ((mal = dynamic_cast<MidiAutomationLine*> (al)) != 0) {
+		type = EditorAutomationLineItem;
+		if (event->type == GDK_BUTTON_PRESS) {
+			clicked_regionview = &mal->region_view ();
 		}
 	} else {
 		type = EditorAutomationLineItem;

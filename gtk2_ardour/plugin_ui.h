@@ -266,6 +266,7 @@ private:
 		Gtk::Label                              label;
 		ArdourWidgets::ArdourDropdown*          combo;
 		Gtk::FileChooserButton*                 file_button;
+		Gtk::Entry*                             string_entry;
 		ArdourWidgets::ArdourSpinner*           spin_box;
 
 		bool                                    button;
@@ -323,7 +324,14 @@ private:
 	FilePathControls _filepath_controls;
 	void set_path_property (const ARDOUR::ParameterDescriptor& desc,
 	                        Gtk::FileChooserButton*            widget);
-	void path_property_changed (uint32_t key, const ARDOUR::Variant& value);
+
+	typedef std::map<uint32_t, Gtk::Entry*> StringControls;
+	StringControls _string_controls;
+	void set_string_property (const ARDOUR::ParameterDescriptor& desc,
+							  Gtk::Entry*                        widget);
+
+	// Supports both path and string properties
+	void string_property_changed (uint32_t key, const ARDOUR::Variant& value);
 
 	void scroller_size_request (Gtk::Requisition*);
 	Gtk::ScrolledWindow scroller;

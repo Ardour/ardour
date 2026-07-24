@@ -109,11 +109,8 @@ aaf_dump_TaggedValueSet (AAF_Data* aafd, aafObject* ObjCollection, const char* p
 
 	aafObject* Obj = NULL;
 
-	int i = 0;
 	AAF_foreach_ObjectInSet (&Obj, ObjCollection, NULL)
 	{
-		i++;
-
 		if (!aafUIDCmp (Obj->Class->ID, &AAFClassID_TaggedValue)) {
 			LOG_BUFFER_WRITE (log, "%s%sObject > %s\n",
 			                  padding,

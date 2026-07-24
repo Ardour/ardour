@@ -29,6 +29,7 @@
 
 #include "ardour/audioengine.h"
 #include "ardour/debug.h"
+#include "ardour/midi_port.h"
 #include "ardour/session.h"
 #include "ardour/types.h"
 
@@ -70,6 +71,16 @@ JACKAudioBackend::JACKAudioBackend (AudioEngine& e, AudioBackendInfo& info, std:
 {
 	_jack_connection->Connected.connect_same_thread (jack_connection_connection, std::bind (&JACKAudioBackend::when_connected_to_jack, this));
 	_jack_connection->Disconnected.connect_same_thread (disconnect_connection, std::bind (&JACKAudioBackend::disconnected, this, _1));
+
+	/* The Linux startup script detects early versions of Pipewire and sets
+	 * an environment variable if this indicates that we may be dealing
+	 * with its broken MIDI implementation. On non-JACK backends and
+	 * platforms, this will have no effect.
+	 */
+
+	if (g_getenv ("PIPEWIRE_MIDI_BROKEN")) {
+		MidiPort::sysex_midi_io_may_be_broken = true;
+	}
 }
 
 JACKAudioBackend::~JACKAudioBackend()

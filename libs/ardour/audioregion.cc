@@ -2363,7 +2363,7 @@ AudioRegion::find_silence (Sample threshold, samplecnt_t min_length, samplecnt_t
 Temporal::Range
 AudioRegion::body_range () const
 {
-	return Temporal::Range ((position() + _fade_in->back()->when).increment(), end().earlier (_fade_out->back()->when));
+	return Temporal::Range ((position() + _fade_in->back()->when).increment(), end_position().earlier (_fade_out->back()->when));
 }
 
 std::shared_ptr<Region>

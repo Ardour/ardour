@@ -44,8 +44,6 @@ StepButton::StepButton (Canvas* canvas, double w, double h, Gtkmm2ext::Color c)
 	, current_value (0)
 	, prelight (false)
 	, highlight (false)
-	, dragging (false)
-	, clicking (false)
 	, color (c)
 {
 	label->set (string_compose ("%1", rint (current_value)));

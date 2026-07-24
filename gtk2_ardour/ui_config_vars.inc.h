@@ -128,7 +128,7 @@ UI_CONFIG_VARIABLE (bool, prefer_inline_over_gui, "prefer-inline-over-gui", true
 UI_CONFIG_VARIABLE (uint32_t, max_inline_controls, "max-inline-controls", 32) /* per processor */
 UI_CONFIG_VARIABLE (uint32_t, action_table_columns, "action-table-columns", 3)
 UI_CONFIG_VARIABLE (bool, hide_splash_screen, "hide-splash-screen", true)
-UI_CONFIG_VARIABLE (bool, check_announcements, "check-announcements,", true)
+UI_CONFIG_VARIABLE (bool, check_announcements, "check-announcements", true)
 UI_CONFIG_VARIABLE (bool, use_wm_visibility, "use-wm-visibility", true)
 UI_CONFIG_VARIABLE (std::string, stripable_color_palette, "stripable-color-palette", "#AA3939:#FFAAAA:#D46A6A:#801515:#550000:#AA8E39:#FFEAAA:#D4BA6A:#806515:#554000:#343477:#8080B3:#565695:#1A1A59:#09093B:#2D882D:#88CC88:#55AA55:#116611:#004400")  /* Gtk::ColorSelection::palette_to_string */
 UI_CONFIG_VARIABLE (bool, use_palette_for_new_track, "use-palette-for-new-track", true)
@@ -165,6 +165,7 @@ UI_CONFIG_VARIABLE (Editing::RegionEditDisposition, region_edit_disposition, "re
 UI_CONFIG_VARIABLE (int, drag_sensitivity, "drag-sensitivity", 1)
 UI_CONFIG_VARIABLE (Gtk::WindowPosition, default_window_position, "default-window-position", Gtk::WIN_POS_MOUSE)
 UI_CONFIG_VARIABLE (ARDOUR::ColorMode, default_midi_note_color_mode, "default-midi-note-color-mode", ARDOUR::TrackColor)
+UI_CONFIG_VARIABLE (bool, use_cross_cursor, "use-cross-cursor", true)
 
 /* these are visibility-type selections in the New Track dialog that we should make persistent for the user's choices */
 UI_CONFIG_VARIABLE (bool, show_on_cue_page, "show-on-cue-page", true)

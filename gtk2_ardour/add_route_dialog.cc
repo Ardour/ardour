@@ -104,8 +104,12 @@ AddRouteDialog::AddRouteDialog ()
 		     _("You may select:") + "\n" +
 		     "* " + _("The number of tracks to add") + "\n" +
 		     "* " + _("A name for the track(s)") + "\n" +
+#ifndef MIXBUS
 		     "* " + _("Mono, stereo, or multi-channel operation for the track(s)") + "\n" +
-		     "* " + _("A group which the track(s) will be assigned to") + "\n" +
+#else
+                     "* " + _("Mono or stereo operation for the track(s)") + "\n" +
+#endif
+                     "* " + _("A group which the track(s) will be assigned to") + "\n" +
 #ifndef MIXBUS
 		     "* " + _("The pin connections mode (see tooltip for details)") + "\n" +
 #endif

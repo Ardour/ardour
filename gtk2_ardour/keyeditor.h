@@ -65,6 +65,7 @@ private:
 		void bind (GdkEventKey* release_event, guint pressed_key);
 		void action_selected ();
 		void sort_column_changed ();
+		int name_sorter(Gtk::TreeModel::iterator a, Gtk::TreeModel::iterator b) const;
 		void tab_mapped ();
 		bool visible_func(const Gtk::TreeModel::const_iterator& iter) const;
 

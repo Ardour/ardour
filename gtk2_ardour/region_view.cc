@@ -601,9 +601,9 @@ RegionView::update_cue_markers ()
 			mark->set_points_color ("region mark");
 			mark->set_show_line (true);
 			/* make sure the line has a clean end, before the frame
-			   of the region view
+			   of the region view or name frame
 			*/
-			mark->set_line_height (trackview.current_height() - (1.5 * UIConfiguration::instance ().get_ui_scale ()));
+			mark->set_line_height (_effective_height - 1);
 			mark->the_item().raise_to_top ();
 
 			if (show_cue_markers) {
@@ -778,14 +778,14 @@ RegionView::make_name () const
 
 	// XXX nice to have some good icons for this
 	if (_region->position_time_domain() == Temporal::BeatTime) {
-		str += u8"\u266B"; // BEAMED EIGHTH NOTES
+		str += u8"\u266B "; // BEAMED EIGHTH NOTES
 	}
 
 	if (_region->locked()) {
-		str += u8"\u2629"; // CROSS OF JERUSALEM
+		str += u8"\u2629 "; // CROSS OF JERUSALEM
 		str += _region->name();
 	} else if (_region->position_locked()) {
-		str += u8"\u21B9"; // LEFTWARDS ARROW TO BAR OVER RIGHTWARDS ARROW TO BAR
+		str += u8"\u21B9 "; // LEFTWARDS ARROW TO BAR OVER RIGHTWARDS ARROW TO BAR
 		str += _region->name();
 	} else if (_region->video_locked()) {
 		str += '[';
@@ -796,7 +796,7 @@ RegionView::make_name () const
 	}
 
 	if (_region->muted()) {
-		str = std::string(u8"\U0001F507") + str; // SPEAKER WITH CANCELLATION STROKE
+		str = std::string(u8"\U0001F507 ") + str; // SPEAKER WITH CANCELLATION STROKE
 	}
 	if (_region->has_region_fx()) {
 		str = str + " (Fx)";
@@ -879,7 +879,7 @@ RegionView::region_sync_changed ()
 			sync_mark->set (points);
 			sync_mark->show ();
 
-			sync_line->set (ArdourCanvas::Duple (offset, 0), ArdourCanvas::Duple (offset, trackview.current_height() - NAME_HIGHLIGHT_SIZE));
+			sync_line->set (ArdourCanvas::Duple (offset, 0), ArdourCanvas::Duple (offset, _effective_height));
 			sync_line->show ();
 		}
 	}
@@ -952,7 +952,7 @@ RegionView::set_height (double h)
 
 		sync_line->set (
 			ArdourCanvas::Duple (offset, 0),
-			ArdourCanvas::Duple (offset, h - NAME_HIGHLIGHT_SIZE)
+			ArdourCanvas::Duple (offset, _effective_height)
 			);
 	}
 
@@ -965,7 +965,7 @@ RegionView::set_height (double h)
 	}
 
 	for (auto& _cue_marker : _cue_markers) {
-		_cue_marker->view_marker->set_line_height (h - (1.5 * UIConfiguration::instance ().get_ui_scale ()));
+		_cue_marker->view_marker->set_line_height (_effective_height - 1);
 	}
 }
 
@@ -1081,7 +1081,7 @@ RegionView::trim_front (timepos_t const & new_bound, bool no_overlap)
 
 		bool regions_touching = false;
 
-		if (region_left && (pos == region_left->end())) {
+		if (region_left && (pos == region_left->end_position())) {
 			regions_touching = true;
 		}
 
@@ -1120,7 +1120,7 @@ RegionView::trim_end (timepos_t const & new_bound, bool no_overlap)
 
 		/* Only trim region on the right if the last sample has gone beyond the right region's first sample. */
 		if (region_right && (region_right->position() < _region->nt_last() || regions_touching)) {
-			region_right->trim_front (_region->end());
+			region_right->trim_front (_region->end_position());
 		}
 
 		region_changed (ARDOUR::bounds_change);
@@ -1147,11 +1147,7 @@ RegionView::thaw_after_trim ()
 void
 RegionView::move_contents (timecnt_t const & distance)
 {
-	if (_region->locked()) {
-		return;
-	}
 	_region->move_start (distance);
-	region_changed (PropertyChange (ARDOUR::Properties::start));
 }
 
 void

@@ -23,6 +23,7 @@
 
 #include "pbd/basename.h"
 #include "pbd/file_utils.h"
+#include "pbd/natsort.h"
 #include "pbd/openuri.h"
 #include "pbd/pathexpand.h"
 #include "pbd/search_path.h"
@@ -187,7 +188,7 @@ TriggerClipPicker::TriggerClipPicker ()
 	_view.set_headers_visible (false);  //TODO: show headers when we have size/tags/etc
 	_view.set_reorderable (false);
 	_view.get_selection ()->set_mode (SELECTION_MULTIPLE);
-	_view.signal_realize().connect (mem_fun (this, &TriggerClipPicker::on_theme_changed));
+	_view.signal_realize().connect (mem_fun (*this, &TriggerClipPicker::on_theme_changed));
 
 	_view.ensure_style ();
 	on_theme_changed ();
@@ -780,8 +781,12 @@ TriggerClipPicker::list_dir (std::string const& path, Gtk::TreeNodeChildren cons
 	} catch (Glib::FileError const& err) {
 	}
 
-	std::sort (dirs.begin (), dirs.end ());
-	std::sort (files.begin (), files.end ());
+	std::sort (dirs.begin (), dirs.end (), [](const std::string a, const std::string b) {
+		return naturally_less (a, b);
+	});
+	std::sort (files.begin (), files.end (), [](const std::string a, const std::string b) {
+		return naturally_less (a, b);
+	});
 
 	if (!pc) {
 		if (_root_paths.find (_current_path) == _root_paths.end ()) {

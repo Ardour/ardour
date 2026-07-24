@@ -284,7 +284,15 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, timepos_t const & pos)
 	if (tmcb && !tmcb->empty()) {
 		std::cerr << "CB\n";
 		tmcb->dump (std::cerr);
-		wmap->paste (*tmcb, pos, false, _("import"));
+
+		bool need_bbt_marker;
+
+		if (wmap->n_tempos() == 1 && wmap->n_meters() == 1 && pos.is_zero()) {
+			need_bbt_marker = false;
+		} else {
+			need_bbt_marker = true;
+		}
+		wmap->paste (*tmcb, pos, false, _("import"), need_bbt_marker);
 		TempoMap::update (wmap);
 		std::cerr << "final map\n";
 		TempoMap::use()->dump (std::cerr);
