@@ -52,6 +52,7 @@
 
 #include "add_route_dialog.h"
 #include "ardour_ui.h"
+#include "gui_dimensions.h"
 #include "route_group_dialog.h"
 #include "ui_config.h"
 
@@ -234,12 +235,12 @@ AddRouteDialog::AddRouteDialog ()
 	settings_table->set_row_spacings (8);
 	settings_table->set_col_spacings	(4);
 	settings_table->set_col_spacing	(3, 20);
-	settings_table->set_border_width	(12);
+	settings_table->set_border_width (gui_distance (12));
 
 	VBox* settings_vbox = manage (new VBox);
 	settings_vbox->pack_start(trk_template_desc_frame , true, true);
 	settings_vbox->pack_start(*settings_table , true, true);
-	settings_vbox->set_border_width	(4);
+	settings_vbox->set_border_width	(gui_distance (4));
 
 	trk_template_outer_frame.add (*settings_vbox);
 

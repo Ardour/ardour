@@ -27,6 +27,7 @@
 
 #include "scale_dialog.h"
 #include "ui_config.h"
+#include "gui_dimensions.h"
 
 #include "pbd/i18n.h"
 
@@ -34,6 +35,7 @@ std::map<ARDOUR::MusicalModeType,std::string> ScaleDialog::type_string_map;
 std::map<std::string,ARDOUR::MusicalModeType> ScaleDialog::string_type_map;
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 void
 ScaleDialog::fill_maps ()
@@ -80,12 +82,12 @@ ScaleDialog::ScaleDialog (std::string const & provider_name)
 	using namespace Gtk::Menu_Helpers;
 
 	Gtk::HBox* inner_tuning_box (manage (new Gtk::HBox));
-	inner_tuning_box->set_spacing (12);
-	inner_tuning_box->set_border_width (12);
+	inner_tuning_box->set_spacing (spacing());
+	inner_tuning_box->set_border_width (padding());
 
 	clear_label.set_markup (string_compose ("<span size=\"large\">%1</span>", _("Remove Scale")));
 	clear_button.add (clear_label);
-	clear_label.set_padding (12, 12);
+	clear_label.set_padding (padding(), padding());
 
 	tuning_dropdown.add_menu_elem (MenuElem (_("Twelve Tone"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::fill_dropdowns), TwelveTone)));
 	tuning_dropdown.set_active (0);
@@ -107,7 +109,7 @@ ScaleDialog::ScaleDialog (std::string const & provider_name)
 	Gtk::HBox* inner_type_box (manage (new Gtk::HBox));
 	inner_type_box->pack_start (type_label, false, false);
 	inner_type_box->pack_start (type_dropdown, false, false);
-	inner_type_box->set_spacing (12);
+	inner_type_box->set_spacing (spacing());
 	type_box.pack_start (*inner_type_box, true, false);
 
 	Gtk::VBox* inner_name_box (manage (new Gtk::VBox));
@@ -116,7 +118,7 @@ ScaleDialog::ScaleDialog (std::string const & provider_name)
 	name_label.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", Gtkmm2ext::markup_escape_text (provider)));
 	inner_name_box->pack_start (*pre_label, false, false);
 	inner_name_box->pack_start (name_label, false, false);
-	inner_name_box->set_spacing (12);
+	inner_name_box->set_spacing (spacing());
 
 	Gtk::HBox* clear_box (manage (new Gtk::HBox));
 	clear_button.signal_clicked().connect ([this]() { response (Gtk::RESPONSE_REJECT); });
@@ -125,13 +127,13 @@ ScaleDialog::ScaleDialog (std::string const & provider_name)
 	Gtk::HBox* inner_step_box (manage (new Gtk::HBox));
 	inner_step_box->pack_start (steps_label, false, false);
 	inner_step_box->pack_start (step_spinner, false, false);
-	inner_step_box->set_spacing (12);
+	inner_step_box->set_spacing (spacing());
 	steps_box.pack_start (*inner_step_box, true, false);
 
 	Gtk::HBox* inner_scala_box (manage (new Gtk::HBox));
 	inner_scala_box->pack_start (scala_label, false, false);
 	inner_scala_box->pack_start (scala_file_button, true, true);
-	inner_scala_box->set_spacing (12);
+	inner_scala_box->set_spacing (spacing());
 	scala_box.pack_start (*inner_scala_box);
 
 	scala_file_button.set_current_folder (Glib::get_home_dir());
@@ -145,11 +147,11 @@ ScaleDialog::ScaleDialog (std::string const & provider_name)
 	vbox->pack_start (step_packer, false, false);
 	vbox->pack_start (scala_box, false, false);
 
-	vbox->set_border_width (6);
-	vbox->set_spacing (12);
+	vbox->set_border_width (border());
+	vbox->set_spacing (spacing());
 	vbox->show_all ();
 
-	step_packer.set_spacing (12);
+	step_packer.set_spacing (spacing());
 	pack_steps ();
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);

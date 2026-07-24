@@ -29,11 +29,13 @@
 #include "gtkmm2ext/utils.h"
 
 #include "missing_file_dialog.h"
+#include "gui_dimensions.h"
 #include "pbd/i18n.h"
 
 using namespace Gtk;
 using namespace std;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 
 MissingFileDialog::MissingFileDialog (Gtk::Window& parent, Session* s, const std::string& path, DataType type)
@@ -87,8 +89,8 @@ MissingFileDialog::MissingFileDialog (Gtk::Window& parent, Session* s, const std
 
 	VBox* button_packer_box = manage (new VBox);
 
-	button_packer_box->set_spacing (6);
-	button_packer_box->set_border_width (12);
+	button_packer_box->set_spacing (gui_distance (6));
+	button_packer_box->set_border_width (border());
 
 	button_packer_box->pack_start (use_chosen, false, false);
 	button_packer_box->pack_start (this_missing_ok, false, false);
@@ -112,8 +114,8 @@ MissingFileDialog::MissingFileDialog (Gtk::Window& parent, Session* s, const std
 	Label* label = manage (new Label);
 	label->set_text (_("Click to choose an additional folder"));
 
-	hbox->set_spacing (6);
-	hbox->set_border_width (12);
+	hbox->set_spacing (gui_distance(6));
+	hbox->set_border_width (border());
 	hbox->pack_start (*label, false, false);
 	hbox->pack_start (chooser, true, true);
 	hbox->show_all ();
