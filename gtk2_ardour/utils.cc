@@ -69,6 +69,7 @@
 #include "context_menu_helper.h"
 #include "debug.h"
 #include "gui_thread.h"
+#include "gui_dimensions.h"
 #include "keyboard.h"
 #include "main_clock.h"
 #include "public_editor.h"
@@ -1091,3 +1092,8 @@ ARDOUR_UI_UTILS::format_position (ARDOUR::Session* s, Temporal::timepos_t const&
 			break;
 	}
 }
+
+int ARDOUR_UI_UTILS::padding() { return (int) floor (12. * UIConfiguration::instance().get_ui_scale()); }
+int ARDOUR_UI_UTILS::spacing() { return (int) floor (12. * UIConfiguration::instance().get_ui_scale()); }
+int ARDOUR_UI_UTILS::border() { return (int) floor (12. * UIConfiguration::instance().get_ui_scale()); }
+int ARDOUR_UI_UTILS::gui_distance(int d) { return (int) floor (d * UIConfiguration::instance().get_ui_scale()); }
