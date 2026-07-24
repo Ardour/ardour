@@ -243,6 +243,8 @@ public:
 
 	std::shared_ptr<ReadOnlyControl> control_output (uint32_t) const;
 
+	std::shared_ptr<PBD::Controllable> bypass_control () const;
+
 	std::string describe_parameter (Evoral::Parameter param);
 
 	samplecnt_t signal_latency () const;
@@ -385,6 +387,12 @@ private:
 	bool _latency_changed;
 	uint32_t _bypass_port;
 	bool     _inverted_bypass_enable;
+
+	std::shared_ptr<AutomationControl> _host_bypass_control;
+	PBD::ScopedConnection _bypass_control_connection;
+	PBD::ScopedConnection _bypass_active_connection;
+	void sync_bypass_control ();
+	void host_bypass_control_changed ();
 
 	typedef std::map<uint32_t, std::shared_ptr<ReadOnlyControl> >CtrlOutMap;
 	CtrlOutMap _control_outputs;
