@@ -473,9 +473,9 @@ Meter::round_up_to_beat_div (Temporal::BBT_Time const & bbt, int beat_div) const
 Temporal::Beats
 Meter::to_quarters (Temporal::BBT_Offset const & offset) const
 {
-	int64_t ticks = (Beats::PPQN * offset.bars * _divisions_per_bar * 4) / _note_value;
+	int64_t ticks = (Beats::PPQN * (int64_t) offset.bars * (int64_t) _divisions_per_bar * 4) / (int64_t) _note_value;
 
-	ticks += (Beats::PPQN * offset.beats * 4) / _note_value;
+	ticks += (Beats::PPQN * (int64_t) offset.beats * 4) / (int64_t)_note_value;
 
 	/* "parts per bar division" */
 
