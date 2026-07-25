@@ -58,6 +58,7 @@
 #include "ardour/profile.h"
 
 #include "actions.h"
+#include "gui_dimensions.h"
 #include "keyboard.h"
 #include "keyeditor.h"
 
@@ -67,6 +68,7 @@ using namespace std;
 using namespace Gtk;
 using namespace Gdk;
 using namespace PBD;
+using namespace ARDOUR_UI_UTILS;
 
 using Gtkmm2ext::Keyboard;
 using Gtkmm2ext::Bindings;
@@ -280,7 +282,7 @@ KeyEditor::Tab::Tab (KeyEditor& ke, string const & str, Bindings* b)
 	scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
 	set_spacing (6);
-	set_border_width (12);
+	set_border_width (border());
 	pack_start (scroller);
 }
 

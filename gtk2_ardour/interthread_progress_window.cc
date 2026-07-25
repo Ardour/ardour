@@ -21,12 +21,14 @@
 #include <glibmm/main.h>
 #include <ytkmm/stock.h>
 #include "gtkmm2ext/utils.h"
+#include "gui_dimensions.h"
 #include "ardour/import_status.h"
 #include "interthread_progress_window.h"
 #include "pbd/i18n.h"
 
 using namespace std;
 using namespace Gtk;
+using namespace ARDOUR_UI_UTILS;
 
 /** @param i Status information.
  *  @param t Window title.
@@ -40,7 +42,7 @@ InterthreadProgressWindow::InterthreadProgressWindow (ARDOUR::InterThreadInfo* i
 
 	_bar.set_orientation (Gtk::PROGRESS_LEFT_TO_RIGHT);
 
-	set_border_width (12);
+	set_border_width (border());
 	get_vbox()->set_spacing (6);
 
 	get_vbox()->pack_start (_bar, false, false);

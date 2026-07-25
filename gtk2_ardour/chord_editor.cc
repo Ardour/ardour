@@ -25,12 +25,14 @@
 #include "gtkmm2ext/actions.h"
 
 #include "editing_context.h"
+#include "gui_dimensions.h"
 #include "chord_editor.h"
 #include "ui_config.h"
 
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 ChordEditor::ChordEditor (EditingContext& ec, ChordProvider& cp, int cs)
 	: chord_provider (cp)
@@ -71,22 +73,22 @@ ChordEditor::ChordEditor (EditingContext& ec, ChordProvider& cp, int cs)
 	ArdourWidgets::set_tooltip (short_entry, _("Your preferred short name for this chord"));
 	ArdourWidgets::set_tooltip (other_entry, _("Comma-separated list of other names for this chord (optional)"));
 
-	canonical_box.set_spacing (12);
+	canonical_box.set_spacing (spacing());
 	canonical_box.pack_start (canonical_label, false, true);
 	canonical_box.pack_start (canonical_entry, true, true);
 
-	other_box.set_spacing (12);
+	other_box.set_spacing (spacing());
 	other_box.pack_start (other_label, false, true);
 	other_box.pack_start (other_entry, true, true);
 
-	short_box.set_spacing (12);
+	short_box.set_spacing (spacing());
 	short_box.pack_start (short_label, false, true);
 	short_box.pack_start (short_entry, true, true);
 
 	Label* l (manage (new Label (_("Chord contains the following intervals from root"))));
 
-	set_border_width (12);
-	set_spacing (12);
+	set_border_width (border());
+	set_spacing (spacing());
 
 	pack_start (*l, true, true);
 	pack_start (upper_interval_packer, true, true);

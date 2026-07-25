@@ -84,6 +84,7 @@
 #include "actions.h"
 #include "ardour_dialog.h"
 #include "ardour_ui.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "io_selector.h"
 #include "keyboard.h"
@@ -116,6 +117,7 @@ bool ProcessorBox::show_all_processors = false;
 
 using namespace std;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtk;
 using namespace Glib;
@@ -3442,7 +3444,7 @@ You cannot reorder these plugins/sends/inserts\n\
 in that way because the inputs and\n\
 outputs will not work correctly."));
 
-	dialog.get_vbox()->set_border_width (12);
+	dialog.get_vbox()->set_border_width (border());
 	dialog.get_vbox()->pack_start (label);
 	dialog.add_button (Stock::OK, RESPONSE_ACCEPT);
 

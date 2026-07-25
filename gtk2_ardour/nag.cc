@@ -29,10 +29,12 @@
 #include "ardour/filesystem_paths.h"
 #include "ardour/rc_configuration.h"
 
+#include "gui_dimensions.h"
 #include "nag.h"
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace std;
 using namespace Glib;
 using namespace Gtk;
@@ -68,11 +70,11 @@ relies on a stable, sustainable income stream. Thanks for using Ardour!"));
 	button_box.pack_start (next_time_button);
 	button_box.pack_start (never_again_button);
 
-	get_vbox()->set_spacing (12);
+	get_vbox()->set_spacing (spacing());
 	get_vbox()->pack_start (message);
 	get_vbox()->pack_start (button_box);
 
-	set_border_width (12);
+	set_border_width (border());
 	add_button (Stock::OK, RESPONSE_ACCEPT);
 }
 

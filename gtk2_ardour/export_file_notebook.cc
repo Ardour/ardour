@@ -25,6 +25,7 @@
 
 #include "ardour/export_format_specification.h"
 
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "utils.h"
 #include "pbd/i18n.h"
@@ -225,7 +226,7 @@ ExportFileNotebook::FilePage::FilePage (Session * s, ManagerPtr profile_manager,
 	reimport_button (_("Re-Import Exported Audio")),
 	tab_number (number)
 {
-	set_border_width (12);
+	set_border_width (border());
 
 	pack_start (format_label, false, false, 0);
 	pack_start (format_align, false, false, 0);

@@ -35,6 +35,7 @@
 #include "ardour/transport_master_manager.h"
 
 #include "midi_tracer.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "pbd/i18n.h"
 
@@ -45,6 +46,7 @@ using namespace std;
 using namespace MIDI;
 using namespace Glib;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 MidiTracer::MidiTracer ()
 	: ArdourWindow (_("MIDI Tracer"))
@@ -89,8 +91,8 @@ MidiTracer::MidiTracer ()
 	vbox->pack_start (*pbox, false, false);
 
 	scroller.add (text);
-	vbox->set_border_width (12);
-	vbox->set_spacing (12);
+	vbox->set_border_width (border());
+	vbox->set_spacing (spacing());
 	vbox->pack_start (scroller, true, true);
 
 	text.show ();

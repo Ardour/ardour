@@ -22,6 +22,8 @@
 #include <ytkmm/comboboxtext.h>
 #include <ytkmm/stock.h>
 #include <ytkmm/alignment.h>
+
+#include "gui_dimensions.h"
 #include "insert_remove_time_dialog.h"
 #include "audio_clock.h"
 #include "ardour_ui.h"
@@ -31,6 +33,7 @@
 using namespace Gtk;
 using namespace Editing;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 InsertRemoveTimeDialog::InsertRemoveTimeDialog (PublicEditor& e, bool remove)
 	: ArdourDialog (remove ? _("Remove Time") : _("Insert Time"))
@@ -52,7 +55,7 @@ InsertRemoveTimeDialog::InsertRemoveTimeDialog (PublicEditor& e, bool remove)
 {
 	set_session (_editor.session ());
 
-	get_vbox()->set_border_width (12);
+	get_vbox()->set_border_width (border());
 	get_vbox()->set_spacing (4);
 
 	Table* table = manage (new Table (2, 3));

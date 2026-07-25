@@ -146,6 +146,7 @@
 #include "engine_dialog.h"
 #include "export_video_dialog.h"
 #include "global_port_matrix.h"
+#include "gui_dimensions.h"
 #include "gui_object.h"
 #include "gui_thread.h"
 #include "idleometer.h"
@@ -2875,7 +2876,7 @@ ARDOUR_UI::add_route_dialog_response (int r)
 		h.pack_start (*s, true, true);
 
 		ArdourDialog d (_("Custom Channel"), true, false);
-		d.get_vbox()->set_border_width (12);
+		d.get_vbox()->set_border_width (border());
 		d.get_vbox()->pack_start (h, false, false);
 
 		d.add_button(Stock::CANCEL, RESPONSE_CANCEL);

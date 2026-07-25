@@ -102,6 +102,7 @@
 #include "editor_regions.h"
 #include "editor_sources.h"
 #include "editor_routes.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "insert_remove_time_dialog.h"
 #include "interthread_progress_window.h"
@@ -137,6 +138,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
@@ -2823,7 +2825,7 @@ Editor::rename_region ()
 	hbox.pack_start (label, false, false);
 	hbox.pack_start (entry, true, true);
 
-	d.get_vbox()->set_border_width (12);
+	d.get_vbox()->set_border_width (border());
 	d.get_vbox()->pack_start (hbox, false, false);
 
 	d.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
@@ -5448,7 +5450,7 @@ Editor::tag_regions (RegionList regions)
 	hbox.pack_start (label, false, false);
 	hbox.pack_start (entry, true, true);
 
-	d.get_vbox()->set_border_width (12);
+	d.get_vbox()->set_border_width (border());
 	d.get_vbox()->pack_start (hbox, false, false);
 
 	d.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
@@ -7595,7 +7597,7 @@ Editor::close_region_gaps ()
 
 	Table table (2, 3);
 	table.set_spacings (12);
-	table.set_border_width (12);
+	table.set_border_width (border());
 	Label* l = manage (left_aligned_label (_("Crossfade length")));
 	table.attach (*l, 0, 1, 0, 1);
 
@@ -9121,8 +9123,8 @@ Editor::do_remove_gaps ()
 	Gtk::Label label1 (_("Smallest gap size to remove (seconds):"));
 	Gtk::Entry e1;
 
-	hpacker1.set_spacing (12);
-	hpacker1.set_border_width (12);
+	hpacker1.set_spacing (spacing());
+	hpacker1.set_border_width (border());
 	hpacker1.pack_start (label1, true, false);
 	hpacker1.pack_start (e1, false, false);
 
@@ -9130,8 +9132,8 @@ Editor::do_remove_gaps ()
 	Gtk::Label label2 (_("Leave a gap of(seconds):"));
 	Gtk::Entry e2;
 
-	hpacker2.set_spacing (12);
-	hpacker2.set_border_width (12);
+	hpacker2.set_spacing (spacing());
+	hpacker2.set_border_width (border());
 	hpacker2.pack_start (label2, true, false);
 	hpacker2.pack_start (e2, false, false);
 
@@ -9586,13 +9588,13 @@ Editor::find_and_display_track ()
 	Gtk::Entry text;
 	Gtk::HBox hpacker;
 	Gtk::Label l (_("Name:"));
-	hpacker.set_spacing (12);
-	hpacker.set_border_width (12);
+	hpacker.set_spacing (spacing());
+	hpacker.set_border_width (border());
 	hpacker.pack_start (l, true, false);
 	hpacker.pack_start (text, true, true);
 
-	d.get_vbox()->set_spacing (12);
-	d.get_vbox()->set_border_width (12);
+	d.get_vbox()->set_spacing (spacing());
+	d.get_vbox()->set_border_width (border());
 	d.get_vbox()->pack_start (hpacker, false, false);
 	d.get_vbox()->show_all ();
 

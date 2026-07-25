@@ -46,6 +46,7 @@
 #include "ardour_ui.h"
 #include "clock_group.h"
 #include "context_menu_helper.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "main_clock.h"
@@ -62,6 +63,7 @@
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace std;
 using namespace Gtkmm2ext;
@@ -150,7 +152,7 @@ RegionEditor::RegionEditor (Session* s, std::shared_ptr<Region> r)
 
 	_table_main.set_col_spacings (12);
 	_table_main.set_row_spacings (6);
-	_table_main.set_border_width (12);
+	_table_main.set_border_width (border());
 
 	_name_label.set_alignment (1, 0.5);
 	_sources_label.set_alignment (1, 0.5);

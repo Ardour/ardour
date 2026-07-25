@@ -27,22 +27,24 @@
 
 #include "gtkmm2ext/utils.h"
 
+#include "gui_dimensions.h"
 #include "midi_export_dialog.h"
 
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 MidiExportDialog::MidiExportDialog (PublicEditor&, std::shared_ptr<MidiRegion> region)
 	: ArdourDialog (string_compose (_("Export MIDI: %1"), region->name()))
 	, file_chooser (Gtk::FILE_CHOOSER_ACTION_SAVE)
 {
-	set_border_width (12);
+	set_border_width (border());
 
 	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
 
-	get_vbox()->set_border_width (12);
+	get_vbox()->set_border_width (border());
 	get_vbox()->pack_start (file_chooser);
 
 	set_default_response (Gtk::RESPONSE_ACCEPT);

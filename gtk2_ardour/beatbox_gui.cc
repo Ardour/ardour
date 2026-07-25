@@ -81,7 +81,7 @@ BBGUI::BBGUI (std::shared_ptr<BeatBox> bb)
 
 	canvas_hbox.pack_start (*_canvas_viewport, true, true);
 
-	get_vbox()->set_spacing (12);
+	get_vbox()->set_spacing (spacing());
 	get_vbox()->pack_start (canvas_hbox, true, true);
 
 	export_as_region_button.signal_clicked.connect (sigc::mem_fun (*this, &BBGUI::export_as_region));
@@ -1073,9 +1073,9 @@ SequenceView::SequenceView (SequencerView& sview, StepSequence& sq, Canvas* canv
 	, sequence (sq)
 {
 	lhs_box = new ArdourCanvas::ConstraintPacker (canvas, ArdourCanvas::Horizontal);
-	lhs_box->set_padding (12);
+	lhs_box->set_padding (padding());
 	rhs_box = new ArdourCanvas::ConstraintPacker (canvas, ArdourCanvas::Horizontal);
-	rhs_box->set_padding (12);
+	rhs_box->set_padding (padding());
 	step_box = new ArdourCanvas::ConstraintPacker (canvas, ArdourCanvas::Horizontal);
 	step_box->set_padding (6);
 

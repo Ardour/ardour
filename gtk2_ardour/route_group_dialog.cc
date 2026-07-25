@@ -30,6 +30,7 @@
 
 #include "gtkmm2ext/colors.h"
 
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "route_group_dialog.h"
 #include "group_tabs.h"
@@ -39,6 +40,7 @@
 
 using namespace Gtk;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace std;
 using namespace PBD;
 
@@ -85,7 +87,7 @@ RouteGroupDialog::RouteGroupDialog (std::shared_ptr<RouteGroup> g, bool creating
 
 	l = manage (new Label (_("Color"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 	hbox = manage (new HBox);
-	hbox->set_spacing (12);
+	hbox->set_spacing (spacing());
 	hbox->pack_start (*l, false, false);
 	hbox->pack_start (_color, false, false);
 	top_vbox->pack_start (*hbox, false, false);

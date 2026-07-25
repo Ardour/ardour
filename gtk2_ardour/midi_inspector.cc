@@ -19,6 +19,7 @@
 #include <ardour/midi_region.h>
 
 #include "chord_box.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "midi_inspector.h"
 #include "ui_config.h"
@@ -27,6 +28,7 @@
 
 #include "pbd/i18n.h"
 
+using namespace ARDOUR_UI_UTILS;
 using namespace ARDOUR;
 
 MidiInspector::MidiInspector (EditingContext& ec)
@@ -45,7 +47,7 @@ MidiInspector::MidiInspector (EditingContext& ec)
 	pack_start (quantize_expander, false, false);
 	pack_start (region_expander, false, false);
 
-	set_border_width (12);
+	set_border_width (border());
 	UIConfiguration::instance().DPIReset.connect ([this]() { queue_resize(); });
 }
 

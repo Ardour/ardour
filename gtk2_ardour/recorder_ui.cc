@@ -54,6 +54,7 @@
 #include "ardour_dialog.h"
 #include "ardour_ui.h"
 #include "audio_clock.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "instrument_selector.h"
 #include "public_editor.h"
@@ -68,6 +69,7 @@
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace Gtkmm2ext;
 using namespace ArdourWidgets;
 using namespace Gtk;
@@ -1284,7 +1286,7 @@ RecorderUI::new_track_for_port (DataType dt, string const& port_name)
 	}
 
 	d.get_vbox()->pack_start (t, false, false);
-	d.get_vbox()->set_border_width (12);
+	d.get_vbox()->set_border_width (border());
 
 	d.add_button(Stock::CANCEL, RESPONSE_CANCEL);
 	d.add_button(Stock::OK, RESPONSE_OK);

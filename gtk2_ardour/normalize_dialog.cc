@@ -26,11 +26,13 @@
 #include <ytkmm/table.h>
 #include <ytkmm/progressbar.h>
 
+#include "gui_dimensions.h"
 #include "normalize_dialog.h"
 
 #include "pbd/i18n.h"
 
 using namespace Gtk;
+using namespace ARDOUR_UI_UTILS;
 
 double NormalizeDialog::_last_normalization_value = 0;
 double NormalizeDialog::_last_rms_target_value = -9;
@@ -45,7 +47,7 @@ NormalizeDialog::NormalizeDialog (bool more_than_one)
 	: ArdourDialog (more_than_one ? _("Normalize regions") : _("Normalize region"))
 	, _normalize_individually (0)
 {
-	get_vbox()->set_spacing (12);
+	get_vbox()->set_spacing (spacing());
 
 	Table* tbl = manage (new Table);
 	tbl->set_spacings (6);

@@ -19,6 +19,7 @@
 #include <ytkmm/stock.h>
 
 #include "bbt_marker_dialog.h"
+#include "gui_dimensions.h"
 
 #include "pbd/i18n.h"
 
@@ -26,6 +27,7 @@ using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Temporal;
 
@@ -99,8 +101,8 @@ BBTMarkerDialog::init (bool add)
 		add_button (_("Save Changes"), RESPONSE_OK);
 	}
 
-	get_vbox()->set_border_width (12);
-	get_vbox()->set_spacing (12);
+	get_vbox()->set_border_width (border());
+	get_vbox()->set_spacing (spacing());
 }
 
 BBT_Time

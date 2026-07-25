@@ -36,6 +36,7 @@
 
 #include "gtkmm2ext/utils.h"
 
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "tempo_dialog.h"
 #include "ui_config.h"
@@ -46,6 +47,7 @@ using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Temporal;
 
@@ -245,7 +247,7 @@ TempoDialog::init (const Temporal::BBT_Time& when, double bpm, double end_bpm, d
 
 	set_name ("MetricDialog");
 	set_resizable (false);
-	get_vbox ()->set_border_width (12);
+	get_vbox ()->set_border_width (border());
 	get_vbox ()->set_spacing (6);
 
 	get_vbox ()->pack_start (*table, false, false);
@@ -726,7 +728,7 @@ MeterDialog::init (const Temporal::BBT_Time& when, double bpb, double divisor, b
 	}
 
 	set_resizable(false);
-	get_vbox()->set_border_width (12);
+	get_vbox()->set_border_width (border());
 	get_vbox()->pack_start (*table, false, false);
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);

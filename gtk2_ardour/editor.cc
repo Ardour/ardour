@@ -130,6 +130,7 @@
 #include "enums_convert.h"
 #include "export_report.h"
 #include "global_port_matrix.h"
+#include "gui_dimensions.h"
 #include "gui_object.h"
 #include "gui_thread.h"
 #include "keyboard.h"
@@ -3140,7 +3141,7 @@ Editor::duplicate_range (bool with_dialog)
 		SpinButton spinner (adjustment, 0.0, 1);
 		HBox hbox;
 
-		win.get_vbox()->set_spacing (12);
+		win.get_vbox()->set_spacing (spacing());
 		win.get_vbox()->pack_start (hbox);
 		hbox.set_border_width (6);
 		hbox.pack_start (label, PACK_EXPAND_PADDING, 12);

@@ -27,6 +27,7 @@
 
 #include "ardour/region.h"
 
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "public_editor.h"
@@ -89,7 +90,7 @@ RegionLayeringOrderEditor::RegionLayeringOrderEditor (PublicEditor& pe)
 	info_table->attach (clock, 1, 2, 1, 2, Gtk::AttachOptions(0), FILL);
 
 	Gtk::VBox* vbox = Gtk::manage (new Gtk::VBox ());
-	vbox->set_spacing (12);
+	vbox->set_spacing (spacing());
 	vbox->pack_start (*info_table, false, false);
 	vbox->pack_start (*scroller_table, true, true);
 	add (*vbox);

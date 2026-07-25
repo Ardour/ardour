@@ -31,6 +31,8 @@
 #include "widgets/slider_controller.h"
 
 #include "stripable_colorpicker.h"
+
+#include "gui_dimensions.h"
 #include "luadialog.h"
 #include "public_editor.h"
 #include "splash.h"
@@ -38,6 +40,7 @@
 #include "utils.h"
 
 using namespace LuaDialog;
+using namespace ARDOUR_UI_UTILS;
 
 /* *****************************************************************************
  * Simple Message Dialog
@@ -906,7 +909,7 @@ ProgressWindow::ProgressWindow (std::string const& title, bool allow_cancel)
 {
 	_bar.set_orientation (Gtk::PROGRESS_LEFT_TO_RIGHT);
 
-	set_border_width (12);
+	set_border_width (border());
 	get_vbox()->set_spacing (6);
 	get_vbox()->pack_start (_bar, false, false);
 

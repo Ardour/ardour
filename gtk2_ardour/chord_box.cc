@@ -24,6 +24,7 @@
 #include "editing_context.h"
 #include "chord_box.h"
 #include "chord_dialog.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "ui_config.h"
@@ -31,6 +32,7 @@
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 struct DoubleButton : public Gtk::HBox
 {
@@ -83,7 +85,7 @@ ChordBox::ChordBox (EditingContext& ec)
 	tuning_button.set_no_show_all ();
 	tuning_button.set_active (0);
 
-	set_border_width (12);
+	set_border_width (border());
 	set_spacing (6);
 
 	EditingContext::ChordsChanged.connect (chord_connection, invalidator (*this), [&]() { refill_tables(); }, gui_context());

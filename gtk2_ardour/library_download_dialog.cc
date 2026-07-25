@@ -32,12 +32,14 @@
 #include "ardour/library.h"
 
 #include "ardour_message.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "library_download_dialog.h"
 #include "ui_config.h"
 
 using namespace PBD;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using std::string;
 
 LibraryDownloadDialog::LibraryDownloadDialog ()
@@ -74,7 +76,7 @@ LibraryDownloadDialog::LibraryDownloadDialog ()
 	h->pack_start (scroller);
 
 	get_vbox()->set_spacing (8);
-	get_vbox()->set_border_width (12);
+	get_vbox()->set_border_width (border());
 	get_vbox()->pack_start (*Gtk::manage (h));
 
 	_display.get_selection()->set_mode (Gtk::SELECTION_SINGLE);

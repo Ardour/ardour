@@ -41,6 +41,7 @@
 
 #include "panner2d.h"
 #include "keyboard.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "rgb_macros.h"
 #include "utils.h"
@@ -962,7 +963,7 @@ Panner2dWindow::Panner2dWindow (std::shared_ptr<PannerShell> p, int32_t h, uint3
 	left_side.show ();
 
 	hpacker.set_spacing (6);
-	hpacker.set_border_width (12);
+	hpacker.set_border_width (border());
 	hpacker.pack_start (widget, false, false);
 	hpacker.pack_start (left_side, false, false);
 	hpacker.show ();

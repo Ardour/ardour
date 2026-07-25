@@ -47,6 +47,7 @@
 #include "ardour_ui.h"
 #include "debug.h"
 #include "engine_dialog.h"
+#include "gui_dimensions.h"
 #include "new_user_wizard.h"
 #include "opts.h"
 #include "plugin_scan_dialog.h"
@@ -61,6 +62,7 @@
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace PBD;
@@ -974,7 +976,7 @@ Full information on all the above can be found on the support page at\n\
 
 	current_dialog_connection = pre_release_dialog->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &StartupFSM::dialog_response_handler), PreReleaseDialog));
 
-	pre_release_dialog->get_vbox()->set_border_width (12);
+	pre_release_dialog->get_vbox()->set_border_width (border());
 	pre_release_dialog->get_vbox()->pack_start (*label, false, false, 12);
 	pre_release_dialog->get_vbox()->show_all ();
 	pre_release_dialog->set_position (WIN_POS_CENTER);

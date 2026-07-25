@@ -56,6 +56,7 @@
 #include "gtkmm2ext/utils.h"
 
 #include "ardour_ui.h"
+#include "gui_dimensions.h"
 #include "new_user_wizard.h"
 #include "opts.h"
 #include "splash.h"
@@ -81,7 +82,7 @@ NewUserWizard::NewUserWizard ()
 	, default_dir_chooser (0)
 {
 	set_position (WIN_POS_CENTER);
-	set_border_width (12);
+	set_border_width (border());
 
 	if (! (icon_pixbuf = ::get_icon (PROGRAM_NAME "-icon_48px"))) {
 		throw failed_constructor();

@@ -23,12 +23,15 @@
 #include "ardour/ardour.h"
 
 #include "configinfo.h"
+#include "gui_dimensions.h"
 #include "pbd/i18n.h"
+
+using namespace ARDOUR_UI_UTILS;
 
 ConfigInfoDialog::ConfigInfoDialog ()
 	: ArdourDialog (_("Build Configuration"))
 {
-	set_border_width (12);
+	set_border_width (border());
 	text.get_buffer()->set_text (std::string (ARDOUR::ardour_config_info));
 	text.set_wrap_mode (Gtk::WRAP_WORD);
 	text.set_editable (false);

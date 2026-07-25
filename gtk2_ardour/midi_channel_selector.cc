@@ -38,6 +38,7 @@
 
 #include "ardour/midi_track.h"
 
+#include "gui_dimensions.h"
 #include "midi_channel_selector.h"
 #include "rgb_macros.h"
 
@@ -46,6 +47,7 @@
 using namespace std;
 using namespace Gtk;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 MidiChannelSelector::MidiChannelSelector(int n_rows, int n_columns, int start_row, int start_column)
 	: Table(std::max(4, std::max(n_rows,    start_row    + 4)),
@@ -368,7 +370,7 @@ MidiChannelSelectorWindow::build ()
 
 	vpacker = manage (new VBox);
 	vpacker->set_spacing (6);
-	vpacker->set_border_width (12);
+	vpacker->set_border_width (border());
 
 	l = manage (new Label (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("Inbound"))));
 	l->set_use_markup (true);

@@ -25,6 +25,8 @@
 #include "gtkmm2ext/utils.h"
 
 #include "pbd/convert.h"
+
+#include "gui_dimensions.h"
 #include "quantize_dialog.h"
 #include "editing_context.h"
 
@@ -35,6 +37,7 @@ using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 static const gchar *_grid_strings[] = {
 	N_("Main Grid"),
@@ -44,7 +47,7 @@ static const gchar *_grid_strings[] = {
 	N_("1/32 Note"),
 	N_("1/64 Note"),
 	N_("1/128 Note"),
-	
+
 	N_("1/3 (8th triplet)"),
 	N_("1/6 (16th triplet)"),
 	N_("1/12 (32nd triplet)"),
@@ -95,7 +98,7 @@ QuantizeWidget::QuantizeWidget (EditingContext& e)
 	end_grid_combo.set_active_text (grid_strings.front());
 
 	set_spacings (12);
-	set_border_width (12);
+	set_border_width (border());
 
 	int r = 0;
 

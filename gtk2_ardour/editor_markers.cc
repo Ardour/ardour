@@ -45,6 +45,7 @@
 #include "widgets/prompter.h"
 
 #include "editor.h"
+#include "gui_dimensions.h"
 #include "marker.h"
 #include "selection.h"
 #include "editing.h"
@@ -58,6 +59,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
@@ -1917,19 +1919,19 @@ Editor::edit_location (Location& loc, bool with_scene, bool with_command)
 		scene_title->set_use_markup (true);
 
 		Gtk::HBox* b1 = manage (new Gtk::HBox);
-		b1->set_spacing (12);
+		b1->set_spacing (spacing());
 		b1->pack_start (*l1, true, true);
 		l1->set_alignment (1.0);
 		b1->pack_start (*program, true, false);
 
 		Gtk::HBox* b2 = manage (new Gtk::HBox);
-		b2->set_spacing (12);
+		b2->set_spacing (spacing());
 		b2->pack_start (*l2, true, true);
 		l2->set_alignment (1.0);
 		b2->pack_start (*bank, true, false);
 
 		Gtk::HBox* b3 = manage (new Gtk::HBox);
-		b3->set_spacing (12);
+		b3->set_spacing (spacing());
 		b3->pack_start (*l3, true, true);
 		l3->set_alignment (1.0);
 		b3->pack_start (*channel, true, false);
@@ -1957,7 +1959,7 @@ Editor::edit_location (Location& loc, bool with_scene, bool with_command)
 		b4->pack_start (*use_scene_button, true, false);
 
 		Gtk::VBox* scene_box = manage (new Gtk::VBox);
-		scene_box->set_spacing (12);
+		scene_box->set_spacing (spacing());
 		scene_box->pack_start (*scene_title, false, false);
 		scene_box->pack_start (*b1, false, false);
 		scene_box->pack_start (*b2, false, false);

@@ -27,12 +27,14 @@
 #include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/utils.h"
 
+#include "gui_dimensions.h"
 #include "note_base.h"
 #include "pitch_color_dialog.h"
 
 #include "pbd/i18n.h"
 
 using namespace Gtk;
+using namespace ARDOUR_UI_UTILS;
 
 PitchColorDialog::PitchColorDialog ()
 	: ArdourDialog (_("Pitch Color Dialog"))
@@ -46,8 +48,8 @@ PitchColorDialog::PitchColorDialog ()
 	cycle_hpacker->pack_start (*cycle_label, true, false);
 	cycle_hpacker->pack_start (*cycle_spinner, true, false);
 	cycle_hpacker->show_all ();
-	cycle_hpacker->set_border_width (12);
-	cycle_hpacker->set_spacing (12);
+	cycle_hpacker->set_border_width (border());
+	cycle_hpacker->set_spacing (spacing());
 
 	refill ();
 

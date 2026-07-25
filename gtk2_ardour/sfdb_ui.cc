@@ -75,6 +75,7 @@
 #include "ardour_ui.h"
 #include "editing.h"
 #include "gui_thread.h"
+#include "gui_dimensions.h"
 #include "sfdb_ui.h"
 #include "editing.h"
 #include "gain_meter.h"
@@ -88,6 +89,7 @@
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace std;
 using namespace Gtk;
@@ -690,7 +692,7 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 
 	//add the file chooser
 
-	chooser.set_border_width (12);
+	chooser.set_border_width (border());
 
 	audio_filter.add_custom (FILE_FILTER_FILENAME, sigc::mem_fun(*this, &SoundFileBrowser::on_audio_filter));
 	audio_filter.set_name (_("Audio files"));
@@ -1005,7 +1007,7 @@ SoundFileBrowser::add_gain_meter ()
 		gm->set_controls (r, r->shared_peak_meter(), r->amp(), r->gain_control());
 		gm->set_fader_name (X_("GainFader"));
 
-		meter_packer.set_border_width (12);
+		meter_packer.set_border_width (border());
 		meter_packer.pack_start (*gm, false, true);
 		hpacker.pack_end (meter_packer, false, false);
 		meter_packer.show_all ();

@@ -29,12 +29,14 @@
 
 #include "ardour_ui.h"
 #include "dsp_stats_ui.h"
+#include "gui_dimensions.h"
 #include "timers.h"
 #include "utils.h"
 
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace Gtkmm2ext;
 using namespace Gtk;
 
@@ -84,7 +86,7 @@ DspStatisticsGUI::DspStatisticsGUI ()
 	HBox* hbox2 = manage (new HBox);
 	hbox2->pack_start (reset_button, true, true);
 
-	set_border_width (12);
+	set_border_width (border());
 	set_spacing (6);
 
 	info_text.set_markup (_("The measurements shown below are <b>worst case</b>.\n"

@@ -27,11 +27,13 @@
 
 #include "gtkmm2ext/utils.h"
 
+#include "gui_dimensions.h"
 #include "search_path_option.h"
 #include "pbd/i18n.h"
 
 using namespace std;
 using namespace Gtk;
+using namespace ARDOUR_UI_UTILS;
 
 SearchPathOption::SearchPathOption (const string& pathname, const string& label,
 				    const string& default_path,
@@ -46,7 +48,7 @@ SearchPathOption::SearchPathOption (const string& pathname, const string& label,
 
 	HBox* hbox = manage (new HBox);
 
-	hbox->set_border_width (12);
+	hbox->set_border_width (border());
 	hbox->set_spacing (6);
 	hbox->pack_end (add_chooser, true, true);
 	hbox->pack_end (*manage (new Label (_("Click to add a new location"))), false, false);

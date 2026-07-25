@@ -65,6 +65,7 @@
 #include "ardour_message.h"
 #include "ardour_ui.h"
 #include "context_menu_helper.h"
+#include "gui_dimensions.h"
 #include "session_dialog.h"
 #include "opts.h"
 #include "engine_dialog.h"
@@ -165,7 +166,7 @@ SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_
 		Gtk::HBox* info_hbox = manage (new HBox);
 		Gtk::VBox* info_vbox = manage (new VBox);
 
-		info_hbox->set_border_width (12);
+		info_hbox->set_border_width (border());
 		info_hbox->set_spacing (6);
 		info_vbox->set_spacing (6);
 

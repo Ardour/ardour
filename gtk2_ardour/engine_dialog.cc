@@ -55,6 +55,7 @@
 #include "ardour_ui.h"
 #include "debug.h"
 #include "engine_dialog.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "opts.h"
 #include "pbd/i18n.h"
@@ -181,7 +182,7 @@ EngineControl::EngineControl ()
 	 */
 
 	settings_table.set_spacings (6);
-	settings_table.set_border_width (12);
+	settings_table.set_border_width (border());
 
 	buffer_size_duration_label.set_alignment (0.0); /* left-align */
 
@@ -190,8 +191,8 @@ EngineControl::EngineControl ()
 	main_hbox.pack_start (settings_table, false, false);
 	main_vbox.pack_start (main_hbox, false, false);
 
-	midi_vbox.set_border_width (12);
-	midi_device_table.set_border_width (12);
+	midi_vbox.set_border_width (border());
+	midi_device_table.set_border_width (border());
 	midi_vbox.pack_start (midi_device_table, true, true);
 
 	latency_expander.property_expanded ().signal_changed ().connect (sigc::mem_fun (*this, &EngineControl::on_latency_expand));
@@ -258,7 +259,7 @@ EngineControl::EngineControl ()
 	lm_table.attach (lm_results, 0, 4, row, row + 1, xopt, SHRINK);
 	lm_results.set_markup (string_compose (results_markup, _("No measurement results yet")));
 
-	lm_vbox.set_border_width (12);
+	lm_vbox.set_border_width (border());
 	lm_vbox.pack_start (lm_table, false, false);
 
 	midi_back_button.signal_clicked ().connect (sigc::bind (sigc::mem_fun (notebook, &Gtk::Notebook::set_current_page), 0));
@@ -268,7 +269,7 @@ EngineControl::EngineControl ()
 	notebook.pages ().push_back (TabElem (main_vbox, _("Audio")));
 	notebook.pages ().push_back (TabElem (lm_vbox, _("Latency")));
 	notebook.pages ().push_back (TabElem (midi_vbox, _("MIDI")));
-	notebook.set_border_width (12);
+	notebook.set_border_width (border());
 
 	notebook.set_show_tabs (false);
 	notebook.show_all ();
@@ -277,7 +278,7 @@ EngineControl::EngineControl ()
 
 	/* packup the notebook */
 
-	get_vbox ()->set_border_width (12);
+	get_vbox ()->set_border_width (border());
 	get_vbox ()->pack_start (notebook);
 
 	/* Setup buttons and signals */

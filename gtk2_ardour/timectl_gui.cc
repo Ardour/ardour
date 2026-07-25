@@ -34,6 +34,7 @@
 
 #include "gtkmm2ext/utils.h"
 
+#include "gui_dimensions.h"
 #include "timectl_gui.h"
 #include "utils.h"
 
@@ -43,7 +44,7 @@ using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR;
-
+using namespace ARDOUR_UI_UTILS;
 
 static const gchar *_unit_strings[] = {
 	N_("sample"),
@@ -132,7 +133,7 @@ TimeCtlGUI::init ()
 	hbox1.pack_start (bc, true, true);
 
 	hbox2.set_homogeneous (false);
-	hbox2.set_spacing (12);
+	hbox2.set_spacing (spacing());
 	hbox2.pack_start (reset_button);
 	hbox2.pack_start (minus_button);
 	hbox2.pack_start (plus_button);
@@ -157,7 +158,7 @@ TimeCtlGUI::init ()
 	bc.set_size_request (-1, 25);
 	bc.set_name (X_("ProcessorControlSlider"));
 
-	set_spacing (12);
+	set_spacing (spacing());
 	pack_start (hbox1, true, true);
 	pack_start (hbox2, true, true);
 }

@@ -34,6 +34,7 @@
 #include "widgets/binding_proxy.h"
 
 #include "context_menu_helper.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "timectl_gui.h"
 #include "port_insert_ui.h"
@@ -43,6 +44,7 @@
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 PortInsertUI::PortInsertUI (Gtk::Window* parent, ARDOUR::Session* sess, std::shared_ptr<ARDOUR::PortInsert> pi)
 	: _pi (pi)
@@ -84,7 +86,7 @@ PortInsertUI::PortInsertUI (Gtk::Window* parent, ARDOUR::Session* sess, std::sha
 
 	_notebook.set_current_page (0);
 
-	set_spacing (12);
+	set_spacing (spacing());
 	pack_start (_notebook, true, true);
 	pack_start (_latency_hbox, false, false);
 
