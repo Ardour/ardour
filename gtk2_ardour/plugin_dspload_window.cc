@@ -25,12 +25,14 @@
 
 #include "gtkmm2ext/gui_thread.h"
 
+#include "gui_dimensions.h"
 #include "plugin_dspload_ui.h"
 #include "plugin_dspload_window.h"
 
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 PluginDSPLoadWindow::PluginDSPLoadWindow ()
 	: ArdourWindow (_("Plugin DSP Load"))
@@ -38,7 +40,7 @@ PluginDSPLoadWindow::PluginDSPLoadWindow ()
 	, _sort_avg_button (_("Sort by Average Load"))
 	, _sort_max_button (_("Sort by Worst-Case Load"))
 {
-	_scroller.set_border_width (0);
+	_scroller.set_border_width (gui_distance (0));
 	_scroller.set_shadow_type (Gtk::SHADOW_NONE);
 	_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	_scroller.add (_box);
@@ -57,7 +59,7 @@ PluginDSPLoadWindow::PluginDSPLoadWindow ()
 
 	Gtk::Viewport* viewport = (Gtk::Viewport*) _scroller.get_child();
 	viewport->set_shadow_type(Gtk::SHADOW_NONE);
-	viewport->set_border_width(0);
+	viewport->set_border_width (gui_distance (0));
 
 	_ctrlbox.pack_end (_reset_button, Gtk::PACK_SHRINK, 2);
 	_ctrlbox.pack_end (_sort_avg_button, Gtk::PACK_SHRINK, 2);

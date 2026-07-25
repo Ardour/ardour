@@ -22,12 +22,14 @@
 
 #include "gtkmm2ext/utils.h"
 
+#include "gui_dimensions.h"
 #include "script_selector.h"
 #include "pbd/i18n.h"
 
 using namespace std;
 using namespace Gtk;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 ScriptSelector::ScriptSelector (Gtk::Window& parent, std::string title, LuaScriptInfo::ScriptType type)
 	: ArdourDialog (parent, title, true)
@@ -62,7 +64,7 @@ ScriptSelector::ScriptSelector (Gtk::Window& parent, std::string title, LuaScrip
 	_description.set_padding (5, 5);
 	_description.set_line_wrap();
 
-	get_vbox()->set_spacing (6);
+	get_vbox()->set_spacing (gui_distance (6));
 	get_vbox()->pack_start (_script_combo, false, false);
 	get_vbox()->pack_start (*t, true, true);
 
@@ -176,7 +178,7 @@ SessionScriptManager::SessionScriptManager (std::string title, const std::vector
 	Gtk::Label* l;
 	l = manage (new Label (_("Select Script to unload")));
 
-	get_vbox()->set_spacing (6);
+	get_vbox()->set_spacing (gui_distance (6));
 	get_vbox()->pack_start (*l, false, false);
 	get_vbox()->pack_start (_names_combo, false, false);
 

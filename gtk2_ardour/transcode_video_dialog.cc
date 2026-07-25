@@ -39,6 +39,7 @@
 #include "ardour/template_utils.h"
 #include "ardour_ui.h"
 #include "gtkmm2ext/utils.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "pbd/convert.h"
 #include "pbd/error.h"
@@ -53,6 +54,7 @@ using namespace Gtk;
 using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace VideoUtils;
 
 TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
@@ -293,11 +295,11 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 	vbox->pack_start (*path_hbox, false, false);
 	vbox->pack_start (*options_box, false, true);
 
-	get_vbox ()->set_spacing (4);
+	get_vbox ()->set_spacing (gui_distance (4));
 	get_vbox ()->pack_start (*vbox, false, false);
 
 	progress_box = manage (new VBox);
-	progress_box->set_spacing (6);
+	progress_box->set_spacing (gui_distance (6));
 	progress_box->pack_start (progress_label, false, false);
 	progress_box->pack_start (pbar, false, false);
 	progress_box->pack_start (abort_button, false, false);

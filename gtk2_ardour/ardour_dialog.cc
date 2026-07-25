@@ -27,6 +27,7 @@
 
 #include "ardour_dialog.h"
 #include "ardour_ui.h"
+#include "gui_dimensions.h"
 #include "keyboard.h"
 #include "splash.h"
 #include "ui_config.h"
@@ -161,7 +162,7 @@ ArdourDialog::on_delete_event (GdkEventAny*)
 void
 ArdourDialog::init ()
 {
-	set_border_width (10);
+	set_border_width (gui_distance (10));
 	add_events (Gdk::FOCUS_CHANGE_MASK);
 
 #ifdef __APPLE__

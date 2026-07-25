@@ -28,6 +28,8 @@
 
 #include "ardour/region.h"
 #include "ardour/region_fx_plugin.h"
+
+#include "gui_dimensions.h"
 #include "plugin_ui.h"
 #include "region_fx_properties_box.h"
 #include "timers.h"
@@ -37,6 +39,7 @@
 
 using namespace Gtk;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace ArdourWidgets;
 
 RegionFxPropertiesBox::RegionFxPropertiesBox (std::shared_ptr<ARDOUR::Region> r)
@@ -45,10 +48,10 @@ RegionFxPropertiesBox::RegionFxPropertiesBox (std::shared_ptr<ARDOUR::Region> r)
 {
 	_scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_NEVER);
 	_scroller.set_shadow_type(Gtk::SHADOW_NONE);
-	_scroller.set_border_width(0);
+	_scroller.set_border_width (gui_distance (0));
 	_scroller.add (_box);
 
-	_box.set_spacing (4);
+	_box.set_spacing (gui_distance (4));
 
 	pack_start (_scroller, true, true);
 	show_all();
@@ -56,7 +59,7 @@ RegionFxPropertiesBox::RegionFxPropertiesBox (std::shared_ptr<ARDOUR::Region> r)
 	/* remove shadow from scrollWindow's viewport */
 	Gtk::Viewport* viewport = (Gtk::Viewport*) _scroller.get_child();
 	viewport->set_shadow_type(Gtk::SHADOW_NONE);
-	viewport->set_border_width(0);
+	viewport->set_border_width (gui_distance (0));
 
 	_region->PropertyChanged.connect (_region_connection, invalidator (*this), std::bind (&RegionFxPropertiesBox::region_property_changed, this, _1), gui_context ());
 
@@ -118,7 +121,7 @@ RegionFxPropertiesBox::add_fx_to_display (std::weak_ptr<RegionFxPlugin> wfx)
 	ArdourWidgets::Frame* frame = new ArdourWidgets::Frame ();
 	frame->set_label (fx->name ());
 	frame->add (*plugin_ui);
-	frame->set_padding (0);
+	frame->set_padding (gui_distance (0));
 	frame->set_edge_color (0x000000ff); // black (0);
 	_box.pack_start (*frame, false, false);
 	plugin_ui->show ();

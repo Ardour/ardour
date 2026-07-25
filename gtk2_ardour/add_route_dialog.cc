@@ -187,13 +187,13 @@ AddRouteDialog::AddRouteDialog ()
 
 	/* top-level VBox */
 	VBox* vbox = manage (new VBox);
-	get_vbox()->set_spacing (4);
-	vbox->set_spacing (18);
-	vbox->set_border_width (5);
+	get_vbox()->set_spacing (gui_distance (4));
+	vbox->set_spacing (gui_distance (18));
+	vbox->set_border_width (gui_distance (5));
 
 	/* this box contains the template chooser, and the template details */
 	HBox* template_hbox = manage (new HBox);
-	template_hbox->set_spacing (8);
+	template_hbox->set_spacing (gui_distance (8));
 
 	/* scrollbars for the template chooser and template descriptions.... */
 	Gtk::ScrolledWindow *template_scroller = manage (new Gtk::ScrolledWindow());
@@ -229,7 +229,7 @@ AddRouteDialog::AddRouteDialog ()
 	trk_template_desc.set_wrap_mode (Gtk::WRAP_WORD);
 	trk_template_desc.set_size_request(400,200);
 	trk_template_desc.set_name (X_("TextOnBackground"));
-	trk_template_desc.set_border_width (6);
+	trk_template_desc.set_border_width (gui_distance (6));
 
 	Table *settings_table = manage (new Table (2, 6, false));
 	settings_table->set_row_spacings (8);
@@ -257,7 +257,7 @@ AddRouteDialog::AddRouteDialog ()
 	HBox *separator_hbox = manage (new HBox);
 	separator_hbox->pack_start (manual_label, false, false);
 	separator_hbox->pack_start (*(manage (new Gtk::HSeparator)), true, true);
-	separator_hbox->set_spacing (6);
+	separator_hbox->set_spacing (gui_distance (6));
 	settings_table->attach (*separator_hbox, 0, 6, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 	++n;
@@ -318,7 +318,7 @@ AddRouteDialog::AddRouteDialog ()
 	++n;
 
 	HBox* outer_box = manage (new HBox);
-	outer_box->set_spacing (4);
+	outer_box->set_spacing (gui_distance (4));
 
 	/* New route will be inserted at.. */
 	insert_label.set_alignment (Gtk::ALIGN_END, Gtk::ALIGN_CENTER);

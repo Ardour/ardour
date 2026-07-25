@@ -40,6 +40,7 @@
 #include "ardour_window.h"
 #include "enums_convert.h"
 #include "foldback_strip.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "io_selector.h"
 #include "keyboard.h"
@@ -53,6 +54,7 @@
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace ArdourWidgets;
 using namespace PBD;
 using namespace Gtk;
@@ -414,7 +416,7 @@ FoldbackStrip::init ()
 	_number_label.set_alignment (.5, .5);
 	_number_label.set_fallthrough_to_parent (true);
 
-	_prev_next_box.set_spacing (2);
+	_prev_next_box.set_spacing (gui_distance (2));
 	_prev_next_box.pack_start (_previous_button, false, true);
 	_prev_next_box.pack_start (_next_button, false, true);
 	_prev_next_box.pack_start (_number_label, true, true);
@@ -425,7 +427,7 @@ FoldbackStrip::init ()
 	_name_button.set_layout_ellipsize_width (PX_SCALE (_width) * PANGO_SCALE);
 
 	_send_display.set_can_focus ();
-	_send_display.set_spacing (4);
+	_send_display.set_spacing (gui_distance (4));
 
 	_send_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	_send_scroller.add (_send_display);
@@ -481,8 +483,8 @@ FoldbackStrip::init ()
 	_comment_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
 	_comment_button.set_layout_ellipsize_width (PX_SCALE (_width) * PANGO_SCALE);
 
-	_global_vpacker.set_border_width (1);
-	_global_vpacker.set_spacing (2);
+	_global_vpacker.set_border_width (gui_distance (1));
+	_global_vpacker.set_spacing (gui_distance (2));
 
 	/* Packing is from top down to the send box. The send box
 	 * needs the most room and takes all left over space

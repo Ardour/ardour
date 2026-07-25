@@ -23,6 +23,7 @@
 
 #include "gtkmm2ext/utils.h"
 
+#include "gui_dimensions.h"
 #include "session_archive_dialog.h"
 
 #include "pbd/i18n.h"
@@ -30,6 +31,7 @@
 using namespace std;
 using namespace Gtk;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 SessionArchiveDialog::SessionArchiveDialog ()
 	: ArdourDialog (_("Zip/Archive Current Session"))
@@ -39,7 +41,7 @@ SessionArchiveDialog::SessionArchiveDialog ()
 {
 	VBox* vbox = get_vbox();
 
-	vbox->set_spacing (6);
+	vbox->set_spacing (gui_distance (6));
 
 	encode_selector.append (_("None"));
 	encode_selector.append (_("FLAC 16bit"));
@@ -62,7 +64,7 @@ SessionArchiveDialog::SessionArchiveDialog ()
 	table->attach (*label, 0, 1, row, row + 1, Gtk::FILL, Gtk::SHRINK);
 
 	HBox* hbox = manage (new HBox);
-	hbox->set_spacing (6);
+	hbox->set_spacing (gui_distance (6));
 	hbox->pack_start (name_entry, true, true);
 	hbox->pack_start (format_Label, false, false);
 	table->attach (*hbox, 1, 2, row, row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);

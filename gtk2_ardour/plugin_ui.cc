@@ -84,6 +84,7 @@ extern VST3PluginUI* create_mac_vst3_gui (std::shared_ptr<ARDOUR::PlugInsertBase
 
 #include "ardour_ui.h"
 #include "ardour_window.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "timectl_gui.h"
@@ -193,7 +194,7 @@ PluginUIWindow::PluginUIWindow (std::shared_ptr<PlugInsertBase> pib,
 		}
 	}
 
-	set_border_width (0);
+	set_border_width (gui_distance (0));
 	set_default_size (w, h);
 	set_resizable (_pluginui->resizable ());
 	unset_transient_for ();

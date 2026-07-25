@@ -73,6 +73,7 @@
 #include "widgets/tooltips.h"
 
 #include "foldback_strip.h"
+#include "gui_dimensions.h"
 #include "keyboard.h"
 #include "mixer_ui.h"
 #include "mixer_strip.h"
@@ -198,8 +199,8 @@ Mixer_UI::Mixer_UI ()
 #endif
 
 	_group_tabs = new MixerGroupTabs (this);
-	strip_group_box.set_spacing (0);
-	strip_group_box.set_border_width (0);
+	strip_group_box.set_spacing (gui_distance (0));
+	strip_group_box.set_border_width (gui_distance (0));
 	strip_group_box.pack_start (*_group_tabs, PACK_SHRINK);
 	strip_group_box.pack_start (strip_packer);
 	strip_group_box.show_all ();
@@ -304,16 +305,16 @@ Mixer_UI::Mixer_UI ()
 	favorite_plugins_scroller.add (favorite_plugins_display);
 	favorite_plugins_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
-	favorite_plugins_search_hbox.set_spacing (2);
+	favorite_plugins_search_hbox.set_spacing (gui_distance (2));
 	favorite_plugins_search_hbox.pack_start (plugin_search_entry, true, true);
 	favorite_plugins_search_hbox.pack_start (plugin_search_clear_button, false, false);
 
-	favorite_plugins_vbox.set_spacing (3);
+	favorite_plugins_vbox.set_spacing (gui_distance (3));
 	favorite_plugins_vbox.pack_start (favorite_plugins_scroller, true, true);
 	favorite_plugins_vbox.pack_start (favorite_plugins_search_hbox, false, false);
 
 	/* mixer scenes */
-	_mixer_scene_table.set_border_width(4);
+	_mixer_scene_table.set_border_width (gui_distance (4));
 	_mixer_scene_table.set_spacings(4);
 	_mixer_scene_table.set_homogeneous(false);
 
@@ -350,7 +351,7 @@ Mixer_UI::Mixer_UI ()
 	_sidebar_pager2.set_name ("tab button");
 
 	HBox* tabbox = manage (new HBox (true));
-	tabbox->set_spacing (3);
+	tabbox->set_spacing (gui_distance (3));
 	tabbox->pack_start (_sidebar_pager1);
 	tabbox->pack_start (_sidebar_pager2);
 

@@ -16,15 +16,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "transpose_dialog.h"
-
 #include <ytkmm/table.h>
 #include <ytkmm/label.h>
 #include <ytkmm/stock.h>
 
+#include "gui_dimensions.h"
+#include "transpose_dialog.h"
+
 #include "pbd/i18n.h"
 
 using namespace Gtk;
+using namespace ARDOUR_UI_UTILS;
 
 TransposeDialog::TransposeDialog (Gtk::Window& parent)
 	: ArdourDialog (parent, _("Transpose MIDI"))
@@ -48,7 +50,7 @@ TransposeDialog::TransposeDialog (Gtk::Window& parent)
 	t->attach (_semitones_spinner, 1, 2, r, r + 1, FILL, EXPAND & FILL, 0, 0);
 	++r;
 
-	get_vbox()->set_spacing (6);
+	get_vbox()->set_spacing (gui_distance (6));
 	get_vbox()->pack_start (*t, false, false);
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);

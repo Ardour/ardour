@@ -58,6 +58,7 @@
 #include "plugin_selector.h"
 #include "ardour_ui.h"
 #include "plugin_utils.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "ui_config.h"
 #include "utils.h"
@@ -65,6 +66,7 @@
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtk;
 using namespace std;
@@ -138,7 +140,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	plugin_display.signal_row_activated().connect_notify (sigc::mem_fun(*this, &PluginSelector::row_activated));
 	plugin_display.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &PluginSelector::display_selection_changed));
 
-	scroller.set_border_width(10);
+	scroller.set_border_width (gui_distance (10));
 	scroller.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	scroller.add(plugin_display);
 
@@ -155,7 +157,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 		}
 	}
 
-	ascroller.set_border_width(10);
+	ascroller.set_border_width (gui_distance (10));
 	ascroller.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	ascroller.add(added_list);
 	btn_add = manage(new Gtk::Button(Stock::ADD));
@@ -201,7 +203,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	search_table->attach (*search_help_label1,     0, 3, 2, 3, FILL, FILL);
 	search_table->attach (*search_help_label2,     0, 3, 3, 4, FILL, FILL);
 
-	search_table->set_border_width (4);
+	search_table->set_border_width (gui_distance (4));
 	search_table->set_col_spacings (4);
 	search_table->set_row_spacings (4);
 
@@ -257,8 +259,8 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	filter_vbox->pack_start (_fil_type_combo,         false, false);
 	filter_vbox->pack_start (_fil_creator_combo,      false, false);
 
-	filter_vbox->set_border_width (4);
-	filter_vbox->set_spacing (4);
+	filter_vbox->set_border_width (gui_distance (4));
+	filter_vbox->set_spacing (gui_distance (4));
 
 	Gtk::Frame* filter_frame = manage (new Gtk::Frame);
 	filter_frame->set_name ("BaseFrame");
@@ -278,7 +280,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	/* TAG entry */
 
 	Gtk::Table* tagging_table = manage(new Gtk::Table(1, 2));
-	tagging_table->set_border_width (4);
+	tagging_table->set_border_width (gui_distance (4));
 	tagging_table->set_col_spacings (4);
 	tagging_table->set_row_spacings (4);
 

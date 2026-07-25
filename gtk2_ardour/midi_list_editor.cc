@@ -36,6 +36,7 @@
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/keyboard.h"
 
+#include "gui_dimensions.h"
 #include "midi_list_editor.h"
 #include "note_player.h"
 #include "ui_config.h"
@@ -47,6 +48,8 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace Glib;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
+
 using Temporal::BBT_Time;
 
 static map<int32_t, std::string> note_length_map;
@@ -166,8 +169,8 @@ MidiListEditor::MidiListEditor (Session* s, std::shared_ptr<MidiRegion> r, std::
 	vbox.show ();
 	sound_notes_button.show ();
 
-	vbox.set_spacing (6);
-	vbox.set_border_width (6);
+	vbox.set_spacing (gui_distance (6));
+	vbox.set_border_width (gui_distance (6));
 	vbox.pack_start (buttons, false, false);
 	vbox.pack_start (scroller, true, true);
 

@@ -152,7 +152,7 @@ RecorderUI::RecorderUI ()
 	_toolbar_button_height->add_widget (_btn_new_plist);
 	_toolbar_button_height->add_widget (_btn_new_plist_rec);
 
-	_meter_area.set_spacing (0);
+	_meter_area.set_spacing (gui_distance (0));
 	_meter_area.pack_start (_meter_table, true, true);
 	_meter_area.signal_size_request().connect (sigc::mem_fun (*this, &RecorderUI::meter_area_size_request));
 	_meter_area.signal_size_allocate ().connect (mem_fun (*this, &RecorderUI::meter_area_size_allocate));
@@ -171,7 +171,7 @@ RecorderUI::RecorderUI ()
 
 	/* LAYOUT */
 
-	_rec_area.set_spacing (0);
+	_rec_area.set_spacing (gui_distance (0));
 	_rec_area.pack_end (_scroller_base, true, true);
 	_rec_area.pack_end (_ruler_sep, false, false, 0);
 
@@ -1502,8 +1502,8 @@ RecorderUI::InputPort::InputPort (string const& name, DataType dt, RecorderUI* p
 	_alignment.set_padding (2, 2, 4, 4);
 
 	_frame.add (_alignment);
-	_frame.set_border_width (3);
-	_frame.set_padding (3);
+	_frame.set_border_width (gui_distance (3));
+	_frame.set_padding (gui_distance (3));
 
 	add (_frame);
 	show_all ();

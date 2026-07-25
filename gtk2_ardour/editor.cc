@@ -461,7 +461,7 @@ Editor::Editor ()
 
 	selection->MarkersChanged.connect (sigc::mem_fun(*this, &Editor::marker_selection_changed));
 
-	edit_controls_vbox.set_spacing (0);
+	edit_controls_vbox.set_spacing (gui_distance (0));
 	vertical_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &Editor::tie_vertical_scrolling), true);
 	_track_canvas->signal_map_event().connect (sigc::mem_fun (*this, &Editor::track_canvas_map_handler));
 
@@ -502,7 +502,7 @@ Editor::Editor ()
 	edit_packer.set_col_spacings (0);
 	edit_packer.set_row_spacings (0);
 	edit_packer.set_homogeneous (false);
-	edit_packer.set_border_width (0);
+	edit_packer.set_border_width (gui_distance (0));
 	edit_packer.set_name ("EditorWindow");
 
 	time_bars_event_box.add (time_bars_vbox);
@@ -627,11 +627,11 @@ Editor::Editor ()
 	editor_summary_pane.add (_summary_vbox);
 
 	HBox* tabbox = manage (new HBox (true));
-	tabbox->set_spacing (3);
+	tabbox->set_spacing (gui_distance (3));
 	tabbox->pack_start (_notebook_tab1);
 	tabbox->pack_start (_notebook_tab2);
 
-	_editor_list_vbox.set_spacing (3);
+	_editor_list_vbox.set_spacing (gui_distance (3));
 	_editor_list_vbox.pack_start (*manage (new ArdourVSpacer (0)), false, false, 2); // align top with editor shadow
 	_editor_list_vbox.pack_start (*tabbox, false, false);
 	_editor_list_vbox.pack_start (_the_notebook, true, true, 3);
@@ -647,8 +647,8 @@ Editor::Editor ()
 	}
 	editor_summary_pane.set_absolute_divider (0, ArdourWidgets::Pane::DividerMode::AbsoluteAfter, size);
 
-	global_vpacker.set_spacing (0);
-	global_vpacker.set_border_width (0);
+	global_vpacker.set_spacing (gui_distance (0));
+	global_vpacker.set_border_width (gui_distance (0));
 
 	ArdourWidgets::ArdourDropShadow *toolbar_shadow = manage (new (ArdourWidgets::ArdourDropShadow));
 	toolbar_shadow->set_size_request (-1, 4);
@@ -2724,7 +2724,7 @@ Editor::setup_toolbar ()
 
 	HBox* mode_box = manage(new HBox);
 	mode_box->set_border_width (spc);
-	mode_box->set_spacing(2);
+	mode_box->set_spacing (gui_distance (2));
 
 	HBox* mouse_mode_box = manage (new HBox);
 	HBox* mouse_mode_hbox = manage (new HBox);
@@ -2798,7 +2798,7 @@ Editor::setup_toolbar ()
 
 	/* Zoom */
 
-	_zoom_box.set_spacing (2);
+	_zoom_box.set_spacing (gui_distance (2));
 	_zoom_box.set_border_width (spc);
 
 	RefPtr<Action> act;
@@ -2812,7 +2812,7 @@ Editor::setup_toolbar ()
 	_zoom_box.pack_start (zoom_focus_selector, false, false);
 
 	/* Track zoom buttons */
-	_track_box.set_spacing (2);
+	_track_box.set_spacing (gui_distance (2));
 	_track_box.set_border_width (spc);
 
 	visible_tracks_selector.set_name ("zoom button");
@@ -2848,7 +2848,7 @@ Editor::setup_toolbar ()
 	/* Nudge */
 
 	HBox *nudge_box = manage (new HBox);
-	nudge_box->set_spacing (2);
+	nudge_box->set_spacing (gui_distance (2));
 	nudge_box->set_border_width (spc);
 
 	nudge_forward_button.signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::nudge_forward_release), false);
@@ -2861,7 +2861,7 @@ Editor::setup_toolbar ()
 	stretch_marker_cb.set_label (_("Adjust Markers"));
 	stretch_marker_cb.set_active (true);
 
-	grid_box.set_spacing (2);
+	grid_box.set_spacing (gui_distance (2));
 	grid_box.set_border_width (spc);
 	grid_box.pack_start (stretch_marker_cb, false, false, 4);
 	stretch_marker_cb.show ();
@@ -2878,7 +2878,7 @@ Editor::setup_toolbar ()
 
 	/* Pack everything in... */
 
-	toolbar_hbox.set_spacing (2);
+	toolbar_hbox.set_spacing (gui_distance (2));
 	toolbar_hbox.set_border_width (spc ? 1 : 0);
 
 #ifndef MIXBUS
@@ -3143,7 +3143,7 @@ Editor::duplicate_range (bool with_dialog)
 
 		win.get_vbox()->set_spacing (spacing());
 		win.get_vbox()->pack_start (hbox);
-		hbox.set_border_width (6);
+		hbox.set_border_width (gui_distance (6));
 		hbox.pack_start (label, PACK_EXPAND_PADDING, 12);
 
 		/* dialogs have ::add_action_widget() but that puts the spinner in the wrong

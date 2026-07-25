@@ -45,6 +45,7 @@
 #include "editor_cursors.h"
 #include "editor_drag.h"
 #include "grid_lines.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "midi_region_view.h"
@@ -62,6 +63,7 @@
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace Editing;
 using namespace Glib;
 using namespace Gtk;
@@ -2463,7 +2465,7 @@ EditingContext::pack_draw_box (bool with_channel)
 	EC_LOCAL_TEMPO_SCOPE;
 
 	/* Draw  - these MIDI tools are only visible when in Draw mode */
-	draw_box.set_spacing (2);
+	draw_box.set_spacing (gui_distance (2));
 	draw_box.pack_start (*manage (new Label (_("Len:"))), false, false);
 	draw_box.pack_start (draw_length_selector, false, false, 4);
 	if (with_channel) {
@@ -2492,7 +2494,7 @@ EditingContext::pack_snap_box ()
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	snap_box.set_spacing (2);
+	snap_box.set_spacing (gui_distance (2));
 	snap_box.pack_start (snap_mode_button, false, false);
 	snap_box.pack_start (grid_type_selector, false, false);
 }

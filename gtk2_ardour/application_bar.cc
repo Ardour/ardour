@@ -70,6 +70,7 @@
 #include "application_bar.h"
 #include "ardour_ui.h"
 #include "debug.h"
+#include "gui_dimensions.h"
 #include "gui_object.h"
 #include "gui_thread.h"
 #include "keyboard.h"
@@ -183,8 +184,8 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	/* alert box sub-group */
 	VBox* alert_box = manage (new VBox);
 	alert_box->set_homogeneous (true);
-	alert_box->set_spacing (1);
-	alert_box->set_border_width (0);
+	alert_box->set_spacing (gui_distance (1));
+	alert_box->set_border_width (gui_distance (0));
 	alert_box->pack_start (_solo_alert_button, true, true);
 	alert_box->pack_start (_auditioning_alert_button, true, true);
 	alert_box->pack_start (_feedback_alert_button, true, true);
@@ -192,8 +193,8 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	/* monitor section sub-group */
 	VBox* monitor_box = manage (new VBox);
 	monitor_box->set_homogeneous (true);
-	monitor_box->set_spacing (1);
-	monitor_box->set_border_width (0);
+	monitor_box->set_spacing (gui_distance (1));
+	monitor_box->set_border_width (gui_distance (0));
 	monitor_box->pack_start (_monitor_mono_button, true, true);
 	monitor_box->pack_start (_monitor_dim_button, true, true);
 	monitor_box->pack_start (_monitor_mute_button, true, true);
@@ -239,7 +240,7 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 
 	_route_latency_value.set_alignment (Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
 
-	_left_hbox.set_spacing (3);
+	_left_hbox.set_spacing (gui_distance (3));
 	_table.attach (_left_hbox, TCOL, 0, 2, EXPAND|FILL, EXPAND|FILL, hpadding, 0);
 	++col;
 
@@ -272,7 +273,7 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 	++col;
 
 	/* editor-meter, mini-timeline and selection clock are options in the transport_hbox */
-	_transport_hbox.set_spacing (3);
+	_transport_hbox.set_spacing (gui_distance (3));
 	_table.attach (_transport_hbox, TCOL, 0, 2, EXPAND|FILL, EXPAND|FILL, hpadding, 0);
 	++col;
 
@@ -299,7 +300,7 @@ ApplicationBar::on_parent_changed (Gtk::Widget*)
 
 	_table.set_spacings (0);
 	_table.set_row_spacings (4);
-	_table.set_border_width (1);
+	_table.set_border_width (gui_distance (1));
 
 	/* mark any optional widgets as no-show, so they don't expand the toolbar on load */
 	//_transport_spacer.set_no_show_all ();

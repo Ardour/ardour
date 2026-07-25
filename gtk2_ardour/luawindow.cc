@@ -45,6 +45,7 @@
 #include "LuaBridge/LuaBridge.h"
 
 #include "ardour_ui.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "luainstance.h"
 #include "luawindow.h"
@@ -56,6 +57,7 @@
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtk;
 using namespace Glib;
@@ -109,7 +111,7 @@ LuaWindow::LuaWindow ()
 
 	script_select.disable_scrolling ();
 
-	set_border_width (0);
+	set_border_width (gui_distance (0));
 
 	outtext.set_editable (false);
 	outtext.set_wrap_mode (Gtk::WRAP_WORD);

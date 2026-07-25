@@ -87,7 +87,7 @@ DspStatisticsGUI::DspStatisticsGUI ()
 	hbox2->pack_start (reset_button, true, true);
 
 	set_border_width (border());
-	set_spacing (6);
+	set_spacing (gui_distance (6));
 
 	info_text.set_markup (_("The measurements shown below are <b>worst case</b>.\n"
 	                        "\n"

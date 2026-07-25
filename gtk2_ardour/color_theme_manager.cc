@@ -44,6 +44,7 @@
 
 #include "ardour_dialog.h"
 #include "color_theme_manager.h"
+#include "gui_dimensions.h"
 #include "rgb_macros.h"
 #include "ui_config.h"
 #include "utils.h"
@@ -103,7 +104,7 @@ ColorThemeManager::ColorThemeManager ()
 		Gtk::HBox* hbox = Gtk::manage (new Gtk::HBox());
 		Gtk::Alignment* align = Gtk::manage (new Gtk::Alignment (0, 0.5, 0, 1.0));
 		align->add (color_theme_dropdown);
-		hbox->set_spacing (6);
+		hbox->set_spacing (gui_distance (6));
 		hbox->pack_start (color_theme_label, false, false);
 		hbox->pack_start (*align, true, true);
 		hbox->show_all ();

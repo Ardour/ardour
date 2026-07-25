@@ -34,6 +34,7 @@
 #include <gtkmm2ext/gtk_ui.h>
 
 #include "ardour_ui.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "playlist_selector.h"
 #include "public_editor.h"
@@ -46,6 +47,7 @@ using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 
 PlaylistSelector::PlaylistSelector ()
@@ -85,15 +87,15 @@ PlaylistSelector::PlaylistSelector ()
 	_scope_all_radio = manage (new RadioButton (scope_group, _("ALL tracks")));
 
 	_scope_box = manage (new HBox ());
-	_scope_box->set_spacing (4);
-	_scope_box->set_border_width (2);
+	_scope_box->set_spacing (gui_distance (4));
+	_scope_box->set_border_width (gui_distance (2));
 	_scope_box->pack_start (*_scope_grp_radio, false, false);
 	_scope_box->pack_start (*_scope_rec_radio, false, false);
 	_scope_box->pack_start (*_scope_all_radio, false, false);
 	Gtk::Frame* scope_frame = manage (new Frame ());
 	scope_frame->add (*_scope_box);
 
-	_button_box.set_spacing (6);
+	_button_box.set_spacing (gui_distance (6));
 	_button_box.pack_start (_btn_new_plist);
 	_button_box.pack_start (_btn_copy_plist);
 
@@ -101,7 +103,7 @@ PlaylistSelector::PlaylistSelector ()
 	_scope_container.pack_start (*scope_frame);
 
 	Gtk::Table* table = manage (new Gtk::Table ());
-	table->set_border_width (6);
+	table->set_border_width (gui_distance (6));
 	table->attach (*scroller_frame,  0, 2, 0, 1, EXPAND | FILL, EXPAND | FILL, 0, 4);
 	table->attach (_scope_container, 0, 2, 1, 2, EXPAND | FILL, SHRINK, 0, 6);
 	table->attach (_button_box,      0, 2, 2, 3, EXPAND | FILL, SHRINK, 0, 0);

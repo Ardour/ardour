@@ -21,10 +21,13 @@
 #include <ytkmm/stock.h>
 #include <ytkmm/table.h>
 
+#include "gui_dimensions.h"
 #include "plugin_setup_dialog.h"
+
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace ArdourWidgets;
 using namespace Gtk;
 
@@ -67,7 +70,7 @@ PluginSetupDialog::PluginSetupDialog (std::shared_ptr<ARDOUR::Route> r, std::sha
 		tbl->attach (*l, 1, 2, row, row + 1, EXPAND|FILL, SHRINK); ++row;
 
 		Box* box = manage (new HBox ());
-		box->set_border_width (2);
+		box->set_border_width (gui_distance (2));
 		box->pack_start (_keep_mapping, true, true);
 		Frame* f = manage (new Frame ());
 		f->set_label (_("I/O Pin Mapping"));
@@ -87,7 +90,7 @@ PluginSetupDialog::PluginSetupDialog (std::shared_ptr<ARDOUR::Route> r, std::sha
 	if (flags & Route::MultiOut) {
 		setup_output_presets ();
 		Box* box = manage (new HBox ());
-		box->set_border_width (2);
+		box->set_border_width (gui_distance (2));
 		box->pack_start (_out_presets, true, true);
 		box->pack_start (_fan_out, false, false);
 		Frame* f = manage (new Frame ());

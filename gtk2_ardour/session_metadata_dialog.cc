@@ -34,6 +34,7 @@
 
 #include "gtkmm2ext/utils.h"
 
+#include "gui_dimensions.h"
 #include "session_metadata_dialog.h"
 
 #include "pbd/i18n.h"
@@ -41,6 +42,7 @@
 using namespace std;
 using namespace Glib;
 using namespace PBD;
+using namespace ARDOUR_UI_UTILS;
 
 #define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember))
 
@@ -405,8 +407,8 @@ SessionMetadataSetEditable::SessionMetadataSetEditable (string const & name)
 	table.set_col_spacings (12);
 	table.set_homogeneous (false);
 	vbox.pack_start (table, false, false);
-	vbox.set_spacing (6);
-	vbox.set_border_width (6);
+	vbox.set_spacing (gui_distance (6));
+	vbox.set_border_width (gui_distance (6));
 }
 
 Gtk::Widget &

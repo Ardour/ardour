@@ -234,7 +234,7 @@ ExportFileNotebook::FilePage::FilePage (Session * s, ManagerPtr profile_manager,
 	pack_start (filename_align, false, false, 0);
 
 	Gtk::HBox *hbox = Gtk::manage (new Gtk::HBox());
-	hbox->set_spacing (6);
+	hbox->set_spacing (gui_distance (6));
 #ifndef NDEBUG // SoundCloud upload is currently b0rked, needs debugging
 	hbox->pack_start (soundcloud_upload_button, false, false, 0);
 #endif

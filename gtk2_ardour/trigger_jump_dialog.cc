@@ -25,6 +25,7 @@
 
 #include "ardour/triggerbox.h"
 
+#include "gui_dimensions.h"
 #include "trigger_jump_dialog.h"
 
 #include "pbd/i18n.h"
@@ -35,6 +36,7 @@ using namespace Gtkmm2ext;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace ArdourWidgets;
+using namespace ARDOUR_UI_UTILS;
 
 /**
  *    EditNoteDialog constructor.
@@ -54,7 +56,7 @@ TriggerJumpDialog::TriggerJumpDialog (bool right)
 void
 TriggerJumpDialog::on_trigger_set ()
 {
-	_table.set_border_width (4);
+	_table.set_border_width (gui_distance (4));
 	_table.set_spacings (4);
 
 	int r = 0;

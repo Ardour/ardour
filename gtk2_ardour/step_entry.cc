@@ -30,6 +30,7 @@
 
 #include "ardour/filesystem_paths.h"
 
+#include "gui_dimensions.h"
 #include "midi_channel_selector.h"
 #include "midi_time_axis.h"
 #include "step_editor.h"
@@ -292,7 +293,7 @@ StepEntry::StepEntry ()
 	act = ActionManager::get_action ("StepEditing/toggle-chord");
 	chord_button.set_related_action (act);
 
-	upper_box.set_spacing (6);
+	upper_box.set_spacing (gui_distance (6));
 	upper_box.pack_start (chord_button, false, false);
 	upper_box.pack_start (note_length_box, false, false, 12);
 	upper_box.pack_start (triplet_button, false, false);
@@ -307,28 +308,28 @@ StepEntry::StepEntry ()
 
 	v = manage (new VBox);
 	l = manage (new Label (_("Channel")));
-	v->set_spacing (6);
+	v->set_spacing (gui_distance (6));
 	v->pack_start (*l, false, false);
 	v->pack_start (channel_spinner, false, false);
 	upper_box.pack_start (*v, false, false);
 
 	v = manage (new VBox);
 	l = manage (new Label (_("1/Note")));
-	v->set_spacing (6);
+	v->set_spacing (gui_distance (6));
 	v->pack_start (*l, false, false);
 	v->pack_start (length_divisor_spinner, false, false);
 	upper_box.pack_start (*v, false, false);
 
 	v = manage (new VBox);
 	l = manage (new Label (_("Velocity")));
-	v->set_spacing (6);
+	v->set_spacing (gui_distance (6));
 	v->pack_start (*l, false, false);
 	v->pack_start (velocity_spinner, false, false);
 	upper_box.pack_start (*v, false, false);
 
 	v = manage (new VBox);
 	l = manage (new Label (_("Octave")));
-	v->set_spacing (6);
+	v->set_spacing (gui_distance (6));
 	v->pack_start (*l, false, false);
 	v->pack_start (octave_spinner, false, false);
 	upper_box.pack_start (*v, false, false);
@@ -336,7 +337,7 @@ StepEntry::StepEntry ()
 #if 0 // not implemented in StepEditor
 	v = manage (new VBox);
 	l = manage (new Label (_("Bank")));
-	v->set_spacing (6);
+	v->set_spacing (gui_distance (6));
 	v->pack_start (*l, false, false);
 	v->pack_start (bank_spinner, false, false);
 	v->pack_start (bank_button, false, false);
@@ -344,7 +345,7 @@ StepEntry::StepEntry ()
 
 	v = manage (new VBox);
 	l = manage (new Label (_("Program")));
-	v->set_spacing (6);
+	v->set_spacing (gui_distance (6));
 	v->pack_start (*l, false, false);
 	v->pack_start (program_spinner, false, false);
 	v->pack_start (program_button, false, false);
@@ -365,7 +366,7 @@ StepEntry::StepEntry ()
 	beat_resync_button.signal_clicked().connect (sigc::mem_fun (*this, &StepEntry::beat_resync_click));
 	bar_resync_button.signal_clicked().connect (sigc::mem_fun (*this, &StepEntry::bar_resync_click));
 
-	packer.set_spacing (6);
+	packer.set_spacing (gui_distance (6));
 	packer.pack_start (upper_box, false, false);
 	packer.pack_start (_piano, false, false);
 	packer.show_all ();

@@ -56,6 +56,7 @@
 #include "audio_time_axis.h"
 #include "editor.h"
 #include "export_dialog.h"
+#include "gui_dimensions.h"
 #include "loudness_dialog.h"
 #include "midi_export_dialog.h"
 #include "midi_region_view.h"
@@ -70,6 +71,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtk;
 
@@ -350,9 +352,9 @@ Editor::bounce_region_selection (bool with_processing)
 
 		Table*  table  = manage (new Table);
 		table->set_spacings (4);
-		table->set_border_width (8);
+		table->set_border_width (gui_distance (8));
 		dialog.get_vbox()->pack_start (*table);
-		dialog.get_vbox()->set_spacing (4);
+		dialog.get_vbox()->set_spacing (gui_distance (4));
 
 		/* copy to a slot on this track ? */
 		Gtk::CheckButton *to_slot = NULL;

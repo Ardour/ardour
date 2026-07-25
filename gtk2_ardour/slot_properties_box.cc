@@ -45,6 +45,7 @@
 
 #include "ardour_ui.h"
 #include "audio_clock.h"
+#include "gui_dimensions.h"
 #include "region_view.h"
 #include "trigger_ui.h"
 #include "utils.h"
@@ -62,6 +63,7 @@
 using namespace Gtk;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace ArdourWidgets;
 using namespace Temporal;
 using std::min;
@@ -224,8 +226,8 @@ SlotPropertyTable::SlotPropertyTable ()
 
 	_name_frame.add (_namebox);
 	_name_frame.set_edge_color (0x000000ff);
-	_name_frame.set_border_width (0);
-	_name_frame.set_padding (0);
+	_name_frame.set_border_width (gui_distance (0));
+	_name_frame.set_padding (gui_distance (0));
 
 	_gain_spinner.set_can_focus(false);
 	_gain_spinner.configure(_gain_adjustment, 0.0, 1);
@@ -254,14 +256,14 @@ SlotPropertyTable::SlotPropertyTable ()
 	_allow_button.signal_event().connect (sigc::mem_fun (*this, (&SlotPropertyTable::allow_button_event)));
 
 	set_spacings (8);  //match to TriggerPage::  table->set_spacings
-	set_border_width (0);  //change TriggerPage::  table->set_border_width   instead
+	set_border_width (gui_distance (0));  //change TriggerPage::  table->set_border_width   instead
 	set_homogeneous (false);
 
 	int row=0;
 
 	/* ---- Basic trigger properties (name, color) ----- */
 	_trigger_table.set_spacings (4);
-	_trigger_table.set_border_width (8);
+	_trigger_table.set_border_width (gui_distance (8));
 	_trigger_table.set_homogeneous (false);
 
 	_trigger_table.attach(_name_frame,    0, 6, row, row+1, Gtk::FILL|Gtk::EXPAND, Gtk::SHRINK ); row++;
@@ -276,7 +278,7 @@ SlotPropertyTable::SlotPropertyTable ()
 
 	/* ---- Launch settings ----- */
 	_launch_table.set_spacings (2);
-	_launch_table.set_border_width (8);
+	_launch_table.set_border_width (gui_distance (8));
 	_launch_table.set_homogeneous (false);
 	row=0;
 
@@ -303,7 +305,7 @@ SlotPropertyTable::SlotPropertyTable ()
 
 	/* ---- Follow settings ----- */
 	_follow_table.set_spacings (2);
-	_follow_table.set_border_width (8);
+	_follow_table.set_border_width (gui_distance (8));
 	_follow_table.set_homogeneous (false);
 	row=0;
 
@@ -314,7 +316,7 @@ SlotPropertyTable::SlotPropertyTable ()
 
 	Gtk::Table *prob_table = manage(new Gtk::Table());
 	prob_table->set_spacings(2);
-	prob_table->set_border_width(0);
+	prob_table->set_border_width (gui_distance (0));
 	prob_table->attach(_left_probability_label,    0, 1, 0, 1, Gtk::FILL,             Gtk::SHRINK );
 	prob_table->attach(_right_probability_label,   1, 2, 0, 1, Gtk::FILL,             Gtk::SHRINK );
 	prob_table->attach(_follow_probability_slider, 0, 2, 1, 2, Gtk::FILL, Gtk::SHRINK );
@@ -322,7 +324,7 @@ SlotPropertyTable::SlotPropertyTable ()
 	/* follow count, follow length */
 	Gtk::Table *fol_table = manage(new Gtk::Table());
 	fol_table->set_spacings(2);
-	fol_table->set_border_width(4);
+	fol_table->set_border_width (gui_distance (4));
 
 	_follow_count_label.set_text(_("Follow Count:"));
 	_follow_count_label.set_alignment(1.0, 0.5);

@@ -23,11 +23,13 @@
 #include "gtkmm2ext/keyboard.h"
 
 #include "speaker_dialog.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace std;
 using namespace Gtk;
@@ -46,21 +48,21 @@ SpeakerDialog::SpeakerDialog ()
 	, ignore_azimuth_change (false)
 {
 	side_vbox.set_homogeneous (false);
-	side_vbox.set_border_width (6);
-	side_vbox.set_spacing (6);
+	side_vbox.set_border_width (gui_distance (6));
+	side_vbox.set_spacing (gui_distance (6));
 	side_vbox.pack_start (add_speaker_button, false, false);
 
 	aspect_frame.set_size_request (300, 200);
 	aspect_frame.set_shadow_type (SHADOW_NONE);
 	aspect_frame.add (darea);
 
-	hbox.set_spacing (6);
-	hbox.set_border_width (6);
+	hbox.set_spacing (gui_distance (6));
+	hbox.set_border_width (gui_distance (6));
 	hbox.pack_start (aspect_frame, true, true);
 	hbox.pack_start (side_vbox, false, false);
 
 	HBox* current_speaker_hbox = manage (new HBox);
-	current_speaker_hbox->set_spacing (4);
+	current_speaker_hbox->set_spacing (gui_distance (4));
 	current_speaker_hbox->pack_start (*manage (new Label (_("Azimuth:"))), false, false);
 	current_speaker_hbox->pack_start (azimuth_spinner, true, true);
 	current_speaker_hbox->pack_start (remove_speaker_button, true, true);

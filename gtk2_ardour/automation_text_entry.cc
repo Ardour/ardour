@@ -23,10 +23,13 @@
 #include "gtkmm2ext/utils.h"
 
 #include "automation_text_entry.h"
+#include "gui_dimensions.h"
 #include "public_editor.h"
 #include "utils.h"
 
 #include "pbd/i18n.h"
+
+using namespace ARDOUR_UI_UTILS;
 
 AutomationTextEntry::AutomationTextEntry (Gtk::Window* parent, std::string const & initial_contents)
 	: Gtk::Window ()
@@ -34,7 +37,7 @@ AutomationTextEntry::AutomationTextEntry (Gtk::Window* parent, std::string const
 {
 	//set_name (X_("AutomationTextEntry"));
 	set_position (Gtk::WIN_POS_MOUSE);
-	set_border_width (0);
+	set_border_width (gui_distance (0));
 	set_type_hint(Gdk::WINDOW_TYPE_HINT_POPUP_MENU);
 	set_resizable (false);
 	set_accept_focus (false);
@@ -61,7 +64,7 @@ AutomationTextEntry::AutomationTextEntry (Gtk::Window* parent, std::string const
 
 	if (!unit_text.empty()) {
 		Gtk::HBox* hbox (manage (new Gtk::HBox));
-		hbox->set_spacing (6);
+		hbox->set_spacing (gui_distance (6));
 
 		hbox->pack_start (entry);
 		hbox->pack_start (units);

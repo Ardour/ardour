@@ -86,7 +86,7 @@ ChordBox::ChordBox (EditingContext& ec)
 	tuning_button.set_active (0);
 
 	set_border_width (border());
-	set_spacing (6);
+	set_spacing (gui_distance (6));
 
 	EditingContext::ChordsChanged.connect (chord_connection, invalidator (*this), [&]() { refill_tables(); }, gui_context());
 }
@@ -345,7 +345,7 @@ ChordBox::build_twelvetone ()
 	twelvetone_vbox.pack_start (arpeggiate_button, false, false);
 
 	twelvetone_vbox.show_all ();
-	twelvetone_vbox.set_spacing (6);
+	twelvetone_vbox.set_spacing (gui_distance (6));
 
 	pack_start (twelvetone_vbox);
 }

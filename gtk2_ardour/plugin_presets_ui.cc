@@ -22,13 +22,15 @@
 #include "gtkmm2ext/utils.h"
 
 #include "ardour/plugin.h"
-#include "gui_thread.h"
 
+#include "gui_dimensions.h"
+#include "gui_thread.h"
 #include "plugin_presets_ui.h"
 
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace Gtk;
 
 PluginPresetsUI::PluginPresetsUI (std::shared_ptr<PluginInsert> insert)
@@ -75,7 +77,7 @@ PluginPresetsUI::PluginPresetsUI (std::shared_ptr<PluginInsert> insert)
 	_preset_desc.set_wrap_mode (WRAP_WORD);
 	_preset_desc.set_size_request (300,200);
 	_preset_desc.set_name (X_("TextOnBackground"));
-	_preset_desc.set_border_width (15);
+	_preset_desc.set_border_width (gui_distance (15));
 
 	Frame* frame = manage (new Frame);
 	frame->set_label (_("Description"));

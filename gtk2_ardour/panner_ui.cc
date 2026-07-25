@@ -40,6 +40,7 @@
 #include "gain_meter.h"
 #include "panner_ui.h"
 #include "panner2d.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "stereo_panner.h"
 #include "timers.h"
@@ -50,6 +51,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtkmm2ext;
 using namespace Gtk;
@@ -83,7 +85,7 @@ PannerUI::PannerUI (Session* s)
 
 	pan_automation_state_button.signal_button_press_event().connect (sigc::mem_fun(*this, &PannerUI::pan_automation_state_button_event), false);
 
-	pan_vbox.set_spacing (2);
+	pan_vbox.set_spacing (gui_distance (2));
 	pack_start (pan_vbox, true, true);
 
 	twod_panner = 0;

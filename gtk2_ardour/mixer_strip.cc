@@ -79,6 +79,7 @@
 #include "automation_controller.h"
 #include "context_menu_helper.h"
 #include "enums_convert.h"
+#include "gui_dimensions.h"
 #include "mixer_strip.h"
 #include "mixer_ui.h"
 #include "keyboard.h"
@@ -96,6 +97,7 @@
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace ArdourWidgets;
 using namespace PBD;
 using namespace Gtk;
@@ -208,7 +210,7 @@ MixerStrip::init ()
 	hide_button.set_tweaks (ArdourButton::Square);
 	set_tooltip (&hide_button, _("Hide this mixer strip"));
 
-	input_button_box.set_spacing(2);
+	input_button_box.set_spacing (gui_distance (2));
 	input_button_box.pack_start (input_button, true, true);
 
 	bottom_button_table.attach (gpm.meter_point_button, 1, 2, 0, 1);
@@ -308,8 +310,8 @@ MixerStrip::init ()
 	input_button_box.pack_start (trim_control, false, false);
 
 	global_vpacker.set_no_show_all ();
-	global_vpacker.set_border_width (1);
-	global_vpacker.set_spacing (2);
+	global_vpacker.set_border_width (gui_distance (1));
+	global_vpacker.set_spacing (gui_distance (2));
 
 	width_button.set_name ("mixer strip button");
 	hide_button.set_name ("mixer strip button");
@@ -317,7 +319,7 @@ MixerStrip::init ()
 	width_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::width_button_pressed), false);
 	hide_button.signal_clicked.connect (sigc::mem_fun(*this, &MixerStrip::hide_clicked));
 
-	width_hide_box.set_spacing (2);
+	width_hide_box.set_spacing (gui_distance (2));
 	width_hide_box.pack_start (width_button, false, true);
 	width_hide_box.pack_start (number_label, true, true);
 	width_hide_box.pack_end (hide_button, false, true);

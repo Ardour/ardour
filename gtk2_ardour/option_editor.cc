@@ -48,6 +48,7 @@
 #include "widgets/frame.h"
 #include "widgets/slider_controller.h"
 
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "option_editor.h"
 #include "public_editor.h"
@@ -59,6 +60,7 @@ using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 void
 OptionEditorComponent::add_widget_to_page (OptionEditorPage* p, Gtk::Widget* w)
@@ -621,7 +623,7 @@ FaderOption::FaderOption (string const & i, string const & n, sigc::slot<gain_t>
 
 	_fader_centering_box.pack_start (*_db_slider, true, false);
 
-	_box.set_spacing (4);
+	_box.set_spacing (gui_distance (4));
 	_box.set_homogeneous (false);
 	_box.pack_start (_fader_centering_box, false, false);
 	_box.pack_start (_db_display, false, false);
@@ -767,7 +769,7 @@ OptionEditorPage::OptionEditorPage (Gtk::Notebook& n, std::string const & t)
 {
 	init ();
 	box.pack_start (table, false, false);
-	box.set_border_width (4);
+	box.set_border_width (gui_distance (4));
 	n.append_page (box, t);
 }
 
@@ -1208,11 +1210,11 @@ DirectoryOption::selection_changed ()
 OptionEditorContainer::OptionEditorContainer (PBD::Configuration* c)
 	: OptionEditor (c)
 {
-	set_border_width (4);
+	set_border_width (gui_distance (4));
 	Frame* f = manage (new Frame ());
 	f->add (treeview());
 	f->set_shadow_type (Gtk::SHADOW_OUT);
-	f->set_border_width (0);
+	f->set_border_width (gui_distance (0));
 	treeview_packer.pack_start (*f, true, true);
 
 	hpacker.pack_start (treeview_packer, false, false, 4);
@@ -1226,12 +1228,12 @@ OptionEditorWindow::OptionEditorWindow (PBD::Configuration* c, string const& str
 	: OptionEditor (c)
 	, ArdourWindow (str)
 {
-	hpacker.set_border_width (4);
+	hpacker.set_border_width (gui_distance (4));
 	Frame* f = manage (new Frame ());
 
 	f->add (treeview());
 	f->set_shadow_type (Gtk::SHADOW_OUT);
-	f->set_border_width (0);
+	f->set_border_width (gui_distance (0));
 	vpacker.pack_start (*f, true, true);
 
 	hpacker.pack_start (vpacker, false, false);

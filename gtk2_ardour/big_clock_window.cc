@@ -26,6 +26,7 @@
 #include "ardour_ui.h"
 #include "audio_clock.h"
 #include "big_clock_window.h"
+#include "gui_dimensions.h"
 #include "public_editor.h"
 #include "utils.h"
 
@@ -44,7 +45,7 @@ BigClockWindow::BigClockWindow (AudioClock& c)
 	clock.set_corner_radius (0.0);
 
 	set_keep_above (true);
-	set_border_width (0);
+	set_border_width (gui_distance (0));
 	add (clock);
 	clock.show_all ();
 

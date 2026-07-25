@@ -37,6 +37,7 @@
 #include "clock_group.h"
 #include "enums_convert.h"
 #include "main_clock.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "location_ui.h"
@@ -48,6 +49,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace ArdourWidgets;
 using namespace PBD;
 using namespace Gtk;
@@ -116,7 +118,7 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 	Gtk::HBox* mid_spacing = manage (new HBox);
 	mid_spacing->set_size_request (20, -1);
 
-	cd_track_details_hbox.set_spacing (4);
+	cd_track_details_hbox.set_spacing (gui_distance (4));
 	cd_track_details_hbox.pack_start (*front_spacing, false, false);
 	cd_track_details_hbox.pack_start (isrc_label, false, false);
 	cd_track_details_hbox.pack_start (isrc_entry, false, false);
@@ -138,7 +140,7 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 
 	set_session (sess);
 
-	start_hbox.set_spacing (2);
+	start_hbox.set_spacing (gui_distance (2));
 	start_hbox.pack_start (locate_to_start_button, false, false);
 	start_hbox.pack_start (start_clock, false, false);
 	start_hbox.pack_start (start_to_playhead_button, false, false);
@@ -153,7 +155,7 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 	start_clock.ValueChanged.connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::clock_changed), LocStart));
 	start_clock.signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::locate_to_clock), &start_clock), false);
 
-	end_hbox.set_spacing (2);
+	end_hbox.set_spacing (gui_distance (2));
 	end_hbox.pack_start (locate_to_end_button, false, false);
 	end_hbox.pack_start (end_clock, false, false);
 	end_hbox.pack_start (end_to_playhead_button, false, false);
@@ -760,7 +762,7 @@ LocationUI::LocationUI (std::string state_node_name)
 	loop_edit_row.set_clock_group (*_clock_group);
 	punch_edit_row.set_clock_group (*_clock_group);
 
-	loop_punch_box.set_border_width (6); // 5 + 1 px framebox-border
+	loop_punch_box.set_border_width (gui_distance (6)); // 5 + 1 px framebox-border
 	loop_punch_box.pack_start (loop_edit_row, false, false);
 	loop_punch_box.pack_start (punch_edit_row, false, false);
 
@@ -791,8 +793,8 @@ LocationUI::LocationUI (std::string state_node_name)
 
 	newest_location = 0;
 
-	loc_frame_box.set_spacing (5);
-	loc_frame_box.set_border_width (5);
+	loc_frame_box.set_spacing (gui_distance (5));
+	loc_frame_box.set_border_width (gui_distance (5));
 	loc_frame_box.set_name("LocationFrameBox");
 
 	loc_frame_box.pack_start (location_rows_scroller, true, true);
@@ -824,9 +826,9 @@ LocationUI::LocationUI (std::string state_node_name)
 	range_rows_scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	range_rows_scroller.set_size_request (-1, 130);
 
-	range_frame_box.set_spacing (5);
+	range_frame_box.set_spacing (gui_distance (5));
 	range_frame_box.set_name("LocationFrameBox");
-	range_frame_box.set_border_width (5);
+	range_frame_box.set_border_width (gui_distance (5));
 	range_frame_box.pack_start (range_rows_scroller, true, true);
 
 	add_range_button.set_name ("LocationAddRangeButton");

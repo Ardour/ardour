@@ -30,6 +30,7 @@
 #include "ardour/session.h"
 #include "pbd/error.h"
 
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "lv2_plugin_ui.h"
 #include "timers.h"
@@ -48,6 +49,7 @@
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace Gtk;
 using namespace PBD;
 
@@ -306,8 +308,8 @@ LV2PluginUI::LV2PluginUI(std::shared_ptr<PlugInsertBase> pib,
 	, _external_ui_ptr(NULL)
 	, _inst(NULL)
 {
-	_ardour_buttons_box.set_spacing (6);
-	_ardour_buttons_box.set_border_width (6);
+	_ardour_buttons_box.set_spacing (gui_distance (6));
+	_ardour_buttons_box.set_border_width (gui_distance (6));
 
 	add_common_widgets (&_ardour_buttons_box);
 

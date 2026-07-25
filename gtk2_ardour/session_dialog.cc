@@ -104,7 +104,7 @@ SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_
 	action_group->add (demo_session_action, sigc::mem_fun (*this, &SessionDialog::demo_button_choice_action));
 
 	set_position (WIN_POS_CENTER);
-	get_vbox()->set_spacing (6);
+	get_vbox()->set_spacing (gui_distance (6));
 	get_vbox()->pack_start (_open_table, true, true);
 
 	string image_path;
@@ -167,8 +167,8 @@ SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_
 		Gtk::VBox* info_vbox = manage (new VBox);
 
 		info_hbox->set_border_width (border());
-		info_hbox->set_spacing (6);
-		info_vbox->set_spacing (6);
+		info_hbox->set_spacing (gui_distance (6));
+		info_vbox->set_spacing (gui_distance (6));
 
 		info_scroller_count = 0;
 		info_scroller_connection = Glib::signal_timeout().connect (mem_fun(*this, &SessionDialog::info_scroller_update), 50);
@@ -245,7 +245,7 @@ SessionDialog::SessionDialog (DialogTab initial_tab, const std::string& session_
 	_disable_plugins.set_relief (Gtk::RELIEF_NORMAL);
 	_disable_plugins.set_mode (true);
 	_disable_plugins.set_active (ARDOUR::Session::get_disable_all_loaded_plugins());
-	_disable_plugins.set_border_width(0);
+	_disable_plugins.set_border_width (gui_distance (0));
 #ifndef LIVETRAX
 	_disable_plugins.signal_clicked().connect (sigc::mem_fun (*this, &SessionDialog::disable_plugins_clicked));
 
@@ -839,13 +839,13 @@ SessionDialog::populate_session_templates ()
 void
 SessionDialog::setup_new_session_page ()
 {
-	session_new_vbox.set_spacing (8);
+	session_new_vbox.set_spacing (gui_distance (8));
 
 	Label* name_label = manage (new Label);
 	name_label->set_text (_("Session name:"));
 
 	HBox* name_hbox = manage (new HBox);
-	name_hbox->set_spacing (8);
+	name_hbox->set_spacing (gui_distance (8));
 	name_hbox->pack_start (*name_label, false, true);
 	name_hbox->pack_start (new_name_entry, true, true);
 
@@ -857,7 +857,7 @@ SessionDialog::setup_new_session_page ()
 	Label* new_folder_label = manage (new Label);
 	new_folder_label->set_text (_("Create session folder in:"));
 	HBox* folder_box = manage (new HBox);
-	folder_box->set_spacing (8);
+	folder_box->set_spacing (gui_distance (8));
 	folder_box->pack_start (*new_folder_label, false, false);
 	folder_box->pack_start (new_folder_chooser, true, true);
 
@@ -885,7 +885,7 @@ SessionDialog::setup_new_session_page ()
 	Label* session_domain_label = manage (new Label);
 	session_domain_label->set_text (_("Default Time Domain:"));
 	HBox* timebase_box = manage (new HBox);
-	timebase_box->set_spacing (8);
+	timebase_box->set_spacing (gui_distance (8));
 	timebase_box->pack_start (*session_domain_label, false, false);
 	timebase_box->pack_start (timebase_chooser, true, true);
 
@@ -906,7 +906,7 @@ SessionDialog::setup_new_session_page ()
 
 	//if the "template override" is provided, don't give the user any template selections   (?)
 	if (load_template_override.empty()) {
-		template_hbox->set_spacing (8);
+		template_hbox->set_spacing (gui_distance (8));
 
 		Gtk::ScrolledWindow *template_scroller = manage (new Gtk::ScrolledWindow());
 		template_scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
@@ -928,7 +928,7 @@ SessionDialog::setup_new_session_page ()
 	template_desc.set_wrap_mode (Gtk::WRAP_WORD);
 	template_desc.set_size_request (200,300);
 	template_desc.set_name (X_("TextOnBackground"));
-	template_desc.set_border_width (6);
+	template_desc.set_border_width (gui_distance (6));
 
 	//template_chooser is the treeview showing available templates
 	template_model = TreeStore::create (session_template_columns);
@@ -990,7 +990,7 @@ SessionDialog::setup_demo_sessions ()
 	demo_description.set_wrap_mode (Gtk::WRAP_WORD);
 	demo_description.set_editable (false);
 	demo_description.set_name (X_("TextOnBackground"));
-	demo_description.set_border_width (6);
+	demo_description.set_border_width (gui_distance (6));
 	demo_description.set_size_request (-1, std::max<int>(80, rintf(80. * UIConfiguration::instance().get_ui_scale())));
 
 	demo_name_entry.signal_changed().connect (sigc::mem_fun (*this, &SessionDialog::demo_name_changed));
@@ -1015,12 +1015,12 @@ SessionDialog::setup_demo_sessions ()
 	license_tabel->attach (demo_license,   1, 2, 1, 2, EXPAND | FILL, SHRINK);
 
 	HBox* folder_hbox = manage (new HBox);
-	folder_hbox->set_spacing (8);
+	folder_hbox->set_spacing (gui_distance (8));
 	folder_hbox->pack_start (*folder_label, false, false);
 	folder_hbox->pack_start (demo_folder_chooser, true, true);
 
 	HBox* name_hbox = manage (new HBox);
-	name_hbox->set_spacing (8);
+	name_hbox->set_spacing (gui_distance (8));
 	name_hbox->pack_start (*name_label, false, true);
 	name_hbox->pack_start (demo_name_entry, true, true);
 
@@ -1036,7 +1036,7 @@ SessionDialog::setup_demo_sessions ()
 	demo_vbox.pack_start (*license_tabel, false, false);
 	demo_vbox.pack_start (*folder_hbox, false, false);
 	demo_vbox.pack_start (*name_hbox, false, false);
-	demo_vbox.set_spacing (8);
+	demo_vbox.set_spacing (gui_distance (8));
 }
 
 bool

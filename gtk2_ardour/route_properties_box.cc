@@ -34,6 +34,7 @@
 #include "widgets/tooltips.h"
 
 #include "ardour_ui.h"
+#include "gui_dimensions.h"
 #include "mixer_ui.h"
 #include "plugin_selector.h"
 #include "plugin_ui.h"
@@ -46,6 +47,7 @@
 
 using namespace Gtk;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace ArdourWidgets;
 
 class ProcessorUIFrame : public Gtk::Frame
@@ -145,9 +147,9 @@ RoutePropertiesBox::RoutePropertiesBox ()
 	 */
 	Gtk::Viewport* viewport = (Gtk::Viewport*) _scroller.get_child();
 	viewport->set_shadow_type(Gtk::SHADOW_NONE);
-	viewport->set_border_width(0);
+	viewport->set_border_width (gui_distance (0));
 
-	_box.set_spacing (4);
+	_box.set_spacing (gui_distance (4));
 	_insert_frame.set_no_show_all ();
 
 	pack_start (_insert_frame, false, false, 4);
@@ -194,7 +196,7 @@ RoutePropertiesBox::set_session (ARDOUR::Session* s) {
 	float ui_scale = std::max<float> (1.f, UIConfiguration::instance().get_ui_scale());
 	_insert_frame.remove ();
 	_insert_frame.add (*_insert_box);
-	_insert_frame.set_padding (4);
+	_insert_frame.set_padding (gui_distance (4));
 	_insert_frame.set_size_request (144 * ui_scale, 236 * ui_scale);
 
 	_session->SurroundMasterAddedOrRemoved.connect (_session_connections, invalidator (*this), std::bind (&RoutePropertiesBox::surround_master_added_or_removed, this), gui_context());
@@ -332,7 +334,7 @@ RoutePropertiesBox::add_processor_to_display (std::weak_ptr<Processor> w)
 	ArdourWidgets::Frame* frame = new ArdourWidgets::Frame ();
 	frame->set_label (p->display_name ());
 	frame->add (*plugin_ui);
-	frame->set_padding (0);
+	frame->set_padding (gui_distance (0));
 	_box.pack_start (*frame, false, false);
 	plugin_ui->show ();
 #else

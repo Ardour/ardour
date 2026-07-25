@@ -24,12 +24,14 @@
 
 #include "ardour/session.h"
 
+#include "gui_dimensions.h"
 #include "save_template_dialog.h"
 
 #include "pbd/i18n.h"
 
 using namespace Gtk;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 SaveTemplateDialog::SaveTemplateDialog (const std::string& name, const std::string& desc)
 	: ArdourDialog (_("Save as template"))
@@ -40,7 +42,7 @@ SaveTemplateDialog::SaveTemplateDialog (const std::string& name, const std::stri
 	_description_editor.set_size_request(400, 300);
 
 	HBox* hb = manage (new HBox);
-	hb->set_spacing (8);
+	hb->set_spacing (gui_distance (8));
 	Label* lb = manage (new Label(_("Template name:")));
 	hb->pack_start (*lb, false, true);
 	hb->pack_start (_name_entry, true, true);
@@ -48,7 +50,7 @@ SaveTemplateDialog::SaveTemplateDialog (const std::string& name, const std::stri
 	Frame* fd = manage (new Frame(_("Description:")));
 	fd->add (_description_editor);
 
-	get_vbox()->set_spacing (8);
+	get_vbox()->set_spacing (gui_distance (8));
 	get_vbox()->pack_start (*fd);
 	get_vbox()->pack_start (*hb);
 

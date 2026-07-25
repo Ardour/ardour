@@ -248,7 +248,7 @@ TempoDialog::init (const Temporal::BBT_Time& when, double bpm, double end_bpm, d
 	set_name ("MetricDialog");
 	set_resizable (false);
 	get_vbox ()->set_border_width (border());
-	get_vbox ()->set_spacing (6);
+	get_vbox ()->set_spacing (gui_distance (6));
 
 	get_vbox ()->pack_start (*table, false, false);
 	table->show_all ();

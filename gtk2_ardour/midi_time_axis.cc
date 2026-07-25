@@ -81,6 +81,7 @@
 #include "editor.h"
 #include "enums.h"
 #include "ghostregion.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "midi_channel_selector.h"
@@ -104,6 +105,7 @@
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
@@ -280,7 +282,7 @@ MidiTimeAxisView::set_route (std::shared_ptr<Route> rt)
 	_midi_controls_box.pack_start (_midnam_channel_selector, false, false, 2);
 
 	_midi_controls_box.set_homogeneous(false);
-	_midi_controls_box.set_border_width (2);
+	_midi_controls_box.set_border_width (gui_distance (2));
 
 	/* this directly calls use_midnam_info() if there are midnam's already */
 	MIDI::Name::MidiPatchManager::instance().maybe_use (*this, invalidator (*this), std::bind (&MidiTimeAxisView::use_midnam_info, this), gui_context());

@@ -173,9 +173,9 @@ SoundFileBox::SoundFileBox (bool /*persistent*/)
 	border_frame.add (main_box);
 
 	pack_start (border_frame, true, true);
-	set_border_width (6);
+	set_border_width (gui_distance (6));
 
-	main_box.set_border_width (6);
+	main_box.set_border_width (gui_distance (6));
 
 	length.set_text (_("Length:"));
 	length.set_alignment (1, 0.5);
@@ -240,7 +240,7 @@ SoundFileBox::SoundFileBox (bool /*persistent*/)
 //	stop_btn.set_label (_("Stop"));
 
 	bottom_box.set_homogeneous (false);
-	bottom_box.set_spacing (6);
+	bottom_box.set_spacing (gui_distance (6));
 	bottom_box.pack_start(play_btn, true, true);
 	bottom_box.pack_start(stop_btn, true, true);
 	bottom_box.pack_start(autoplay_btn, false, false);
@@ -727,11 +727,11 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 
 	notebook.append_page (chooser, _("Browse Files"));
 
-	hpacker.set_spacing (6);
+	hpacker.set_spacing (gui_distance (6));
 	hpacker.pack_start (notebook, true, true);
 	hpacker.pack_start (preview, false, false);
 
-	vpacker.set_spacing (6);
+	vpacker.set_spacing (gui_distance (6));
 	vpacker.pack_start (hpacker, true, true);
 
 	add (vpacker);
@@ -771,7 +771,7 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 	Label* label;
 
 	passbox = manage(new HBox);
-	passbox->set_spacing (6);
+	passbox->set_spacing (gui_distance (6));
 
 	vbox = manage (new VBox);
 	label = manage (new Label);
@@ -833,7 +833,7 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 	scroll->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 
 	vbox = manage(new VBox);
-	vbox->set_spacing (3);
+	vbox->set_spacing (gui_distance (3));
 	vbox->pack_start (*passbox, PACK_SHRINK);
 	vbox->pack_start (*scroll);
 
@@ -1902,7 +1902,7 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 
 	options.set_row_spacings(8);
 	options.set_col_spacings(0);
-	options.set_border_width(6);
+	options.set_border_width (gui_distance (6));
 
 	str.clear ();
 	str.push_back (_("file timestamp"));

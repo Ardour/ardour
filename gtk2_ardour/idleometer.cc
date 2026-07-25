@@ -24,15 +24,17 @@
 
 #include "temporal/time.h"
 
+#include "gui_dimensions.h"
 #include "idleometer.h"
 #include "pbd/i18n.h"
 
 using namespace Gtk;
+using namespace ARDOUR_UI_UTILS;
 
 IdleOMeter::IdleOMeter ()
 	: ArdourDialog (_("Idle O Meter"))
 {
-	get_vbox()->set_spacing (8);
+	get_vbox()->set_spacing (gui_distance (8));
 	Label* l = manage (new Label (_("<b>GUI Idle Timing Statistics</b>"), ALIGN_CENTER));
 	l->set_use_markup ();
 

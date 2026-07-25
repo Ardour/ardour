@@ -49,7 +49,7 @@ SearchPathOption::SearchPathOption (const string& pathname, const string& label,
 	HBox* hbox = manage (new HBox);
 
 	hbox->set_border_width (border());
-	hbox->set_spacing (6);
+	hbox->set_spacing (gui_distance (6));
 	hbox->pack_end (add_chooser, true, true);
 	hbox->pack_end (*manage (new Label (_("Click to add a new location"))), false, false);
 	hbox->show_all ();
@@ -160,7 +160,7 @@ SearchPathOption::PathEntry::PathEntry (const std::string& path, bool removable)
 	entry.set_text (path);
 	entry.show ();
 
-	box.set_spacing (6);
+	box.set_spacing (gui_distance (6));
 	box.set_homogeneous (false);
 	box.pack_start (entry, true, true);
 

@@ -30,6 +30,7 @@
 #include "ardour/session.h"
 #include "ardour/user_bundle.h"
 #include "bundle_manager.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "pbd/i18n.h"
 #include "utils.h"
@@ -228,7 +229,7 @@ BundleEditor::BundleEditor (Session* session, std::shared_ptr<UserBundle> bundle
 
 	get_vbox()->pack_start (*Gtk::manage (t), false, false);
 	get_vbox()->pack_start (_matrix);
-	get_vbox()->set_spacing (4);
+	get_vbox()->set_spacing (gui_distance (4));
 
 	show_all ();
 
@@ -290,7 +291,7 @@ BundleManager::BundleManager (Session* session)
 
 	/* New / Edit / Delete buttons */
 	Gtk::VBox* buttons = new Gtk::VBox;
-	buttons->set_spacing (8);
+	buttons->set_spacing (gui_distance (8));
 	Gtk::Button* b = new Gtk::Button (_("New"));
 	b->set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::NEW, Gtk::ICON_SIZE_BUTTON)));
 	b->signal_clicked().connect (sigc::mem_fun (*this, &BundleManager::new_clicked));
@@ -303,12 +304,12 @@ BundleManager::BundleManager (Session* session)
 	buttons->pack_start (delete_button, false, false);
 
 	Gtk::HBox* h = new Gtk::HBox;
-	h->set_spacing (8);
-	h->set_border_width (8);
+	h->set_spacing (gui_distance (8));
+	h->set_border_width (gui_distance (8));
 	h->pack_start (_tree_view);
 	h->pack_start (*Gtk::manage (buttons), false, false);
 
-	get_vbox()->set_spacing (8);
+	get_vbox()->set_spacing (gui_distance (8));
 	get_vbox()->pack_start (*Gtk::manage (h));
 
 	set_default_size (480, 240);

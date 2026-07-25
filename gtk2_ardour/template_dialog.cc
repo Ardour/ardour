@@ -51,6 +51,7 @@
 #include "ardour/session.h"
 #include "ardour/template_utils.h"
 
+#include "gui_dimensions.h"
 #include "progress_reporter.h"
 #include "template_dialog.h"
 
@@ -60,6 +61,7 @@ using namespace std;
 using namespace Gtk;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 class TemplateManager : public Gtk::HBox,
 			public ProgressReporter
@@ -275,7 +277,7 @@ TemplateManager::TemplateManager ()
 	sw->set_size_request (300, 200);
 
 	VBox* vb_btns = manage (new VBox);
-	vb_btns->set_spacing (4);
+	vb_btns->set_spacing (gui_distance (4));
 	vb_btns->pack_start (_rename_button, false, false);
 	vb_btns->pack_start (_remove_button, false, false);
 	vb_btns->pack_start (_save_desc, false, false);
@@ -296,7 +298,7 @@ TemplateManager::TemplateManager ()
 	_import_template_set_button.set_sensitive (true);
 	_import_template_set_button.signal_clicked().connect (sigc::mem_fun (*this, &TemplateManager::import_template_set));
 
-	set_spacing (6);
+	set_spacing (gui_distance (6));
 
 	VBox* vb = manage (new VBox);
 	vb->pack_start (*sw);
@@ -306,7 +308,7 @@ TemplateManager::TemplateManager ()
 
 	_description_editor.set_wrap_mode (Gtk::WRAP_WORD);
 	_description_editor.set_size_request (300,400);
-	_description_editor.set_border_width (6);
+	_description_editor.set_border_width (gui_distance (6));
 
 	_save_desc.set_sensitive (false);
 	_save_desc.signal_clicked().connect (sigc::mem_fun (*this, &TemplateManager::save_template_desc));

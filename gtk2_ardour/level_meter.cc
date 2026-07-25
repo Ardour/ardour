@@ -31,6 +31,7 @@
 
 #include "level_meter.h"
 #include "utils.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "public_editor.h"
@@ -532,7 +533,7 @@ LevelMeterBase::color_handler ()
 LevelMeterHBox::LevelMeterHBox(Session* s)
 	: LevelMeterBase(s, invalidator(*this))
 {
-	set_spacing(1);
+	set_spacing (gui_distance (1));
 	show();
 }
 
@@ -553,7 +554,7 @@ LevelMeterHBox::mtr_remove(Gtk::Widget &w) {
 LevelMeterVBox::LevelMeterVBox(Session* s)
 	: LevelMeterBase(s, invalidator(*this), FastMeter::Horizontal)
 {
-	set_spacing(1);
+	set_spacing (gui_distance (1));
 	show();
 }
 LevelMeterVBox::~LevelMeterVBox() {}

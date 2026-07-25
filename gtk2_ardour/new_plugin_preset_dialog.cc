@@ -18,22 +18,26 @@
  */
 
 #include <ytkmm/stock.h>
+
+#include "gui_dimensions.h"
 #include "new_plugin_preset_dialog.h"
+
 #include "pbd/i18n.h"
 
 using namespace std;
 using namespace Gtk;
+using namespace ARDOUR_UI_UTILS;
 
 NewPluginPresetDialog::NewPluginPresetDialog (std::shared_ptr<ARDOUR::Plugin> p, std::string title, bool favorite_btn)
 	: ArdourDialog (title)
 	, _replace (_("Replace existing preset with this name"))
 {
 	HBox* h = manage (new HBox);
-	h->set_spacing (6);
+	h->set_spacing (gui_distance (6));
 	h->pack_start (*manage (new Label (_("Name of new preset"))));
 	h->pack_start (_name);
 
-	get_vbox()->set_spacing (6);
+	get_vbox()->set_spacing (gui_distance (6));
 	get_vbox()->pack_start (*h);
 
 	get_vbox()->pack_start (_replace);

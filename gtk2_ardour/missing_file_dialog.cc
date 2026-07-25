@@ -99,8 +99,8 @@ MissingFileDialog::MissingFileDialog (Gtk::Window& parent, Session* s, const std
 
 	button_packer_box->show_all ();
 
-	get_vbox()->set_spacing (6);
-	get_vbox()->set_border_width (25);
+	get_vbox()->set_spacing (gui_distance (6));
+	get_vbox()->set_border_width (gui_distance (25));
 	get_vbox()->set_homogeneous (false);
 
 

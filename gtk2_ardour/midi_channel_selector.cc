@@ -369,7 +369,7 @@ MidiChannelSelectorWindow::build ()
 	Label* l;
 
 	vpacker = manage (new VBox);
-	vpacker->set_spacing (6);
+	vpacker->set_spacing (gui_distance (6));
 	vpacker->set_border_width (border());
 
 	l = manage (new Label (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("Inbound"))));
@@ -388,7 +388,7 @@ MidiChannelSelectorWindow::build ()
 	vpacker->pack_start (capture_mask_box);
 
 	capture_controls = manage (new HBox);
-	capture_controls->set_spacing (6);
+	capture_controls->set_spacing (gui_distance (6));
 
 	b = manage (new Button (_("All")));
 	Gtkmm2ext::UI::instance()->set_tip (*b, _("Click to enable recording all channels"));
@@ -427,7 +427,7 @@ MidiChannelSelectorWindow::build ()
 	vpacker->pack_start (playback_mask_box);
 
 	playback_controls = manage (new HBox);
-	playback_controls->set_spacing (6);
+	playback_controls->set_spacing (gui_distance (6));
 
 	b = manage (new Button (_("All")));
 	Gtkmm2ext::UI::instance()->set_tip (*b, _("Click to enable playback of all channels"));

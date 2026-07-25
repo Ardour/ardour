@@ -39,6 +39,7 @@
 #include "editor_automation_line.h"
 #include "control_point.h"
 #include "editor.h"
+#include "gui_dimensions.h"
 #include "region_view.h"
 
 #include "audio_trigger_properties_box.h"
@@ -47,6 +48,7 @@
 
 using namespace Gtk;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace ArdourWidgets;
 using std::max;
 using std::min;
@@ -69,7 +71,7 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 	Gtk::Table* bpm_table = manage (new Gtk::Table ());
 	bpm_table->set_homogeneous (false);
 	bpm_table->set_spacings (4);
-	bpm_table->set_border_width (8);
+	bpm_table->set_border_width (gui_distance (8));
 
 	_stretch_toggle.set_text (_("Stretch"));
 	bpm_table->attach (_stretch_toggle, 0, 1, row, row + 1, Gtk::FILL, Gtk::SHRINK);
@@ -130,7 +132,7 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 
 	_table.set_homogeneous (false);
 	_table.set_spacings (4);
-	_table.set_border_width (2);
+	_table.set_border_width (gui_distance (2));
 
 	attach (*eTempoBox,    0,1, 0,1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL);
 #if 0

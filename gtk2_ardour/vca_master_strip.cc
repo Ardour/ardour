@@ -35,6 +35,7 @@
 #include "ardour_dialog.h"
 #include "ardour_message.h"
 #include "floating_text_entry.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "mixer_ui.h"
 #include "ui_config.h"
@@ -43,6 +44,7 @@
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace ArdourWidgets;
 using namespace Gtkmm2ext;
 using namespace Gtk;
@@ -95,7 +97,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, std::shared_ptr<VCA> v)
 
 	hide_button.signal_clicked.connect (sigc::mem_fun(*this, &VCAMasterStrip::hide_clicked));
 
-	solo_mute_box.set_spacing (2);
+	solo_mute_box.set_spacing (gui_distance (2));
 	solo_mute_box.pack_start (mute_button, true, true);
 	solo_mute_box.pack_start (solo_button, true, true);
 
@@ -123,9 +125,9 @@ VCAMasterStrip::VCAMasterStrip (Session* s, std::shared_ptr<VCA> v)
 	vertical_button.set_active_color (_vca->presentation_info().color ());
 	set_tooltip (vertical_button, _("Click to show assigned channels only")); /* tooltip updated dynamically */
 
-	global_vpacker.set_border_width (0);
-	global_vpacker.set_spacing (0);
-	gain_meter.set_spacing(4);
+	global_vpacker.set_border_width (gui_distance (0));
+	global_vpacker.set_spacing (gui_distance (0));
+	gain_meter.set_spacing (gui_distance (4));
 
 	global_vpacker.pack_start (number_label, false, false, 1);
 	global_vpacker.pack_start (hide_button, false, false, 1);

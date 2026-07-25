@@ -1077,7 +1077,7 @@ SequenceView::SequenceView (SequencerView& sview, StepSequence& sq, Canvas* canv
 	rhs_box = new ArdourCanvas::ConstraintPacker (canvas, ArdourCanvas::Horizontal);
 	rhs_box->set_padding (padding());
 	step_box = new ArdourCanvas::ConstraintPacker (canvas, ArdourCanvas::Horizontal);
-	step_box->set_padding (6);
+	step_box->set_padding (gui_distance (6));
 
 	lhs_box->set_fill_color (UIConfiguration::instance().color ("gtk_bright_color"));
 	lhs_box->set_fill (true);

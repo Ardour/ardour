@@ -68,6 +68,7 @@
 #include "plugin_ui.h"
 #include "plugin_presets_ui.h"
 #include "plugin_display.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "automation_controller.h"
 #include "gain_meter.h"
@@ -96,14 +97,14 @@ GenericPluginUI::GenericPluginUI (std::shared_ptr<PlugInsertBase> pib, bool scro
 	, _piano_channel (*manage (new Adjustment (0, 1, 16, 1, 1)))
 {
 	set_name ("PluginEditor");
-	set_border_width (6);
+	set_border_width (gui_distance (6));
 	//set_homogeneous (false);
 
 	pack_start (main_contents, true, true);
 
 	HBox* smaller_hbox = manage (new HBox);
-	smaller_hbox->set_spacing (6);
-	smaller_hbox->set_border_width (0);
+	smaller_hbox->set_spacing (gui_distance (6));
+	smaller_hbox->set_border_width (gui_distance (0));
 
 	if (_pib->ui_elements () == PlugInsertBase::NoGUIToolbar) {
 		Gtk::Label* spacer = manage (new Gtk::Label());
@@ -141,7 +142,7 @@ GenericPluginUI::GenericPluginUI (std::shared_ptr<PlugInsertBase> pib, bool scro
 		Box* box2 = manage (new HBox ());
 		box2->pack_start (*box, true, false);
 
-		_pianobox.set_spacing (4);
+		_pianobox.set_spacing (gui_distance (4));
 		_pianobox.pack_start (*box2, true, true);
 		_pianobox.pack_start (*_piano, true, true);
 
@@ -162,13 +163,13 @@ GenericPluginUI::GenericPluginUI (std::shared_ptr<PlugInsertBase> pib, bool scro
 	}
 
 	settings_box.set_homogeneous (false);
-	settings_box.set_spacing (0);
-	settings_box.set_border_width (0);
+	settings_box.set_spacing (gui_distance (0));
+	settings_box.set_border_width (gui_distance (0));
 	settings_box.pack_start (*smaller_hbox, false, false);
 
 	if (_pi && _pi->has_automatables ()) {
 		HBox* automation_hbox = manage (new HBox);
-		automation_hbox->set_spacing (6);
+		automation_hbox->set_spacing (gui_distance (6));
 		Label* l = manage (new Label (_("All Automation")));
 		l->set_alignment (1.0, 0.5);
 		automation_hbox->pack_start (*l, true, true);
@@ -450,11 +451,11 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 
 	if (in_property_box) {
 		/* don't add spacing in property box */
-		hpacker.set_spacing (5);
-		hpacker.set_border_width (0);
+		hpacker.set_spacing (gui_distance (5));
+		hpacker.set_border_width (gui_distance (0));
 	} else {
-		hpacker.set_spacing (10);
-		hpacker.set_border_width (10);
+		hpacker.set_spacing (gui_distance (10));
+		hpacker.set_border_width (gui_distance (10));
 	}
 
 	output_rows = initial_output_rows;
@@ -470,15 +471,15 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 	button_table->set_row_spacings (2);
 	button_table->set_col_spacings (2);
 	if (in_property_box) {
-		button_table->set_border_width (1);
+		button_table->set_border_width (gui_distance (1));
 	} else {
-		button_table->set_border_width (5);
+		button_table->set_border_width (gui_distance (5));
 	}
 
 	output_table->set_homogeneous (true);
 	output_table->set_row_spacings (2);
 	output_table->set_col_spacings (2);
-	output_table->set_border_width (5);
+	output_table->set_border_width (gui_distance (5));
 
 
 	bt_frame = manage (new Gtk::Frame);
@@ -489,11 +490,11 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 
 	box = manage (new VBox);
 	if (in_property_box) {
-		box->set_border_width (1);
-		box->set_spacing (2);
+		box->set_border_width (gui_distance (1));
+		box->set_spacing (gui_distance (2));
 	} else {
-		box->set_border_width (5);
-		box->set_spacing (1);
+		box->set_border_width (gui_distance (5));
+		box->set_spacing (gui_distance (1));
 	}
 
 	frame = manage (new Gtk::Frame);
@@ -607,11 +608,11 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 				frame->set_label (_("Controls"));
 				box = manage (new VBox);
 				if (in_property_box) {
-					box->set_border_width (1);
-					box->set_spacing (2);
+					box->set_border_width (gui_distance (1));
+					box->set_spacing (gui_distance (2));
 				} else {
-					box->set_border_width (5);
-					box->set_spacing (1);
+					box->set_border_width (gui_distance (5));
+					box->set_spacing (gui_distance (1));
 				}
 				frame->add (*box);
 				hpacker.pack_start(*frame, true, true);
@@ -674,7 +675,7 @@ GenericPluginUI::build_midi_table ()
 	pgm_table->set_homogeneous (false);
 	pgm_table->set_row_spacings (2);
 	pgm_table->set_col_spacings (2);
-	pgm_table->set_border_width (5);
+	pgm_table->set_border_width (gui_distance (5));
 	pgm_table->set_col_spacing (2, 10);
 
 	ArdourWidgets::Frame* frame = manage (new ArdourWidgets::Frame);
@@ -899,7 +900,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 	control_ui->label.set_text (desc.label);
 	control_ui->label.set_alignment (0.0, 0.5);
 	control_ui->label.set_name ("PluginParameterLabel");
-	control_ui->set_spacing (5);
+	control_ui->set_spacing (gui_distance (5));
 	set_short_autostate(control_ui, false);
 
 	if (is_input) {
@@ -1126,7 +1127,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 		control_ui->display->show_all ();
 
 		control_ui->vbox = manage (new VBox);
-		control_ui->vbox->set_spacing(3);
+		control_ui->vbox->set_spacing (gui_distance (3));
 
 		if (desc.unit == ParameterDescriptor::MIDI_NOTE) {
 			control_ui->vbox->pack_end (*control_ui->display, false, false);
@@ -1155,7 +1156,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			control_ui->label.set_angle(90);
 
 			HBox* center =  manage (new HBox);
-			center->set_spacing(1);
+			center->set_spacing (gui_distance (1));
 			center->pack_start (control_ui->label, false, false);
 			center->pack_start (*info->meter, false, false);
 

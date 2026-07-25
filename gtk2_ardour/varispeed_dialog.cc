@@ -23,11 +23,13 @@
 #include "varispeed_dialog.h"
 
 #include "ardour_ui.h"
+#include "gui_dimensions.h"
 #include "utils.h"
 
 #include "pbd/i18n.h"
 
 using namespace Gtk;
+using namespace ARDOUR_UI_UTILS;
 
 VarispeedDialog::VarispeedDialog ()
 	: ArdourDialog (_("Varispeed"), false)
@@ -59,7 +61,7 @@ VarispeedDialog::VarispeedDialog ()
 	t->attach (_percent_spinner, 1, 2, r, r + 1, FILL, EXPAND & FILL, 0, 0);
 	++r;
 
-	get_vbox ()->set_spacing (6);
+	get_vbox ()->set_spacing (gui_distance (6));
 	get_vbox ()->pack_start (*t, false, false);
 
 	_semitones_spinner.set_can_focus (false);

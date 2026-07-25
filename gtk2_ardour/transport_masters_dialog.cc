@@ -36,6 +36,7 @@
 
 #include "ardour_ui.h"
 #include "floating_text_entry.h"
+#include "gui_dimensions.h"
 #include "transport_masters_dialog.h"
 #include "ui_config.h"
 
@@ -45,6 +46,7 @@ using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace ArdourWidgets;
 
@@ -696,11 +698,11 @@ TransportMastersWidget::AddTransportMasterDialog::AddTransportMasterDialog ()
 	, name_label (_("Name"))
 	, type_label (_("Type"))
 {
-	name_hbox.set_spacing (6);
+	name_hbox.set_spacing (gui_distance (6));
 	name_hbox.pack_start (name_label, false, false);
 	name_hbox.pack_start (name_entry, true, true);
 
-	type_hbox.set_spacing (6);
+	type_hbox.set_spacing (gui_distance (6));
 	type_hbox.pack_start (type_label, false, false);
 	type_hbox.pack_start (type_combo, true, true);
 

@@ -77,6 +77,7 @@
 #include "ardour_ui.h"
 #include "ardour_window.h"
 #include "color_theme_manager.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "meter_patterns.h"
@@ -347,7 +348,7 @@ public:
 
 		Label* l = manage (left_aligned_label (_("commands")));
 		HBox* box = manage (new HBox());
-		box->set_spacing (4);
+		box->set_spacing (gui_distance (4));
 		box->pack_start (_limit_undo_spin, false, false);
 		box->pack_start (*l, true, true);
 		t->attach (_limit_undo_button, 1, 2, n, n +1, FILL);
@@ -355,7 +356,7 @@ public:
 
 		l = manage (left_aligned_label (_("commands")));
 		box = manage (new HBox());
-		box->set_spacing (4);
+		box->set_spacing (gui_distance (4));
 		box->pack_start (_save_undo_spin, false, false);
 		box->pack_start (*l, true, true);
 		t->attach (_save_undo_button, 1, 2, n + 1, n + 2, FILL);
@@ -1564,7 +1565,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			Gtk::TreeViewColumn* tvc = manage (new Gtk::TreeViewColumn ());
 			tvc->set_resizable (false);
 			tvc->set_expand (false);
-			tvc->set_spacing (8);
+			tvc->set_spacing (gui_distance (8));
 
 			Gtk::CellRendererToggle* tgc = manage (new Gtk::CellRendererToggle());
 			tgc->property_activatable () = true;

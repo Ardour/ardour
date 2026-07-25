@@ -23,6 +23,7 @@
 
 #include "gtkmm2ext/utils.h"
 
+#include "gui_dimensions.h"
 #include "save_as_dialog.h"
 
 #include "pbd/i18n.h"
@@ -30,6 +31,7 @@
 using namespace std;
 using namespace Gtk;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 SaveAsDialog::SaveAsDialog ()
 	: ArdourDialog (_("Save As"))
@@ -40,20 +42,20 @@ SaveAsDialog::SaveAsDialog ()
 {
 	VBox* vbox = get_vbox();
 
-	vbox->set_spacing (6);
+	vbox->set_spacing (gui_distance (6));
 
 	HBox* hbox;
 	Label* label;
 
 	hbox = manage (new HBox);
-	hbox->set_spacing (6);
+	hbox->set_spacing (gui_distance (6));
 	label = manage (new Label (_("Save as session name")));
 	hbox->pack_start (*label, false, false);
 	hbox->pack_start (new_name_entry, true, true);
 	vbox->pack_start (*hbox, false, false);
 
 	hbox = manage (new HBox);
-	hbox->set_spacing (6);
+	hbox->set_spacing (gui_distance (6));
 	label = manage (new Label (_("Parent directory/folder")));
 	hbox->pack_start (*label, false, false);
 	hbox->pack_start (new_parent_folder_selector, true, true);
@@ -69,7 +71,7 @@ SaveAsDialog::SaveAsDialog ()
 	sub_vbox->pack_start (copy_external_button, false, false);
 
 	/* indent the two media-related buttons by some amount */
-	sub_hbox->set_spacing (24);
+	sub_hbox->set_spacing (gui_distance (24));
 	sub_hbox->pack_start (*empty, false, false);
 	sub_hbox->pack_start (*sub_vbox, false, false);
 

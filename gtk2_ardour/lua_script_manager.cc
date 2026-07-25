@@ -28,6 +28,7 @@
 #include "LuaBridge/LuaBridge.h"
 
 #include "ardour_ui.h"
+#include "gui_dimensions.h"
 #include "lua_script_manager.h"
 #include "luawindow.h"
 #include "script_selector.h"
@@ -36,6 +37,7 @@
 using namespace std;
 using namespace Gtk;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 LuaScriptManager::LuaScriptManager ()
 	: ArdourWindow (_("Script Manager"))
@@ -62,7 +64,7 @@ LuaScriptManager::LuaScriptManager ()
 	Gtk::Label* doc;
 
 	Gtk::HBox* edit_box = manage (new Gtk::HBox);
-	edit_box->set_spacing(3);
+	edit_box->set_spacing (gui_distance (3));
 
 	edit_box->pack_start (_a_set_button, true, true);
 	edit_box->pack_start (_a_del_button, true, true);
@@ -111,7 +113,7 @@ LuaScriptManager::LuaScriptManager ()
 	r->property_ellipsize () = Pango::ELLIPSIZE_MIDDLE;
 
 	edit_box = manage (new Gtk::HBox);
-	edit_box->set_spacing(3);
+	edit_box->set_spacing (gui_distance (3));
 	edit_box->pack_start (_c_add_button, true, true);
 	edit_box->pack_start (_c_del_button, true, true);
 
@@ -147,7 +149,7 @@ LuaScriptManager::LuaScriptManager ()
 	_s_view.get_column(0)->set_expand (true);
 
 	edit_box = manage (new Gtk::HBox);
-	edit_box->set_spacing(3);
+	edit_box->set_spacing (gui_distance (3));
 	edit_box->pack_start (_s_add_button, true, true);
 	edit_box->pack_start (_s_del_button, true, true);
 

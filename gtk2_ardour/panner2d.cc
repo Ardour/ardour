@@ -941,10 +941,10 @@ Panner2dWindow::Panner2dWindow (std::shared_ptr<PannerShell> p, int32_t h, uint3
 	p->pannable()->pan_width_control->Changed.connect (panvalue_connections, invalidator(*this), std::bind (&Panner2dWindow::set_width, this), gui_context());
 
 
-	button_box.set_spacing (6);
+	button_box.set_spacing (gui_distance (6));
 	button_box.pack_start (bypass_button, false, false);
 
-	left_side.set_spacing (6);
+	left_side.set_spacing (gui_distance (6));
 
 	left_side.pack_start (button_box, false, false);
 
@@ -962,7 +962,7 @@ Panner2dWindow::Panner2dWindow (std::shared_ptr<PannerShell> p, int32_t h, uint3
 	spinner_box.show ();
 	left_side.show ();
 
-	hpacker.set_spacing (6);
+	hpacker.set_spacing (gui_distance (6));
 	hpacker.set_border_width (border());
 	hpacker.pack_start (widget, false, false);
 	hpacker.pack_start (left_side, false, false);

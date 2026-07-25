@@ -71,11 +71,11 @@ LibraryDownloadDialog::LibraryDownloadDialog ()
 	scroller.add (_display);
 
 	Gtk::HBox* h = new Gtk::HBox;
-	h->set_spacing (8);
-	h->set_border_width (8);
+	h->set_spacing (gui_distance (8));
+	h->set_border_width (gui_distance (8));
 	h->pack_start (scroller);
 
-	get_vbox()->set_spacing (8);
+	get_vbox()->set_spacing (gui_distance (8));
 	get_vbox()->set_border_width (border());
 	get_vbox()->pack_start (*Gtk::manage (h));
 

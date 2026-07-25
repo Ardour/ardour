@@ -79,10 +79,10 @@ MidiTracer::MidiTracer ()
 		(_manager_connection, invalidator (*this), std::bind (&MidiTracer::ports_changed, this), gui_context());
 
 	VBox* vbox = manage (new VBox);
-	vbox->set_spacing (4);
+	vbox->set_spacing (gui_distance (4));
 
 	HBox* pbox = manage (new HBox);
-	pbox->set_spacing (6);
+	pbox->set_spacing (gui_distance (6));
 	pbox->pack_start (*manage (new Label (_("Port:"))), false, false);
 
 	_midi_port_combo.signal_changed().connect (sigc::mem_fun (*this, &MidiTracer::port_changed));
@@ -104,7 +104,7 @@ MidiTracer::MidiTracer ()
 	base_button.set_active (false);
 	autoscroll_button.set_active (true);
 
-	line_count_box.set_spacing (6);
+	line_count_box.set_spacing (gui_distance (6));
 	line_count_box.pack_start (line_count_label, false, false);
 	line_count_box.pack_start (line_count_spinner, false, false);
 

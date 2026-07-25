@@ -51,6 +51,7 @@
 #include "widgets/ardour_icon.h"
 
 #include "ardour_ui.h"
+#include "gui_dimensions.h"
 #include "plugin_ui.h"
 #include "timers.h"
 #include "trigger_clip_picker.h"
@@ -61,6 +62,7 @@
 using namespace Gtk;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 #define PX_SCALE(px) std::max((float)px, rintf((float)px * UIConfiguration::instance().get_ui_scale()))
 
@@ -152,7 +154,7 @@ TriggerClipPicker::TriggerClipPicker ()
 	_midi_prop_table.attach (channels_value,    0, 1, 1, 2, EXPAND | FILL, SHRINK);
 	_midi_prop_table.attach (_auditioner_combo, 0, 3, 2, 3, EXPAND | FILL, SHRINK);
 	_midi_prop_table.attach (_show_plugin_btn,  3, 4, 2, 3, SHRINK, SHRINK);
-	_midi_prop_table.set_border_width (4);
+	_midi_prop_table.set_border_width (gui_distance (4));
 	_midi_prop_table.set_spacings (4);
 
 	/* Layout */
@@ -164,14 +166,14 @@ TriggerClipPicker::TriggerClipPicker ()
 	_auditable.attach (_autoplay_btn,     3, 4, r,r+1, EXPAND | FILL, SHRINK); r++;
 	_auditable.attach (_seek_slider,      0, 5, r,r+1, EXPAND | FILL, SHRINK);  r++;
 	_auditable.attach (_midi_prop_table,  0, 5, r,r+1, EXPAND | FILL, SHRINK);
-	_auditable.set_border_width (4);
+	_auditable.set_border_width (gui_distance (4));
 	_auditable.set_spacings (4);
 
 	_scroller.set_policy (POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 	_scroller.add (_view);
 
 	Gtk::Table *dir_table = manage(new Gtk::Table());
-	dir_table->set_border_width(4);
+	dir_table->set_border_width (gui_distance (4));
 	dir_table->set_spacings(4);
 	dir_table->attach (_clip_dir_menu,    0, 1, 0, 1, EXPAND | FILL, SHRINK);
 	dir_table->attach (_open_library_btn, 1, 2, 0, 1, SHRINK, SHRINK);

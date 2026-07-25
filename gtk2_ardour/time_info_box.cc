@@ -31,9 +31,10 @@
 #include "ardour/session.h"
 
 #include "audio_clock.h"
-#include "editor_automation_line.h"
 #include "control_point.h"
+#include "editor_automation_line.h"
 #include "editor.h"
+#include "gui_dimensions.h"
 #include "region_view.h"
 #include "time_info_box.h"
 #include "ui_config.h"
@@ -42,6 +43,7 @@
 
 using namespace Gtk;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using std::min;
 using std::max;
 
@@ -72,14 +74,14 @@ TimeInfoBox::TimeInfoBox (std::string state_node_name, bool with_punch)
 	selection_title.set_text (_("Selection"));
 
 	set_homogeneous (false);
-	set_spacing (0);
-	set_border_width (2);
+	set_spacing (gui_distance (0));
+	set_border_width (gui_distance (2));
 
 	pack_start (table, false, false);
 
 	table.set_homogeneous (false);
 	table.set_spacings (0);
-	table.set_border_width (2);
+	table.set_border_width (gui_distance (2));
 	table.set_col_spacings (2);
 
 	Gtk::Label* l;

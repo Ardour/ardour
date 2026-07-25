@@ -44,6 +44,7 @@
 #include "audio_clock.h"
 #include "export_analysis_graphs.h"
 #include "export_report.h"
+#include "gui_dimensions.h"
 #include "loudness_settings.h"
 #include "ui_config.h"
 
@@ -51,6 +52,7 @@
 
 using namespace Gtk;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 ExportReport::ExportReport (Session* session, StatusPtr s)
 	: ArdourDialog (_("Export Report/Analysis"))
@@ -91,11 +93,11 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 		Table *t = manage (new Table (4, 4));
 		Table *wtbl = manage (new Table (3, 2));
 		int wrow = 0;
-		t->set_border_width (0);
+		t->set_border_width (gui_distance (0));
 		t->set_spacings (4);
 		wtbl->set_spacings (4);
-		vb->set_spacing (4);
-		vb->set_border_width (4);
+		vb->set_spacing (gui_distance (4));
+		vb->set_border_width (gui_distance (4));
 		vb->pack_start (*t, false, false, 2);
 		vb->pack_start (*wtbl, false, false, 2);
 
@@ -544,7 +546,7 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 			CimgArea *eb = manage (new CimgArea (ebur));
 			CimgArea *hi = manage (new CimgArea (hist));
 			HBox *hb = manage (new HBox ());
-			hb->set_spacing (4);
+			hb->set_spacing (gui_distance (4));
 			hb->pack_start (*nu, false, false);
 			hb->pack_start (*hi, false, false);
 			hb->pack_start (*eb, false, false);
@@ -828,7 +830,7 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 	pages.set_name ("ExportReportNotebook");
 	pages.set_current_page (0);
 
-	get_vbox ()->set_spacing (4);
+	get_vbox ()->set_spacing (gui_distance (4));
 	get_vbox ()->pack_start (pages, false, false);
 
 	if (_session && _session->the_auditioner()) {

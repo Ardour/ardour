@@ -125,7 +125,7 @@ KeyEditor::KeyEditor ()
 	unbind_box.pack_start (unbind_button, false, false);
 	unbind_button.signal_clicked().connect (sigc::mem_fun (*this, &KeyEditor::unbind));
 
-	vpacker.set_spacing (4);
+	vpacker.set_spacing (gui_distance (4));
 	vpacker.pack_start (unbind_box, false, false);
 	unbind_box.show ();
 	unbind_button.show ();
@@ -281,7 +281,7 @@ KeyEditor::Tab::Tab (KeyEditor& ke, string const & str, Bindings* b)
 	scroller.add (view);
 	scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
-	set_spacing (6);
+	set_spacing (gui_distance (6));
 	set_border_width (border());
 	pack_start (scroller);
 }

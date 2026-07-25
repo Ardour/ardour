@@ -35,6 +35,7 @@
 #include "widgets/tooltips.h"
 
 #include "context_menu_helper.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "io_plugin_window.h"
 #include "io_selector.h"
@@ -47,6 +48,7 @@
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 
@@ -70,7 +72,7 @@ IOPluginWindow::IOPluginWindow ()
 	scroller = manage (new ScrolledWindow);
 	scroller->set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_NEVER);
 	scroller->set_shadow_type (Gtk::SHADOW_NONE);
-	scroller->set_border_width (0);
+	scroller->set_border_width (gui_distance (0));
 	scroller->add (_box_pre);
 	vbox->pack_start (*scroller);
 
@@ -80,7 +82,7 @@ IOPluginWindow::IOPluginWindow ()
 	scroller = manage (new ScrolledWindow);
 	scroller->set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_NEVER);
 	scroller->set_shadow_type (Gtk::SHADOW_NONE);
-	scroller->set_border_width (0);
+	scroller->set_border_width (gui_distance (0));
 	scroller->add (_box_post);
 	vbox->pack_start (*scroller);
 
@@ -156,7 +158,7 @@ IOPluginWindow::PluginBox::PluginBox (bool is_pre)
 	_base.drag_dest_set (target_table, DEST_DEFAULT_ALL, Gdk::ACTION_COPY);
 	_base.signal_drag_data_received ().connect (sigc::mem_fun (*this, &PluginBox::drag_data_received));
 
-	_hbox.set_spacing (4);
+	_hbox.set_spacing (gui_distance (4));
 	_top.pack_start (_hbox, false, false);
 	_top.pack_end (_base, true, true);
 	add (_top);
@@ -288,7 +290,7 @@ IOPluginWindow::IOPlugUI::IOPlugUI (std::shared_ptr<ARDOUR::IOPlug> iop)
 	_box.pack_start (_btn_input, true, true);
 	_box.pack_start (_btn_ioplug, true, true);
 	_box.pack_start (_btn_output, true, true);
-	_box.set_border_width (1);
+	_box.set_border_width (gui_distance (1));
 
 	Gdk::Color bg;
 	Gtkmm2ext::set_color_from_rgba (bg, UIConfiguration::instance ().color (X_("theme:bg1")));

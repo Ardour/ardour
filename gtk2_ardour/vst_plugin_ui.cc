@@ -25,6 +25,8 @@
 #include "ardour/vst_plugin.h"
 #include "ardour/vst_types.h"
 #include "ardour/plugin_insert.h"
+
+#include "gui_dimensions.h"
 #include "vst_plugin_ui.h"
 
 #ifdef PLATFORM_WINDOWS
@@ -35,13 +37,15 @@
 #include <ydk/gdkx.h>
 #endif
 
+using namespace ARDOUR_UI_UTILS;
+
 VSTPluginUI::VSTPluginUI (std::shared_ptr<ARDOUR::PlugInsertBase> pib, std::shared_ptr<ARDOUR::VSTPlugin> plugin)
 	: PlugUIBase (pib)
 	, _vst (plugin)
 {
 	Gtk::HBox* box = manage (new Gtk::HBox);
-	box->set_spacing (6);
-	box->set_border_width (6);
+	box->set_spacing (gui_distance (6));
+	box->set_border_width (gui_distance (6));
 
 	add_common_widgets (box);
 
@@ -49,7 +53,7 @@ VSTPluginUI::VSTPluginUI (std::shared_ptr<ARDOUR::PlugInsertBase> pib, std::shar
 	box->signal_size_allocate().connect (sigc::mem_fun (*this, &VSTPluginUI::top_box_allocated));
 #ifdef GDK_WINDOWING_X11
 	pack_start (_socket, true, true);
-	_socket.set_border_width (0);
+	_socket.set_border_width (gui_distance (0));
 #endif
 }
 

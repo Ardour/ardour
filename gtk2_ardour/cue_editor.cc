@@ -35,6 +35,7 @@
 #include "ardour_ui.h"
 #include "cue_editor.h"
 #include "editor_drag.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "public_editor.h"
 #include "timers.h"
@@ -43,6 +44,7 @@
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace ArdourWidgets;
 using namespace Temporal;
 
@@ -398,7 +400,7 @@ Gtk::Box*
 CueEditor::pack_mouse_mode_box ()
 {
 	Gtk::HBox* mouse_mode_hbox = manage (new Gtk::HBox);
-	mouse_mode_hbox->set_spacing (2);
+	mouse_mode_hbox->set_spacing (gui_distance (2));
 	mouse_mode_hbox->pack_start (mouse_draw_button, false, false);
 	mouse_mode_hbox->pack_start (mouse_content_button, false, false);
 	mouse_mode_hbox->pack_start (*(manage (new ArdourVSpacer ())), false, false, 3);
@@ -435,11 +437,11 @@ CueEditor::build_upper_toolbar ()
 	Gtk::HBox* toolbar_outer = manage (new Gtk::HBox);
 	Gtk::HBox* toolbar_right = manage (new Gtk::HBox);
 
-	toolbar_outer->set_border_width (6);
-	toolbar_outer->set_spacing (2);
-	toolbar_inner->set_spacing (2);
-	toolbar_right->set_spacing (2);
-	grid_box.set_spacing (2);
+	toolbar_outer->set_border_width (gui_distance (6));
+	toolbar_outer->set_spacing (gui_distance (2));
+	toolbar_inner->set_spacing (gui_distance (2));
+	toolbar_right->set_spacing (gui_distance (2));
+	grid_box.set_spacing (gui_distance (2));
 
 	Gtk::Box* mouse_mode_box = pack_mouse_mode_box ();
 
@@ -465,7 +467,7 @@ CueEditor::build_upper_toolbar ()
 
 		solo_button.set_name ("solo button");
 
-		play_box.set_spacing (2);
+		play_box.set_spacing (gui_distance (2));
 		play_box.pack_start (play_button, false, false);
 		play_box.pack_start (loop_button, false, false);
 		play_box.pack_start (solo_button, false, false, 4);
@@ -519,7 +521,7 @@ CueEditor::build_upper_toolbar ()
 	Gtkmm2ext::set_size_request_to_display_given_text (length_selector, _("Until Stopped"), 30, 2);
 
 	ArdourVSpacer* rec_spacer = manage (new ArdourVSpacer (0));
-	rec_box.set_spacing (2);
+	rec_box.set_spacing (gui_distance (2));
 	rec_box.pack_start (rec_enable_button, false, false);
 	rec_box.pack_start (*rec_spacer, false, false, 6);
 	rec_box.pack_start (length_label, false, false);

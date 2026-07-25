@@ -22,10 +22,12 @@
 #include <ytkmm/stock.h>
 
 #include "transform_dialog.h"
+#include "gui_dimensions.h"
 
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 TransformDialog::Model::Model()
 	: source_list(Gtk::ListStore::create(source_cols))
@@ -102,7 +104,7 @@ TransformDialog::TransformDialog(Gtk::Window& parent)
 	_add_button.signal_clicked().connect(
 		sigc::mem_fun(*this, &TransformDialog::add_clicked));
 
-	get_vbox()->set_spacing(6);
+	get_vbox()->set_spacing (gui_distance (6));
 	get_vbox()->pack_start(*property_hbox, false, false);
 	get_vbox()->pack_start(_operations_box, false, false);
 	get_vbox()->pack_start(*add_hbox, false, false);
@@ -128,7 +130,7 @@ TransformDialog::ValueChooser::ValueChooser(const Model& model)
 	property_combo.set_model(model.property_list);
 	property_combo.pack_start(model.property_cols.label);
 
-	set_spacing(4);
+	set_spacing (gui_distance (4));
 	pack_start(source_combo, false, false);
 	pack_start(property_combo, false, false);
 	pack_start(value_spinner, false, false);

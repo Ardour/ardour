@@ -64,6 +64,7 @@
 #include "editor.h"
 #include "editing.h"
 #include "enums_convert.h"
+#include "gui_dimensions.h"
 #include "actions.h"
 #include "meter_patterns.h"
 #include "meterbridge.h"
@@ -94,6 +95,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtkmm2ext;
 using namespace Gtk;
@@ -854,7 +856,7 @@ ARDOUR_UI::build_menu_bar ()
 
 	Gtk::HBox* hbox = manage (new Gtk::HBox);
 	hbox->show ();
-	hbox->set_border_width (2);
+	hbox->set_border_width (gui_distance (2));
 	ev->add (*hbox);
 
 	wall_clock_label.set_name ("WallClock");

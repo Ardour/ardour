@@ -46,6 +46,7 @@
 #include "ardour_message.h"
 #include "export_analysis_graphs.h"
 #include "export_report.h"
+#include "gui_dimensions.h"
 #include "loudness_dialog.h"
 #include "ui_config.h"
 
@@ -55,6 +56,7 @@ using namespace Gtk;
 using namespace ARDOUR;
 using namespace Gtkmm2ext;
 using namespace ArdourWidgets;
+using namespace ARDOUR_UI_UTILS;
 
 bool LoudnessDialog::_first_time = true;
 CLoudnessPreset LoudnessDialog::_last_preset;
@@ -847,7 +849,7 @@ LoudnessDialog::test_conformity ()
 		}
 	}
 
-	t->set_border_width (6);
+	t->set_border_width (gui_distance (6));
 	_conformity_frame.add (*t);
 	_conformity_frame.show_all ();
 }

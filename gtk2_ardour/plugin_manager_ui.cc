@@ -36,6 +36,7 @@
 
 #include "ardour_message.h"
 #include "ardour_ui.h"
+#include "gui_dimensions.h"
 #include "plugin_manager_ui.h"
 #include "plugin_scan_dialog.h"
 #include "plugin_utils.h"
@@ -44,6 +45,7 @@
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace Gtk;
 using namespace ArdourWidgets;
 using namespace ARDOUR_PLUGIN_UTILS;
@@ -160,7 +162,7 @@ PluginManagerUI::PluginManagerUI ()
 	_log.set_wrap_mode (WRAP_WORD);
 
 	_log_scroller.set_shadow_type (SHADOW_NONE);
-	_log_scroller.set_border_width (0);
+	_log_scroller.set_border_width (gui_distance (0));
 	_log_scroller.add (_log);
 	_log_scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
 
@@ -181,7 +183,7 @@ PluginManagerUI::PluginManagerUI ()
 	f_paths->add (*b_paths);
 	f_search->add (_tbl_search);
 
-	_tbl_nfo.set_border_width (4);
+	_tbl_nfo.set_border_width (gui_distance (4));
 	_tbl_nfo.set_row_spacings (0);
 	_tbl_nfo.set_col_spacings (3);
 	_tbl_nfo.set_row_spacing (0, 3);
@@ -192,11 +194,11 @@ PluginManagerUI::PluginManagerUI ()
 	b_actions->pack_start (_btn_rescan_err);
 	b_actions->pack_start (_btn_rescan_all);
 	b_actions->pack_start (_btn_clear);
-	b_actions->set_spacing (4);
-	b_actions->set_border_width (4);
+	b_actions->set_spacing (gui_distance (4));
+	b_actions->set_border_width (gui_distance (4));
 
 	/* search table */
-	_tbl_search.set_border_width (4);
+	_tbl_search.set_border_width (gui_distance (4));
 
 	_cb_search_name.set_active (true);
 	_cb_search_type.set_active (false);
@@ -254,8 +256,8 @@ PluginManagerUI::PluginManagerUI ()
 	b_paths->pack_start (*btn_vst3);
 #endif
 	b_paths->pack_start (_btn_prefs);
-	b_paths->set_spacing (4);
-	b_paths->set_border_width (4);
+	b_paths->set_spacing (gui_distance (4));
+	b_paths->set_border_width (gui_distance (4));
 
 	/* tooltips */
 	/* clang-format off */

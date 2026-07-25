@@ -2871,7 +2871,7 @@ ARDOUR_UI::add_route_dialog_response (int r)
 		Gtk::Adjustment* a = manage (new Gtk::Adjustment (2, 0, 121, 1)); // arbitrary max 11^2 for 10th order amb)
 		Gtk::SpinButton* s = manage (new Gtk::SpinButton (*a, 1, 0));
 
-		h.set_spacing (6);
+		h.set_spacing (gui_distance (6));
 		h.pack_start (*l, false, false);
 		h.pack_start (*s, true, true);
 

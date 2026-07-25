@@ -30,12 +30,14 @@
 
 #include "gtkmm2ext/utils.h"
 
+#include "gui_dimensions.h"
 #include "pt_import_selector.h"
 
 #include "pbd/i18n.h"
 
 using namespace Gtk;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 
 PTImportSelector::PTImportSelector (PTFFormat& ptf) :
@@ -72,19 +74,19 @@ PTImportSelector::PTImportSelector (PTFFormat& ptf) :
 
 
 	HBox* buttons = manage (new HBox);
-	buttons->set_spacing (2);
-	buttons->set_border_width (10);
+	buttons->set_spacing (gui_distance (2));
+	buttons->set_border_width (gui_distance (10));
 	buttons->pack_start (ptimport_import_button, false, false);
 	buttons->pack_start (ptimport_cancel_button, false, false);
 
 	HBox* infobox = manage (new HBox);
-	infobox->set_spacing (1);
-	infobox->set_border_width (50);
+	infobox->set_spacing (gui_distance (1));
+	infobox->set_border_width (gui_distance (50));
 	infobox->pack_start (ptimport_info_text, false, false);
 
 	HBox* toplevel = manage (new HBox);
-	toplevel->set_spacing (2);
-	toplevel->set_border_width (10);
+	toplevel->set_spacing (gui_distance (2));
+	toplevel->set_border_width (gui_distance (10));
 	toplevel->pack_start (ptimport_ptf_chooser, true, true);
 	toplevel->pack_start (*infobox, false, false);
 

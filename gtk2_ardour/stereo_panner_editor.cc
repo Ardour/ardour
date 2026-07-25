@@ -22,13 +22,17 @@
 #include "gtkmm2ext/gui_thread.h"
 #include "ardour/panner.h"
 #include "pbd/controllable.h"
+
+#include "gui_dimensions.h"
 #include "stereo_panner_editor.h"
 #include "stereo_panner.h"
+
 #include "pbd/i18n.h"
 
 using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
+using namespace ARDOUR_UI_UTILS;
 
 using PBD::Controllable;
 
@@ -53,7 +57,7 @@ StereoPannerEditor::StereoPannerEditor (StereoPanner* p)
 	++n;
 
 	get_vbox()->pack_start (*manage (t));
-	get_vbox()->set_spacing (6);
+	get_vbox()->set_spacing (gui_distance (6));
 
 	_position.set_increments (1, 10);
 	_width.set_increments (1, 10);

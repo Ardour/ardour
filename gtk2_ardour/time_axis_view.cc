@@ -52,6 +52,7 @@
 #include "ardour_dialog.h"
 #include "audio_time_axis.h"
 #include "floating_text_entry.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "public_editor.h"
 #include "time_axis_view.h"
@@ -72,6 +73,7 @@ using namespace std;
 using namespace Gtk;
 using namespace Gdk;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Editing;
 using namespace ArdourCanvas;
@@ -178,7 +180,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 
 	controls_table.set_row_spacings (2);
 	controls_table.set_col_spacings (2);
-	controls_table.set_border_width (2);
+	controls_table.set_border_width (gui_distance (2));
 
 	if (ARDOUR::Profile->get_mixbus() ) {
 		controls_table.attach (name_label, 4, 5, 0, 1,  Gtk::FILL|Gtk::EXPAND, Gtk::SHRINK, 0, 0);
@@ -190,7 +192,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	controls_table.set_no_show_all ();
 
 	inactive_table.set_no_show_all ();
-	inactive_table.set_border_width (4);  //try to match the offset of the label on an "active" track
+	inactive_table.set_border_width (gui_distance (4));  //try to match the offset of the label on an "active" track
 	inactive_table.attach (inactive_label, 1, 2, 0, 1,  Gtk::FILL|Gtk::EXPAND, Gtk::SHRINK, 0, 0);
 	controls_vbox.pack_start (inactive_table, false, false);
 

@@ -32,6 +32,7 @@
 #include "widgets/tooltips.h"
 
 #include "ardour_ui.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "rta_manager.h"
@@ -42,6 +43,7 @@
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 RTAWindow::RTAWindow ()
 	: ArdourWindow (_("Realtime Perceptual Analyzer"))
@@ -100,7 +102,7 @@ RTAWindow::RTAWindow ()
 	_warp_dropdown.set_sizing_texts (_warp_strings);
 	_warp_dropdown.set_text (_warp_strings[(int)RTAManager::instance ()->rta_warp ()]);
 
-	_ctrlbox.set_spacing (4);
+	_ctrlbox.set_spacing (gui_distance (4));
 	_ctrlbox.pack_start (*manage (new Gtk::Label (_("Speed:"))), false, false);
 	_ctrlbox.pack_start (_speed_dropdown, false, false);
 	_ctrlbox.pack_start (*manage (new Gtk::Label (_("Warp:"))), false, false);
@@ -113,7 +115,7 @@ RTAWindow::RTAWindow ()
 	_vpacker.pack_start (_ctrlbox, false, false, 5);
 
 	add (_vpacker);
-	set_border_width (4);
+	set_border_width (gui_distance (4));
 	_vpacker.show_all ();
 
 	Gtkmm2ext::UI::instance ()->theme_changed.connect (sigc::mem_fun (*this, &RTAWindow::on_theme_changed));

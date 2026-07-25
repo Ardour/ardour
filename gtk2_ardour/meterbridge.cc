@@ -42,6 +42,7 @@
 
 #include "meterbridge.h"
 
+#include "gui_dimensions.h"
 #include "keyboard.h"
 #include "monitor_section.h"
 #include "public_editor.h"
@@ -119,17 +120,17 @@ Meterbridge::Meterbridge ()
 	assert(max_height % 16 == 0);
 	set_geometry_hints(*((Gtk::Window*) this), geom, Gdk::HINT_MIN_SIZE | Gdk::HINT_MAX_SIZE | Gdk::HINT_RESIZE_INC);
 
-	set_border_width (0);
+	set_border_width (gui_distance (0));
 
 	metrics_vpacker_left.pack_start (metrics_left, true, true);
 	metrics_vpacker_left.pack_start (metrics_spacer_left, false, false);
 	metrics_spacer_left.set_size_request(-1, 0);
-	metrics_spacer_left.set_spacing(0);
+	metrics_spacer_left.set_spacing (gui_distance (0));
 
 	metrics_vpacker_right.pack_start (metrics_right, true, true);
 	metrics_vpacker_right.pack_start (metrics_spacer_right, false, false);
 	metrics_spacer_right.set_size_request(-1, 0);
-	metrics_spacer_right.set_spacing(0);
+	metrics_spacer_right.set_spacing (gui_distance (0));
 
 	signal_delete_event().connect (sigc::mem_fun (*this, &Meterbridge::hide_window));
 	signal_configure_event().connect (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
@@ -147,9 +148,9 @@ Meterbridge::Meterbridge ()
 	yspc->show();
 	xspc->show();
 
-	meterarea.set_spacing(0);
+	meterarea.set_spacing (gui_distance (0));
 	scroller.set_shadow_type(Gtk::SHADOW_NONE);
-	scroller.set_border_width(0);
+	scroller.set_border_width (gui_distance (0));
 	scroller.add (*xspc);
 	scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_NEVER);
 
@@ -179,7 +180,7 @@ Meterbridge::Meterbridge ()
 	 */
 	Gtk::Viewport* viewport = (Gtk::Viewport*) scroller.get_child();
 	viewport->set_shadow_type(Gtk::SHADOW_NONE);
-	viewport->set_border_width(0);
+	viewport->set_border_width (gui_distance (0));
 
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &Meterbridge::on_theme_changed));
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &Meterbridge::on_theme_changed));

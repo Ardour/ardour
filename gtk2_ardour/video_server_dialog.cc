@@ -39,6 +39,7 @@
 #undef interface
 #endif
 
+#include "gui_dimensions.h"
 #include "video_server_dialog.h"
 #include "utils_videotl.h"
 #include "pbd/i18n.h"
@@ -55,6 +56,7 @@ using namespace Gtk;
 using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace VideoUtils;
 
 VideoServerDialog::VideoServerDialog (Session* s)
@@ -174,7 +176,7 @@ VideoServerDialog::VideoServerDialog (Session* s)
 	}
 	vbox->pack_start (*options_box, false, true);
 
-	get_vbox()->set_spacing (4);
+	get_vbox()->set_spacing (gui_distance (4));
 	get_vbox()->pack_start (*vbox, false, false);
 	get_vbox()->pack_start (showagain_checkbox, false, false);
 	showagain_checkbox.set_active(!Config->get_show_video_server_dialog());

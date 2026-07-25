@@ -152,7 +152,7 @@ using the program.</span> \
 	foomatic->set_line_wrap ();
 
 	VBox* vbox = manage (new VBox);
-	vbox->set_border_width (24);
+	vbox->set_border_width (gui_distance (24));
 	vbox->pack_start (*foomatic, true, true, 12);
 
 #ifndef __APPLE__
@@ -259,8 +259,8 @@ Where would you like new %1 sessions to be stored by default?\n\n\
 	txt->set_alignment (0.0, 0.0);
 	txt->set_justify (JUSTIFY_FILL);
 
-	vbox->set_spacing (18);
-	vbox->set_border_width (24);
+	vbox->set_spacing (gui_distance (18));
+	vbox->set_border_width (gui_distance (24));
 
 	hbox->pack_start (*default_dir_chooser, false, true, 8);
 	hbox->pack_start (*default_dir_label, false, false, 8);
@@ -310,8 +310,8 @@ don't have any samples, just leave this setting as it is.\n\n\
 	txt->set_alignment (0.0, 0.0);
 	txt->set_justify (JUSTIFY_FILL);
 
-	vbox->set_spacing (18);
-	vbox->set_border_width (24);
+	vbox->set_spacing (gui_distance (18));
+	vbox->set_border_width (gui_distance (24));
 
 	hbox->pack_start (*clip_lib_chooser, false, true, 8);
 	hbox->pack_start (*clip_lib_label, false, false, 8);

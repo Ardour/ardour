@@ -24,8 +24,11 @@
 #include "automation_line.h"
 #include "control_point.h"
 #include "control_point_dialog.h"
+#include "gui_dimensions.h"
 
 #include "pbd/i18n.h"
+
+using namespace ARDOUR_UI_UTILS;
 
 /**
  *    ControlPointDialog constructor.
@@ -59,7 +62,7 @@ ControlPointDialog::ControlPointDialog (ControlPoint* p, bool multi)
 
 	Gtk::HBox* b = Gtk::manage (new Gtk::HBox ());
 
-	b->set_spacing (4);
+	b->set_spacing (gui_distance (4));
 	b->pack_start (*Gtk::manage (new Gtk::Label (_("Value"))));
 	b->pack_start (value_);
 
@@ -75,7 +78,7 @@ ControlPointDialog::ControlPointDialog (ControlPoint* p, bool multi)
 			  "<b>When disabled</b> only the current automation point is modified."));
 	toggle_all_.set_sensitive (multi);
 
-	get_vbox ()->set_spacing (4);
+	get_vbox ()->set_spacing (gui_distance (4));
 	show_all ();
 
 	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);

@@ -34,6 +34,7 @@
 
 #include "widgets/tooltips.h"
 
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "meter_patterns.h"
 #include "mixer_ui.h"
@@ -133,7 +134,7 @@ TriggerStrip::init ()
 	_name_button.signal_size_allocate ().connect (sigc::mem_fun (*this, &TriggerStrip::name_button_resized));
 
 	/* strip layout */
-	global_vpacker.set_spacing (2);
+	global_vpacker.set_spacing (gui_distance (2));
 	global_vpacker.pack_start (input_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (_name_button, Gtk::PACK_SHRINK);
 

@@ -38,7 +38,7 @@ ConfigInfoDialog::ConfigInfoDialog ()
 	text.show ();
 
 	scroller.set_shadow_type(Gtk::SHADOW_NONE);
-	scroller.set_border_width(0);
+	scroller.set_border_width (gui_distance (0));
 	scroller.add (text);
 	scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	scroller.show();

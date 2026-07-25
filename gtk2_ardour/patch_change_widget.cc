@@ -37,6 +37,7 @@
 #include "gtkmm2ext/utils.h"
 #include "widgets/tooltips.h"
 
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "patch_change_widget.h"
 #include "ui_config.h"
@@ -45,6 +46,7 @@
 
 using namespace Gtk;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 PatchBankList::PatchBankList ()
 	: _bank_msb_spin (*manage (new Adjustment (0, 0, 127, 1, 16)))
@@ -247,8 +249,8 @@ PatchChangeTab::PatchChangeTab (int channel)
 {
 	Box* box;
 	box = manage (new HBox ());
-	box->set_border_width (2);
-	box->set_spacing (4);
+	box->set_border_width (gui_distance (2));
+	box->set_spacing (gui_distance (4));
 	box->pack_start (_enable_btn, false, false);
 	box->pack_start (*manage (new Label (_("Bank:"))), false, false);
 	box->pack_start (_bank_select, true, true);
@@ -262,7 +264,7 @@ PatchChangeTab::PatchChangeTab (int channel)
 	_program_table.set_spacings (1);
 	pack_start (_program_table, true, true);
 
-	set_spacing (4);
+	set_spacing (gui_distance (4));
 	show_all ();
 
 	_enable_btn.signal_clicked.connect (sigc::mem_fun (*this, &PatchChangeTab::enable_toggle));
@@ -406,8 +408,8 @@ PatchChangeWidget::PatchChangeWidget (std::shared_ptr<ARDOUR::Route> r)
 {
 	Box* box;
 	box = manage (new HBox ());
-	box->set_border_width (2);
-	box->set_spacing (4);
+	box->set_border_width (gui_distance (2));
+	box->set_spacing (gui_distance (4));
 	box->pack_start (*manage (new Label (_("Channel:"))), false, false);
 	box->pack_start (_channel_select, false, false);
 	box->pack_start (*manage (new Label (_("Bank:"))), false, false);
@@ -427,7 +429,7 @@ PatchChangeWidget::PatchChangeWidget (std::shared_ptr<ARDOUR::Route> r)
 	}
 
 	box = manage (new HBox ());
-	box->set_spacing (4);
+	box->set_spacing (gui_distance (4));
 	box->pack_start (_audition_enable, false, false);
 	box->pack_start (*manage (new Label (_("Start Note:"))), false, false);
 	box->pack_start (_audition_start_spin, false, false);
@@ -438,7 +440,7 @@ PatchChangeWidget::PatchChangeWidget (std::shared_ptr<ARDOUR::Route> r)
 
 	Box* box2 = manage (new HBox ());
 	box2->pack_start (*box, true, false);
-	box2->set_border_width (2);
+	box2->set_border_width (gui_distance (2));
 	pack_start (*box2, false, false);
 
 	for (uint32_t chn = 0; chn < 16; ++chn) {
@@ -463,7 +465,7 @@ PatchChangeWidget::PatchChangeWidget (std::shared_ptr<ARDOUR::Route> r)
 	_audition_start_spin.signal_changed ().connect (sigc::bind (sigc::mem_fun (*this, &PatchChangeWidget::check_note_range), false));
 	_audition_end_spin.signal_changed ().connect (sigc::bind (sigc::mem_fun (*this, &PatchChangeWidget::check_note_range), true));
 
-	set_spacing (4);
+	set_spacing (gui_distance (4));
 	show_all ();
 
 	if (!std::dynamic_pointer_cast<MidiTrack> (_route)) {

@@ -32,6 +32,7 @@
 
 #include "ardour_ui.h"
 #include "debug.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "plugin_scan_dialog.h"
 #include "ui_config.h"
@@ -39,6 +40,7 @@
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtk;
 using namespace std;
@@ -80,10 +82,10 @@ PluginScanDialog::PluginScanDialog (bool just_cached, bool v, Gtk::Window* paren
 	tbl->show_all ();
 	/* clang-format on */
 
-	tbl->set_border_width (8);
+	tbl->set_border_width (gui_distance (8));
 
 	format_frame.add (*tbl);
-	format_frame.set_border_width (4);
+	format_frame.set_border_width (gui_distance (4));
 	format_frame.set_shadow_type (Gtk::SHADOW_ETCHED_IN);
 
 	Gtk::HBox* cancel_all_padder = manage (new HBox (true));

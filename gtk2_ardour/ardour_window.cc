@@ -25,6 +25,7 @@
 
 #include "ardour_window.h"
 #include "ardour_ui.h"
+#include "gui_dimensions.h"
 #include "ui_config.h"
 #include "keyboard.h"
 #include "utils.h"
@@ -119,7 +120,7 @@ ArdourWindow::on_delete_event (GdkEventAny*)
 void
 ArdourWindow::init ()
 {
-	set_border_width (10);
+	set_border_width (gui_distance (10));
 	add_events (Gdk::FOCUS_CHANGE_MASK);
 
 	/* ArdourWindows are not dialogs (they have no "OK" or "Close" button) but

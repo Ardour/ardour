@@ -34,6 +34,7 @@
 #include "ardour_window.h"
 #include "surround_strip.h"
 
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "io_selector.h"
 #include "keyboard.h"
@@ -45,6 +46,7 @@
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace ArdourWidgets;
 using namespace PBD;
 using namespace Gtk;
@@ -102,7 +104,7 @@ SurroundStrip::init ()
 
 	Gtk::Table *lufs_table = manage(new Gtk::Table());
 	lufs_table->set_homogeneous(true);
-	lufs_table->set_border_width(2);
+	lufs_table->set_border_width (gui_distance (2));
 	lufs_table->set_spacings(4);
 	lufs_table->attach(_lufs_cap,   0, 1, 0, 1, FILL|EXPAND, SHRINK);
 	lufs_table->attach(_lufs_label, 1, 2, 0, 1, FILL|EXPAND, SHRINK);
@@ -187,8 +189,8 @@ SurroundStrip::init ()
 	_comment_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
 	_comment_button.set_layout_ellipsize_width (PX_SCALE (_width) * PANGO_SCALE);
 
-	_global_vpacker.set_border_width (1);
-	_global_vpacker.set_spacing (2);
+	_global_vpacker.set_border_width (gui_distance (1));
+	_global_vpacker.set_spacing (gui_distance (2));
 
 	Gtk::Label* top_spacer = manage (new Gtk::Label);
 	top_spacer->show ();

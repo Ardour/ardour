@@ -23,12 +23,15 @@
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/gui_thread.h"
 #include "pbd/controllable.h"
+
+#include "gui_dimensions.h"
 #include "mono_panner_editor.h"
 #include "mono_panner.h"
 #include "pbd/i18n.h"
 
 using namespace Gtk;
 using namespace Gtkmm2ext;
+using namespace ARDOUR_UI_UTILS;
 
 using PBD::Controllable;
 
@@ -53,7 +56,7 @@ MonoPannerEditor::MonoPannerEditor (MonoPanner* p)
 	++n;
 
 	get_vbox()->pack_start (*manage (t));
-	get_vbox()->set_spacing (6);
+	get_vbox()->set_spacing (gui_distance (6));
 
 	_left.set_increments (1, 10);
 	_left.set_range (0, 100);

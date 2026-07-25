@@ -36,7 +36,10 @@
 using namespace PBD;
 
 #include "ardour/session_metadata.h"
+#include "gui_dimensions.h"
 #include "utils.h"
+
+using namespace ARDOUR_UI_UTILS;
 
 SoundcloudExportSelector::SoundcloudExportSelector () :
 	  sc_table (4, 3),
@@ -60,12 +63,12 @@ SoundcloudExportSelector::SoundcloudExportSelector () :
 	soundcloud_password_entry.set_visibility (false);
 
 	Gtk::Frame *sc_frame = manage (new Gtk::Frame);
-	sc_frame->set_border_width (4);
+	sc_frame->set_border_width (gui_distance (4));
 	sc_frame->set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
 	sc_frame->set_name ("soundcloud_export_box");
 	pack_start (*sc_frame, false, false);
 
-	sc_table.set_border_width (4);
+	sc_table.set_border_width (gui_distance (4));
 	sc_table.set_col_spacings (5);
 	sc_table.set_row_spacings (5);
 	sc_frame->add (sc_table);

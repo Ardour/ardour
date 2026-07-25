@@ -51,7 +51,7 @@ NormalizeDialog::NormalizeDialog (bool more_than_one)
 
 	Table* tbl = manage (new Table);
 	tbl->set_spacings (6);
-	tbl->set_border_width (6);
+	tbl->set_border_width (gui_distance (6));
 
 	_dbfs_dbtp = manage (new Gtk::ComboBoxText);
 	_dbfs_dbtp->append (_("dBFS"));

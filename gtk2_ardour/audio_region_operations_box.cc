@@ -53,7 +53,7 @@ AudioRegionOperationsBox::AudioRegionOperationsBox ()
 
 	table.set_homogeneous (true);
 	table.set_spacings (4);
-	table.set_border_width (8);
+	table.set_border_width (gui_distance (8));
 	table.set_col_spacings (2);
 
 	reverse_button.set_text (_("Reverse"));

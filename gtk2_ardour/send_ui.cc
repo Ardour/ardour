@@ -28,6 +28,7 @@
 #include "ardour/send.h"
 #include "ardour/session.h"
 
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "io_selector.h"
 #include "send_ui.h"
@@ -37,6 +38,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 
 SendUI::SendUI (Gtk::Window* parent, Session* session, std::shared_ptr<Send> s)
@@ -72,8 +74,8 @@ SendUI::SendUI (Gtk::Window* parent, Session* session, std::shared_ptr<Send> s)
 
 	set_name (X_("SendUIFrame"));
 
-	_vbox.set_spacing (4);
-	_vbox.set_border_width (4);
+	_vbox.set_spacing (gui_distance (4));
+	_vbox.set_border_width (gui_distance (4));
 	_vbox.pack_start (_gpm, false, false, false);
 	_vbox.pack_start (_invert_button, false, false);
 	_vbox.pack_start (_panners, false, false);

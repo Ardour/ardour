@@ -34,6 +34,7 @@
 #include "audio_region_view.h"
 #include "control_point.h"
 #include "editor.h"
+#include "gui_dimensions.h"
 #include "midi_region_view.h"
 #include "pianoroll.h"
 #include "region_fx_line.h"
@@ -51,6 +52,7 @@
 
 using namespace Gtk;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using std::min;
 using std::max;
 
@@ -75,7 +77,7 @@ SelectionPropertiesBox::SelectionPropertiesBox (DispositionMask mask)
 	_route_prop_box->set_no_show_all ();
 	_slot_prop_box->set_no_show_all ();
 	_region_editor_box.set_no_show_all ();
-	_region_editor_box.set_spacing (4);
+	_region_editor_box.set_spacing (gui_distance (4));
 
 	_time_info_box->hide ();
 	_route_prop_box->hide ();
@@ -252,7 +254,7 @@ SelectionPropertiesBox::selection_changed ()
 				// TODO subscribe to region name changes
 
 				_region_editor->set_label (string_compose (_("Region '%1'"), rv->region()->name ()));
-				_region_editor->set_padding (4);
+				_region_editor->set_padding (gui_distance (4));
 				_region_editor->set_edge_color (0x000000ff); // black
 				_region_editor->show_all ();
 

@@ -71,6 +71,7 @@
 #include "ardour_ui.h"
 #include "editor.h"
 #include "group_tabs.h"
+#include "gui_dimensions.h"
 #include "gui_object.h"
 #include "gui_thread.h"
 #include "keyboard.h"
@@ -2158,7 +2159,7 @@ RouteUI::setup_invert_buttons ()
 		invert_button_box.pack_start (*b);
 	}
 
-	invert_button_box.set_spacing (1);
+	invert_button_box.set_spacing (gui_distance (1));
 	invert_button_box.show_all ();
 
 	update_polarity_display ();

@@ -57,6 +57,7 @@
 #include "automation_time_axis.h"
 #include "automation_streamview.h"
 #include "ghostregion.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "mergeable_line.h"
 #include "route_time_axis.h"
@@ -231,7 +232,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	name_label.set_size_request (floor (50.0 * UIConfiguration::instance().get_ui_scale()), -1);
 
 	/* add the buttons */
-	controls_table.set_border_width (0);
+	controls_table.set_border_width (gui_distance (0));
 	controls_table.attach (hide_button, 1, 2, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
 
 	if (show_automation_controls()) {

@@ -1993,7 +1993,7 @@ ProcessorBox::ProcessorBox (ARDOUR::Session* sess, std::function<PluginSelector*
 	processor_display.set_name ("ProcessorList");
 	processor_display.set_data ("processorbox", this);
 	processor_display.set_size_request (48, -1);
-	processor_display.set_spacing (0);
+	processor_display.set_spacing (gui_distance (0));
 
 	processor_display.signal_enter_notify_event().connect (sigc::mem_fun(*this, &ProcessorBox::enter_notify), false);
 	processor_display.signal_leave_notify_event().connect (sigc::mem_fun(*this, &ProcessorBox::leave_notify), false);

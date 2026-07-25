@@ -255,7 +255,7 @@ public:
 
 		_fader_centering_box.pack_start (*_db_slider, true, false);
 
-		_box.set_spacing (4);
+		_box.set_spacing (gui_distance (4));
 		_box.set_homogeneous (false);
 		_box.pack_start (_fader_centering_box, false, false);
 		_box.pack_start (_db_display, false, false);
@@ -812,7 +812,7 @@ Dialog::Dialog (std::string const& title, luabridge::LuaRef lr)
 	table->signal_size_request ().connect (sigc::mem_fun (*this, &Dialog::table_size_request));
 
 	_scroller.set_shadow_type(Gtk::SHADOW_NONE);
-	_scroller.set_border_width(0);
+	_scroller.set_border_width (gui_distance (0));
 	_scroller.add (*table);
 	_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_NEVER);
 
@@ -839,7 +839,7 @@ Dialog::Dialog (std::string const& title, luabridge::LuaRef lr)
 				table->attach (*((*i)->widget ()), col + 1, cend, row, row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
 			} else {
 				Gtk::HBox* hb = Gtk::manage (new Gtk::HBox());
-				hb->set_spacing(4);
+				hb->set_spacing (gui_distance (4));
 				hb->pack_start (*lbl, true, false);
 				hb->pack_start (*(*i)->widget (), true, false);
 				table->attach (*hb, col, cend, row, row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
@@ -895,7 +895,7 @@ Dialog::table_size_request (Gtk::Requisition* req)
 		 */
 		Gtk::Viewport* viewport = (Gtk::Viewport*) _scroller.get_child();
 		viewport->set_shadow_type(Gtk::SHADOW_NONE);
-		viewport->set_border_width(0);
+		viewport->set_border_width (gui_distance (0));
 	}
 }
 
@@ -910,7 +910,7 @@ ProgressWindow::ProgressWindow (std::string const& title, bool allow_cancel)
 	_bar.set_orientation (Gtk::PROGRESS_LEFT_TO_RIGHT);
 
 	set_border_width (border());
-	get_vbox()->set_spacing (6);
+	get_vbox()->set_spacing (gui_distance (6));
 	get_vbox()->pack_start (_bar, false, false);
 
 	if (allow_cancel) {

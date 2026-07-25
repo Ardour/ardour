@@ -2821,7 +2821,7 @@ Editor::rename_region ()
 	Label label (_("New name:"));
 	HBox hbox;
 
-	hbox.set_spacing (6);
+	hbox.set_spacing (gui_distance (6));
 	hbox.pack_start (label, false, false);
 	hbox.pack_start (entry, true, true);
 
@@ -4113,10 +4113,10 @@ Editor::bounce_range_selection (BounceTarget target, bool with_processing)
 
 		Table*  table  = manage (new Table);
 		table->set_spacings (4);
-		table->set_border_width (8);
+		table->set_border_width (gui_distance (8));
 		table->set_homogeneous (true);
 		dialog.get_vbox()->pack_start (*table);
-		dialog.get_vbox()->set_spacing (4);
+		dialog.get_vbox()->set_spacing (gui_distance (4));
 
 		/* copy to a slot on this track ? */
 		Gtk::CheckButton *to_slot = NULL;
@@ -5446,7 +5446,7 @@ Editor::tag_regions (RegionList regions)
 	Label label (_("Tag:"));
 	HBox hbox;
 
-	hbox.set_spacing (6);
+	hbox.set_spacing (gui_distance (6));
 	hbox.pack_start (label, false, false);
 	hbox.pack_start (entry, true, true);
 

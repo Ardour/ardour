@@ -47,6 +47,7 @@
 #include "context_menu_helper.h"
 #include "editor_cursors.h"
 #include "group_tabs.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "level_meter.h"
@@ -139,8 +140,8 @@ TrackRecordAxis::TrackRecordAxis (Session* s, std::shared_ptr<ARDOUR::Route> rt)
 
 	_name_frame.add (_namebox);
 	_name_frame.set_edge_color (0x000000ff);
-	_name_frame.set_border_width (0);
-	_name_frame.set_padding (0);
+	_name_frame.set_border_width (gui_distance (0));
+	_name_frame.set_padding (gui_distance (0));
 
 	_input_button.set_sizing_text ("Capture_8888");
 	_input_button.set_route (rt, this);

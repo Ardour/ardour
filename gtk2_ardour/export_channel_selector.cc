@@ -40,6 +40,7 @@
 #include "ardour/session.h"
 #include "ardour/selection.h"
 
+#include "gui_dimensions.h"
 #include "export_channel_selector.h"
 #include "route_sorter.h"
 
@@ -48,6 +49,7 @@
 using namespace std;
 using namespace Glib;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 
 #define MAX_EXPORT_CHANNELS 32
@@ -600,7 +602,7 @@ TrackExportChannelSelector::TrackExportChannelSelector (ARDOUR::Session * sessio
 	}
 
 	// Options
-	options_box.set_spacing (8);
+	options_box.set_spacing (gui_distance (8));
 	options_box.pack_start (track_output_button, false, false);
 	options_box.pack_start (select_menu, false, false);
 	main_layout.pack_start (options_box, false, false);

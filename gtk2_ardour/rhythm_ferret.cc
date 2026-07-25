@@ -34,6 +34,7 @@
 #include "rhythm_ferret.h"
 #include "audio_region_view.h"
 #include "editor.h"
+#include "gui_dimensions.h"
 #include "time_axis_view.h"
 
 #include "pbd/i18n.h"
@@ -43,6 +44,7 @@ using namespace Gtk;
 using namespace Gdk;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 /* order of these must match the AnalysisMode enums
    in rhythm_ferret.h
@@ -164,8 +166,8 @@ RhythmFerret::RhythmFerret (Editor& e)
 	analyze_button.signal_clicked().connect (sigc::mem_fun (*this, &RhythmFerret::run_analysis));
 	action_button.signal_clicked().connect (sigc::mem_fun (*this, &RhythmFerret::do_action));
 
-	get_vbox()->set_border_width (6);
-	get_vbox()->set_spacing (6);
+	get_vbox()->set_border_width (gui_distance (6));
+	get_vbox()->set_spacing (gui_distance (6));
 	get_vbox()->pack_start (*t);
 
 	add_action_widget (analyze_button, 1);

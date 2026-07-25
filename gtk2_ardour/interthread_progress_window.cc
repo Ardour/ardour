@@ -43,7 +43,7 @@ InterthreadProgressWindow::InterthreadProgressWindow (ARDOUR::InterThreadInfo* i
 	_bar.set_orientation (Gtk::PROGRESS_LEFT_TO_RIGHT);
 
 	set_border_width (border());
-	get_vbox()->set_spacing (6);
+	get_vbox()->set_spacing (gui_distance (6));
 
 	get_vbox()->pack_start (_bar, false, false);
 

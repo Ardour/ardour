@@ -51,6 +51,7 @@
 #include "editing_convert.h"
 #include "editor_cursors.h"
 #include "editor_drag.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "midi_inspector.h"
@@ -74,6 +75,7 @@
 
 using namespace PBD;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace ArdourCanvas;
 using namespace ArdourWidgets;
 using namespace Gtkmm2ext;
@@ -3078,7 +3080,7 @@ ControllerControls::ControllerControls (int num, std::string const & str, Gtk::R
 	edit_button->set_act_on_release (false);
 	edit_button->set_fallthrough_to_parent (false);
 
-	set_spacing (6);
+	set_spacing (gui_distance (6));
 	pack_start (*show_hide_button, false, false);
 	pack_start (*edit_button, false, false);
 	pack_start (name, false, false, 6);

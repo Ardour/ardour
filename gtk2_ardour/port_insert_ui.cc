@@ -61,22 +61,22 @@ PortInsertUI::PortInsertUI (Gtk::Window* parent, ARDOUR::Session* sess, std::sha
 	_latency_hbox.pack_start (_measure_latency_button, false, false);
 	_latency_hbox.pack_start (_edit_latency_button, false, false);
 	_latency_hbox.pack_start (_latency_display, false, false);
-	_latency_hbox.set_spacing (4);
+	_latency_hbox.set_spacing (gui_distance (4));
 
 	_output_selector.set_min_height_divisor (2);
 	_input_selector.set_min_height_divisor (2);
 
 	_input_vbox.pack_start (_input_gpm, false, false);
-	_input_vbox.set_spacing (4);
-	_input_vbox.set_border_width (4);
+	_input_vbox.set_spacing (gui_distance (4));
+	_input_vbox.set_border_width (gui_distance (4));
 
 	_input_hbox.pack_start (_input_vbox, false, false);
 	_input_hbox.pack_start (_input_selector, true, true);
 
 	_output_vbox.pack_start (_output_gpm, false, false);
 	_output_vbox.pack_start (_invert_button, false, false);
-	_output_vbox.set_spacing (4);
-	_output_vbox.set_border_width (4);
+	_output_vbox.set_spacing (gui_distance (4));
+	_output_vbox.set_border_width (gui_distance (4));
 
 	_output_hbox.pack_start (_output_vbox, false, false);
 	_output_hbox.pack_start (_output_selector, true, true);

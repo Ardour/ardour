@@ -38,6 +38,7 @@
 #include "ardour/session_directory.h"
 
 #include "ardour_ui.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 
 #include "ardour/export_channel_configuration.h"
@@ -60,6 +61,7 @@ using namespace Gtk;
 using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace ArdourWidgets;
 using namespace VideoUtils;
 
@@ -115,7 +117,7 @@ ExportVideoDialog::ExportVideoDialog ()
 	path_hbox->pack_start (outfn_path_entry, true, true, 3);
 	path_hbox->pack_start (outfn_browse_button, false, false, 3);
 	f->add (*path_hbox);
-	path_hbox->set_border_width (2);
+	path_hbox->set_border_width (gui_distance (2));
 	vbox->pack_start (*f, false, false, 4);
 
 	f               = manage (new Gtk::Frame (_("Input")));
@@ -133,7 +135,7 @@ ExportVideoDialog::ExportVideoDialog ()
 	path_hbox->pack_start (*l, false, false, 2);
 	input_box->pack_start (*path_hbox, false, false, 2);
 
-	input_box->set_border_width (2);
+	input_box->set_border_width (gui_distance (2));
 	f->add (*input_box);
 	vbox->pack_start (*f, false, false, 4);
 
@@ -152,7 +154,7 @@ ExportVideoDialog::ExportVideoDialog ()
 
 	f = manage (new Gtk::Frame (_("Settings")));
 	t = manage (new Table (3, 2));
-	t->set_border_width (2);
+	t->set_border_width (gui_distance (2));
 	t->set_spacings (4);
 	int ty = 0;
 
@@ -183,7 +185,7 @@ ExportVideoDialog::ExportVideoDialog ()
 	f->add (*t);
 	vbox->pack_start (*f, false, true, 4);
 
-	get_vbox ()->set_spacing (4);
+	get_vbox ()->set_spacing (gui_distance (4));
 	get_vbox ()->pack_start (*vbox, false, false);
 
 	progress_box = manage (new VBox);

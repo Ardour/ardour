@@ -35,6 +35,7 @@
 #include "widgets/ardour_dropdown.h"
 #include "widgets/ardour_spacer.h"
 
+#include "gui_dimensions.h"
 #include "strip_import_dialog.h"
 
 #include "pbd/i18n.h"
@@ -43,6 +44,7 @@ using namespace Gtk;
 using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace ArdourWidgets;
 
 StripImportDialog::StripImportDialog (Session* s)
@@ -737,7 +739,7 @@ StripImportDialog::setup_strip_import_page ()
 	_show_all_toggle->set_can_focus (true);
 	_show_all_toggle->signal_clicked.connect (mem_fun (*this, &StripImportDialog::refill_import_table));
 
-	_action_box.set_spacing (4);
+	_action_box.set_spacing (gui_distance (4));
 	_action_box.pack_start (*_action, true, false);
 	_action_box.pack_start (*_show_all_toggle, true, false);
 
@@ -747,7 +749,7 @@ StripImportDialog::setup_strip_import_page ()
 	_strip_scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
 	_strip_scroller.add (*vbox);
 
-	_page_strip.set_spacing (4);
+	_page_strip.set_spacing (gui_distance (4));
 	_page_strip.pack_start (_strip_scroller);
 	_page_strip.pack_end (_progress_bar, false, false, 4);
 	_page_strip.pack_end (_action_box, false, false, 4);

@@ -36,6 +36,7 @@
 
 #include "audio_clock.h"
 #include "editor.h"
+#include "gui_dimensions.h"
 #include "audio_time_axis.h"
 #include "audio_region_view.h"
 #include "region_selection.h"
@@ -49,6 +50,7 @@ using namespace RubberBand;
 
 using namespace std;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
@@ -93,12 +95,12 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch, timecnt_t const & oldlen, tim
 	VBox* vbox = manage (new VBox);
 	Gtk::Label* l;
 
-	get_vbox()->set_spacing (4);
+	get_vbox()->set_spacing (gui_distance (4));
 
-	vbox->set_spacing (18);
-	vbox->set_border_width (5);
+	vbox->set_spacing (gui_distance (18));
+	vbox->set_border_width (gui_distance (5));
 
-	upper_button_box.set_spacing (6);
+	upper_button_box.set_spacing (gui_distance (6));
 
 	/* if the ratio is already set, do not allow adjustment */
 
@@ -200,7 +202,7 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch, timecnt_t const & oldlen, tim
 	set_default_response (Gtk::RESPONSE_ACCEPT);
 
 	VBox* progress_box = manage (new VBox);
-	progress_box->set_spacing (6);
+	progress_box->set_spacing (gui_distance (6));
 
 	l = manage (new Label (_("<b>Progress</b>"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 	l->set_use_markup ();

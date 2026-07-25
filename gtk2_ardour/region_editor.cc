@@ -147,7 +147,7 @@ RegionEditor::RegionEditor (Session* s, std::shared_ptr<Region> r)
 
 	_table_clocks.set_col_spacings (12);
 	_table_clocks.set_row_spacings (6);
-	_table_clocks.set_border_width (0);
+	_table_clocks.set_border_width (gui_distance (0));
 	_table_clocks.set_homogeneous ();
 
 	_table_main.set_col_spacings (12);
@@ -167,7 +167,7 @@ RegionEditor::RegionEditor (Session* s, std::shared_ptr<Region> r)
 
 	/* Name & Audition Box */
 	Gtk::HBox* nb = Gtk::manage (new Gtk::HBox);
-	nb->set_spacing (6);
+	nb->set_spacing (gui_distance (6));
 	nb->pack_start (_name_entry);
 	nb->pack_start (_audition_button, false, false);
 
@@ -175,7 +175,7 @@ RegionEditor::RegionEditor (Session* s, std::shared_ptr<Region> r)
 
 	_table_tempo.set_col_spacings (12);
 	_table_tempo.set_row_spacings (6);
-	_table_tempo.set_border_width (0);
+	_table_tempo.set_border_width (gui_distance (0));
 	_table_tempo.set_homogeneous ();
 
 	_region_tempo_entry.signal_key_press_event().connect (sigc::mem_fun (*this, &RegionEditor::tempo_entry_key), false);
@@ -636,7 +636,7 @@ RegionEditor::RegionFxBox::RegionFxBox (std::shared_ptr<ARDOUR::Region> r)
 	_display.set_data ("regionfxbox", this);
 	set_widget_bindings (_display, *bindings, ARDOUR_BINDING_KEY);
 	_display.set_size_request (104, -1); // TODO UI scale
-	_display.set_spacing (0);
+	_display.set_spacing (gui_distance (0));
 
 	_display.ButtonPress.connect (sigc::mem_fun (*this, &RegionFxBox::fxe_button_press_event));
 	_display.ButtonRelease.connect (sigc::mem_fun (*this, &RegionFxBox::fxe_button_release_event));

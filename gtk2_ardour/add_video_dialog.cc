@@ -40,6 +40,7 @@
 
 #include "add_video_dialog.h"
 #include "ardour_http.h"
+#include "gui_dimensions.h"
 #include "utils_videotl.h"
 #include "pbd/i18n.h"
 
@@ -47,6 +48,7 @@ using namespace Gtk;
 using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace VideoUtils;
 
 #define PREVIEW_WIDTH (240)
@@ -118,7 +120,7 @@ AddVideoDialog::AddVideoDialog (Session* s)
 	server_index_box.pack_start (*scroll, true, true);
 
 	/* file chooser */
-	chooser.set_border_width (4);
+	chooser.set_border_width (gui_distance (4));
 	Gtkmm2ext::add_volume_shortcuts (chooser);
 #ifdef __APPLE__
 	/* some broken redraw behaviour - this is a bandaid */
@@ -198,7 +200,7 @@ AddVideoDialog::AddVideoDialog (Session* s)
 	hbox->pack_start (browser_container, true, true);
 	hbox->pack_start (*previewpane, false, false);
 
-	get_vbox()->set_spacing (4);
+	get_vbox()->set_spacing (gui_distance (4));
 	get_vbox()->pack_start (*hbox, true, true);
 	get_vbox()->pack_start (*options_box, false, false);
 

@@ -53,6 +53,7 @@
 
 #include "ardour_ui.h"
 #include "gain_meter.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "public_editor.h"
@@ -71,6 +72,7 @@
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace ArdourWidgets;
 using namespace PBD;
 using namespace Gtkmm2ext;
@@ -1001,7 +1003,7 @@ GainMeter::GainMeter (Session* s, int fader_length)
 
 	gain_automation_state_button.set_can_focus (false);
 
-	fader_vbox.set_spacing (0);
+	fader_vbox.set_spacing (gui_distance (0));
 	fader_vbox.pack_start (*gain_slider, true, true);
 
 	fader_alignment.set (0.5, 0.5, 0.0, 1.0);

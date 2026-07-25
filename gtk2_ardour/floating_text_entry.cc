@@ -21,9 +21,12 @@
 #include "gtkmm2ext/utils.h"
 
 #include "floating_text_entry.h"
+#include "gui_dimensions.h"
 #include "public_editor.h"
 
 #include "pbd/i18n.h"
+
+using namespace ARDOUR_UI_UTILS;
 
 FloatingTextEntry::FloatingTextEntry (Gtk::Window* parent, const std::string& initial_contents)
 	: Gtk::Window ()
@@ -31,7 +34,7 @@ FloatingTextEntry::FloatingTextEntry (Gtk::Window* parent, const std::string& in
 {
 	//set_name (X_("FloatingTextEntry"));
 	set_position (Gtk::WIN_POS_MOUSE);
-	set_border_width (0);
+	set_border_width (gui_distance (0));
 	set_type_hint(Gdk::WINDOW_TYPE_HINT_POPUP_MENU);
 	set_resizable (false);
 

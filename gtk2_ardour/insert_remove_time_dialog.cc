@@ -56,7 +56,7 @@ InsertRemoveTimeDialog::InsertRemoveTimeDialog (PublicEditor& e, bool remove)
 	set_session (_editor.session ());
 
 	get_vbox()->set_border_width (border());
-	get_vbox()->set_spacing (4);
+	get_vbox()->set_spacing (gui_distance (4));
 
 	Table* table = manage (new Table (2, 3));
 	table->set_spacings (4);
@@ -111,7 +111,7 @@ InsertRemoveTimeDialog::InsertRemoveTimeDialog (PublicEditor& e, bool remove)
 	get_vbox()->pack_start (*indent);
 	tempo_label.set_markup (_("Move tempo and time signature changes\n<i>(may cause oddities in the tempo map)</i>"));
 	HBox* tempo_box = manage (new HBox);
-	tempo_box->set_spacing (6);
+	tempo_box->set_spacing (gui_distance (6));
 	tempo_box->pack_start (_move_tempos, false, false);
 	tempo_box->pack_start (tempo_label, false, false);
 	get_vbox()->pack_start (*tempo_box);

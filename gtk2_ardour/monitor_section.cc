@@ -46,6 +46,7 @@
 #include "ardour/plugin_manager.h"
 
 #include "ardour_ui.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "mixer_ui.h"
 #include "monitor_section.h"
@@ -442,7 +443,7 @@ MonitorSection::MonitorSection ()
 	vpacker.pack_start (master_packer,        false, false, PX_SCALE(10));
 	vpacker.pack_end   (*out_packer,          false, false, scrollbar_height + 2 /* frame borders */);
 
-	hpacker.set_spacing (0);
+	hpacker.set_spacing (gui_distance (0));
 	hpacker.pack_start (vpacker, true, true);
 
 	add (hpacker);

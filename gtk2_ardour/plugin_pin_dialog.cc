@@ -45,6 +45,7 @@
 
 #include "plugin_pin_dialog.h"
 #include "plugin_setup_dialog.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "timers.h"
 #include "ui_config.h"
@@ -58,6 +59,7 @@ using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ArdourWidgets;
+using namespace ARDOUR_UI_UTILS;
 
 PluginPinWidget::PluginPinWidget (std::shared_ptr<ARDOUR::PluginInsert> pi)
 	: _set_config (_("Manual Config"), ArdourButton::led_default_elements)
@@ -141,19 +143,19 @@ PluginPinWidget::PluginPinWidget (std::shared_ptr<ARDOUR::PluginInsert> pi)
 	Frame *f;
 
 	VBox* tl = manage (new VBox ());
-	tl->set_border_width (2);
-	tl->set_spacing (2);
+	tl->set_border_width (gui_distance (2));
+	tl->set_spacing (gui_distance (2));
 
 	VBox* tr = manage (new VBox ());
-	tr->set_border_width (2);
-	tr->set_spacing (2);
+	tr->set_border_width (gui_distance (2));
+	tr->set_spacing (gui_distance (2));
 
 	/* left side */
 	tl->pack_start (_set_config, false, false);
 
 	if (_pi->plugin (0)->get_info()->reconfigurable_io () || _pi->plugin (0)->get_info()->variable_bus_layout ()) {
 		box = manage (new HBox ());
-		box->set_border_width (2);
+		box->set_border_width (gui_distance (2));
 		box->pack_start (_add_input_audio, true, false);
 		box->pack_start (_del_input_audio, true, false);
 		f = manage (new Frame ());
@@ -162,7 +164,7 @@ PluginPinWidget::PluginPinWidget (std::shared_ptr<ARDOUR::PluginInsert> pi)
 		tl->pack_start (*f, false, false);
 
 		box = manage (new HBox ());
-		box->set_border_width (2);
+		box->set_border_width (gui_distance (2));
 		box->pack_start (_add_input_midi, true, false);
 		box->pack_start (_del_input_midi, true, false);
 		f = manage (new Frame ());
@@ -171,7 +173,7 @@ PluginPinWidget::PluginPinWidget (std::shared_ptr<ARDOUR::PluginInsert> pi)
 		tl->pack_start (*f, false, false);
 	} else {
 		box = manage (new HBox ());
-		box->set_border_width (2);
+		box->set_border_width (gui_distance (2));
 		box->pack_start (_add_plugin, true, false);
 		box->pack_start (_del_plugin, true, false);
 		f = manage (new Frame ());
@@ -181,7 +183,7 @@ PluginPinWidget::PluginPinWidget (std::shared_ptr<ARDOUR::PluginInsert> pi)
 	}
 
 	box = manage (new HBox ());
-	box->set_border_width (2);
+	box->set_border_width (gui_distance (2));
 	box->pack_start (_add_output_audio, true, false);
 	box->pack_start (_del_output_audio, true, false);
 	f = manage (new Frame ());
@@ -190,7 +192,7 @@ PluginPinWidget::PluginPinWidget (std::shared_ptr<ARDOUR::PluginInsert> pi)
 	tl->pack_start (*f, false, false);
 
 	box = manage (new HBox ());
-	box->set_border_width (2);
+	box->set_border_width (gui_distance (2));
 	box->pack_start (_add_output_midi, true, false);
 	box->pack_start (_del_output_midi, true, false);
 	f = manage (new Frame ());
@@ -212,8 +214,8 @@ PluginPinWidget::PluginPinWidget (std::shared_ptr<ARDOUR::PluginInsert> pi)
 	tr->pack_start (*_sidechain_tbl, true, true);
 
 	box = manage (new VBox ());
-	box->set_border_width (2);
-	box->set_spacing (2);
+	box->set_border_width (gui_distance (2));
+	box->set_spacing (gui_distance (2));
 	box->pack_start (_add_sc_audio, false, false);
 	box->pack_start (_add_sc_midi , false, false);
 	f = manage (new Frame ());
@@ -224,13 +226,13 @@ PluginPinWidget::PluginPinWidget (std::shared_ptr<ARDOUR::PluginInsert> pi)
 
 	/* global packing */
 	HBox* hbox = manage (new HBox ());
-	hbox->set_spacing (4);
+	hbox->set_spacing (gui_distance (4));
 	hbox->pack_start (*tl, false, false);
 	hbox->pack_start (darea, true, true);
 	hbox->pack_start (*tr, false, false);
 
 	pack_start (*hbox, true, true);
-	set_border_width (4);
+	set_border_width (gui_distance (4));
 	show_all ();
 
 	plugin_reconfigured ();

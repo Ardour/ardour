@@ -67,20 +67,20 @@ RouteGroupDialog::RouteGroupDialog (std::shared_ptr<RouteGroup> g, bool creating
 	VBox* main_vbox = manage (new VBox);
 	Gtk::Label* l;
 
-	get_vbox()->set_spacing (4);
+	get_vbox()->set_spacing (gui_distance (4));
 
-	main_vbox->set_spacing (18);
-	main_vbox->set_border_width (5);
+	main_vbox->set_spacing (gui_distance (18));
+	main_vbox->set_border_width (gui_distance (5));
 
 	HBox* hbox = manage (new HBox);
-	hbox->set_spacing (6);
+	hbox->set_spacing (gui_distance (6));
 	l = manage (new Label (_("Name:"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false ));
 
 	hbox->pack_start (*l, false, true);
 	hbox->pack_start (_name, true, true);
 
 	VBox* top_vbox = manage (new VBox);
-	top_vbox->set_spacing (4);
+	top_vbox->set_spacing (gui_distance (4));
 
 	top_vbox->pack_start (*hbox, false, true);
 	top_vbox->pack_start (_active);
@@ -101,7 +101,7 @@ RouteGroupDialog::RouteGroupDialog (std::shared_ptr<RouteGroup> g, bool creating
 	_color.set_color (c);
 
 	VBox* options_box = manage (new VBox);
-	options_box->set_spacing (6);
+	options_box->set_spacing (gui_distance (6));
 
 	l = manage (new Label (_("<b>Sharing</b>"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false ));
 	l->set_use_markup ();

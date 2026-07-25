@@ -27,6 +27,7 @@
 
 #include "return_ui.h"
 #include "io_selector.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "timers.h"
 
@@ -34,6 +35,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 
 ReturnUI::ReturnUI (Gtk::Window* parent, std::shared_ptr<Return> r, Session* session)
@@ -45,8 +47,8 @@ ReturnUI::ReturnUI (Gtk::Window* parent, std::shared_ptr<Return> r, Session* ses
 	_hbox.pack_start (_gpm, true, true);
 	set_name (X_("ReturnUIFrame"));
 
-	_vbox.set_spacing (5);
-	_vbox.set_border_width (5);
+	_vbox.set_spacing (gui_distance (5));
+	_vbox.set_border_width (gui_distance (5));
 
 	_vbox.pack_start (_hbox, false, false, false);
 

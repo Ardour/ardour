@@ -24,11 +24,13 @@
 
 #include "gtkmm2ext/gui_thread.h"
 
+#include "gui_dimensions.h"
 #include "timers.h"
 #include "ui_config.h"
 #include "vst3_plugin_ui.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace Steinberg;
 
 #ifdef PLATFORM_WINDOWS
@@ -43,8 +45,8 @@ VST3PluginUI::VST3PluginUI (std::shared_ptr<PlugInsertBase> pib, std::shared_ptr
 	, _resize_in_progress (false)
 	, _view_realized (false)
 {
-	_ardour_buttons_box.set_spacing (6);
-	_ardour_buttons_box.set_border_width (6);
+	_ardour_buttons_box.set_spacing (gui_distance (6));
+	_ardour_buttons_box.set_border_width (gui_distance (6));
 
 	add_common_widgets (&_ardour_buttons_box);
 

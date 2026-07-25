@@ -45,6 +45,7 @@
 #include "application_bar.h"
 #include "ardour_ui.h"
 #include "editor.h"
+#include "gui_dimensions.h"
 #include "gui_thread.h"
 #include "public_editor.h"
 #include "pianoroll.h"
@@ -57,9 +58,8 @@
 
 #include "pbd/i18n.h"
 
-#define PX_SCALE(px) std::max ((float)px, rintf ((float)px* UIConfiguration::instance ().get_ui_scale ()))
-
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace ArdourWidgets;
 using namespace Gtkmm2ext;
 using namespace Gtk;
@@ -92,7 +92,7 @@ TriggerPage::TriggerPage ()
 	}
 
 	/* left-side, fixed-size cue-box */
-	_cue_area_box.set_spacing (2);
+	_cue_area_box.set_spacing (gui_distance (2));
 	_cue_area_box.pack_start (*spacer[0], Gtk::PACK_SHRINK);
 	_cue_area_box.pack_start (*spacer[1], Gtk::PACK_SHRINK);
 	_cue_area_box.pack_start (*spacer[2], Gtk::PACK_SHRINK);
@@ -113,7 +113,7 @@ TriggerPage::TriggerPage ()
 	_strip_packer.pack_end (_no_strips, true, true);
 	_no_strips.set_can_focus ();
 	_no_strips.add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK);
-	_no_strips.set_size_request (PX_SCALE (20), -1);
+	_no_strips.set_size_request (gui_distance (20), -1);
 	if (UIConfiguration::instance().get_render_plus_hints ()) {
 		_no_strips.signal_expose_event ().connect (sigc::bind (sigc::ptr_fun (&ArdourWidgets::ArdourIcon::expose_with_text), &_no_strips, ArdourWidgets::ArdourIcon::ShadedPlusSign, _("Drop a clip here\nto create a new Track")));
 	}
@@ -157,8 +157,8 @@ TriggerPage::TriggerPage ()
 	/* Bottom -- Properties of selected Slot/Region */
 
 	hpacker.set_homogeneous (false);
-	hpacker.set_spacing (8);  //match to slot_properties_box::set_spacings
-	hpacker.set_border_width (1);
+	hpacker.set_spacing (gui_distance (8));  //match to slot_properties_box::set_spacings
+	hpacker.set_border_width (gui_distance (1));
 
 	/* note these are re-packed as needed below. see
 	 * hide_all(), selection_changed(), trigger_arm_changed()
@@ -179,7 +179,7 @@ TriggerPage::TriggerPage ()
 	_sidebar_pager2.set_name ("tab button");
 
 	HBox* tabbox = manage (new HBox (true));
-	tabbox->set_spacing (3);
+	tabbox->set_spacing (gui_distance (3));
 	tabbox->pack_start (_sidebar_pager1);
 	tabbox->pack_start (_sidebar_pager2);
 
