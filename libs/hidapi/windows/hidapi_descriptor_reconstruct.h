@@ -130,8 +130,12 @@ typedef struct hid_pp_link_collection_node_ {
 //       Although very unlikely, it might still be possible that the compiler creates a memory layout that is
 //       not binary compatile.
 //       Other structs are not checked at the time of writing.
+// static_assert was added to <assert.h> in C11; skip this check when the
+// translation unit is compiled as C99 or earlier, where it is unavailable.
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L
 static_assert(sizeof(struct hid_pp_link_collection_node_) == 16,
     "Size of struct hid_pp_link_collection_node_ not as expected. This might break binary compatibility");
+#endif
 
 typedef struct hidp_unknown_token_ {
 	UCHAR Token; /* Specifies the one-byte prefix of a global item. */
