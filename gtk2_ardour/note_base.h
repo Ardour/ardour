@@ -133,6 +133,8 @@ class NoteBase : public sigc::trackable
 	static std::vector<uint32_t> pitch_colors;
 	static void save_colors ();
 
+	bool mouse_near_start () const;
+	bool mouse_near_end () const;
 	bool mouse_near_ends () const;
 	virtual bool big_enough_to_trim () const;
 
