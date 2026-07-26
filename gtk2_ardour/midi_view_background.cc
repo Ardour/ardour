@@ -476,23 +476,23 @@ MidiViewBackground::build_key_enforcement_menu ()
 	menu->set_name ("ArdourContextMenu");
 
 	RadioMenuItem::Group group;
-	CheckMenuItem* last_check_item;
+	Gtk::CheckMenuItem* last_check_item;
 	RadioMenuItem* last_radio_item;
 
 	ARDOUR::KeyEnforcementPolicy kep = midi_track()->key_enforcement_policy();
 
 	items.push_back (CheckMenuElem (_("Show notes-in-scale in MIDI backgrounds")));
-	last_check_item = dynamic_cast<CheckMenuItem*>(&items.back());
+	last_check_item = dynamic_cast<Gtk::CheckMenuItem*>(&items.back());
 	last_check_item->set_active (kep & ARDOUR::ShowKey);
 	last_check_item->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiViewBackground::toggle_key_enforcement_policy), ARDOUR::ShowKey, last_check_item));
 
 	items.push_back (CheckMenuElem (_("Don't show non-scale ghost notes while drawing/editing")));
-	last_check_item = dynamic_cast<CheckMenuItem*>(&items.back());
+	last_check_item = dynamic_cast<Gtk::CheckMenuItem*>(&items.back());
 	last_check_item->set_active (kep & ARDOUR::NoDraw);
 	last_check_item->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiViewBackground::toggle_key_enforcement_policy), ARDOUR::NoDraw, last_check_item));
 
 	items.push_back (CheckMenuElem (_("Don't allow mouse edits to create non-scale notes")));
-	last_check_item = dynamic_cast<CheckMenuItem*>(&items.back());
+	last_check_item = dynamic_cast<Gtk::CheckMenuItem*>(&items.back());
 	last_check_item->set_active (kep & ARDOUR::NoInsert);
 	last_check_item->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiViewBackground::toggle_key_enforcement_policy), ARDOUR::NoInsert, last_check_item));
 
