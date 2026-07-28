@@ -278,7 +278,7 @@ ScaleDialog::fill_dropdowns (TuningSystem tuning)
 		if (tune != tuning) {
 			continue;
 		}
-		mode_dropdown.add_menu_elem (MenuElem (mode.name(), [this,mode]() { float root = _key ? _key->root() : 64; MusicalKey k (root, mode); set (&k); }));
+		mode_dropdown.add_menu_elem (MenuElem (mode.name(), [this,mymode = mode]() { float root = _key ? _key->root() : 64; MusicalKey k (root, mymode); set (&k); }));
 	}
 
 	root_dropdown.set_active (0);
