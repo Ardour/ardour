@@ -946,6 +946,9 @@ DiskWriter::configuration_changed ()
 int
 DiskWriter::seek (samplepos_t /*sample*/, bool /*complete_refill*/)
 {
+	/* must not run concurrently with finish_capture */
+	PBD::Mutex::Lock lm (capture_info_lock);
+
 	reset_capture ();
 	return 0;
 }
@@ -966,6 +969,7 @@ DiskWriter::reset_capture ()
 
 	_accumulated_capture_offset = 0;
 	_capture_start_sample.reset ();
+	_was_recording = false;
 }
 
 int
