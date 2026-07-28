@@ -28,6 +28,7 @@ export ARDOUR_EXPORT_FORMATS_PATH=$TOP/share/export
 export ARDOUR_THEMES_PATH=$TOP/gtk2_ardour/themes
 export ARDOUR_BACKEND_PATH=$libs/backends/jack:$libs/backends/dummy:$libs/backends/alsa:$libs/backends/coreaudio:$libs/backends/portaudio:$libs/backends/pulseaudio
 export ARDOUR_TEST_PATH=$TOP/libs/ardour/test/data
+export ARDOUR_MCP_PATH=$TOP/share/mcp
 export PBD_TEST_PATH=$TOP/libs/pbd/test
 export EVORAL_TEST_PATH=$TOP/libs/evoral/test/testdata
 export MIDIPP_TEST_PATH=$TOP/share/patchfiles
