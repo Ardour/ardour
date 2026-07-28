@@ -292,7 +292,7 @@ DeviceInfo::has_touch_sense_faders () const
 }
 
 static const char * const devinfo_env_variable_name = "ARDOUR_MCP_PATH";
-static const char* const devinfo_dir_name = "mcp";
+static const char* const devinfo_dir_name = "us2400";
 static const char* const devinfo_suffix = ".device";
 
 static Searchpath
