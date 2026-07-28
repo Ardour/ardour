@@ -946,6 +946,7 @@ DiskWriter::configuration_changed ()
 int
 DiskWriter::seek (samplepos_t /*sample*/, bool /*complete_refill*/)
 {
+	assert (!_was_recording);
 	/* must not run concurrently with finish_capture */
 	PBD::Mutex::Lock lm (capture_info_lock);
 
