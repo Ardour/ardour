@@ -578,6 +578,7 @@ CoreSelection::set_state (const XMLNode& node, int /* version */)
 {
 	XMLNodeList children (node.children());
 	PBD::RWLock::WriterLock lm (_lock);
+	std::weak_ptr<ARDOUR::Stripable> last;
 
 	_stripables.clear ();
 
@@ -606,8 +607,11 @@ CoreSelection::set_state (const XMLNode& node, int /* version */)
 
 		SelectedStripable ss (PBD::ID (s), PBD::ID (c), order);
 		_stripables.insert (ss);
+
+		last = session.stripable_by_id (ss.stripable);
 	}
 
+	_first_selected_stripable = last;
 	return 0;
 }
 
