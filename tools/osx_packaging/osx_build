@@ -155,6 +155,7 @@ LuaScripts=$Shared/scripts
 MediaClips=$Shared/media
 WebSurfaces=$Shared/web_surfaces
 MackieControl=$Shared/mcp
+US2400=$Shared/us2400
 OSC=$Shared/osc
 Themes=$Shared/themes
 
@@ -189,6 +190,7 @@ mkdir -p $MidiMaps
 mkdir -p $ExportFormats
 mkdir -p $Etc
 mkdir -p $MackieControl
+mkdir -p $US2400
 mkdir -p $OSC
 mkdir -p $Themes
 
@@ -405,6 +407,12 @@ rm $MediaClips/wscript
 # got to be careful with names here
 for x in $BUILD_ROOT/../share/mcp/*.device $BUILD_ROOT/../share/mcp/*.profile ; do
 	cp "$x" $MackieControl
+done
+
+# US2400 data
+# got to be careful with names here
+for x in $BUILD_ROOT/../share/us2400/*.device $BUILD_ROOT/../share/us2400/*.profile ; do
+	cp "$x" $US2400
 done
 
 # Chord data

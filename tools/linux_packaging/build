@@ -216,6 +216,7 @@ LuaScripts=$Shared/scripts
 MediaClips=$Shared/media
 WebSurfaces=$Shared/web_surfaces
 MackieControl=$Shared/mcp
+US2400=$Shared/us2400
 OSC=$Shared/osc
 
 if [ x$PRINT_SYSDEPS != x ] ; then
@@ -249,6 +250,7 @@ mkdir -p $Locale
 mkdir -p $Surfaces
 mkdir -p $MidiMaps
 mkdir -p $MackieControl
+mkdir -p $US2400
 mkdir -p $OSC
 mkdir -p $ExportFormats
 mkdir -p $Panners
@@ -416,6 +418,13 @@ rm $MediaClips/wscript
 for x in $BUILD_ROOT/../share/mcp/*.device $BUILD_ROOT/../share/mcp/*.profile ; do
     cp "$x" $MackieControl
 done
+
+# US2400 data
+# got to be careful with names here
+for x in $BUILD_ROOT/../share/us2400/*.device $BUILD_ROOT/../share/us2400/*.profile ; do
+    cp "$x" $US2400
+done
+
 
 # Chord data
 cp $BUILD_ROOT/../share/chords.txt $Shared
