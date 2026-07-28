@@ -115,6 +115,12 @@ gdk_window_impl_quartz_get_context (GdkDrawable *drawable,
   if (!cg_context)
     return NULL;
 
+  if (window_impl->offscreen) {
+    CGContextSaveGState (window_impl->offscreen);
+    CGContextSetAllowsAntialiasing (window_impl->offscreen, antialias);
+    return window_impl->offscreen;
+  }
+
   CGContextSaveGState (cg_context);
   CGContextSetAllowsAntialiasing (cg_context, antialias);
 
@@ -633,6 +639,42 @@ get_nsscreen_for_point (gint x, gint y)
   return screen;
 }
 
+void _update_offscreen(GdkWindow *window) {
+  GdkWindowObject *private;
+  GdkWindowImplQuartz *impl;
+
+  private = (GdkWindowObject *)window;
+  impl = private->impl;
+
+  fprintf(stderr, "update offscreen\n");
+
+  if (impl->view) {
+    if (impl->offscreen) {
+      CFRelease(impl->offscreen);
+      impl->offscreen = NULL;
+    }
+
+    CALayer *layer = [impl->view layer];
+
+    CGFloat scale = 1.0;
+    scale = [impl->toplevel backingScaleFactor];
+    fprintf(stderr, "scale:%f\n", scale);
+      int w = private->width * scale;
+      int stride = (w * 4 + 255) & ~255;
+      CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+      impl->offscreen = CGBitmapContextCreate(NULL,
+        w,
+        private->height * scale,
+        8,
+        stride,
+        colorSpace,
+        kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little);
+      CGContextScaleCTM(impl->offscreen, scale, scale);
+      CGColorSpaceRelease(colorSpace);
+  }
+
+}
+
 void
 _gdk_window_impl_new (GdkWindow     *window,
 		      GdkWindow     *real_parent,
@@ -810,6 +852,8 @@ _gdk_window_impl_new (GdkWindow     *window,
     default:
       g_assert_not_reached ();
     }
+
+  _update_offscreen(window);
 
   GDK_QUARTZ_RELEASE_POOL;
 
@@ -1140,6 +1184,12 @@ move_resize_window_internal (GdkWindow *window,
     {
       delta.height = 0;
     }
+
+  if (
+    (width != private->width && width != -1) ||
+    (height != private->height && height != -1)) {
+    _update_offscreen(window);
+  }
 
   if (width != -1)
     private->width = width;

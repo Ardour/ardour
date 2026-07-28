@@ -840,6 +840,23 @@ static int showInvalidation = 0;
   _gdk_window_process_updates_recurse (gdk_window, region);
   impl->in_paint_rect_count--;
 
+  if (impl->offscreen) {
+    fprintf(stderr, "offscreen blit %d,%d %d,%d\n",
+      private->x, private->y, private->width, private->height);
+    CGContextRef cg;
+    CGContextFlush(impl->offscreen);
+    CGImageRef img = CGBitmapContextCreateImage(impl->offscreen);
+    [NSGraphicsContext saveGraphicsState];
+    cg = [[NSGraphicsContext currentContext] CGContext];
+    CGRect rect = CGRectMake (
+      0,
+      0,
+      private->width, private->height);
+    CGContextDrawImage(cg, rect, img);
+    CGContextFlush(cg);
+    [NSGraphicsContext restoreGraphicsState];
+    CFRelease(img);
+  }
 
 #ifndef NDEBUG
   if (showInvalidation) {
