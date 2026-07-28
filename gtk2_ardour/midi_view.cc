@@ -4533,14 +4533,14 @@ MidiView::sysex_left (SysEx *)
 }
 
 void
-MidiView::note_mouse_position (float x_fraction, float /*y_fraction*/, bool can_set_cursor)
+MidiView::note_mouse_position (float /*x_fraction*/, float /*y_fraction*/, bool can_set_cursor)
 {
-	bool trimmable = _editing_context.allow_trim_cursors ();
+	bool trimmable = _editing_context.allow_trim_cursors () && _entered_note && _entered_note->big_enough_to_trim ();
 
 	if (can_set_cursor) {
-		if (trimmable && x_fraction > 0.0 && x_fraction < 0.2) {
+		if (trimmable && _entered_note->mouse_near_start ()) {
 			_editing_context.set_canvas_cursor (_editing_context.cursors()->left_side_trim);
-		} else if (trimmable && x_fraction >= 0.8 && x_fraction < 1.0) {
+		} else if (trimmable && _entered_note->mouse_near_end ()) {
 			_editing_context.set_canvas_cursor (_editing_context.cursors()->right_side_trim);
 		} else {
 			_editing_context.set_canvas_cursor (_editing_context.cursors()->grabber_note);

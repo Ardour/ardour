@@ -19,6 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <algorithm>
 #include <iostream>
 
 #include "pbd/strsplit.h"
@@ -50,6 +51,19 @@ using namespace std;
 using namespace Gtkmm2ext;
 using ARDOUR::MidiModel;
 using namespace ArdourCanvas;
+
+namespace {
+
+constexpr double max_note_trim_handle_pixels = 8.0;
+
+double
+note_trim_edge_width (NoteBase const& note)
+{
+	const double width = std::max (0.0, note.x1 () - note.x0 ());
+	return std::min (max_note_trim_handle_pixels, std::max (0.0, (width * 0.5) - 1.0));
+}
+
+}
 
 /// dividing the hue circle in 16 parts, hand adjusted for equal look, courtesy Thorsten Wilms
 const uint32_t NoteBase::midi_channel_colors[16] = {
@@ -372,10 +386,31 @@ NoteBase::event_handler (GdkEvent* ev)
 }
 
 bool
+NoteBase::mouse_near_start () const
+{
+	if (_mouse_x_fraction < 0.0 || _mouse_x_fraction >= 1.0) {
+		return false;
+	}
+
+	const double width = std::max (0.0, x1 () - x0 ());
+	return (_mouse_x_fraction * width) < note_trim_edge_width (*this);
+}
+
+bool
+NoteBase::mouse_near_end () const
+{
+	if (_mouse_x_fraction < 0.0 || _mouse_x_fraction >= 1.0) {
+		return false;
+	}
+
+	const double width = std::max (0.0, x1 () - x0 ());
+	return (_mouse_x_fraction * width) >= (width - note_trim_edge_width (*this));
+}
+
+bool
 NoteBase::mouse_near_ends () const
 {
-	return (_mouse_x_fraction >= 0.0 && _mouse_x_fraction < 0.25) ||
-		(_mouse_x_fraction >= 0.75 && _mouse_x_fraction < 1.0);
+	return mouse_near_start () || mouse_near_end ();
 }
 
 bool

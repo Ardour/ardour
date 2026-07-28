@@ -46,7 +46,7 @@ Bracelet::render (Cairo::RefPtr<Cairo::Context> const& ctxt, cairo_rectangle_t*)
 
 	ctxt->translate (width/2., width/2.);
 
-	float main_radius = width/2. - 30;
+	float main_radius = width/2. - 30.;
 	float minor_radius = main_radius / 5.;
 
 	Gtkmm2ext::set_source_rgba (ctxt->cobj(), outline_color);

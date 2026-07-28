@@ -1528,7 +1528,7 @@ CueEditor::set_from_rsu (RegionUISettings& rsu)
 		ArdourWindow* aw = dynamic_cast<ArdourWindow*> (toplevel);
 		if (aw) {
 			aw->move (rsu.x, rsu.y);
-			aw->set_size_request (rsu.width, rsu.height);
+			aw->set_default_size (rsu.width, rsu.height);
 		}
 	}
 }
