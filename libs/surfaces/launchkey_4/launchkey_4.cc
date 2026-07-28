@@ -513,7 +513,7 @@ LaunchKey4::input_port_name () const
 	switch (last_detected) {
 	case LAUNCHKEY4_MINI_25:
 	case LAUNCHKEY4_MINI_37:
-		return X_(":Launchpad Mini MK3.*MIDI (In|2)");
+		return X_(":Launchkey Mini MK4.*MIDI (In|2)");
 	default:
 		break;
 	}
@@ -526,7 +526,7 @@ LaunchKey4::output_port_name () const
 	switch (last_detected) {
 	case LAUNCHKEY4_MINI_25:
 	case LAUNCHKEY4_MINI_37:
-		return X_(":Launchpad Mini MK3.*MIDI (Out|2)");
+		return X_(":Launchkey Mini MK4.*MIDI (Out|2)");
 	default:
 		break;
 	}
