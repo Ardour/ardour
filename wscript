@@ -398,6 +398,7 @@ children = [
         'share/patchfiles',
         'share/plugin_metadata',
         'share/scripts',
+        'share/us2400',
         'share/web_surfaces',
         # frontends
         'gtk2_ardour',
