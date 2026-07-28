@@ -62,6 +62,8 @@ struct _GdkWindowImplQuartz
   GdkColor background_color;
 
   guint background_color_set : 1;
+
+  CGContextRef *offscreen;
 };
  
 struct _GdkWindowImplQuartzClass 
