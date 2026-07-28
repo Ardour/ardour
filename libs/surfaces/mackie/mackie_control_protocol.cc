@@ -366,12 +366,18 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 
 	Sorted sorted = get_sorted_stripables();
 	uint32_t strip_cnt = n_strips (false); // do not include locked strips
-					       // in this count
+	bool exists = false;
+	Sorted::iterator first = sorted.end();
 
-	if (initial >= sorted.size() && !force) {
-		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("bank target %1 exceeds route range %2\n",
-		                                                   _current_initial_bank, sorted.size()));
-		/* too high, we can't get there */
+	for (auto s = sorted.begin(); s != sorted.end(); ++s) {
+		if ((*s)->presentation_info().order() == initial) {
+			first = s;
+			exists = true;
+			break;
+		}
+	}
+
+	if (!exists) {
 		return -1;
 	}
 
@@ -389,52 +395,37 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 
 	// Map current bank of stripables onto each surface(+strip)
 
-	if (_current_initial_bank < sorted.size()) {
 
-		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("switch to %1, %2, available stripables %3 on %4 surfaces\n",
-								   _current_initial_bank, strip_cnt, sorted.size(),
-								   surfaces.size()));
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("switch to %1, %2, available stripables %3 on %4 surfaces\n",
+	                                                   _current_initial_bank, strip_cnt, sorted.size(),
+	                                                   surfaces.size()));
 
-		// link stripables to strips
+	// link stripables to strips
 
-		Sorted::iterator r = sorted.begin() + _current_initial_bank;
+	Sorted::iterator r = first;
 
-		{
-			PBD::Mutex::Lock lm (surfaces_lock);
-			for (Surfaces::iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
-				vector<std::shared_ptr<Stripable> > stripables;
-				uint32_t added = 0;
+	{
+		PBD::Mutex::Lock lm (surfaces_lock);
+		for (Surfaces::iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
 
-				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("surface has %1 unlocked strips\n", (*si)->n_strips (false)));
+			vector<std::shared_ptr<Stripable> > stripables;
+			uint32_t added = 0;
 
-				for (; r != sorted.end() && added < (*si)->n_strips (false); ++r, ++added) {
-					stripables.push_back (*r);
-				}
+			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("surface has %1 unlocked strips\n", (*si)->n_strips (false)));
 
-				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("give surface %1 stripables\n", stripables.size()));
+			for (; r != sorted.end() && added < (*si)->n_strips (false); ++r, ++added) {
+				stripables.push_back (*r);
+			}
 
-				(*si)->map_stripables (stripables);
+			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("give surface %1 stripables\n", stripables.size()));
 
-				// Force RGB update on next redisplay
-				if (_device_info.is_v1m() || _device_info.is_p1m() || _device_info.is_p1nano()) {
-					(*si)->force_icon_rgb_update();
-				}
+			(*si)->map_stripables (stripables);
+
+			// Force RGB update on next redisplay
+			if (_device_info.is_v1m() || _device_info.is_p1m() || _device_info.is_p1nano()) {
+				(*si)->force_icon_rgb_update();
 			}
 		}
-
-	} else {
-		/* all strips need to be reset */
-		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("clear all strips, bank target %1  is outside route range %2\n",
-		                                                   _current_initial_bank, sorted.size()));
-		{
-			PBD::Mutex::Lock lm (surfaces_lock);
-			for (Surfaces::iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
-				vector<std::shared_ptr<Stripable> > stripables;
-				/* pass in an empty stripables list, so that all strips will be reset */
-				(*si)->map_stripables (stripables);
-			}
-		}
-		return -1;
 	}
 
 	/* current bank has not been saved */
