@@ -495,7 +495,9 @@ LTC_TransportMaster::process_ltc(samplepos_t const now)
 				break;
 		}
 
-		if (!ltc_frame.reverse) {
+		if (ltc_is_stationary) {
+			transport_direction = 0;
+		} else if (!ltc_frame.reverse) {
 			ltc_frame_increment(&ltc_frame.ltc, fps_i, tv_standard, 0);
 			ltc_frame_to_time(&stime, &ltc_frame.ltc, 0);
 			transport_direction = 1;
