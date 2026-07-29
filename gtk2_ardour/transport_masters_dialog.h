@@ -101,6 +101,10 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 		samplepos_t save_when;
 		std::string save_last;
 
+		Gdk::Color color_locked;
+		Gdk::Color color_posnfo;
+		bool position_is_locked;
+
 		void mod_request_type (ARDOUR::TransportRequestType);
 
 		std::shared_ptr<ARDOUR::TransportMaster> tm;

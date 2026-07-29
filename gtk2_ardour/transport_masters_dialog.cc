@@ -324,6 +324,7 @@ TransportMastersWidget::Row::Row (TransportMastersWidget& p)
 	, name_editor (0)
 	, save_when (0)
 	, save_last (" --:--:--:--")
+	, position_is_locked (true)
 {
 	remove_button.set_icon (ArdourIcon::CloseCross);
 	format.modify_font (UIConfiguration::instance().get_BigMonospaceFont());
@@ -332,14 +333,17 @@ TransportMastersWidget::Row::Row (TransportMastersWidget& p)
 
 	uint32_t bg = UIConfigurationBase::instance().color ("clock: background");
 	uint32_t fg = UIConfigurationBase::instance().color ("clock: text");
+	uint32_t hl = UIConfigurationBase::instance().color ("transport delta clock: text");
 	Gdk::Color bg_color = Gtkmm2ext::gdk_color_from_rgba (bg);
-	Gdk::Color fg_color = Gtkmm2ext::gdk_color_from_rgba (fg);
+
+	color_locked = Gtkmm2ext::gdk_color_from_rgba (fg);
+	color_posnfo = Gtkmm2ext::gdk_color_from_rgba (hl);
 
 	current_box.modify_bg (Gtk::STATE_NORMAL, bg_color);
-	current.modify_fg (Gtk::STATE_NORMAL, fg_color);
+	current.modify_fg (Gtk::STATE_NORMAL, color_locked);
 
 	last_box.modify_bg (Gtk::STATE_NORMAL, bg_color);
-	last.modify_fg (Gtk::STATE_NORMAL, fg_color);
+	last.modify_fg (Gtk::STATE_NORMAL, color_locked);
 
 	set_size_request_to_display_given_text (format, "999.9 BPM", 0, 0);
 
@@ -568,6 +572,8 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 		return;
 	}
 
+	bool pos_is_locked = true;
+
 	string current_str (" --:--:--:--");
 	string delta_str (u8"\u0394  ----  ");
 	string age_str ("         ");
@@ -601,6 +607,19 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 		save_last = current_str;
 	} else {
 		format.set_text ("   ?   ");
+		if (tm->valid_position (save_last, save_when)) {
+			pos_is_locked = false;
+			delta_str = tm->delta_string ();
+		}
+	}
+
+	if (position_is_locked != pos_is_locked) {
+		position_is_locked = pos_is_locked;
+		if (position_is_locked) {
+			last.modify_fg (Gtk::STATE_NORMAL, color_locked);
+		} else {
+			last.modify_fg (Gtk::STATE_NORMAL, color_posnfo);
+		}
 	}
 
 	if (save_when) {
