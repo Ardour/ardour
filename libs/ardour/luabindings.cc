@@ -258,7 +258,7 @@ CLASSINFO(TrackViewList);
 CLASSINFO(UIConfiguration);
 
 /* this needs to match gtk2_ardour/luasignal.h */
-CLASSKEYS(std::bitset<50ul>); // LuaSignal::LAST_SIGNAL
+CLASSKEYS(std::bitset<52ul>); // LuaSignal::LAST_SIGNAL
 
 CLASSKEYS(void);
 CLASSKEYS(float);

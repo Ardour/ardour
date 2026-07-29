@@ -31,6 +31,8 @@ ENGINE(EngineHalted, Halted)
 ENGINE(EngineDeviceListChanged, DeviceListChanged)
 ENGINE(BufferSizeChanged, BufferSizeChanged)
 ENGINE(SampleRateChanged, SampleRateChanged)
+ENGINE(PortRegisteredOrUnregistered, PortRegisteredOrUnregistered)
+ENGINE(PortConnectedOrDisconnected, PortConnectedOrDisconnected)
 
 // session static
 STATIC(FeedbackDetected, &ARDOUR::Session::FeedbackDetected)
@@ -105,5 +107,5 @@ STATIC(SelectionChanged, &LuaInstance::SelectionChanged)
 // NOTE: WHEN ADDING/REMOVING SIGNALS, UPDATE libs/ardour/luabindings.cc
 // TO MATCH THE TOTAL NUMBER OF SIGNALS.
 //
-// CLASSKEYS(std::bitset<50ul>); // LuaSignal::LAST_SIGNAL
+// CLASSKEYS(std::bitset<52ul>); // LuaSignal::LAST_SIGNAL
 // /////////////////////////////////////////////////////////////////////
