@@ -823,10 +823,10 @@ RouteTimeAxisView::build_display_menu ()
 		build_playlist_menu ();
 		items.push_back (MenuElem (_("Playlist"), *playlist_action_menu));
 		items.back().set_sensitive (_editor.get_selection().tracks.size() <= 1);
+		items.push_back (SeparatorElem());
 	}
 
 	if (active) {
-		items.push_back (SeparatorElem());
 		items.push_back (MenuElem (_("Scale..."), sigc::mem_fun (*this, &RouteTimeAxisView::edit_scale)));
 		add_scale_related_menu_items (items);
 		items.push_back (SeparatorElem());
