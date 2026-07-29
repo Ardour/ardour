@@ -49,6 +49,7 @@ LTC_TransportMaster::LTC_TransportMaster (std::string const & name)
 	, monotonic_cnt (0)
 	, frames_since_reset (0)
 	, delayedlocked (10)
+	, frame_age (0)
 	, ltc_detect_fps_cnt (0)
 	, ltc_detect_fps_max (0)
 	, sync_lock_broken (false)
@@ -513,6 +514,8 @@ LTC_TransportMaster::process_ltc(samplepos_t const now)
 		timecode.seconds = stime.secs;
 		timecode.frames  = stime.frame;
 
+		frame_age = ltc_frame.off_end;
+
 		samplepos_t ltc_sample; // audio-sample corresponding to position of LTC frame
 
 		if (_session) {
@@ -679,6 +682,17 @@ LTC_TransportMaster::apparent_timecode_format () const
 	} else {
 		return timecode_30;
 	}
+}
+
+bool
+LTC_TransportMaster::valid_position (std::string& tc, samplepos_t& when) const
+{
+	if (frame_age == 0) {
+		return false;
+	}
+	tc =  Timecode::timecode_format_time(timecode);
+	when = frame_age;
+	return true;
 }
 
 std::string

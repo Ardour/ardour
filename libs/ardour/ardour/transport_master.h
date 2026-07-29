@@ -313,6 +313,14 @@ public:
 	*/
 	virtual std::string position_string () const = 0;
 
+	/* This can be used as display value when transport is not locked,
+	 * but a valid position has been received. e.g LTC standing TC.
+	 */
+	virtual bool valid_position (std::string& tc, samplepos_t& when) const
+	{
+		return false;
+	}
+
 	virtual bool can_loop () const
 	{
 		return false;
@@ -608,6 +616,8 @@ public:
 	std::string              position_string () const;
 	std::string              delta_string () const;
 
+	bool valid_position (std::string& tc, samplepos_t& when) const;
+
 	void create_port ();
 
 private:
@@ -632,6 +642,8 @@ private:
 	samplecnt_t    monotonic_cnt;
 	uint64_t       frames_since_reset;
 	int            delayedlocked;
+
+	samplepos_t    frame_age;
 
 	int            ltc_detect_fps_cnt;
 	int            ltc_detect_fps_max;
