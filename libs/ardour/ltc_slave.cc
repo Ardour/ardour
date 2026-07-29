@@ -430,14 +430,18 @@ LTC_TransportMaster::process_ltc(samplepos_t const now)
 
 		const bool ltc_is_stationary = equal_ltc_sample_time (&prev_frame.ltc, &ltc_frame.ltc);
 
-		if (detect_discontinuity (&ltc_frame, ceil(timecode.rate), !fps_detected)) {
+		if (ltc_is_stationary && fps_detected) {
+			if (frames_since_reset < 20) {
+				frames_since_reset++;
+			}
+		} else if (detect_discontinuity (&ltc_frame, ceil(timecode.rate), !fps_detected)) {
 			if (frames_since_reset > 1) {
 				reset (false);
 			}
-		} else {
-			if (fps_detected) {
+		} else if (fps_detected) {
+			/* prevent overvlow */
+			if (frames_since_reset < 20) {
 				frames_since_reset++;
-				DEBUG_TRACE (DEBUG::LTC, string_compose ("fsr %1\n", frames_since_reset));
 			}
 		}
 
@@ -545,7 +549,11 @@ LTC_TransportMaster::process_ltc(samplepos_t const now)
 		DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC ltc-sample: %1 prev-ltc-sample %2  cur-timestamp: %3 last-timestamp: %4 frame-spans %5..%6\n", ltc_sample, current.position, cur_timestamp, current.timestamp, ltc_frame.off_start, ltc_frame.off_end));
 
 		if (cur_timestamp <= current.timestamp || current.timestamp == 0) {
+			// FIXME handle backwards playback!
 			DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC speed: UNCHANGED: %1\n", current.speed));
+		} else if (transport_direction == 0) {
+			/* static timecode - no-roll/stop */
+			ltc_speed = 0;
 		} else {
 			ltc_speed = double (ltc_sample - current.position) / double (cur_timestamp - current.timestamp);
 
