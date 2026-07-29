@@ -609,7 +609,6 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 		format.set_text ("   ?   ");
 		if (tm->valid_position (save_last, save_when)) {
 			pos_is_locked = false;
-			delta_str = tm->delta_string ();
 		}
 	}
 
