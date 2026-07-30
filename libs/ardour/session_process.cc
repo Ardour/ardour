@@ -1385,7 +1385,12 @@ Session::plan_master_strategy (pframes_t nframes, double master_speed, samplepos
 		if (_transport_fsm->rolling() && Config->get_transport_masters_just_roll_when_sync_lost()) {
 			transport_master_strategy.action = TransportMasterRelax;
 		} else {
-			transport_master_strategy.action = TransportMasterNoRoll;
+			/* Master is invalid, stop first, before doing NoRoll */
+			if (_transport_fsm->rolling()) {
+				transport_master_strategy.action = TransportMasterStop;
+			} else {
+				transport_master_strategy.action = TransportMasterNoRoll;
+			}
 		}
 		return 1.0;
 	}
