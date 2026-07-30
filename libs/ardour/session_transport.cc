@@ -615,9 +615,14 @@ Session::start_transport (bool after_loop)
 		queue_event (ev);
 
 		samplepos_t roll_pos = _transport_sample + std::max (_count_in_samples, _remaining_latency_preroll) * (_transport_fsm->will_roll_forwards () ? 1 : -1);
+
 		if (roll_pos > 0 && roll_pos != _transport_sample) {
 			/* and when transport_rolling () == true */
 			SessionEvent* ev = new SessionEvent (SessionEvent::TransportStateChange, SessionEvent::Add, roll_pos, roll_pos, 1.0);
+			queue_event (ev);
+		} else if (transport_master_is_external ()) {
+			/* with TC masters, count_in and preroll are zero and actual _transport_sample is adjusted. */
+			SessionEvent* ev = new SessionEvent (SessionEvent::TransportStateChange, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
 			queue_event (ev);
 		}
 	}
