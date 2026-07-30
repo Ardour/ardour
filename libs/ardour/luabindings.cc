@@ -368,6 +368,7 @@ CLASSKEYS(std::shared_ptr<ARDOUR::MidiRegion>);
 CLASSKEYS(std::shared_ptr<ARDOUR::MidiSource>);
 CLASSKEYS(std::shared_ptr<ARDOUR::PluginInfo>);
 CLASSKEYS(std::shared_ptr<ARDOUR::PluginInsert>);
+CLASSKEYS(std::shared_ptr<ARDOUR::Port>);
 CLASSKEYS(std::shared_ptr<ARDOUR::RegionFxPlugin>);
 CLASSKEYS(std::shared_ptr<ARDOUR::Route>);
 CLASSKEYS(std::shared_ptr<ARDOUR::RouteGroup>);
@@ -387,6 +388,7 @@ CLASSKEYS(std::shared_ptr<Evoral::PatchChange<Temporal::Beats> >);
 CLASSKEYS(std::shared_ptr<Evoral::Sequence<Temporal::Beats> >);
 
 CLASSKEYS(std::weak_ptr<ARDOUR::Bundle>);
+CLASSKEYS(std::weak_ptr<ARDOUR::Port>);
 CLASSKEYS(std::weak_ptr<ARDOUR::Route>);
 CLASSKEYS(std::weak_ptr<ARDOUR::Track>);
 CLASSKEYS(std::weak_ptr<ARDOUR::VCA>);
