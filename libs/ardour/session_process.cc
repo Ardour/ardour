@@ -276,7 +276,9 @@ Session::process_routes (pframes_t nframes, bool& need_butler)
 			bool b = false;
 
 			if ((ret = i->roll (nframes, start_sample, end_sample, b)) < 0) {
+#ifndef NDEBUG
 				cerr << "ERR1 STOP\n";
+#endif
 				TFSM_STOP (false, false);
 				return -1;
 			}
@@ -1296,7 +1298,9 @@ Session::plan_master_strategy_engine (pframes_t nframes, double master_speed, sa
 					transport_master_strategy.action = TransportMasterRelax;
 					return 1.0;
 				} else {
+#ifndef NDEBUG
 					cerr << "\n\n\n IMPOSSIBLE! OUT OF SYNC (delta = " << delta << ") WITH JACK TRANSPORT (rlp = " << remaining_latency_preroll() << " wlp " << worst_latency_preroll() << ")\n\n\n";
+#endif
 				}
 			}
 		}
@@ -1644,13 +1648,21 @@ Session::implement_master_strategy ()
 		break;
 	case TransportMasterLocate:
 		transport_master_strategy.action = TransportMasterWait;
+#ifndef NDEBUG
+		cerr << "MASTER LOCATE, roll-dispo: " << transport_master_strategy.roll_disposition << "\n";
+#endif
 		TFSM_LOCATE(transport_master_strategy.target, transport_master_strategy.roll_disposition, false, false);
 		break;
 	case TransportMasterStart:
+#ifndef NDEBUG
+		cerr << "MASTER START\n";
+#endif
 		TFSM_EVENT (TransportFSM::StartTransport);
 		break;
 	case TransportMasterStop:
+#ifndef NDEBUG
 		cerr << "MASTER STOP\n";
+#endif
 		TFSM_STOP (false, false);
 		break;
 	}
