@@ -226,6 +226,8 @@ private:
 	std::vector<std::string> _input_names;
 	std::vector<std::string> _output_names;
 
+	std::atomic<bool> _enable_callback;
+
 	pthread_mutex_t _discovery_lock;
 };
 

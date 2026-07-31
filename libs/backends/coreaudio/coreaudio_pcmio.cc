@@ -216,6 +216,7 @@ CoreAudioPCM::halted_callback() {
 #ifndef NDEBUG
 	printf("CoreAudio halted callback..\n");
 #endif
+	_enable_callback = false;
 	if (_halted_callback) {
 		_halted_callback(_halted_arg);
 	}
@@ -628,6 +629,9 @@ CoreAudioPCM::pcm_stop ()
 	if (!_auhal) return;
 
 	AudioOutputUnitStop(_auhal);
+
+	_enable_callback = false;
+
 	if (_state == 0) {
 		AudioObjectPropertyAddress prop;
 		prop.mScope = kAudioObjectPropertyScopeGlobal;
@@ -887,6 +891,7 @@ CoreAudioPCM::pcm_start (
 	err = add_listener (_active_device_id, kAudioDevicePropertyDeviceIsAlive, this);
 	if (err != noErr) { errorMsg="kAudioDevicePropertyNominalSampleRate, Listen"; _state = -9; goto error; }
 
+	_enable_callback = true;
 
 	_samples_per_period = current_buffer_size_id(_active_device_id);
 
@@ -931,6 +936,7 @@ error:
 	char *rv = (char*)&err;
 	fprintf(stderr, "CoreaudioPCM Error: %c%c%c%c %s\n", rv[0], rv[1], rv[2], rv[3], errorMsg.c_str());
 	pcm_stop();
+	_enable_callback = false;
 	_active_device_id = 0;
 	pthread_mutex_unlock (&_discovery_lock);
 	return -1;
@@ -1022,6 +1028,17 @@ CoreAudioPCM::render_callback (
 		UInt32 inNumberSamples,
 		AudioBufferList* ioData)
 {
+	if (!_enable_callback) {
+		if (_playback_channels > 0) {
+			/* silence outputs */
+			for (uint32_t i = 0; i < ioData->mNumberBuffers; ++i) {
+				float* ob = (float*) ioData->mBuffers[i].mData;
+				memset(ob, 0, sizeof(float) * inNumberSamples);
+			}
+		}
+		return kAudioHardwareNoError;
+	}
+
 	PBD::WaitTimerRAII tr (*_dsp_timer);
 	OSStatus retVal = kAudioHardwareNoError;
 
