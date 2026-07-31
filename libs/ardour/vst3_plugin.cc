@@ -101,6 +101,16 @@ VST3Plugin::init ()
 	_plug->OnResizeView.connect_same_thread (_connections, std::bind (&VST3Plugin::forward_resize_view, this, _1, _2));
 	_plug->OnParameterChange.connect_same_thread (_connections, std::bind (&VST3Plugin::parameter_change_handler, this, _1, _2, _3));
 	_plug->OnProcessorChange.connect_same_thread (_connections, [&](ARDOUR::RouteProcessorChange const& rpc) { Plugin::send_processors_changed (rpc); });
+
+	/* enable all Audio I/Os of the first bus (w/o aux) by default */
+	_connected_inputs.clear ();
+	_connected_outputs.clear ();
+	_connected_inputs.resize (_plug->n_audio_inputs (false));
+	_connected_outputs.resize (_plug->n_audio_outputs (false));
+	_connected_inputs.flip ();
+	_connected_outputs.flip ();
+	_connected_inputs.resize (_plug->n_audio_inputs ());
+	_connected_outputs.resize (_plug->n_audio_outputs ());
 }
 
 void
