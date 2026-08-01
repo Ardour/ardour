@@ -2112,6 +2112,15 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 			_configured = false;
 			return false;
 		}
+
+		/* Exact Match, replicated plugins - eg. VST3s saved in v8.x */
+		uint32_t pc = 0;
+		for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
+			if (pc == 0) {
+				continue;
+			}
+			(*i)->reconfigure_io (natural_input_streams (), aux_in, natural_output_streams ());
+		}
 		break;
 	}
 
