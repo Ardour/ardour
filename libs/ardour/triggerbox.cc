@@ -1094,7 +1094,7 @@ Trigger::compute_start (Temporal::TempoMap::SharedPtr const & tmap, samplepos_t 
 bool
 Trigger::compute_quantized_transition (samplepos_t start_sample, Temporal::Beats const & start_beats, Temporal::Beats const & end_beats,
                                        Temporal::BBT_Argument& t_bbt, Temporal::Beats& t_beats, samplepos_t& t_samples,
-                                       Temporal::TempoMap::SharedPtr const & tmap, Temporal::BBT_Offset const & q)
+                                       Temporal::TempoMap::SharedPtr const & tmap, Temporal::BBT_Offset const & q, Temporal::Beats const & offset)
 {
 	/* XXX need to use global grid here is quantization == zero */
 
@@ -1115,7 +1115,7 @@ Trigger::compute_quantized_transition (samplepos_t start_sample, Temporal::Beats
 
 	} else if (q.bars == 0) {
 
-		possible_beats = start_beats.round_up_to_multiple (Temporal::Beats (q.beats, q.ticks));
+		possible_beats = start_beats.round_up_to_multiple (Temporal::Beats (q.beats, q.ticks)) + offset;
 		possible_bbt = tmap->bbt_at (possible_beats);
 		possible_samples = tmap->sample_at (possible_beats);
 
@@ -1132,12 +1132,12 @@ Trigger::compute_quantized_transition (samplepos_t start_sample, Temporal::Beats
 		if (possible_beats % qb != Temporal::Beats()) {
 			possible_beats = ((tmap->quarters_at (start) + (qb/2)) / qb) * qb;
 		}
+		possible_beats += offset;
 		possible_bbt = tmap->bbt_at (possible_beats);
 		possible_samples = tmap->sample_at (possible_beats);
-
 	}
 
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%6/%1 quantized with %5 transition at %2, sb %3 eb %4 (would be %7 aka %8)\n", index(), possible_samples, start_beats, end_beats, q, _box.order(), possible_bbt, possible_beats));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%6/%1 quantized with %5 and offset %9 transition at %2, sb %3 eb %4 (would be %7 aka %8)\n", index(), possible_samples, start_beats, end_beats, q, _box.order(), possible_bbt, possible_beats, offset));
 
 	/* See if this time falls within the range of time given to us */
 

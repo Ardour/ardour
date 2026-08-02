@@ -349,7 +349,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 
 	bool compute_quantized_transition (samplepos_t start_sample, Temporal::Beats const & start, Temporal::Beats const & end,
 	                                   Temporal::BBT_Argument& t_bbt, Temporal::Beats& t_beats, samplepos_t& t_samples,
-	                                   Temporal::TempoMap::SharedPtr const & tmap, Temporal::BBT_Offset const & q);
+	                                   Temporal::TempoMap::SharedPtr const & tmap, Temporal::BBT_Offset const & q, Temporal::Beats const & offset = Temporal::Beats());
 
 	pframes_t compute_next_transition (samplepos_t start_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t nframes,
 	                                   Temporal::BBT_Argument& t_bbt, Temporal::Beats& t_beats, samplepos_t& t_samples,
