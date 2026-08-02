@@ -1107,6 +1107,7 @@ Trigger::compute_quantized_transition (samplepos_t start_sample, Temporal::Beats
 	samplepos_t possible_samples;
 
 	if (q < Temporal::BBT_Offset (0, 0, 0)) {
+
 		/* negative quantization == do not quantize */
 
 		possible_samples = start_sample;
@@ -3778,13 +3779,11 @@ TriggerBox::setup_arm_info_bounds (SlotArmInfo& ai, samplepos_t now, Trigger& sl
 	samplepos_t t_samples;
 	TempoMap::SharedPtr tmap (TempoMap::use());
 	Beats now_beats = tmap->quarters_at (timepos_t (now));
+	Meter const & m (tmap->meter_at (now));
 
 	slot.compute_quantized_transition (now, now_beats, std::numeric_limits<Beats>::max(),
-	                                   t_bbt, t_beats, t_samples, tmap, slot.quantization());
+	                                   t_bbt, t_beats, t_samples, tmap, slot.quantization(), Temporal::Beats::beats (2 * m.divisions_per_bar()));
 
-	t_bbt = tmap->bbt_walk (t_bbt, slot.quantization());
-	t_beats = tmap->quarters_at (t_bbt);
-	t_samples = tmap->sample_at (t_beats);
 
 	ai.start_samples = t_samples;
 	ai.start_beats = t_beats;
@@ -3869,6 +3868,7 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 
 	TempoMap::SharedPtr tmap (TempoMap::use());
 	Beats now_beats = tmap->quarters_at (timepos_t (start_sample));
+	Meter const & m (tmap->meter_at (timepos_t (start_sample)));
 
 	if (!ai->slot->armed()) {
 		/* since _arm_info is set, we have been capturing for a slot,
@@ -3888,7 +3888,7 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 			samplepos_t t_samples;
 
 			ai->slot->compute_quantized_transition (start_sample, now_beats, std::numeric_limits<Beats>::max(),
-			                                       t_bbt, t_beats, t_samples, tmap, ai->slot->quantization());
+			                                        t_bbt, t_beats, t_samples, tmap, ai->slot->quantization());
 			ai->end_samples = t_samples;
 			ai->end_beats = t_beats;
 			/* Always record slightly more than we need to allow for alignment adjustment */
@@ -3920,17 +3920,42 @@ TriggerBox::maybe_capture (BufferSet& bufs, samplepos_t start_sample, samplepos_
 
 	Temporal::Beats count_in_beats = ai->start_beats - now_beats;
 
+	count_in_beats = count_in_beats.round_down_to_beat ();
+
 	if (count_in_beats < Temporal::Beats()) {
-		/* passed the start */
-		count_in_beats = Temporal::Beats ();
+
+		if (ai->count_in_beats > Temporal::Beats()) {
+			/* last time was positive, so this is the final countdown */
+			count_in_beats = Temporal::Beats::beats (m.divisions_per_bar());
+		} else if (count_in_beats > Temporal::Beats::beats (-1)) {
+			/* still haven't reached the first beat *after* the
+			   start, so do nothing
+			*/
+			count_in_beats = ai->count_in_beats;
+		} else {
+			/* we're negative by more than 1 beat, so we're totally
+			   done. Tell the UI (or whoever is listening
+			*/
+			count_in_beats = Temporal::Beats ();
+		}
+
+	} else if (count_in_beats == Temporal::Beats ()) {
+
+		/* do nothing, we'll send zero, and the signal listener(s) will be done */
+
 	} else {
-		count_in_beats = count_in_beats.round_up_to_beat ();
+
+		/* Convert count-in to count-up order ("3 4 1 2 3 4") */
+
+		int rem  = count_in_beats.get_beats() % m.divisions_per_bar();
+		if (!rem) {
+			count_in_beats = 1;
+		} else {
+			count_in_beats = Temporal::Beats::beats (1 + (m.divisions_per_bar() - rem));
+		}
 	}
 
-	if (count_in_beats != ai->count_in_beats) {
-		if (count_in_beats < Temporal::Beats()) {
-			count_in_beats = Temporal::Beats();
-		}
+	if (ai->count_in_beats != count_in_beats) {
 		CountIn (count_in_beats); /* EMIT SIGNAL */
 		ai->count_in_beats = count_in_beats;
 	}
