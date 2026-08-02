@@ -72,7 +72,7 @@ MusicalMode::init ()
 
 	register_scales (TwelveTone, { _("Major"), _("Ionian") }, PitchClass, {  2 , 4 , 5 , 7 , 9 , 11 });
 	register_scales (TwelveTone, { _("Minor"), _("Aeolian") }, PitchClass, {  2 , 3 , 5 , 7 , 8 , 10 });
-	register_scale (TwelveTone, _("Dorian"), PitchClass, { 2 , 3 , 4 , 6 , 8 , 9 , 11 });
+	register_scale (TwelveTone, _("Dorian"), PitchClass, { 2 , 3 , 5, 7, 9, 10 });
 	register_scale (TwelveTone, _("Harmonic Minor"), PitchClass, { 2 , 3 , 5 , 7 , 10 , 11 });
 	register_scale (TwelveTone, _("Blues"), PitchClass, { 2 , 3 , 5 , 6 , 7 , 9 , 10 , 11 });
 	register_scale (TwelveTone, _("Melodic Minor Ascending"), PitchClass, { 2 , 3 , 5 , 7 , 9 , 11 });
