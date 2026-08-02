@@ -128,12 +128,13 @@ ScaleDialog::ScaleDialog (std::string const & provider_name)
 	inner_step_box->set_spacing (12);
 	steps_box.pack_start (*inner_step_box, true, false);
 
+#if 0
 	Gtk::HBox* inner_scala_box (manage (new Gtk::HBox));
 	inner_scala_box->pack_start (scala_label, false, false);
 	inner_scala_box->pack_start (scala_file_button, true, true);
 	inner_scala_box->set_spacing (12);
 	scala_box.pack_start (*inner_scala_box);
-
+#endif
 	scala_file_button.set_current_folder (Glib::get_home_dir());
 
 	Gtk::VBox* vbox (get_vbox());
