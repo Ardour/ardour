@@ -2319,7 +2319,9 @@ Session::disable_record (bool rt_context, bool force)
 
 	if ((rs = (RecordState) _record_status.load ()) != Disabled) {
 
-		if (!Config->get_latched_record_enable () || force) {
+		bool keep_rec_armed = Config->get_latched_record_enable () || transport_master_is_external ();
+
+		if (!keep_rec_armed || force) {
 			_record_status.store (Disabled);
 			send_immediate_mmc (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordExit));
 		} else {
