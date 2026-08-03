@@ -181,6 +181,8 @@ ARDOUR_UI::setup_transport ()
 	ARDOUR_UI::Clock.connect (sigc::bind (sigc::mem_fun (*primary_clock, &MainClock::set), false, false));
 	ARDOUR_UI::Clock.connect (sigc::bind (sigc::mem_fun (*secondary_clock, &MainClock::set), false, false));
 
+	big_clock->ValueChanged.connect ([&]() {if (_session) {_session->request_locate (big_clock->last_when ().samples());}});
+
 	editor_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), editor));
 	mixer_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), mixer));
 	prefs_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), rc_option_editor));
