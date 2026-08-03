@@ -82,5 +82,6 @@ protected:
 	void set_mode(Mode);  //override
 
 private:
-	void follow_canonical_clock();
+	void clock_mode_changed ();
+	void clock_time_changed ();
 };

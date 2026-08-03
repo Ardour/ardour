@@ -146,7 +146,7 @@ MainClock::set (timepos_t const & when, bool force, bool round_to_beat)
 			break;
 	}
 
-	CanonicalClockChanged ();  //signal
+	CanonicalClockChanged (); // EMIT SIGNAL
 }
 
 void
@@ -253,12 +253,14 @@ TransportClock::TransportClock (
 	: MainClock (clock_name, widget_name, d)
 {
 	if (_disposition==PrimaryClock) {
-		ARDOUR_UI::instance()->primary_clock->CanonicalClockChanged.connect (sigc::mem_fun(*this, &TransportClock::follow_canonical_clock));
-		ARDOUR_UI::instance()->primary_clock->mode_changed.connect (sigc::mem_fun(*this, &TransportClock::follow_canonical_clock));
+		ARDOUR_UI::instance()->primary_clock->mode_changed.connect (sigc::mem_fun(*this, &TransportClock::clock_mode_changed));
+		ARDOUR_UI::instance()->primary_clock->ValueChanged.connect (sigc::mem_fun(*this, &TransportClock::clock_time_changed));
+		ARDOUR_UI::instance()->primary_clock->CanonicalClockChanged.connect (sigc::mem_fun(*this, &TransportClock::clock_time_changed));
 		change_display_delta_mode_signal.connect (sigc::mem_fun(UIConfiguration::instance(), &UIConfiguration::set_primary_clock_delta_mode));
 	} else {
-		ARDOUR_UI::instance()->secondary_clock->CanonicalClockChanged.connect (sigc::mem_fun(*this, &TransportClock::follow_canonical_clock));
-		ARDOUR_UI::instance()->secondary_clock->mode_changed.connect (sigc::mem_fun(*this, &TransportClock::follow_canonical_clock));
+		ARDOUR_UI::instance()->secondary_clock->mode_changed.connect (sigc::mem_fun(*this, &TransportClock::clock_mode_changed));
+		ARDOUR_UI::instance()->secondary_clock->ValueChanged.connect (sigc::mem_fun(*this, &TransportClock::clock_time_changed));
+		ARDOUR_UI::instance()->secondary_clock->CanonicalClockChanged.connect (sigc::mem_fun(*this, &TransportClock::clock_time_changed));
 		change_display_delta_mode_signal.connect (sigc::mem_fun(UIConfiguration::instance(), &UIConfiguration::set_secondary_clock_delta_mode));
 	}
 }
@@ -276,14 +278,11 @@ TransportClock::set_mode(Mode m)
 }
 
 void
-TransportClock::follow_canonical_clock ()
+TransportClock::clock_mode_changed ()
 {
 	if (!_session) {
 		return;
 	}
-
-	set(timepos_t(_session->audible_sample()));
-
 	if (_disposition==PrimaryClock) {
 		AudioClock::set_mode(ARDOUR_UI::instance()->primary_clock->mode());
 		set_display_delta_mode(ARDOUR_UI::instance()->primary_clock->display_delta_mode());
@@ -291,4 +290,14 @@ TransportClock::follow_canonical_clock ()
 		AudioClock::set_mode(ARDOUR_UI::instance()->secondary_clock->mode());
 		set_display_delta_mode(ARDOUR_UI::instance()->secondary_clock->display_delta_mode());
 	}
+}
+
+void
+TransportClock::clock_time_changed ()
+{
+	if (!_session) {
+		return;
+	}
+
+	set(timepos_t(_session->audible_sample()));
 }

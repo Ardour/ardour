@@ -114,7 +114,7 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	set_widget_name (widget_name);
 
 	_mode = BBT; /* lie to force mode switch */
-	set_mode (Timecode);
+	AudioClock::set_mode (Timecode);
 
 	if (!transient) {
 		clocks.push_back (this);
@@ -1401,7 +1401,7 @@ AudioClock::set_session (Session *s)
 
 				AudioClock::Mode amode;
 				if ((*i)->get_property (X_("mode"), amode)) {
-					set_mode (amode);
+					AudioClock::set_mode (amode);
 				}
 				bool on;
 				if ((*i)->get_property (X_("on"), on)) {
