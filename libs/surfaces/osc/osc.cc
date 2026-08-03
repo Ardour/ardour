@@ -300,7 +300,7 @@ OSC::thread_init ()
 	}
 
 	PBD::notify_event_loops_about_thread_creation (pthread_self(), event_loop_name(), 2048);
-	SessionEvent::create_per_thread_pool (event_loop_name(), 128);
+	SessionEvent::create_per_thread_pool (event_loop_name(), 1024);
 }
 
 int
