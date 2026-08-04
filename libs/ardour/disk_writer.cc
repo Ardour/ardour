@@ -391,6 +391,33 @@ DiskWriter::set_align_style (AlignStyle a, bool force)
 	}
 }
 
+std::vector<std::string>
+DiskWriter::capture_source_paths ()
+{
+	/* must be called from GUI thread */
+
+	// TODO: consider passing this information along with the
+	// RecordInfo signal. Currently there may be the possibility
+	// that when RecordInfo is handled by the GUI, capturing_sources
+	// have already been changed.
+	// (eg. when using a ctrl surface to disable rec-arm)
+
+	std::vector<std::string> rv;
+	for (auto const& cs: capturing_sources) {
+		rv.push_back (cs->path ());
+	}
+#if 0
+	/* current not possible to recover MIDI.
+	 * We record into a MIDI Model, and SMF is only
+	 * written at the end.
+	 */
+	if (_midi_write_source) {
+		rv.push_back (_midi_write_source->path ());
+	}
+#endif
+	return rv;
+}
+
 XMLNode&
 DiskWriter::state () const
 {
@@ -549,6 +576,9 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 						}
 					}
 				}
+				RecordInfo (_capture_start_sample.value (), loop_loc->length ().samples ()); // EMIT SIGNAL
+			} else {
+				RecordInfo (_capture_start_sample.value (), 0); // EMIT SIGNAL
 			}
 
 			if (_midi_write_source) {
@@ -788,6 +818,13 @@ DiskWriter::finish_capture (std::shared_ptr<ChannelList const> c)
 	ci->samples = _capture_captured;
 	ci->xruns   = _xruns;
 	_xruns.clear ();
+
+	if (_session.transport_state_rolling ()) {
+		/* only emit when not called from stopped at wallclock. 
+		 * looping or manual record dis-arm
+		 */
+		RecordInfo (ci->start, ci->samples); /* EMIT SIGNAL */
+	}
 
 	if (_loop_location) {
 		timepos_t loop_start;

@@ -153,6 +153,8 @@ Track::init ()
 
 	_disk_reader->ConfigurationChanged.connect_same_thread (*this, std::bind (&Track::chan_count_changed, this));
 
+	_disk_writer->RecordInfo.connect_same_thread (*this, [&](samplepos_t when, samplecnt_t len) { RecordInfo (when, len); /* EMIT SIGNAL */});
+
 	return 0;
 }
 
@@ -749,6 +751,12 @@ void
 Track::playlist_modified ()
 {
 	_disk_reader->playlist_modified ();
+}
+
+std::vector<std::string>
+Track::capture_source_paths ()
+{
+	return _disk_writer->capture_source_paths ();
 }
 
 int

@@ -184,12 +184,16 @@ public:
 
 	void time_domain_changed ();
 
+	std::vector<std::string> capture_source_paths ();
+
 	PBD::Signal<void()> FreezeChange;
 	PBD::Signal<void()> PlaylistChanged;
 	PBD::Signal<void()> PlaylistAdded;
 	PBD::Signal<void()> SpeedChanged;
 	PBD::Signal<void()> AlignmentStyleChanged;
 	PBD::Signal<void()> ChanCountChanged;
+
+	PBD::Signal<void(samplepos_t, samplecnt_t)> RecordInfo;
 
 protected:
 	XMLNode& state (bool save_template) const;

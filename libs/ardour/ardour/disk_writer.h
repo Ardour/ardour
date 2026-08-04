@@ -118,6 +118,9 @@ public:
 	PBD::Signal<void()> RecordEnableChanged;
 	PBD::Signal<void()> RecordSafeChanged;
 
+	PBD::Signal<void(samplepos_t, samplecnt_t)> RecordInfo;
+	std::vector<std::string> capture_source_paths ();
+
 	void transport_looped (samplepos_t transport_sample);
 	void transport_stopped_wallclock (struct tm&, time_t, bool abort);
 
