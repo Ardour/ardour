@@ -93,7 +93,7 @@ compiler_flags_dictionaries= {
         'mconsole': ['-mconsole'],
     },
     'msvc' : {
-        'debuggable' : ['/DDEBUG', '/Od', '/Z7', '/MDd', '/Gd', '/EHsc', '/JMC'],
+        'debuggable' : ['/Od', '/Z7', '/MDd', '/Gd', '/EHsc', '/JMC'],
         'linker-debuggable' : ['/DEBUG', '/INCREMENTAL' ],
         'nondebuggable' : ['/DNDEBUG', '/Ob2', '/MD', '/Gd', '/EHsc'],
         'profile' : ['/Oy-'],
@@ -1293,7 +1293,10 @@ int main () { return 0; }
         # see http://gareus.org/wiki/ardour_windows_gdk_and_cairo
         conf.env.append_value('CFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
         conf.env.append_value('CXXFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
-        conf.env.append_value('LIB', 'pthreadVC3')
+        if conf.env['DEBUG']:
+            conf.env.append_value('LIB', 'pthreadVC3d')
+        else:
+            conf.env.append_value('LIB', 'pthreadVC3')
         conf.env.append_value('LIB', 'Ws2_32')
         conf.env.append_value('LIB', 'Advapi32')
         conf.env.append_value('LIB', 'Shell32')
