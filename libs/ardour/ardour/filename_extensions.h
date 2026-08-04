@@ -39,5 +39,6 @@ namespace ARDOUR {
 	LIBARDOUR_API extern const char* const midi_map_suffix;
 	LIBARDOUR_API extern const char* const advanced_authoring_format_suffix;
 	LIBARDOUR_API extern const char* const routestate_suffix;
+	LIBARDOUR_API extern const char* const recordlog_suffix;
 }
 
