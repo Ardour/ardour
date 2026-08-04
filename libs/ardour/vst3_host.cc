@@ -39,6 +39,11 @@
 #include <glibmm.h>
 #endif
 
+#ifdef COMPILER_MSVC
+#undef max
+#undef min
+#endif
+
 using namespace Steinberg;
 
 DEF_CLASS_IID (FUnknown)
