@@ -656,6 +656,10 @@ MusicalKey::closest_midi_note (int midi_note) const
 int
 MusicalKey::conform_midi_note (int midi_note, KeyEnforcementPolicy key_enforcment_policy) const
 {
+	if (key_enforcment_policy == KeyEnforcementPolicy (0)) {
+		return midi_note;
+	}
+
 	bool ok = in_key (midi_note);
 
 	if (ok) {
@@ -667,7 +671,7 @@ MusicalKey::conform_midi_note (int midi_note, KeyEnforcementPolicy key_enforcmen
 		return -1;
 	}
 
-	int new_note;
+	int new_note = midi_note;
 
 	if (key_enforcment_policy & ForceNearest) {
 		int old = midi_note;
