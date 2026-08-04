@@ -44,7 +44,7 @@ SessionArchiveDialog::SessionArchiveDialog ()
 	encode_selector.append (_("None"));
 	encode_selector.append (_("FLAC 16bit"));
 	encode_selector.append (_("FLAC 24bit"));
-	encode_selector.set_active_text (_("FLAC 16bit")); // TODO remember
+	encode_selector.set_active_text (_("FLAC 24bit")); // TODO remember
 
 	compression_selector.append (_("None"));
 	compression_selector.append (_("Fast"));
