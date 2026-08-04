@@ -204,6 +204,8 @@ RouteTimeAxisView::set_route (std::shared_ptr<Route> rt)
 		update_playlist_tip ();
 		track()->PlaylistChanged.connect (*this, invalidator (*this), ui_bind(&RouteTimeAxisView::update_playlist_tip, this), gui_context());
 
+		track()->RecordInfo.connect (*this, invalidator (*this), bind(&RouteTimeAxisView::pending_capture_info, this, _1, _2), gui_context());
+
 	} else {
 		gm.set_fader_name ("AudioBusFader");
 		Gtk::Fixed *blank = manage(new Gtk::Fixed());
@@ -2694,4 +2696,10 @@ bool
 RouteTimeAxisView::set_marked_for_display (bool yn)
 {
 	return RouteUI::mark_hidden (!yn);
+}
+
+void
+RouteTimeAxisView::pending_capture_info (samplepos_t when, samplepos_t len)
+{
+	_editor.pending_capture_info (track()->id (), when, len, track()->capture_source_paths ());
 }

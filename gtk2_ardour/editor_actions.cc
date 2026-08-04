@@ -27,6 +27,8 @@
  */
 
 #include <gio/gio.h>
+#include "pbd/gstdio_compat.h"
+
 #include <ytk/gtkiconfactory.h>
 
 #include "pbd/file_utils.h"
@@ -34,9 +36,11 @@
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/utils.h"
 
+#include "ardour/filename_extensions.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/profile.h"
 #include "ardour/session.h"
+#include "ardour/session_directory.h"
 #include "ardour/types.h"
 
 #include "temporal/bbt_time.h"
@@ -1202,6 +1206,35 @@ Editor::capture_sources_changed (bool cleared)
 	} else {
 		ActionManager::get_action (X_("Editor"), X_("remove-last-capture"))->set_sensitive (_session->have_last_capture_sources ());
 	}
+}
+
+void
+Editor::pending_capture_info (PBD::ID const& id, samplepos_t when, samplepos_t len, std::vector<std::string> const& src)
+{
+	if (src.empty () && len == 0) {
+		return;
+	}
+	/* GUI is single threaded, no lock needed, though this is called for
+	 * every track, once it starts recording; which can be many..
+	 */
+	std::string state_file_path (_session->session_directory().root_path());
+	std::string reclog = Glib::build_filename (state_file_path, legalize_for_path (_session->snap_name() + recordlog_suffix));
+
+	Glib::RefPtr<Gio::File> rf = Gio::File::create_for_path (reclog);
+	Glib::RefPtr <Gio::FileOutputStream> os = rf->append_to ();
+	os->write (string_compose ("%1 %2 %3", id.to_s (), when, len));
+	for (auto const& s : src) {
+		os->write (string_compose (" %1:%2",s.size(), s));
+	}
+	os->write ("\n");
+	os->flush ();
+}
+
+void
+Editor::recording_ended ()
+{
+	assert (_session);
+	_session->remove_pending_record_log ();
 }
 
 /** A Configuration parameter has changed.

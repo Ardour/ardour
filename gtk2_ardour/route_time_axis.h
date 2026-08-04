@@ -303,6 +303,8 @@ private:
 	void show_touched_automation (std::weak_ptr<PBD::Controllable>);
 	void maybe_hide_automation (bool, ARDOUR::WeakAutomationControlList);
 
+	void pending_capture_info (samplepos_t, samplepos_t);
+
 	void drop_instrument_ref ();
 	void reread_midnam ();
 	PBD::ScopedConnectionList midnam_connection;

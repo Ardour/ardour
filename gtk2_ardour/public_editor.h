@@ -222,6 +222,8 @@ public:
 	virtual void set_loop_start_from_edit_point () = 0;
 	virtual void set_loop_end_from_edit_point () = 0;
 
+	virtual void pending_capture_info (PBD::ID const&, samplepos_t, samplepos_t, std::vector<std::string> const&) = 0;
+
 	virtual Editing::MouseMode effective_mouse_mode () const = 0;
 
 	/** Import existing media */

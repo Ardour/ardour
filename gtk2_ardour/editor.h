@@ -1425,6 +1425,9 @@ private:
 	void set_loop_start_from_edit_point ();
 	void set_loop_end_from_edit_point ();
 
+	void pending_capture_info (PBD::ID const&, samplepos_t, samplepos_t, std::vector<std::string> const&);
+	void recording_ended ();
+
 	void keyboard_selection_begin (Editing::EditIgnoreOption = Editing::EDIT_IGNORE_NONE);
 	void keyboard_selection_finish (bool add, Editing::EditIgnoreOption = Editing::EDIT_IGNORE_NONE);
 	bool have_pending_keyboard_selection;
