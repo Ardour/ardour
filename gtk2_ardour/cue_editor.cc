@@ -1263,25 +1263,24 @@ CueEditor::get_context_extent() const
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	if (_region) {
-
-		Temporal::Beats len;
-
-		if (show_source) {
-			len = _region->source()->length().beats();
-			if (len != Temporal::Beats()) {
-				return std::make_pair (timepos_t (Temporal::Beats()), timepos_t (len));
-			}
-		} else {
-			len = _region->length().beats();
-			if (len != Temporal::Beats()) {
-				return std::make_pair (timepos_t (_region->start().beats()), timepos_t (_region->start().beats() + len));
-			}
-		}
+	if (!_region) {
+		/* this needs to match the default empty region length used in ::make_a_region() */
+		return std::make_pair (Temporal::timepos_t (Temporal::Beats()), Temporal::timepos_t (Temporal::Beats (32, 0)));
 	}
 
-	/* this needs to match the default empty region length used in ::make_a_region() */
-	return std::make_pair (Temporal::timepos_t (Temporal::Beats()), Temporal::timepos_t (Temporal::Beats (32, 0)));
+	Temporal::Beats len;
+
+	if (show_source) {
+		len = _region->source()->length().beats();
+		if (len != Temporal::Beats()) {
+			return std::make_pair (timepos_t (Temporal::Beats()), timepos_t (len));
+		}
+	} else {
+		len = _region->length().beats();
+		if (len != Temporal::Beats()) {
+			return std::make_pair (timepos_t (_region->start().beats()), timepos_t (_region->start().beats() + len));
+		}
+	}
 }
 
 void
@@ -2100,4 +2099,3 @@ CueEditor::hide_count_in ()
 {
 	EC_LOCAL_TEMPO_SCOPE;
 }
-
