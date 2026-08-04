@@ -66,15 +66,15 @@ public:
 };
 
 /// append the given byte to the end of the array
-MidiByteArray & operator << ( MidiByteArray & mba, const MIDI::byte & b );
+ARDOURSURFACE_API MidiByteArray & operator << ( MidiByteArray & mba, const MIDI::byte & b );
 
 /// append the given string to the end of the array
-MidiByteArray & operator << ( MidiByteArray & mba, const std::string & );
+ARDOURSURFACE_API MidiByteArray & operator << ( MidiByteArray & mba, const std::string & );
 
 /// append the given array to the end of this array
-MidiByteArray & operator << ( MidiByteArray & mba, const MidiByteArray & barr );
+ARDOURSURFACE_API MidiByteArray & operator << ( MidiByteArray & mba, const MidiByteArray & barr );
 
 /// output the bytes as hex to the given stream
-std::ostream & operator << ( std::ostream & os, const MidiByteArray & mba );
+ARDOURSURFACE_API std::ostream & operator << ( std::ostream & os, const MidiByteArray & mba );
 
 #endif
