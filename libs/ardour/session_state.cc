@@ -88,6 +88,7 @@
 #include "pbd/localtime_r.h"
 #include "pbd/unwind.h"
 
+#include "ardour/analyser.h"
 #include "ardour/amp.h"
 #include "ardour/async_midi_port.h"
 #include "ardour/audio_track.h"
@@ -114,6 +115,7 @@
 #include "ardour/midi_source.h"
 #include "ardour/midi_track.h"
 #include "ardour/mixer_scene.h"
+#include "ardour/operations.h"
 #include "ardour/playlist_factory.h"
 #include "ardour/playlist_source.h"
 #include "ardour/port.h"
@@ -692,12 +694,34 @@ Session::remove_pending_capture_state ()
 	}
 
 	if (::g_unlink (pending_state_file_path.c_str()) != 0) {
-		error << string_compose(_("Could not remove pending capture state at path \"%1\" (%2)"),
+		error << string_compose(_("Could not remove pending state at path \"%1\" (%2)"),
 				pending_state_file_path, g_strerror (errno)) << endmsg;
 	}
 #ifndef NDEBUG
 	else {
 		cerr << "removed " << pending_state_file_path << endl;
+	}
+#endif
+
+	remove_pending_record_log ();
+}
+
+void
+Session::remove_pending_record_log ()
+{
+	std::string reclog = Glib::build_filename (session_directory().root_path(), legalize_for_path (snap_name() + recordlog_suffix));
+
+	if (!Glib::file_test (reclog, Glib::FILE_TEST_EXISTS)) {
+		return;
+	}
+
+	if (::g_unlink (reclog.c_str()) != 0) {
+		error << string_compose(_("Could not remove pending capture state at path \"%1\" (%2)"),
+				reclog, g_strerror (errno)) << endmsg;
+	}
+#ifndef NDEBUG
+	else {
+		cerr << "removed " << reclog << endl;
 	}
 #endif
 }
@@ -953,6 +977,11 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 		remove_pending_capture_state ();
 	}
 
+	if (pending) {
+		/* new pending state includes recorded regions. */
+		remove_pending_record_log ();
+	}
+
 	if (!pending && !for_archive && ! template_only) {
 		save_misc_port_state ();
 	}
@@ -961,18 +990,195 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 }
 
 int
-Session::restore_state (string snapshot_name)
+Session::recover_recordings (string const& recinfo)
 {
-	try {
-		if (load_state (snapshot_name) == 0) {
-			set_state (*state_tree->root(), Stateful::loading_state_version);
+	/* per track there can
+	 * - N files (one for each channel)
+	 * - M regions (looping, manually rec[dis]-arm)
+	 */
+
+	struct RecordInfo {
+		RecordInfo () : start (0), samples (0) {}
+		RecordInfo (samplepos_t s, samplecnt_t l) : start (s), samples (l) {}
+		samplepos_t start;
+		samplecnt_t samples;
+	};
+
+	std::map<PBD::ID, std::set<std::string>>   files;
+	std::map<PBD::ID, std::vector<RecordInfo>> captures;
+
+	/* see Editor::recording_started for format */
+	auto ss = std::stringstream (recinfo);
+	for (std::string line; std::getline (ss, line, '\n');) {
+		RecordInfo ri;
+		std::size_t off = 0;
+		std::size_t pos;
+		PBD::ID id (stoll(line, &pos));
+		off += pos + 1;
+		ri.start = stoll(line.substr(off), &pos);
+		off += pos + 1;
+		ri.samples = stoll(line.substr(off), &pos);
+		off += pos + 1;
+
+#ifndef NDEBUG
+		cout << string_compose ("Recover Recording for %1 at %2 (len %3)\n", id, ri.start, ri.samples);
+#endif
+
+		while (off < line.size ()) {
+			size_t len = stoll(line.substr(off), &pos);
+			off += pos;
+			assert (line.substr(off, 1) == ":");
+			++off;
+			std::string path (line, off, len);
+			files[id].insert (path);
+#ifndef NDEBUG
+			cout << string_compose (" * '%1'\n", path);
+#endif
+			off += len + 1;
 		}
-	} catch (...) {
-		// SessionException
-		// unknown_enumeration
+
+		if (!files[id].empty ()) {
+			captures[id].push_back (ri);
+		}
+	}
+
+	if (files.empty () || captures.empty ()) {
+		assert (0);
 		return -1;
 	}
 
+	begin_reversible_command (Operations::capture);
+
+	for (auto const& [id, paths] : files) {
+		std::shared_ptr<Route> route = route_by_id (id);
+		std::shared_ptr<Track> track = std::dynamic_pointer_cast<Track> (route);
+		if (!track) {
+			error << _("Failed to find track to recover recording.") << endmsg;
+			continue;
+		}
+
+		SourceList srcs;
+		try {
+			for (auto const& fn : paths) {
+				std::shared_ptr<Source> src (SourceFactory::createForRecovery (DataType::AUDIO, *this, fn, 0));
+				std::shared_ptr<FileSource> fs = std::dynamic_pointer_cast<FileSource> (src);
+				fs->mark_immutable ();
+				fs->mark_nonremovable ();
+				Analyser::queue_source_for_analysis (src, false);
+				srcs.push_back (src);
+				info << string_compose ("Recovering recording from file '%1'", fn) << endmsg;
+			}
+		} catch (...) {
+			error << "Failed to create source for recovery.\n";
+			continue;
+		}
+
+		assert (!srcs.empty ());
+		assert (captures.find (id) != captures.end());
+		assert (!captures.at(id).empty ());
+
+		std::shared_ptr<AudioFileSource> afs = std::dynamic_pointer_cast<AudioFileSource> (srcs.front());
+
+		std::vector<RecordInfo> ci;
+		if (captures[id].size () == 1) {
+			ci.push_back (RecordInfo (captures[id].front ().start, afs->length().samples ()));
+		} else {
+			samplepos_t start    = 0;
+			samplecnt_t captured = 0;
+			bool        pending = false;
+			for (auto const& ri : captures[id]) {
+				if (ri.samples == 0) {
+					pending = true;
+					start = ri.start;
+				} else {
+					pending = false;
+					ci.push_back (RecordInfo (ri.start, ri.samples));
+					captured += ri.samples;
+				}
+			}
+			if (pending) {
+				ci.push_back (RecordInfo (start, afs->length().samples () - captured));
+			}
+		}
+
+		/* compare to Track::use_captured_sources */
+
+		/* create whole file region */
+		std::shared_ptr<AudioRegion> region;
+		try {
+			RecordMode rmode   = config.get_record_mode ();
+			RecordInfo ri      = captures[id].front ();
+			string region_name = region_name_from_path (afs->name(), true);
+
+			PropertyList plist;
+
+			plist.add (Properties::start, timecnt_t (0, timepos_t (Temporal::AudioTime)));
+			plist.add (Properties::length, afs->length());
+			plist.add (Properties::name, region_name);
+			plist.add (Properties::opaque, rmode != RecSoundOnSound);
+			std::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
+			rx->set_automatic (true);
+			rx->set_whole_file (true);
+
+			const timepos_t np (ri.start);
+			rx->set_tempo (Temporal::TempoMap::use()->tempo_at (np));
+			rx->set_meter (Temporal::TempoMap::use()->meter_at (np));
+
+			region = std::dynamic_pointer_cast<AudioRegion> (rx);
+			region->special_set_position (np);
+		} catch (failed_constructor& err) {
+			error << string_compose(_("%1: could not create region for recovered audio file"), afs->name ()) << endmsg;
+		}
+
+		/* now add region to playlist */
+
+		std::shared_ptr<Playlist> playlist = track->playlist();
+		playlist->clear_changes ();
+		playlist->freeze ();
+
+		int               cnt             = 0;
+		samplecnt_t       buffer_position = 0;
+		samplecnt_t const preroll_off     = preroll_record_trim_len ();
+
+		for (auto const& i : ci) {
+			samplecnt_t len = std::min(afs->length().samples () - buffer_position, i.samples);
+			if (len < 1) {
+				break;
+			}
+
+			PropertyList plist = region->derive_properties ();
+			plist.remove (Properties::start);
+			plist.remove (Properties::length);
+			plist.add (Properties::start, timecnt_t (buffer_position, timepos_t::zero (false)));
+			plist.add (Properties::length, timecnt_t (len, timepos_t::zero (false)));
+
+			std::shared_ptr<Region> copy (RegionFactory::create (region, plist));
+			copy->set_region_group (Region::get_retained_group_id(cnt++)); // XXX < is this correct?
+
+			if (preroll_off > 0) {
+				/* This doesn't do anything, yet. preroll_off isn't saved for recovery */
+				copy->trim_front (timepos_t (buffer_position + preroll_off));
+			}
+
+			const timepos_t p (i.start + preroll_off);
+			copy->set_tempo (Temporal::TempoMap::use()->tempo_at (p));
+			copy->set_meter (Temporal::TempoMap::use()->meter_at (p));
+
+			playlist->add_region (copy, timepos_t (i.start));
+			playlist->set_layer (copy, DBL_MAX);
+
+			buffer_position += len;
+		}
+		playlist->thaw ();
+		add_command (new StatefulDiffCommand (playlist));
+	}
+
+	commit_reversible_command ();
+	/* increase take name */
+	if (config.get_track_name_take () && !config.get_take_name ().empty()) {
+		string newname = config.get_take_name();
+		config.set_take_name(bump_name_number (newname));
+	}
 	return 0;
 }
 
@@ -981,6 +1187,7 @@ Session::load_state (string snapshot_name, bool from_template)
 {
 	delete state_tree;
 	state_tree = 0;
+	_record_recover_log.clear ();
 
 	bool state_was_pending = false;
 
@@ -1075,6 +1282,15 @@ Session::load_state (string snapshot_name, bool from_template)
 			if (!copy_file (xmlpath, backup_path)) {;
 				return -1;
 			}
+		}
+	}
+
+	if (state_was_pending) {
+		std::string reclog = Glib::build_filename (session_directory().root_path(), legalize_for_path (snap_name() + recordlog_suffix));
+		if (Glib::file_test (reclog, Glib::FILE_TEST_IS_REGULAR)) {
+			try {
+				_record_recover_log = Glib::file_get_contents (reclog);
+			} catch (...) { }
 		}
 	}
 
@@ -2525,6 +2741,16 @@ Session::set_state (const XMLNode& node, int version)
 		_selection->set_state (*child, version);
 	}
 
+	/* recover recordings */
+	if (!_record_recover_log.empty ()) {
+		try {
+			recover_recordings (_record_recover_log);
+		} catch (...) {
+			error << _("Session: failed to recover recordings.") << endmsg;
+		}
+		_record_recover_log.clear ();
+	}
+
 	update_route_record_state ();
 	sync_cues ();
 
@@ -2540,6 +2766,7 @@ Session::set_state (const XMLNode& node, int version)
 out:
 	delete state_tree;
 	state_tree = 0;
+	_record_recover_log.clear ();
 	return ret;
 }
 

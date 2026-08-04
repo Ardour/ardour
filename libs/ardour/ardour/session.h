@@ -636,13 +636,13 @@ public:
 	                     bool only_used_sources = false,
 	                     PBD::Progress* p = 0);
 
-	int restore_state (std::string snapshot_name);
 	int save_template (const std::string& template_name, const std::string& description = "", bool replace_existing = false);
 	int save_history (std::string snapshot_name = "");
 	int restore_history (std::string snapshot_name);
 	void remove_state (std::string snapshot_name);
 	void rename_state (std::string old_name, std::string new_name);
 	void remove_pending_capture_state ();
+	void remove_pending_record_log ();
 	int rename (const std::string&);
 	bool get_nsm_state () const { return _under_nsm_control; }
 	void set_nsm_state (bool state) { _under_nsm_control = state; }
@@ -1644,6 +1644,7 @@ private:
 
 	XMLTree*         state_tree;
 	StateOfTheState _state_of_the_state;
+	std::string      _record_recover_log;
 
 	friend class     StateProtector;
 	std::atomic<int> _suspend_save;
@@ -1658,6 +1659,7 @@ private:
 	int        load_options (const XMLNode&);
 	int        load_state (std::string snapshot_name, bool from_template = false);
 	static int parse_stateful_loading_version (const std::string&);
+	int        recover_recordings (std::string const&);
 
 	bool load_misc_port_state ();
 	bool save_misc_port_state () const;

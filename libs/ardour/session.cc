@@ -2366,13 +2366,11 @@ Session::maybe_enable_record (bool rt_context)
 
 	_record_status.store (Enabled);
 
-	// TODO make configurable, perhaps capture-buffer-seconds dependnet?
-	bool quick_start = true;
 
 	/* Save pending state of which sources the next record will use,
 	 * which gives us some chance of recovering from a crash during the record.
 	 */
-	if (!rt_context && (!quick_start || _transport_fsm->transport_speed() == 0)) {
+	if (!rt_context && _transport_fsm->transport_speed() == 0) {
 		save_state ("", true);
 	}
 
@@ -2381,22 +2379,6 @@ Session::maybe_enable_record (bool rt_context)
 		if (!config.get_punch_in() || 0 == locations()->auto_punch_location ()) {
 			enable_record ();
 		}
-		/* When rolling, start recording immediately.
-		 * Do not wait for .pending state save to complete
-		 * because that may take some time (up to a second
-		 * for huge sessions).
-		 *
-		 * This is potentially dangerous!! If a crash happens
-		 * while recording before the .pending save completed,
-		 * the data until then may be lost or overwritten.
-		 * (However disk-writer buffers are usually longer,
-		 *  compared to the time it takes to save a session.
-		 *  disk I/O may not be a bottleneck either. Except
-		 *  perhaps plugin-state saves taking a lock.
-		 */
-		 if (!rt_context && quick_start) {
-			 save_state ("", true);
-		 }
 	} else {
 		send_immediate_mmc (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordPause));
 		RecordStateChanged (); /* EMIT SIGNAL */
