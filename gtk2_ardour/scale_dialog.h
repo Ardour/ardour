@@ -35,16 +35,18 @@ namespace ArdourWidgets {
 	class Bracelet;
 }
 
-class ScaleDialog : public ArdourDialog
+class ScaleBox : public Gtk::VBox
 {
   public:
-	ScaleDialog (std::string const & provider_name);
-	~ScaleDialog ();
+	ScaleBox (std::string const & provider_name);
+	~ScaleBox ();
 
 	void set (ARDOUR::MusicalKey const *);
 	ARDOUR::MusicalKey* get() const;
 
 	void set_tuning (ARDOUR::TuningSystem);
+
+	sigc::signal<void> clear_scale;
 
   private:
 	static std::map<ARDOUR::MusicalModeType,std::string> type_string_map;
@@ -93,4 +95,17 @@ class ScaleDialog : public ArdourDialog
 
 	ARDOUR::MusicalKey* twelvetone_get() const;
 	void                twelvetone_set (ARDOUR::MusicalKey const &);
+};
+
+class ScaleDialog : public ArdourDialog
+{
+   public:
+	ScaleDialog (std::string const & provider_name);
+
+	void set (ARDOUR::MusicalKey const * key) { box.set (key); }
+	ARDOUR::MusicalKey* get() const { return box.get(); }
+	void set_tuning (ARDOUR::TuningSystem ts) { box.set_tuning (ts); }
+
+  protected:
+	ScaleBox box;
 };

@@ -30,13 +30,13 @@
 
 #include "pbd/i18n.h"
 
-std::map<ARDOUR::MusicalModeType,std::string> ScaleDialog::type_string_map;
-std::map<std::string,ARDOUR::MusicalModeType> ScaleDialog::string_type_map;
+std::map<ARDOUR::MusicalModeType,std::string> ScaleBox::type_string_map;
+std::map<std::string,ARDOUR::MusicalModeType> ScaleBox::string_type_map;
 
 using namespace ARDOUR;
 
 void
-ScaleDialog::fill_maps ()
+ScaleBox::fill_maps ()
 {
 	struct stpair {
 		stpair (char const * const s, MusicalModeType t) : str (s), type (t) {}
@@ -58,9 +58,8 @@ ScaleDialog::fill_maps ()
 	}
 }
 
-ScaleDialog::ScaleDialog (std::string const & provider_name)
-	: ArdourDialog (_("Scale Editor"))
-	, provider (provider_name)
+ScaleBox::ScaleBox (std::string const & provider_name)
+	: provider (provider_name)
 	, _tuning (TwelveTone)
 	, _key (nullptr)
 	, type_label (_("Type"))
@@ -87,7 +86,7 @@ ScaleDialog::ScaleDialog (std::string const & provider_name)
 	clear_button.add (clear_label);
 	clear_label.set_padding (12, 12);
 
-	tuning_dropdown.add_menu_elem (MenuElem (_("Twelve Tone"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::fill_dropdowns), TwelveTone)));
+	tuning_dropdown.add_menu_elem (MenuElem (_("Twelve Tone"), sigc::bind (sigc::mem_fun (*this, &ScaleBox::fill_dropdowns), TwelveTone)));
 	tuning_dropdown.set_active (0);
 
 	inner_tuning_box->pack_start (tuning_label, false, false);
@@ -96,13 +95,13 @@ ScaleDialog::ScaleDialog (std::string const & provider_name)
 	root_mode_box.pack_start (root_dropdown, false, false);
 	root_mode_box.pack_start (mode_dropdown, true, true);
 
-	mode_dropdown.menu().signal_selection_done ().connect (sigc::mem_fun (*this, &ScaleDialog::mode_changed));
+	mode_dropdown.menu().signal_selection_done ().connect (sigc::mem_fun (*this, &ScaleBox::mode_changed));
 
-	type_dropdown.add_menu_elem (MenuElem (_("Absolute Pitch (Hz)"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), AbsolutePitch)));
-	type_dropdown.add_menu_elem (MenuElem (_("Pitch Class"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), PitchClass)));
-	type_dropdown.add_menu_elem (MenuElem (_("Ratio steps"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), RatioSteps)));
-	type_dropdown.add_menu_elem (MenuElem (_("Ratios from root"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), RatioFromRoot)));
-	type_dropdown.add_menu_elem (MenuElem (_("MIDI Note Numbers"), sigc::bind (sigc::mem_fun (*this, &ScaleDialog::set_type), MidiNote)));
+	type_dropdown.add_menu_elem (MenuElem (_("Absolute Pitch (Hz)"), sigc::bind (sigc::mem_fun (*this, &ScaleBox::set_type), AbsolutePitch)));
+	type_dropdown.add_menu_elem (MenuElem (_("Pitch Class"), sigc::bind (sigc::mem_fun (*this, &ScaleBox::set_type), PitchClass)));
+	type_dropdown.add_menu_elem (MenuElem (_("Ratio steps"), sigc::bind (sigc::mem_fun (*this, &ScaleBox::set_type), RatioSteps)));
+	type_dropdown.add_menu_elem (MenuElem (_("Ratios from root"), sigc::bind (sigc::mem_fun (*this, &ScaleBox::set_type), RatioFromRoot)));
+	type_dropdown.add_menu_elem (MenuElem (_("MIDI Note Numbers"), sigc::bind (sigc::mem_fun (*this, &ScaleBox::set_type), MidiNote)));
 
 	Gtk::HBox* inner_type_box (manage (new Gtk::HBox));
 	inner_type_box->pack_start (type_label, false, false);
@@ -119,7 +118,7 @@ ScaleDialog::ScaleDialog (std::string const & provider_name)
 	inner_name_box->set_spacing (12);
 
 	Gtk::HBox* clear_box (manage (new Gtk::HBox));
-	clear_button.signal_clicked().connect ([this]() { response (Gtk::RESPONSE_REJECT); });
+	clear_button.signal_clicked().connect ([this]() { clear_scale (); /* EMIT SIGNAL */ });
 	clear_box->pack_start (clear_button, true, false);
 
 	Gtk::HBox* inner_step_box (manage (new Gtk::HBox));
@@ -137,46 +136,42 @@ ScaleDialog::ScaleDialog (std::string const & provider_name)
 #endif
 	scala_file_button.set_current_folder (Glib::get_home_dir());
 
-	Gtk::VBox* vbox (get_vbox());
-	vbox->pack_start (*inner_name_box, false, false);
-	vbox->pack_start (*inner_tuning_box, false, false);
-	vbox->pack_start (root_mode_box, false, false);
-	vbox->pack_start (named_scale_box, false, false);
-	vbox->pack_start (*clear_box, false, false);
-	vbox->pack_start (step_packer, false, false);
-	vbox->pack_start (scala_box, false, false);
+	pack_start (*inner_name_box, false, false);
+	pack_start (*inner_tuning_box, false, false);
+	pack_start (root_mode_box, false, false);
+	pack_start (named_scale_box, false, false);
+	pack_start (*clear_box, false, false);
+	pack_start (step_packer, false, false);
+	pack_start (scala_box, false, false);
 
-	vbox->set_border_width (6);
-	vbox->set_spacing (12);
-	vbox->show_all ();
+	set_border_width (6);
+	set_spacing (12);
+	show_all ();
 
 	step_packer.set_spacing (12);
 	pack_steps ();
-
-	add_button (Stock::CANCEL, RESPONSE_CANCEL);
-	add_button (Stock::OK, RESPONSE_OK);
 }
 
-ScaleDialog::~ScaleDialog ()
+ScaleBox::~ScaleBox ()
 {
 	delete bracelet;
 }
 
 void
-ScaleDialog::mode_changed ()
+ScaleBox::mode_changed ()
 {
 	pack_steps ();
 }
 
 void
-ScaleDialog::set_tuning (TuningSystem c)
+ScaleBox::set_tuning (TuningSystem c)
 {
 	_tuning = c;
 	tuning_dropdown.set_active ((int) c);
 }
 
 void
-ScaleDialog::set (MusicalKey const * key)
+ScaleBox::set (MusicalKey const * key)
 {
 	using namespace ARDOUR;
 
@@ -203,7 +198,7 @@ ScaleDialog::set (MusicalKey const * key)
 }
 
 void
-ScaleDialog::twelvetone_set (MusicalKey const & key)
+ScaleBox::twelvetone_set (MusicalKey const & key)
 {
 	if (!_key) {
 		_key.reset (new MusicalKey (key));
@@ -227,7 +222,7 @@ ScaleDialog::twelvetone_set (MusicalKey const & key)
 }
 
 MusicalKey*
-ScaleDialog::get() const
+ScaleBox::get() const
 {
 	using namespace ARDOUR;
 
@@ -240,7 +235,7 @@ ScaleDialog::get() const
 }
 
 MusicalKey*
-ScaleDialog::twelvetone_get() const
+ScaleBox::twelvetone_get() const
 {
 	std::string mode = mode_dropdown.get_active ();
 
@@ -257,7 +252,7 @@ ScaleDialog::twelvetone_get() const
 }
 
 void
-ScaleDialog::fill_dropdowns (TuningSystem tuning)
+ScaleBox::fill_dropdowns (TuningSystem tuning)
 {
 	using namespace Gtk::Menu_Helpers;
 	using namespace ARDOUR;
@@ -287,7 +282,7 @@ ScaleDialog::fill_dropdowns (TuningSystem tuning)
 }
 
 void
-ScaleDialog::pack_steps ()
+ScaleBox::pack_steps ()
 {
 	if (!bracelet) {
 		bracelet = new ArdourWidgets::Bracelet (MusicalMode::tones_per_equivalent[_tuning]);
@@ -318,6 +313,24 @@ ScaleDialog::pack_steps ()
 
 
 void
-ScaleDialog::set_type (MusicalModeType t)
+ScaleBox::set_type (MusicalModeType t)
 {
 }
+
+
+/*---*/
+
+ScaleDialog::ScaleDialog (std::string const & pname)
+	: ArdourDialog (_("Scale Editor"))
+	, box (pname)
+{
+	using namespace Gtk;
+
+	box.clear_scale.connect ([this]() {  response (RESPONSE_REJECT); });
+
+	get_vbox()->pack_start (box, true, true);
+
+	add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	add_button (Stock::OK, RESPONSE_OK);
+}
+
