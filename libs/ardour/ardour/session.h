@@ -55,6 +55,7 @@
 #include "pbd/event_loop.h"
 #include "pbd/file_archive.h"
 #include "pbd/history_owner.h"
+#include "pbd/mpmc_queue.h"
 #include "pbd/mutex.h"
 #include "pbd/rcu.h"
 #include "pbd/rwlock.h"
@@ -1378,6 +1379,17 @@ public:
 	void import_pt_rest (PTFFormat& ptf);
 	bool import_sndfile_as_region (std::string path, SrcQuality quality, timepos_t& pos, SourceList& sources, ImportStatus& status, uint32_t current, uint32_t total);
 
+	struct RecordInfo {
+		RecordInfo () : start (0), samples (0) {}
+		RecordInfo (samplepos_t s, samplecnt_t l) : start (s), samples (l) {}
+		RecordInfo (std::weak_ptr<Track> t, samplepos_t s, samplecnt_t l) : track (t), start (s), samples (l) {}
+		std::weak_ptr<Track> track;
+		samplepos_t start;
+		samplecnt_t samples;
+	};
+
+	void record_info (std::weak_ptr<Track>, samplecnt_t, samplepos_t);
+
 	typedef struct ptflookup {
 		uint16_t index1;
 		uint16_t index2;
@@ -1827,6 +1839,8 @@ private:
 	PBD::Mutex _auto_connect_queue_lock;
 	AutoConnectQueue     _auto_connect_queue;
 	std::atomic<unsigned int>   _latency_recompute_pending;
+
+	PBD::MPMCQueue<RecordInfo> _rec_info_queue;
 
 	void get_physical_ports (std::vector<std::string>& inputs, std::vector<std::string>& outputs, DataType type,
 	                         MidiPortFlags include = MidiPortFlags (0),

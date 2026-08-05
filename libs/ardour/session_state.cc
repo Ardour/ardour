@@ -997,13 +997,6 @@ Session::recover_recordings (string const& recinfo)
 	 * - M regions (looping, manually rec[dis]-arm)
 	 */
 
-	struct RecordInfo {
-		RecordInfo () : start (0), samples (0) {}
-		RecordInfo (samplepos_t s, samplecnt_t l) : start (s), samples (l) {}
-		samplepos_t start;
-		samplecnt_t samples;
-	};
-
 	std::map<PBD::ID, std::set<std::string>>   files;
 	std::map<PBD::ID, std::vector<RecordInfo>> captures;
 

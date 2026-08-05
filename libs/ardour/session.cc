@@ -38,6 +38,8 @@
 #include <cerrno>
 #include <limits.h>
 
+#include <giomm.h>
+
 #include <glibmm/datetime.h>
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
@@ -287,6 +289,7 @@ Session::Session (AudioEngine &eng,
 	, _rt_thread_active (false)
 	, _rt_emit_pending (false)
 	, _ac_thread_active (0)
+	, _rec_info_queue (2048)
 	, step_speed (0)
 	, outbound_mtc_timecode_frame (0)
 	, next_quarter_frame_to_send (-1)
@@ -545,6 +548,8 @@ Session::Session (AudioEngine &eng,
 	IOPluginsChanged.connect_same_thread (*this, std::bind (&Session::resort_io_plugs, this));
 
 	TempoMap::MapChanged.connect_same_thread (*this, std::bind (&Session::tempo_map_changed, this));
+
+	RecordPassCompleted.connect_same_thread (*this, [&]() { record_info (std::weak_ptr<Track>(), -1, -1); });
 
 	emit_thread_start ();
 	auto_connect_thread_start ();
@@ -3687,6 +3692,7 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 					mt->StepEditStatusChange.connect_same_thread (*this, std::bind (&Session::step_edit_status_change, this, _1));
 					mt->presentation_info().PropertyChanged.connect_same_thread (*this, std::bind (&Session::midi_track_presentation_info_changed, this, _1, std::weak_ptr<MidiTrack>(mt)));
 				}
+				tr->RecordInfo.connect_same_thread (*this, std::bind (&Session::record_info, this, std::weak_ptr<Track> (tr), _1, _2));
 			}
 
 			if (r->triggerbox()) {
@@ -7898,6 +7904,14 @@ Session::queue_latency_recompute ()
 }
 
 void
+Session::record_info (std::weak_ptr<Track> t, samplecnt_t s, samplepos_t l)
+{
+	RecordInfo ri (t, s, l);
+	_rec_info_queue.push_back (ri);
+	auto_connect_thread_wakeup ();
+}
+
+void
 Session::auto_connect (const AutoConnectRequest& ar)
 {
 	std::shared_ptr<Route> route = ar.route.lock();
@@ -8116,6 +8130,37 @@ Session::auto_connect_thread_run ()
 			pthread_cond_wait (&_auto_connect_cond, &_auto_connect_mutex);
 			lx.acquire ();
 		}
+
+		{
+			Glib::RefPtr<Gio::File> rf;
+			Glib::RefPtr<Gio::FileOutputStream> os ;
+			RecordInfo ri;
+			while (_rec_info_queue.pop_front (ri)) {
+				if (ri.samples < 0 && ri.start < 0) {
+					os.reset ();
+					rf.reset ();
+					remove_pending_record_log ();
+					continue;
+				}
+				std::shared_ptr<Track> t = ri.track.lock();
+				if (!t) {
+					continue;
+				}
+				if (!rf) {
+					std::string reclog = Glib::build_filename (session_directory().root_path(), legalize_for_path (snap_name() + recordlog_suffix));
+					rf = Gio::File::create_for_path (reclog);
+				}
+				if (!os) {
+					os = rf->append_to ();
+				}
+				os->write (string_compose ("%1 %2 %3", t->id().to_s (), ri.start, ri.samples));
+				for (auto const& s : t->capture_source_paths ()) {
+					os->write (string_compose (" %1:%2",s.size(), s));
+				}
+				os->write ("\n");
+			}
+		}
+
 	}
 	lx.release ();
 	pthread_mutex_unlock (&_auto_connect_mutex);
