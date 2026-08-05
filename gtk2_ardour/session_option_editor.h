@@ -27,10 +27,13 @@ namespace ARDOUR {
 	class SessionConfiguration;
 }
 
+class ScaleBox;
+
 class SessionOptionEditor : public OptionEditorWindow
 {
 public:
 	SessionOptionEditor (ARDOUR::Session* s);
+	~SessionOptionEditor();
 
 private:
 	void parameter_changed (std::string const &);
@@ -40,7 +43,8 @@ private:
 	ComboOption<float>* _vpu;
 	ComboOption<ARDOUR::SampleFormat>* _sf;
 	EntryOption* _take_name;
+	ScaleBox* scale_widget;
 
 	void save_defaults ();
+	void scale_change ();
 };
-

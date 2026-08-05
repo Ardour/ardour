@@ -27,6 +27,7 @@
 
 #include "actions.h"
 #include "gui_thread.h"
+#include "scale_dialog.h"
 #include "session_option_editor.h"
 #include "search_path_option.h"
 #include "pbd/i18n.h"
@@ -38,6 +39,7 @@ using namespace Timecode;
 SessionOptionEditor::SessionOptionEditor (Session* s)
 	: OptionEditorWindow (&(s->config), _("Session Properties"))
 	, _session_config (&(s->config))
+	, scale_widget (nullptr)
 {
 	set_session (s);
 
@@ -392,6 +394,21 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	add_option (_("MIDI"), li);
 
+	add_option (_("Scale & Tuning"), new OptionEditorHeading (_("Scale and Tuning")));
+	scale_widget = new ScaleBox (_("Session"));
+	scale_widget->show ();
+	scale_widget->set (_session->key());
+
+	Gtk::Button* sb = Gtk::manage (new Gtk::Button (_("Use this scale")));
+	sb->signal_clicked().connect ([this]() { scale_change (); });
+	sb->show ();
+	scale_widget->pack_end (*sb, false, false, 12);
+
+	Gtk::HBox* hb = Gtk::manage (new Gtk::HBox);
+	hb->pack_start (*scale_widget, false, false);
+
+	add_option (_("Scale & Tuning"), new FooOption (hb));
+
 	/* Misc */
 
 	add_option (_("Misc"), new OptionEditorHeading (_("Miscellaneous Options")));
@@ -451,6 +468,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	btn->signal_clicked().connect (sigc::mem_fun (*this, &SessionOptionEditor::save_defaults));
 	add_option (_("Misc"), new FooOption (btn));
 
+
 	set_current_page (_("Timecode"));
 
 	/* Place the search entry */
@@ -470,6 +488,18 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 			}
 		}
 	}
+}
+
+SessionOptionEditor::~SessionOptionEditor ()
+{
+	delete scale_widget;
+}
+
+void
+SessionOptionEditor::scale_change ()
+{
+	ARDOUR::MusicalKey* key = scale_widget->get();
+	_session->set_key (key);
 }
 
 void
