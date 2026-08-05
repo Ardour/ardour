@@ -171,7 +171,7 @@ private:
 
 	void loop (samplepos_t);
 
-	CaptureInfos                 capture_info;
+	CaptureInfos       capture_info;
 	mutable PBD::Mutex capture_info_lock;
 
 	samplepos_t get_capture_start_sample_locked (uint32_t n = 0) const;
@@ -203,6 +203,7 @@ private:
 
 	std::list<std::shared_ptr<Source> >            _last_capture_sources;
 	std::vector<std::shared_ptr<AudioFileSource> > capturing_sources;
+	mutable PBD::Mutex                             capturing_sources_lock;
 
 	/** A buffer that we use to put newly-arrived MIDI data in for
 	 * the GUI to read (so that it can update itself).

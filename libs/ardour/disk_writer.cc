@@ -394,14 +394,7 @@ DiskWriter::set_align_style (AlignStyle a, bool force)
 std::vector<std::string>
 DiskWriter::capture_source_paths ()
 {
-	/* must be called from GUI thread */
-
-	// TODO: consider passing this information along with the
-	// RecordInfo signal. Currently there may be the possibility
-	// that when RecordInfo is handled by the GUI, capturing_sources
-	// have already been changed.
-	// (eg. when using a ctrl surface to disable rec-arm)
-
+	PBD::Mutex::Lock lm (capturing_sources_lock);
 	std::vector<std::string> rv;
 	for (auto const& cs: capturing_sources) {
 		rv.push_back (cs->path ());
@@ -931,6 +924,7 @@ DiskWriter::prep_record_enable ()
 
 	std::shared_ptr<ChannelList const> c = channels.reader();
 
+	PBD::Mutex::Lock lm (capturing_sources_lock);
 	capturing_sources.clear ();
 
 	for (auto const& chan : *c) {
@@ -945,6 +939,7 @@ DiskWriter::prep_record_enable ()
 bool
 DiskWriter::prep_record_disable ()
 {
+	PBD::Mutex::Lock lm (capturing_sources_lock);
 	capturing_sources.clear ();
 	return true;
 }
@@ -1144,6 +1139,7 @@ DiskWriter::reset_write_sources (bool mark_write_complete)
 		return;
 	}
 
+	PBD::Mutex::Lock lm (capturing_sources_lock);
 	capturing_sources.clear ();
 
 	for (auto const chan : *c) {
@@ -1174,6 +1170,8 @@ DiskWriter::reset_write_sources (bool mark_write_complete)
 			capturing_sources.push_back (chan->write_source);
 		}
 	}
+
+	lm.release ();
 
 	if (_playlists[DataType::MIDI]) {
 		use_new_write_source (DataType::MIDI);
