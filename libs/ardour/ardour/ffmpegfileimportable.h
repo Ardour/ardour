@@ -37,7 +37,7 @@ public:
 		ALL_CHANNELS = -1,
 	};
 
-	FFMPEGFileImportableSource (const std::string& path, int channel = ALL_CHANNELS);
+	FFMPEGFileImportableSource (const std::string& path, int channel = ALL_CHANNELS, bool for_recovery = false);
 
 	virtual ~FFMPEGFileImportableSource ();
 

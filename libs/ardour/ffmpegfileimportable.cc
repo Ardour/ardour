@@ -34,7 +34,7 @@ receive_stdout (std::string* out, const std::string& data, size_t size)
 	*out += data;
 }
 
-FFMPEGFileImportableSource::FFMPEGFileImportableSource (const std::string& path, int channel)
+FFMPEGFileImportableSource::FFMPEGFileImportableSource (const std::string& path, int channel, bool for_recovery)
 	: _path (path)
 	, _channel (channel)
 	, _buffer (32768)
@@ -82,9 +82,20 @@ FFMPEGFileImportableSource::FFMPEGFileImportableSource (const std::string& path,
 
 		// TODO: Find the stream with the most channels, rather than whatever the first one is.
 		_channels    = root.get<int> ("streams..channels");
-		_length      = root.get<int64_t> ("streams..duration_ts");
 		_samplerate  = root.get<int> ("streams..sample_rate");
 		_format_name = root.get<std::string> ("streams..codec_long_name");
+
+		if (for_recovery) {
+			/* this may be missing for corrup FLAC files */
+			try {
+				_length = root.get<int64_t> ("streams..duration_ts");
+			} catch (...) {
+				_length = 9223372036854775807; // SF_COUNT_MAX
+			}
+		} else {
+			_length = root.get<int64_t> ("streams..duration_ts");
+		}
+
 		/* this is only present in video files */
 		try {
 			_natural_position = root.get<int64_t> ("streams..start_pts");
