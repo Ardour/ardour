@@ -81,11 +81,16 @@ FFMPEGFileImportableSource::FFMPEGFileImportableSource (const std::string& path,
 		pt::read_json (is, root);
 
 		// TODO: Find the stream with the most channels, rather than whatever the first one is.
-		_channels         = root.get<int> ("streams..channels");
-		_length           = root.get<int64_t> ("streams..duration_ts");
-		_samplerate       = root.get<int> ("streams..sample_rate");
-		_natural_position = root.get<int64_t> ("streams..start_pts");
-		_format_name      = root.get<std::string> ("streams..codec_long_name");
+		_channels    = root.get<int> ("streams..channels");
+		_length      = root.get<int64_t> ("streams..duration_ts");
+		_samplerate  = root.get<int> ("streams..sample_rate");
+		_format_name = root.get<std::string> ("streams..codec_long_name");
+		/* this is only present in video files */
+		try {
+			_natural_position = root.get<int64_t> ("streams..start_pts");
+		} catch (...) {
+			_natural_position = 0;
+		}
 		delete exec;
 	} catch (...) {
 		PBD::error << "FFMPEGFileImportableSource: Failed to read file metadata" << endmsg;
