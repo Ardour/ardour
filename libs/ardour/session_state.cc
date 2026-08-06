@@ -1053,7 +1053,7 @@ Session::recover_recordings (string const& recinfo)
 		SourceList srcs;
 		try {
 			for (auto const& fn : paths) {
-				std::shared_ptr<Source> src (SourceFactory::createForRecovery (DataType::AUDIO, *this, fn, 0));
+				std::shared_ptr<Source> src (SourceFactory::createForRecovery (DataType::AUDIO, *this, fn));
 				std::shared_ptr<FileSource> fs = std::dynamic_pointer_cast<FileSource> (src);
 				fs->mark_immutable ();
 				fs->mark_nonremovable ();

@@ -24,6 +24,7 @@
 #include "libardour-config.h"
 #endif
 
+#include "pbd/basename.h"
 #include "pbd/convert.h"
 #include "pbd/error.h"
 
@@ -379,34 +380,76 @@ SourceFactory::createWritable (DataType type, Session& s, const std::string& pat
 }
 
 std::shared_ptr<Source>
-SourceFactory::createForRecovery (DataType type, Session& s, const std::string& path, int chn)
+SourceFactory::createForRecovery (DataType type, Session& s, const std::string& path)
 {
 	/* this might throw failed_constructor(), which is OK */
 
-	if (type == DataType::AUDIO) {
-		Source* src = new SndFileSource (s, path, chn);
+	if (type != DataType::AUDIO) {
+		error << _("Recovery attempted on a MIDI file - not implemented") << endmsg;
+		throw failed_constructor ();
+	}
 
-		std::shared_ptr<Source> ret (src);
-		BOOST_MARK_SOURCE (ret);
+	string error_msg;
+	SoundFileInfo sfinfo;
+	if (!SndFileSource::get_soundfile_info (path, sfinfo, error_msg)) {
+		error << string_compose (_("Failed to open file' %1' for recovery"), path) << endmsg;
+		throw failed_constructor ();
+	}
 
-		if (setup_peakfile (ret, false)) {
+	std::shared_ptr<Source> ret;
+
+	if (sfinfo.length > 0 && sfinfo.length < SF_COUNT_MAX && sfinfo.format_name.find ("FLAC") == string::npos) {
+
+		Source* src = new SndFileSource (s, path, 0);
+		ret = std::shared_ptr<Source> (src);
+
+	} else {
+#ifndef NDEBUG
+		cout << string_compose ("Using ffmpeg to recover corrupted file '%1'\n", path);
+#endif
+		/* libsnfile cannot handle half written file */
+		shared_ptr<FFMPEGFileImportableSource> source (new FFMPEGFileImportableSource (path, FFMPEGFileImportableSource::ALL_CHANNELS, true));
+
+		if (source->channels() != 1) {
+			/* we only ever record to mono */
+			error << _("Recovery attempted on a multi-channel file.") << endmsg;
 			throw failed_constructor ();
 		}
 
-		// no analysis data - this is still basically a new file (we
-		// crashed while recording.
+		string name = PBD::basename_nosuffix (path);
+		const string new_path = s.new_audio_source_path (name, 1, 0, false);
+		info << string_compose (_("Recovering file '%s' to '%s'"), path, new_path) << endmsg;
 
-		// always announce these files
+		ret = std::shared_ptr<Source> (SourceFactory::createWritable (DataType::AUDIO, s, new_path, source->samplerate (), false, true));
+		std::shared_ptr<AudioFileSource> afs = std::dynamic_pointer_cast<AudioFileSource>(ret);
 
-		SourceCreated (ret);
+		const samplecnt_t nframes = 8192;
+		std::unique_ptr<float[]> data(new float[nframes]);
 
-		return ret;
+		samplecnt_t nread;
+		while ((nread = source->read (data.get(), nframes)) > 0) {
+			afs->write (data.get(), nread);
+		}
+		afs->mark_immutable ();
+		afs->close();
 
-	} else if (type == DataType::MIDI) {
-		error << _("Recovery attempted on a MIDI file - not implemented") << endmsg;
+#if 0
+		source.reset ();
+		//g_rename (path.c_str (), (path + ".corrupt").c_str());
+		g_unlink (path.c_str ());
+#endif
 	}
 
-	throw failed_constructor ();
+	BOOST_MARK_SOURCE (ret);
+
+	if (setup_peakfile (ret, false)) {
+		throw failed_constructor ();
+	}
+
+	/* always announce these files */
+	SourceCreated (ret);
+
+	return ret;
 }
 
 std::shared_ptr<Source>

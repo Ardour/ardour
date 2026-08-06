@@ -48,7 +48,7 @@ public:
 	static std::shared_ptr<Source> createSilent (Session&, const XMLNode& node, samplecnt_t, float sample_rate);
 	static std::shared_ptr<Source> createExternal (DataType, Session&, const std::string& path, int chn, Source::Flag, bool announce = true, bool async = false);
 	static std::shared_ptr<Source> createWritable (DataType, Session&, const std::string& path, samplecnt_t rate, bool announce = true, bool async = false);
-	static std::shared_ptr<Source> createForRecovery (DataType, Session&, const std::string& path, int chn);
+	static std::shared_ptr<Source> createForRecovery (DataType, Session&, const std::string& path);
 	static std::shared_ptr<Source> createFromPlaylist (DataType, Session&, std::shared_ptr<Playlist> p, const PBD::ID& orig, const std::string& name, uint32_t chn, timepos_t start, timepos_t const& len, bool copy, bool defer_peaks);
 
 	static PBD::Cond  PeaksToBuild;
