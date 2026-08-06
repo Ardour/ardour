@@ -1805,6 +1805,10 @@ AudioRegion::set_scale_amplitude (gain_t g)
 
 	_scale_amplitude = g;
 
+	if (fabsf (_scale_amplitude - GAIN_COEFF_UNITY) < GAIN_COEFF_SMALL) {
+		_scale_amplitude = GAIN_COEFF_UNITY;
+	}
+
 	send_change (PropertyChange (Properties::scale_amplitude));
 }
 
