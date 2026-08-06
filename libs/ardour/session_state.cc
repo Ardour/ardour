@@ -1040,6 +1040,8 @@ Session::recover_recordings (string const& recinfo)
 		return -1;
 	}
 
+	BootMessage (_("Recovering Recordings"));
+
 	begin_reversible_command (Operations::capture);
 
 	for (auto const& [id, paths] : files) {
@@ -1060,6 +1062,8 @@ Session::recover_recordings (string const& recinfo)
 				Analyser::queue_source_for_analysis (src, false);
 				srcs.push_back (src);
 				info << string_compose ("Recovering recording from file '%1'", fn) << endmsg;
+				/* copying data to new files may take time, short of a progress report, kick the GUI */
+				GUIIdle ();
 			}
 		} catch (...) {
 			error << "Failed to create source for recovery.\n";
