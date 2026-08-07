@@ -607,7 +607,8 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 		save_last = current_str;
 	} else {
 		format.set_text ("   ?   ");
-		if (tm->valid_position (save_last, save_when)) {
+		samplepos_t unused;
+		if (tm->valid_position (save_last, unused, save_when)) {
 			pos_is_locked = false;
 		}
 	}
