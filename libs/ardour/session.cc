@@ -375,6 +375,7 @@ Session::Session (AudioEngine &eng,
 	_have_rec_enabled_track.store (0);
 	_have_rec_disabled_track.store (1);
 	_latency_recompute_pending.store (0);
+	_have_capture_info.store (false);
 	_suspend_timecode_transmission.store (0);
 	_update_pretty_names.store (0);
 	_seek_counter.store (0);
@@ -2375,7 +2376,7 @@ Session::maybe_enable_record (bool rt_context)
 	/* Save pending state of which sources the next record will use,
 	 * which gives us some chance of recovering from a crash during the record.
 	 */
-	if (!rt_context && _transport_fsm->transport_speed() == 0) {
+	if (!rt_context && (!_have_capture_info || _transport_fsm->transport_speed() == 0)) {
 		save_state ("", true);
 	}
 
@@ -8140,6 +8141,7 @@ Session::auto_connect_thread_run ()
 					os.reset ();
 					rf.reset ();
 					remove_pending_record_log ();
+					_have_capture_info = false;
 					continue;
 				}
 				std::shared_ptr<Track> t = ri.track.lock();
@@ -8153,6 +8155,7 @@ Session::auto_connect_thread_run ()
 				if (!os) {
 					os = rf->append_to ();
 				}
+					_have_capture_info = true;
 				os->write (string_compose ("%1 %2 %3", t->id().to_s (), ri.start, ri.samples));
 				for (auto const& s : t->capture_source_paths ()) {
 					os->write (string_compose (" %1:%2",s.size(), s));

@@ -1841,6 +1841,7 @@ private:
 	std::atomic<unsigned int>   _latency_recompute_pending;
 
 	PBD::MPMCQueue<RecordInfo> _rec_info_queue;
+	std::atomic<bool>          _have_capture_info;
 
 	void get_physical_ports (std::vector<std::string>& inputs, std::vector<std::string>& outputs, DataType type,
 	                         MidiPortFlags include = MidiPortFlags (0),
