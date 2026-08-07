@@ -316,7 +316,7 @@ public:
 	/* This can be used as display value when transport is not locked,
 	 * but a valid position has been received. e.g LTC standing TC.
 	 */
-	virtual bool valid_position (std::string& tc, samplepos_t& when) const
+	virtual bool valid_position (std::string& tc, samplepos_t& pos, samplepos_t& when) const
 	{
 		return false;
 	}
@@ -616,7 +616,7 @@ public:
 	std::string              position_string () const;
 	std::string              delta_string () const;
 
-	bool valid_position (std::string& tc, samplepos_t& when) const;
+	bool valid_position (std::string& tc, samplepos_t& pos, samplepos_t& when) const;
 
 	void create_port ();
 

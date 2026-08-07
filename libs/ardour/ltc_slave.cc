@@ -695,12 +695,13 @@ LTC_TransportMaster::apparent_timecode_format () const
 }
 
 bool
-LTC_TransportMaster::valid_position (std::string& tc, samplepos_t& when) const
+LTC_TransportMaster::valid_position (std::string& tc, samplepos_t& pos, samplepos_t& when) const
 {
-	if (frame_age == 0) {
+	if (frame_age == 0 || (delayedlocked > 1 && delayedlocked < 10)) {
 		return false;
 	}
 	tc =  Timecode::timecode_format_time(timecode);
+	pos = current.position;
 	when = frame_age;
 	return true;
 }
