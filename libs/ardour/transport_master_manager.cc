@@ -206,6 +206,14 @@ TransportMasterManager::pre_process_transport_masters (pframes_t nframes, sample
 	if (!_current_master->locked()) {
 		DEBUG_TRACE (DEBUG::Slave, "no roll4 - not locked\n");
 		_master_invalid_this_cycle = true;
+		if (!_session->transport_state_rolling ()) {
+			std::string unused;
+			samplepos_t pos;
+			samplepos_t when;
+			if (_current_master->valid_position (unused, pos, when) && _session->transport_sample () != pos) {
+				_session->request_locate (pos, false, MustStop, _current_master->request_type());
+			}
+	}
 		return 1.0;
 	}
 
