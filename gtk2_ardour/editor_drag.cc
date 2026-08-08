@@ -3016,7 +3016,7 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 	} else {
 		/* no mouse movement */
 		if (adjusted_current_time (event) != adjusted_time (_drags->current_pointer_time (), event, false)) {
-			_editor.point_trim (event, adjusted_current_time (event));
+			_editor.point_trim (event, adjusted_current_time (event), _operation == StartTrim);
 		}
 	}
 
