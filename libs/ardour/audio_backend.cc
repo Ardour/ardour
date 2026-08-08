@@ -100,15 +100,15 @@ AudioBackend::get_error_string (ErrorCode error_code)
 }
 
 std::string
-AudioBackend::get_standard_device_name (StandardDeviceName device_name)
+AudioBackend::get_none_device_name ()
 {
-	switch (device_name) {
-	case DeviceNone:
-		return _("None");
-	case DeviceDefault:
-		return _("Default");
-	}
-	return std::string();
+	return _("None");
+}
+
+std::string
+AudioBackend::get_default_device_name ()
+{
+	return _("Default");
 }
 
 } // namespace ARDOUR
