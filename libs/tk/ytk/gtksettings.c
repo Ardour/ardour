@@ -38,7 +38,7 @@
 #ifdef GDK_WINDOWING_QUARTZ
 #define DEFAULT_KEY_THEME "Mac"
 #else
-#define DEFAULT_KEY_THEME NULL
+#define DEFAULT_KEY_THEME "Ardour"
 #endif
 
 #define DEFAULT_TIMEOUT_INITIAL 200
@@ -309,11 +309,7 @@ gtk_settings_class_init (GtkSettingsClass *class)
                                              g_param_spec_string ("gtk-theme-name",
 								   P_("Theme Name"),
 								   P_("Name of theme RC file to load"),
-#ifdef G_OS_WIN32
-								  "MS-Windows",
-#else
-								  "Raleigh",
-#endif
+								  "Ardour",
 								  GTK_PARAM_READWRITE),
                                              NULL);
   g_assert (result == PROP_THEME_NAME);
