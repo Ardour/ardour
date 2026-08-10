@@ -63,6 +63,7 @@
 #include <glib.h>
 #include "pbd/gstdio_compat.h"
 #include "pbd/locale_guard.h"
+#include "pbd/localtime_r.h"
 #include "pbd/strsplit.h"
 
 #include <glibmm.h>
@@ -1046,8 +1047,8 @@ Session::recover_recordings (string const& recinfo)
 
 	std::string pending_state_file_path = Glib::build_filename (_session_dir->root_path(), legalize_for_path (_current_snapshot_name + pending_suffix));
 
-	time_t     xnow;
-	struct tm* now;
+	time_t    xnow;
+	struct tm now;
 	GStatBuf  gsb;
 	if (0 == g_stat (pending_state_file_path.c_str(), &gsb)) {
 		xnow = gsb.st_mtime;
@@ -1055,8 +1056,7 @@ Session::recover_recordings (string const& recinfo)
 		time (&xnow);
 	}
 
-	now = localtime (&xnow);
-	//printf ("USE STAT %d:%d:%d\n", now->tm_hour, now->tm_min, now->tm_sec);
+	localtime_r (&xnow, &now);
 
 	for (auto const& [id, paths] : files) {
 		std::shared_ptr<Route> route = route_by_id (id);
@@ -1071,7 +1071,7 @@ Session::recover_recordings (string const& recinfo)
 			for (auto const& fn : paths) {
 				std::shared_ptr<Source> src (SourceFactory::createForRecovery (DataType::AUDIO, *this, fn));
 				std::shared_ptr<AudioFileSource> afs = std::dynamic_pointer_cast<AudioFileSource> (src);
-				afs->update_header (captures[id].front ().start, *now, xnow);
+				afs->update_header (captures[id].front ().start, now, xnow);
 				afs->set_captured_for (track->name ());
 				afs->mark_immutable ();
 				afs->mark_nonremovable ();
