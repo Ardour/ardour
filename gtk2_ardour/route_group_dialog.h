@@ -39,6 +39,7 @@ public:
 
 	std::shared_ptr<ARDOUR::RouteGroup> group() const { return _group; }
 	bool name_check () const;
+	void on_show() override;
 
 private:
 	std::shared_ptr<ARDOUR::RouteGroup> _group;
