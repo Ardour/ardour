@@ -1044,11 +1044,19 @@ Session::recover_recordings (string const& recinfo)
 
 	begin_reversible_command (Operations::capture);
 
+	std::string pending_state_file_path = Glib::build_filename (_session_dir->root_path(), legalize_for_path (_current_snapshot_name + pending_suffix));
+
 	time_t     xnow;
 	struct tm* now;
+	GStatBuf  gsb;
+	if (0 == g_stat (pending_state_file_path.c_str(), &gsb)) {
+		xnow = gsb.st_mtime;
+	} else {
+		time (&xnow);
+	}
 
-	time (&xnow);
 	now = localtime (&xnow);
+	//printf ("USE STAT %d:%d:%d\n", now->tm_hour, now->tm_min, now->tm_sec);
 
 	for (auto const& [id, paths] : files) {
 		std::shared_ptr<Route> route = route_by_id (id);
