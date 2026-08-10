@@ -430,8 +430,6 @@ SourceFactory::createForRecovery (DataType type, Session& s, const std::string& 
 		while ((nread = source->read (data.get(), nframes)) > 0) {
 			afs->write (data.get(), nread);
 		}
-		afs->mark_immutable ();
-		afs->close();
 
 #if 0
 		source.reset ();

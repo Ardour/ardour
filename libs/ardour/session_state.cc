@@ -1044,6 +1044,12 @@ Session::recover_recordings (string const& recinfo)
 
 	begin_reversible_command (Operations::capture);
 
+	time_t     xnow;
+	struct tm* now;
+
+	time (&xnow);
+	now = localtime (&xnow);
+
 	for (auto const& [id, paths] : files) {
 		std::shared_ptr<Route> route = route_by_id (id);
 		std::shared_ptr<Track> track = std::dynamic_pointer_cast<Track> (route);
@@ -1056,9 +1062,12 @@ Session::recover_recordings (string const& recinfo)
 		try {
 			for (auto const& fn : paths) {
 				std::shared_ptr<Source> src (SourceFactory::createForRecovery (DataType::AUDIO, *this, fn));
-				std::shared_ptr<FileSource> fs = std::dynamic_pointer_cast<FileSource> (src);
-				fs->mark_immutable ();
-				fs->mark_nonremovable ();
+				std::shared_ptr<AudioFileSource> afs = std::dynamic_pointer_cast<AudioFileSource> (src);
+				afs->update_header (captures[id].front ().start, *now, xnow);
+				afs->set_captured_for (track->name ());
+				afs->mark_immutable ();
+				afs->mark_nonremovable ();
+				afs->close();
 				Analyser::queue_source_for_analysis (src, false);
 				srcs.push_back (src);
 				info << string_compose ("Recovering recording from file '%1'", fn) << endmsg;
