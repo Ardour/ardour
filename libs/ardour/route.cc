@@ -6583,8 +6583,10 @@ Route::monitoring_state () const
 		assert (track_rec != clip_rec);
 
 		if (clip_rec) {
-			/* preparing to, or actively recording into a slot */
-			return MonitoringInput;
+			/* preparing to, or actively recording into a slot. Use
+			   the same monitoring settings as timeline recording.
+			*/
+			return get_input_monitoring_state (true, auto_input_does_talkback) & auto_monitor_mask;
 		}
 
 		if (!roll) {
