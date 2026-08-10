@@ -429,6 +429,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, X_("/add_marker"), "", add_marker);
 		REGISTER_CALLBACK (serv, X_("/add_marker"), "f", add_marker);
 		REGISTER_CALLBACK (serv, X_("/add_marker"), "s", add_marker_name);
+		REGISTER_CALLBACK (serv, X_("/add_section"), "s", add_section_name);
 		REGISTER_CALLBACK (serv, X_("/rename_marker"), "s", rename_marker_at_playhead);
 		REGISTER_CALLBACK (serv, X_("/rename_marker"), "ss", rename_marker);
 		REGISTER_CALLBACK (serv, X_("/access_action"), "s", access_action);

@@ -356,6 +356,10 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		add_marker(markername);
 	}
 
+	void add_section_name(const std::string &markername) {
+		add_marker (markername, ARDOUR::Location::Flags(ARDOUR::Location::IsMark | ARDOUR::Location::IsSection));
+	}
+
 	int goto_marker(const char* types, lo_arg **argv, int argc, lo_message msg, ARDOUR::LocateTransportDisposition ltd);
 	int rename_marker_at_playhead(char *n, lo_message msg);
 	int rename_marker(char *on, char *nn, lo_message msg);
@@ -506,6 +510,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 
 	PATH_CALLBACK1(set_transport_speed,f,);
 	PATH_CALLBACK1(add_marker_name,s,&);
+	PATH_CALLBACK1(add_section_name,s,&);
 	PATH_CALLBACK1(access_action,s,&);
 
 	PATH_CALLBACK1(jump_by_bars,f,);
