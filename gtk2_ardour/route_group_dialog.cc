@@ -188,6 +188,15 @@ RouteGroupDialog::RouteGroupDialog (std::shared_ptr<RouteGroup> g, bool creating
 	show_all_children ();
 }
 
+void
+RouteGroupDialog::on_show ()
+{
+	ArdourDialog::on_show ();
+	present ();
+	set_focus (_name);
+	_name.grab_focus ();
+}
+
 bool
 RouteGroupDialog::name_check () const
 {
