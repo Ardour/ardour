@@ -58,6 +58,7 @@ class LIBARDOUR_API ScaleProvider : public virtual PBD::Stateful {
 	KeyEnforcementPolicy key_enforcement_policy() const;
 
 	ScaleProvider const * scale_provider_origin() const;
+	bool own_scale() const { return scale_provider_origin() == this; }
 
   private:
 	ScaleProvider* _parent;
