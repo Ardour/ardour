@@ -58,7 +58,7 @@ ScaleBox::fill_maps ()
 	}
 }
 
-ScaleBox::ScaleBox (std::string const & provider_name)
+ScaleBox::ScaleBox (std::string const & provider_name, bool with_remove)
 	: provider (provider_name)
 	, _tuning (TwelveTone)
 	, _key (nullptr)
@@ -69,6 +69,7 @@ ScaleBox::ScaleBox (std::string const & provider_name)
 	, step_spinner (step_adjustment)
 	, scala_label (_("Load a Scala file"))
 	, ignore_set (false)
+	, allow_remove (with_remove)
 	, bracelet (nullptr)
 {
 	if (type_string_map.empty()) {
@@ -109,18 +110,6 @@ ScaleBox::ScaleBox (std::string const & provider_name)
 	inner_type_box->set_spacing (12);
 	type_box.pack_start (*inner_type_box, true, false);
 
-	Gtk::VBox* inner_name_box (manage (new Gtk::VBox));
-	Gtk::Label* pre_label (manage (new Gtk::Label (_("Current Scale for"))));
-	pre_label->set_alignment (0.5);
-	name_label.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", Gtkmm2ext::markup_escape_text (provider)));
-	inner_name_box->pack_start (*pre_label, false, false);
-	inner_name_box->pack_start (name_label, false, false);
-	inner_name_box->set_spacing (12);
-
-	Gtk::HBox* clear_box (manage (new Gtk::HBox));
-	clear_button.signal_clicked().connect ([this]() { clear_scale (); /* EMIT SIGNAL */ });
-	clear_box->pack_start (clear_button, true, false);
-
 	Gtk::HBox* inner_step_box (manage (new Gtk::HBox));
 	inner_step_box->pack_start (steps_label, false, false);
 	inner_step_box->pack_start (step_spinner, false, false);
@@ -136,11 +125,28 @@ ScaleBox::ScaleBox (std::string const & provider_name)
 #endif
 	scala_file_button.set_current_folder (Glib::get_home_dir());
 
-	pack_start (*inner_name_box, false, false);
+	if (allow_remove) {
+		Gtk::VBox* inner_name_box (manage (new Gtk::VBox));
+		Gtk::Label* pre_label (manage (new Gtk::Label (_("Current Scale for"))));
+		pre_label->set_alignment (0.5);
+		name_label.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", Gtkmm2ext::markup_escape_text (provider)));
+		inner_name_box->pack_start (*pre_label, false, false);
+		inner_name_box->pack_start (name_label, false, false);
+		inner_name_box->set_spacing (12);
+		pack_start (*inner_name_box, false, false);
+	}
+
 	pack_start (*inner_tuning_box, false, false);
 	pack_start (root_mode_box, false, false);
 	pack_start (named_scale_box, false, false);
-	pack_start (*clear_box, false, false);
+
+	if (allow_remove) {
+		Gtk::HBox* clear_box (manage (new Gtk::HBox));
+		clear_button.signal_clicked().connect ([this]() { clear_scale (); /* EMIT SIGNAL */ });
+		clear_box->pack_start (clear_button, true, false);
+		pack_start (*clear_box, false, false);
+	}
+
 	pack_start (step_packer, false, false);
 	pack_start (scala_box, false, false);
 
@@ -155,6 +161,12 @@ ScaleBox::ScaleBox (std::string const & provider_name)
 ScaleBox::~ScaleBox ()
 {
 	delete bracelet;
+}
+
+void
+ScaleBox::sensitize_remove (bool yn)
+{
+	clear_button.set_sensitive (yn);
 }
 
 void

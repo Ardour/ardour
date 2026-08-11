@@ -38,13 +38,14 @@ namespace ArdourWidgets {
 class ScaleBox : public Gtk::VBox
 {
   public:
-	ScaleBox (std::string const & provider_name);
+	ScaleBox (std::string const & provider_name, bool with_remove = true);
 	~ScaleBox ();
 
 	void set (ARDOUR::MusicalKey const *);
 	ARDOUR::MusicalKey* get() const;
 
 	void set_tuning (ARDOUR::TuningSystem);
+	void sensitize_remove (bool);
 
 	sigc::signal<void> clear_scale;
 
@@ -85,6 +86,7 @@ class ScaleBox : public Gtk::VBox
 	Gtk::HBox root_mode_box;
 	Gtk::VBox named_scale_box;
 	bool ignore_set;
+	bool allow_remove;
 
 	ArdourWidgets::Bracelet* bracelet;
 
@@ -105,6 +107,7 @@ class ScaleDialog : public ArdourDialog
 	void set (ARDOUR::MusicalKey const * key) { box.set (key); }
 	ARDOUR::MusicalKey* get() const { return box.get(); }
 	void set_tuning (ARDOUR::TuningSystem ts) { box.set_tuning (ts); }
+	void sensitize_remove (bool yn) { box.sensitize_remove (yn); };
 
   protected:
 	ScaleBox box;
