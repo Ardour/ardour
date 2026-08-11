@@ -50,7 +50,7 @@ class LIBARDOUR_API TransportMasterManager
 
 	typedef std::list<std::shared_ptr<TransportMaster> > TransportMasters;
 
-	int add (SyncSource type, std::string const & name, bool removeable = true);
+	int add (SyncSource type, std::string const & name);
 	int remove (std::string const & name);
 	void clear (bool emit = true);
 
@@ -62,7 +62,7 @@ class LIBARDOUR_API TransportMasterManager
 	double get_current_speed_in_process_context() const { return _master_speed; }
 	samplepos_t get_current_position_in_process_context() const { return _master_position; }
 
-	std::shared_ptr<TransportMaster> current() const { return _current_master; }
+	std::shared_ptr<TransportMaster> current() const;
 	int set_current (std::shared_ptr<TransportMaster>);
 	int set_current (SyncSource);
 	int set_current (std::string const &);
