@@ -1442,11 +1442,6 @@ ARDOUR_UI::update_timecode_format ()
 		std::shared_ptr<TimecodeTransportMaster> tcmaster;
 		std::shared_ptr<TransportMaster> tm = TransportMasterManager::instance().current();
 
-		/* it should be impossible for tm to be NULL, but there anecdotal evidence
-		 * that it can be when re-starting the engine under some circumstances.
-		 */
-		assert (tm);
-
 		if (tm && (tm->type() == LTC || tm->type() == MTC || tm->type() == WallClock) && (tcmaster = std::dynamic_pointer_cast<TimecodeTransportMaster>(tm)) != 0 && tm->locked()) {
 			matching = (tcmaster->apparent_timecode_format() == _session->config.get_timecode_format());
 		} else {
