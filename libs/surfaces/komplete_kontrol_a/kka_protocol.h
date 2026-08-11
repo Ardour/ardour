@@ -24,6 +24,19 @@
  * from any GPL-3 source; where a third-party project's published findings
  * agree they are cited as corroboration only.
  *
+ * Every constant below has a documented derivation, including the captures
+ * behind it, the experiments that settled the ambiguous cases and the two
+ * places where a published third-party map is demonstrably wrong:
+ *
+ *	https://github.com/nuketownada/ardourkomplete
+ *	  docs/a61-hid-map.md	the protocol map itself
+ *	  tools/		Python probes that talk to the device directly,
+ *				which is how most of this was measured
+ *
+ * Worth reaching for before changing anything here: a value that looks
+ * arbitrary usually is not, and several of them cost a hardware session to
+ * pin down.
+ *
  * This header is protocol description, deliberately free of Ardour types, so
  * it can be read and checked against a capture on its own.
  */
