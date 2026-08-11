@@ -117,6 +117,11 @@ private:
 	int      _knob_accum[KKA::NumKnobs];
 	uint8_t  _encoder_pos;
 
+	/* Whole previous payload, so that movement in the bytes this decode does
+	 * not interpret is reported rather than discarded.  See decode().
+	 */
+	uint8_t  _payload_prev[KKA::InputPayloadSize];
+
 	bool _warned_short_report;
 	bool _warned_read_error;
 };

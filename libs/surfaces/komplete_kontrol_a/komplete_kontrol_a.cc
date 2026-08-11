@@ -66,6 +66,7 @@ KompleteKontrolA::KompleteKontrolA (ARDOUR::Session& s)
 {
 	memset (_knob_raw, 0, sizeof (_knob_raw));
 	memset (_knob_accum, 0, sizeof (_knob_accum));
+	memset (_payload_prev, 0, sizeof (_payload_prev));
 
 	if (hid_init ()) {
 		throw KompleteKontrolAException ("HIDAPI initialization failed");
@@ -254,6 +255,7 @@ KompleteKontrolA::start ()
 	_encoder_pos = 0;
 	memset (_knob_raw, 0, sizeof (_knob_raw));
 	memset (_knob_accum, 0, sizeof (_knob_accum));
+	memset (_payload_prev, 0, sizeof (_payload_prev));
 
 	Glib::RefPtr<Glib::TimeoutSource> read_timeout = Glib::TimeoutSource::create (read_interval_ms);
 	_read_connection = read_timeout->connect (sigc::mem_fun (*this, &KompleteKontrolA::dev_read));
@@ -404,6 +406,23 @@ KompleteKontrolA::decode (const uint8_t* p, size_t len)
 		return;
 	}
 
+	/* The whole payload, so that a session at the hardware can settle what
+	 * this decode does not explain -- payload[28] above all, a constant 36 in
+	 * every capture so far, and the field free-m32 calls "keyshift" on the
+	 * M32.  Guarded rather than merely gated: this runs on a 1ms poll, and
+	 * formatting 29 bytes we then throw away would not be free.
+	 */
+	if (DEBUG_ENABLED (DEBUG::KompleteKontrolA)) {
+		std::string hex;
+		for (size_t i = 0; i < KKA::InputPayloadSize; ++i) {
+			char b[4];
+			snprintf (b, sizeof (b), "%02x ", p[i]);
+			hex += b;
+		}
+		DEBUG_TRACE (DEBUG::KompleteKontrolA,
+		             string_compose ("KKA raw %1%2\n", hex, _seeded ? "" : "(seed, not dispatched)"));
+	}
+
 	uint64_t buttons = 0;
 	for (size_t i = 0; i < KKA::ButtonsBytes; ++i) {
 		buttons |= (uint64_t) p[KKA::ButtonsOffset + i] << (8 * i);
@@ -421,6 +440,7 @@ KompleteKontrolA::decode (const uint8_t* p, size_t len)
 		_buttons = buttons;
 		memcpy (_knob_raw, knobs, sizeof (_knob_raw));
 		_encoder_pos = encoder;
+		memcpy (_payload_prev, p, KKA::InputPayloadSize);
 		_seeded = true;
 		return;
 	}
@@ -429,8 +449,17 @@ KompleteKontrolA::decode (const uint8_t* p, size_t len)
 	_buttons = buttons;
 
 	/* Declared bits 34..39 are padding on this hardware and are deliberately
-	 * not dispatched.
+	 * not dispatched.  Say so loudly if they ever move: that would mean a
+	 * control exists which the map does not know about.
 	 */
+	uint64_t undeclared = changed >> KKA::NumControls;
+	if (undeclared) {
+		char b[32];
+		snprintf (b, sizeof (b), "0x%llx", (unsigned long long) undeclared);
+		DEBUG_TRACE (DEBUG::KompleteKontrolA,
+		             string_compose ("KKA *** bits 34..39 changed (%1) -- the map is incomplete\n", b));
+	}
+
 	for (int b = 0; b < KKA::NumControls; ++b) {
 		if (changed & (1ULL << b)) {
 			handle_button ((KKA::ControlID) b, (buttons >> b) & 1);
@@ -464,6 +493,22 @@ KompleteKontrolA::decode (const uint8_t* p, size_t len)
 	if (ed) {
 		handle_encoder (ed);
 	}
+
+	/* Everything from the end of the knob block onwards: the analog fields
+	 * that read constant zero on this unit, the encoder byte, and payload[28].
+	 * Only the encoder's low nibble means anything to us, so any other
+	 * movement here is a fact the map does not yet account for -- report it
+	 * instead of dropping it on the floor.
+	 */
+	for (size_t i = KKA::KnobsOffset + 2 * KKA::NumKnobs; i < KKA::InputPayloadSize; ++i) {
+		if (p[i] != _payload_prev[i]) {
+			DEBUG_TRACE (DEBUG::KompleteKontrolA,
+			             string_compose ("KKA payload[%1] %2 -> %3\n",
+			                             i, (int) _payload_prev[i], (int) p[i]));
+		}
+	}
+
+	memcpy (_payload_prev, p, KKA::InputPayloadSize);
 }
 
 /* Phase 2 stops here: decode and trace. Phase 3 binds these to Ardour. */
