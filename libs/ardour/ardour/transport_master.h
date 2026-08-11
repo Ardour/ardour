@@ -348,6 +348,8 @@ public:
 				return TRS_MTC;
 			case LTC:
 				return TRS_LTC;
+			case WallClock:
+				return TRS_WallClock;
 			case MIDIClock:
 				break;
 		}
@@ -664,6 +666,36 @@ private:
 	bool   _filter_enable;
 	Biquad _lpf;
 	Biquad _hpf;
+};
+
+class LIBARDOUR_API WallClock_TransportMaster : public TimecodeTransportMaster
+{
+public:
+	WallClock_TransportMaster (std::string const&);
+	~WallClock_TransportMaster ();
+
+	void set_session (Session*);
+
+	void pre_process (pframes_t nframes, samplepos_t now, std::optional<samplepos_t>);
+
+	void reset (bool with_pos);
+	bool locked () const { return true; }
+	bool ok () const { return true; }
+
+	samplecnt_t update_interval () const;
+	samplecnt_t resolution () const;
+	bool        requires_seekahead () const { return false; }
+	void        init ();
+
+	Timecode::TimecodeFormat apparent_timecode_format () const;
+	std::string              position_string () const;
+
+	void create_port () {}
+	void check_backend ();
+
+private:
+	samplepos_t _time;
+	bool        _set;
 };
 
 class LIBARDOUR_API MIDIClock_TransportMaster : public TransportMaster, public TransportMasterViaMIDI
