@@ -107,9 +107,10 @@ private:
 	const KKA::Variant* _variant;
 	sigc::connection    _read_connection;
 
-	/* Input state.  The first report seeds it without emitting events: the
-	 * device reports on change only, so whatever position it happens to be
-	 * sitting in must not read as a burst of user input at startup.
+	/* Input state.  _seeded covers the analog fields only -- the knobs and the
+	 * encoder are wrapping counters needing a baseline before a delta means
+	 * anything.  Buttons are absolute and are dispatched from the first report
+	 * onwards; see decode() for why seeding them was wrong.
 	 */
 	bool     _seeded;
 	uint64_t _buttons;

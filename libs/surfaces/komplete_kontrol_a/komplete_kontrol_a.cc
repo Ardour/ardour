@@ -420,7 +420,8 @@ KompleteKontrolA::decode (const uint8_t* p, size_t len)
 			hex += b;
 		}
 		DEBUG_TRACE (DEBUG::KompleteKontrolA,
-		             string_compose ("KKA raw %1%2\n", hex, _seeded ? "" : "(seed, not dispatched)"));
+		             string_compose ("KKA raw %1%2\n", hex,
+		                             _seeded ? "" : "(first report -- analog baseline)"));
 	}
 
 	uint64_t buttons = 0;
@@ -436,13 +437,24 @@ KompleteKontrolA::decode (const uint8_t* p, size_t len)
 
 	uint8_t encoder = p[KKA::EncoderOffset] & 0x0f;
 
+	/* The knobs and the 4-D encoder are wrapping counters, so a delta against
+	 * them means nothing until there is a baseline; take it from the first
+	 * report.
+	 *
+	 * Buttons are not like that, and seeding them was a mistake.  They are
+	 * absolute, and the device reports only on change -- so it stays silent
+	 * until the user does something, and the first report to arrive after
+	 * start() is already a user action rather than a resting state.  Seeding
+	 * buttons from it therefore swallows that action every time: the first
+	 * hardware trace ate a Shift press and reported only the release.
+	 * "Nothing is held" is the correct opening assumption, and it is the safe
+	 * one, so buttons dispatch from the very first report.
+	 */
 	if (!_seeded) {
-		_buttons = buttons;
 		memcpy (_knob_raw, knobs, sizeof (_knob_raw));
 		_encoder_pos = encoder;
 		memcpy (_payload_prev, p, KKA::InputPayloadSize);
 		_seeded = true;
-		return;
 	}
 
 	uint64_t changed = buttons ^ _buttons;
