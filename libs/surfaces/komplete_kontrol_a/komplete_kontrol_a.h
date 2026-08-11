@@ -86,8 +86,10 @@ private:
 	void thread_init ();
 
 	/* device lifecycle */
-	int  open_device ();
-	void close_device ();
+	int  open_device (bool quiet_if_absent);
+	void close_device (bool graceful);
+	int  take_over_device ();
+	void device_vanished ();
 
 	/* output paths */
 	int set_device_mode (const uint8_t mode[2]);
@@ -96,6 +98,9 @@ private:
 
 	/* input path */
 	bool dev_read ();
+	bool dev_reconnect ();
+	void start_read_poll ();
+	void start_reconnect_poll ();
 	void decode (const uint8_t* payload, size_t len);
 
 	/* Phase 3 binds these; for now they trace. */
@@ -105,7 +110,14 @@ private:
 
 	hid_device*         _handle;
 	const KKA::Variant* _variant;
+
+	/* Exactly one of these is live at a time: the fast input poll while the
+	 * device is present, the slow reconnect poll while it is not.  Each hands
+	 * over by attaching the other and then returning false, so neither ever
+	 * disconnects the source it is running inside.
+	 */
 	sigc::connection    _read_connection;
+	sigc::connection    _reconnect_connection;
 
 	/* Input state.  _seeded covers the analog fields only -- the knobs and the
 	 * encoder are wrapping counters needing a baseline before a delta means
@@ -124,7 +136,6 @@ private:
 	uint8_t  _payload_prev[KKA::InputPayloadSize];
 
 	bool _warned_short_report;
-	bool _warned_read_error;
 };
 
 } /* namespace ArdourSurface */

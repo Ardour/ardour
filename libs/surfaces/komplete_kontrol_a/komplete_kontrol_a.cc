@@ -43,6 +43,13 @@ using namespace ArdourSurface;
  */
 static const unsigned int read_interval_ms = 1;
 
+/* Reconnect polling, used only while the device is absent.  hid_enumerate()
+ * walks every hidraw node in sysfs and reads a file per node, so this must not
+ * run anywhere near the read poll's rate.  A second is imperceptible to
+ * somebody who has just pushed a plug in.
+ */
+static const unsigned int reconnect_interval_ms = 1000;
+
 bool
 KompleteKontrolA::available ()
 {
@@ -62,7 +69,6 @@ KompleteKontrolA::KompleteKontrolA (ARDOUR::Session& s)
 	, _buttons (0)
 	, _encoder_pos (0)
 	, _warned_short_report (false)
-	, _warned_read_error (false)
 {
 	memset (_knob_raw, 0, sizeof (_knob_raw));
 	memset (_knob_accum, 0, sizeof (_knob_accum));
@@ -131,7 +137,7 @@ KompleteKontrolA::set_state (const XMLNode& node, int version)
 /* ------------------------------------------------------------------------ */
 
 int
-KompleteKontrolA::open_device ()
+KompleteKontrolA::open_device (bool quiet_if_absent)
 {
 	/* Deliberately not hid_open (vid, pid, NULL).  To filter by ids, hidapi's
 	 * Linux backend re-reads each candidate's sysfs uevent with
@@ -163,7 +169,13 @@ KompleteKontrolA::open_device ()
 	hid_free_enumeration (devs);
 
 	if (!_handle) {
-		error << _("Komplete Kontrol A-Series: no device found") << endmsg;
+		/* Silent when polling for a replug: the whole point of that loop is
+		 * that the device is expected to be absent, most of the time, for as
+		 * long as the user leaves it unplugged.
+		 */
+		if (!quiet_if_absent) {
+			error << _("Komplete Kontrol A-Series: no device found") << endmsg;
+		}
 		return -1;
 	}
 
@@ -204,12 +216,20 @@ KompleteKontrolA::open_device ()
 		}
 	}
 
+	/* Load-bearing for hotplug, not just for latency. This does not set
+	 * O_NONBLOCK; it makes hid_read() run hid_read_timeout() with a zero
+	 * timeout, which polls first and returns -1 when revents carries
+	 * POLLERR/POLLHUP/POLLNVAL. That is how a disconnect is detected -- and
+	 * hidapi works that way precisely because some kernels will not report
+	 * disconnection through a bare non-blocking read(). Drop this call and
+	 * reads would block the event loop forever instead.
+	 */
 	hid_set_nonblocking (_handle, 1);
 	return 0;
 }
 
 void
-KompleteKontrolA::close_device ()
+KompleteKontrolA::close_device (bool graceful)
 {
 	if (!_handle) {
 		return;
@@ -219,57 +239,131 @@ KompleteKontrolA::close_device ()
 	 * panel and never resumes -- not even on a switch back to MIDI mode. So
 	 * leaving without blanking strands the user's last frame on the screen
 	 * until they replug.
+	 *
+	 * Skipped when the device has vanished, where none of these writes can
+	 * land anyway and there is nothing to be polite to: a replugged device
+	 * comes back power-on clean, in MIDI mode, with the firmware drawing its
+	 * own panel again.
 	 */
-	clear_leds ();
-	blank_display ();
-	set_device_mode (KKA::ModeMIDI);
+	if (graceful) {
+		clear_leds ();
+		blank_display ();
+		set_device_mode (KKA::ModeMIDI);
+	}
 
 	hid_close (_handle);
 	_handle = 0;
 	_variant = 0;
 }
 
+/* Everything that has to happen against a device we have just opened, whether
+ * at startup or after a replug.  Interactive mode does not survive a power
+ * cycle, so a returning device is back in MIDI mode -- sending CC 14-21 at
+ * whatever the user has armed -- and has to be taken over from scratch.
+ */
 int
-KompleteKontrolA::start ()
+KompleteKontrolA::take_over_device ()
 {
-	if (open_device ()) {
-		return -1;
-	}
-
-	/* Interactive mode takes the knobs off the MIDI port and hands us the
-	 * display. It does not survive a replug, so a user who reconnects
-	 * mid-session silently gets a device sending CC 14-21 at their tracks
-	 * again; re-asserting on hotplug is Phase 3 work.
-	 */
 	if (set_device_mode (KKA::ModeInteractive)) {
-		error << _("Komplete Kontrol A-Series: failed to enter interactive mode") << endmsg;
-		close_device ();
 		return -1;
 	}
 
 	clear_leds ();
 	blank_display ();
 
+	/* A returning device is a different device as far as this state is
+	 * concerned: its knob counters start wherever they start.
+	 */
 	_seeded = false;
 	_buttons = 0;
 	_encoder_pos = 0;
 	memset (_knob_raw, 0, sizeof (_knob_raw));
 	memset (_knob_accum, 0, sizeof (_knob_accum));
 	memset (_payload_prev, 0, sizeof (_payload_prev));
+	_warned_short_report = false;
 
-	Glib::RefPtr<Glib::TimeoutSource> read_timeout = Glib::TimeoutSource::create (read_interval_ms);
-	_read_connection = read_timeout->connect (sigc::mem_fun (*this, &KompleteKontrolA::dev_read));
-	read_timeout->attach (main_loop ()->get_context ());
+	return 0;
+}
 
+void
+KompleteKontrolA::device_vanished ()
+{
+	info << _("Komplete Kontrol A-Series: device disconnected, watching for its return")
+	     << endmsg;
+
+	close_device (false);
+	start_reconnect_poll ();
+}
+
+void
+KompleteKontrolA::start_read_poll ()
+{
+	Glib::RefPtr<Glib::TimeoutSource> t = Glib::TimeoutSource::create (read_interval_ms);
+	_read_connection = t->connect (sigc::mem_fun (*this, &KompleteKontrolA::dev_read));
+	t->attach (main_loop ()->get_context ());
+}
+
+void
+KompleteKontrolA::start_reconnect_poll ()
+{
+	Glib::RefPtr<Glib::TimeoutSource> t = Glib::TimeoutSource::create (reconnect_interval_ms);
+	_reconnect_connection = t->connect (sigc::mem_fun (*this, &KompleteKontrolA::dev_reconnect));
+	t->attach (main_loop ()->get_context ());
+}
+
+bool
+KompleteKontrolA::dev_reconnect ()
+{
+	if (open_device (true)) {
+		return true; /* still gone; keep watching */
+	}
+
+	if (take_over_device ()) {
+		/* Present but not yet talking to us -- udev may still be applying
+		 * permissions to the new node. Drop it and come back in a second
+		 * rather than holding a handle we cannot drive.
+		 */
+		close_device (false);
+		return true;
+	}
+
+	info << _("Komplete Kontrol A-Series: device reconnected, interactive mode re-asserted")
+	     << endmsg;
+
+	start_read_poll ();
+	return false; /* hand over to the read poll */
+}
+
+int
+KompleteKontrolA::start ()
+{
+	if (open_device (false)) {
+		return -1;
+	}
+
+	if (take_over_device ()) {
+		error << _("Komplete Kontrol A-Series: failed to enter interactive mode") << endmsg;
+		/* Nothing was taken over, so there is nothing to hand back; a
+		 * graceful close here would only add three more failing writes.
+		 */
+		close_device (false);
+		return -1;
+	}
+
+	start_read_poll ();
 	return 0;
 }
 
 int
 KompleteKontrolA::stop ()
 {
+	/* Whichever of the two is live -- disconnecting an already-finished
+	 * connection is a no-op, so there is no need to know which.
+	 */
 	_read_connection.disconnect ();
+	_reconnect_connection.disconnect ();
 
-	close_device ();
+	close_device (true);
 
 	BaseUI::quit ();
 	return 0;
@@ -370,12 +464,14 @@ KompleteKontrolA::dev_read ()
 		}
 
 		if (n < 0) {
-			if (!_warned_read_error) {
-				_warned_read_error = true;
-				error << _("Komplete Kontrol A-Series: HID read failed; was the device unplugged?")
-				      << endmsg;
-			}
-			break;
+			/* In non-blocking mode "nothing to read" is 0, so a negative
+			 * return is a real failure and in practice always means the
+			 * device is gone. Hand over to the reconnect poll rather than
+			 * hammering a dead handle every millisecond for the rest of the
+			 * session, which is what the previous warn-once-and-carry-on did.
+			 */
+			device_vanished ();
+			return false;
 		}
 
 		if (buf[0] != KKA::ReportInput) {
