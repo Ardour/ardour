@@ -132,13 +132,34 @@ KompleteKontrolA::set_state (const XMLNode& node, int version)
 int
 KompleteKontrolA::open_device ()
 {
-	for (size_t i = 0; i < KKA::NumVariants; ++i) {
-		_handle = hid_open (KKA::VendorID, KKA::Variants[i].pid, NULL);
-		if (_handle) {
-			_variant = &KKA::Variants[i];
-			break;
+	/* Deliberately not hid_open (vid, pid, NULL).  To filter by ids, hidapi's
+	 * Linux backend re-reads each candidate's sysfs uevent with
+	 *
+	 *	open (path, O_RDONLY | FD_CLOEXEC)
+	 *
+	 * but FD_CLOEXEC is a descriptor flag rather than an open() flag, and its
+	 * value is 1 -- which is O_WRONLY.  Opening a root-owned sysfs attribute
+	 * write-only is refused for any ordinary user, so the parse fails and the
+	 * device is skipped without comment.  Every device is skipped, so
+	 * hid_open() by ids cannot match at all unless we are root.  Unfiltered
+	 * enumeration never takes that path, so matching the ids here and opening
+	 * by path is both a fix and cheaper than the call it replaces.
+	 */
+	struct hid_device_info* devs = hid_enumerate (0x0, 0x0);
+
+	for (size_t i = 0; i < KKA::NumVariants && !_handle; ++i) {
+		for (struct hid_device_info* d = devs; d; d = d->next) {
+			if (d->vendor_id != KKA::VendorID || d->product_id != KKA::Variants[i].pid) {
+				continue;
+			}
+			if ((_handle = hid_open_path (d->path)) != 0) {
+				_variant = &KKA::Variants[i];
+				break;
+			}
 		}
 	}
+
+	hid_free_enumeration (devs);
 
 	if (!_handle) {
 		error << _("Komplete Kontrol A-Series: no device found") << endmsg;

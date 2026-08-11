@@ -43,7 +43,18 @@ new_komplete_kontrol_a (Session* s, std::string const& /* config */)
 		return 0;
 	}
 
-	kka->set_active (true);
+	/* Honour the result.  Ardour's activate() calls set_active() again, and
+	 * our set_active() re-runs start() whenever the protocol is not already
+	 * active -- so handing back an object that failed to start means the
+	 * device is opened twice and every failure is logged twice.  Reporting
+	 * the failure here instead gives one error and lets activate() fail
+	 * cleanly, which is also what makes the GUI checkbox behave.
+	 */
+	if (kka->set_active (true)) {
+		delete kka;
+		return 0;
+	}
+
 	return kka;
 }
 
