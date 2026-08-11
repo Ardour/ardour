@@ -630,6 +630,7 @@ RouteTimeAxisView::edit_scale ()
 	ScaleDialog sd (_route->name());
 
 	sd.set (_route->key());
+	sd.sensitize_remove (_route->own_scale());
 
 	sd.present ();
 
