@@ -1447,7 +1447,7 @@ ARDOUR_UI::update_timecode_format ()
 		 */
 		assert (tm);
 
-		if (tm && (tm->type() == LTC || tm->type() == MTC) && (tcmaster = std::dynamic_pointer_cast<TimecodeTransportMaster>(tm)) != 0 && tm->locked()) {
+		if (tm && (tm->type() == LTC || tm->type() == MTC || tm->type() == WallClock) && (tcmaster = std::dynamic_pointer_cast<TimecodeTransportMaster>(tm)) != 0 && tm->locked()) {
 			matching = (tcmaster->apparent_timecode_format() == _session->config.get_timecode_format());
 		} else {
 			matching = true;
