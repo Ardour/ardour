@@ -100,8 +100,8 @@ private:
 
 	/* Phase 3 binds these; for now they trace. */
 	void handle_button (KKA::ControlID, bool pressed);
-	void handle_knob (int knob, int detents);
-	void handle_encoder (int detents);
+	void handle_knob (int knob, int steps);
+	void handle_encoder (int steps);
 
 	hid_device*         _handle;
 	const KKA::Variant* _variant;

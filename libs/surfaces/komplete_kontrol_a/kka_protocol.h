@@ -176,12 +176,18 @@ static inline int encoder_delta (uint8_t prev, uint8_t cur)
 	return (((int) cur - (int) prev + 8) & 0x0f) - 8;
 }
 
-/* Each knob is a wrapping counter, 8 units per detent, modulo KnobRange.
+/* Each knob is a wrapping counter modulo KnobRange, moving KnobUnitsPerStep at
+ * a time.  The knobs turn freely and have no physical detent, so a "step" here
+ * is the device's reporting quantum and not something the user can feel.
  * Reports coalesce during a fast spin, so a single report can carry several
- * detents; never assume one.
+ * steps; never assume one.
+ *
+ * Both constants are measured on an A61.  Successive reports through a slow
+ * turn differ by exactly 8, and turning down through zero reports 991 -- which
+ * is 999 - 8, so the modulus is 999 rather than the 1000 one would guess.
  */
-static const int KnobRange          = 999;
-static const int KnobUnitsPerDetent = 8;
+static const int KnobRange        = 999;
+static const int KnobUnitsPerStep = 8;
 
 static inline int knob_delta (uint16_t prev, uint16_t cur)
 {

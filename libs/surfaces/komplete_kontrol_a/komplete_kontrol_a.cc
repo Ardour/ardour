@@ -487,16 +487,16 @@ KompleteKontrolA::decode (const uint8_t* p, size_t len)
 		}
 
 		/* Carry the remainder rather than truncating it. Every delta seen on
-		 * this hardware is an exact multiple of the detent size, so today
-		 * this is a no-op -- but a dropped report would otherwise silently
-		 * discard the fraction.
+		 * this hardware is an exact multiple of the step size, so today this
+		 * is a no-op -- but a dropped report would otherwise silently discard
+		 * the fraction.
 		 */
 		_knob_accum[k] += raw;
-		int detents = _knob_accum[k] / KKA::KnobUnitsPerDetent;
-		_knob_accum[k] -= detents * KKA::KnobUnitsPerDetent;
+		int steps = _knob_accum[k] / KKA::KnobUnitsPerStep;
+		_knob_accum[k] -= steps * KKA::KnobUnitsPerStep;
 
-		if (detents) {
-			handle_knob (k, detents);
+		if (steps) {
+			handle_knob (k, steps);
 		}
 	}
 
@@ -535,17 +535,17 @@ KompleteKontrolA::handle_button (KKA::ControlID c, bool pressed)
 }
 
 void
-KompleteKontrolA::handle_knob (int knob, int detents)
+KompleteKontrolA::handle_knob (int knob, int steps)
 {
 	DEBUG_TRACE (DEBUG::KompleteKontrolA,
 	             string_compose ("KKA knob %1 %2%3\n",
-	                             knob + 1, detents > 0 ? "+" : "", detents));
+	                             knob + 1, steps > 0 ? "+" : "", steps));
 }
 
 void
-KompleteKontrolA::handle_encoder (int detents)
+KompleteKontrolA::handle_encoder (int steps)
 {
 	DEBUG_TRACE (DEBUG::KompleteKontrolA,
 	             string_compose ("KKA 4-D encoder %1%2\n",
-	                             detents > 0 ? "+" : "", detents));
+	                             steps > 0 ? "+" : "", steps));
 }
