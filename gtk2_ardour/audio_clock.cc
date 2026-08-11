@@ -1030,6 +1030,7 @@ AudioClock::set_slave_info ()
 
 		switch (tm->type()) {
 		case Engine:
+		case WallClock:
 			_left_btn.set_text (tm->name(), true);
 			_right_btn.set_text ("", true);
 			break;
