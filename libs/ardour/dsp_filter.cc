@@ -185,9 +185,9 @@ Biquad::run (float* data, const uint32_t n_samples)
 {
 	for (uint32_t i = 0; i < n_samples; ++i) {
 		const float xn = data[i];
-		const float z  = _b0 * xn + _z1;
-		_z1            = _b1 * xn - _a1 * z + _z2;
-		_z2            = _b2 * xn - _a2 * z;
+		const float z  = fma (_b0, xn, _z1);
+		_z1            = fma (_b1, xn, fma (- _a1, z, _z2));
+		_z2            = fma (_b2, xn, - _a2 * z);
 		data[i]        = z;
 	}
 
