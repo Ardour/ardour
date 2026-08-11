@@ -759,17 +759,17 @@ KompleteKontrolA::refresh_transport_leds ()
 
 	bool rolling = session->transport_rolling ();
 
-	set_led (KKA::Play, rolling ? KKA::LEDOn : KKA::LEDOff);
-	set_led (KKA::Stop, rolling ? KKA::LEDOff : KKA::LEDOn);
-	set_led (KKA::Loop, session->get_play_loop () ? KKA::LEDOn : KKA::LEDOff);
-	set_led (KKA::Metro, Config->get_clicking () ? KKA::LEDOn : KKA::LEDOff);
+	set_led (KKA::Play, rolling ? KKA::LEDBright : KKA::LEDOff);
+	set_led (KKA::Stop, rolling ? KKA::LEDOff : KKA::LEDBright);
+	set_led (KKA::Loop, session->get_play_loop () ? KKA::LEDBright : KKA::LEDOff);
+	set_led (KKA::Metro, Config->get_clicking () ? KKA::LEDBright : KKA::LEDOff);
 
 	/* Armed and actually capturing are different states and the panel has the
 	 * range to say so. LEDDim is also the probe for open question 1 -- see
 	 * kka_protocol.h.
 	 */
 	if (session->actively_recording ()) {
-		set_led (KKA::Rec, KKA::LEDOn);
+		set_led (KKA::Rec, KKA::LEDBright);
 	} else if (session->record_status () != ARDOUR::Disabled) {
 		set_led (KKA::Rec, KKA::LEDDim);
 	} else {

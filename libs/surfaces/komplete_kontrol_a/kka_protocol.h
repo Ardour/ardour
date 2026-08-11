@@ -161,21 +161,33 @@ static inline bool control_has_led (ControlID c)
 	return (size_t) c < LEDCount;
 }
 
-/* LED brightness.  The descriptor declares a full 0..127 range, so this is
- * plausibly a continuum, but only off and full have been exercised.
+/* LED brightness: three states, not the continuum the declared 0..127 range
+ * implies.  Measured on an A61 by lighting all 21 lamps at once with 21
+ * different values, which shows the whole space at a glance
+ * (`tools/a61led.py ramp` in the ardourkomplete repo):
+ *
+ *	value < 4	off, whatever bit 1 says
+ *	bit 1 clear	dim
+ *	bit 1 set	bright
+ *
+ * Bits 2..6 change nothing beyond lighting the lamp at all: 0x04, 0x40 and
+ * 0x7c are indistinguishable from one another, as are 0x06, 0x42 and 0x7e.
+ * Which is exactly why upstream ships LED_ON 0x7c and LED_BRIGHT 0x7e as its
+ * two levels -- they differ in bit 1 and in nothing else that matters.
+ *
+ * Consistent with NI's usual (colour << 2) | brightness LED byte, where colour
+ * index 0 means "no colour" and so reads as off, and where a monochrome button
+ * has no hue to pick and ignores the index. The firmware's own power-on
+ * animation sweeps roughly sixteen visibly distinct levels, so the panel can
+ * do far more than this -- but report 0x80 is not the road to it.
+ *
+ * Upstream's byte values are kept in preference to the equivalent 0x04 / 0x06
+ * because these are the ones also exercised on an A25, and the A25 and A49
+ * remain untested here.
  */
 static const uint8_t LEDOff    = 0x00;
-static const uint8_t LEDOn     = 0x7c;
+static const uint8_t LEDDim    = 0x7c;
 static const uint8_t LEDBright = 0x7e;
-
-/* Deliberately far from the others, because it is also the experiment that
- * answers open question 1 -- whether brightness is a continuum or a handful of
- * quantised steps. LEDOn and LEDBright differ by 2 out of 127 and would look
- * identical whatever the answer, so they cannot tell us. If this reads as
- * visibly dimmer than LEDOn the range is usable for signalling intensity; if
- * it reads as off or as full brightness, it is not.
- */
-static const uint8_t LEDDim    = 0x20;
 
 /* ------------------------------------------------------------ encoders */
 
