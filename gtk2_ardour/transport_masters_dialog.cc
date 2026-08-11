@@ -708,6 +708,7 @@ TransportMastersWidget::set_session (ARDOUR::Session* s)
 	} else {
 		clear ();
 	}
+	update_usability ();
 }
 
 TransportMastersWidget::AddTransportMasterDialog::AddTransportMasterDialog ()
