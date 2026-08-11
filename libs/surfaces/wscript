@@ -41,6 +41,11 @@ def configure(conf):
     else:
         print ('You are missing the libusb-1.0 development package needed to compile Push2 and ContourDesign support')
 
+    if conf.is_defined('HAVE_HIDAPI'):
+        children += [ 'komplete_kontrol_a' ]
+    else:
+        print ('You are missing the hidapi dependency needed to compile Komplete Kontrol A-Series support')
+
     if conf.is_defined('HAVE_HIDAPI') and Options.options.maschine:
         children += [ 'maschine2' ]
         conf.define('BUILD_MASCHINE', 1)
@@ -87,6 +92,8 @@ def build(bld):
         bld.recurse('launchpad_pro')
         bld.recurse('launchpad_x')
         bld.recurse('launchkey_4')
+    if bld.is_defined('HAVE_HIDAPI'):
+        bld.recurse('komplete_kontrol_a')
     if bld.is_defined('BUILD_MASCHINE'):
         bld.recurse('maschine2')
     if bld.is_defined ('HAVE_WEBSOCKETS'):
