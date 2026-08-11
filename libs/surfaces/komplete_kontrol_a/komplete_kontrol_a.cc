@@ -50,6 +50,14 @@ static const unsigned int read_interval_ms = 1;
  */
 static const unsigned int reconnect_interval_ms = 1000;
 
+/* The panel has three states and Rec has three meanings, but two of them --
+ * armed, and actually capturing -- are the pair a player most needs to tell
+ * apart. Blinking the armed one is how Ardour's own transport solves this.
+ * The timer runs whenever the surface does: when nothing is armed the toggle
+ * changes no lamp, refresh finds nothing dirty, and no report is written.
+ */
+static const unsigned int blink_interval_ms = 200;
+
 bool
 KompleteKontrolA::available ()
 {
@@ -65,6 +73,7 @@ KompleteKontrolA::KompleteKontrolA (ARDOUR::Session& s)
 	, AbstractUI<KompleteKontrolARequest> (name ())
 	, _handle (0)
 	, _variant (0)
+	, _blink_on (false)
 	, _seeded (false)
 	, _buttons (0)
 	, _encoder_pos (0)
@@ -375,8 +384,24 @@ KompleteKontrolA::start ()
 	connect_session_signals ();
 	refresh_transport_leds ();
 
+	/* Attached here rather than in start_read_poll(), which reconnection calls
+	 * again -- the blink belongs to the surface being active, not to the
+	 * device being present, and a second copy would fight the first.
+	 */
+	Glib::RefPtr<Glib::TimeoutSource> b = Glib::TimeoutSource::create (blink_interval_ms);
+	_blink_connection = b->connect (sigc::mem_fun (*this, &KompleteKontrolA::blink));
+	b->attach (main_loop ()->get_context ());
+
 	start_read_poll ();
 	return 0;
+}
+
+bool
+KompleteKontrolA::blink ()
+{
+	_blink_on = !_blink_on;
+	refresh_transport_leds ();
+	return true;
 }
 
 int
@@ -387,6 +412,7 @@ KompleteKontrolA::stop ()
 	 */
 	_read_connection.disconnect ();
 	_reconnect_connection.disconnect ();
+	_blink_connection.disconnect ();
 
 	/* Before the device goes, so nothing can arrive mid-teardown and try to
 	 * light a lamp on a handle that is being closed.
@@ -759,21 +785,28 @@ KompleteKontrolA::refresh_transport_leds ()
 
 	bool rolling = session->transport_rolling ();
 
-	set_led (KKA::Play, rolling ? KKA::LEDBright : KKA::LEDOff);
-	set_led (KKA::Stop, rolling ? KKA::LEDOff : KKA::LEDBright);
-	set_led (KKA::Loop, session->get_play_loop () ? KKA::LEDBright : KKA::LEDOff);
-	set_led (KKA::Metro, Config->get_clicking () ? KKA::LEDBright : KKA::LEDOff);
+	/* Dim when idle rather than dark, because it is the legend that the LED
+	 * lights: an unlit button is not a button with its lamp off, it is a black
+	 * rectangle you cannot read in a dim room. Dark is therefore reserved to
+	 * mean "this button does nothing", which is honest while most of the panel
+	 * is still unbound, and stops the surface claiming more than it does.
+	 */
+	set_led (KKA::Play,  rolling ? KKA::LEDBright : KKA::LEDDim);
+	set_led (KKA::Stop,  rolling ? KKA::LEDDim : KKA::LEDBright);
+	set_led (KKA::Loop,  session->get_play_loop () ? KKA::LEDBright : KKA::LEDDim);
+	set_led (KKA::Metro, Config->get_clicking () ? KKA::LEDBright : KKA::LEDDim);
 
-	/* Armed and actually capturing are different states and the panel has the
-	 * range to say so. LEDDim is also the probe for open question 1 -- see
-	 * kka_protocol.h.
+	/* Rec has three states and the panel only has two brightnesses, so armed
+	 * blinks. Solid bright is capturing; a blinking lamp cannot be mistaken
+	 * for it at a glance, which is the distinction that actually matters when
+	 * the transport is about to roll.
 	 */
 	if (session->actively_recording ()) {
 		set_led (KKA::Rec, KKA::LEDBright);
 	} else if (session->record_status () != ARDOUR::Disabled) {
-		set_led (KKA::Rec, KKA::LEDDim);
+		set_led (KKA::Rec, _blink_on ? KKA::LEDBright : KKA::LEDDim);
 	} else {
-		set_led (KKA::Rec, KKA::LEDOff);
+		set_led (KKA::Rec, KKA::LEDDim);
 	}
 
 	flush_leds ();

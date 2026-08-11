@@ -114,6 +114,7 @@ private:
 	/* input path */
 	bool dev_read ();
 	bool dev_reconnect ();
+	bool blink ();
 	void start_read_poll ();
 	void start_reconnect_poll ();
 	void decode (const uint8_t* payload, size_t len);
@@ -133,6 +134,12 @@ private:
 	 */
 	sigc::connection    _read_connection;
 	sigc::connection    _reconnect_connection;
+
+	/* Belongs to the surface being active rather than to the device being
+	 * present, so unlike the two above it is attached once and stays.
+	 */
+	sigc::connection    _blink_connection;
+	bool                _blink_on;
 
 	/* Input state.  _seeded covers the analog fields only -- the knobs and the
 	 * encoder are wrapping counters needing a baseline before a delta means
