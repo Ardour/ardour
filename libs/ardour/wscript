@@ -283,6 +283,7 @@ libardour_sources = [
         'velocity_control.cc',
         'video_tools_paths.cc',
         'vumeterdsp.cc',
+        'wallclock_transport.cc',
         'worker.cc',
         'zeroconf.cc'
 ]

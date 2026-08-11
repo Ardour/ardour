@@ -82,6 +82,7 @@ TransportMasterManager::set_default_configuration ()
 		*/
 
 		add (Engine, X_("JACK Transport"), false);
+		add (WallClock, X_("Wall Clock"), false);
 		add (MTC, X_("MTC"), false);
 		add (LTC, X_("LTC"), false);
 		add (MIDIClock, X_("MIDI Clock"), false);
