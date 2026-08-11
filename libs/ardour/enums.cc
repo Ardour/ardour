@@ -467,6 +467,7 @@ setup_enum_writer ()
 	REGISTER_ENUM (Engine);
 	REGISTER_ENUM (MIDIClock);
 	REGISTER_ENUM (LTC);
+	REGISTER_ENUM (WallClock);
 	REGISTER (_SyncSource);
 
 	REGISTER_ENUM (TR_StartStop);

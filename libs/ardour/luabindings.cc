@@ -2986,6 +2986,7 @@ LuaBindings::common (lua_State* L)
 		.addConst ("MTC", ARDOUR::SyncSource(MTC))
 		.addConst ("MIDIClock", ARDOUR::SyncSource(MIDIClock))
 		.addConst ("LTC", ARDOUR::SyncSource(LTC))
+		.addConst ("WallClock", ARDOUR::SyncSource(WallClock))
 		.endNamespace ()
 
 		.beginNamespace ("TracksAutoNamingRule")
