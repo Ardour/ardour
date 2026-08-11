@@ -69,10 +69,12 @@ KompleteKontrolA::KompleteKontrolA (ARDOUR::Session& s)
 	, _buttons (0)
 	, _encoder_pos (0)
 	, _warned_short_report (false)
+	, _leds_dirty (false)
 {
 	memset (_knob_raw, 0, sizeof (_knob_raw));
 	memset (_knob_accum, 0, sizeof (_knob_accum));
 	memset (_payload_prev, 0, sizeof (_payload_prev));
+	memset (_led, KKA::LEDOff, sizeof (_led));
 
 	if (hid_init ()) {
 		throw KompleteKontrolAException ("HIDAPI initialization failed");
@@ -152,6 +154,8 @@ KompleteKontrolA::open_device (bool quiet_if_absent)
 	 * enumeration never takes that path, so matching the ids here and opening
 	 * by path is both a fix and cheaper than the call it replaces.
 	 */
+	Glib::Threads::Mutex::Lock lm (_device_mutex);
+
 	struct hid_device_info* devs = hid_enumerate (0x0, 0x0);
 
 	for (size_t i = 0; i < KKA::NumVariants && !_handle; ++i) {
@@ -231,8 +235,15 @@ KompleteKontrolA::open_device (bool quiet_if_absent)
 void
 KompleteKontrolA::close_device (bool graceful)
 {
-	if (!_handle) {
-		return;
+	/* The goodbye writes take the lock individually, so it cannot be held
+	 * across them; taking it only for the close itself is enough, because
+	 * every other path rechecks _handle under it.
+	 */
+	{
+		Glib::Threads::Mutex::Lock lm (_device_mutex);
+		if (!_handle) {
+			return;
+		}
 	}
 
 	/* Once interactive mode has been entered the firmware stops drawing the
@@ -249,6 +260,12 @@ KompleteKontrolA::close_device (bool graceful)
 		clear_leds ();
 		blank_display ();
 		set_device_mode (KKA::ModeMIDI);
+	}
+
+	Glib::Threads::Mutex::Lock lm (_device_mutex);
+
+	if (!_handle) {
+		return; /* raced with another close */
 	}
 
 	hid_close (_handle);
@@ -270,6 +287,11 @@ KompleteKontrolA::take_over_device ()
 
 	clear_leds ();
 	blank_display ();
+
+	/* Whatever the transport was doing while the device was away, the panel
+	 * now has to agree with it.
+	 */
+	refresh_transport_leds ();
 
 	/* A returning device is a different device as far as this state is
 	 * concerned: its knob counters start wherever they start.
@@ -350,6 +372,9 @@ KompleteKontrolA::start ()
 		return -1;
 	}
 
+	connect_session_signals ();
+	refresh_transport_leds ();
+
 	start_read_poll ();
 	return 0;
 }
@@ -362,6 +387,11 @@ KompleteKontrolA::stop ()
 	 */
 	_read_connection.disconnect ();
 	_reconnect_connection.disconnect ();
+
+	/* Before the device goes, so nothing can arrive mid-teardown and try to
+	 * light a lamp on a handle that is being closed.
+	 */
+	_session_connections.drop_connections ();
 
 	close_device (true);
 
@@ -382,6 +412,8 @@ KompleteKontrolA::thread_init ()
 int
 KompleteKontrolA::set_device_mode (const uint8_t mode[2])
 {
+	Glib::Threads::Mutex::Lock lm (_device_mutex);
+
 	if (!_handle) {
 		return -1;
 	}
@@ -390,23 +422,70 @@ KompleteKontrolA::set_device_mode (const uint8_t mode[2])
 	return hid_write (_handle, buf, sizeof (buf)) < 0 ? -1 : 0;
 }
 
-int
-KompleteKontrolA::clear_leds ()
+void
+KompleteKontrolA::set_led (KKA::ControlID c, uint8_t brightness)
 {
+	if (!KKA::control_has_led (c)) {
+		return;
+	}
+
+	Glib::Threads::Mutex::Lock lm (_device_mutex);
+
+	if (_led[c] != brightness) {
+		_led[c] = brightness;
+		_leds_dirty = true;
+	}
+}
+
+int
+KompleteKontrolA::flush_leds ()
+{
+	Glib::Threads::Mutex::Lock lm (_device_mutex);
+	return flush_leds_locked ();
+}
+
+int
+KompleteKontrolA::flush_leds_locked ()
+{
+	if (!_leds_dirty) {
+		return 0;
+	}
+
 	if (!_handle) {
 		return -1;
 	}
 
+	/* All 21 go out together -- there is no partial LED write -- so a single
+	 * changed lamp costs the same 22 bytes as all of them.
+	 */
 	uint8_t buf[KKA::LEDReportSize];
-	memset (buf, KKA::LEDOff, sizeof (buf));
 	buf[0] = KKA::ReportLEDs;
+	memcpy (buf + 1, _led, KKA::LEDCount);
 
-	return hid_write (_handle, buf, sizeof (buf)) < 0 ? -1 : 0;
+	if (hid_write (_handle, buf, sizeof (buf)) < 0) {
+		return -1;
+	}
+
+	_leds_dirty = false;
+	return 0;
+}
+
+int
+KompleteKontrolA::clear_leds ()
+{
+	Glib::Threads::Mutex::Lock lm (_device_mutex);
+
+	memset (_led, KKA::LEDOff, sizeof (_led));
+	_leds_dirty = true;
+
+	return flush_leds_locked ();
 }
 
 int
 KompleteKontrolA::blank_display ()
 {
+	Glib::Threads::Mutex::Lock lm (_device_mutex);
+
 	if (!_handle) {
 		return -1;
 	}
@@ -446,10 +525,6 @@ KompleteKontrolA::blank_display ()
 bool
 KompleteKontrolA::dev_read ()
 {
-	if (!_handle) {
-		return false;
-	}
-
 	uint8_t buf[KKA::InputReportSize];
 
 	/* Reports are emitted on change only, but a fast knob spin coalesces
@@ -457,7 +532,21 @@ KompleteKontrolA::dev_read ()
 	 * The bound is a safety valve against a device that never goes quiet.
 	 */
 	for (int i = 0; i < 32; ++i) {
-		int n = hid_read (_handle, buf, sizeof (buf));
+		int n;
+
+		{
+			/* Held across the read alone. decode() reaches into Ardour from
+			 * here, and holding a device lock across that is how a deadlock
+			 * gets invented later.
+			 */
+			Glib::Threads::Mutex::Lock lm (_device_mutex);
+
+			if (!_handle) {
+				return false;
+			}
+
+			n = hid_read (_handle, buf, sizeof (buf));
+		}
 
 		if (n == 0) {
 			break;
@@ -619,7 +708,76 @@ KompleteKontrolA::decode (const uint8_t* p, size_t len)
 	memcpy (_payload_prev, p, KKA::InputPayloadSize);
 }
 
-/* Phase 2 stops here: decode and trace. Phase 3 binds these to Ardour. */
+/* ------------------------------------------------------- Ardour bindings */
+
+void
+KompleteKontrolA::connect_session_signals ()
+{
+	if (!session) {
+		return;
+	}
+
+	/* The trailing `this` is the PBD::EventLoop these are delivered on. We are
+	 * an AbstractUI, so passing ourselves marshals every callback onto this
+	 * surface's own thread -- the same thread as the read poll. That is what
+	 * makes it safe for these handlers to write to the device directly.
+	 */
+	session->TransportStateChange.connect (_session_connections, MISSING_INVALIDATOR,
+	                                       std::bind (&KompleteKontrolA::transport_state_changed, this), this);
+	session->RecordStateChanged.connect (_session_connections, MISSING_INVALIDATOR,
+	                                     std::bind (&KompleteKontrolA::transport_state_changed, this), this);
+	session->TransportLooped.connect (_session_connections, MISSING_INVALIDATOR,
+	                                  std::bind (&KompleteKontrolA::transport_state_changed, this), this);
+
+	/* The metronome is a global config item rather than session transport
+	 * state, so it arrives by a different road.
+	 */
+	Config->ParameterChanged.connect (_session_connections, MISSING_INVALIDATOR,
+	                                  std::bind (&KompleteKontrolA::parameter_changed, this, _1), this);
+}
+
+void
+KompleteKontrolA::transport_state_changed ()
+{
+	refresh_transport_leds ();
+}
+
+void
+KompleteKontrolA::parameter_changed (std::string p)
+{
+	if (p == "clicking") {
+		refresh_transport_leds ();
+	}
+}
+
+void
+KompleteKontrolA::refresh_transport_leds ()
+{
+	if (!session) {
+		return;
+	}
+
+	bool rolling = session->transport_rolling ();
+
+	set_led (KKA::Play, rolling ? KKA::LEDOn : KKA::LEDOff);
+	set_led (KKA::Stop, rolling ? KKA::LEDOff : KKA::LEDOn);
+	set_led (KKA::Loop, session->get_play_loop () ? KKA::LEDOn : KKA::LEDOff);
+	set_led (KKA::Metro, Config->get_clicking () ? KKA::LEDOn : KKA::LEDOff);
+
+	/* Armed and actually capturing are different states and the panel has the
+	 * range to say so. LEDDim is also the probe for open question 1 -- see
+	 * kka_protocol.h.
+	 */
+	if (session->actively_recording ()) {
+		set_led (KKA::Rec, KKA::LEDOn);
+	} else if (session->record_status () != ARDOUR::Disabled) {
+		set_led (KKA::Rec, KKA::LEDDim);
+	} else {
+		set_led (KKA::Rec, KKA::LEDOff);
+	}
+
+	flush_leds ();
+}
 
 void
 KompleteKontrolA::handle_button (KKA::ControlID c, bool pressed)
@@ -628,6 +786,43 @@ KompleteKontrolA::handle_button (KKA::ControlID c, bool pressed)
 	             string_compose ("KKA button %1 (bit %2) %3\n",
 	                             KKA::control_name (c), (int) c,
 	                             pressed ? "pressed" : "released"));
+
+	/* Act on press. Release matters only for controls used as modifiers, and
+	 * none of the transport buttons are.
+	 */
+	if (!pressed) {
+		return;
+	}
+
+	/* These go straight through BasicUI, which reaches the session by its
+	 * request queue rather than by touching transport state here, so calling
+	 * them from this thread is correct. The LEDs are not updated here either:
+	 * the session tells us what actually happened, and a button that lit
+	 * because it was pressed rather than because the transport moved would be
+	 * lying whenever the request was refused.
+	 */
+	switch (c) {
+	case KKA::Play:
+		/* Same behaviour as the spacebar, which is what a player expects; the
+		 * comment on transport_play() says toggle_roll is preferred.
+		 */
+		toggle_roll (false, true);
+		break;
+	case KKA::Stop:
+		transport_stop ();
+		break;
+	case KKA::Rec:
+		rec_enable_toggle ();
+		break;
+	case KKA::Loop:
+		loop_toggle ();
+		break;
+	case KKA::Metro:
+		toggle_click ();
+		break;
+	default:
+		break;
+	}
 }
 
 void

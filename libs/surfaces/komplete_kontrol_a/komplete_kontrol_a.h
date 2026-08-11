@@ -27,6 +27,8 @@
 #include <exception>
 #include <string>
 
+#include <glibmm/threads.h>
+
 #include <hidapi.h>
 
 #define ABSTRACT_UI_EXPORTS
@@ -96,6 +98,19 @@ private:
 	int clear_leds ();
 	int blank_display ();
 
+	/* LEDs.  The report is all 21 at once, so callers set what they want and
+	 * flush once; flush_leds() writes only when something actually changed.
+	 */
+	void set_led (KKA::ControlID, uint8_t brightness);
+	int  flush_leds ();
+	int  flush_leds_locked (); /* caller holds _device_mutex */
+
+	/* Ardour bindings */
+	void connect_session_signals ();
+	void transport_state_changed ();
+	void parameter_changed (std::string);
+	void refresh_transport_leds ();
+
 	/* input path */
 	bool dev_read ();
 	bool dev_reconnect ();
@@ -136,6 +151,24 @@ private:
 	uint8_t  _payload_prev[KKA::InputPayloadSize];
 
 	bool _warned_short_report;
+
+	/* Session signals are connected with this surface as their event loop, so
+	 * they arrive on our thread rather than Ardour's -- which is what lets the
+	 * LED writes below share a thread with the read poll.
+	 */
+	PBD::ScopedConnectionList _session_connections;
+
+	/* Desired LED state, indexed by ControlID, which for 0..LEDCount-1 is also
+	 * the index in the LED report. No mapping table in either direction.
+	 */
+	uint8_t _led[KKA::LEDCount];
+	bool    _leds_dirty;
+
+	/* Guards _handle. Everything else touching the device runs on this
+	 * surface's event loop, but stop() arrives on Ardour's GUI thread and
+	 * closes the handle out from under it.
+	 */
+	Glib::Threads::Mutex _device_mutex;
 };
 
 } /* namespace ArdourSurface */

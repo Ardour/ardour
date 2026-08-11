@@ -168,6 +168,15 @@ static const uint8_t LEDOff    = 0x00;
 static const uint8_t LEDOn     = 0x7c;
 static const uint8_t LEDBright = 0x7e;
 
+/* Deliberately far from the others, because it is also the experiment that
+ * answers open question 1 -- whether brightness is a continuum or a handful of
+ * quantised steps. LEDOn and LEDBright differ by 2 out of 127 and would look
+ * identical whatever the answer, so they cannot tell us. If this reads as
+ * visibly dimmer than LEDOn the range is usable for signalling intensity; if
+ * it reads as off or as full brightness, it is not.
+ */
+static const uint8_t LEDDim    = 0x20;
+
 /* ------------------------------------------------------------ encoders */
 
 /* The 4-D encoder is a 4-bit wrapping absolute position, not a delta. */
