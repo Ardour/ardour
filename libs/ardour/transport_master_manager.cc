@@ -59,12 +59,13 @@ TransportMasterManager::create ()
 
 	_instance = new TransportMasterManager;
 
+	/* these are always present and not nonremovable */
+	_instance->set_default_configuration ();
+
 	XMLNode* tmm_node = Config->transport_master_state ();
 
 	if (tmm_node) {
 		_instance->set_state (*tmm_node, Stateful::current_state_version);
-	} else {
-		_instance->set_default_configuration ();
 	}
 
 	return *_instance;
@@ -619,22 +620,27 @@ TransportMasterManager::set_state (XMLNode const & node, int version)
 	{
 		PBD::RWLock::WriterLock lm (_lock);
 
-		_current_master.reset ();
-#if 0
-		boost_debug_list_ptrs ();
-#endif
+		for (auto const c: children) {
+			bool removeable;
+			if (!c->get_property (X_("removeable"), removeable)) {
+				continue;
+			}
 
-		/* TramsportMasters live for the entire life of the
-		 * program. TransportMasterManager::set_state() should only be
-		 * called at the start of the program, and there should be no
-		 * transport masters at that time.
-		 */
+			/* non-removable factory TMs are always present */
+			if (!removeable) {
+				std::string name;
+				if (!c->get_property (X_("name"), name)) {
+					continue;
+				}
+				for (auto const& tm: _transport_masters) {
+					if (tm->name() == name) {
+						tm->set_state (*c, version);
+					}
+				}
+				continue;
+			}
 
-		assert (_transport_masters.empty());
-
-		for (XMLNodeList::const_iterator c = children.begin(); c != children.end(); ++c) {
-
-			std::shared_ptr<TransportMaster> tm = TransportMaster::factory (**c);
+			std::shared_ptr<TransportMaster> tm = TransportMaster::factory (*c);
 
 			if (!tm) {
 				continue;
@@ -646,17 +652,18 @@ TransportMasterManager::set_state (XMLNode const & node, int version)
 				continue;
 			}
 
-			/* we know it is the last thing added to the list of masters */
+			_transport_masters.back()->set_state (*c, version);
+		}
 
-			_transport_masters.back()->set_state (**c, version);
+		std::string current_master;
+		if (node.get_property (X_("current"), current_master)) {
+			for (auto const& tm: _transport_masters) {
+				if (tm->name() == current_master) {
+					set_current_locked (tm);
+				}
+			}
 		}
 	}
-
-	/* fallback choice, lives on until ::restart() is called after the
-	 * engine is running.
-	 */
-
-	set_current (MTC);
 
 	return 0;
 }
