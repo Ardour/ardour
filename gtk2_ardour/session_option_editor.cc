@@ -395,7 +395,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	add_option (_("MIDI"), li);
 
 	add_option (_("Scale & Tuning"), new OptionEditorHeading (_("Scale and Tuning")));
-	scale_widget = new ScaleBox (_("Session"));
+	scale_widget = new ScaleBox (_("Session"), false); /* no remove scale, because this is the Session */
 	scale_widget->show ();
 	scale_widget->set (_session->key());
 
