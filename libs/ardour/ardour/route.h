@@ -718,6 +718,9 @@ protected:
 	SlavableAutomationControlList slavables () const;
 
 	virtual void input_change_handler (IOChange);
+	virtual void reorder_triggerbox_for_recording () {}
+
+	PBD::ScopedConnection tbr_connection;
 
 private:
 	/* no copy construction */

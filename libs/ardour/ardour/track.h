@@ -246,6 +246,7 @@ protected:
 
 	void use_captured_audio_sources (SourceList&, CaptureInfos const &);
 	void use_captured_midi_sources (SourceList&, CaptureInfos const &);
+	void reorder_triggerbox_for_recording ();
 
 private:
 	void parameter_changed (std::string const & p);

@@ -95,7 +95,9 @@ int
 Track::init ()
 {
 	if (!is_auditioner()) {
+		tbr_connection.disconnect ();
 		_triggerbox = std::shared_ptr<TriggerBox> (new TriggerBox (_session, data_type ()));
+		_triggerbox->RecEnableChanged.connect_same_thread (tbr_connection, [this]() { reorder_triggerbox_for_recording (); });
 		_triggerbox->set_owner (this);
 	}
 
@@ -367,20 +369,24 @@ Track::update_input_meter ()
 	/* meter input if _record_prepared,
 	 * except if Rolling, but not recording (master-rec-enable is off) and auto-input is enabled
 	 */
-	bool monitor_input = false;
+	bool session_rec    = _session.get_record_enabled ();
+	bool const clip_rec = _triggerbox && (_triggerbox->record_enabled() >= Enabled) && !session_rec;
+	bool meter_input    = clip_rec;
 
-	if (_record_prepared) {
+	if (!clip_rec && _record_prepared) {
 		/* actually rolling (no count-in, pre-roll) */
 		bool const rolling     = 0 != _session.transport_speed();
 		bool const recording   = _session.actively_recording ();
 		bool const auto_input  = _session.config.get_auto_input ();
 
 		if (!(rolling && !recording && auto_input)) {
-			monitor_input = true;
+			meter_input = true;
 		}
 	}
 
-	if (monitor_input) {
+	std::cerr << "UIM: " << meter_input << std::endl;
+
+	if (meter_input) {
 		if (_saved_meter_point) {
 			/* already monitoring input */
 			return;
@@ -1344,4 +1350,27 @@ Track::time_domain_changed ()
 			pl->time_domain_changed ();
 		}
 	}
+}
+#if 1
+static void
+dump_processors(const string& name, const list<std::shared_ptr<Processor> >& procs)
+{
+	cerr << name << " {" << endl;
+	for (list<std::shared_ptr<Processor> >::const_iterator p = procs.begin();
+			p != procs.end(); ++p) {
+		cerr << "\t" << (*p)->name() << " ID = " << (*p)->id() << " @ " << (*p) << endl;
+	}
+	cerr << "}" << endl;
+}
+#endif
+
+void
+Track::reorder_triggerbox_for_recording ()
+{
+	PBD::RWLock::ReaderLock lm (_processor_lock);
+	ProcessorList new_order (_processors);
+	lm.release ();
+
+	reorder_processors (new_order, nullptr);
+	update_input_meter ();
 }

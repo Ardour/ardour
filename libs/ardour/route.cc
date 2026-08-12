@@ -1170,7 +1170,9 @@ Route::add_processors (const ProcessorList& others, std::shared_ptr<Processor> b
 
 			std::shared_ptr<TriggerBox> tb = std::dynamic_pointer_cast<TriggerBox> (other);
 			if (tb) {
+				tbr_connection.disconnect ();
 				_triggerbox = tb;
+				_triggerbox->RecEnableChanged.connect_same_thread (tbr_connection, [this]() { reorder_triggerbox_for_recording(); });
 			}
 
 			if (other == _meter) {
@@ -3556,6 +3558,8 @@ Route::set_processor_state (const XMLNode& node, int version)
 		} else if (prop->value() == "triggerbox") {
 			if (!_triggerbox) {
 				_triggerbox.reset (new TriggerBox (_session, _default_type));
+				tbr_connection.disconnect ();
+				_triggerbox->RecEnableChanged.connect_same_thread (tbr_connection, [this]() { reorder_triggerbox_for_recording(); });
 				_triggerbox->set_owner (this);
 			}
 			_triggerbox->set_state (**niter, version);
@@ -5602,6 +5606,9 @@ Route::setup_invisible_processors ()
 	ProcessorList new_processors;
 	ProcessorList foldback_sends;
 
+	bool const session_rec = _session.get_record_enabled ();
+	bool const clip_rec    = _triggerbox && (_triggerbox->record_enabled() >= Enabled) && !session_rec;
+
 	/* find visible processors */
 
 	for (auto & proc : _processors) {
@@ -5830,10 +5837,16 @@ Route::setup_invisible_processors ()
 			}
 		}
 
-		if (_triggerbox && (_disk_io_point != DiskIOCustom)) {
+		if (!clip_rec && _triggerbox && (_disk_io_point != DiskIOCustom)) {
 			/* BEFORE polarity */
 			new_processors.insert (polarity_pos, _triggerbox);
 		}
+	}
+
+	if (clip_rec) {
+		ProcessorList::iterator writer_pos = find (new_processors.begin(), new_processors.end(), _disk_writer);
+		assert (writer_pos != new_processors.end());
+		new_processors.insert (writer_pos, _triggerbox);
 	}
 
 	/* EXPORT PROCESSOR */
