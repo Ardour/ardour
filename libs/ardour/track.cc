@@ -1353,10 +1353,12 @@ Track::time_domain_changed ()
 void
 Track::reorder_triggerbox_for_recording ()
 {
-	PBD::RWLock::ReaderLock lm (_processor_lock);
-	ProcessorList new_order (_processors);
-	lm.release ();
+	if (Config->get_monitoring_model() != SoftwareMonitoring) {
+		PBD::RWLock::ReaderLock lm (_processor_lock);
+		ProcessorList new_order (_processors);
+		lm.release ();
+		reorder_processors (new_order, nullptr);
+	}
 
-	reorder_processors (new_order, nullptr);
 	update_input_meter ();
 }
