@@ -454,6 +454,9 @@ AudioClipEditor::position_lines ()
 	end_line->set_position (ArdourCanvas::Duple (end_x0, 0.));
 	end_line->set (ArdourCanvas::Rect (0., 0., ArdourCanvas::COORD_MAX, _visible_canvas_height));
 
+	start_line->show ();
+	end_line->show ();
+
 	set_ruler_shift (_region->start().samples());
 	update_tempo_based_rulers ();
 }
@@ -474,6 +477,14 @@ AudioClipEditor::set_colors ()
 	// loop_line->set_outline_color (UIConfiguration::instance ().color (X_("theme:contrasting selection")));
 
 	set_waveform_colors ();
+}
+
+void
+AudioClipEditor::drop_everything_else ()
+{
+	hide_grid_lines ();
+	start_line->hide ();
+	end_line->hide ();
 }
 
 void
@@ -500,6 +511,7 @@ AudioClipEditor::set_region (std::shared_ptr<Region> region)
 	}
 
 	drop_waves ();
+	drop_everything_else ();
 
 	if (!region) {
 		return;
@@ -813,6 +825,7 @@ AudioClipEditor::unset_region ()
 	EC_LOCAL_TEMPO_SCOPE;
 
 	drop_waves ();
+	drop_everything_else ();
 
 	CueEditor::unset_region ();
 }
@@ -822,6 +835,17 @@ AudioClipEditor::unset_trigger ()
 {
 	EC_LOCAL_TEMPO_SCOPE;
 	CueEditor::unset_trigger ();
+}
+
+void
+AudioClipEditor::trigger_prop_change (PBD::PropertyChange const & what_changed)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	if (what_changed.contains (Properties::region)) {
+		std::cerr << "TPC\n";
+		set_trigger (ref);
+	}
 }
 
 Gdk::Cursor*

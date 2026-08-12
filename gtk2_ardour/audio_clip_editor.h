@@ -174,6 +174,7 @@ public:
 	bool end_line_event_handler (GdkEvent* ev, EndBoundaryRect*);
 	bool data_group_event_handler (GdkEvent* ev);
 	void drop_waves ();
+	void drop_everything_else ();
 	void set_wave_heights ();
 	void set_spp_from_length (ARDOUR::samplecnt_t);
 	void set_waveform_colors ();
@@ -210,4 +211,6 @@ public:
 	void grid_type_chosen (Editing::GridType);
 
 	Gtk::Box* pack_mouse_mode_box () { return nullptr; }
+
+	void trigger_prop_change (PBD::PropertyChange const & what_changed);
 };
