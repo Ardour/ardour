@@ -178,9 +178,12 @@ private:
 	uint8_t _led[KKA::LEDCount];
 	bool    _leds_dirty;
 
-	/* Guards _handle. Everything else touching the device runs on this
-	 * surface's event loop, but stop() arrives on Ardour's GUI thread and
-	 * closes the handle out from under it.
+	/* Guards _handle and the LED state above it.  The device is driven from
+	 * this surface's event loop, but start() runs on Ardour's GUI thread and
+	 * connects the session signals partway through, so a transport change can
+	 * be lighting lamps on the surface thread while start() is still finishing
+	 * over here.  stop() is not a party to this: it joins the surface thread
+	 * before it touches anything.
 	 */
 	Glib::Threads::Mutex _device_mutex;
 };

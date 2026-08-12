@@ -102,9 +102,15 @@ KompleteKontrolA::do_request (KompleteKontrolARequest* req)
 {
 	if (req->type == CallSlot) {
 		call_slot (MISSING_INVALIDATOR, req->the_slot);
-	} else if (req->type == Quit) {
-		stop ();
 	}
+
+	/* No Quit case, deliberately, though every other surface carries one.
+	 * Nothing in the tree ever posts such a request -- BaseUI::Quit is only
+	 * ever compared against, never assigned -- so the branch is dead in all of
+	 * them. Here it would be worse than dead: it is the only way stop() could
+	 * be reached on this surface's own thread, and stop() joins that thread.
+	 * Omitting it keeps "stop() runs on the GUI thread" true by construction.
+	 */
 }
 
 int
@@ -409,6 +415,19 @@ KompleteKontrolA::blink ()
 int
 KompleteKontrolA::stop ()
 {
+	/* First, because it ends the surface's event loop and *joins* its thread.
+	 * Everything below then runs with no other thread left to race against.
+	 *
+	 * That ordering is the whole point. The three timeouts are attached to
+	 * this surface's own main context, so their callbacks run on that thread,
+	 * while stop() is reached from the GUI thread -- and sigc::connection has
+	 * no internal locking, so disconnecting one whose callback is executing is
+	 * a race that no amount of care around _handle would fix. Removing the
+	 * other thread is simpler and stronger than trying to lock against it.
+	 * push2 tears down in this order for the same reason.
+	 */
+	BaseUI::quit ();
+
 	/* Whichever of the two is live -- disconnecting an already-finished
 	 * connection is a no-op, so there is no need to know which.
 	 */
@@ -416,14 +435,16 @@ KompleteKontrolA::stop ()
 	_reconnect_connection.disconnect ();
 	_blink_connection.disconnect ();
 
-	/* Before the device goes, so nothing can arrive mid-teardown and try to
-	 * light a lamp on a handle that is being closed.
+	/* These were never part of that race: PBD's signals take their own lock
+	 * and ScopedConnectionList guards its list, which is why they could be
+	 * dropped from either thread. They come down here with everything else.
 	 */
 	_session_connections.drop_connections ();
 
+	/* Last, so the goodbye writes cannot collide with a blink or a read that
+	 * is still in flight -- by now neither can be.
+	 */
 	close_device (true);
-
-	BaseUI::quit ();
 	return 0;
 }
 
