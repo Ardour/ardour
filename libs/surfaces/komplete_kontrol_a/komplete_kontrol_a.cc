@@ -68,11 +68,11 @@ KompleteKontrolA::available ()
 	return true;
 }
 
-KompleteKontrolA::KompleteKontrolA (ARDOUR::Session& s)
+KompleteKontrolA::KompleteKontrolA (ARDOUR::Session& s, const KKA::Variant& variant)
 	: ControlProtocol (s, std::string (X_("NI Komplete Kontrol A-Series")))
 	, AbstractUI<KompleteKontrolARequest> (name ())
 	, _handle (0)
-	, _variant (0)
+	, _variant (variant)
 	, _blink_on (false)
 	, _seeded (false)
 	, _buttons (0)
@@ -167,15 +167,12 @@ KompleteKontrolA::open_device (bool quiet_if_absent)
 
 	struct hid_device_info* devs = hid_enumerate (0x0, 0x0);
 
-	for (size_t i = 0; i < KKA::NumVariants && !_handle; ++i) {
-		for (struct hid_device_info* d = devs; d; d = d->next) {
-			if (d->vendor_id != KKA::VendorID || d->product_id != KKA::Variants[i].pid) {
-				continue;
-			}
-			if ((_handle = hid_open_path (d->path)) != 0) {
-				_variant = &KKA::Variants[i];
-				break;
-			}
+	for (struct hid_device_info* d = devs; d; d = d->next) {
+		if (d->vendor_id != KKA::VendorID || d->product_id != _variant.pid) {
+			continue;
+		}
+		if ((_handle = hid_open_path (d->path)) != 0) {
+			break;
 		}
 	}
 
@@ -187,16 +184,21 @@ KompleteKontrolA::open_device (bool quiet_if_absent)
 		 * long as the user leaves it unplugged.
 		 */
 		if (!quiet_if_absent) {
-			error << _("Komplete Kontrol A-Series: no device found") << endmsg;
+			/* Naming the model matters here: the likely mistake is a user
+			 * who picked the wrong row for the keyboard on their desk, and
+			 * "no device found" would not tell them that.
+			 */
+			error << string_compose (_("Komplete Kontrol A-Series: no %1 found"), _variant.model)
+			      << endmsg;
 		}
 		return -1;
 	}
 
 	char usbid[16];
-	snprintf (usbid, sizeof (usbid), "%04x:%04x", KKA::VendorID, _variant->pid);
+	snprintf (usbid, sizeof (usbid), "%04x:%04x", KKA::VendorID, _variant.pid);
 
 	info << string_compose (_("Komplete Kontrol A-Series: found %1 (%2), %3 keys"),
-	                        _variant->model, usbid, _variant->keys)
+	                        _variant.model, usbid, _variant.keys)
 	     << endmsg;
 
 	/* The A25 and A49 are believed identical to the A61 apart from the
@@ -205,26 +207,26 @@ KompleteKontrolA::open_device (bool quiet_if_absent)
 	 * report descriptor -- and say so loudly if it differs.  That turns the
 	 * first A25 user into a useful bug report instead of a silent misdecode.
 	 */
-	if (!_variant->tested) {
+	if (!_variant.tested) {
 		unsigned char desc[4096];
 		int n = hid_get_report_descriptor (_handle, desc, sizeof (desc));
 
 		if (n < 0) {
 			info << string_compose (_("Komplete Kontrol A-Series: %1 is untested; "
 			                          "please report any misbehaviour."),
-			                        _variant->model)
+			                        _variant.model)
 			     << endmsg;
 		} else if ((size_t) n != KKA::ExpectedDescriptorSize) {
 			warning << string_compose (_("Komplete Kontrol A-Series: %1 reports a %2 byte HID "
 			                             "descriptor, expected %3. This model is untested and "
 			                             "controls may be misread. Please report this, with the "
 			                             "output of `lsusb -v -d %4`."),
-			                           _variant->model, n, KKA::ExpectedDescriptorSize, usbid)
+			                           _variant.model, n, KKA::ExpectedDescriptorSize, usbid)
 			        << endmsg;
 		} else {
 			info << string_compose (_("Komplete Kontrol A-Series: %1 is untested, but its HID "
 			                          "descriptor matches the A61. Proceeding."),
-			                        _variant->model)
+			                        _variant.model)
 			     << endmsg;
 		}
 	}
@@ -279,7 +281,6 @@ KompleteKontrolA::close_device (bool graceful)
 
 	hid_close (_handle);
 	_handle = 0;
-	_variant = 0;
 }
 
 /* Everything that has to happen against a device we have just opened, whether

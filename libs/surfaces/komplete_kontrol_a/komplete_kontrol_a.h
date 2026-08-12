@@ -66,7 +66,7 @@ public:
 class KompleteKontrolA : public ARDOUR::ControlProtocol, public AbstractUI<KompleteKontrolARequest>
 {
 public:
-	KompleteKontrolA (ARDOUR::Session&);
+	KompleteKontrolA (ARDOUR::Session&, const KKA::Variant& variant);
 	~KompleteKontrolA ();
 
 	static bool available ();
@@ -124,8 +124,16 @@ private:
 	void handle_knob (int knob, int steps);
 	void handle_encoder (int steps);
 
-	hid_device*         _handle;
-	const KKA::Variant* _variant;
+	hid_device* _handle;
+
+	/* The model the user ticked in the surface list, resolved before the
+	 * surface was constructed and fixed for its lifetime.  Only this model is
+	 * ever opened: a user who selected an A25 has told us which device they
+	 * have, and silently driving an A61 instead makes the selection a lie.
+	 * Unlike _handle it survives a replug, because which keyboard is
+	 * configured does not change when the cable is pulled.
+	 */
+	const KKA::Variant& _variant;
 
 	/* Exactly one of these is live at a time: the fast input poll while the
 	 * device is present, the slow reconnect poll while it is not.  Each hands

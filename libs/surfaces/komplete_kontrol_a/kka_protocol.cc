@@ -17,11 +17,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <string.h>
+
 #include "kka_protocol.h"
 
 namespace ArdourSurface { namespace KKA {
 
-/* Ordered widest-first so the most likely device is probed first. */
+/* The surface list in the GUI is generated from this table, in this order, so
+ * adding a model here is all it takes to offer it -- and nothing can be
+ * offered that the surface would then fail to recognise.  Widest first,
+ * because the A61 is the most common of the three.
+ */
 const Variant Variants[] = {
 	{ 0x1750, 61, "Komplete Kontrol A61", true  },
 	{ 0x1740, 49, "Komplete Kontrol A49", false },
@@ -35,6 +41,20 @@ variant_for_pid (uint16_t pid)
 {
 	for (size_t i = 0; i < NumVariants; ++i) {
 		if (Variants[i].pid == pid) {
+			return &Variants[i];
+		}
+	}
+	return 0;
+}
+
+const Variant*
+variant_for_model (const char* model)
+{
+	if (!model) {
+		return 0;
+	}
+	for (size_t i = 0; i < NumVariants; ++i) {
+		if (!strcmp (Variants[i].model, model)) {
 			return &Variants[i];
 		}
 	}

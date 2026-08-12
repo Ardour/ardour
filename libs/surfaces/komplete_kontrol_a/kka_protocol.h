@@ -77,6 +77,12 @@ extern const size_t  NumVariants;
 
 const Variant* variant_for_pid (uint16_t pid);
 
+/* Matched against Variant::model.  enumerate() offers the GUI exactly these
+ * names, so the string that comes back always resolves; null means a session
+ * naming a model this build does not have, which is the caller's to refuse.
+ */
+const Variant* variant_for_model (const char* model);
+
 /* --------------------------------------------------------- HID reports */
 
 enum ReportID {

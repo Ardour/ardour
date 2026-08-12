@@ -31,12 +31,25 @@ using namespace PBD;
 using namespace ArdourSurface;
 
 static ControlProtocol*
-new_komplete_kontrol_a (Session* s, std::string const& /* config */)
+new_komplete_kontrol_a (Session* s, std::string const& config)
 {
 	KompleteKontrolA* kka = 0;
 
+	/* `config` is the model the user selected, and enumerate() offered no name
+	 * that is not in this table, so the only way to arrive with an unknown one
+	 * is a session naming a model this build does not have.  There is nothing
+	 * sensible to open in that case -- the configured device is precisely the
+	 * one we cannot drive -- so decline rather than substituting another.
+	 */
+	const KKA::Variant* variant = KKA::variant_for_model (config.c_str ());
+
+	if (!variant) {
+		PBD::error << "Komplete Kontrol A-Series: unknown model \"" << config << "\"" << endmsg;
+		return 0;
+	}
+
 	try {
-		kka = new KompleteKontrolA (*s);
+		kka = new KompleteKontrolA (*s, *variant);
 	} catch (std::exception& e) {
 		PBD::error << "Failed to instantiate Komplete Kontrol A-Series: " << e.what () << endmsg;
 		delete kka;
@@ -64,12 +77,20 @@ delete_komplete_kontrol_a (ControlProtocol* cp)
 	delete cp;
 }
 
+/* Built from the variant table rather than written out again, so the names
+ * offered here and the names the surface can resolve are the same list by
+ * construction and cannot drift apart.
+ */
 static std::map<std::string, std::vector<std::string> >
 enumerate_komplete_kontrol_a ()
 {
-	return { { "Native Instruments", { "Komplete Kontrol A25",
-	                                   "Komplete Kontrol A49",
-	                                   "Komplete Kontrol A61" } } };
+	std::vector<std::string> models;
+
+	for (size_t i = 0; i < KKA::NumVariants; ++i) {
+		models.push_back (KKA::Variants[i].model);
+	}
+
+	return { { "Native Instruments", models } };
 }
 
 static ControlProtocolDescriptor komplete_kontrol_a_descriptor = {
