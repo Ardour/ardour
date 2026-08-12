@@ -56,18 +56,12 @@ new_komplete_kontrol_a (Session* s, std::string const& config)
 		return 0;
 	}
 
-	/* Honour the result.  Ardour's activate() calls set_active() again, and
-	 * our set_active() re-runs start() whenever the protocol is not already
-	 * active -- so handing back an object that failed to start means the
-	 * device is opened twice and every failure is logged twice.  Reporting
-	 * the failure here instead gives one error and lets activate() fail
-	 * cleanly, which is also what makes the GUI checkbox behave.
+	/* Deliberately inactive.  ControlProtocolManager::activate() runs
+	 * set_state() between here and set_active(), so anything that configures
+	 * the surface has to land before the hardware is touched; starting the
+	 * device here would open it against state that has not been restored yet.
+	 * Failure to start is reported by activate(), which tears us down.
 	 */
-	if (kka->set_active (true)) {
-		delete kka;
-		return 0;
-	}
-
 	return kka;
 }
 
