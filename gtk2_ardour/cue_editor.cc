@@ -1418,6 +1418,23 @@ CueEditor::set_trigger (TriggerReference& tref)
 }
 
 void
+CueEditor::unset_trigger ()
+{
+	ref = TriggerReference ();
+	solo_button.set_active_state (Gtkmm2ext::Off);
+	solo_button.set_sensitive (false);
+	trigger_connections.drop_connections ();
+	track_connections.drop_connections ();
+	_track.reset ();
+
+	/* Since set_trigger() calls set_region(), we need the symmetry here
+	 * that calling unset_trigger() also calls unset_region().
+	 */
+
+	unset_region ();
+}
+
+void
 CueEditor::set_region (std::shared_ptr<Region> r)
 {
 	unset_region ();
@@ -1468,23 +1485,6 @@ CueEditor::unset_region ()
 	rec_blink_connection.disconnect ();
 	capture_connections.drop_connections ();
 	_region.reset ();
-}
-
-void
-CueEditor::unset_trigger ()
-{
-	ref = TriggerReference ();
-	solo_button.set_active_state (Gtkmm2ext::Off);
-	solo_button.set_sensitive (false);
-	trigger_connections.drop_connections ();
-	track_connections.drop_connections ();
-	_track.reset ();
-
-	/* Since set_trigger() calls set_region(), we need the symmetry here
-	 * that calling unset_trigger() also calls unset_region().
-	 */
-
-	unset_region ();
 }
 
 bool
