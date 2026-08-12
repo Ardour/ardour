@@ -384,8 +384,6 @@ Track::update_input_meter ()
 		}
 	}
 
-	std::cerr << "UIM: " << meter_input << std::endl;
-
 	if (meter_input) {
 		if (_saved_meter_point) {
 			/* already monitoring input */
