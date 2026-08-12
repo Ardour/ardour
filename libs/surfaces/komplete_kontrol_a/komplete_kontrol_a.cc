@@ -382,8 +382,10 @@ KompleteKontrolA::start ()
 		return -1;
 	}
 
+	/* No refresh needed here -- take_over_device() has just done one, and the
+	 * lamps cannot have gone stale between there and here.
+	 */
 	connect_session_signals ();
-	refresh_transport_leds ();
 
 	/* Attached here rather than in start_read_poll(), which reconnection calls
 	 * again -- the blink belongs to the surface being active, not to the
