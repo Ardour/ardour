@@ -772,7 +772,7 @@ Pianoroll::maybe_update ()
 			}
 		}
 
-	} else if (_active_view->midi_region()) {
+	} else if (_active_view && _active_view->midi_region()) {
 
 		/* Timeline region editor */
 
@@ -1773,8 +1773,11 @@ Pianoroll::trigger_prop_change (PBD::PropertyChange const & what_changed)
 	EC_LOCAL_TEMPO_SCOPE;
 
 	if (what_changed.contains (Properties::region)) {
-		std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion> (ref.trigger()->the_region());
-		set_region (mr);
+		clear_regions ();
+		unset_region ();
+		if (ref.trigger()) {
+			set_region (ref.trigger()->the_region());
+		}
 	}
 }
 
@@ -1857,6 +1860,12 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 	bg->disconnect_property_changes ();
 
 	if (!region) {
+		clear_regions ();
+
+		std::shared_ptr<ARDOUR::MidiTrack> track (std::dynamic_pointer_cast<ARDOUR::MidiTrack> (_track));
+		empty_view = new PianorollMidiView (track, *data_group, *no_scroll_group, *this, *bg);
+		set_inspector_visibility (false);
+
 		/* make sure note names can be used */
 		prh->instrument_info_change ();
 		return;
@@ -1987,6 +1996,13 @@ Pianoroll::add_region (std::shared_ptr<ARDOUR::Region> region, std::shared_ptr<A
 void
 Pianoroll::remove_regions ()
 {
+	set_region (nullptr);
+	clear_regions ();
+}
+
+void
+Pianoroll::clear_regions ()
+{
 	std::vector<MidiView*> mvs;
 
 	if (empty_view) {
@@ -1999,7 +2015,6 @@ Pianoroll::remove_regions ()
 	}
 
 	region_view_map.clear ();
-	set_region (nullptr);
 
 	for (auto & mv : mvs) {
 		delete mv;
