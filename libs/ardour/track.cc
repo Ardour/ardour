@@ -1349,18 +1349,6 @@ Track::time_domain_changed ()
 		}
 	}
 }
-#if 1
-static void
-dump_processors(const string& name, const list<std::shared_ptr<Processor> >& procs)
-{
-	cerr << name << " {" << endl;
-	for (list<std::shared_ptr<Processor> >::const_iterator p = procs.begin();
-			p != procs.end(); ++p) {
-		cerr << "\t" << (*p)->name() << " ID = " << (*p)->id() << " @ " << (*p) << endl;
-	}
-	cerr << "}" << endl;
-}
-#endif
 
 void
 Track::reorder_triggerbox_for_recording ()
