@@ -1,5 +1,4 @@
 /*
- * Copyright (C) 2026 Ada <ada@6bit.com>
  * Copyright (C) 2026 Joshua Perry <josh@6bit.com>
  *
  * This program is free software; you can redistribute it and/or modify
