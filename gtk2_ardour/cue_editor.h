@@ -294,4 +294,6 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner
 	void add_region_ui_settings (PBD::ID const &, RegionUISettings&);
 
 	samplecnt_t ruler_shift;
+
+	virtual bool canvas_scroll_event (GdkEventScroll*);
 };

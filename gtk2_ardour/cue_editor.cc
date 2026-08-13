@@ -67,6 +67,8 @@ CueEditor::CueEditor (std::string const & name, bool with_transport)
 	_canvas_hscrollbar->signal_button_press_event().connect (sigc::mem_fun (*this, &CueEditor::hscroll_press), false);
 	_canvas_hscrollbar->signal_button_release_event().connect (sigc::mem_fun (*this, &CueEditor::hscroll_release), false);
 
+	_canvas.signal_scroll_event().connect (sigc::mem_fun (*this, &CueEditor::canvas_scroll_event));
+
 	horizontal_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &CueEditor::scrolled));
 
 	_history.Changed.connect (history_connection, invalidator (*this), std::bind (&CueEditor::history_changed, this), gui_context());
@@ -2098,4 +2100,21 @@ void
 CueEditor::hide_count_in ()
 {
 	EC_LOCAL_TEMPO_SCOPE;
+}
+
+bool
+CueEditor::canvas_scroll_event (GdkEventScroll *ev)
+{
+	switch (ev->direction) {
+	case GDK_SCROLL_LEFT:
+		scroll_left_step ();
+		break;
+	case GDK_SCROLL_RIGHT:
+		scroll_right_step ();
+		break;
+	default:
+		return false;
+	}
+
+	return true;
 }
