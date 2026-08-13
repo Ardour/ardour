@@ -1812,6 +1812,8 @@ Pianoroll::make_a_region ()
 void
 Pianoroll::unset_region ()
 {
+	/* no local tempo map scope, since it depends on the the region */
+
 	if (region_view_map.empty()) {
 		CueEditor::unset_region ();
 		// _active_view->set_region (nullptr);
@@ -1821,12 +1823,16 @@ Pianoroll::unset_region ()
 void
 Pianoroll::unset_trigger ()
 {
+	/* no local tempo map scope, since it depends on the the region */
+
 	CueEditor::unset_trigger ();
 }
 
 void
 Pianoroll::replace_region (std::shared_ptr<ARDOUR::Region> region, std::shared_ptr<ARDOUR::MidiTrack> track)
 {
+	/* no local tempo map scope, since it depends on the the region */
+
 	view_connections.drop_connections ();
 	for (auto & [region,view] : region_view_map) {
 		delete view;
@@ -1840,6 +1846,8 @@ Pianoroll::replace_region (std::shared_ptr<ARDOUR::Region> region, std::shared_p
 void
 Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 {
+	/* no local tempo map scope, since it depends on the the region */
+
 	CueEditor::set_region (region);
 
 	if (_visible_pending_region) {
@@ -1944,6 +1952,8 @@ Pianoroll::set_region (std::shared_ptr<ARDOUR::Region> region)
 void
 Pianoroll::add_region (std::shared_ptr<ARDOUR::Region> region, std::shared_ptr<ARDOUR::Track> tr)
 {
+	/* no local tempo map scope, since it depends on the the region */
+
 	std::shared_ptr<ARDOUR::MidiTrack> track (std::dynamic_pointer_cast<ARDOUR::MidiTrack> (tr));
 
 	if (single_region && !region_view_map.empty()) {
@@ -1996,6 +2006,8 @@ Pianoroll::add_region (std::shared_ptr<ARDOUR::Region> region, std::shared_ptr<A
 void
 Pianoroll::remove_regions ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	set_region (nullptr);
 	clear_regions ();
 }
@@ -2003,6 +2015,8 @@ Pianoroll::remove_regions ()
 void
 Pianoroll::clear_regions ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	std::vector<MidiView*> mvs;
 
 	if (empty_view) {
@@ -2024,6 +2038,8 @@ Pianoroll::clear_regions ()
 void
 Pianoroll::remove_region (std::shared_ptr<ARDOUR::Region> region)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	auto rvm = region_view_map.find (region);
 	if (rvm == region_view_map.end()) {
 		return;
@@ -2042,9 +2058,12 @@ Pianoroll::remove_region (std::shared_ptr<ARDOUR::Region> region)
 void
 Pianoroll::rebuild_region_dropdown ()
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	region_dropdown.clear_items ();
 	for (auto & [region,view] : region_view_map) {
 		std::weak_ptr<ARDOUR::Region> wr (region);
+
 		region_dropdown.add_menu_elem (Gtk::Menu_Helpers::MenuElem (region->name(), [this,wr]() { std::shared_ptr<ARDOUR::Region> r (wr.lock()); if (r) set_region (r); }));
 	}
 }
@@ -2052,6 +2071,8 @@ Pianoroll::rebuild_region_dropdown ()
 void
 Pianoroll::region_going_away (std::weak_ptr<ARDOUR::Region> wr)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	std::shared_ptr<ARDOUR::Region> region (wr.lock());
 	if (!region) {
 		return;
@@ -2081,6 +2102,8 @@ Pianoroll::region_going_away (std::weak_ptr<ARDOUR::Region> wr)
 void
 Pianoroll::apply_note_range (uint8_t lowest, uint8_t highest)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	for (auto & [region,view] : region_view_map) {
 		view->apply_note_range (lowest, highest);
 	}
@@ -2149,6 +2172,8 @@ Pianoroll::AutomationLane::deduce_color (uint32_t nth)
 std::string
 Pianoroll::parameter_name (Evoral::Parameter const & param) const
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	std::string str = midi_track()->get_parameter_name (param);
 	auto res = controller_name_map.find (str);
 
@@ -2164,6 +2189,8 @@ Pianoroll::parameter_name (Evoral::Parameter const & param) const
 bool
 Pianoroll::automation_clear_event (GdkEvent* ev, Evoral::Parameter param)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
 		return true;
@@ -2179,6 +2206,8 @@ Pianoroll::automation_clear_event (GdkEvent* ev, Evoral::Parameter param)
 bool
 Pianoroll::automation_close_event (GdkEvent* ev, Evoral::Parameter param)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
 		return true;
@@ -2194,6 +2223,8 @@ Pianoroll::automation_close_event (GdkEvent* ev, Evoral::Parameter param)
 void
 Pianoroll::add_automation_lane (Evoral::Parameter const & param)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	if (automation_lanes.find (param) != automation_lanes.end()) {
 		return;
 	}
@@ -2233,6 +2264,8 @@ Pianoroll::add_automation_lane (Evoral::Parameter const & param)
 void
 Pianoroll::remove_automation_lane (Evoral::Parameter const & param)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	auto existing = automation_lanes.find (param);
 
 	if (existing == automation_lanes.end()) {
@@ -2263,6 +2296,8 @@ Pianoroll::remove_automation_lane (Evoral::Parameter const & param)
 void
 Pianoroll::clear_automation_lane (Evoral::Parameter const & param)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	auto res = automation_lanes.find (param);
 	if (res == automation_lanes.end()) {
 		return;
@@ -2283,6 +2318,8 @@ Pianoroll::clear_automation_lane (Evoral::Parameter const & param)
 bool
 Pianoroll::automation_group_event (GdkEvent* event, Evoral::Parameter param)
 {
+	EC_LOCAL_TEMPO_SCOPE;
+
 	switch (event->type) {
 	case GDK_ENTER_NOTIFY:
 		for (auto & [region,view] : region_view_map) {
