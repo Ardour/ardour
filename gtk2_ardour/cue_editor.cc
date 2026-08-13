@@ -1813,7 +1813,7 @@ CueEditor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, sample
 
 #if 0 // DEBUG GRID
 	for (auto const& g : grid) {
-		std::cout << "Grid " << g.time() <<  " Beats: " << g.beats() << " BBT: " << g.bbt() << " sample: " << g.sample(_session->nominal_sample_rate ()) << "\n";
+		std::cout << "Grid " << g.time() <<  " Beats: " << g.beats() << " BBT: " << g.bbt() << " sample: " << g.sample_is_dangerous(_session->nominal_sample_rate ()) << "\n";
 	}
 #endif
 
