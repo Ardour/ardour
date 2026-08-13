@@ -1761,6 +1761,8 @@ CueEditor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, sample
 	/* prevent negative values of leftmost from creeping into tempomap
 	 */
 
+	leftmost -= ruler_shift;
+
 	const Beats left = tmap->quarters_at_sample (leftmost).round_down_to_beat();
 	const Beats lower_beat = (left < Beats() ? Beats() : left);
 
