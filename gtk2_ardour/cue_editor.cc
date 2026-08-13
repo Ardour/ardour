@@ -1817,7 +1817,7 @@ CueEditor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, sample
 	}
 #endif
 
-	if (distance (grid.begin(), grid.end()) == 0) {
+	if (grid.empty()) {
 		return;
 	}
 
