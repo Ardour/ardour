@@ -2491,7 +2491,7 @@ MIDITrigger::check_edit_swap (timepos_t const & time, bool playing, BufferSet& b
 		}
 	}
 
-	adjust_bounds (pending->play_start, pending->play_end, pending->length, true);
+	adjust_bounds (pending->play_start, pending->play_end, pending->length, pending->length, true);
 
 	pending->rt_midibuffer = old_rtmb;
 	old_pending_swap.store (pending);
@@ -2537,10 +2537,10 @@ MIDITrigger::setup_event_indices ()
 }
 
 void
-MIDITrigger::adjust_bounds (Temporal::timepos_t const & start, Temporal::timepos_t const & end, Temporal::timecnt_t const & length, bool from_region)
+MIDITrigger::adjust_bounds (Temporal::timepos_t const & start, Temporal::timepos_t const & end, Temporal::timecnt_t const & length, Temporal::timecnt_t const & region_length, bool from_region)
 {
 	if (!from_region && _region) {
-		_region->set_length (timecnt_t (length, timepos_t (start)));
+		_region->set_length (timecnt_t (region_length, timepos_t (start)));
 	}
 
 	_play_start = start.beats();
@@ -2553,8 +2553,8 @@ MIDITrigger::adjust_bounds (Temporal::timepos_t const & start, Temporal::timepos
 	_loop_start = _play_start;
 	_loop_end = _play_end;
 
-	data_length = length.beats();
-	_follow_length = Temporal::BBT_Offset (0, data_length.get_beats(), 0);
+	data_length = region_length.beats();
+	_follow_length = Temporal::BBT_Offset (0, region_length.beats().get_beats(), 0);
 	set_length (timecnt_t (length));
 
 	setup_event_indices ();
@@ -2583,7 +2583,19 @@ MIDITrigger::captured (SlotArmInfo& ai)
 		return;
 	}
 
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 captured %3 of MIDI\n", _box.order(), index(), ai.captured));
+
 	samplecnt_t pre_capture = ai.start_samples - ai.pre_start_samples;
+	samplecnt_t capture_adjust = pre_capture;
+	Track* trk = static_cast<Track*> (_box.owner());
+
+	switch (trk->alignment_style()) {
+	case CaptureTime:
+		break;
+	case ExistingMaterial:
+		capture_adjust += _box.capture_offset() + _box.playback_offset();
+		break;
+	}
 
 	/* Move ownership of the MIDI buffer from the SlotArmInfo (where it was
 	 * captured) to our own rt_midibuffer pointer.
@@ -2594,7 +2606,13 @@ MIDITrigger::captured (SlotArmInfo& ai)
 	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
 	timecnt_t dur = tmap->convert_duration (timecnt_t (ai.captured), timepos_t (ai.start_samples), Temporal::BeatTime);
 
-	adjust_bounds (timepos_t::zero (Temporal::BeatTime), timepos_t (dur.beats()), dur, false);
+	samplepos_t len = ai.captured - capture_adjust;
+	timecnt_t region_dur = tmap->convert_duration (timecnt_t (len), timepos_t (ai.start_samples), Temporal::BeatTime);
+
+	/* Move ownership of the MIDI buffer from the SlotArmInfo (where it was
+	 * captured) to our own rt_midibuffer pointer.
+	 */
+	adjust_bounds (timepos_t::zero (Temporal::BeatTime), timepos_t (dur.beats()), dur, region_dur, false);
 
 	iter = 0;
 	_follow_action0 = FollowAction::Again;
@@ -3325,7 +3343,8 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 
 		if (maybe_last_event_timeline_beats < start_beats) {
 			DEBUG_TRACE (DEBUG::TriggerStop, "out1\n");
-			break;
+			++iter;
+			continue;
 		}
 
 		if (iter >= last_event_index) {

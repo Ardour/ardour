@@ -725,7 +725,7 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
   protected:
 	void retrigger ();
 	void _arm (Temporal::BBT_Offset const &);
-	void adjust_bounds (Temporal::timepos_t const & start, Temporal::timepos_t const & end, Temporal::timecnt_t const & length, bool from_region);
+	void adjust_bounds (Temporal::timepos_t const & start, Temporal::timepos_t const & end, Temporal::timecnt_t const & length, Temporal::timecnt_t const & region_length, bool from_region);
 	int load_pending_data (PendingSwap&);
 
   private:
