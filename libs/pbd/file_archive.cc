@@ -517,13 +517,27 @@ FileArchive::create (const std::map<std::string, std::string>& filemap, Compress
 	}
 
 	a = archive_write_new ();
-	archive_write_set_format_pax_restricted (a);
+	if (!a) {
+		return -5;
+	}
+	if (ARCHIVE_FATAL == archive_write_set_format_pax_restricted (a)) {
+		archive_write_free (a);
+		return -5;
+	}
 
 	if (compression_level != CompressNone) {
-		archive_write_add_filter_lzma (a);
+		if (ARCHIVE_FATAL == archive_write_add_filter_lzma (a)) {
+			archive_write_free (a);
+			return -4;
+		}
+
 		char buf[64];
 		snprintf (buf, sizeof (buf), "lzma:compression-level=%u,lzma:threads=0", (uint32_t) compression_level);
-		archive_write_set_options (a, buf);
+
+		if (ARCHIVE_FATAL == archive_write_set_options (a, buf)) {
+			archive_write_free (a);
+			return -4;
+		}
 	}
 
 	if (ARCHIVE_OK != archive_write_open_filename (a, _req.url)) {
