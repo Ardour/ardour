@@ -2724,10 +2724,13 @@ OSC::get_send (std::shared_ptr<Stripable> st, lo_address addr)
 	OSCSurface *sur = get_surface(addr);
 	std::shared_ptr<Stripable> s = sur->temp_master;
 	if (st && s && (st != s)) {
+		// Note: s could be a VCA
 		std::shared_ptr<Route> rt = std::dynamic_pointer_cast<Route> (s);
 		std::shared_ptr<Route> rst = std::dynamic_pointer_cast<Route> (st);
-		//find what send number feeds s
-		return rst->internal_send_for (rt);
+		if (rt && rst) {
+			// find what send number feeds s
+			return rst->internal_send_for (rt);
+		}
 	}
 	return std::shared_ptr<Send> ();
 }
