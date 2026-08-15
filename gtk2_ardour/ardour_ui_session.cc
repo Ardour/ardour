@@ -1107,6 +1107,12 @@ ARDOUR_UI::archive_session ()
 		case -3:
 			errmsg = _("Session Archiving failed.\nCannot write archive. Disk full or file size exceeded.");
 			break;
+		case -4:
+			errmsg = _("Session Archiving failed.\nCannot setup LZMA compression.");
+			break;
+		case -5:
+			errmsg = _("Session Archiving failed.\nCannot setup initialze streaming archive.");
+			break;
 	}
 	if (!errmsg.empty ()) {
 		ArdourMessageDialog msg (errmsg);
