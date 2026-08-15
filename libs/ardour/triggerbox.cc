@@ -3104,7 +3104,7 @@ MIDITrigger::set_region_in_worker_thread_from_capture (std::shared_ptr<Region> r
 	/* we've changed some of our internal values; we need to update our queued UIState or they will be lost when UIState is applied */
 	copy_to_ui_state ();
 
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 loaded midi region, span is %2\n", name(), data_length));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 loaded midi region, span is %2 rlen is  %3\n", name(), data_length, _region->length().beats().str()));
 
 	send_property_change (ARDOUR::Properties::region);
 
@@ -3342,7 +3342,7 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 		/* check that the event is within the bounds for this run() call */
 
 		if (maybe_last_event_timeline_beats < start_beats) {
-			DEBUG_TRACE (DEBUG::TriggerStop, "out1\n");
+			DEBUG_TRACE (DEBUG::TriggerStop, string_compose ("out1, mletb = %1 start @ %2, from tb %3 rs %4\n", maybe_last_event_timeline_beats, start_beats.str(), transition_beats.str(), region_start.str()));
 			++iter;
 			continue;
 		}
@@ -3360,7 +3360,7 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 		}
 
 		if (maybe_last_event_timeline_beats >= end_beats) {
-			DEBUG_TRACE (DEBUG::TriggerStop, "out4\n");
+			DEBUG_TRACE (DEBUG::TriggerStop, string_compose ("out4, mletb = %1 start @ %2, from tb %3 rs %4\n", maybe_last_event_timeline_beats, end_beats.str(), transition_beats.str(), region_start.str()));
 			break;
 		}
 
@@ -5462,7 +5462,11 @@ TriggerBox::run_cycle (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 			}
 		}
 
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("currently playing: %1 (%4/%5), state now %2 stop all ? %3\n", _currently_playing->name(), enum_2_string (_currently_playing->state()), _stop_all, order(), _currently_playing->index()));
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("currently playing: %1 (%4/%5), length %6 FL %7 state now %2 stop all ? %3\n",
+		                                              _currently_playing->name(), enum_2_string (_currently_playing->state()), _stop_all, order(), _currently_playing->index(),
+		                                              _currently_playing->the_region() ?
+		                                              _currently_playing->the_region()->length().beats().str() : std::string ("??"),
+		                                              _currently_playing->follow_length()));
 
 		/* if we're not in the process of stopping all active triggers,
 		 * but the current one has stopped, decide which (if any)
