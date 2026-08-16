@@ -86,6 +86,14 @@ MidiClockTicker::tick (samplepos_t start_sample, samplepos_t end_sample, pframes
 
 	double speed = (end_sample - start_sample) / (double)n_samples;
 
+	Location* loop = _session.locations()->auto_loop_location();
+	bool is_loop_wrap = loop && end_sample < start_sample;
+	if (is_loop_wrap) {
+		samplecnt_t loop_end_length = loop->end_sample() - start_sample;
+		samplecnt_t loop_start_length = end_sample - loop->start_sample();
+		speed = (loop_end_length + loop_start_length) / (double)n_samples;
+	}
+
 	if (!Config->get_send_midi_clock () /*|| !TransportMasterManager::instance().current()*/) {
 		if (_rolling) {
 			send_stop_event (0, n_samples);
@@ -197,7 +205,8 @@ MidiClockTicker::tick (samplepos_t start_sample, samplepos_t end_sample, pframes
 
 	assert (_rolling);
 
-	while (_next_tick >= start_sample && _next_tick < end_sample) {
+	while ((_next_tick >= start_sample && _next_tick < end_sample)
+			|| (is_loop_wrap && (_next_tick >= start_sample || _next_tick < end_sample))) {
 		DEBUG_TRACE (DEBUG::MidiClock, string_compose ("Tick @ %1 cycle: %2 .. %3 nsamples: %4, ticker-pos: %5\n",
 		                                               _next_tick, start_sample, end_sample, n_samples, _transport_pos));
 		send_midi_clock_event (_next_tick - start_sample, n_samples);
@@ -206,6 +215,13 @@ MidiClockTicker::tick (samplepos_t start_sample, samplepos_t end_sample, pframes
 			++_beat_pos;
 		}
 		_next_tick += one_ppqn_in_samples (llrint (_next_tick));
+
+		if (is_loop_wrap) {
+			samplecnt_t loop_end_delta = _next_tick - loop->end_sample();
+			if (loop_end_delta >= 0) {
+				_next_tick = loop->start_sample() + loop_end_delta;
+			}
+		}
 	}
 
 	_transport_pos = end_sample;
