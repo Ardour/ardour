@@ -303,7 +303,7 @@
     <ColorAlias name="piano key white" alias="arc-foreground-light"/>
     <ColorAlias name="piano roll black" alias="arc-black"/>
     <ColorAlias name="piano roll black outline" alias="arc-background-dark"/>
-    <ColorAlias name="piano roll offkey" alias="neutral:midground"/>
+    <ColorAlias name="piano roll offkey" alias="arc-foreground-dark"/>
     <ColorAlias name="piano roll white" alias="arc-white"/>
     <ColorAlias name="pianoroll: insensitive bender line" alias="arc-background-dark"/>
     <ColorAlias name="pianoroll: insensitive expression line" alias="arc-background-dark"/>
@@ -326,8 +326,8 @@
     <ColorAlias name="processor automation line" alias="arc-green"/>
     <ColorAlias name="processor auxfeedback: fill" alias="arc-green"/>
     <ColorAlias name="processor auxfeedback: led active" alias="arc-green"/>
-    <ColorAlias name="processor collapse button: fill" alias="widget:bg"/>
-    <ColorAlias name="processor collapse button: fill active" alias="widget:bg"/>
+    <ColorAlias name="processor collapse button: fill" alias="arc-background-light"/>
+    <ColorAlias name="processor collapse button: fill active" alias="arc-background-light"/>
     <ColorAlias name="processor control button: fill" alias="arc-background-dark"/>
     <ColorAlias name="processor control button: fill active" alias="arc-background-light"/>
     <ColorAlias name="processor control button: led active" alias="arc-blue"/>
