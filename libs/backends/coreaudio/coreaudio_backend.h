@@ -160,7 +160,6 @@ class CoreAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 	/* AUDIOBACKEND API */
 
 	std::string name () const;
-	bool is_realtime () const;
 
 	bool use_separate_input_and_output_devices () const { return true; }
 	std::vector<DeviceStatus> enumerate_devices () const;
