@@ -2758,6 +2758,12 @@ void
 AudioRegion::ensure_length_sanity ()
 {
 	if (_type == DataType::AUDIO) {
+		/* Make sure length of the region is not greater than the source length*/
+		for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
+			if (_length.val().distance() > (*i)->length()) {
+				_length = timecnt_t (timepos_t((*i)->length().samples()), _length.val().position());
+			}
+		}
 		/* Force audio regions to have a length that is the
 		   rounded-down integer number of samples. No other value makes
 		   any sort of logical sense. We tried to fix this at a lower

@@ -59,6 +59,7 @@
 
 #include "ardour/audioengine.h"
 #include "ardour/audio_track.h"
+#include "ardour/audiofilesource.h"
 #include "ardour/audioregion.h"
 #include "ardour/boost_debug.h"
 #include "ardour/clip_library.h"
@@ -75,6 +76,8 @@
 #include "ardour/reverse.h"
 #include "ardour/selection.h"
 #include "ardour/session.h"
+#include "ardour/smf_source.h"
+#include "ardour/source_factory.h"
 #include "ardour/session_playlists.h"
 #include "ardour/source.h"
 #include "ardour/strip_silence.h"
@@ -145,6 +148,114 @@ using namespace Editing;
 using namespace Temporal;
 
 using Gtkmm2ext::Keyboard;
+
+namespace {
+
+class ReplaceRegionSourceCommand : public PBD::Command
+{
+public:
+	ReplaceRegionSourceCommand (std::shared_ptr<ARDOUR::Playlist> playlist,
+	                               std::shared_ptr<ARDOUR::Region> original,
+	                               std::shared_ptr<ARDOUR::Region> replacement,
+	                               timepos_t const & position)
+		: _playlist (playlist)
+		, _original (original)
+		, _replacement (replacement)
+		, _position (position)
+	{
+		if (_playlist) {
+			_playlist_id = _playlist->id();
+		}
+		if (_original) {
+			_original_id = _original->id();
+		}
+		if (_replacement) {
+			_replacement_id = _replacement->id();
+		}
+		set_name (_("replace source clip"));
+	}
+
+	void operator() () override
+	{
+		if (_playlist && _original && _replacement) {
+			_playlist->replace_region (_original, _replacement, _position);
+		}
+	}
+
+	void undo () override
+	{
+		if (_playlist && _original && _replacement) {
+			_playlist->replace_region (_replacement, _original, _position);
+		}
+	}
+
+	XMLNode& get_state () const override
+	{
+		XMLNode* node = new XMLNode (X_("ReplaceRegionSourceCommand"));
+		node->set_property (X_("name"), name());
+		node->set_property (X_("position-samples"), _position.samples());
+
+		PBD::ID playlist_id (_playlist_id);
+		PBD::ID original_id (_original_id);
+		PBD::ID replacement_id (_replacement_id);
+
+		if (_playlist) {
+			playlist_id = _playlist->id();
+		}
+		if (_original) {
+			original_id = _original->id();
+		}
+		if (_replacement) {
+			replacement_id = _replacement->id();
+		}
+
+		node->set_property (X_("playlist-id"), playlist_id.to_s());
+		node->set_property (X_("original-id"), original_id.to_s());
+		node->set_property (X_("replacement-id"), replacement_id.to_s());
+
+		return *node;
+	}
+
+	int set_state (const XMLNode& node, int /*version*/) override
+	{
+		std::string command_name;
+		int64_t position_samples = 0;
+
+		node.get_property (X_("name"), command_name);
+		if (!command_name.empty()) {
+			set_name (command_name);
+		}
+
+		std::string playlist_id_str;
+		std::string original_id_str;
+		std::string replacement_id_str;
+
+		if (!node.get_property (X_("playlist-id"), playlist_id_str) ||
+		    !node.get_property (X_("original-id"), original_id_str) ||
+		    !node.get_property (X_("replacement-id"), replacement_id_str) ||
+		    !node.get_property (X_("position-samples"), position_samples)) {
+			return -1;
+		}
+
+		_playlist_id = PBD::ID (playlist_id_str);
+		_original_id = PBD::ID (original_id_str);
+		_replacement_id = PBD::ID (replacement_id_str);
+
+		_position = timepos_t (position_samples);
+		return 0;
+	}
+
+private:
+	std::shared_ptr<ARDOUR::Playlist> _playlist;
+	std::shared_ptr<ARDOUR::Region> _original;
+	std::shared_ptr<ARDOUR::Region> _replacement;
+	timepos_t _position;
+	PBD::ID _playlist_id;
+	PBD::ID _original_id;
+	PBD::ID _replacement_id;
+};
+
+}
 
 /***********************************************************************
   Editor operations
@@ -5766,6 +5877,156 @@ Editor::reverse_region ()
 
 	Reverse rev (*_session);
 	apply_filter (rev, _("reverse regions"));
+}
+
+void
+Editor::replace_source_for_selected_regions ()
+{
+	if (!_session) {
+		return;
+	}
+
+	RegionSelection rs = get_regions_from_selection_and_entered ();
+	if (rs.empty()) {
+		return;
+	}
+
+	Gtk::Dialog dialog (_("Replace Source Clip"), true);
+	dialog.set_default_size (520, 420);
+	dialog.set_border_width (6);
+
+	TriggerClipPicker picker;
+	picker.set_session (_session);
+	picker.set_selection_mode (Gtk::SELECTION_SINGLE);
+	dialog.get_vbox ()->pack_start (picker, true, true, 6);
+	dialog.add_button (Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	dialog.add_button (_("Replace"), Gtk::RESPONSE_OK);
+	dialog.set_default_response (Gtk::RESPONSE_OK);
+	picker.show_all ();
+
+	int result = dialog.run ();
+	picker.stop_audition();
+	dialog.hide ();
+	if (result != Gtk::RESPONSE_OK) {
+		return;
+	}
+
+	std::string clip_path;
+	if (!picker.get_selected_file_path (clip_path) || clip_path.empty ()) {
+		return;
+	}
+
+	if (SMFSource::safe_midi_file_extension (clip_path)) {
+		ArdourMessageDialog msg (_("Only audio clips can replace audio regions."), true);
+		msg.run ();
+		return;
+	}
+
+	SoundFileInfo info;
+	std::string   error;
+	if (!AudioFileSource::get_soundfile_info (clip_path, info, error)) {
+		ArdourMessageDialog msg (string_compose (_("Could not read clip: %1"), error.empty () ? clip_path : error), true);
+		msg.run ();
+		return;
+	}
+
+	if (info.channels == 0) {
+		ArdourMessageDialog msg (_("The selected clip contains no audio channels."), true);
+		msg.run ();
+		return;
+	}
+
+	SourceList replacement_sources;
+	for (uint32_t channel = 0; channel < info.channels; ++channel) {
+		std::shared_ptr<Source> source;
+		try {
+			source = SourceFactory::createExternal (DataType::AUDIO, *_session, clip_path, channel, Source::Flag (0), true, true);
+		} catch (failed_constructor&) {
+			continue;
+		}
+		if (source) {
+			replacement_sources.push_back (source);
+		}
+	}
+
+	if (replacement_sources.empty ()) {
+		ArdourMessageDialog msg (_("The selected clip could not be opened as audio."), true);
+		msg.run ();
+		return;
+	}
+
+	uint32_t replacement_channels = replacement_sources.size ();
+	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
+		std::shared_ptr<AudioRegion> region = std::dynamic_pointer_cast<AudioRegion> ((*i)->region());
+		if (!region || region->n_channels() < replacement_channels) {
+			ArdourMessageDialog msg (string_compose (_("Selected regions do not match the clip channel count (%1 channels)."), replacement_channels), true);
+			msg.run ();
+			return;
+		}
+	}
+
+	struct PendingReplacement {
+		std::shared_ptr<Playlist> playlist;
+		std::shared_ptr<AudioRegion> region;
+		std::shared_ptr<Region> replacement;
+	};
+
+	std::vector<PendingReplacement> pending_replacements;
+	pending_replacements.reserve (rs.size ());
+
+	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
+		std::shared_ptr<AudioRegion> region = std::dynamic_pointer_cast<AudioRegion> ((*i)->region());
+		if (!region || region->n_channels() < replacement_channels) {
+			continue;
+		}
+
+		std::shared_ptr<Playlist> playlist = region->playlist();
+		if (!playlist) {
+			continue;
+		}
+
+		std::shared_ptr<Region> replacement = RegionFactory::create (region, replacement_sources, region->derive_properties ());
+		if (!replacement) {
+			continue;
+		}
+
+		pending_replacements.push_back (PendingReplacement { playlist, region, replacement });
+	}
+
+	if (pending_replacements.empty()) {
+		return;
+	}
+
+	ArdourDialog progress_dialog (_("Replace Source Clip"), true);
+	Gtk::Label label (_("Replacing regions..."));
+	Gtk::ProgressBar bar;
+	progress_dialog.get_vbox()->pack_start (label, false, false);
+	progress_dialog.get_vbox()->pack_start (bar, false, false);
+	progress_dialog.set_default_size (320, -1);
+	progress_dialog.show_all ();
+
+	size_t const total = pending_replacements.size();
+	size_t count = 0;
+
+	begin_reversible_command (_("replace source clip"));
+
+	for (std::vector<PendingReplacement>::iterator i = pending_replacements.begin(); i != pending_replacements.end(); ++i) {
+		_session->add_command (new ReplaceRegionSourceCommand (i->playlist, i->region, i->replacement, i->region->position()));
+		i->playlist->replace_region (i->region, i->replacement, i->region->position());
+
+		++count;
+
+		if ((count % 10 == 0) || (count == total)) {
+			bar.set_fraction (static_cast<double> (count) / static_cast<double> (total));
+			bar.set_text (string_compose ("%1 / %2", count, total));
+			while (Gtk::Main::events_pending()) {
+				Gtk::Main::iteration();
+			}
+		}
+	}
+
+	commit_reversible_command ();
+	progress_dialog.hide ();
 }
 
 void
