@@ -50,6 +50,7 @@
 #include "region_selection.h"
 #include "luadialog.h"
 #include "luainstance.h"
+#include "lua_proc_handlers.h"
 #include "luasignal.h"
 #include "marker.h"
 #include "mixer_ui.h"
@@ -1460,6 +1461,11 @@ LuaInstance::init ()
 
 	luabridge::push <PublicEditor *> (L, &PublicEditor::instance());
 	lua_setglobal (L, "Editor");
+
+	/* bring up the RT->GUI Lua dispatch manager: this connects
+	 * ARDOUR::LuaProc::AccessLuaScript (gui_context) so DSP scripts can
+	 * marshal work to the GUI thread.  See lua_proc_handlers.h. */
+	LuaProcHandlers::instance ();
 
 	Selection& sel (PublicEditor::instance().get_selection ());
 	sel.TimeChanged.connect (sigc::mem_fun (*this, &LuaInstance::selection_changed));
