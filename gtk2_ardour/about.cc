@@ -241,7 +241,8 @@ static const char* translators[] = {
 \n\tOlivier Humbert <trebmuh@librazik.org>\
 \n\tFrédéric Rech <fred_rech@laposte.net>\
 \n\tJulien Taverna <jujudusud@gmail.com>\
-\n\tNicolas Faure <sub26nico@laposte.net>\n"),
+\n\tNicolas Faure <sub26nico@laposte.net>\
+\n\tJean-Emmanuel Doucet <jean-emmanuel.doucet@groolot.net>\n"),
 	N_("German:\n\tKarsten Petersen <kapet@kapet.de>\
 \n\tSebastian Arnold <mail@sebastian-arnold.net>\
 \n\tRobert Schwede <schwede@ironshark.com>\
