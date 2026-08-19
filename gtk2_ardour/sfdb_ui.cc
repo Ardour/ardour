@@ -1413,7 +1413,7 @@ SoundFileBrowser::handle_freesound_results(std::string theString) {
 			double size_bytes = atof(filesize);
 			char bsize[32];
 			if (size_bytes < 1000) {
-				sprintf(bsize, "%.0f %s", size_bytes, _("B"));
+				sprintf(bsize, "%.0f %s", size_bytes, _("byte|B"));
 			} else if (size_bytes < 1000000 ) {
 				sprintf(bsize, "%.1f %s", size_bytes / 1000.0, _("kB"));
 			} else if (size_bytes < 10000000) {
