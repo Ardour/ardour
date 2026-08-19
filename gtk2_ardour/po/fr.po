@@ -18,7 +18,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 8\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-19 13:58+0200\n"
+"POT-Creation-Date: 2026-08-19 15:10+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Jean-Emmanuel <jean-emmanuel@ammd.net>\n"
 "Language-Team: \n"
@@ -448,9 +448,20 @@ msgid ""
 "\tFrédéric Rech <fred_rech@laposte.net>\n"
 "\tJulien Taverna <jujudusud@gmail.com>\n"
 "\tNicolas Faure <sub26nico@laposte.net>\n"
+"\tJean-Emmanuel Doucet <jean-emmanuel.doucet@groolot.net>\n"
 msgstr ""
+"Français :\n"
+"\tAlain Fréhel <alain.frehel@free.fr>\n"
+"\tChristophe Combelles <ccomb@free.fr>\n"
+"\tMartin Blanchard\n"
+"\tRomain Arnaud <roming22@gmail.com>\n"
+"\tOlivier Humbert <trebmuh@librazik.org>\n"
+"\tFrédéric Rech <fred_rech@laposte.net>\n"
+"\tJulien Taverna <jujudusud@gmail.com>\n"
+"\tNicolas Faure <sub26nico@laposte.net>\n"
+"\tJean-Emmanuel Doucet <jean-emmanuel.doucet@groolot.net>\n"
 
-#: about.cc:245
+#: about.cc:246
 msgid ""
 "German:\n"
 "\tKarsten Petersen <kapet@kapet.de>\n"
@@ -470,7 +481,7 @@ msgstr ""
 "\tRichard Oax <richard@pagliacciempire.de>\n"
 "\tRobin Gloster <robin@loc-com.de>\n"
 
-#: about.cc:252
+#: about.cc:253
 msgid ""
 "Italian:\n"
 "\tVincenzo Reale <smart2128@baslug.org>\n"
@@ -486,7 +497,7 @@ msgstr ""
 "\tGuido Pietrella\n"
 "\tDaniele Tombolini\n"
 
-#: about.cc:257
+#: about.cc:258
 msgid ""
 "Portuguese:\n"
 "\tRui Nuno Capela <rncbc@rncbc.org>\n"
@@ -494,7 +505,7 @@ msgstr ""
 "Portugais :\n"
 "\tRui Nuno Capela <rncbc@rncbc.org>\n"
 
-#: about.cc:258
+#: about.cc:259
 msgid ""
 "Brazilian Portuguese:\n"
 "\tAlexander da Franca Fernandes <alexander@nautae.eti.br>\n"
@@ -504,7 +515,7 @@ msgstr ""
 "\tAlexander da Franca Fernandes <alexander@nautae.eti.br>\n"
 "\tChris Ross <chris@tebibyte.org>\n"
 
-#: about.cc:260
+#: about.cc:261
 msgid ""
 "Spanish:\n"
 "\t Alex Krohn <alexkrohn@fastmail.fm>\n"
@@ -516,7 +527,7 @@ msgstr ""
 "\tPablo Fernández <pablo.fbus@gmail.com>\n"
 "\tJuan Cruz Vardy Sabaté <juanvardy@zohomail.com>\n"
 
-#: about.cc:263
+#: about.cc:264
 msgid ""
 "Russian:\n"
 "\t Igor Blinov <pitstop@nm.ru>\n"
@@ -530,7 +541,7 @@ msgstr ""
 "\tPetr Semiletov <tea@list.ru>\n"
 "\tAlexandre Prokoudine <alexandre.prokoudine@gmail.com>\n"
 
-#: about.cc:267
+#: about.cc:268
 msgid ""
 "Greek:\n"
 "\t Klearchos Gourgourinis <muadib@in.gr>\n"
@@ -538,7 +549,7 @@ msgstr ""
 "Grec :\n"
 "\tKlearchos Gourgourinis <muadib@in.gr>\n"
 
-#: about.cc:268
+#: about.cc:269
 msgid ""
 "Swedish:\n"
 "\t Petter Sundlöf <petter.sundlof@gmail.com>\n"
@@ -546,7 +557,7 @@ msgstr ""
 "Suédois :\n"
 "\tPetter Sundlöf <petter.sundlof@gmail.com>\n"
 
-#: about.cc:269
+#: about.cc:270
 msgid ""
 "Polish:\n"
 "\t Piotr Zaryk <pzaryk@gmail.com>\n"
@@ -554,7 +565,7 @@ msgstr ""
 "Polonais :\n"
 "\tPiotr Zaryk <pzaryk@gmail.com>\n"
 
-#: about.cc:270
+#: about.cc:271
 msgid ""
 "Czech:\n"
 "\t Pavel Fric <pavelfric@seznam.cz>\n"
@@ -564,7 +575,7 @@ msgstr ""
 "\t Pavel Fric <pavelfric@seznam.cz>\n"
 "\t Martin Vlk <martin@vlkk.cz>\n"
 
-#: about.cc:271
+#: about.cc:272
 msgid ""
 "Norwegian:\n"
 "\t Eivind Ødegård\n"
@@ -572,7 +583,7 @@ msgstr ""
 "Norvégien :\n"
 "\tEivind Ødegård\n"
 
-#: about.cc:272
+#: about.cc:273
 msgid ""
 "Chinese:\n"
 "\t Rui-huai Zhang <zrhzrh@mail.ustc.edu.cn>\n"
@@ -580,7 +591,7 @@ msgstr ""
 "Chinois :\n"
 "\tRui-huai Zhang <zrhzrh@mail.ustc.edu.cn>\n"
 
-#: about.cc:273
+#: about.cc:274
 msgid ""
 "Japanese:\n"
 "\t Hiroki Inagaki <hiroki.ingk@gmail.com>\n"
@@ -588,7 +599,7 @@ msgstr ""
 "Japonais :\n"
 "\t Hiroki Inagaki <hiroki.ingk@gmail.com>\n"
 
-#: about.cc:274
+#: about.cc:275
 msgid ""
 "Korean:\n"
 "\t Junghee Lee <daemul72@gmail.com>\n"
@@ -596,55 +607,55 @@ msgstr ""
 "Coréen :\n"
 "\t Junghee Lee <daemul72@gmail.com>\n"
 
-#: about.cc:617
+#: about.cc:618
 msgid "Intel 64-bit"
 msgstr "Intel 64 bits"
 
-#: about.cc:619
+#: about.cc:620
 msgid "Intel 32-bit"
 msgstr "Intel 32 bits"
 
-#: about.cc:621
+#: about.cc:622
 msgid "PowerPC 64-bit"
 msgstr "Power PC 64 bits"
 
-#: about.cc:623
+#: about.cc:624
 msgid "PowerPC 32-bit"
 msgstr "Power PC 32 bits"
 
-#: about.cc:625
+#: about.cc:626
 msgid "ARM 64-bit (aarch64)"
 msgstr "ARM 64 bits (aarch64)"
 
-#: about.cc:627
+#: about.cc:628
 msgid "ARM 32-bit (armhf)"
 msgstr "ARM 32 bits (armhf)"
 
-#: about.cc:629
+#: about.cc:630
 msgid "ARM 32-bit"
 msgstr "ARM 32 bits"
 
-#: about.cc:631
+#: about.cc:632
 msgid "64-bit"
 msgstr "64 bits"
 
-#: about.cc:633
+#: about.cc:634
 msgid "32-bit"
 msgstr "32 bits"
 
-#: about.cc:641
+#: about.cc:642
 msgid " - debug"
 msgstr " - debug"
 
-#: about.cc:647
+#: about.cc:648
 msgid "Copyright (C) 1999-2026 Paul Davis\n"
 msgstr "Copyright (C) 1999-2026 Paul Davis\n"
 
-#: about.cc:651
+#: about.cc:652
 msgid "http://ardour.org/"
 msgstr "http://ardour.org/"
 
-#: about.cc:652
+#: about.cc:653
 msgid ""
 "%1%2\n"
 "(rev %3)\n"
@@ -654,7 +665,7 @@ msgstr ""
 "(rev %3)\n"
 "%4%5"
 
-#: about.cc:657
+#: about.cc:658
 msgid "Config"
 msgstr "Configuration"
 
@@ -3455,6 +3466,8 @@ msgid ""
 "Session Archiving failed.\n"
 "Cannot setup initialze streaming archive."
 msgstr ""
+"Échec de l'archivage de la session.\n"
+"Impossible de paramétrer \"initialize streaming archive\"."
 
 #: ardour_ui_session.cc:1144
 msgid ""
@@ -21289,7 +21302,7 @@ msgid "No more results available"
 msgstr "Pas d'autre résultat disponible"
 
 #: sfdb_ui.cc:1416
-msgid "B"
+msgid "byte|B"
 msgstr "B"
 
 #: sfdb_ui.cc:1418
@@ -24027,6 +24040,9 @@ msgstr ""
 #: export_video_dialog.cc:815
 msgid "Input Video File"
 msgstr "Fichier vidéo d'entrée"
+
+#~ msgid "B"
+#~ msgstr "B"
 
 #~ msgid ""
 #~ "<b>Layered</b>, new recordings will be added as regions on a layer atop "
