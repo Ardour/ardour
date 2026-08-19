@@ -2057,7 +2057,7 @@ PluginManager::vst3_refresh (bool cache_only)
 	}
 
 #ifdef __APPLE__
-	vst3_discover_from_path ("~/Library/Audio/Plug-Ins/VST3:/Library/Audio/Plug-Ins/VST3", cache_only);
+	vst3_discover_from_path ("~/Library/Audio/Plug-Ins/VST3:/Library/Audio/Plug-Ins/VST3:/Network/Library/Audio/Plug-ins/VST3/", cache_only);
 #elif defined PLATFORM_WINDOWS
 	std::string prog = PBD::get_win_special_folder_path (CSIDL_PROGRAM_FILES);
 	vst3_discover_from_path (Glib::build_filename (prog, "Common Files", "VST3"), cache_only);
