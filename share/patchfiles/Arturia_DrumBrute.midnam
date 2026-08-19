@@ -1,0 +1,86 @@
+<?xml version='1.0' encoding='utf-8'?>
+<MIDINameDocument>
+  <Author>Holger</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Arturia</Manufacturer>
+    <Model>Drumbrute</Model>
+    <CustomDeviceMode Name="Default">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Default Channel Name Set" />
+        <ChannelNameSetAssign Channel="2" NameSet="Default Channel Name Set" />
+        <ChannelNameSetAssign Channel="3" NameSet="Default Channel Name Set" />
+        <ChannelNameSetAssign Channel="4" NameSet="Default Channel Name Set" />
+        <ChannelNameSetAssign Channel="5" NameSet="Default Channel Name Set" />
+        <ChannelNameSetAssign Channel="6" NameSet="Default Channel Name Set" />
+        <ChannelNameSetAssign Channel="7" NameSet="Default Channel Name Set" />
+        <ChannelNameSetAssign Channel="8" NameSet="Default Channel Name Set" />
+        <ChannelNameSetAssign Channel="9" NameSet="Default Channel Name Set" />
+        <ChannelNameSetAssign Channel="10" NameSet="Default Channel Name Set" />
+        <ChannelNameSetAssign Channel="11" NameSet="Default Channel Name Set" />
+        <ChannelNameSetAssign Channel="12" NameSet="Default Channel Name Set" />
+        <ChannelNameSetAssign Channel="13" NameSet="Default Channel Name Set" />
+        <ChannelNameSetAssign Channel="14" NameSet="Default Channel Name Set" />
+        <ChannelNameSetAssign Channel="15" NameSet="Default Channel Name Set" />
+        <ChannelNameSetAssign Channel="16" NameSet="Default Channel Name Set" />
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Default Channel Name Set">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true" />
+        <AvailableChannel Channel="2" Available="true" />
+        <AvailableChannel Channel="3" Available="true" />
+        <AvailableChannel Channel="4" Available="true" />
+        <AvailableChannel Channel="5" Available="true" />
+        <AvailableChannel Channel="6" Available="true" />
+        <AvailableChannel Channel="7" Available="true" />
+        <AvailableChannel Channel="8" Available="true" />
+        <AvailableChannel Channel="9" Available="true" />
+        <AvailableChannel Channel="10" Available="true" />
+        <AvailableChannel Channel="11" Available="true" />
+        <AvailableChannel Channel="12" Available="true" />
+        <AvailableChannel Channel="13" Available="true" />
+        <AvailableChannel Channel="14" Available="true" />
+        <AvailableChannel Channel="15" Available="true" />
+        <AvailableChannel Channel="16" Available="true" />
+      </AvailableForChannels>
+      <UsesControlNameList Name="Controls" />
+      <UsesNoteNameList Name="Default Note Name List" />
+      <PatchBank Name="User Patch Bank">
+        <PatchNameList Name="User Patches"/>
+      </PatchBank>
+    </ChannelNameSet>
+    <ControlNameList Name="Controls">
+      <Control Type="7bit" Number="5" Name="Slide Time" />
+      <Control Type="7bit" Number="11" Name="Expression" />
+      <Control Type="7bit" Number="40" Name="Octave" />
+      <Control Type="7bit" Number="41" Name="LFO Rate" />
+      <Control Type="7bit" Number="42" Name="LFO Int" />
+      <Control Type="7bit" Number="43" Name="VCO Pitch 1" />
+      <Control Type="7bit" Number="44" Name="VCO Pitch 2" />
+      <Control Type="7bit" Number="45" Name="VCO Pitch 3" />
+      <Control Type="7bit" Number="46" Name="EG Attack" />
+      <Control Type="7bit" Number="47" Name="EG Decay/Release" />
+      <Control Type="7bit" Number="48" Name="Cutoff EG Int" />
+      <Control Type="7bit" Number="49" Name="Gate Time" />
+    </ControlNameList>
+    <NoteNameList Name="Default Note Name List">
+      <Note Number="36" Name="Kick 1" />
+      <Note Number="37" Name="Kick 2" />
+      <Note Number="38" Name="Snare" />
+      <Note Number="39" Name="Clap" />
+      <Note Number="40" Name="Rim" />
+      <Note Number="41" Name="Claves" />
+      <Note Number="42" Name="Cl Hat" />
+      <Note Number="43" Name="Op Hat" />
+      <Note Number="44" Name="Conga H" />
+      <Note Number="45" Name="Tom Hi" />
+      <Note Number="46" Name="Conga L" />
+      <Note Number="47" Name="Tom Lo" />
+      <Note Number="48" Name="Cymbal" />
+      <Note Number="49" Name="Rev. Cymbal" />
+      <Note Number="50" Name="Maracas" />
+      <Note Number="51" Name="Tambourine" />
+      <Note Number="52" Name="Zap" />
+    </NoteNameList>
+  </MasterDeviceNames>
+</MIDINameDocument>
