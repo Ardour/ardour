@@ -2062,7 +2062,7 @@ PluginManager::vst3_refresh (bool cache_only)
 	std::string prog = PBD::get_win_special_folder_path (CSIDL_PROGRAM_FILES);
 	vst3_discover_from_path (Glib::build_filename (prog, "Common Files", "VST3"), cache_only);
 #else
-	vst3_discover_from_path ("~/.vst3:/usr/local/lib/vst3:/usr/lib/vst3", cache_only);
+	vst3_discover_from_path ("~/.vst3:/usr/lib64/vst3:/usr/lib/vst3:/usr/local/lib64/vst3:/usr/local/lib/vst3", cache_only);
 #endif
 }
 
