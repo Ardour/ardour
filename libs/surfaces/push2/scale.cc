@@ -499,11 +499,9 @@ ScaleLayout::build_scale_menu ()
 	v.push_back ("Leading Whole Tone");
 	v.push_back ("Arabian");
 	v.push_back ("Balinese");
-	v.push_back ("Gypsy");
 	v.push_back ("Mohammedan");
 	v.push_back ("Javanese");
 	v.push_back ("Persian");
-	v.push_back ("Algeria");
 
 	_scale_menu = new Push2Menu (this, v);
 	_scale_menu->Rearranged.connect (_menu_connections, invalidator (*this), std::bind (&ScaleLayout::menu_rearranged, this), &_p2);
