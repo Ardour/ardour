@@ -120,7 +120,7 @@ MusicalMode::register_scale (TuningSystem ts, std::string const & name, MusicalM
 	if (id > 0) {
 		auto ret = modes_by_id.find (id);
 		if (ret != modes_by_id.end()) {
-			std::cerr << "trying to insert " << name << " but ring ID matches " << ret->second.name() << std::endl;
+			std::cerr << "trying to insert " << name << " but ring ID " << (id & 0xfff) << " matches " << ret->second.name() << std::endl;
 		} else {
 			modes_by_id.insert (std::make_pair (id, mm));
 		}
@@ -144,7 +144,7 @@ MusicalMode::register_scales (TuningSystem ts, std::vector<std::string> const & 
 
 		if (!ret.second) {
 			auto e = modes_by_id.find (id);
-			std::cerr << "trying to insert " << names.front() << " but ring ID matches " << e->second.name() << std::endl;
+			std::cerr << "trying to insert " << names.front() << " but ring ID " << (id & 0xfff)  << " matches " << e->second.name() << std::endl;
 		}
 	}
 }
