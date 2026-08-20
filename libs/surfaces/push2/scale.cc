@@ -471,8 +471,8 @@ ScaleLayout::build_scale_menu ()
 	v.push_back ("Ionian (Major)");
 	v.push_back ("Aeolian (Minor)");
 	v.push_back ("Harmonic Minor");
-	v.push_back ("MelodicMinor Asc.");
-	v.push_back ("MelodicMinor Desc.");
+	v.push_back ("Melodic Minor Asc.");
+	v.push_back ("Melodic Minor Desc.");
 	v.push_back ("Phrygian");
 	v.push_back ("Lydian");
 	v.push_back ("Mixolydian");
