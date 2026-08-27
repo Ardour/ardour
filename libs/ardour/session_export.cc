@@ -30,6 +30,7 @@
 #include "ardour/butler.h"
 #include "ardour/export_handler.h"
 #include "ardour/export_status.h"
+#include "ardour/midi_track.h"
 #include "ardour/process_thread.h"
 #include "ardour/session.h"
 #include "ardour/track.h"
@@ -175,12 +176,21 @@ Session::start_audio_export (samplepos_t position, bool realtime, bool region_ex
 		ARDOUR::ProcessThread* pt = new ProcessThread ();
 		pt->get_buffers ();
 
-		for (auto const& i : *rl) {
-			std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (i);
-			if (tr && tr->seek (position, true)) {
-				error << string_compose (_("%1: cannot seek to %2 for export"), i->name(), position)
-				      << endmsg;
-				return -1;
+		for (auto const& r : *rl) {
+			std::shared_ptr<Track> tr (std::dynamic_pointer_cast<Track> (r));
+
+			if (tr) {
+				std::shared_ptr<MidiTrack> mtr (std::dynamic_pointer_cast<MidiTrack> (tr));
+
+				if (mtr) {
+					mtr->clear_midi_chase();
+				}
+
+				if (tr->seek (position, true)) {
+					error << string_compose (_("%1: cannot seek to %2 for export"), r->name(), position)
+					      << endmsg;
+					return -1;
+				}
 			}
 		}
 		pt->drop_buffers ();
