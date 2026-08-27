@@ -137,10 +137,16 @@ MidiTrack::set_chase_notes (bool yn)
 	if (_chase_notes != yn) {
 		_chase_notes = yn;
 		if (!yn && _disk_reader) {
-			_disk_reader->clear_midi_chase ();
+			clear_midi_chase ();
 		}
 		_session.set_dirty();
 	}
+}
+
+void
+MidiTrack::clear_midi_chase ()
+{
+	_disk_reader->clear_midi_chase ();
 }
 
 void
@@ -446,7 +452,7 @@ MidiTrack::non_realtime_locate (samplepos_t spos)
 	Track::non_realtime_locate (spos);
 
 	/* always clear this state on every locate */
-	_disk_reader->clear_midi_chase ();
+	clear_midi_chase ();
 
 	std::shared_ptr<MidiPlaylist> playlist = _disk_writer->midi_playlist();
 

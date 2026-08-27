@@ -99,6 +99,7 @@ public:
 
 	bool chase_notes() const { return _chase_notes; }
 	void set_chase_notes (bool yn);
+	void clear_midi_chase ();
 
 	std::string describe_parameter (Evoral::Parameter param);
 	std::string get_parameter_name (Evoral::Parameter param);
