@@ -119,7 +119,8 @@ protected:
 private:
 	void refill_banks ();
 
-	void select_channel (uint8_t);
+	void    select_channel (uint8_t);
+	uint8_t get_preferred_midi_channel () const;
 
 	/* Implement PatchBankList */
 	void select_bank (uint32_t);
