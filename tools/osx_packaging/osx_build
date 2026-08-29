@@ -94,6 +94,7 @@ while [ $# -gt 0 ] ; do
 
 	--noharvid) shift ;;
 	--nostrip) STRIP= ; shift ;;
+	--clean) CLEANBUILD=1 ; shift ;;
 	--sysdeps) PRINT_SYSDEPS=1; shift ;;
 	--no-nls) WITH_NLS= ; shift ;;
 	--nls) WITH_NLS=1 ; shift ;;
@@ -629,7 +630,7 @@ for exe in $executables; do
 		install_name_tool $changes $EXE
 	fi
 	if [ x$DEBUG = xT ]; then
-		dsymutil -q $EXE
+		dsymutil $EXE
 	fi
 done
 
@@ -674,7 +675,7 @@ for libdir in $Frameworks $Surfaces $Panners $Backends $Frameworks/LV2/* $GTK_EN
 		install_name_tool -id @executable_path/../lib$libbase/$base $dylib
 
 		if [ x$DEBUG = xT ]; then
-			dsymutil -q $dylib
+			dsymutil $dylib
 		fi
 
 	done
@@ -934,6 +935,9 @@ if test -n "$MIXBUS"; then
 fi
 ################################################################################
 
+if test -n "$CLEANBUILD"; then
+	rm -rf $BUILD_ROOT
+fi
 
 ##### App Signing ##############################################################
 
