@@ -567,6 +567,9 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 			rec->signal_toggled ().connect (sigc::bind (sigc::mem_fun (*this, &ExportReport::on_rectivied_toggled), rec));
 			lrb->show_all ();
 			wtbl->attach (*lrb, 1, 2, wrow, wrow + p->n_channels, SHRINK, SHRINK);
+
+			rec->set_active (UIConfiguration::instance().get_waveform_shape() == Rectified);
+			log->set_active (UIConfiguration::instance().get_waveform_scale() == Logarithmic);
 		}
 
 		for (uint32_t c = 0; c < p->n_channels; ++c) {
@@ -579,6 +582,9 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 			Cairo::RefPtr<Cairo::ImageSurface> wave_lr   = ArdourGraphs::draw_waveform (get_pango_context (), p, c, waveh2, m_l, true, true);
 
 			CimgWaveArea *wv = manage (new CimgWaveArea (wave, wave_log, wave_rect, wave_lr, m_l, width));
+
+			wv->set_rectified (UIConfiguration::instance().get_waveform_shape() == Rectified);
+			wv->set_logscale (UIConfiguration::instance().get_waveform_scale() == Logarithmic);
 
 			playhead_widgets.push_back (wv);
 			waves.push_back (wv);
