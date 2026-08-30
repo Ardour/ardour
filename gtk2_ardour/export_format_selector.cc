@@ -90,7 +90,7 @@ ExportFormatSelector::update_format_list ()
 		tree_it = format_list->append();
 		tree_it->set_value (format_cols.format, *it);
 		tree_it->set_value (format_cols.label, (*it)->description());
-		if (!format_to_select && (*it)->id ().to_s () == "dd4f6f30-f054-4e0a-8d91-67eed5d79153" /* "Wav (Tagged)" */) {
+		if (!format_to_select && (*it)->id ().to_s () == ARDOUR::Config->get_default_export_format()) {
 			format_to_select = *it;
 		}
 	}
