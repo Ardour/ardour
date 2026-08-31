@@ -145,8 +145,9 @@ public:
 	struct MarkerAt {
 		std::string text;
 		size_t time_pulses; /* type matches libsmf smf_event_struct.time_pulses */
+		uint8_t meta_type;  /* SMF meta-event type byte: 0x06 Marker, 0x05 Lyric, 0x01 Text, ... */
 
-		MarkerAt (std::string const & txt, size_t tp) : text (txt), time_pulses (tp) {}
+		MarkerAt (std::string const & txt, size_t tp, uint8_t mt = 0x06) : text (txt), time_pulses (tp), meta_type (mt) {}
 	};
 
 	typedef std::vector<MarkerAt> Markers;
