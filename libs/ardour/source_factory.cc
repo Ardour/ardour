@@ -418,7 +418,7 @@ SourceFactory::createForRecovery (DataType type, Session& s, const std::string& 
 
 		string name = PBD::basename_nosuffix (path);
 		const string new_path = s.new_audio_source_path (name, 1, 0, false);
-		info << string_compose (_("Recovering file '%s' to '%s'"), path, new_path) << endmsg;
+		info << string_compose (_("Recovering file '%1' to '%2'"), path, new_path) << endmsg;
 
 		ret = std::shared_ptr<Source> (SourceFactory::createWritable (DataType::AUDIO, s, new_path, source->samplerate (), false, true));
 		std::shared_ptr<AudioFileSource> afs = std::dynamic_pointer_cast<AudioFileSource>(ret);
