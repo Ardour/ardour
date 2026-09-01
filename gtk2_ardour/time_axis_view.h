@@ -251,7 +251,6 @@ protected:
 	Gtk::Frame             time_axis_frame;
 	Gtk::HBox              top_hbox;
 	Gtk::Fixed             scroomer_placeholder;
-	bool                  _name_editing;
 	uint32_t               height;  /* in canvas units */
 	std::string            controls_base_unselected_name;
 	std::string            controls_base_selected_name;
