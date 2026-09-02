@@ -80,7 +80,6 @@
 #include "pbd/debug.h"
 #include "pbd/enumwriter.h"
 #include "pbd/error.h"
-#include "pbd/no_state.h"
 #include "pbd/file_utils.h"
 #include "pbd/pathexpand.h"
 #include "pbd/pthread_utils.h"
@@ -1476,19 +1475,10 @@ Session::export_route_state (std::shared_ptr<RouteList> rl, const string& path, 
 		 */
 		child = node->add_child ("Playlists"); // SessionPlaylists::add_state
 		for (PlaylistSet::const_iterator i = playlists.begin(); i != playlists.end(); ++i) {
-
-			try {
-				child->add_child_nocopy ((*i)->get_state ());
-			} catch (no_state const & ns) {
-				continue;
-			}
-
+			child->add_child_nocopy ((*i)->get_state ());
 			std::shared_ptr<RegionList> prl = (*i)->region_list ();
-			for (auto const & r : *prl) {
-				if (r->transient()) {
-					continue;
-				}
-				const Region::SourceList& sl = r->sources ();
+			for (RegionList::const_iterator s = prl->begin(); s != prl->end(); ++s) {
+				const Region::SourceList& sl = (*s)->sources ();
 				for (Region::SourceList::const_iterator sli = sl.begin(); sli != sl.end(); ++sli) {
 					sources.insert (*sli);
 				}
@@ -2023,12 +2013,8 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 
 		if (!only_used_assets) {
 			const RegionFactory::RegionMap& region_map (RegionFactory::all_regions());
-			for (auto const & [id,r] : region_map) {
-
-				if (r->transient()) {
-					continue;
-				}
-
+			for (RegionFactory::RegionMap::const_iterator i = region_map.begin(); i != region_map.end(); ++i) {
+				std::shared_ptr<Region> r = i->second;
 				/* regions must have sources */
 				assert (r->sources().size() > 0 && r->master_sources().size() > 0);
 				/* only store regions not attached to playlists */
@@ -2051,10 +2037,7 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 			std::set<std::shared_ptr<Region>> tr;
 			{
 				std::shared_ptr<RouteList const> rl = routes.reader();
-				for (auto const & r : *rl) {
-					if (r->is_transient()) {
-						continue;
-					}
+				for (auto const& r : *rl) {
 					std::shared_ptr<TriggerBox> tb = r->triggerbox ();
 					if (tb) {
 						tb->used_regions (tr);
@@ -2064,11 +2047,8 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 
 			auto const& used_pl (_playlists->get_used ());
 			const RegionFactory::RegionMap& region_map (RegionFactory::all_regions());
-			for (auto const & [id,r] : region_map) {
-
-				if (r->transient()) {
-					continue;
-				}
+			for (RegionFactory::RegionMap::const_iterator i = region_map.begin(); i != region_map.end(); ++i) {
+				std::shared_ptr<Region> r = i->second;
 
 				if (tr.find (r) != tr.end()) {
 					child->add_child_nocopy (r->get_state ());
@@ -2175,11 +2155,6 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 		xml_node_order.sort (cmp);
 
 		for (RouteList::const_iterator i = xml_node_order.begin(); i != xml_node_order.end(); ++i) {
-
-			if ((*i)->is_transient()) {
-				continue;
-			}
-
 			if (!(*i)->is_auditioner()) {
 				if (save_template) {
 					child->add_child_nocopy ((*i)->get_template());

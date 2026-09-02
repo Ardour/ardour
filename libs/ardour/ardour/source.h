@@ -58,7 +58,6 @@ public:
 		Empty = 0x100, /* used for MIDI only */
 		RF64_RIFF = 0x200,
 		Missing = 0x400, /* used for MIDI only */
-		Transient = 0x800, /* do not save with session */
 	};
 
 	typedef PBD::RWLock::ReaderLock ReaderLock;
@@ -141,7 +140,6 @@ public:
 
 	PBD::RWLock& mutex() { return _lock; }
 	Flag flags() const { return _flags; }
-	bool transient() const { return _flags & Transient; }
 
 	virtual void inc_use_count ();
 	virtual void dec_use_count ();

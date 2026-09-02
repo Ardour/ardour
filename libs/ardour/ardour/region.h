@@ -283,7 +283,6 @@ public:
 	bool sync_marked ()      const { return _sync_marked; }
 	bool external ()         const { return _external; }
 	bool import ()           const { return _import; }
-	bool transient ()        const;
 
 	Trimmable::CanTrim can_trim () const;
 
