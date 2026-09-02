@@ -2137,16 +2137,16 @@ Region::get_cue_markers (CueMarkers& cues, bool abs) const
 void
 Region::move_cue_marker (CueMarker const & cm, timepos_t const & region_relative_position)
 {
-	for (SourceList::const_iterator s = _sources.begin (); s != _sources.end(); ++s) {
-		(*s)->move_cue_marker (cm, region_relative_position + start());
+	for (auto const & src : _sources) {
+		src->move_cue_marker (cm, region_relative_position + start());
 	}
 }
 
 void
 Region::rename_cue_marker (CueMarker& cm, std::string const & str)
 {
-	for (SourceList::const_iterator s = _sources.begin (); s != _sources.end(); ++s) {
-		(*s)->rename_cue_marker (cm, str);
+	for (auto const & src : _sources) {
+		src->rename_cue_marker (cm, str);
 	}
 }
 
@@ -2154,8 +2154,8 @@ void
 Region::drop_sources ()
 {
 	PBD::Mutex::Lock lx (_source_list_lock);
-	for (SourceList::const_iterator i = _sources.begin (); i != _sources.end(); ++i) {
-		(*i)->dec_use_count ();
+	for (auto const & src : _sources) {
+		src->dec_use_count ();
 	}
 
 	_sources.clear ();
@@ -2172,11 +2172,11 @@ void
 Region::use_sources (SourceList const & s)
 {
 	PBD::Mutex::Lock lx (_source_list_lock);
-	for (SourceList::const_iterator i = s.begin (); i != s.end(); ++i) {
-		_sources.push_back (*i);
-		(*i)->inc_use_count ();
-		_master_sources.push_back (*i);
-		(*i)->inc_use_count ();
+	for (auto const & src : _sources) {
+		_sources.push_back (src);
+		src->inc_use_count ();
+		_master_sources.push_back (src);
+		src->inc_use_count ();
 	}
 	subscribe_to_source_drop ();
 }
@@ -2621,4 +2621,20 @@ Region::meter() const
 		return std::optional<Temporal::Meter>();
 	}
 	return tmap->meter_at (0);
+}
+
+bool
+Region::transient () const
+{
+	for (auto const & src : _sources) {
+		if (src->transient()) {
+			return true;
+		}
+	}
+	for (auto const & src : _master_sources) {
+		if (src->transient()) {
+			return true;
+		}
+	}
+	return false;
 }
