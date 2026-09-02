@@ -540,7 +540,7 @@ CoreAudioPCM::discover()
 	_device_outs = (uint32_t*) calloc(_n_devices, sizeof(uint32_t));
 
 	assert(_device_ins && _device_outs && _device_ids);
-	if (!_device_ins || !_device_ins || !_device_ids) {
+	if (!_device_ins || !_device_outs || !_device_ids) {
 		fprintf(stderr, "OUT OF MEMORY\n");
 		_device_ids = 0;
 		_device_ins = 0;
