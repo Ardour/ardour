@@ -41,7 +41,6 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<uint32_t> color;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> selected;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> trigger_track;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> transient;
 	/* we use this; declared in region.cc */
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> hidden;
 }
@@ -148,8 +147,6 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 		VBMAny      = 0x30000,
 #endif
 
-		Transient   = 0x60000,
-
 		/* special mask to detect out "state" bits */
 		StatusMask = (Hidden | MixbusEditorHidden | TriggerTrack),
 
@@ -189,7 +186,6 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 
 	void set_color (color_t);
 	void set_hidden (bool yn);
-	void set_transient (bool yn);
 	void set_trigger_track (bool yn);
 	void set_flags (Flag f) { _flags = f; }
 
@@ -198,7 +194,6 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 	int selection_cnt() const { return _selection_cnt; }
 
 	bool hidden() const { return _flags & Hidden; }
-	bool transient() const { return _flags & Transient; }
 	bool trigger_track () const { return _flags & TriggerTrack; }
 	bool special(bool with_master = true) const { return _flags & ((with_master ? MasterOut : 0)|SurroundMaster|MonitorOut|Auditioner); }
 

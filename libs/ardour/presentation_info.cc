@@ -58,7 +58,6 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<uint32_t> order;
 		PBD::PropertyDescriptor<uint32_t> color;
 		PBD::PropertyDescriptor<bool>     trigger_track;
-		PBD::PropertyDescriptor<bool>     transient;
 	}
 }
 
@@ -274,22 +273,6 @@ PresentationInfo::set_hidden (bool yn)
 
 		send_change (PropertyChange (Properties::hidden));
 		send_static_change (PropertyChange (Properties::hidden));
-	}
-}
-
-void
-PresentationInfo::set_transient (bool yn)
-{
-	if (yn != transient()) {
-
-		if (yn) {
-			_flags = Flag (_flags | Transient);
-		} else {
-			_flags = Flag (_flags & ~Transient);
-		}
-
-		send_change (PropertyChange (Properties::transient));
-		send_static_change (PropertyChange (Properties::transient));
 	}
 }
 
