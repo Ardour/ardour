@@ -32,6 +32,7 @@
 
 #include <glibmm/datetime.h>
 
+#include "pbd/no_state.h"
 #include "pbd/stateful_diff_command.h"
 #include "pbd/strsplit.h"
 #include "pbd/types_convert.h"
@@ -2414,6 +2415,19 @@ Playlist::get_template ()
 XMLNode&
 Playlist::state (bool full_state) const
 {
+	bool empty = true;
+
+	for (auto const & r : regions) {
+		if (!r->transient()) {
+			empty = false;
+			break;
+		}
+	}
+
+	if (empty) {
+		throw no_state();
+	}
+
 	XMLNode* node = new XMLNode (X_("Playlist"));
 
 	node->set_property (X_("id"), id ());
@@ -2440,6 +2454,9 @@ Playlist::state (bool full_state) const
 		node->set_property ("combine-ops", _combine_ops);
 
 		for (auto const & r : regions) {
+			if (r->transient()) {
+				continue;
+			}
 			assert (r->sources ().size () > 0 && r->master_sources ().size () > 0);
 			node->add_child_nocopy (r->get_state ());
 		}
