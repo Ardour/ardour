@@ -2259,7 +2259,7 @@ SoundFileOmega::do_something (int action)
 	if (copy_files_btn.get_active()) {
 		PublicEditor::instance().do_import (paths, chns, mode, quality, mts, mtd, where, instrument, std::shared_ptr<Track>(), with_midi_markers);
 	} else {
-		PublicEditor::instance().do_embed (paths, chns, mode, where, instrument);
+		PublicEditor::instance().do_embed (paths, chns, mode, false, where, instrument);
 	}
 
 	_import_active = false;

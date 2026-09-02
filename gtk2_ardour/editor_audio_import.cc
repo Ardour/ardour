@@ -465,6 +465,7 @@ void
 Editor::do_embed (vector<string>           paths,
                   ImportDisposition        import_as,
                   ImportMode               mode,
+                  bool                     transient,
                   timepos_t&               pos,
                   ARDOUR::PluginInfoPtr    instrument,
                   std::shared_ptr<Track> track)
@@ -492,7 +493,7 @@ Editor::do_embed (vector<string>           paths,
 				track = get_nth_selected_audio_track (nth++);
 			}
 
-			if (embed_sndfiles (to_embed, multi, check_sample_rate, import_as, mode, pos, 1, -1, track, pgroup_id, instrument) < -1) {
+			if (embed_sndfiles (to_embed, multi, check_sample_rate, import_as, mode, transient, pos, 1, -1, track, pgroup_id, instrument) < -1) {
 				/* error, bail out */
 				return;
 			}
@@ -510,7 +511,7 @@ Editor::do_embed (vector<string>           paths,
 			to_embed.clear ();
 			to_embed.push_back (*a);
 
-			if (embed_sndfiles (to_embed, multi, check_sample_rate, import_as, mode, pos, -1, -1, track, pgroup_id, instrument) < -1) {
+			if (embed_sndfiles (to_embed, multi, check_sample_rate, import_as, mode, transient, pos, -1, -1, track, pgroup_id, instrument) < -1) {
 				/* error, bail out */
 				return;
 			}
@@ -518,7 +519,7 @@ Editor::do_embed (vector<string>           paths,
 		break;
 
 	case Editing::ImportMergeFiles:
-		if (embed_sndfiles (paths, multi, check_sample_rate, import_as, mode, pos, 1, 1, track, pgroup_id, instrument) < -1) {
+		if (embed_sndfiles (paths, multi, check_sample_rate, import_as, mode, transient, pos, 1, 1, track, pgroup_id, instrument) < -1) {
 			/* error, bail out */
 			return;
 		}
@@ -535,7 +536,7 @@ Editor::do_embed (vector<string>           paths,
 			to_embed.clear ();
 			to_embed.push_back (*a);
 
-			if (embed_sndfiles (to_embed, multi, check_sample_rate, import_as, mode, pos, 1, 1, track, pgroup_id, instrument) < -1) {
+			if (embed_sndfiles (to_embed, multi, check_sample_rate, import_as, mode, transient, pos, 1, 1, track, pgroup_id, instrument) < -1) {
 				/* error, bail out */
 				return;
 			}
@@ -604,6 +605,7 @@ Editor::import_sndfiles (vector<string>            paths,
 			import_status.pos,
 			disposition,
 			import_status.mode,
+			false, /* non-transient */
 			import_status.target_regions,
 			import_status.target_tracks,
 			track, pgroup_id, false, instrument
@@ -623,7 +625,8 @@ Editor::embed_sndfiles (vector<string>            paths,
                         bool&                     check_sample_rate,
                         ImportDisposition         disposition,
                         ImportMode                mode,
-                        timepos_t&              pos,
+                        bool                      transient,
+                        timepos_t&                pos,
                         int                       target_regions,
                         int                       target_tracks,
                         std::shared_ptr<Track>& track,
@@ -640,9 +643,8 @@ Editor::embed_sndfiles (vector<string>            paths,
 
 	CursorRAII cr (*this, _cursors->wait);
 
-	for (vector<string>::iterator p = paths.begin(); p != paths.end(); ++p) {
+	for (auto & path : paths) {
 
-		string path = *p;
 		string error_msg;
 
 		/* note that we temporarily truncated _id at the colon */
@@ -723,7 +725,7 @@ Editor::embed_sndfiles (vector<string>            paths,
 
 					source = std::dynamic_pointer_cast<AudioFileSource> (
 						SourceFactory::createExternal (DataType::AUDIO, *_session,
-									       path, n,
+									       path, n, 
 						                               Source::Flag (0),
 									true, true));
 				} else {
@@ -743,7 +745,7 @@ Editor::embed_sndfiles (vector<string>            paths,
 	}
 
 	if (!sources.empty()) {
-		return add_sources (paths, sources, pos, disposition, mode, target_regions, target_tracks, track, pgroup_id, true, instrument);
+		return add_sources (paths, sources, pos, disposition, mode, transient, target_regions, target_tracks, track, pgroup_id, true, instrument);
 	}
 
 	return 0;
@@ -755,6 +757,7 @@ Editor::add_sources (vector<string>            paths,
                      timepos_t&                pos,
                      ImportDisposition         disposition,
                      ImportMode                mode,
+                     bool                      transient,
                      int                       target_regions,
                      int                       target_tracks,
                      std::shared_ptr<Track>&   track,
