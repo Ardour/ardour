@@ -299,7 +299,7 @@ EditorSources::drag_data_received (const RefPtr<Gdk::DragContext>& context,
 			_editor.do_import (paths, Editing::ImportDistinctFiles, Editing::ImportAsRegion,
 			                   SrcBest, SMFFileAndTrackName, SMFTempoIgnore, pos);
 		} else {
-			_editor.do_embed (paths, Editing::ImportDistinctFiles, Editing::ImportAsRegion, false, pos);
+			_editor.do_embed (paths, Editing::ImportDistinctFiles, Editing::ImportAsRegion, pos);
 		}
 		context->drag_finish (true, false, dtime);
 	}

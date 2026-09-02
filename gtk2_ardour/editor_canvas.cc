@@ -493,12 +493,12 @@ Editor::track_canvas_drag_data_received (const RefPtr<Gdk::DragContext>& context
 bool
 Editor::idle_drop_paths (vector<string> paths, timepos_t pos, double ypos, bool copy)
 {
-	drop_paths_part_two (paths, pos, ypos, copy, false);
+	drop_paths_part_two (paths, pos, ypos, copy);
 	return false;
 }
 
 void
-Editor::drop_paths_part_two (const vector<string>& paths, timepos_t const & p, double ypos, bool copy, bool transient)
+Editor::drop_paths_part_two (const vector<string>& paths, timepos_t const & p, double ypos, bool copy)
 {
 	RouteTimeAxisView* tv;
 	timepos_t pos (p);
@@ -525,13 +525,13 @@ Editor::drop_paths_part_two (const vector<string>& paths, timepos_t const & p, d
 		/* drop onto canvas background: create new tracks */
 
 		InstrumentSelector is(InstrumentSelector::ForTrackDefault); // instantiation builds instrument-list and sets default.
-		do_import (midi_paths, Editing::ImportDistinctFiles, ImportAsTrack, SrcBest, SMFFileAndTrackName, SMFTempoIgnore, pos, is.selected_instrument());
+	        do_import (midi_paths, Editing::ImportDistinctFiles, ImportAsTrack, SrcBest, SMFFileAndTrackName, SMFTempoIgnore, pos, is.selected_instrument());
 
 		if (UIConfiguration::instance().get_only_copy_imported_files() || copy) {
 			do_import (audio_paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack,
 			           SrcBest, SMFFileAndTrackName, SMFTempoIgnore, pos);
 		} else {
-			do_embed (audio_paths, Editing::ImportDistinctFiles, ImportAsTrack, transient, pos);
+			do_embed (audio_paths, Editing::ImportDistinctFiles, ImportAsTrack, pos);
 		}
 
 	} else if ((tv = dynamic_cast<RouteTimeAxisView*> (tvp.first)) != 0) {
@@ -546,7 +546,7 @@ Editor::drop_paths_part_two (const vector<string>& paths, timepos_t const & p, d
 				do_import (audio_paths, Editing::ImportSerializeFiles, Editing::ImportToTrack,
 					   SrcBest, SMFFileAndTrackName, SMFTempoIgnore, pos, std::shared_ptr<PluginInfo>(), tv->track ());
 			} else {
-				do_embed (audio_paths, Editing::ImportSerializeFiles, ImportToTrack, transient, pos, std::shared_ptr<ARDOUR::PluginInfo>(), tv->track ());
+				do_embed (audio_paths, Editing::ImportSerializeFiles, ImportToTrack, pos, std::shared_ptr<ARDOUR::PluginInfo>(), tv->track ());
 			}
 		}
 	}
@@ -581,7 +581,7 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 		*/
 		Glib::signal_idle().connect (sigc::bind (sigc::mem_fun (*this, &Editor::idle_drop_paths), paths, when, cy, copy));
 #else
-		drop_paths_part_two (paths, when, cy, copy, false);
+		drop_paths_part_two (paths, when, cy, copy);
 #endif
 	}
 

@@ -230,7 +230,7 @@ public:
 	                        std::shared_ptr<ARDOUR::PluginInfo> instrument = std::shared_ptr<ARDOUR::PluginInfo>(),
 	                        std::shared_ptr<ARDOUR::Track> track = std::shared_ptr<ARDOUR::Track>(),
 	                        bool with_markers = false) = 0;
-	virtual void do_embed (std::vector<std::string> paths, Editing::ImportDisposition, Editing::ImportMode mode, bool transient, Temporal::timepos_t&,
+	virtual void do_embed (std::vector<std::string> paths, Editing::ImportDisposition, Editing::ImportMode mode, Temporal::timepos_t&,
 	                       std::shared_ptr<ARDOUR::PluginInfo> instrument = std::shared_ptr<ARDOUR::PluginInfo>(),
 	                       std::shared_ptr<ARDOUR::Track> track = std::shared_ptr<ARDOUR::Track>()) = 0;
 

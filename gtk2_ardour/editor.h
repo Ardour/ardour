@@ -385,7 +385,6 @@ public:
 	void do_embed (std::vector<std::string>              paths,
 	               Editing::ImportDisposition            disposition,
 	               Editing::ImportMode                   mode,
-	               bool                                  transient,
 	               Temporal::timepos_t&                  pos,
 	               std::shared_ptr<ARDOUR::PluginInfo> instrument = std::shared_ptr<ARDOUR::PluginInfo>(),
 	               std::shared_ptr<ARDOUR::Track>      track = std::shared_ptr<ARDOUR::Track>());
@@ -1250,7 +1249,7 @@ private:
 	void bring_in_external_audio (Editing::ImportMode mode,  samplepos_t& pos);
 
 	bool  idle_drop_paths  (std::vector<std::string> paths, Temporal::timepos_t sample, double ypos, bool copy);
-	void  drop_paths_part_two  (const std::vector<std::string>& paths, Temporal::timepos_t const & sample, double ypos, bool copy, bool transient);
+	void  drop_paths_part_two  (const std::vector<std::string>& paths, Temporal::timepos_t const & sample, double ypos, bool copy);
 
 	int import_sndfiles (std::vector<std::string>              paths,
 	                     Editing::ImportDisposition            disposition,
@@ -1259,7 +1258,7 @@ private:
 	                     Temporal::timepos_t&                  pos,
 	                     int                                   target_regions,
 	                     int                                   target_tracks,
-	                     std::shared_ptr<ARDOUR::Track>&       track,
+	                     std::shared_ptr<ARDOUR::Track>&     track,
 	                     std::string const&                    pgroup_id,
 	                     bool                                  replace,
 	                     bool                                  with_markers,
@@ -1270,11 +1269,10 @@ private:
 	                    bool&                                 check_sample_rate,
 	                    Editing::ImportDisposition            disposition,
 	                    Editing::ImportMode                   mode,
-	                    bool                                  transient,
 	                    Temporal::timepos_t&                  pos,
 	                    int                                   target_regions,
 	                    int                                   target_tracks,
-	                    std::shared_ptr<ARDOUR::Track>&       track,
+	                    std::shared_ptr<ARDOUR::Track>&     track,
 	                    std::string const&                    pgroup_id,
 	                    std::shared_ptr<ARDOUR::PluginInfo> instrument = std::shared_ptr<ARDOUR::PluginInfo>());
 
@@ -1283,10 +1281,9 @@ private:
 	                 Temporal::timepos_t&                  pos,
 	                 Editing::ImportDisposition            disposition,
 	                 Editing::ImportMode                   mode,
-	                 bool                                  transient,
 	                 int                                   target_regions,
 	                 int                                   target_tracks,
-	                 std::shared_ptr<ARDOUR::Track>&       track,
+	                 std::shared_ptr<ARDOUR::Track>&     track,
 	                 std::string const&                    pgroup_id,
 	                 bool                                  add_channel_suffix,
 	                 std::shared_ptr<ARDOUR::PluginInfo> instrument = std::shared_ptr<ARDOUR::PluginInfo>());
