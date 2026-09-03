@@ -150,7 +150,7 @@
 #endif
 
 typedef unsigned int u32_t; /* NOTE: Make sure that this type is 4 bytes long on your computer */
-typedef unsigned char u8_t; /* NOTE: Make sure that this type is 1 byte on your computer */
+typedef unsigned char _t; /* NOTE: Make sure that this type is 1 byte on your computer */
 
 typedef struct free_ptr_struct {
 	struct bhdr_struct *prev;
@@ -165,7 +165,7 @@ typedef struct bhdr_struct {
 	/* bit 1 allows to know whether the previous block is free */
 	union {
 		struct free_ptr_struct free_ptr;
-		u8_t buffer[1]; /*sizeof(struct free_ptr_struct)]; */
+		_t buffer[1]; /*sizeof(struct free_ptr_struct)]; */
 	} ptr;
 } bhdr_t;
 
