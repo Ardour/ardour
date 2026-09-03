@@ -42,38 +42,41 @@ FFMPEGFileImportableSource::FFMPEGFileImportableSource (const std::string& path,
 	, _read_pos (0)
 	, _ffmpeg_exec (0)
 {
-	std::string ffprobe_exe, unused;
-	if (!ArdourVideoToolPaths::transcoder_exe (unused, ffprobe_exe)) {
-		PBD::error << "FFMPEGFileImportableSource: Can't find ffprobe and ffmpeg" << endmsg;
-		throw failed_constructor ();
-	}
+	std::string ffprobe_output;
 
-	int    a    = 0;
-	char** argp = (char**)calloc (10, sizeof (char*));
+	{
+		std::string ffprobe_exe, unused;
+		if (!ArdourVideoToolPaths::transcoder_exe (unused, ffprobe_exe)) {
+			PBD::error << "FFMPEGFileImportableSource: Can't find ffprobe and ffmpeg" << endmsg;
+			throw failed_constructor ();
+		}
 
-	argp[a++] = strdup (ffprobe_exe.c_str ());
-	argp[a++] = strdup (_path.c_str ());
-	argp[a++] = strdup ("-show_streams");
-	argp[a++] = strdup ("-of");
-	argp[a++] = strdup ("json");
+		int    a    = 0;
+		char** argp = (char**)calloc (10, sizeof (char*));
 
-	ARDOUR::SystemExec* exec = new ARDOUR::SystemExec (ffprobe_exe, argp, true);
-	PBD::info << "Probe command: { " << exec->to_s () << "}" << endmsg;
+		argp[a++] = strdup (ffprobe_exe.c_str ());
+		argp[a++] = strdup (_path.c_str ());
+		argp[a++] = strdup ("-show_streams");
+		argp[a++] = strdup ("-of");
+		argp[a++] = strdup ("json");
 
-	if (exec->start ()) {
-		PBD::error << "FFMPEGFileImportableSource: External decoder (ffprobe) cannot be started." << endmsg;
+		ARDOUR::SystemExec* exec = new ARDOUR::SystemExec (ffprobe_exe, argp, true);
+		PBD::info << "Probe command: { " << exec->to_s () << "}" << endmsg;
+
+		PBD::ScopedConnection c;
+		exec->ReadStdout.connect_same_thread (c, std::bind (&receive_stdout, &ffprobe_output, std::placeholders::_1, std::placeholders::_2));
+
+		if (exec->start ()) {
+			PBD::error << "FFMPEGFileImportableSource: External decoder (ffprobe) cannot be started." << endmsg;
+			delete exec;
+			throw failed_constructor ();
+		}
+		/* wait for ffprobe process to exit */
+		exec->wait ();
 		delete exec;
-		throw failed_constructor ();
 	}
 
 	try {
-		PBD::ScopedConnection c;
-		std::string           ffprobe_output;
-		exec->ReadStdout.connect_same_thread (c, std::bind (&receive_stdout, &ffprobe_output, std::placeholders::_1, std::placeholders::_2));
-
-		/* wait for ffprobe process to exit */
-		exec->wait ();
-
 		namespace pt = boost::property_tree;
 		pt::ptree          root;
 		std::istringstream is (ffprobe_output);
@@ -102,10 +105,8 @@ FFMPEGFileImportableSource::FFMPEGFileImportableSource (const std::string& path,
 		} catch (...) {
 			_natural_position = 0;
 		}
-		delete exec;
 	} catch (...) {
 		PBD::error << "FFMPEGFileImportableSource: Failed to read file metadata" << endmsg;
-		delete exec;
 		throw failed_constructor ();
 	}
 
