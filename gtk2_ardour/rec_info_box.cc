@@ -347,7 +347,7 @@ RemainInfoBox::render (Cairo::RefPtr<Cairo::Context> const& cr, cairo_rectangle_
 		char buf[32];
 
 		bool  at_least     = FLAC == _session->config.get_native_file_header_format ();
-		const char* prefix = at_least ? u8"\u2265" : ""; // Greater-Than or Equal To
+		const char* prefix = at_least ? "\u2265" : ""; // Greater-Than or Equal To
 
 		if (remain_sec > 86400) {
 			_layout_value->set_text (_(">24h"));

@@ -1377,7 +1377,7 @@ ARDOUR_UI::format_disk_space_label (float remain_sec)
 	std::string label = string_compose (X_("<span weight=\"ultralight\">%1</span>: "), _("Rec"));
 
 	if (_session && FLAC == _session->config.get_native_file_header_format () && remain_sec <= 86400) {
-		label += u8"\u2265"; // Greater-Than or Equal To
+		label += "\u2265"; // Greater-Than or Equal To
 	}
 
 	if (remain_sec > 86400) {
