@@ -57,6 +57,7 @@ private:
 	void reset ();
 
 	void did_read_data (std::string data, size_t size);
+	void terminated ();
 
 	std::string _path;
 	int         _channel;
@@ -69,7 +70,8 @@ private:
 
 	PBD::RingBuffer<Sample> _buffer;
 	/* Set to 1 to indicate that ffmpeg should be terminating. */
-	std::atomic<int> _ffmpeg_should_terminate;
+	std::atomic<bool> _ffmpeg_should_terminate;
+	std::atomic<bool> _read_complete;
 
 	/* To make sure we don't try to parse partial floats, we might have a couple of bytes
 	 * of leftover unparsable data after any `did_read_data` call. Those couple of bytes are
@@ -79,8 +81,8 @@ private:
 
 	samplecnt_t _read_pos;
 
-	ARDOUR::SystemExec*   _ffmpeg_exec;
-	PBD::ScopedConnection _ffmpeg_conn;
+	ARDOUR::SystemExec*       _ffmpeg_exec;
+	PBD::ScopedConnectionList _ffmpeg_conn;
 };
 
 } // namespace ARDOUR

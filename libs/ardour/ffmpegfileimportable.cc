@@ -38,7 +38,8 @@ FFMPEGFileImportableSource::FFMPEGFileImportableSource (const std::string& path,
 	: _path (path)
 	, _channel (channel)
 	, _buffer (32768)
-	, _ffmpeg_should_terminate (0)
+	, _ffmpeg_should_terminate (false)
+	, _read_complete (false)
 	, _read_pos (0)
 	, _ffmpeg_exec (0)
 {
@@ -107,6 +108,9 @@ FFMPEGFileImportableSource::FFMPEGFileImportableSource (const std::string& path,
 		}
 	} catch (...) {
 		PBD::error << "FFMPEGFileImportableSource: Failed to read file metadata" << endmsg;
+#ifndef NDEBUG
+		std::cerr << "--8<-- FFMPEGFileImportableSource failed for: '"<< path << "'\n" << ffprobe_output << "-->8--\n";
+#endif
 		throw failed_constructor ();
 	}
 
@@ -140,8 +144,7 @@ FFMPEGFileImportableSource::seek (samplepos_t pos)
 				PBD::warning << string_compose ("FFMPEGFileImportableSource: Reached EOF while trying to seek to %1", pos) << endmsg;
 				break;
 			}
-			// TODO: don't just spin, but use some signalling
-			Glib::usleep (1000);
+			Glib::usleep (10000); // 10 ms
 			continue;
 		}
 		guint inc = std::min<guint> (read_space, pos - _read_pos);
@@ -157,16 +160,25 @@ FFMPEGFileImportableSource::read (Sample* dst, samplecnt_t nframes)
 		start_ffmpeg ();
 	}
 
+	int timeout = 0;
+
 	samplecnt_t total_read = 0;
 	while (nframes > 0) {
 		guint read = _buffer.read (dst + total_read, nframes);
 		if (read == 0) {
-			if (!_ffmpeg_exec->is_running ()) {
-				// FFMPEG quit, must have reached EOF.
+			if (_read_complete.load ()) {
 				break;
 			}
-			// TODO: don't just spin, but use some signalling
-			Glib::usleep (1000);
+			if (!_ffmpeg_exec->is_running ()) {
+				// FFMPEG quit?, wait 1 sec
+				if (++timeout > 200 || _ffmpeg_should_terminate.load ()) {
+#ifndef NDEBUUG
+					std::cerr << "FFMPEGFileImportableSource::read aborted\n";
+#endif
+					break;
+				}
+			}
+			Glib::usleep (5000); // 5ms
 			continue;
 		}
 		nframes -= read;
@@ -205,25 +217,33 @@ FFMPEGFileImportableSource::start_ffmpeg ()
 
 	_ffmpeg_exec = new ARDOUR::SystemExec (ffmpeg_exe, argp, true);
 	PBD::info << "Decode command: { " << _ffmpeg_exec->to_s () << "}" << endmsg;
+
+	_ffmpeg_should_terminate.store (false);
+	_read_complete.store (false);
+
+	_leftover_data.clear ();
+	_ffmpeg_conn.drop_connections ();
+
+	_ffmpeg_exec->ReadStdout.connect_same_thread (_ffmpeg_conn, std::bind (&FFMPEGFileImportableSource::did_read_data, this, std::placeholders::_1, std::placeholders::_2));
+	_ffmpeg_exec->Terminated.connect_same_thread (_ffmpeg_conn, std::bind (&FFMPEGFileImportableSource::terminated, this));
+
 	if (_ffmpeg_exec->start ()) {
 		PBD::error << "FFMPEGFileImportableSource: External decoder (ffmpeg) cannot be started." << endmsg;
 		throw std::runtime_error ("Failed to start ffmpeg");
 	}
-
-	_ffmpeg_exec->ReadStdout.connect_same_thread (_ffmpeg_conn, std::bind (&FFMPEGFileImportableSource::did_read_data, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 void
 FFMPEGFileImportableSource::reset ()
 {
 	// TODO: actually signal did_read_data to unblock
-	_ffmpeg_should_terminate.store (1);
+	_ffmpeg_should_terminate.store (true);
 	delete _ffmpeg_exec;
 	_ffmpeg_exec = 0;
-	_ffmpeg_conn.disconnect ();
+	_ffmpeg_conn.drop_connections ();
 	_buffer.reset ();
+	_leftover_data.clear ();
 	_read_pos = 0;
-	_ffmpeg_should_terminate.store (0);
 }
 
 void
@@ -245,8 +265,7 @@ FFMPEGFileImportableSource::did_read_data (std::string data, size_t size)
 		PBD::RingBuffer<float>::rw_vector wv;
 		_buffer.get_write_vector (&wv);
 		if (wv.len[0] == 0) {
-			// TODO: don't just spin, but use some signalling
-			Glib::usleep (1000);
+			Glib::usleep (2000);
 			continue;
 		}
 
@@ -263,4 +282,25 @@ FFMPEGFileImportableSource::did_read_data (std::string data, size_t size)
 		}
 		_buffer.increment_write_idx (written);
 	}
+}
+
+void
+FFMPEGFileImportableSource::terminated ()
+{
+	if (!_leftover_data.empty()) {
+		samplecnt_t n_samples = _leftover_data.length () / sizeof (float);
+		const char* cur = _leftover_data.data ();
+		while (n_samples > 0) {
+			if (_buffer.write_space () == 0) {
+				Glib::usleep (5000);
+				continue;
+			}
+			Sample s;
+			memcpy (&s, cur, sizeof (float));
+			_buffer.write (&s, 1);
+			cur += sizeof (float);
+			--n_samples;
+		}
+	}
+	_read_complete.store (true);
 }
