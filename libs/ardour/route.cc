@@ -5082,18 +5082,18 @@ bool Route::set_name_sequence (std::string const& str)
 	if (_session.loading ()) {
 		return false;
 	}
-	std::regex sequence_regex ("^(.*) (\\d+)\\.\\.(\\d+)$");
+	std::regex sequence_regex ("^(.*)(\\d+)\\.\\.(\\d+)(.*)$");
 	std::smatch matches;
 	bool found = std::regex_search (str, matches, sequence_regex);
 	bool numeric = true;
 
 	if (!found) {
-		std::regex sequence_regex ("^(.*) ([[:alpha:]])\\.\\.([[:alpha:]])$");
+		std::regex sequence_regex ("^(.*)([[:alpha:]])\\.\\.([[:alpha:]])(.*)$");
 		found = std::regex_search (str, matches, sequence_regex);
 		numeric = false;
 	}
 
-	if (found && !matches.empty() && matches.size() == 4) {
+	if (found && !matches.empty() && matches.size() == 5) {
 		bool rv  = true;
 		std::string start (matches[2]);
 		std::string end   (matches[3]);
@@ -5106,7 +5106,7 @@ bool Route::set_name_sequence (std::string const& str)
 				if (!iter) {
 					continue;
 				}
-				rv &= r->set_name (string_compose("%1 %2", matches[1], start));
+				rv &= r->set_name (string_compose("%1%2%3", matches[1], start, matches[4]));
 				if (start == end || !rv) {
 					break;
 				}
