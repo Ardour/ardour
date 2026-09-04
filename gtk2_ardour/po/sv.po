@@ -396,7 +396,7 @@ msgstr "cooltehno"
 
 #: about.cc:226
 msgid "danceswithbugs"
-msgstr "dansar med småfåglar"
+msgstr "danceswithbugs"
 
 #: about.cc:227
 msgid "dbolton"
@@ -939,11 +939,11 @@ msgstr "Signalkälla"
 
 #: analysis_window.cc:49
 msgid "Selected ranges"
-msgstr "Utvalda sortiment"
+msgstr "Valda intervall"
 
 #: analysis_window.cc:50
 msgid "Selected regions"
-msgstr "Utvalda regioner"
+msgstr "Valda regioner"
 
 #: analysis_window.cc:51
 msgid "Show frequency power range"
@@ -1016,7 +1016,7 @@ msgstr "Punch:"
 
 #: application_bar.cc:167
 msgid "Rec:"
-msgstr "Rekommendation:"
+msgstr "Insp:"
 
 #: application_bar.cc:177
 msgid "Disable PDC"
@@ -1200,7 +1200,7 @@ msgstr "Dialogruta för videoexport"
 
 #: ardour_ui.cc:317 lua_script_manager.cc:41
 msgid "Script Manager"
-msgstr "Manusansvarig"
+msgstr "Skripthanterare"
 
 #: ardour_ui.cc:318
 msgid "Idle'o'Meter"
@@ -2355,7 +2355,7 @@ msgstr "Punch Out"
 
 #: ardour_ui_ed.cc:492
 msgid "Punch In/Out"
-msgstr "Stämpla in/ut"
+msgstr "Punch in/ut"
 
 #: ardour_ui_ed.cc:493
 msgid "In/Out"
@@ -2495,7 +2495,7 @@ msgstr "Skjut upp till senare"
 
 #: ardour_ui_ed.cc:698
 msgid "Nudge Next Earlier"
-msgstr "Nudge Nästa Tidigare"
+msgstr "Flytta nästa tidigare"
 
 #: ardour_ui_ed.cc:701
 msgid "Nudge Playhead Forward"
@@ -2503,15 +2503,15 @@ msgstr "Flytta uppspelningshuvudet framåt"
 
 #: ardour_ui_ed.cc:703
 msgid "Nudge Playhead Backward"
-msgstr "Flytta uppspelningsmarkören bakåt"
+msgstr "Flytta uppspelningshuvudet bakåt"
 
 #: ardour_ui_ed.cc:705
 msgid "Playhead to Next Grid"
-msgstr "Spela upp till nästa rutnät"
+msgstr "Flytta uppspelningshuvudet till nästa rutnätslinje"
 
 #: ardour_ui_ed.cc:707
 msgid "Playhead to Previous Grid"
-msgstr "Spela upp till föregående rutnät"
+msgstr "Flytta uppspelningshuvudet till föregående rutnätslinje"
 
 #: ardour_ui_ed.cc:710
 msgid "Start Range from Playhead"
@@ -3706,27 +3706,27 @@ msgstr "1 eller flera spår/bussar kunde inte dupliceras"
 
 #: edit_note_dialog.cc:48
 msgid "Note"
-msgstr "Anteckning"
+msgstr "Not"
 
 #: edit_note_dialog.cc:51
 msgid "Set selected notes to this channel"
-msgstr "Ställ in valda toner till denna kanal"
+msgstr "Ställ in valda noter till den här kanalen"
 
 #: edit_note_dialog.cc:52
 msgid "Set selected notes to this pitch"
-msgstr "Ställ in valda noter till denna tonhöjd"
+msgstr "Ställ in valda noter till den här tonhöjden"
 
 #: edit_note_dialog.cc:53
 msgid "Set selected notes to this velocity"
-msgstr "Ställ in valda noter till denna hastighet"
+msgstr "Ställ in valda noter till den här anslagsstyrkan"
 
 #: edit_note_dialog.cc:55
 msgid "Set selected notes to this time"
-msgstr "Ställ in valda anteckningar till denna tidpunkt"
+msgstr "Ställ in valda noter till den här tidpunkten"
 
 #: edit_note_dialog.cc:57
 msgid "Set selected notes to this length"
-msgstr "Ställ in valda noter till denna längd"
+msgstr "Ställ in valda noter till den här längden"
 
 #: edit_note_dialog.cc:64 editor_markers.cc:1899 midi_list_editor.cc:106
 #: patch_change_dialog.cc:92 step_entry.cc:309 virtual_keyboard_window.cc:134
@@ -3735,12 +3735,12 @@ msgstr "Kanal"
 
 #: edit_note_dialog.cc:74
 msgid "Pitch"
-msgstr "Pitch"
+msgstr "Tonhöjd"
 
 #: edit_note_dialog.cc:84 midi_time_axis.cc:819 pianoroll.cc:245
 #: step_entry.cc:323 virtual_keyboard_window.cc:180
 msgid "Velocity"
-msgstr "Hastighet"
+msgstr "Anslagsstyrka"
 
 #: edit_note_dialog.cc:94 export_analysis_graphs.cc:562 export_report.cc:254
 #: patch_change_dialog.cc:68
@@ -3755,7 +3755,7 @@ msgstr "Längd"
 
 #: edit_note_dialog.cc:175
 msgid "edit note"
-msgstr "redigera anteckning"
+msgstr "redigera not"
 
 #: editing_context.cc:79 editing_context.cc:104 editing_context.cc:502
 msgid "No Grid"
@@ -3764,32 +3764,32 @@ msgstr "Inget rutnät"
 #: editing_context.cc:81 editing_context.cc:106 editor_actions.cc:701
 #: quantize_dialog.cc:41
 msgid "1/4 Note"
-msgstr "1/4 Not"
+msgstr "1/4-not"
 
 #: editing_context.cc:82 editing_context.cc:107 editor_actions.cc:702
 #: quantize_dialog.cc:42
 msgid "1/8 Note"
-msgstr "1/8 Not"
+msgstr "1/8-not"
 
 #: editing_context.cc:83 editing_context.cc:108 editor_actions.cc:703
 #: quantize_dialog.cc:43
 msgid "1/16 Note"
-msgstr "1/16 Anmärkning"
+msgstr "1/16-not"
 
 #: editing_context.cc:84 editing_context.cc:109 editor_actions.cc:704
 #: quantize_dialog.cc:44
 msgid "1/32 Note"
-msgstr "1/32 Not"
+msgstr "1/32-not"
 
 #: editing_context.cc:85 editing_context.cc:110 editor_actions.cc:705
 #: quantize_dialog.cc:45
 msgid "1/64 Note"
-msgstr "1/64 Anmärkning"
+msgstr "1/64-not"
 
 #: editing_context.cc:86 editing_context.cc:111 editor_actions.cc:706
 #: quantize_dialog.cc:46
 msgid "1/128 Note"
-msgstr "1/128 Anmärkning"
+msgstr "1/128-not"
 
 #: editing_context.cc:87 quantize_dialog.cc:48
 msgid "1/3 (8th triplet)"
@@ -4167,27 +4167,27 @@ msgstr "Transponera nedåt (halvton, tillåt mos)"
 
 #: editing_context.cc:633
 msgid "Nudge Notes Later (grid)"
-msgstr "Nudge Notes Later (rutnät)"
+msgstr "Flytta noter senare (rutnät)"
 
 #: editing_context.cc:634
 msgid "Nudge Notes Later (1/4 grid)"
-msgstr "Nudge Notes Later (1/4 rutnät)"
+msgstr "Flytta noter senare (1/4 rutnät)"
 
 #: editing_context.cc:635
 msgid "Nudge Notes Earlier (grid)"
-msgstr "Tidigare påminnelser (rutnät)"
+msgstr "Flytta noter tidigare (rutnät)"
 
 #: editing_context.cc:636
 msgid "Nudge Notes Earlier (1/4 grid)"
-msgstr "Tidigare anteckningar (1/4 rutnät)"
+msgstr "Flytta noter tidigare (1/4 rutnät)"
 
 #: editing_context.cc:646
 msgid "Edit Note Channels"
-msgstr "Redigera anteckningskanaler"
+msgstr "Redigera noternas kanaler"
 
 #: editing_context.cc:647
 msgid "Edit Note Velocities"
-msgstr "Redigera anteckningshastigheter"
+msgstr "Redigera noternas anslagsstyrka"
 
 #: editing_context.cc:1226 editor_actions.cc:164
 msgid "Triplets"
@@ -4246,7 +4246,7 @@ msgstr "Grab Mode (välj/flytta objekt)"
 
 #: editing_context.cc:2395
 msgid "Cut Mode (split regions)"
-msgstr "Klippningsläge (delade regioner)"
+msgstr "Klippningsläge (dela regioner)"
 
 #: editing_context.cc:2396
 msgid "Range Mode (select time ranges)"
@@ -4365,7 +4365,7 @@ msgstr "Tempo"
 
 #: editor.cc:422 editor_actions.cc:579
 msgid "Range Markers"
-msgstr "Räckviddsmarkörer"
+msgstr "Intervallmarkörer"
 
 #: editor.cc:427 editor_actions.cc:581
 msgid "Location Markers"
@@ -4411,7 +4411,7 @@ msgstr "Markörer"
 
 #: editor.cc:548
 msgid "Ranges & Marks"
-msgstr "Områden och betyg"
+msgstr "Intervall och markörer"
 
 #: editor.cc:1189
 msgid "Window|Editor"
@@ -4523,11 +4523,11 @@ msgstr "Välj alla i intervallet"
 
 #: editor.cc:1894 editor_actions.cc:353
 msgid "Set Loop from Selection"
-msgstr "Ställ in slinga från val"
+msgstr "Ställ in loop från markering"
 
 #: editor.cc:1895 editor_actions.cc:354
 msgid "Set Punch from Selection"
-msgstr "Ställ in stansning från val"
+msgstr "Ställ in punch från markering"
 
 #: editor.cc:1896 editor_actions.cc:355
 msgid "Set Session Start/End from Selection"
@@ -4535,11 +4535,11 @@ msgstr "Ställ in sessionens start/slut från valet"
 
 #: editor.cc:1901
 msgid "Add Range Markers"
-msgstr "Lägg till avståndsmarkörer"
+msgstr "Lägg till intervallmarkörer"
 
 #: editor.cc:1905
 msgid "Crop Region to Range"
-msgstr "Skördeområde till intervall"
+msgstr "Beskär region till intervall"
 
 #: editor.cc:1906
 msgid "Duplicate Range"
@@ -4656,7 +4656,7 @@ msgstr "Flytta hela spåret senare"
 
 #: editor.cc:2000 editor.cc:2057
 msgid "Nudge Track After Edit Point Later"
-msgstr "Justera spår efter redigeringspunkt senare"
+msgstr "Flytta spåret efter redigeringspunkten senare"
 
 #: editor.cc:2001 editor.cc:2058
 msgid "Nudge Entire Track Earlier"
@@ -4664,11 +4664,11 @@ msgstr "Flytta hela spåret tidigare"
 
 #: editor.cc:2002 editor.cc:2059
 msgid "Nudge Track After Edit Point Earlier"
-msgstr "Justera spår efter redigeringspunkt tidigare"
+msgstr "Flytta spåret efter redigeringspunkten tidigare"
 
 #: editor.cc:2004 editor.cc:2061
 msgid "Nudge"
-msgstr "Knuff"
+msgstr "Flytta"
 
 #: editor.cc:2187
 msgid ""
@@ -4689,11 +4689,11 @@ msgstr "Grupper: klicka för att (av)aktivera Kontextklicka för andra åtgärde
 
 #: editor.cc:2895
 msgid "Nudge Region/Selection Later"
-msgstr "Justera region/markering senare"
+msgstr "Flytta region/markering senare"
 
 #: editor.cc:2896
 msgid "Nudge Region/Selection Earlier"
-msgstr "Justera region/markering tidigare"
+msgstr "Flytta region/markering tidigare"
 
 #: editor.cc:2897
 msgid "Zoom to Time Scale"
@@ -4705,11 +4705,11 @@ msgstr "Zooma till session"
 
 #: editor.cc:2899
 msgid "Expand Tracks"
-msgstr "Expandera spår"
+msgstr "Öka spårens höjd"
 
 #: editor.cc:2900
 msgid "Shrink Tracks"
-msgstr "Krympspår"
+msgstr "Minska spårens höjd"
 
 #: editor.cc:2901
 msgid "Number of visible tracks"
@@ -4756,43 +4756,43 @@ msgstr "Urval"
 
 #: editor.cc:3240
 msgid "Fit 1 track"
-msgstr "Passar 1 spår"
+msgstr "Anpassa till 1 spår"
 
 #: editor.cc:3241
 msgid "Fit 2 tracks"
-msgstr "Passar 2 spår"
+msgstr "Anpassa till 2 spår"
 
 #: editor.cc:3242
 msgid "Fit 4 tracks"
-msgstr "Passar 4 spår"
+msgstr "Anpassa till 4 spår"
 
 #: editor.cc:3243
 msgid "Fit 8 tracks"
-msgstr "Passar 8 spår"
+msgstr "Anpassa till 8 spår"
 
 #: editor.cc:3244
 msgid "Fit 16 tracks"
-msgstr "Passar 16 spår"
+msgstr "Anpassa till 16 spår"
 
 #: editor.cc:3245
 msgid "Fit 24 tracks"
-msgstr "Passar 24 spår"
+msgstr "Anpassa till 24 spår"
 
 #: editor.cc:3246
 msgid "Fit 32 tracks"
-msgstr "Passar 32 spår"
+msgstr "Anpassa till 32 spår"
 
 #: editor.cc:3247
 msgid "Fit 48 tracks"
-msgstr "Passar 48 spår"
+msgstr "Anpassa till 48 spår"
 
 #: editor.cc:3248
 msgid "Fit All tracks"
-msgstr "Passar alla spår"
+msgstr "Anpassa till alla spår"
 
 #: editor.cc:3249
 msgid "Fit Selection"
-msgstr "Passform"
+msgstr "Anpassa till markeringen"
 
 #: editor.cc:3251 editor_actions.cc:321
 msgid "Zoom to 10 ms"
@@ -4980,7 +4980,7 @@ msgstr "Lokalisera till markörer"
 
 #: editor_actions.cc:132 trigger_page.cc:69 trigger_page.cc:230
 msgid "Cues"
-msgstr "Ledtrådar"
+msgstr "Cues"
 
 #: editor_actions.cc:133
 msgid "Meter falloff"
@@ -5103,27 +5103,27 @@ msgstr "Spelhuvud till föregående regiongräns (ingen spårval)"
 
 #: editor_actions.cc:208
 msgid "Playhead to Next Region Start"
-msgstr "Spela upp till nästa regions början"
+msgstr "Flytta uppspelningshuvudet till nästa regionstart"
 
 #: editor_actions.cc:209
 msgid "Playhead to Next Region End"
-msgstr "Spela upp till nästa regions slut"
+msgstr "Flytta uppspelningshuvudet till nästa regionslut"
 
 #: editor_actions.cc:210
 msgid "Playhead to Next Region Sync"
-msgstr "Spela upp till nästa region Synkronisera"
+msgstr "Flytta uppspelningshuvudet till nästa regions synkpunkt"
 
 #: editor_actions.cc:212
 msgid "Playhead to Previous Region Start"
-msgstr "Spelhuvud till föregående regions början"
+msgstr "Flytta uppspelningshuvudet till föregående regionstart"
 
 #: editor_actions.cc:213
 msgid "Playhead to Previous Region End"
-msgstr "Spela upp till föregående regions slut"
+msgstr "Flytta uppspelningshuvudet till föregående regionslut"
 
 #: editor_actions.cc:214
 msgid "Playhead to Previous Region Sync"
-msgstr "Spela upp till föregående region Synkronisera"
+msgstr "Flytta uppspelningshuvudet till föregående regions synkpunkt"
 
 #: editor_actions.cc:216
 msgid "To Next Region Boundary"
@@ -5232,12 +5232,12 @@ msgstr "Växla mellan visning av lager"
 #: editor_actions.cc:277 editor_actions.cc:278 editor_actions.cc:1452
 #: editor_actions.cc:1453
 msgid "Nudge Later"
-msgstr "Påminn senare"
+msgstr "Flytta senare"
 
 #: editor_actions.cc:279 editor_actions.cc:280 editor_actions.cc:1454
 #: editor_actions.cc:1455
 msgid "Nudge Earlier"
-msgstr "Nudge tidigare"
+msgstr "Flytta tidigare"
 
 #: editor_actions.cc:282
 msgid "Toggle Record Enable"
@@ -5277,43 +5277,43 @@ msgstr "Växla zoomstatus"
 
 #: editor_actions.cc:309
 msgid "Expand Track Height"
-msgstr "Utöka spårhöjd"
+msgstr "Öka spårhöjden"
 
 #: editor_actions.cc:310
 msgid "Shrink Track Height"
-msgstr "Krympspårhöjd"
+msgstr "Minska spårhöjden"
 
 #: editor_actions.cc:312
 msgid "Fit 1 Track"
-msgstr "Passform 1 Spår"
+msgstr "Anpassa till 1 spår"
 
 #: editor_actions.cc:313
 msgid "Fit 2 Tracks"
-msgstr "Passar 2 spår"
+msgstr "Anpassa till 2 spår"
 
 #: editor_actions.cc:314
 msgid "Fit 4 Tracks"
-msgstr "Passar 4 spår"
+msgstr "Anpassa till 4 spår"
 
 #: editor_actions.cc:315
 msgid "Fit 8 Tracks"
-msgstr "Passform 8 spår"
+msgstr "Anpassa till 8 spår"
 
 #: editor_actions.cc:316
 msgid "Fit 16 Tracks"
-msgstr "Passar 16 spår"
+msgstr "Anpassa till 16 spår"
 
 #: editor_actions.cc:317
 msgid "Fit 32 Tracks"
-msgstr "Passar 32 spår"
+msgstr "Anpassa till 32 spår"
 
 #: editor_actions.cc:318
 msgid "Fit All Tracks"
-msgstr "Passar alla spår"
+msgstr "Anpassa till alla spår"
 
 #: editor_actions.cc:319
 msgid "Fit Selected Tracks"
-msgstr "Rym valda spår"
+msgstr "Anpassa till valda spår"
 
 #: editor_actions.cc:326
 msgid "Zoom to 5 min"
@@ -5409,7 +5409,7 @@ msgstr "Aktiv markör till mus"
 
 #: editor_actions.cc:386
 msgid "Set Auto Punch In/Out from Playhead"
-msgstr "Ställ in automatisk in-/utstansning från uppspelningshuvudet"
+msgstr "Ställ in automatisk punch in/ut från uppspelningshuvudet"
 
 #: editor_actions.cc:391 editor_actions.cc:1373
 msgid "Multi-Duplicate..."
@@ -5421,7 +5421,7 @@ msgstr "Ångra valändring"
 
 #: editor_actions.cc:396
 msgid "Redo Selection Change"
-msgstr "Gör om val Ändra"
+msgstr "Gör om markeringsändring"
 
 #: editor_actions.cc:398
 msgid "Export Audio"
@@ -5429,11 +5429,11 @@ msgstr "Exportera ljud"
 
 #: editor_actions.cc:399 export_dialog.cc:592
 msgid "Export Range"
-msgstr "Exportområde"
+msgstr "Exportera intervall"
 
 #: editor_actions.cc:404
 msgid "Separate Using Punch Range"
-msgstr "Separera med hjälp av stansområde"
+msgstr "Separera med punchintervall"
 
 #: editor_actions.cc:405
 msgid "Separate Using Loop Range"
@@ -5445,7 +5445,7 @@ msgstr "Beskär"
 
 #: editor_actions.cc:421
 msgid "Consolidate Range"
-msgstr "Konsolidera sortiment"
+msgstr "Konsolidera intervall"
 
 #: editor_actions.cc:432 rc_option_editor.cc:3408
 msgid "Split/Separate"
@@ -5453,7 +5453,7 @@ msgstr "Dela/Separera"
 
 #: editor_actions.cc:434
 msgid "Fade Range Selection"
-msgstr "Val av toningsintervall"
+msgstr "Tona markerat intervall"
 
 #: editor_actions.cc:436
 msgid "Set Tempo from Edit Range = Bar"
@@ -5501,7 +5501,7 @@ msgstr "Slå på/av aktiv"
 
 #: editor_actions.cc:510
 msgid "Fit Selection (Vertical)"
-msgstr "Passform (vertikal)"
+msgstr "Anpassa till markeringen (vertikalt)"
 
 #: editor_actions.cc:513 time_axis_view.cc:1415
 msgid "Largest"
@@ -5722,19 +5722,19 @@ msgstr "Fyll spår"
 
 #: editor_actions.cc:1379 editor_markers.cc:1301
 msgid "Set Loop Range"
-msgstr "Ställ in slingans räckvidd"
+msgstr "Ställ in loopintervall"
 
 #: editor_actions.cc:1385
 msgid "Set Punch"
-msgstr "Ställ in Punch"
+msgstr "Ställ in punch"
 
 #: editor_actions.cc:1388
 msgid "Add Single Range Marker"
-msgstr "Lägg till enkel räckviddsmarkör"
+msgstr "Lägg till en intervallmarkör"
 
 #: editor_actions.cc:1391
 msgid "Add Range Marker Per Region"
-msgstr "Lägg till områdesmarkör per region"
+msgstr "Lägg till en intervallmarkör per region"
 
 #: editor_actions.cc:1394
 msgid "Snap Position to Grid"
@@ -5822,27 +5822,27 @@ msgstr "Strip Silence..."
 
 #: editor_actions.cc:1450
 msgid "Set Range Selection"
-msgstr "Ställ in intervallval"
+msgstr "Ställ in intervallmarkering"
 
 #: editor_actions.cc:1457
 msgid "Sequence Regions"
-msgstr "Sekvensregioner"
+msgstr "Sekvensera regioner"
 
 #: editor_actions.cc:1459
 msgid "Nudge Later by Capture Offset"
-msgstr "Nudge Later av Capture Offset"
+msgstr "Flytta senare med inspelningsförskjutning"
 
 #: editor_actions.cc:1461
 msgid "Nudge Earlier by Capture Offset"
-msgstr "Nudge tidigare genom att fånga upp avvikelsen"
+msgstr "Flytta tidigare med inspelningsförskjutning"
 
 #: editor_actions.cc:1463
 msgid "Trim to Loop"
-msgstr "Klipp till ögla"
+msgstr "Trimma till loop"
 
 #: editor_actions.cc:1464
 msgid "Trim to Punch"
-msgstr "Klipp till stansning"
+msgstr "Trimma till punch"
 
 #: editor_actions.cc:1466
 msgid "Trim to Previous"
@@ -6007,7 +6007,7 @@ msgstr "skapa region"
 
 #: editor_drag.cc:2441 midi_view.cc:3453
 msgid "resize notes"
-msgstr "ändra storlek på anteckningar"
+msgstr "ändra storlek på noter"
 
 #: editor_drag.cc:2583 editor_drag.cc:2618
 msgid ""
@@ -6244,7 +6244,7 @@ msgstr "Studsa till klippbiblioteket"
 
 #: editor_export_audio.cc:427 editor_ops.cc:4151
 msgid "One of your selected tracks has content in this slot."
-msgstr "En av dina valda låtar har innehåll i denna slot."
+msgstr "Ett av dina valda spår har innehåll på den här platsen."
 
 #: editor_group_tabs.cc:197
 msgid "Fit to Window"
@@ -6260,11 +6260,11 @@ msgstr "slut"
 
 #: editor_markers.cc:849 editor_markers.cc:2018
 msgid "set loop range"
-msgstr "ställa in slingans räckvidd"
+msgstr "ställ in loopintervall"
 
 #: editor_markers.cc:865 editor_markers.cc:2024
 msgid "set punch range"
-msgstr "ställa in stansområde"
+msgstr "ställ in punchintervall"
 
 #: editor_markers.cc:882 editor_ops.cc:4382 editor_ops.cc:7161
 msgid "range"
@@ -6284,15 +6284,15 @@ msgstr "Skapa intervall till nästa markör"
 
 #: editor_markers.cc:1151 editor_markers.cc:1205
 msgid "Promote to Time Origin"
-msgstr "Befordra till tidsursprung"
+msgstr "Gör till tidsursprung"
 
 #: editor_markers.cc:1165
 msgid "Arrangement Boundary"
-msgstr "Arrangemang Gräns"
+msgstr "Arrangemangsgräns"
 
 #: editor_markers.cc:1196
 msgid "Set Range from Selection"
-msgstr "Ställ in intervall från val"
+msgstr "Ställ in intervall från markering"
 
 #: editor_markers.cc:1207
 msgid "Hide Range"
@@ -6332,7 +6332,7 @@ msgstr "Ramp till nästa"
 
 #: editor_markers.cc:1302
 msgid "Set Punch Range"
-msgstr "Ställ in slagavstånd"
+msgstr "Ställ in punchintervall"
 
 #: editor_markers.cc:1621
 msgid "loop range from marker"
@@ -6422,23 +6422,23 @@ msgstr "flytta platsen framåt"
 
 #: editor_ops.cc:613
 msgid "nudge regions backward"
-msgstr "skjuta tillbaka regioner"
+msgstr "flytta regioner bakåt"
 
 #: editor_ops.cc:742
 msgid "nudge forward"
-msgstr "knuffa framåt"
+msgstr "flytta framåt"
 
 #: editor_ops.cc:766
 msgid "nudge backward"
-msgstr "knuffa bakåt"
+msgstr "flytta bakåt"
 
 #: editor_ops.cc:831
 msgid "sequence regions"
-msgstr "sekvensregioner"
+msgstr "sekvensera regioner"
 
 #: editor_ops.cc:1872 location_ui.cc:738
 msgid "New Range"
-msgstr "Nytt sortiment"
+msgstr "Nytt intervall"
 
 #: editor_ops.cc:1874
 msgid "New Location Marker"
@@ -6585,11 +6585,11 @@ msgstr "trimma tillbaka"
 
 #: editor_ops.cc:3773
 msgid "trim to loop"
-msgstr "klipp till ögla"
+msgstr "trimma till loop"
 
 #: editor_ops.cc:3783
 msgid "trim to punch"
-msgstr "trimma för att stansa"
+msgstr "trimma till punch"
 
 #: editor_ops.cc:3890
 msgid "trim to region"
@@ -6809,7 +6809,7 @@ msgstr "växla mellan aktiv och inaktiv"
 
 #: editor_ops.cc:6885
 msgid "set loop range from selection"
-msgstr "ställ in loopintervall från val"
+msgstr "ställ in loopintervall från markering"
 
 #: editor_ops.cc:6899
 msgid "set loop range from region"
@@ -6817,15 +6817,15 @@ msgstr "ställ in loopintervall från region"
 
 #: editor_ops.cc:6917
 msgid "set punch range from selection"
-msgstr "ställ in stansområde från urval"
+msgstr "ställ in punchintervall från markering"
 
 #: editor_ops.cc:6941
 msgid "Auto Punch In"
-msgstr "Automatisk inmatning"
+msgstr "Automatisk punch-in"
 
 #: editor_ops.cc:6948 editor_ops.cc:6952
 msgid "Auto Punch In/Out"
-msgstr "Automatisk in-/utstämpling"
+msgstr "Automatisk punch in/ut"
 
 #: editor_ops.cc:6994
 msgid "set session start/end from selection"
@@ -6833,11 +6833,11 @@ msgstr "ställ in sessionens start/slut från valet"
 
 #: editor_ops.cc:7029
 msgid "set punch start from EP"
-msgstr "ställ in stansstart från EP"
+msgstr "ställ in punch-start från EP"
 
 #: editor_ops.cc:7053
 msgid "set punch end from EP"
-msgstr "ställ in stansänden från EP"
+msgstr "ställ in punch-slut från EP"
 
 #: editor_ops.cc:7084
 msgid "set loop start from EP"
@@ -6845,11 +6845,11 @@ msgstr "ställ in loopstart från EP"
 
 #: editor_ops.cc:7109
 msgid "set loop end from EP"
-msgstr "ställ in slingans ände från EP"
+msgstr "ställ in loopslut från EP"
 
 #: editor_ops.cc:7120
 msgid "set punch range from region"
-msgstr "ställa in stansområde från region"
+msgstr "ställ in punchintervall från region"
 
 #: editor_ops.cc:7207
 msgid "Add new marker"
@@ -6861,7 +6861,7 @@ msgstr "Ställ in globalt tempo"
 
 #: editor_ops.cc:7211
 msgid "Define one bar"
-msgstr "Definiera en stapel"
+msgstr "Definiera en takt"
 
 #: editor_ops.cc:7212
 msgid "Do you want to set the global tempo or add a new tempo marker?"
@@ -6870,7 +6870,7 @@ msgstr ""
 
 #: editor_ops.cc:7262
 msgid "split regions"
-msgstr "delade regioner"
+msgstr "dela regioner"
 
 #: editor_ops.cc:7304
 msgid ""
@@ -7171,7 +7171,7 @@ msgstr "Ja, ta bort."
 
 #: editor_regions.cc:279
 msgid "Remove unused regions"
-msgstr "Ta bort oanvända områden"
+msgstr "Ta bort oanvända regioner"
 
 #: editor_routes.cc:31 route_list_base.cc:84 trigger_route_list.cc:31
 msgid "Track/Bus visible ?"
@@ -7179,11 +7179,11 @@ msgstr "Spår/buss synlig?"
 
 #: editor_routes.cc:32 route_list_base.cc:85 trigger_route_list.cc:32
 msgid "Cues|C"
-msgstr "Ledtrådar|C"
+msgstr "C"
 
 #: editor_routes.cc:32 route_list_base.cc:85 trigger_route_list.cc:32
 msgid "Visible on Cues window ?"
-msgstr "Synlig på Cues-fönstret?"
+msgstr "Synlig i cue-fönstret?"
 
 #: editor_routes.cc:33 route_list_base.cc:86 trigger_route_list.cc:33
 msgid "Track/Bus active ?"
@@ -8937,7 +8937,7 @@ msgstr "<b>Markörer (inklusive CD-index)</b>"
 
 #: location_ui.cc:815
 msgid "<b>Ranges (Including CD Track Ranges)</b>"
-msgstr "<b>Områden (inklusive CD-spårens områden)</b>"
+msgstr "<b>Intervall (inklusive CD-spårintervall)</b>"
 
 #: location_ui.cc:1091
 msgid "add range marker"
@@ -9504,31 +9504,31 @@ msgstr "Vel"
 
 #: midi_list_editor.cc:225
 msgid "edit note start"
-msgstr "redigeringsanteckning början"
+msgstr "redigera notstart"
 
 #: midi_list_editor.cc:234
 msgid "edit note channel"
-msgstr "redigera anteckningskanal"
+msgstr "redigera notkanal"
 
 #: midi_list_editor.cc:244
 msgid "edit note number"
-msgstr "redigera anteckningsnummer"
+msgstr "redigera notnummer"
 
 #: midi_list_editor.cc:254
 msgid "edit note velocity"
-msgstr "redigera anteckning hastighet"
+msgstr "redigera notens anslagsstyrka"
 
 #: midi_list_editor.cc:268
 msgid "edit note length"
-msgstr "redigera anteckningens längd"
+msgstr "redigera notlängd"
 
 #: midi_list_editor.cc:475
 msgid "insert new note"
-msgstr "infoga ny anteckning"
+msgstr "infoga ny not"
 
 #: midi_list_editor.cc:546
 msgid "delete notes (from list)"
-msgstr "ta bort anteckningar (från listan)"
+msgstr "ta bort noter (från listan)"
 
 #: midi_list_editor.cc:621
 msgid "change note channel"
@@ -9540,7 +9540,7 @@ msgstr "ändra notnummer"
 
 #: midi_list_editor.cc:646
 msgid "change note velocity"
-msgstr "ändra nothastighet"
+msgstr "ändra notens anslagsstyrka"
 
 #: midi_list_editor.cc:705
 msgid "change note length"
@@ -9577,11 +9577,11 @@ msgstr "Insticksmodul tillhandahålls"
 
 #: midi_time_axis.cc:730
 msgid "Show Full Range"
-msgstr "Visa hela sortimentet"
+msgstr "Visa hela tonomfånget"
 
 #: midi_time_axis.cc:735
 msgid "Fit Contents"
-msgstr "Passform Innehåll"
+msgstr "Anpassa till innehållet"
 
 #: midi_time_axis.cc:739
 msgid "Note Range"
@@ -9746,15 +9746,15 @@ msgstr "ta bort anteckning"
 
 #: midi_view.cc:3083
 msgid "move notes"
-msgstr "flytta anteckningar"
+msgstr "flytta noter"
 
 #: midi_view.cc:3127
 msgid "copy notes"
-msgstr "kopiera anteckningar"
+msgstr "kopiera noter"
 
 #: midi_view.cc:3840
 msgid "change velocities"
-msgstr "förändringshastigheter"
+msgstr "ändra anslagsstyrkor"
 
 #: midi_view.cc:3908
 msgid "transpose"
@@ -9766,7 +9766,7 @@ msgstr "ändra notlängder"
 
 #: midi_view.cc:4041
 msgid "nudge"
-msgstr "knuff"
+msgstr "flytta"
 
 #: midi_view.cc:4095
 msgid "Bank "
@@ -11102,7 +11102,7 @@ msgstr "Importerad"
 
 #: plugin_eq_gui.cc:124 export_video_dialog.cc:159
 msgid "Range:"
-msgstr "Räckvidd:"
+msgstr "Omfång:"
 
 #: plugin_eq_gui.cc:131
 msgid "Off"
@@ -12411,7 +12411,7 @@ msgstr "Förankrad trimning med:"
 
 #: rc_option_editor.cc:668
 msgid "Resize notes relatively using:"
-msgstr "Ändra storlek på anteckningar relativt med hjälp av:"
+msgstr "Ändra storlek på noter relativt med:"
 
 #: rc_option_editor.cc:677
 msgid "While Dragging:"
@@ -12932,11 +12932,11 @@ msgstr "Visa inte periodiska (MTC, MMC) SysEx-meddelanden i MIDI-regioner"
 
 #: rc_option_editor.cc:2779
 msgid "Show velocity horizontally inside notes"
-msgstr "Visa hastighet horisontellt inuti noter"
+msgstr "Visa anslagsstyrka horisontellt inuti noter"
 
 #: rc_option_editor.cc:2787
 msgid "Use colors to show note velocity"
-msgstr "Använd färger för att visa nothastighet"
+msgstr "Använd färger för att visa noternas anslagsstyrka"
 
 #: rc_option_editor.cc:2812
 msgid "Show waveforms in regions"
@@ -15127,7 +15127,7 @@ msgstr "programmeringsfel: %1 (%2)"
 
 #: rhythm_ferret.cc:399
 msgid "split regions (rhythm ferret)"
-msgstr "delade regioner (rytmferret)"
+msgstr "dela regioner (Rhythm Ferret)"
 
 #: route_comment_editor.cc:122
 msgid "Show this comment on next session load"
@@ -16401,15 +16401,15 @@ msgstr "gör ingenting särskilt"
 
 #: session_option_editor.cc:388
 msgid "replace any overlapped existing note"
-msgstr "ersätt eventuella överlappande befintliga anteckningar"
+msgstr "ersätt befintlig not som överlappas"
 
 #: session_option_editor.cc:389
 msgid "shorten the overlapped existing note"
-msgstr "förkorta den överlappande befintliga anteckningen"
+msgstr "förkorta den befintliga not som överlappas"
 
 #: session_option_editor.cc:390
 msgid "shorten the overlapping new note"
-msgstr "förkorta den överlappande nya noten"
+msgstr "förkorta den nya överlappande noten"
 
 #: session_option_editor.cc:391
 msgid "replace both overlapping notes with a single note"
@@ -17017,7 +17017,7 @@ msgstr "Ställ in notlängden till en sextondel"
 
 #: step_entry.cc:155
 msgid "Set note length to a thirty-second note"
-msgstr "Ställ in notlängden till en trettiotalsnot"
+msgstr "Ställ in notlängden till en trettioandradelsnot"
 
 #: step_entry.cc:156
 msgid "Set note length to a sixty-fourth note"
@@ -17025,39 +17025,39 @@ msgstr "Ställ in notlängden till en sextiofjärdedelsnot"
 
 #: step_entry.cc:175
 msgid "Set volume (velocity) to pianississimo"
-msgstr "Ställ in volym (hastighet) på pianississimo"
+msgstr "Ställ in volymen (anslagsstyrkan) på pianississimo"
 
 #: step_entry.cc:176
 msgid "Set volume (velocity) to pianissimo"
-msgstr "Ställ in volym (hastighet) på pianissimo"
+msgstr "Ställ in volymen (anslagsstyrkan) på pianissimo"
 
 #: step_entry.cc:177
 msgid "Set volume (velocity) to piano"
-msgstr "Ställ in volym (hastighet) på piano"
+msgstr "Ställ in volymen (anslagsstyrkan) på piano"
 
 #: step_entry.cc:178
 msgid "Set volume (velocity) to mezzo-piano"
-msgstr "Ställ in volym (hastighet) till mezzo-piano"
+msgstr "Ställ in volymen (anslagsstyrkan) på mezzo piano"
 
 #: step_entry.cc:179
 msgid "Set volume (velocity) to mezzo-forte"
-msgstr "Ställ in volym (hastighet) till mezzo-forte"
+msgstr "Ställ in volymen (anslagsstyrkan) på mezzo forte"
 
 #: step_entry.cc:180
 msgid "Set volume (velocity) to forte"
-msgstr "Ställ in volym (hastighet) på forte"
+msgstr "Ställ in volymen (anslagsstyrkan) på forte"
 
 #: step_entry.cc:181
 msgid "Set volume (velocity) to fortissimo"
-msgstr "Ställ in volym (hastighet) på fortissimo"
+msgstr "Ställ in volymen (anslagsstyrkan) på fortissimo"
 
 #: step_entry.cc:182
 msgid "Set volume (velocity) to fortississimo"
-msgstr "Ställ in volym (hastighet) på fortississimo"
+msgstr "Ställ in volymen (anslagsstyrkan) på fortississimo"
 
 #: step_entry.cc:246
 msgid "Stack inserted notes to form a chord"
-msgstr "Stapla insatta toner för att bilda ett ackord"
+msgstr "Stapla infogade noter för att bilda ett ackord"
 
 #: step_entry.cc:247
 msgid "Extend selected notes by note length"
@@ -17069,11 +17069,11 @@ msgstr "Använd notlängder utan punkter"
 
 #: step_entry.cc:249
 msgid "Use dotted (* 1.5) note lengths"
-msgstr "Använd prickade (* 1,5) notlängder"
+msgstr "Använd punkterade (* 1,5) notlängder"
 
 #: step_entry.cc:250
 msgid "Use double-dotted (* 1.75) note lengths"
-msgstr "Använd dubbeldotterade (* 1,75) notlängder"
+msgstr "Använd dubbelpunkterade (* 1,75) notlängder"
 
 #: step_entry.cc:251
 msgid "Use triple-dotted (* 1.875) note lengths"
@@ -17113,7 +17113,7 @@ msgstr "Flytta infogningspositionen till redigeringspunkten"
 
 #: step_entry.cc:316
 msgid "1/Note"
-msgstr "1/Anmärkning"
+msgstr "1/not"
 
 #: step_entry.cc:330 virtual_keyboard_window.cc:171
 msgid "Octave"
@@ -17125,11 +17125,11 @@ msgstr "Bank"
 
 #: step_entry.cc:396
 msgid "Step Entry: %1"
-msgstr "Stepinmatning: %1"
+msgstr "Steginmatning: %1"
 
 #: step_entry.cc:524
 msgid "Insert Note A"
-msgstr "Infoga anteckning A"
+msgstr "Infoga not A"
 
 #: step_entry.cc:525
 msgid "Insert Note A-sharp"
@@ -17137,11 +17137,11 @@ msgstr "Infoga not Aiss"
 
 #: step_entry.cc:526
 msgid "Insert Note B"
-msgstr "Infoga anteckning B"
+msgstr "Infoga not B"
 
 #: step_entry.cc:527
 msgid "Insert Note C"
-msgstr "Infoga anteckning C"
+msgstr "Infoga not C"
 
 #: step_entry.cc:528
 msgid "Insert Note C-sharp"
@@ -17149,7 +17149,7 @@ msgstr "Infoga not Ciss"
 
 #: step_entry.cc:529
 msgid "Insert Note D"
-msgstr "Infoga anteckning D"
+msgstr "Infoga not D"
 
 #: step_entry.cc:530
 msgid "Insert Note D-sharp"
@@ -17157,11 +17157,11 @@ msgstr "Infoga not Diss"
 
 #: step_entry.cc:531
 msgid "Insert Note E"
-msgstr "Infoga anteckning E"
+msgstr "Infoga not E"
 
 #: step_entry.cc:532
 msgid "Insert Note F"
-msgstr "Infoga anteckning F"
+msgstr "Infoga not F"
 
 #: step_entry.cc:533
 msgid "Insert Note F-sharp"
@@ -17169,7 +17169,7 @@ msgstr "Infoga not Fiss"
 
 #: step_entry.cc:534
 msgid "Insert Note G"
-msgstr "Infoga anteckning G"
+msgstr "Infoga not G"
 
 #: step_entry.cc:535
 msgid "Insert Note G-sharp"
@@ -17205,19 +17205,19 @@ msgstr "Minska notlängden"
 
 #: step_entry.cc:549
 msgid "Move to Next Note Velocity"
-msgstr "Gå till nästa nothastighet"
+msgstr "Gå till nästa anslagsstyrka"
 
 #: step_entry.cc:550
 msgid "Move to Previous Note Velocity"
-msgstr "Flytta till föregående nothastighet"
+msgstr "Gå till föregående anslagsstyrka"
 
 #: step_entry.cc:552
 msgid "Increase Note Velocity"
-msgstr "Öka nothastigheten"
+msgstr "Öka anslagsstyrkan"
 
 #: step_entry.cc:553
 msgid "Decrease Note Velocity"
-msgstr "Minska nothastigheten"
+msgstr "Minska anslagsstyrkan"
 
 #: step_entry.cc:555
 msgid "Switch to the 1st octave"
@@ -17309,47 +17309,47 @@ msgstr "Ställ in notlängden till 1/64"
 
 #: step_entry.cc:597
 msgid "Set Note Velocity to Pianississimo"
-msgstr "Ställ in nothastigheten till pianississimo"
+msgstr "Ställ in anslagsstyrkan till pianississimo"
 
 #: step_entry.cc:599
 msgid "Set Note Velocity to Pianissimo"
-msgstr "Ställ in nothastigheten på pianissimo"
+msgstr "Ställ in anslagsstyrkan till pianissimo"
 
 #: step_entry.cc:601
 msgid "Set Note Velocity to Piano"
-msgstr "Ställ in nothastigheten till piano"
+msgstr "Ställ in anslagsstyrkan till piano"
 
 #: step_entry.cc:603
 msgid "Set Note Velocity to Mezzo-Piano"
-msgstr "Ställ in Nothastighet till Mezzo-Piano"
+msgstr "Ställ in anslagsstyrkan till mezzo piano"
 
 #: step_entry.cc:605
 msgid "Set Note Velocity to Mezzo-Forte"
-msgstr "Ställ in nothastigheten till mezzoforte"
+msgstr "Ställ in anslagsstyrkan till mezzo forte"
 
 #: step_entry.cc:607
 msgid "Set Note Velocity to Forte"
-msgstr "Ställ in Nothastighet till Forte"
+msgstr "Ställ in anslagsstyrkan till forte"
 
 #: step_entry.cc:609 step_entry.cc:611
 msgid "Set Note Velocity to Fortississimo"
-msgstr "Ställ in Nothastighet till Fortississimo"
+msgstr "Ställ in anslagsstyrkan till fortississimo"
 
 #: step_entry.cc:616
 msgid "No Dotted Notes"
-msgstr "Inga prickade noter"
+msgstr "Inga punkterade noter"
 
 #: step_entry.cc:617
 msgid "Toggled Dotted Notes"
-msgstr "Växlande prickade noter"
+msgstr "Växla punkterade noter"
 
 #: step_entry.cc:618
 msgid "Toggled Double-Dotted Notes"
-msgstr "Omkopplade dubbeldotterade noter"
+msgstr "Växla dubbelpunkterade noter"
 
 #: step_entry.cc:619
 msgid "Toggled Triple-Dotted Notes"
-msgstr "Omkopplade trepunktsnoter"
+msgstr "Växla trippelpunkterade noter"
 
 #: stereo_panner.cc:134
 #, c-format
@@ -17378,7 +17378,7 @@ msgstr "Sessionsmallar"
 
 #: strip_import_dialog.cc:467
 msgid "<i>New Track</i>"
-msgstr "<i>Ny låt</i>"
+msgstr "<i>Nytt spår</i>"
 
 #: strip_import_dialog.cc:532 strip_import_dialog.cc:533
 msgid " -- New Track -- "
@@ -17726,15 +17726,15 @@ msgstr "denna anteckning"
 
 #: transform_dialog.cc:38
 msgid "the previous note's"
-msgstr "föregående anteckningens"
+msgstr "föregående nots"
 
 #: transform_dialog.cc:39
 msgid "this note's index"
-msgstr "denna antecknings index"
+msgstr "den här notens index"
 
 #: transform_dialog.cc:40
 msgid "the number of notes"
-msgstr "antalet anteckningar"
+msgstr "antalet noter"
 
 #: transform_dialog.cc:41
 msgid "exactly"
@@ -17979,7 +17979,7 @@ msgstr "Triggerplats %1/%2"
 
 #: trigger_page.cc:999 trigger_page.cc:1000
 msgid "Stop Cues %1"
-msgstr "Stoppa ledtrådar %1"
+msgstr "Stoppa cues %1"
 
 #: trigger_page.cc:1003
 msgid "Stop all cues now"
