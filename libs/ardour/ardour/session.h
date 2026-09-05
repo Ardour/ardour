@@ -1161,6 +1161,7 @@ public:
 	// these commands are implemented in libs/ardour/session_command.cc
 	PBD::Command* memento_command_factory(XMLNode* n);
 	PBD::Command* stateful_diff_command_factory (XMLNode *);
+	PBD::Command* replace_region_source_command_factory (XMLNode *);
 	void register_with_memento_command_factory(PBD::ID, PBD::StatefulDestructible*);
 
 	/* clicking */

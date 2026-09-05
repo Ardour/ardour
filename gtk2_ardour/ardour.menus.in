@@ -935,6 +935,7 @@
       <menuitem action='split-region'/>
       <menuitem action='split-region-at-transients'/>
       <menuitem action='split-multichannel-region'/>
+      <menuitem action='replace-region-source'/>
       <menuitem action='close-region-gaps'/>
       <menuitem action='place-transient' />
       <menuitem action='show-rhythm-ferret'/>
