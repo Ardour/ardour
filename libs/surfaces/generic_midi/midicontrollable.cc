@@ -362,6 +362,11 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 
 			if (in_sync || _surface->motorised ()) {
 				_controllable->set_value (midi_to_control (new_value), Controllable::UseGroup);
+				
+				// Suppress immediate echo for accepted absolute CC input.
+				// Ardour's CC round-trip maps an input value N to feedback N-1,
+				// shifting controllers that read and apply feedback.
+				last_value = control_to_midi (_controllable->get_value ());
 			}
 			DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI CC %1 value %2  %3\n", (int) msg->controller_number, (float) midi_to_control(new_value), current_uri() ));
 
