@@ -507,6 +507,14 @@ Track::set_name (const string& str)
 		return false;
 	}
 
+	if (set_name_sequence (str)) {
+		return true;
+	}
+
+	if (str == name()) {
+		return true;
+	}
+
 	string newname = Route::ensure_track_or_route_name (str);
 
 	if (newname == name()) {

@@ -713,6 +713,8 @@ protected:
 
 	bool is_internal_processor (std::shared_ptr<Processor>) const;
 
+	bool set_name_sequence (std::string const&);
+
 	std::shared_ptr<Processor> the_instrument_unlocked() const;
 
 	SlavableAutomationControlList slavables () const;

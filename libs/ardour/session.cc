@@ -37,6 +37,7 @@
 #include <cmath>
 #include <cerrno>
 #include <limits.h>
+#include <regex>
 
 #include <giomm.h>
 
@@ -2744,6 +2745,44 @@ Session::find_route_name (string const & base, uint32_t& id, string& name, bool 
 				}
 			}
 			break;
+		}
+	}
+
+	/* compare to Route::set_name_sequence */
+	std::regex sequence_regex ("^(.*) (\\d+)\\.\\.(\\d+)$");
+	std::smatch matches;
+	bool found = std::regex_search (base, matches, sequence_regex);
+	bool numeric = true;
+
+	if (!found) {
+		std::regex sequence_regex ("^(.*) ([[:alpha:]])\\.\\.([[:alpha:]])$");
+		found = std::regex_search (base, matches, sequence_regex);
+		numeric = false;
+	}
+
+	if (found && !matches.empty() && matches.size() == 4) {
+		std::string start (matches[2]);
+		std::string end   (matches[3]);
+		for (uint32_t i = 1; i < id; ++i) {
+			if (numeric) {
+				start = ARDOUR::bump_name_number (start);
+			} else {
+				start = ARDOUR::bump_name_abc (start);
+			}
+		}
+		while (!PBD::naturally_less (end, start) && id < (UINT_MAX-1)) { // start <= end
+			name = string_compose ("%1 %2", matches[1], start);
+
+			if (route_by_name (name) == 0) {
+				return true;
+			}
+
+			if (numeric) {
+				start = ARDOUR::bump_name_number (start);
+			} else {
+				start = ARDOUR::bump_name_abc (start);
+			}
+			++id;
 		}
 	}
 
