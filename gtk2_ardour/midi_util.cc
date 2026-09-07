@@ -145,7 +145,6 @@ build_controller_menu (Gtk::Menu& menu, InstrumentInfo const & instrument_info, 
 		/* No controllers names, generate generic numeric menu */
 
 		bool multi_channel = (0 != (channel_mask & (channel_mask - 1)));
-		std::cerr << "is mc #2 " << multi_channel << std::endl;
 
 		/* count the number of selected channels because we will build a different menu
 		 * structure if there is more than 1 selected.
