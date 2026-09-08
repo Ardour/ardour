@@ -5097,6 +5097,13 @@ bool Route::set_name_sequence (std::string const& str)
 		bool rv  = true;
 		std::string start (matches[2]);
 		std::string end   (matches[3]);
+		bool isLowCase = ! (std::isupper(static_cast<unsigned char>(start[0])) );
+		if (isLowCase) {
+			end[0] = std::tolower(end[0]);
+		}
+		else{
+			end[0] = std::toupper(end[0]);
+		}
 		if (PBD::naturally_less (start, end)) {
 			bool iter = false;
 			for (auto const& r : _session.get_routelist (false, _presentation_info.flags())) {
@@ -5114,6 +5121,9 @@ bool Route::set_name_sequence (std::string const& str)
 					start = ARDOUR::bump_name_number (start);
 				} else {
 					start = ARDOUR::bump_name_abc (start);
+					if (isLowCase) {
+						start[0] = std::tolower(start[0]);
+					}
 				}
 			}
 			return rv;
