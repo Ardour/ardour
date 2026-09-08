@@ -369,6 +369,16 @@ ARDOUR::module_path_vst3 (string const& path)
 #endif
 			return "-1";
 		}
+#else
+		/* A single .vst3 file was only ever a valid module on Windows. Here it
+		 * is the Windows dll of a multi-platform bundle (Contents/x86_64-win/),
+		 * found because the folder is scanned recursively; the bundle itself is
+		 * used instead.
+		 */
+#ifndef NDEBUG
+		cerr << "Ignore .vst3 file (not a bundle) '" << path << "'\n";
+#endif
+		return "-1";
 #endif
 		module_path = path;
 	} else {

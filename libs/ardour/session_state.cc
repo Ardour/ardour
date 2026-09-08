@@ -4011,7 +4011,7 @@ Session::route_group_by_name (string name)
 			return rg;
 		}
 	}
-	return 0;
+	return std::shared_ptr<RouteGroup> ();
 }
 
 static bool

@@ -5077,11 +5077,60 @@ Route::save_as_template (const string& path, const string& name, const string& d
 	return rv;
 }
 
+bool Route::set_name_sequence (std::string const& str)
+{
+	if (_session.loading ()) {
+		return false;
+	}
+	std::regex sequence_regex ("^(.*) (\\d+)\\.\\.(\\d+)$");
+	std::smatch matches;
+	bool found = std::regex_search (str, matches, sequence_regex);
+	bool numeric = true;
+
+	if (!found) {
+		std::regex sequence_regex ("^(.*) ([[:alpha:]])\\.\\.([[:alpha:]])$");
+		found = std::regex_search (str, matches, sequence_regex);
+		numeric = false;
+	}
+
+	if (found && !matches.empty() && matches.size() == 4) {
+		bool rv  = true;
+		std::string start (matches[2]);
+		std::string end   (matches[3]);
+		if (PBD::naturally_less (start, end)) {
+			bool iter = false;
+			for (auto const& r : _session.get_routelist (false, _presentation_info.flags())) {
+				if (r == shared_from_this ()) {
+					iter = true;
+				}
+				if (!iter) {
+					continue;
+				}
+				rv &= r->set_name (string_compose("%1 %2", matches[1], start));
+				if (start == end || !rv) {
+					break;
+				}
+				if (numeric) {
+					start = ARDOUR::bump_name_number (start);
+				} else {
+					start = ARDOUR::bump_name_abc (start);
+				}
+			}
+			return rv;
+		}
+	}
+	return false;
+}
+
 bool
 Route::set_name (const string& str)
 {
 	if (str.empty ()) {
 		return false;
+	}
+
+	if (set_name_sequence (str)) {
+		return true;
 	}
 
 	if (str == name()) {
