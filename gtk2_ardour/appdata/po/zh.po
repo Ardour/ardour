@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 6\n"
-"POT-Creation-Date: 2020-05-13 15:36+0800\n"
+"POT-Creation-Date: 2026-09-08 12:57+0800\n"
 "PO-Revision-Date: 2021-02-11 21:55+0800\n"
 "Last-Translator: 一善鱼 <YQ-YSY@163.com>\n"
 "Language-Team: 一善鱼 YQ-YSY@163.com\n"
@@ -13,41 +13,102 @@ msgstr ""
 "X-Generator: Poedit 2.4.1\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 
+#. (itstool) path: component/id
+#: ardour.appdata.xml.in.in:3
+msgid "@ARDOUR_EXEC@.desktop"
+msgstr ""
+
+#. (itstool) path: component/metadata_license
+#: ardour.appdata.xml.in.in:4
+msgid "CC0-1.0"
+msgstr ""
+
+#. (itstool) path: component/project_license
+#: ardour.appdata.xml.in.in:5
+msgid "GPL-2.0+"
+msgstr ""
+
 # Intentionally left untranslated.
 #. (itstool) path: component/name
-#: /home/abc-old/Translaton%E7%BF%BB%E8%AF%91/Ardour%E7%BF%BB%E8%AF%91/ardour/gtk2_ardour/ardour.appdata.xml.in.in:6
+#. (itstool) path: keywords/keyword
+#: ardour.appdata.xml.in.in:6 ardour.appdata.xml.in.in:35
 msgid "Ardour"
 msgstr ""
 
 # Intentionally left untranslated.
 #. (itstool) path: component/summary
-#: /home/abc-old/Translaton%E7%BF%BB%E8%AF%91/Ardour%E7%BF%BB%E8%AF%91/ardour/gtk2_ardour/ardour.appdata.xml.in.in:10
+#. (itstool) path: keywords/keyword
+#: ardour.appdata.xml.in.in:10 ardour.appdata.xml.in.in:37
 msgid "Digital Audio Workstation"
 msgstr "数字音频工作站"
 
 #. (itstool) path: description/p
-#: /home/abc-old/Translaton%E7%BF%BB%E8%AF%91/Ardour%E7%BF%BB%E8%AF%91/ardour/gtk2_ardour/ardour.appdata.xml.in.in:12
+#: ardour.appdata.xml.in.in:12
 msgid ""
 "Ardour is a multi-channel digital audio workstation, allowing you to record, "
 "edit, mix and master audio and MIDI projects."
 msgstr ""
-"Ardour 是一个多声道数字音频工作站，允许您录制，编辑，混音并且主控音频和 MIDI "
-"项目。"
+"Ardour 是一款多声道数字音频工作站，可用于录制、编辑、混音和制作音频及 MIDI 工"
+"程。"
 
 #. (itstool) path: description/p
-#: /home/abc-old/Translaton%E7%BF%BB%E8%AF%91/Ardour%E7%BF%BB%E8%AF%91/ardour/gtk2_ardour/ardour.appdata.xml.in.in:16
+#: ardour.appdata.xml.in.in:16
 msgid ""
 "It is targeted at audio engineers, musicians, soundtrack editors and "
 "composers."
-msgstr "它的应用人群针对的是音频工程师、乐师、声音轨道编辑师和作曲家。"
+msgstr ""
+"它面向音频工程师、音乐家、配乐编辑者和作曲家。"
+
+#. (itstool) path: component/url
+#: ardour.appdata.xml.in.in:21
+msgid "https://tracker.ardour.org/"
+msgstr ""
+
+#. (itstool) path: component/url
+#: ardour.appdata.xml.in.in:22
+msgid "https://ardour.org/development"
+msgstr ""
+
+#. (itstool) path: component/url
+#: ardour.appdata.xml.in.in:23
+msgid "https://ardour.org"
+msgstr ""
+
+#. (itstool) path: screenshot/image
+#: ardour.appdata.xml.in.in:26
+msgid ""
+"https://community.ardour.org/files/images/ardour-editor-window-1600x900.png"
+msgstr ""
 
 #. (itstool) path: screenshot/caption
-#: /home/abc-old/Translaton%E7%BF%BB%E8%AF%91/Ardour%E7%BF%BB%E8%AF%91/ardour/gtk2_ardour/ardour.appdata.xml.in.in:25
+#: ardour.appdata.xml.in.in:27
 msgid ""
 "The Editor window where you can arrange audio and MIDI data along a timeline"
-msgstr "编辑器窗口是您可以沿着时间线排列音频和 MIDI 数据的地方"
+msgstr ""
+"编辑器窗口，可让您沿时间线编排音频和 MIDI 数据"
+
+#. (itstool) path: screenshot/image
+#: ardour.appdata.xml.in.in:30
+msgid ""
+"https://community.ardour.org/files/images/ardour-mixer-window-1600x900.png"
+msgstr ""
 
 #. (itstool) path: screenshot/caption
-#: /home/abc-old/Translaton%E7%BF%BB%E8%AF%91/Ardour%E7%BF%BB%E8%AF%91/ardour/gtk2_ardour/ardour.appdata.xml.in.in:29
+#: ardour.appdata.xml.in.in:31
 msgid "The Mixer window which includes channel strips for each track and bus"
-msgstr "混音器窗口包括有每个音轨和总线的声道工具栏"
+msgstr "包含每条音轨和总线通道条的混音器窗口"
+
+#. (itstool) path: keywords/keyword
+#: ardour.appdata.xml.in.in:36
+msgid "DAW"
+msgstr "数字音频工作站"
+
+#. (itstool) path: keywords/keyword
+#: ardour.appdata.xml.in.in:38
+msgid "Mixing"
+msgstr "混音"
+
+#. (itstool) path: keywords/keyword
+#: ardour.appdata.xml.in.in:39
+msgid "Mastering"
+msgstr "母带处理"
