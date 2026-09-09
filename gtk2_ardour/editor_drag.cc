@@ -3014,10 +3014,7 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 		editing_context.commit_reversible_command ();
 
 	} else {
-		/* no mouse movement */
-		if (adjusted_current_time (event) != adjusted_time (_drags->current_pointer_time (), event, false)) {
-			_editor.point_trim (event, adjusted_current_time (event));
-		}
+		/* no mouse movement. do nothing*/
 	}
 
 	for (list<DraggingView>::const_iterator i = _views.begin (); i != _views.end (); ++i) {

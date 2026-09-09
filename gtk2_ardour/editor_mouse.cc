@@ -2053,69 +2053,6 @@ Editor::cancel_time_selection ()
 }
 
 void
-Editor::point_trim (GdkEvent* event, timepos_t const & new_bound)
-{
-	RegionView* rv = clicked_regionview;
-
-	/* Choose action dependent on which button was pressed */
-	switch (event->button.button) {
-	case 1:
-		begin_reversible_command (_("start point trim"));
-
-		if (selection->selected (rv)) {
-			for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin();
-			     i != selection->regions.by_layer().end(); ++i)
-			{
-				if (!(*i)->region()->locked()) {
-					(*i)->region()->clear_changes ();
-					(*i)->region()->trim_front (new_bound);
-					_session->add_command(new StatefulDiffCommand ((*i)->region()));
-				}
-			}
-
-		} else {
-			if (!rv->region()->locked()) {
-				rv->region()->clear_changes ();
-				rv->region()->trim_front (new_bound);
-				_session->add_command(new StatefulDiffCommand (rv->region()));
-			}
-		}
-
-		commit_reversible_command();
-
-		break;
-	case 2:
-		begin_reversible_command (_("end point trim"));
-
-		if (selection->selected (rv)) {
-
-			for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ++i)
-			{
-				if (!(*i)->region()->locked()) {
-					(*i)->region()->clear_changes();
-					(*i)->region()->trim_end (new_bound);
-					_session->add_command(new StatefulDiffCommand ((*i)->region()));
-				}
-			}
-
-		} else {
-
-			if (!rv->region()->locked()) {
-				rv->region()->clear_changes ();
-				rv->region()->trim_end (new_bound);
-				_session->add_command (new StatefulDiffCommand (rv->region()));
-			}
-		}
-
-		commit_reversible_command();
-
-		break;
-	default:
-		break;
-	}
-}
-
-void
 Editor::hide_marker (ArdourCanvas::Item* item, GdkEvent* /*event*/)
 {
 	ArdourMarker* marker;
