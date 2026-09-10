@@ -18,6 +18,7 @@
  */
 
 #include <iostream>
+#include <mutex>
 
 #ifdef COMPILER_MSVC
 #define _WINSOCKAPI_
@@ -365,17 +366,19 @@ ContourDesignControlProtocol::acquire_device ()
 void
 ContourDesignControlProtocol::release_device ()
 {
+	std::mutex transfer_mtx;
 	if (!_dev_handle) {
 		return;
 	}
 
-//	if (_usb_transfer) {
-//		libusb_cancel_transfer (_usb_transfer);
-//		libusb_free_transfer (_usb_transfer);
-//	}
-
 	libusb_release_interface (_dev_handle, 0);
 	libusb_close (_dev_handle);
+
+	if (_usb_transfer) {
+		libusb_cancel_transfer (_usb_transfer);
+		libusb_free_transfer (_usb_transfer);
+	}
+
 	_usb_transfer = 0;
 	_dev_handle = 0;
 }
