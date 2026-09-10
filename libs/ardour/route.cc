@@ -5082,6 +5082,14 @@ bool Route::set_name_sequence (std::string const& str)
 	if (_session.loading ()) {
 		return false;
 	}
+
+	PresentationInfo::Flag flags         = _presentation_info.flags();
+	PresentationInfo::Flag flags_exclude = PresentationInfo::Flag (PresentationInfo::Auditioner | PresentationInfo::Hidden | PresentationInfo::Singleton); // preliminary route check
+	PresentationInfo::Flag flags_mask    = PresentationInfo::Flag (flags & PresentationInfo::Route);
+	if (flags & flags_exclude) {
+		return false;
+	}
+
 	std::regex sequence_regex ("^(.*)(\\d+)\\.\\.(\\d+)(.*)$");
 	std::smatch matches;
 	bool found = std::regex_search (str, matches, sequence_regex);
@@ -5106,13 +5114,18 @@ bool Route::set_name_sequence (std::string const& str)
 		}
 		if (PBD::naturally_less (start, end)) {
 			bool iter = false;
-			for (auto const& r : _session.get_routelist (false, _presentation_info.flags())) {
+			for (auto const& r : _session.get_routelist ()) {
 				if (r == shared_from_this ()) {
 					iter = true;
 				}
 				if (!iter) {
 					continue;
 				}
+
+				if (0 != (r->_presentation_info.flags() & flags_mask)) {
+					return true;
+				}
+
 				rv &= r->set_name (string_compose("%1%2%3", matches[1], start, matches[4]));
 				if (start == end || !rv) {
 					break;
