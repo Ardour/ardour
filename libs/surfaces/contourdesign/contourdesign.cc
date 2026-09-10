@@ -369,9 +369,13 @@ ContourDesignControlProtocol::release_device ()
 		return;
 	}
 
-	libusb_close (_dev_handle);
-	libusb_free_transfer (_usb_transfer);
+//	if (_usb_transfer) {
+//		libusb_cancel_transfer (_usb_transfer);
+//		libusb_free_transfer (_usb_transfer);
+//	}
+
 	libusb_release_interface (_dev_handle, 0);
+	libusb_close (_dev_handle);
 	_usb_transfer = 0;
 	_dev_handle = 0;
 }
