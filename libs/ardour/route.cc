@@ -5082,31 +5082,52 @@ bool Route::set_name_sequence (std::string const& str)
 	if (_session.loading ()) {
 		return false;
 	}
-	std::regex sequence_regex ("^(.*) (\\d+)\\.\\.(\\d+)$");
+
+	// Setting flags
+	PresentationInfo::Flag fl = _presentation_info.flags();
+	PresentationInfo::Flag flEx = PresentationInfo::Flag (PresentationInfo::Auditioner | PresentationInfo::Hidden | PresentationInfo::Singleton); //preliminary route  check
+	PresentationInfo::Flag flMask = PresentationInfo::Flag (fl & PresentationInfo::Route);
+	if (fl & flEx){
+		return false;
+	}
+
+	std::regex sequence_regex ("^(.*)(\\d+)\\.\\.(\\d+)(.*)$");
 	std::smatch matches;
 	bool found = std::regex_search (str, matches, sequence_regex);
 	bool numeric = true;
 
 	if (!found) {
-		std::regex sequence_regex ("^(.*) ([[:alpha:]])\\.\\.([[:alpha:]])$");
+		std::regex sequence_regex ("^(.*)([[:alpha:]])\\.\\.([[:alpha:]])(.*)$");
 		found = std::regex_search (str, matches, sequence_regex);
 		numeric = false;
 	}
 
-	if (found && !matches.empty() && matches.size() == 4) {
+	if (found && !matches.empty() && matches.size() == 5) {
 		bool rv  = true;
 		std::string start (matches[2]);
 		std::string end   (matches[3]);
+		bool isLowCase = ! (std::isupper(static_cast<unsigned char>(start[0])) );
+		if (isLowCase) {
+			end[0] = std::tolower(end[0]);
+		}
+		else{
+			end[0] = std::toupper(end[0]);
+		}
 		if (PBD::naturally_less (start, end)) {
 			bool iter = false;
-			for (auto const& r : _session.get_routelist (false, _presentation_info.flags())) {
+			for (auto const& r : _session.get_routelist () )  {
 				if (r == shared_from_this ()) {
 					iter = true;
 				}
 				if (!iter) {
 					continue;
 				}
-				rv &= r->set_name (string_compose("%1 %2", matches[1], start));
+
+				if ( ! (r->_presentation_info.flags() & flMask) ) {
+					return true;
+				}
+
+				rv &= r->set_name (string_compose("%1%2%3", matches[1], start, matches[4]));
 				if (start == end || !rv) {
 					break;
 				}
@@ -5114,6 +5135,9 @@ bool Route::set_name_sequence (std::string const& str)
 					start = ARDOUR::bump_name_number (start);
 				} else {
 					start = ARDOUR::bump_name_abc (start);
+					if (isLowCase) {
+						start[0] = std::tolower(start[0]);
+					}
 				}
 			}
 			return rv;
