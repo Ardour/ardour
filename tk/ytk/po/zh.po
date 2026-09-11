@@ -1,0 +1,1438 @@
+# gtk+ package simplified Chinese translation file.
+# Copyright (C) 2000, 2001, 2003, 2004, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+# 辛立仁 <hsin@med.cgu.edu.tw>, 2000.
+# Chih-Wei Huang <cwhuang@linux.org.tw>, 2000.
+# Abel Cheung <maddog@linux.org.hk>, 2001.
+# He Qiangqiang <carton@263.net>, 2001.
+# Funda Wang <fundawang@linux.net.cn>, 2003,2004
+# Yang Zhang <zyangmath@gmail.com>, 2007.
+# Deng Xiyue <manphiz@gmail.com>, 2008,2009.
+# Funda Wang <fundawang@gmail.com>, 2008,2009.
+# Dean Lee <xslidian@gmail.com>, 2010.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Ardour\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-09 23:38+0800\n"
+"PO-Revision-Date: 2026-09-07 00:00+0000\n"
+"Last-Translator: Ardour zh_Hans contributors\n"
+"Language-Team: Simplified Chinese\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: gtkaboutdialog.c:245
+msgid "Could not show link"
+msgstr "无法显示链接"
+
+#: gtkaboutdialog.c:399 gtkaboutdialog.c:2286
+msgid "License"
+msgstr "许可"
+
+#: gtkaboutdialog.c:400
+msgid "The license of the program"
+msgstr "程序的许可协议"
+
+#: gtkaboutdialog.c:646
+msgid "C_redits"
+msgstr "致谢(_R)"
+
+#: gtkaboutdialog.c:660
+msgid "_License"
+msgstr "许可(_L)"
+
+#: gtkaboutdialog.c:966
+#, c-format
+msgid "About %s"
+msgstr "关于 %s"
+
+#: gtkaboutdialog.c:2209
+msgid "Credits"
+msgstr "致谢"
+
+#: gtkaboutdialog.c:2238
+msgid "Written by"
+msgstr "编写者"
+
+#: gtkaboutdialog.c:2241
+msgid "Documented by"
+msgstr "文档撰写者"
+
+#: gtkaboutdialog.c:2253
+msgid "Translated by"
+msgstr "翻译者"
+
+#: gtkaboutdialog.c:2257
+msgid "Artwork by"
+msgstr "美工"
+
+#: gtkbuilderparser.c:343
+#, c-format
+msgid "Invalid type function on line %d: '%s'"
+msgstr "无效的类型函数出现于第 %d 行：“%s”"
+
+#: gtkbuilderparser.c:407
+#, c-format
+msgid "Duplicate object ID '%s' on line %d (previously on line %d)"
+msgstr "重复的对象 ID“%s”出现在第 %d 行 (之前出现在第 %d 行)"
+
+#: gtkbuilderparser.c:859
+#, c-format
+msgid "Invalid root element: '%s'"
+msgstr "无效的根元素：“%s”"
+
+#: gtkbuilderparser.c:898
+#, c-format
+msgid "Unhandled tag: '%s'"
+msgstr "未处理的标记：“%s”"
+
+#: gtkcellrendereraccel.c:389 gtkcellrendereraccel.c:663
+msgid "New accelerator..."
+msgstr "新建加速键..."
+
+#: gtkcolorbutton.c:178 gtkcolorbutton.c:459
+msgid "Pick a Color"
+msgstr "选择颜色"
+
+#: gtkcolorbutton.c:352
+msgid "Received invalid color data\n"
+msgstr "收到了无效的颜色数据\n"
+
+#: gtkcolorsel.c:358
+msgid ""
+"Select the color you want from the outer ring. Select the darkness or "
+"lightness of that color using the inner triangle."
+msgstr ""
+"在外围环中选择您要的颜色。在内部三角形中选择该颜色的明暗度。"
+
+#: gtkcolorsel.c:393
+msgid ""
+"Click the eyedropper, then click a color anywhere on your screen to select "
+"that color."
+msgstr ""
+"单击滴管，然后点屏幕任何一处来选取该位置的颜色。"
+
+#: gtkcolorsel.c:403
+msgid "_Hue:"
+msgstr "色调(_H)："
+
+#: gtkcolorsel.c:404
+msgid "Position on the color wheel."
+msgstr "在色相环中的位置。"
+
+#: gtkcolorsel.c:406
+msgid "_Saturation:"
+msgstr "饱和度(_S)："
+
+#: gtkcolorsel.c:407
+msgid "\"Deepness\" of the color."
+msgstr "颜色的“深度”。"
+
+#: gtkcolorsel.c:408
+msgid "_Value:"
+msgstr "值(_V)："
+
+#: gtkcolorsel.c:409
+msgid "Brightness of the color."
+msgstr "颜色的亮度。"
+
+#: gtkcolorsel.c:410
+msgid "_Red:"
+msgstr "红(_R)："
+
+#: gtkcolorsel.c:411
+msgid "Amount of red light in the color."
+msgstr "颜色中的红色分量。"
+
+#: gtkcolorsel.c:412
+msgid "_Green:"
+msgstr "绿(_G)："
+
+#: gtkcolorsel.c:413
+msgid "Amount of green light in the color."
+msgstr "颜色中的绿色分量。"
+
+#: gtkcolorsel.c:414
+msgid "_Blue:"
+msgstr "蓝(_B)："
+
+#: gtkcolorsel.c:415
+msgid "Amount of blue light in the color."
+msgstr "颜色中的蓝色分量。"
+
+#: gtkcolorsel.c:418
+msgid "Op_acity:"
+msgstr "透明度(_A)："
+
+#: gtkcolorsel.c:425 gtkcolorsel.c:435
+msgid "Transparency of the color."
+msgstr "颜色的透明度。"
+
+#: gtkcolorsel.c:442
+msgid "Color _name:"
+msgstr "颜色名称(_N)："
+
+#: gtkcolorsel.c:456
+msgid ""
+"You can enter an HTML-style hexadecimal color value, or simply a color name "
+"such as 'orange' in this entry."
+msgstr ""
+"您可以在此栏输入 HTML 风格的十六进制颜色值，或是像“orange”这样的颜色名称。"
+
+#: gtkcolorsel.c:486
+msgid "_Palette:"
+msgstr "调色板(_P)："
+
+#: gtkcolorsel.c:515
+msgid "Color Wheel"
+msgstr "色相环"
+
+#: gtkcolorsel.c:974
+msgid ""
+"The previously-selected color, for comparison to the color you're selecting "
+"now. You can drag this color to a palette entry, or select this color as "
+"current by dragging it to the other color swatch alongside."
+msgstr ""
+"先前选中的颜色，相对于您正选中的颜色。您可以拖动此颜色到调色板，或拖动此颜色"
+"到下一个颜色样品格内以作为当前选中颜色。"
+
+#: gtkcolorsel.c:977
+msgid ""
+"The color you've chosen. You can drag this color to a palette entry to save "
+"it for use in the future."
+msgstr ""
+"您选择的颜色。您可以拖动此颜色到调色板并将之保存供以后使用。"
+
+#: gtkcolorsel.c:982
+msgid ""
+"The previously-selected color, for comparison to the color you're selecting "
+"now."
+msgstr ""
+"之前选择的颜色，用来与您正在选的颜色作比对。"
+
+#: gtkcolorsel.c:985
+msgid "The color you've chosen."
+msgstr "您所选择的颜色。"
+
+#: gtkcolorsel.c:1401
+msgid "_Save color here"
+msgstr "在此保存颜色(_S)"
+
+#: gtkcolorsel.c:1605
+msgid ""
+"Click this palette entry to make it the current color. To change this entry, "
+"drag a color swatch here or right-click it and select \"Save color here.\""
+msgstr ""
+"单击此调色板项可以将其变为当前颜色。要更改此项，请将颜色拖曳到此处，或者用鼠"
+"标右键单击之，然后选择“在此保存颜色”。"
+
+#: gtkcolorseldialog.c:170
+msgid "Color Selection"
+msgstr "颜色选择"
+
+#: gtkentry.c:8789 gtktextview.c:8007
+msgid "Input _Methods"
+msgstr "输入法(_M)"
+
+#: gtkentry.c:8803 gtktextview.c:8021
+msgid "_Insert Unicode Control Character"
+msgstr "插入 Unicode 控制字符(_I)"
+
+#: gtkentry.c:10177
+msgid "Caps Lock is on"
+msgstr "大写锁已打开"
+
+#: gtkfilechooserbutton.c:64
+msgid "Select a File"
+msgstr "选择文件"
+
+#: gtkfilechooserbutton.c:65 gtkfilechooserdefault.c:1853
+msgid "Desktop"
+msgstr "桌面"
+
+#: gtkfilechooserbutton.c:66
+msgid "(None)"
+msgstr "（无）"
+
+#: gtkfilechooserbutton.c:2175
+msgid "Other..."
+msgstr "其他…"
+
+#: gtkfilechooserdefault.c:150
+msgid "Type name of new folder"
+msgstr "输入新建文件夹的名称"
+
+#: gtkfilechooserdefault.c:958
+msgid "Could not retrieve information about the file"
+msgstr "无法获取关于文件的信息"
+
+#: gtkfilechooserdefault.c:969
+msgid "Could not add a bookmark"
+msgstr "无法添加书签"
+
+#: gtkfilechooserdefault.c:980
+msgid "Could not remove bookmark"
+msgstr "无法删除书签"
+
+#: gtkfilechooserdefault.c:991
+msgid "The folder could not be created"
+msgstr "无法创建文件夹"
+
+#: gtkfilechooserdefault.c:1004
+msgid ""
+"The folder could not be created, as a file with the same name already "
+"exists.  Try using a different name for the folder, or rename the file first."
+msgstr ""
+"无法创建文件夹，因为已经存在同名文件。请试着为文件夹使用不同的名称，或者先重"
+"命名文件。"
+
+#: gtkfilechooserdefault.c:1018
+msgid "You need to choose a valid filename."
+msgstr "您需要选择有效的文件名。"
+
+#: gtkfilechooserdefault.c:1021
+#, c-format
+msgid "Cannot create a file under %s as it is not a folder"
+msgstr "无法在 %s 下创建文件，因为它不是文件夹"
+
+#: gtkfilechooserdefault.c:1033
+msgid ""
+"You may only select folders.  The item that you selected is not a folder; "
+"try using a different item."
+msgstr ""
+"您只能选择文件夹。您选择的项目不是文件夹，请尝试选择其他项目。"
+
+#: gtkfilechooserdefault.c:1043
+msgid "Invalid file name"
+msgstr "无效的文件名"
+
+#: gtkfilechooserdefault.c:1053
+msgid "The folder contents could not be displayed"
+msgstr "无法显示文件夹内容"
+
+#: gtkfilechooserdefault.c:1586
+#, c-format
+msgid "%1$s on %2$s"
+msgstr "%2$s 上的 %1$s"
+
+#: gtkfilechooserdefault.c:1735
+msgid "Search"
+msgstr "搜索"
+
+#: gtkfilechooserdefault.c:1759 gtkfilechooserdefault.c:4877
+msgid "Recently Used"
+msgstr "最近使用的"
+
+#: gtkfilechooserdefault.c:2389
+msgid "Select which types of files are shown"
+msgstr "选择要显示的文件类型"
+
+#: gtkfilechooserdefault.c:2748
+#, c-format
+msgid "Add the folder '%s' to the bookmarks"
+msgstr "将文件夹“%s”添加到书签"
+
+#: gtkfilechooserdefault.c:2792
+msgid "Add the current folder to the bookmarks"
+msgstr "将当前文件夹添加到书签"
+
+#: gtkfilechooserdefault.c:2794
+msgid "Add the selected folders to the bookmarks"
+msgstr "将选中文件夹添加到书签"
+
+#: gtkfilechooserdefault.c:2839
+#, c-format
+msgid "Remove the bookmark '%s'"
+msgstr "删除书签“%s”"
+
+#: gtkfilechooserdefault.c:2841
+#, c-format
+msgid "Bookmark '%s' cannot be removed"
+msgstr "无法删除书签“%s”"
+
+#: gtkfilechooserdefault.c:2848 gtkfilechooserdefault.c:3742
+msgid "Remove the selected bookmark"
+msgstr "删除选中的书签"
+
+#: gtkfilechooserdefault.c:3423
+msgid "Remove"
+msgstr "删除"
+
+#: gtkfilechooserdefault.c:3432
+msgid "Rename..."
+msgstr "重命名..."
+
+#: gtkfilechooserdefault.c:3599
+msgid "Places"
+msgstr "位置"
+
+#: gtkfilechooserdefault.c:3656
+msgid "_Places"
+msgstr "位置(_R)"
+
+#: gtkfilechooserdefault.c:3730
+msgid "Add the selected folder to the Bookmarks"
+msgstr "将选中的文件夹添加到书签"
+
+#: gtkfilechooserdefault.c:3874
+msgid "Could not select file"
+msgstr "无法选择文件"
+
+#: gtkfilechooserdefault.c:4047
+msgid "_Add to Bookmarks"
+msgstr "添加到书签(_A)"
+
+#: gtkfilechooserdefault.c:4060
+msgid "Show _Hidden Files"
+msgstr "显示隐藏文件(_H)"
+
+#: gtkfilechooserdefault.c:4067
+msgid "Show _Size Column"
+msgstr "显示大小列(_S)"
+
+#: gtkfilechooserdefault.c:4291
+msgid "Files"
+msgstr "文件"
+
+#: gtkfilechooserdefault.c:4342
+msgid "Name"
+msgstr "名称"
+
+#: gtkfilechooserdefault.c:4365
+msgid "Size"
+msgstr "大小"
+
+#: gtkfilechooserdefault.c:4379
+msgid "Modified"
+msgstr "修改日期"
+
+#: gtkfilechooserdefault.c:4475
+msgid "_Name:"
+msgstr "名称(_N)："
+
+#: gtkfilechooserdefault.c:4715
+msgid "Type a file name"
+msgstr "输入文件名"
+
+#: gtkfilechooserdefault.c:4762 gtkfilechooserdefault.c:4773
+msgid "Please select a folder below"
+msgstr "请在下面选择一个文件夹"
+
+#: gtkfilechooserdefault.c:4768
+msgid "Please type a file name"
+msgstr "输入文件名"
+
+#: gtkfilechooserdefault.c:4839
+msgid "Create Fo_lder"
+msgstr "创建文件夹(_L)"
+
+#: gtkfilechooserdefault.c:4887
+msgid "Search:"
+msgstr "搜索："
+
+#: gtkfilechooserdefault.c:4938
+msgid "_Location:"
+msgstr "位置(_L)："
+
+#: gtkfilechooserdefault.c:5388
+msgid "Save in _folder:"
+msgstr "保存于文件夹(_F)："
+
+#: gtkfilechooserdefault.c:5390
+msgid "Create in _folder:"
+msgstr "创建于文件夹(_F)："
+
+#: gtkfilechooserdefault.c:6484
+#, c-format
+msgid "Could not read the contents of %s"
+msgstr "无法读取 %s 的内容"
+
+#: gtkfilechooserdefault.c:6488
+msgid "Could not read the contents of the folder"
+msgstr "无法读取文件夹内容"
+
+#: gtkfilechooserdefault.c:6581 gtkfilechooserdefault.c:6649
+#: gtkfilechooserdefault.c:6834
+msgid "Unknown"
+msgstr "未知"
+
+#: gtkfilechooserdefault.c:6596
+msgid "%H:%M"
+msgstr "%H:%M"
+
+#: gtkfilechooserdefault.c:6598
+msgid "Yesterday at %H:%M"
+msgstr "昨天于 %H:%M"
+
+#: gtkfilechooserdefault.c:7306
+msgid "Cannot change to folder because it is not local"
+msgstr "无法更改为文件夹，因为该文件夹并非本地"
+
+#: gtkfilechooserdefault.c:7903 gtkfilechooserdefault.c:7924
+#, c-format
+msgid "Shortcut %s already exists"
+msgstr "快捷方式 %s 已经存在"
+
+#: gtkfilechooserdefault.c:8014
+#, c-format
+msgid "Shortcut %s does not exist"
+msgstr "快捷方式 %s 不存在"
+
+#: gtkfilechooserdefault.c:8255
+#, c-format
+msgid "A file named \"%s\" already exists.  Do you want to replace it?"
+msgstr "已经存在名为“%s”的文件。您是否想要替换？"
+
+#: gtkfilechooserdefault.c:8258
+#, c-format
+msgid ""
+"The file already exists in \"%s\".  Replacing it will overwrite its contents."
+msgstr ""
+"文件已经在“%s”中存在了。替换该文件将覆盖其中的内容。"
+
+#: gtkfilechooserdefault.c:8263
+msgid "_Replace"
+msgstr "替换(_R)"
+
+#: gtkfilechooserdefault.c:9136
+msgid "Could not start the search process"
+msgstr "无法开启搜索进程"
+
+#: gtkfilechooserdefault.c:9137
+msgid ""
+"The program was not able to create a connection to the indexer daemon.  "
+"Please make sure it is running."
+msgstr ""
+"程序无法连接到索引守护进程。请确保它在运行。"
+
+#: gtkfilechooserdefault.c:9151
+msgid "Could not send the search request"
+msgstr "无法发送搜索请求"
+
+#: gtkfilechooserdefault.c:9752
+#, c-format
+msgid "Could not mount %s"
+msgstr "无法挂载 %s"
+
+#: gtkfilechoosersettings.c:515
+#, c-format
+msgid "Error creating folder '%s': %s"
+msgstr "创建目录“%s”时出错：%s"
+
+#: gtkfilesystem.c:52
+msgid "File System"
+msgstr "文件系统"
+
+#: gtkfontbutton.c:144 gtkfontbutton.c:266
+msgid "Pick a Font"
+msgstr "选择字体"
+
+#: gtkfontbutton.c:260
+msgid "Sans 12"
+msgstr "Sans 12"
+
+#: gtkfontbutton.c:785
+msgid "Font"
+msgstr "字体"
+
+#: gtkfontsel.c:75
+msgid "abcdefghijk ABCDEFGHIJK"
+msgstr "abcdefghijk ABCDEFGHIJK"
+
+#: gtkfontsel.c:343
+msgid "_Family:"
+msgstr "字体族(_F)："
+
+#: gtkfontsel.c:349
+msgid "_Style:"
+msgstr "样式(_S)："
+
+#: gtkfontsel.c:355
+msgid "Si_ze:"
+msgstr "大小(_Z)："
+
+#: gtkfontsel.c:532
+msgid "_Preview:"
+msgstr "预览(_P)："
+
+#: gtkfontsel.c:1649
+msgid "Font Selection"
+msgstr "字体选择"
+
+#: gtkiconfactory.c:1354
+#, c-format
+msgid "Error loading icon: %s"
+msgstr "载入图标时出错：%s"
+
+#: gtkicontheme.c:1374
+#, c-format
+msgid ""
+"Could not find the icon '%s'. The '%s' theme\n"
+"was not found either, perhaps you need to install it.\n"
+"You can get a copy from:\n"
+"\t%s"
+msgstr ""
+"找不到图标“%s”。“%s”主题也没有找到，可能您需要先安装它。\n"
+"您可以从下面的位置获得一个副本：\n"
+"\t%s"
+
+#: gtkicontheme.c:1555
+#, c-format
+msgid "Icon '%s' not present in theme"
+msgstr "图标“%s”未出现在主题中"
+
+#: gtkicontheme.c:3101
+msgid "Failed to load icon"
+msgstr "载入图标失败"
+
+#: gtkimmodule.c:527
+msgid "Simple"
+msgstr "简单"
+
+#: gtklabel.c:5696
+msgid "_Open Link"
+msgstr "打开链接(_O)"
+
+#: gtklabel.c:5708
+msgid "Copy _Link Address"
+msgstr "复制链接地址(_L)"
+
+#: gtklinkbutton.c:428
+msgid "Copy URL"
+msgstr "复制 URL"
+
+#: gtklinkbutton.c:586
+msgid "Invalid URI"
+msgstr "无效的 URI"
+
+#: gtkmain.c:412
+msgid "Load additional GTK+ modules"
+msgstr "载入其他 GTK+ 模块"
+
+#: gtkmain.c:413
+msgid "MODULES"
+msgstr "模块"
+
+#: gtkmain.c:415
+msgid "Make all warnings fatal"
+msgstr "将所有警告视为致命错误"
+
+#: gtkmain.c:418
+msgid "GTK+ debugging flags to set"
+msgstr "要设置的 GTK+ 调试标志"
+
+#: gtkmain.c:419 gtkmain.c:422
+msgid "FLAGS"
+msgstr "标志"
+
+#: gtkmain.c:421
+msgid "GTK+ debugging flags to unset"
+msgstr "要取消的 GTK+ 调试标志"
+
+#: gtkmain.c:706
+msgid "default:LTR"
+msgstr "default:LTR"
+
+#: gtkmain.c:771
+#, c-format
+msgid "Cannot open display: %s"
+msgstr "无法打开显示器：%s"
+
+#: gtkmain.c:808
+msgid "GTK+ Options"
+msgstr "GTK+ 选项"
+
+#: gtkmain.c:808
+msgid "Show GTK+ Options"
+msgstr "显示 GTK+ 选项"
+
+#: gtkmountoperation.c:494
+msgid "Co_nnect"
+msgstr "连接(_N)"
+
+#: gtkmountoperation.c:561
+msgid "Connect _anonymously"
+msgstr "匿名连接(_A)"
+
+#: gtkmountoperation.c:570
+msgid "Connect as u_ser:"
+msgstr "连接为用户(_S)："
+
+#: gtkmountoperation.c:608
+msgid "_Username:"
+msgstr "用户名(_U)："
+
+#: gtkmountoperation.c:613
+msgid "_Domain:"
+msgstr "域(_D)："
+
+#: gtkmountoperation.c:619
+msgid "_Password:"
+msgstr "密码(_P)："
+
+#: gtkmountoperation.c:637
+msgid "Forget password _immediately"
+msgstr "立即忘记密码(_I)"
+
+#: gtkmountoperation.c:647
+msgid "Remember password until you _logout"
+msgstr "记到注销之前(_L)"
+
+#: gtkmountoperation.c:657
+msgid "Remember _forever"
+msgstr "永远记住(_F)"
+
+#: gtkmountoperation.c:886
+#, c-format
+msgid "Unknown Application (PID %d)"
+msgstr "未知应用程序(pid %d)"
+
+#: gtkmountoperation.c:1069
+msgid "Unable to end process"
+msgstr "无法结束进程"
+
+#: gtkmountoperation.c:1106
+msgid "_End Process"
+msgstr "结束进程(_E)"
+
+#: gtknotebook.c:4745 gtknotebook.c:7351
+#, c-format
+msgid "Page %u"
+msgstr "第 %u 页"
+
+#: gtkpathbar.c:151
+msgid "Up Path"
+msgstr "上一层路径"
+
+#: gtkpathbar.c:153
+msgid "Down Path"
+msgstr "下一层路径"
+
+#: gtkpathbar.c:1467
+msgid "File System Root"
+msgstr "根文件系统"
+
+#: gtkrc.c:2670
+#, c-format
+msgid "Unable to find include file: \"%s\""
+msgstr "找不到包含文件：“%s”"
+
+#: gtkrc.c:3300 gtkrc.c:3303
+#, c-format
+msgid "Unable to locate image file in pixmap_path: \"%s\""
+msgstr "无法在像素图路径中找到图像文件：“%s”"
+
+#: gtkrecentaction.c:154 gtkrecentaction.c:162 gtkrecentchoosermenu.c:588
+#: gtkrecentchoosermenu.c:596
+#, c-format
+msgid "This function is not implemented for widgets of class '%s'"
+msgstr "此函数尚未在“%s”类的部件上实现"
+
+#: gtkrecentchooserdefault.c:481
+msgid "Select which type of documents are shown"
+msgstr "选择要显示的文档类型"
+
+#: gtkrecentchooserdefault.c:1135 gtkrecentchooserdefault.c:1172
+#, c-format
+msgid "No item for URI '%s' found"
+msgstr "URI“%s”未找到项目"
+
+#: gtkrecentchooserdefault.c:1299
+msgid "Untitled filter"
+msgstr "无标题过滤器"
+
+#: gtkrecentchooserdefault.c:1652
+msgid "Could not remove item"
+msgstr "无法删除项目"
+
+#: gtkrecentchooserdefault.c:1696
+msgid "Could not clear list"
+msgstr "无法清除列表"
+
+#: gtkrecentchooserdefault.c:1780
+msgid "Copy _Location"
+msgstr "复制位置(_L)"
+
+#: gtkrecentchooserdefault.c:1793
+msgid "_Remove From List"
+msgstr "从列表中删除(_R)"
+
+#: gtkrecentchooserdefault.c:1802
+msgid "_Clear List"
+msgstr "清除列表(_C)"
+
+#: gtkrecentchooserdefault.c:1816
+msgid "Show _Private Resources"
+msgstr "显示私有资源(_P)"
+
+#: gtkrecentchoosermenu.c:342
+msgid "No items found"
+msgstr "未找到项目"
+
+#: gtkrecentchoosermenu.c:508 gtkrecentchoosermenu.c:564
+#, c-format
+msgid "No recently used resource found with URI `%s'"
+msgstr "最近使用过的资源中没有找到 URI“%s”"
+
+#: gtkrecentchoosermenu.c:774
+#, c-format
+msgid "Open '%s'"
+msgstr "打开“%s”"
+
+#: gtkrecentchoosermenu.c:804
+msgid "Unknown item"
+msgstr "未知项"
+
+#: gtkrecentmanager.c:1073 gtkrecentmanager.c:1086 gtkrecentmanager.c:1223
+#: gtkrecentmanager.c:1233 gtkrecentmanager.c:1286 gtkrecentmanager.c:1295
+#: gtkrecentmanager.c:1310
+#, c-format
+msgid "Unable to find an item with URI '%s'"
+msgstr "找不到 URI 为“%s”的一项"
+
+#: gtkspinner.c:459
+msgid "Provides visual indication of progress"
+msgstr "提供进度的视觉表示"
+
+#: gtkstock.c:315
+msgctxt "Stock label"
+msgid "Information"
+msgstr "信息"
+
+#: gtkstock.c:316
+msgctxt "Stock label"
+msgid "Warning"
+msgstr "警告"
+
+#: gtkstock.c:317
+msgctxt "Stock label"
+msgid "Error"
+msgstr "错误"
+
+#: gtkstock.c:318
+msgctxt "Stock label"
+msgid "Question"
+msgstr "问题"
+
+#: gtkstock.c:323
+msgctxt "Stock label"
+msgid "_About"
+msgstr "关于(_A)"
+
+#: gtkstock.c:324
+msgctxt "Stock label"
+msgid "_Add"
+msgstr "添加(_A)"
+
+#: gtkstock.c:325
+msgctxt "Stock label"
+msgid "_Apply"
+msgstr "应用(_A)"
+
+#: gtkstock.c:326
+msgctxt "Stock label"
+msgid "_Bold"
+msgstr "粗体(_B)"
+
+#: gtkstock.c:327
+msgctxt "Stock label"
+msgid "_Cancel"
+msgstr "取消(_C)"
+
+#: gtkstock.c:328
+msgctxt "Stock label"
+msgid "_CD-Rom"
+msgstr "_CD-ROM"
+
+#: gtkstock.c:329
+msgctxt "Stock label"
+msgid "_Clear"
+msgstr "清除(_C)"
+
+#: gtkstock.c:330
+msgctxt "Stock label"
+msgid "_Close"
+msgstr "关闭(_C)"
+
+#: gtkstock.c:331
+msgctxt "Stock label"
+msgid "C_onnect"
+msgstr "连接(_O)"
+
+#: gtkstock.c:332
+msgctxt "Stock label"
+msgid "_Convert"
+msgstr "转换(_C)"
+
+#: gtkstock.c:333
+msgctxt "Stock label"
+msgid "_Copy"
+msgstr "复制(_C)"
+
+#: gtkstock.c:334
+msgctxt "Stock label"
+msgid "Cu_t"
+msgstr "剪切(_T)"
+
+#: gtkstock.c:335
+msgctxt "Stock label"
+msgid "_Delete"
+msgstr "删除(_D)"
+
+#: gtkstock.c:336
+msgctxt "Stock label"
+msgid "_Discard"
+msgstr "放弃(_D)"
+
+#: gtkstock.c:337
+msgctxt "Stock label"
+msgid "_Disconnect"
+msgstr "断开连接(_D)"
+
+#: gtkstock.c:338
+msgctxt "Stock label"
+msgid "_Execute"
+msgstr "执行(_E)"
+
+#: gtkstock.c:339
+msgctxt "Stock label"
+msgid "_Edit"
+msgstr "编辑(_E)"
+
+#: gtkstock.c:340
+msgctxt "Stock label"
+msgid "_Find"
+msgstr "查找(_F)"
+
+#: gtkstock.c:341
+msgctxt "Stock label"
+msgid "Find and _Replace"
+msgstr "查找并替换(_R)"
+
+#: gtkstock.c:342
+msgctxt "Stock label"
+msgid "_Floppy"
+msgstr "软盘(_F)"
+
+#: gtkstock.c:343
+msgctxt "Stock label"
+msgid "_Fullscreen"
+msgstr "全屏(_F)"
+
+#: gtkstock.c:344
+msgctxt "Stock label"
+msgid "_Leave Fullscreen"
+msgstr "离开全屏(_L)"
+
+#: gtkstock.c:346
+msgctxt "Stock label, navigation"
+msgid "_Bottom"
+msgstr "到底部(_B)"
+
+#: gtkstock.c:348
+msgctxt "Stock label, navigation"
+msgid "_First"
+msgstr "到第一页(_F)"
+
+#: gtkstock.c:350
+msgctxt "Stock label, navigation"
+msgid "_Last"
+msgstr "到最后一页(_L)"
+
+#: gtkstock.c:352
+msgctxt "Stock label, navigation"
+msgid "_Top"
+msgstr "到顶部(_T)"
+
+#: gtkstock.c:354
+msgctxt "Stock label, navigation"
+msgid "_Back"
+msgstr "后退(_B)"
+
+#: gtkstock.c:356
+msgctxt "Stock label, navigation"
+msgid "_Down"
+msgstr "向下(_D)"
+
+#: gtkstock.c:358
+msgctxt "Stock label, navigation"
+msgid "_Forward"
+msgstr "前进(_F)"
+
+#: gtkstock.c:360
+msgctxt "Stock label, navigation"
+msgid "_Up"
+msgstr "向上(_U)"
+
+#: gtkstock.c:361
+msgctxt "Stock label"
+msgid "_Harddisk"
+msgstr "硬盘(_H)"
+
+#: gtkstock.c:362
+msgctxt "Stock label"
+msgid "_Help"
+msgstr "帮助(_H)"
+
+#: gtkstock.c:363
+msgctxt "Stock label"
+msgid "_Home"
+msgstr "主文件夹(_H)"
+
+#: gtkstock.c:364
+msgctxt "Stock label"
+msgid "Increase Indent"
+msgstr "增加缩进"
+
+#: gtkstock.c:365
+msgctxt "Stock label"
+msgid "Decrease Indent"
+msgstr "减少缩进"
+
+#: gtkstock.c:366
+msgctxt "Stock label"
+msgid "_Index"
+msgstr "索引(_I)"
+
+#: gtkstock.c:367
+msgctxt "Stock label"
+msgid "_Information"
+msgstr "信息(_I)"
+
+#: gtkstock.c:368
+msgctxt "Stock label"
+msgid "_Italic"
+msgstr "斜体(_I)"
+
+#: gtkstock.c:369
+msgctxt "Stock label"
+msgid "_Jump to"
+msgstr "跳至(_J)"
+
+#: gtkstock.c:371
+msgctxt "Stock label"
+msgid "_Center"
+msgstr "居中(_C)"
+
+#: gtkstock.c:373
+msgctxt "Stock label"
+msgid "_Fill"
+msgstr "两端对齐(_F)"
+
+#: gtkstock.c:375
+msgctxt "Stock label"
+msgid "_Left"
+msgstr "左对齐(_L)"
+
+#: gtkstock.c:377
+msgctxt "Stock label"
+msgid "_Right"
+msgstr "右对齐(_R)"
+
+#: gtkstock.c:380
+msgctxt "Stock label, media"
+msgid "_Forward"
+msgstr "前进(_F)"
+
+#: gtkstock.c:382
+msgctxt "Stock label, media"
+msgid "_Next"
+msgstr "下首(_N)"
+
+#: gtkstock.c:384
+msgctxt "Stock label, media"
+msgid "P_ause"
+msgstr "暂停(_A)"
+
+#: gtkstock.c:386
+msgctxt "Stock label, media"
+msgid "_Play"
+msgstr "播放(_P)"
+
+#: gtkstock.c:388
+msgctxt "Stock label, media"
+msgid "Pre_vious"
+msgstr "上首(_V)"
+
+#: gtkstock.c:390
+msgctxt "Stock label, media"
+msgid "_Record"
+msgstr "录制(_R)"
+
+#: gtkstock.c:392
+msgctxt "Stock label, media"
+msgid "R_ewind"
+msgstr "快退(_E)"
+
+#: gtkstock.c:394
+msgctxt "Stock label, media"
+msgid "_Stop"
+msgstr "停止(_S)"
+
+#: gtkstock.c:395
+msgctxt "Stock label"
+msgid "_Network"
+msgstr "网络(_N)"
+
+#: gtkstock.c:396
+msgctxt "Stock label"
+msgid "_New"
+msgstr "新建(_N)"
+
+#: gtkstock.c:397
+msgctxt "Stock label"
+msgid "_No"
+msgstr "否(_N)"
+
+#: gtkstock.c:398
+msgctxt "Stock label"
+msgid "_OK"
+msgstr "确定(_O)"
+
+#: gtkstock.c:399
+msgctxt "Stock label"
+msgid "_Open"
+msgstr "打开(_O)"
+
+#: gtkstock.c:401
+msgctxt "Stock label"
+msgid "Landscape"
+msgstr "横向"
+
+#: gtkstock.c:403
+msgctxt "Stock label"
+msgid "Portrait"
+msgstr "纵向"
+
+#: gtkstock.c:405
+msgctxt "Stock label"
+msgid "Reverse landscape"
+msgstr "横向翻转"
+
+#: gtkstock.c:407
+msgctxt "Stock label"
+msgid "Reverse portrait"
+msgstr "纵向翻转"
+
+#: gtkstock.c:408
+msgctxt "Stock label"
+msgid "Page Set_up"
+msgstr "页面设置(_U)"
+
+#: gtkstock.c:409
+msgctxt "Stock label"
+msgid "_Paste"
+msgstr "粘贴(_P)"
+
+#: gtkstock.c:410
+msgctxt "Stock label"
+msgid "_Preferences"
+msgstr "首选项(_P)"
+
+#: gtkstock.c:411
+msgctxt "Stock label"
+msgid "_Print"
+msgstr "打印(_P)"
+
+#: gtkstock.c:412
+msgctxt "Stock label"
+msgid "Print Pre_view"
+msgstr "打印预览(_V)"
+
+#: gtkstock.c:413
+msgctxt "Stock label"
+msgid "_Properties"
+msgstr "属性(_P)"
+
+#: gtkstock.c:414
+msgctxt "Stock label"
+msgid "_Quit"
+msgstr "退出(_Q)"
+
+#: gtkstock.c:415
+msgctxt "Stock label"
+msgid "_Redo"
+msgstr "重做(_R)"
+
+#: gtkstock.c:416
+msgctxt "Stock label"
+msgid "_Refresh"
+msgstr "刷新(_R)"
+
+#: gtkstock.c:417
+msgctxt "Stock label"
+msgid "_Remove"
+msgstr "删除(_R)"
+
+#: gtkstock.c:418
+msgctxt "Stock label"
+msgid "_Revert"
+msgstr "还原(_R)"
+
+#: gtkstock.c:419
+msgctxt "Stock label"
+msgid "_Save"
+msgstr "保存(_S)"
+
+#: gtkstock.c:420
+msgctxt "Stock label"
+msgid "Save _As"
+msgstr "另存为(_A)"
+
+#: gtkstock.c:421
+msgctxt "Stock label"
+msgid "Select _All"
+msgstr "全选(_A)"
+
+#: gtkstock.c:422
+msgctxt "Stock label"
+msgid "_Color"
+msgstr "颜色(_C)"
+
+#: gtkstock.c:423
+msgctxt "Stock label"
+msgid "_Font"
+msgstr "字体(_F)"
+
+#: gtkstock.c:425
+msgctxt "Stock label"
+msgid "_Ascending"
+msgstr "升序(_A)"
+
+#: gtkstock.c:427
+msgctxt "Stock label"
+msgid "_Descending"
+msgstr "降序(_D)"
+
+#: gtkstock.c:428
+msgctxt "Stock label"
+msgid "_Spell Check"
+msgstr "拼写检查(_S)"
+
+#: gtkstock.c:429
+msgctxt "Stock label"
+msgid "_Stop"
+msgstr "停止(_S)"
+
+#: gtkstock.c:431
+msgctxt "Stock label"
+msgid "_Strikethrough"
+msgstr "删除线(_S)"
+
+#: gtkstock.c:432
+msgctxt "Stock label"
+msgid "_Undelete"
+msgstr "取消删除(_U)"
+
+#: gtkstock.c:434
+msgctxt "Stock label"
+msgid "_Underline"
+msgstr "下划线(_U)"
+
+#: gtkstock.c:435
+msgctxt "Stock label"
+msgid "_Undo"
+msgstr "撤消(_U)"
+
+#: gtkstock.c:436
+msgctxt "Stock label"
+msgid "_Yes"
+msgstr "是(_Y)"
+
+#: gtkstock.c:438
+msgctxt "Stock label"
+msgid "_Normal Size"
+msgstr "普通大小(_N)"
+
+#: gtkstock.c:440
+msgctxt "Stock label"
+msgid "Best _Fit"
+msgstr "最适合(_F)"
+
+#: gtkstock.c:441
+msgctxt "Stock label"
+msgid "Zoom _In"
+msgstr "放大(_I)"
+
+#: gtkstock.c:442
+msgctxt "Stock label"
+msgid "Zoom _Out"
+msgstr "缩小(_O)"
+
+#: gtktextbufferrichtext.c:652
+#, c-format
+msgid "Unknown error when trying to deserialize %s"
+msgstr "试图反序列化 %s 时发生未知错误"
+
+#: gtktextbufferrichtext.c:711
+#, c-format
+msgid "No deserialize function found for format %s"
+msgstr "格式 %s 未找到反序列化函数"
+
+#: gtktextbufferserialize.c:797 gtktextbufferserialize.c:823
+#, c-format
+msgid "Both \"id\" and \"name\" were found on the <%s> element"
+msgstr "<%s> 元素同时找到了“id”和“name”"
+
+#: gtktextbufferserialize.c:807 gtktextbufferserialize.c:833
+#, c-format
+msgid "The attribute \"%s\" was found twice on the <%s> element"
+msgstr "<%s> 元素找到了两次“%s”属性"
+
+#: gtktextbufferserialize.c:847
+#, c-format
+msgid "<%s> element has invalid ID \"%s\""
+msgstr "<%s> 元素的 id“%s”无效"
+
+#: gtktextbufferserialize.c:857
+#, c-format
+msgid "<%s> element has neither a \"name\" nor an \"id\" attribute"
+msgstr "<%s> 元素既没有“name”也没有“id”属性"
+
+#: gtktextbufferserialize.c:944
+#, c-format
+msgid "Attribute \"%s\" repeated twice on the same <%s> element"
+msgstr "在同一个 <%2$s> 元素中重复了两次“%1$s”属性"
+
+#: gtktextbufferserialize.c:962 gtktextbufferserialize.c:987
+#, c-format
+msgid "Attribute \"%s\" is invalid on <%s> element in this context"
+msgstr "此上下文中 <%2$s> 元素的属性“%1$s”非法"
+
+#: gtktextbufferserialize.c:1023
+#, c-format
+msgid "Tag \"%s\" has not been defined."
+msgstr "标签“%s”未定义。"
+
+#: gtktextbufferserialize.c:1035
+msgid "Anonymous tag found and tags can not be created."
+msgstr "发现匿名标签，不能创建标签。"
+
+#: gtktextbufferserialize.c:1046
+#, c-format
+msgid "Tag \"%s\" does not exist in buffer and tags can not be created."
+msgstr "标签“%s”不存在于缓存中，不能创建标签。"
+
+#: gtktextbufferserialize.c:1145 gtktextbufferserialize.c:1220
+#: gtktextbufferserialize.c:1321 gtktextbufferserialize.c:1395
+#, c-format
+msgid "Element <%s> is not allowed below <%s>"
+msgstr "元素 <%s> 不允许位于 <%s> 下方"
+
+#: gtktextbufferserialize.c:1176
+#, c-format
+msgid "\"%s\" is not a valid attribute type"
+msgstr "“%s”不是合法的属性类型"
+
+#: gtktextbufferserialize.c:1184
+#, c-format
+msgid "\"%s\" is not a valid attribute name"
+msgstr "“%s”不是合法的属性名称"
+
+#: gtktextbufferserialize.c:1194
+#, c-format
+msgid ""
+"\"%s\" could not be converted to a value of type \"%s\" for attribute \"%s\""
+msgstr ""
+"“%s”不能被转换为“%s”类型的值，此值用于属性“%s”"
+
+#: gtktextbufferserialize.c:1203
+#, c-format
+msgid "\"%s\" is not a valid value for attribute \"%s\""
+msgstr "“%s”不是属性“%s”的合法的值"
+
+#: gtktextbufferserialize.c:1286
+#, c-format
+msgid "Tag \"%s\" already defined"
+msgstr "标签“%s”已经定义"
+
+#: gtktextbufferserialize.c:1297
+#, c-format
+msgid "Tag \"%s\" has invalid priority \"%s\""
+msgstr "标签“%s”的优先级“%s”非法"
+
+#: gtktextbufferserialize.c:1350
+#, c-format
+msgid "Outermost element in text must be <text_view_markup> not <%s>"
+msgstr "文本最外层元素应当为 <text_view_markup> 而不是 <%s>"
+
+#: gtktextbufferserialize.c:1359 gtktextbufferserialize.c:1375
+#, c-format
+msgid "A <%s> element has already been specified"
+msgstr "已经指定了 <%s> 元素"
+
+#: gtktextbufferserialize.c:1381
+msgid "A <text> element can't occur before a <tags> element"
+msgstr "<text> 元素不能出现在 <tags> 元素之前"
+
+#: gtktextbufferserialize.c:1780
+msgid "Serialized data is malformed"
+msgstr "序列化数据格式不对"
+
+#: gtktextbufferserialize.c:1858
+msgid ""
+"Serialized data is malformed. First section isn't GTKTEXTBUFFERCONTENTS-0001"
+msgstr ""
+"序列化数据格式不对。第一节应该是 GTKTEXTBUFFERCONTENTS-0001"
+
+#: gtktextutil.c:61
+msgid "LRM _Left-to-right mark"
+msgstr "LRM 从左至右记号(_L)"
+
+#: gtktextutil.c:62
+msgid "RLM _Right-to-left mark"
+msgstr "RLM 从右至左记号(_R)"
+
+#: gtktextutil.c:63
+msgid "LRE Left-to-right _embedding"
+msgstr "LRE 从左至右嵌入(_E)"
+
+#: gtktextutil.c:64
+msgid "RLE Right-to-left e_mbedding"
+msgstr "RLE 从右至左嵌入(_M)"
+
+#: gtktextutil.c:65
+msgid "LRO Left-to-right _override"
+msgstr "LRO 从左至右覆盖(_O)"
+
+#: gtktextutil.c:66
+msgid "RLO Right-to-left o_verride"
+msgstr "RLO 从右至左覆盖(_V)"
+
+#: gtktextutil.c:67
+msgid "PDF _Pop directional formatting"
+msgstr "PDF 弹出方向格式化(_P)"
+
+#: gtktextutil.c:68
+msgid "ZWS _Zero width space"
+msgstr "ZWS 零宽度空格(_Z)"
+
+#: gtktextutil.c:69
+msgid "ZWJ Zero width _joiner"
+msgstr "ZWJ 零宽度接合(_J)"
+
+#: gtktextutil.c:70
+msgid "ZWNJ Zero width _non-joiner"
+msgstr "ZWNJ 零宽度非接合(_N)"
+
+#: gtkthemes.c:71
+#, c-format
+msgid "Unable to locate theme engine in module_path: \"%s\","
+msgstr "无法在模块路径中找到主题引擎：“%s”，"
+
+#: gtkuimanager.c:1505
+#, c-format
+msgid "Unexpected start tag '%s' on line %d char %d"
+msgstr "在第%2$d行第%3$d个字符处有未预期的开始标签“%1$s”"
+
+#: gtkuimanager.c:1595
+#, c-format
+msgid "Unexpected character data on line %d char %d"
+msgstr "在第%d行第%d个字符处有未预期的字符"
+
+#: gtkuimanager.c:2444
+msgid "Empty"
+msgstr "空"
