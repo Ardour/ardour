@@ -1447,6 +1447,7 @@ Editor::sensitize_the_right_region_actions (bool because_canvas_crossing)
 	bool have_transients = false;
 	bool have_inverted_polarity = false;
 	bool have_non_inverted_polarity = false;
+	bool have_non_audio = false;
 
 	for (list<RegionView*>::const_iterator i = rs.begin(); i != rs.end(); ++i) {
 
@@ -1458,6 +1459,8 @@ Editor::sensitize_the_right_region_actions (bool because_canvas_crossing)
 			if (ar->n_channels() > 1) {
 				have_multichannel_audio = true;
 			}
+		} else {
+			have_non_audio = true;
 		}
 
 		if (std::dynamic_pointer_cast<MidiRegion> (r)) {
@@ -1590,6 +1593,7 @@ Editor::sensitize_the_right_region_actions (bool because_canvas_crossing)
 			// Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-polarity"))->set_inconsistent (); // N/A
 			Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-polarity"))->set_sensitive (false);
 		}
+		_region_actions->get_action("replace-region-source")->set_sensitive (!have_non_audio);
 
 	} else {
 
