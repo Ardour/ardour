@@ -21,7 +21,7 @@ msgstr ""
 
 #: analyser.cc:134 audioregion.cc:2232
 msgid "Transient Analysis failed for %1."
-msgstr "Övergångsanalys misslyckades för %1."
+msgstr "Transientanalysen misslyckades för %1."
 
 #: analyser.cc:134
 msgid "Audio File Source"
@@ -51,11 +51,7 @@ msgstr "Det gick inte att återinitiera ljudbackend"
 msgid ""
 "Failed to open audio device\n"
 "(Typically caused by hardware parameter settings)"
-msgstr ""
-"Det gick inte att öppna ljudenheten\n"
-"(Orsakas vanligtvis av inställningar för hårdvaruparametrar)"
-"Det gick inte att öppna ljudenheten (orsakas vanligtvis av inställningar för "
-"hårdvaruparametrar)"
+msgstr "Det gick inte att öppna ljudenheten\n(orsakas vanligtvis av maskinvaruinställningar)"
 
 #: audio_backend.cc:41
 msgid "Failed to close audio device"
@@ -63,15 +59,15 @@ msgstr "Det gick inte att stänga ljudenheten"
 
 #: audio_backend.cc:43
 msgid "Audio device not valid"
-msgstr "Ljudkälla inte giltig"
+msgstr "Ljudenheten är inte giltig"
 
 #: audio_backend.cc:45
 msgid "Audio device unavailable"
-msgstr "Ljudanordning otillgänglig"
+msgstr "Ljudenheten är inte tillgänglig"
 
 #: audio_backend.cc:47
 msgid "Audio device not connected"
-msgstr "Ljudanordning inte ansluten"
+msgstr "Ljudenheten är inte ansluten"
 
 #: audio_backend.cc:49
 msgid "Failed to request and reserve audio device"
@@ -91,15 +87,15 @@ msgstr "Det gick inte att stänga MIDI-enheten"
 
 #: audio_backend.cc:57
 msgid "MIDI device unavailable"
-msgstr "MIDI-enhet otillgänglig"
+msgstr "MIDI-enheten är inte tillgänglig"
 
 #: audio_backend.cc:59
 msgid "MIDI device not connected"
-msgstr "MIDI-enhet inte ansluten"
+msgstr "MIDI-enheten är inte ansluten"
 
 #: audio_backend.cc:61
 msgid "MIDI device Input/Output error"
-msgstr "MIDI-enhetens in-/utmatningsfel"
+msgstr "Fel på MIDI-enhetens in-/utgång"
 
 #: audio_backend.cc:63
 msgid "Sample format is not supported"
@@ -159,7 +155,7 @@ msgstr "Det gick inte att starta processtråden"
 
 #: audio_backend.cc:91
 msgid "Failed to start freewheel thread"
-msgstr "Misslyckades med att starta frirullningsgängan"
+msgstr "Det gick inte att starta frirullningstråden"
 
 #: audio_backend.cc:93
 msgid "Failed to register audio/midi ports"
@@ -171,7 +167,7 @@ msgstr "Det gick inte att återansluta ljud-/midi-portarna"
 
 #: audio_backend.cc:97
 msgid "Out Of Memory Error"
-msgstr "Minne fullt-fel"
+msgstr "Minnesfel: slut på minne"
 
 #: audio_backend.cc:99
 msgid "Could not reconnect to Audio/MIDI engine"
@@ -252,7 +248,7 @@ msgstr "kan inte byta namn på toppfil för %1 från %2 till %3 (%4)"
 
 #: audiosource.cc:301
 msgid "AudioSource: cannot stat peakfile \"%1\""
-msgstr "AudioSource: kan inte starta toppfil \"%1\""
+msgstr "AudioSource: kan inte läsa filinformation för toppfilen \"%1\""
 
 #: audiosource.cc:456
 msgid "Cannot open peakfile @ %1 for size check (%2)"
@@ -628,7 +624,7 @@ msgstr "Förlustfri komprimering"
 
 #: export_format_manager.cc:237 export_format_specification.cc:734
 msgid "Session rate"
-msgstr "Sessionspris"
+msgstr "Sessionens samplingsfrekvens"
 
 #: export_format_specification.cc:680
 msgid "normalize loudness"
@@ -708,11 +704,11 @@ msgstr "MPEG-2 Audio Layer III"
 
 #: export_formats.cc:187
 msgid "No sample format"
-msgstr "Inget provformat"
+msgstr "Inget samplingsformat"
 
 #: export_handler.cc:568
 msgid "File %1 uploaded to %2"
-msgstr "Fil %1 uuppladdad till %2"
+msgstr "Filen %1 laddades upp till %2"
 
 #: export_handler.cc:574
 msgid ""
@@ -806,8 +802,7 @@ msgstr ""
 msgid ""
 "%1 supports only %2 channels, but you have %3 channels in your channel "
 "configuration"
-msgstr ""
-"%1 sstöder endast %2 ckanaler, men du har %3 ckanaler i din kanalinställning"
+msgstr "%1 stöder endast %2 kanaler, men du har %3 kanaler i din kanalkonfiguration"
 
 #: file_source.cc:198 session_state.cc:4183
 msgid ""
@@ -880,7 +875,7 @@ msgstr "ARDOUR_DLL_PATH är inte inställt i miljön – avslutar\n"
 
 #: filesystem_paths.cc:227
 msgid "Cannot determine %1 package directory"
-msgstr "Kan inte bestämma %1 paketkatalog"
+msgstr "Kan inte fastställa paketkatalogen för %1"
 
 #: filesystem_paths.cc:272
 msgid "ARDOUR_CONFIG_PATH not set in environment\n"
@@ -964,7 +959,7 @@ msgstr "Destinationsmapp finns redan."
 
 #: find_session.cc:283
 msgid "Unknown Error"
-msgstr "Okänd fel"
+msgstr "Okänt fel"
 
 #: globals.cc:319
 msgid "Released CPU DMA latency request"
@@ -986,17 +981,15 @@ msgstr "Det gick inte att ställa in gränsen för öppna filer i systemet till 
 
 #: globals.cc:388 globals.cc:405
 msgid "Your system is configured to limit %1 to %2 open files"
-msgstr "Ditt system är konfigurerat för att begränsa %1 till %2 o öppna filer"
+msgstr "Systemet är konfigurerat för att begränsa %1 till %2 öppna filer"
 
 #: globals.cc:392
 msgid "Could not get system open files limit (%1)"
-msgstr "Kunde inte öppna systemets filgräns (%1)"
+msgstr "Kunde inte hämta systemets gräns för öppna filer (%1)"
 
 #: globals.cc:407
 msgid "Could not set system open files limit. Current limit is %1 open files"
-msgstr ""
-"Det gick inte att ställa in gränsen för öppna filer i systemet. Den aktuella "
-"gränsen är %1 o öppna filer"
+msgstr "Det gick inte att ställa in systemets gräns för öppna filer. Nuvarande gräns är %1 öppna filer"
 
 #: globals.cc:684
 msgid "Loading configuration"
@@ -2243,9 +2236,7 @@ msgstr "%1: systemkonfigurationsfilen \"%2\" kunde inte laddas."
 msgid ""
 "Your system %1 configuration file is empty. This probably means that there "
 "was an error installing %1"
-msgstr ""
-"Din systemkonfigurationsfil %1 c är tom. Detta betyder troligen att det "
-"uppstod ett fel vid installationen av %1"
+msgstr "Systemkonfigurationsfilen för %1 är tom. Det betyder troligen att ett fel uppstod när %1 installerades."
 
 #: rc_configuration.cc:148
 msgid "Loading user configuration file %1"
@@ -3270,11 +3261,11 @@ msgstr "Sammanfoga VCA-automatisering till %1"
 
 #: smf_source.cc:418
 msgid "Unable to read event prefix, corrupt MIDI ring"
-msgstr "Kan inte läsa händelseprefix, skadad MIDI-ring"
+msgstr "Det går inte att läsa händelseprefixet; MIDI-ringbufferten är skadad"
 
 #: smf_source.cc:431
 msgid "Event has time and size but no body, corrupt MIDI ring"
-msgstr "Händelsen har tid och storlek men ingen kropp, korrupt MIDI-ring"
+msgstr "Händelsen har tid och storlek men inga data; MIDI-ringbufferten är skadad"
 
 #: smf_source.cc:437
 msgid "Event time is before MIDI source position"
@@ -3469,19 +3460,19 @@ msgstr "Skapande av transportmasterobjekt av typen %1 misslyckades"
 
 #: transport_master.cc:419 transport_master.cc:452
 msgid "SyncSource|JACK"
-msgstr "SyncSource|JACK"
+msgstr "JACK"
 
 #: transport_master.cc:426
 msgid "SyncSource|MTC"
-msgstr "SyncSource|MTC"
+msgstr "MTC"
 
 #: transport_master.cc:436
 msgid "SyncSource|M-Clk"
-msgstr "SyncSource|M-Clk"
+msgstr "M-Clk"
 
 #: transport_master.cc:446
 msgid "SyncSource|LTC"
-msgstr "SyncSource|LTC"
+msgstr "LTC"
 
 #: transport_master.cc:479
 msgid "Start/Stop"
@@ -3666,7 +3657,7 @@ msgstr "RippleIntervju"
 
 #: utils.cc:662
 msgid "programming error: unknown native header format: %1"
-msgstr "programmeringsfel: okänt inbyggt rubrikformat: %1"
+msgstr "programmeringsfel: okänt inbyggt filhuvudformat: %1"
 
 #: utils.cc:690
 msgid "cannot open directory %1 (%2)"
