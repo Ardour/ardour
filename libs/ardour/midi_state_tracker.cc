@@ -489,7 +489,7 @@ MidiStateTracker::resolve_state (Evoral::EventSink<samplepos_t>& dst, Evoral::Ev
 		}
 
 		for (int k = 0; k < 127; ++k) {
-			if (poly_pressure[chn][k] != 0x80) {
+			if ((poly_pressure[chn][k] & 0x80) == 0) {
 				buf[0] = MIDI_CMD_NOTE_PRESSURE | chn;
 				buf[1] = k;
 				buf[2] = poly_pressure[chn][k];
