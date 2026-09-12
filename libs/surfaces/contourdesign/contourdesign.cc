@@ -366,18 +366,28 @@ ContourDesignControlProtocol::acquire_device ()
 void
 ContourDesignControlProtocol::release_device ()
 {
-	std::mutex transfer_mtx;
 	if (!_dev_handle) {
 		return;
 	}
 
-	libusb_release_interface (_dev_handle, 0);
-	libusb_close (_dev_handle);
+//	int completed = 0;
+//	while (!completed){
+//		libusb_handle_events_completed(0, &completed);
+//	}
 
 	if (_usb_transfer) {
-		libusb_cancel_transfer (_usb_transfer);
+//		std::mutex transfer_mtx;
+//		std::lock_guard<std::mutex> transfer_guard(transfer_mtx);
+		int lusbCancelled = libusb_cancel_transfer (_usb_transfer);
+		while ( (_usb_transfer->status != LIBUSB_TRANSFER_CANCELLED) && lusbCancelled != LIBUSB_ERROR_NOT_FOUND){
+//			handle_event();
+			libusb_handle_events(0);
+		}
 		libusb_free_transfer (_usb_transfer);
 	}
+
+	int relint = libusb_release_interface (_dev_handle, 0);
+	libusb_close (_dev_handle);
 
 	_usb_transfer = 0;
 	_dev_handle = 0;
