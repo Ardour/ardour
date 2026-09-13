@@ -578,6 +578,7 @@ setup_enum_writer ()
 	 */
 	REGISTER_CLASS_ENUM (Source, Destructive);
 	REGISTER_CLASS_ENUM (Source, Empty);
+	REGISTER_CLASS_ENUM (Source, Transient);
 	REGISTER_BITS (_Source_Flag);
 
 	REGISTER_ENUM (FadeLinear);
