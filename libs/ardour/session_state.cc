@@ -1971,7 +1971,11 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 			collect_sources_of_this_snapshot (sources_used_by_this_snapshot, false);
 		}
 
-		for (SourceMap::const_iterator siter = sources.begin(); siter != sources.end(); ++siter) {
+		for (auto const & [id,src] : sources) {
+
+			if (src->transient()) {
+				continue;
+			}
 
 			/* Don't save information about non-file Sources, or
 			 * about file sources that are empty
@@ -1979,7 +1983,7 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 			 */
 			std::shared_ptr<FileSource> fs;
 
-			if ((fs = std::dynamic_pointer_cast<FileSource> (siter->second)) == 0) {
+			if ((fs = std::dynamic_pointer_cast<FileSource> (src)) == 0) {
 				continue;
 			}
 
@@ -2008,12 +2012,12 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 				   2022) we use const_cast.
 				*/
 
-				if (const_cast<Session*>(this)->maybe_copy_midifile (snapshot_type, siter->second, child)) {
+				if (const_cast<Session*>(this)->maybe_copy_midifile (snapshot_type, src, child)) {
 					continue; /* state already added to child */
 				}
 			}
 
-			child->add_child_nocopy (siter->second->get_state());
+			child->add_child_nocopy (src->get_state());
 		}
 	}
 
