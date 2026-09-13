@@ -22,14 +22,17 @@
  */
 #include <vector>
 
+#include "pbd/compose.h"
+#include "pbd/no_state.h"
+#include "pbd/xml++.h"
+
 #include "ardour/debug.h"
 #include "ardour/playlist.h"
 #include "ardour/playlist_factory.h"
 #include "ardour/session_playlists.h"
 #include "ardour/track.h"
+
 #include "pbd/i18n.h"
-#include "pbd/compose.h"
-#include "pbd/xml++.h"
 
 using namespace std;
 using namespace PBD;
@@ -432,10 +435,15 @@ SessionPlaylists::add_state (XMLNode* node, bool save_template, bool include_unu
 
 	for (IDSortedList::const_iterator i = id_sorted_playlists.begin (); i != id_sorted_playlists.end (); ++i) {
 		if (!(*i)->hidden ()) {
-			if (save_template) {
-				child->add_child_nocopy ((*i)->get_template ());
-			} else {
-				child->add_child_nocopy ((*i)->get_state ());
+			try {
+				if (save_template) {
+					child->add_child_nocopy ((*i)->get_template ());
+				} else {
+					child->add_child_nocopy ((*i)->get_state ());
+				}
+			}
+			catch (no_state const & ns) {
+				continue;
 			}
 		}
 	}
@@ -453,10 +461,14 @@ SessionPlaylists::add_state (XMLNode* node, bool save_template, bool include_unu
 	     i != id_sorted_unused_playlists.end (); ++i) {
 		if (!(*i)->hidden()) {
 			if (!(*i)->empty()) {
-				if (save_template) {
-					child->add_child_nocopy ((*i)->get_template());
-				} else {
-					child->add_child_nocopy ((*i)->get_state());
+				try {
+					if (save_template) {
+						child->add_child_nocopy ((*i)->get_template());
+					} else {
+						child->add_child_nocopy ((*i)->get_state());
+					}
+				} catch (no_state const & ns) {
+					continue;
 				}
 			}
 		}
