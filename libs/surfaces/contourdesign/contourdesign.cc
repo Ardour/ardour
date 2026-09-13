@@ -386,7 +386,7 @@ ContourDesignControlProtocol::release_device ()
 		libusb_free_transfer (_usb_transfer);
 	}
 
-	int relint = libusb_release_interface (_dev_handle, 0);
+	libusb_release_interface (_dev_handle, 0);
 	libusb_close (_dev_handle);
 
 	_usb_transfer = 0;
