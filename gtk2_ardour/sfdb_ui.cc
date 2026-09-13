@@ -1546,6 +1546,7 @@ SoundFileOmega::reset_options ()
 		action_combo.set_sensitive (false);
 		sort_combo.set_sensitive (false);
 		where_combo.set_sensitive (false);
+		transient_btn.set_active (true);
 		copy_files_btn.set_active (true);
 		copy_files_btn.set_sensitive (false);
 		midi_track_name_combo.set_sensitive (false);
@@ -1567,6 +1568,7 @@ SoundFileOmega::reset_options ()
 		*/
 
 		copy_files_btn.set_sensitive (false);
+		transient_btn.set_sensitive (false);
 	}
 
 	bool same_size;
@@ -1740,6 +1742,7 @@ SoundFileOmega::reset_options ()
 		copy_files_btn.set_active (true);
 	}
 	copy_files_btn.set_sensitive (!must_copy && selection_can_be_embedded_with_links);
+	transient_btn.set_sensitive (!must_copy && selection_can_be_embedded_with_links);
 
 	return true;
 }
@@ -1886,6 +1889,7 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 				Editing::ImportMode mode_hint)
 	: SoundFileBrowser (title, s, persistent)
 	, instrument_combo (InstrumentSelector::ForTrackSelector)
+	, transient_btn ( _("Use files temporarily"))
 	, copy_files_btn ( _("Copy audio files to session"))
 	, smf_tempo_btn (_("Use MIDI Tempo Map"))
 	, smf_marker_btn (_("Import MIDI markers"))
@@ -1972,6 +1976,7 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	options.attach (src_combo, 7, 8, 0, 1, FILL, SHRINK, 2, 0);
 
 	options.attach (copy_files_btn, 7, 8, 1, 2, FILL, SHRINK, 2, 0);
+	options.attach (transient_btn, 8, 9, 1, 2, FILL, SHRINK, 2, 0);
 
 	str.clear ();
 	str.push_back (_("by track number"));
@@ -2011,6 +2016,7 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	channel_combo.signal_changed().connect (sigc::mem_fun (*this, &SoundFileOmega::reset_options_noret));
 
 	copy_files_btn.set_active (true);
+	transient_btn.set_active (true);
 
 	vpacker.pack_start (options, false, true);
 
@@ -2259,7 +2265,7 @@ SoundFileOmega::do_something (int action)
 	if (copy_files_btn.get_active()) {
 		PublicEditor::instance().do_import (paths, chns, mode, quality, mts, mtd, where, instrument, std::shared_ptr<Track>(), with_midi_markers);
 	} else {
-		PublicEditor::instance().do_embed (paths, chns, mode, false, where, instrument);
+		PublicEditor::instance().do_embed (paths, chns, mode, transient_btn.get_active(), where, instrument);
 	}
 
 	_import_active = false;
