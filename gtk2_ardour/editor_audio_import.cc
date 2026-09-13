@@ -721,7 +721,7 @@ Editor::embed_sndfiles (vector<string>            paths,
 
 				std::shared_ptr<Source> s;
 
-				if ((s = _session->audio_source_by_path_and_channel (path, n)) == 0) {
+				if ((s = _session->audio_source_by_path_and_channel (path, n)) == nullptr) {
 
 					source = std::dynamic_pointer_cast<AudioFileSource> (
 						SourceFactory::createExternal (DataType::AUDIO, *_session,
