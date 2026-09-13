@@ -2181,17 +2181,17 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 		RouteList xml_node_order (*r);
 		xml_node_order.sort (cmp);
 
-		for (RouteList::const_iterator i = xml_node_order.begin(); i != xml_node_order.end(); ++i) {
+		for (auto const & r : xml_node_order) {
 
-			if ((*i)->is_transient()) {
+			if (r->is_transient()) {
 				continue;
 			}
 
-			if (!(*i)->is_auditioner()) {
+			if (!r->is_auditioner()) {
 				if (save_template) {
-					child->add_child_nocopy ((*i)->get_template());
+					child->add_child_nocopy (r->get_template());
 				} else {
-					child->add_child_nocopy ((*i)->get_state());
+					child->add_child_nocopy (r->get_state());
 				}
 			}
 		}
