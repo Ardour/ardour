@@ -41,6 +41,8 @@
 #include "patch_change_widget.h"
 #include "ui_config.h"
 
+#include "midi_util.h"
+
 #include "pbd/i18n.h"
 
 using namespace Gtk;
@@ -496,7 +498,7 @@ PatchChangeWidget::on_show ()
 {
 	Gtk::VBox::on_show ();
 	_channel = -1;
-	select_channel (0);
+	select_channel (get_preferred_midi_channel ());
 }
 
 void
@@ -545,6 +547,13 @@ PatchChangeWidget::select_channel (uint8_t chn)
 	}
 
 	refill_banks ();
+}
+
+uint8_t
+PatchChangeWidget::get_preferred_midi_channel () const
+{
+	uint16_t const chn_mask = (std::dynamic_pointer_cast<MidiTrack> (_route))->get_playback_channel_mask();
+	return get_preferred_midi_channel_from_chn_mask (chn_mask);
 }
 
 void
