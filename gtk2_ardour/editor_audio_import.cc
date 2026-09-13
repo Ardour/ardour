@@ -726,8 +726,8 @@ Editor::embed_sndfiles (vector<string>            paths,
 					source = std::dynamic_pointer_cast<AudioFileSource> (
 						SourceFactory::createExternal (DataType::AUDIO, *_session,
 									       path, n, 
-						                               Source::Flag (0),
-									true, true));
+						                               transient ? Source::Flag (Source::Transient) : Source::Flag (0),
+						                               true, true));
 				} else {
 					source = std::dynamic_pointer_cast<AudioFileSource> (s);
 				}
@@ -991,7 +991,7 @@ Editor::add_sources (vector<string>            paths,
 			import_status.doing_what = "Creating Tracks";
 			ARDOUR::GUIIdle ();
 		}
-		finish_bringing_in_material (*r, input_chan, output_chan, pos, mode, track, track_names[n], pgroup_id, instrument);
+		finish_bringing_in_material (*r, input_chan, output_chan, pos, mode, transient, track, track_names[n], pgroup_id, instrument);
 
 		rlen = (*r)->length();
 
@@ -1022,6 +1022,7 @@ Editor::finish_bringing_in_material (std::shared_ptr<Region> region,
                                      uint32_t                  out_chans,
                                      timepos_t&                pos,
                                      ImportMode                mode,
+                                     bool                      transient,
                                      std::shared_ptr<Track>& existing_track,
                                      string const&             new_track_name,
                                      string const&             pgroup_id,
@@ -1029,6 +1030,8 @@ Editor::finish_bringing_in_material (std::shared_ptr<Region> region,
 {
 	std::shared_ptr<AudioRegion> ar = std::dynamic_pointer_cast<AudioRegion>(region);
 	std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion>(region);
+
+	assert (!existing_track || !transient);
 
 	switch (mode) {
 	case ImportAsRegion:
@@ -1083,7 +1086,11 @@ Editor::finish_bringing_in_material (std::shared_ptr<Region> region,
 				if (at.empty()) {
 					return -1;
 				}
+
 				for (AudioTrackList::iterator i = at.begin(); i != at.end(); ++i) {
+					if (transient) {
+						(*i)->presentation_info().set_flags (PresentationInfo::Flag ((*i)->presentation_info().flags() | PresentationInfo::Transient));
+					}
 					if (Config->get_strict_io ()) {
 						(*i)->set_strict_io (true);
 					}
@@ -1111,6 +1118,9 @@ Editor::finish_bringing_in_material (std::shared_ptr<Region> region,
 				}
 
 				for (list<std::shared_ptr<MidiTrack> >::iterator i = mt.begin(); i != mt.end(); ++i) {
+					if (transient) {
+						(*i)->presentation_info().set_flags (PresentationInfo::Flag ((*i)->presentation_info().flags() | PresentationInfo::Transient));
+					}
 					if (Config->get_strict_io ()) {
 						(*i)->set_strict_io (true);
 					}

@@ -1292,13 +1292,14 @@ private:
 	                 std::shared_ptr<ARDOUR::PluginInfo> instrument = std::shared_ptr<ARDOUR::PluginInfo>());
 
 	int finish_bringing_in_material (std::shared_ptr<ARDOUR::Region>     region,
-	                                 uint32_t                              in_chans,
-	                                 uint32_t                              out_chans,
-	                                 Temporal::timepos_t&                  pos,
-	                                 Editing::ImportMode                   mode,
+	                                 uint32_t                            in_chans,
+	                                 uint32_t                            out_chans,
+	                                 Temporal::timepos_t&                pos,
+	                                 Editing::ImportMode                 mode,
+	                                 bool                                transient,
 	                                 std::shared_ptr<ARDOUR::Track>&     existing_track,
-	                                 std::string const&                    new_track_name,
-	                                 std::string const&                    pgroup_id,
+	                                 std::string const&                  new_track_name,
+	                                 std::string const&                  pgroup_id,
 	                                 std::shared_ptr<ARDOUR::PluginInfo> instrument);
 
 	std::shared_ptr<ARDOUR::AudioTrack> get_nth_selected_audio_track (int nth) const;
