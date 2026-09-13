@@ -2172,7 +2172,7 @@ void
 Region::use_sources (SourceList const & s)
 {
 	PBD::Mutex::Lock lx (_source_list_lock);
-	for (auto const & src : _sources) {
+	for (auto const & src : s) {
 		_sources.push_back (src);
 		src->inc_use_count ();
 		_master_sources.push_back (src);
