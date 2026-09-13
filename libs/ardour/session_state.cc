@@ -1497,6 +1497,9 @@ Session::export_route_state (std::shared_ptr<RouteList> rl, const string& path, 
 
 		child = node->add_child ("Sources");
 		for (SourceSet::const_iterator i = sources.begin(); i != sources.end(); ++i) {
+			if ((*i)->transient()) {
+				continue;
+			}
 			child->add_child_nocopy ((*i)->get_state ());
 			std::shared_ptr<FileSource> fs = std::dynamic_pointer_cast<FileSource> (*i);
 			if (fs) {
