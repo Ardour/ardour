@@ -69,7 +69,9 @@ ContourDesignControlProtocol::ContourDesignControlProtocol (Session& session)
 	, _jog_distance ()
 	, _gui (0)
 {
-	libusb_init (0);
+//	libusb_init_option _init_options[] = { {LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_DEBUG}, };
+//	libusb_init_context (0,_init_options, 1);
+	libusb_init(0);
 //	libusb_set_debug(0, LIBUSB_LOG_LEVEL_WARNING);
 
 	_shuttle_speeds.push_back (0.50);
@@ -95,6 +97,8 @@ ContourDesignControlProtocol::~ContourDesignControlProtocol ()
 bool
 ContourDesignControlProtocol::available ()
 {
+//	libusb_init_option _init_options[] = { {LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_WARNING}, };
+//	bool rv = LIBUSB_SUCCESS == libusb_init_context (0, _init_options, 1);
 	bool rv = LIBUSB_SUCCESS == libusb_init (0);
 	if (rv) {
 		libusb_exit (0);
@@ -281,7 +285,8 @@ get_usb_device (uint16_t vendor_id, uint16_t product_id, libusb_device** device)
 			goto out;
 		}
 		if (desc.idVendor == vendor_id && desc.idProduct == product_id) {
-			*device = dev;
+//			*device = dev;
+			*device = libusb_ref_device(dev);
 			break;
 		}
 	}
