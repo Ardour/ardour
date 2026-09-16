@@ -395,6 +395,7 @@ MidiStateTracker::flush_non_notes (MidiBuffer& dst, samplepos_t time, bool reset
 static int
 find_event (Evoral::EventList<samplepos_t> const& evlist, samplepos_t time, uint8_t* buf)
 {
+	int rv = 0;
 	for (auto const& e : evlist) {
 		Evoral::Event<samplepos_t>* ev (e);
 		timepos_t                   t (ev->time ());
@@ -409,10 +410,10 @@ find_event (Evoral::EventList<samplepos_t> const& evlist, samplepos_t time, uint
 			for (uint32_t i = 1; i < ev->size (); ++i) {
 				buf[i] = evbuf[i];
 			}
-			return t == time ? -1 : 1;
+			rv = time ? -1 : 1;
 		}
 	}
-	return 0;
+	return rv;
 }
 
 void
