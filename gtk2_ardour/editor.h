@@ -1878,9 +1878,6 @@ private:
 	void start_canvas_autoscroll (bool allow_horiz, bool allow_vert, const ArdourCanvas::Rect& boundary);
 	void stop_canvas_autoscroll ();
 
-	/* trimming */
-	void point_trim (GdkEvent*, Temporal::timepos_t const &);
-
 	void trim_region_front();
 	void trim_region_back();
 	void trim_region (bool front);
