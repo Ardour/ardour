@@ -2005,6 +2005,8 @@ Session::route_processors_changed (RouteProcessorChange c)
 		return;
 	}
 
+	RouteProcessorsChanged (c); /* EMIT SIGNAL */
+
 	if (c.type & RouteProcessorChange::MeterPointChange) {
 		/* sort rec-armed routes to be processed first */
 		resort_routes ();

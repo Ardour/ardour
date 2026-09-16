@@ -754,6 +754,8 @@ public:
 		bool _reconfigure_on_delete;
 	};
 
+	PBD::Signal<void(RouteProcessorChange)> RouteProcessorsChanged;
+
 	std::shared_ptr<RouteGroup> new_route_group (const std::string&);
 	void add_route_group (std::shared_ptr<RouteGroup>);
 	void remove_route_group (std::shared_ptr<RouteGroup> rg);
