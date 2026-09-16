@@ -73,6 +73,7 @@ SESSION(StepEditStatusChange, StepEditStatusChange)
 SESSION(RouteGroupAdded, route_group_added)
 SESSION(RouteGroupRemoved, route_group_removed)
 SESSION(RouteGroupsReordered, route_groups_reordered)
+SESSION(RouteProcessorsChanged, RouteProcessorsChanged)
 
 // plugin manager instance
 STATIC(PluginListChanged, &(PluginManager::instance().PluginListChanged))
