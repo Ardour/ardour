@@ -1545,7 +1545,11 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 		/* disk data needed */
 
 		if (Config->get_midi_chase() && _locate_tracker.on()) {
-			_locate_tracker.flush_notes (dst, 0, true);
+			/* write chased notes with a negative time to ensure they stay at the
+			 * beginning of the buffer and don't end up played after events located
+			 * exactly at the playhead's position
+			 */
+			_locate_tracker.flush_notes (dst, -1, true);
 		}
 
 		Location* loc = _loop_location;
