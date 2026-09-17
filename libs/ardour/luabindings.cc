@@ -309,6 +309,7 @@ CLASSKEYS(ARDOUR::PortEngine);
 CLASSKEYS(ARDOUR::PortManager);
 CLASSKEYS(ARDOUR::PresentationInfo);
 CLASSKEYS(ARDOUR::RCConfiguration);
+CLASSKEYS(ARDOUR::RouteProcessorChange);
 CLASSKEYS(ARDOUR::Session);
 CLASSKEYS(ARDOUR::SessionConfiguration);
 CLASSKEYS(ARDOUR::SimpleExport);
