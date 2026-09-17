@@ -1087,14 +1087,14 @@ Editor::finish_bringing_in_material (std::shared_ptr<Region> region,
 					return -1;
 				}
 
-				for (AudioTrackList::iterator i = at.begin(); i != at.end(); ++i) {
+				for (auto & atr : at) {
 					if (transient) {
-						(*i)->presentation_info().set_flags (PresentationInfo::Flag ((*i)->presentation_info().flags() | PresentationInfo::Transient));
+						atr->presentation_info().set_transient (true);
 					}
 					if (Config->get_strict_io ()) {
-						(*i)->set_strict_io (true);
+						atr->set_strict_io (true);
 					}
-					(*i)->playlist()->set_pgroup_id (pgroup_id);
+					atr->playlist()->set_pgroup_id (pgroup_id);
 				}
 
 				existing_track = at.front();
@@ -1117,14 +1117,14 @@ Editor::finish_bringing_in_material (std::shared_ptr<Region> region,
 					return -1;
 				}
 
-				for (list<std::shared_ptr<MidiTrack> >::iterator i = mt.begin(); i != mt.end(); ++i) {
+				for (auto & mtr : mt) {
 					if (transient) {
-						(*i)->presentation_info().set_flags (PresentationInfo::Flag ((*i)->presentation_info().flags() | PresentationInfo::Transient));
+						mtr->presentation_info().set_transient (true);
 					}
 					if (Config->get_strict_io ()) {
-						(*i)->set_strict_io (true);
+						mtr->set_strict_io (true);
 					}
-					(*i)->playlist()->set_pgroup_id (pgroup_id);
+					mtr->playlist()->set_pgroup_id (pgroup_id);
 				}
 
 				existing_track = mt.front();
