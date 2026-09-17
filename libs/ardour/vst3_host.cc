@@ -207,7 +207,7 @@ public:
 			return kInvalidArgument;
 		}
 		PBD::Mutex::Lock lm (_lock);
-		guint id = g_timeout_add_full (G_PRIORITY_HIGH_IDLE, milliseconds, timeout, handler, NULL);
+		guint id = g_timeout_add_full (G_PRIORITY_DEFAULT_IDLE, milliseconds, timeout, handler, NULL);
 		_timer_handlers[id] = handler;
 #ifndef VST3_SCANNER_APP
 		DEBUG_TRACE (PBD::DEBUG::VST3Callbacks, string_compose ("IRunLoop::registerTimer: id = %1 int = %2 ms\n", id, milliseconds));
