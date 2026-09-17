@@ -191,8 +191,8 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, std::s
 	 */
 
 	switch (_type) {
-	case Mark: /* fallthrough */
-	case RegionCue: /* fallthrough */
+	case Mark: [[fallthrough]];
+	case RegionCue: [[fallthrough]];
 	case BBTPosition:
 		points = new ArdourCanvas::Points ();
 
@@ -207,7 +207,7 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, std::s
 		_label_offset = 8.0 * scale;
 		break;
 
-	case Tempo: /* fallthrough */
+	case Tempo: [[fallthrough]];
 	case Meter:
 		points = new ArdourCanvas::Points ();
 		points->push_back (ArdourCanvas::Duple ( M5, 0.0));
@@ -221,9 +221,9 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, std::s
 		_label_offset = 12.0 * scale;
 		break;
 
-	case PunchIn: /* fallthrough */
-	case LoopStart: /* fallthrough */
-	case SessionStart: /* fallthrough */
+	case PunchIn: [[fallthrough]];
+	case LoopStart: [[fallthrough]];
+	case SessionStart: [[fallthrough]];
 	case RangeStart:
 		points = new ArdourCanvas::Points ();
 		points->push_back (ArdourCanvas::Duple (    0.0, 0.0));
@@ -246,9 +246,9 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, std::s
 		_label_offset = 4.0 * scale;
 		break;
 
-	case PunchOut: /* fallthrough */
-	case LoopEnd: /* fallthrough */
-	case SessionEnd: /* fallthrough */
+	case PunchOut: [[fallthrough]];
+	case LoopEnd: [[fallthrough]];
+	case SessionEnd: [[fallthrough]];
 	case RangeEnd:
 		points = new ArdourCanvas::Points (); // leaks
 		points->push_back (ArdourCanvas::Duple ( M6, 0.0));
@@ -308,13 +308,13 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, std::s
 
 	switch (_type) {
 		case RegionCue:
-			/* fallthrough */
+			[[fallthrough]];
 		case Meter:
-			/* fallthrough */
+			[[fallthrough]];
 		case Tempo:
-			/* fallthrough */
+			[[fallthrough]];
 		case SelectionStart:
-			/* fallthrough */
+			[[fallthrough]];
 		case SelectionEnd:
 			_name_flag = 0;
 			break;
@@ -336,7 +336,7 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, std::s
 
 	switch (_type) {
 		case SelectionStart:
-			/* fallthrough */
+			[[fallthrough]];
 		case SelectionEnd:
 			_pcue->hide();
 			_pmark->show();

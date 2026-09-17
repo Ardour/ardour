@@ -1181,9 +1181,9 @@ Editor::canvas_section_box_event (GdkEvent *event)
 			   && event->button.button == 1) {
 				_drags->set (new CursorDrag (*this, *_playhead_cursor, false), event);
 			}
-			/*fallthrough*/
+			[[fallthrough]];
 		case GDK_2BUTTON_PRESS:
-			/*fallthrough*/
+			[[fallthrough]];
 		case GDK_3BUTTON_PRESS:
 			return !Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier);
 		case GDK_BUTTON_RELEASE:

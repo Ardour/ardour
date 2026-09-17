@@ -1095,7 +1095,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			}
 
 		case GainLineItem:
-			/* fallthrough */
+			[[fallthrough]];
 		case EditorAutomationLineItem:
 			{
 				RegionView* rv;
@@ -2432,7 +2432,7 @@ Editor::use_appropriate_mouse_mode_for_sections ()
 				/* smart mode; OK, leave things as they are */
 				break;
 			}
-			/*fallthrough*/
+			[[fallthrough]];
 		default:
 			/* switch to range mode */
 			mouse_mode_actions[Editing::MouseRange]->set_active (true);

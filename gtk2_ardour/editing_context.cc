@@ -1474,13 +1474,12 @@ EditingContext::time_domain () const
 
 	switch (grid_type()) {
 		case GridTypeNone:
-			/* fallthrough */
+			[[fallthrough]];
 		case GridTypeMinSec:
-			/* fallthrough */
+			[[fallthrough]];
 		case GridTypeCDFrame:
-			/* fallthrough */
+			[[fallthrough]];
 		case GridTypeTimecode:
-			/* fallthrough */
 			return Temporal::AudioTime;
 		default:
 			break;

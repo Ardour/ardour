@@ -226,7 +226,7 @@ MidiViewBackground::setup_note_lines()
 		case 11:
 			/* this is the line corresponding to the division between B & C and E & F */
 			_note_lines->add_rect (i, ArdourCanvas::Rect (0., y, ArdourCanvas::COORD_MAX, y + 1.), divider);
-			/* fallthrough */
+			[[fallthrough]];
 		default:
 			if (show_key && key) {
 				if (key->in_key (i)) {

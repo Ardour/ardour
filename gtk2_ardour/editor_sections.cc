@@ -486,9 +486,9 @@ EditorSections::key_press (GdkEventKey* ev)
 {
 	switch (ev->keyval) {
 		case GDK_KP_Delete:
-			/* fallthrough */
+			[[fallthrough]];
 		case GDK_Delete:
-			/* fallthrough */
+			[[fallthrough]];
 		case GDK_BackSpace:
 			break;
 		default:
