@@ -59,6 +59,9 @@ RecordEnableControl::actually_set_value (double val, Controllable::GroupControlD
 void
 RecordEnableControl::do_pre_realtime_queue_stuff (double newval)
 {
+	if (!_recordable.can_be_record_enabled()) {
+		return;
+	}
 	/* do the non-RT part of rec-enabling first - the RT part will be done
 	 * on the next process cycle. This does mean that theoretically we are
 	 * doing things provisionally on the assumption that the rec-enable
