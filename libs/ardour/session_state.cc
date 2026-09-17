@@ -3465,7 +3465,7 @@ retry:
 
 				case 3:
 					no_questions_about_missing_files = true;
-					/* fallthrough */
+					[[fallthrough]];
 
 				case -1:
 				default:
@@ -5080,7 +5080,7 @@ Session::config_changed (std::string p, bool ours)
 #ifndef HAVE_RF64_RIFF
 		switch (config.get_native_file_header_format ()) {
 			case MBWF:
-				/* fallthrough */
+				[[fallthrough]];
 			case RF64_WAV:
 				config.set_native_file_header_format (RF64);
 				return;

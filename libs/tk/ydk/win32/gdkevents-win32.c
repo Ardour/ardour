@@ -3179,7 +3179,7 @@ gdk_event_translate (MSG  *msg,
 	  generate_grab_broken_event (_gdk_display->keyboard_grab.window, TRUE, NULL);
 	}
 
-      /* fallthrough */
+      [[fallthrough]];
     case WM_SETFOCUS:
       if (_gdk_display->keyboard_grab.window != NULL &&
 	  !_gdk_display->keyboard_grab.owner_events)

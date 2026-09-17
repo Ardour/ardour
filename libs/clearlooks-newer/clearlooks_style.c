@@ -715,13 +715,13 @@ clearlooks_style_draw_box (DRAW_ARGS)
 				{
 					case (ClearlooksOrientation) GTK_PROGRESS_RIGHT_TO_LEFT:
 						tmp.x -= 1;
-						/* fallthrough */
+						[[fallthrough]];
 					case (ClearlooksOrientation) GTK_PROGRESS_LEFT_TO_RIGHT:
 						tmp.width += 1;
 						break;
 					case (ClearlooksOrientation) GTK_PROGRESS_BOTTOM_TO_TOP:
 						tmp.y -= 1;
-						/* fallthrough */
+						[[fallthrough]];
 					case (ClearlooksOrientation) GTK_PROGRESS_TOP_TO_BOTTOM:
 						tmp.height += 1;
 						break;

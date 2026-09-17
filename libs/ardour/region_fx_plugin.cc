@@ -1010,7 +1010,7 @@ RegionFxPlugin::configure_io (ChanCount in, ChanCount out)
 	/* configure plugins */
 	switch (_match.method) {
 		case Split:
-			/* fallthrough */
+			[[fallthrough]];
 		case Hide:
 			if (_plugins.front ()->reconfigure_io (natural_input_streams, ChanCount (), out) == false) {
 				return false;

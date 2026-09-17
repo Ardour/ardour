@@ -1013,7 +1013,7 @@ FaderPort8::filter_stripables (StripableList& strips) const
 			break;
 		default:
 			assert (0);
-			/* fallthrough */
+			[[fallthrough]];
 		case MixAll:
 			allow_master = true;
 			allow_surround = true;

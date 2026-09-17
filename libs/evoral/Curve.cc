@@ -334,7 +334,7 @@ Curve::_get_vector (Temporal::timepos_t x0, Temporal::timepos_t x1, float *vec, 
 					assert (0);
 				case ControlList::Curved:
 					/* no 2 point spline */
-					/* fallthrough */
+					[[fallthrough]];
 				default: // Linear:
 					for (int i = 0; i < veclen; ++i) {
 						vec[i] = (lx * (m_num / m_den) + m_num * i * dx_num / (m_den * dx_den)) + c;
@@ -355,7 +355,7 @@ Curve::_get_vector (Temporal::timepos_t x0, Temporal::timepos_t x1, float *vec, 
 					assert (0);
 				case ControlList::Curved:
 					/* no 2 point spline */
-					/* fallthrough */
+					[[fallthrough]];
 				default: // Linear:
 					vec[0] = interpolate_linear (lval, uval, fraction);
 					break;
@@ -472,7 +472,7 @@ Curve::multipoint_eval (Temporal::timepos_t const & x) const
 					double xv2 = xv * xv;
 					return ev->coeff[0] + (ev->coeff[1] * xv) + (ev->coeff[2] * xv2) + (ev->coeff[3] * xv2 * xv);
 				}
-				/* fallthrough */
+				[[fallthrough]];
 			case ControlList::Linear:
 				return before->value + (vdelta * (tdelta / trange));
 		}

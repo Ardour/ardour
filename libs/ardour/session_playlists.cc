@@ -499,7 +499,7 @@ SessionPlaylists::maybe_delete_unused (std::function<int(std::shared_ptr<Playlis
 			// delete this and all later
 			delete_remaining = true;
 
-			/* fallthrough */
+			[[fallthrough]];
 		case 1:
 			// delete this
 			playlists_tbd.push_back (*x);

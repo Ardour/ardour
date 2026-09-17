@@ -796,17 +796,17 @@ SMF::load_markers ()
 					allow_empty = true;
 					break;
 				case 0x01: // "Text:"
-					/* fallthtough */
+					[[fallthrough]];
 				case 0x02: // "Copyright:"
-					/* fallthtough */
+					[[fallthrough]];
 				case 0x03: // "Sequence/Track Name:"
-					/* fallthtough */
+					[[fallthrough]];
 				case 0x04: // "Instrument:"
-					/* fallthtough */
+					[[fallthrough]];
 				case 0x08: // "Program Name:"
-					/* fallthtough */
+					[[fallthrough]];
 				case 0x09: // "Device (Port) Name:"
-					/* fallthtough */
+					[[fallthrough]];
 				default:
 					continue;
 			}

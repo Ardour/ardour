@@ -500,7 +500,7 @@ Parser::scanner (unsigned char inbyte)
 		if (msgindex < 3) {
 			return;
 		}
-		/* fallthrough */
+		[[fallthrough]];
 
 	case NEEDONEBYTE:
 		/* We've completed a 1 or 2 byte message. */
