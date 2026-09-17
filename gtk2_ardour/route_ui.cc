@@ -2014,11 +2014,9 @@ RouteUI::save_as_template ()
 void
 RouteUI::check_rec_enable_sensitivity ()
 {
-	if (!rec_enable_button) {
-		assert (0); // This should not happen
-		return;
-	}
 	if (!_session->writable()) {
+	assert (rec_enable_button);
+
 		rec_enable_button->set_sensitive (false);
 		return;
 	}
