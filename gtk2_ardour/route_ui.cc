@@ -420,7 +420,7 @@ RouteUI::set_route (std::shared_ptr<Route> rp)
 
 	_route->polarity()->ConfigurationChanged.connect (route_connections, invalidator (*this), std::bind (&RouteUI::setup_invert_buttons, this), gui_context());
 
-	if (_session->writable() && is_track()) {
+	if (_session->writable() && _route->recordable()) {
 		std::shared_ptr<Track> t = std::dynamic_pointer_cast<Track>(_route);
 
 		t->rec_enable_control()->Changed.connect (route_connections, invalidator (*this), std::bind (&RouteUI::route_rec_enable_changed, this), gui_context());
@@ -433,7 +433,6 @@ RouteUI::set_route (std::shared_ptr<Route> rp)
 			midi_track()->StepEditStatusChange.connect (route_connections, invalidator (*this),
 					std::bind (&RouteUI::step_edit_changed, this, _1), gui_context());
 		}
-
 	}
 
 	/* this will work for busses and tracks, and needs to be called to
@@ -2014,12 +2013,17 @@ RouteUI::save_as_template ()
 void
 RouteUI::check_rec_enable_sensitivity ()
 {
-	if (!_session->writable()) {
 	assert (rec_enable_button);
 
+	if (!_session->writable() || !_route->recordable()) {
 		rec_enable_button->set_sensitive (false);
+		if (!_route->recordable()) {
+			rec_enable_button->hide ();
+		}
 		return;
 	}
+
+	rec_enable_button->show ();
 
 	if (_session->transport_rolling() && rec_enable_button->active_state() && Config->get_disable_disarm_during_roll()) {
 		rec_enable_button->set_sensitive (false);
@@ -2319,6 +2323,8 @@ RouteUI::route_gui_changed (PropertyChange const& what_changed)
 	if (what_changed.contains (Properties::hidden) && _route->is_hidden ()) {
 		_session->selection().select_stripable_and_maybe_group (_route, SelectionRemove, false, false);
 	}
+
+	check_rec_enable_sensitivity ();
 }
 
 void
