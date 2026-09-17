@@ -430,13 +430,13 @@ Track::record_safe_changed (bool, Controllable::GroupControlDisposition)
 bool
 Track::can_be_record_safe ()
 {
-	return !_record_enable_control->get_value() && _disk_writer && _session.writable() && (_freeze_record.state != Frozen);
+	return recordable() && !_record_enable_control->get_value() && _disk_writer && _session.writable() && (_freeze_record.state != Frozen);
 }
 
 bool
 Track::can_be_record_enabled ()
 {
-	return !_record_safe_control->get_value() && _disk_writer && !_disk_writer->record_safe() && _session.writable() && (_freeze_record.state != Frozen) && (!_triggerbox || !_triggerbox->record_enabled());
+	return recordable() && !_record_safe_control->get_value() && _disk_writer && !_disk_writer->record_safe() && _session.writable() && (_freeze_record.state != Frozen) && (!_triggerbox || !_triggerbox->record_enabled());
 }
 
 void
