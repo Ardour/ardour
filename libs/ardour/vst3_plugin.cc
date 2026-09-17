@@ -41,6 +41,7 @@
 
 #include "ardour/audio_buffer.h"
 #include "ardour/audioengine.h"
+#include "ardour/butler.h"
 #include "ardour/debug.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/selection.h"
@@ -1635,7 +1636,7 @@ VST3PI::init_output_configuration ()
 tresult
 VST3PI::restartComponent (int32 flags)
 {
-	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::restartComponent %1%2\n", std::hex, flags));
+	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::restartComponent 0x%1%2\n", std::hex, flags));
 
 	if (flags & Vst::kReloadComponent) {
 		PBD::Mutex::Lock pl (_process_lock, PBD::Mutex::NotLock);
@@ -1663,23 +1664,12 @@ VST3PI::restartComponent (int32 flags)
 		update_shadow_data ();
 	}
 	if (flags & Vst::kLatencyChanged) {
-		/* https://forums.steinberg.net/t/reporting-latency-change/201601
-		 * mentions that the host plugin should be deactivated before querying
-		 * latency. However the official spec does not require this.
-		 *
-		 * However other implementations do not call setActive(false/true) when
-		 * the latency changes, and Ardour does not require it either, latency
-		 * changes are automatically picked up.
+		/* Note: If this is initiated by the AudioProcessor, we should also notify
+		 * and restart the EditController.
 		 */
-		PBD::Mutex::Lock pl (_process_lock, PBD::Mutex::NotLock);
-		if (!AudioEngine::instance ()->in_process_thread () && !_is_loading_state && !_restart_component_is_synced && !_process_offline) {
-			/* Some plugins (e.g BlendEQ) call this from the process,
-			 * IPlugProcessor::ProcessBuffers. In that case taking the
-			 * _process_lock would deadlock.
-			 */
-			pl.acquire ();
-		}
-		_plugin_latency.reset ();
+		Stripable* s = dynamic_cast<Stripable*> (_owner);
+		assert (s);
+		s->session ().butler ()->delegate ([&]() { deactivate(); activate (); } );
 	}
 	if (flags & Vst::kIoTitlesChanged) {
 		/* Input and/or Output bus titles have changed
@@ -1871,12 +1861,13 @@ VST3PI::activate ()
 		return false;
 	}
 
+	_plugin_latency = _processor->getLatencySamples ();
+
 	res = _processor->setProcessing (true);
 	if (!(res == kResultOk || res == kNotImplemented)) {
 		return false;
 	}
 
-	_plugin_latency.reset ();
 	_is_processing = true;
 	return true;
 }
