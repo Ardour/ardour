@@ -126,6 +126,7 @@ public:
 	std::shared_ptr<AutomationControl> rec_safe_control() const { return _record_safe_control; }
 
 	int prep_record_enabled (bool);
+	bool recordable() const { return !is_transient(); }
 	bool can_be_record_enabled ();
 	bool can_be_record_safe ();
 

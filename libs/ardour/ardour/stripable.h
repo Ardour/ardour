@@ -80,6 +80,7 @@ class LIBARDOUR_API Stripable : public SessionObject,
 	bool is_main_bus() const { return _presentation_info.flags() & PresentationInfo::MainBus; }
 	bool is_singleton () const { return _presentation_info.flags() & PresentationInfo::Singleton; }
 	bool is_transient () const { return _presentation_info.flags() & PresentationInfo::Transient; }
+	virtual bool recordable() const { return false; }
 	/* no fancy bits set */
 	bool is_normal_route () const {
 		PresentationInfo::Flag f (PresentationInfo::Flag (
