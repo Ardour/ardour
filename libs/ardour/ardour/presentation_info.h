@@ -191,6 +191,7 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 	void set_hidden (bool yn);
 	void set_transient (bool yn);
 	void set_trigger_track (bool yn);
+	/* dangerous: does not send property change */
 	void set_flags (Flag f) { _flags = f; }
 
 	bool order_set() const { return _flags & OrderSet; }
