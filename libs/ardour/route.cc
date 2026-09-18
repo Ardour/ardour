@@ -3403,6 +3403,10 @@ Route::import_state (const XMLNode& node, bool use_pbd_ids, bool processor_only)
 			if (child->get_property ("mute-point", mute_point)) {
 				_mute_master->set_mute_points (mute_point);
 			}
+		} else if (child->name() == X_("Pannable")) {
+			if (_pannable) {
+				_pannable->set_state (*child, version);
+			}
 		}
 	}
 
