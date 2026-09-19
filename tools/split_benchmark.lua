@@ -1,20 +1,20 @@
--- cd gtk2_ardour; ./arlua < ../tools/split_benchmark.lua
+-- gtk2_ardour/arlua tools/split_benchmark.lua
 
 -- This script creates some tracks, records noise,
 -- and then splits recorded regions on all tracks on every
 -- timecode frame (30 regions/sec)
 
-reclen   = 30 -- seconds to record
+reclen   = 10 -- seconds to record
 n_tracks = 16 -- number of tracks to create
 
 backend = AudioEngine:set_backend("None (Dummy)", "", "")
 backend:set_device_name ("Uniform White Noise")
 
-os.execute('rm -rf /tmp/luabench')
+PBD.remove_directory ("/tmp/luabench")
 s = create_session ("/tmp/luabench", "luabench", 48000)
 assert (s)
 
-s:new_audio_track (1, 2, nil, n_tracks, "",  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal, true)
+s:new_audio_track (1, 2, ARDOUR.RouteGroup(), n_tracks, "",  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal, true)
 
 for t in s:get_tracks():iter() do
 	t:rec_enable_control():set_value(1, PBD.GroupControlDisposition.UseGroup)
@@ -29,33 +29,33 @@ s:request_roll (ARDOUR.TransportRequestSource.TRS_UI)
 ARDOUR.LuaAPI.usleep (1000000 * reclen)
 s:request_stop (false, false, ARDOUR.TransportRequestSource.TRS_UI);
 
+repeat
+	-- wait for non-realtime stop to commit_reversible_command (capture)
+	ARDOUR.LuaAPI.usleep (100000)
+until not s:collected_undo_commands()
+
 for t in s:get_tracks():iter() do
 	t:rec_enable_control():set_value(0, PBD.GroupControlDisposition.UseGroup)
 end
 
-ARDOUR.LuaAPI.usleep (100000)
+ARDOUR.LuaAPI.usleep (1000000)
 
 s:goto_start()
 s:save_state("")
 
 function split_at (pos)
-	local add_undo = false -- keep track if something has changed
 	Session:begin_reversible_command ("Auto Region Split")
 	for route in Session:get_tracks():iter() do
 		local playlist = route:to_track():playlist ()
 		playlist:to_stateful ():clear_changes ()
 		for region in playlist:regions_at (pos):iter () do
-			playlist:split_region (region, ARDOUR.MusicSample (pos, 0))
+			playlist:split_region (region, pos)
 		end
-		if not Session:add_stateful_diff_command (playlist:to_statefuldestructible ()):empty () then
-			add_undo = true
-		end
+		Session:add_stateful_diff_command (playlist:to_statefuldestructible ())
 	end
-	if add_undo then
+	if not Session:abort_empty_reversible_command () then
 		Session:commit_reversible_command (nil)
-	else
-		Session:abort_reversible_command ()
-	end
+  end
 end
 
 function count_regions ()
@@ -76,11 +76,11 @@ for x = 2, cnt do
 
 	local t_start = ARDOUR.LuaAPI.monotonic_time ()
 	for i = 1, n_steps do
-		split_at (playhead + stepsize * i)
+		split_at (Temporal.timepos_t (playhead + stepsize * i))
 	end
 	local t_end = ARDOUR.LuaAPI.monotonic_time ()
 
-	Session:request_locate((playhead + stepsize * n_steps), ARDOUR.LocateTransportDisposition.MustStop, ARDOUR.TransportRequestSource.TRS_UI)
+	Session:request_locate((playhead + stepsize * n_steps), false, ARDOUR.LocateTransportDisposition.MustStop, ARDOUR.TransportRequestSource.TRS_UI)
 	print ("n_regions:", count_regions (), "split operation dT:", (t_end - t_start) / 1000 / n_steps, "ms")
 	collectgarbage ();
 	ARDOUR.LuaAPI.usleep(500000)

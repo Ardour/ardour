@@ -1,7 +1,7 @@
 -- [disable CPU freq scaling for benchmark]
 -- create a session
 -- add 16 mono tracks
--- record 2-3 mins on each track starting at 00:00:00:00
+-- record 10-20 sec on each track starting at 00:00:00:00
 -- rewind the playhead to 00:00:00:00
 -- run this script in  Menu > Window. Scripting  10 times
 ardour { ["type"] = "EditorAction", name = "Split Benchmark" }
@@ -15,7 +15,7 @@ function factory (params) return function ()
 			local playlist = route:to_track():playlist ()
 			playlist:to_stateful ():clear_changes ()
 			for region in playlist:regions_at (pos):iter () do
-				playlist:split_region (region, Temporal.timepos_t (pos))
+				playlist:split_region (region, pos)
 			end
 			if not Session:add_stateful_diff_command (playlist:to_statefuldestructible ()):empty () then
 				add_undo = true
@@ -36,15 +36,16 @@ function factory (params) return function ()
 		return total
 	end
 
-	for x = 1, 3 do
+	stepsize = Session:samples_per_timecode_frame()
+	for x = 1, 3 do -- 3 sec
 		local playhead = Session:transport_sample ()
 
 		local step = Session:samples_per_timecode_frame()
-		local n_steps = 20
+		local n_steps = stepsize
 
 		local t_start = ARDOUR.LuaAPI.monotonic_time ()
 		for i = 1, n_steps do
-			split_at (playhead + step * i)
+			split_at (Temporal.timepos_t (playhead + stepsize * i))
 		end
 		local t_end = ARDOUR.LuaAPI.monotonic_time ()
 
