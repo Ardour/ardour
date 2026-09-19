@@ -1171,6 +1171,7 @@ private:
 	void region_fill_track ();
 	void audition_playlist_region_standalone (std::shared_ptr<ARDOUR::Region>);
 	void split_multichannel_region();
+	void replace_source_for_selected_regions ();
 	void reverse_region ();
 	void strip_region_silence ();
 	void normalize_region ();
