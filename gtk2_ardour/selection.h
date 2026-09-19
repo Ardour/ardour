@@ -108,6 +108,10 @@ public:
 	sigc::signal<void> MidiNotesChanged;
 	sigc::signal<void> TriggersChanged;
 
+	sigc::connection idle_regions_changed_connection;
+	void emit_regions_changed ();
+	bool idle_regions_changed ();
+
 	void clear ();
 
 	/** check if all selections are empty

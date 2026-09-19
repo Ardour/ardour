@@ -165,7 +165,7 @@ Selection::clear_regions (bool with_signal)
 	if (!regions.empty()) {
 		regions.clear_all ();
 		if (with_signal) {
-			RegionsChanged();
+			emit_regions_changed();
 		}
 	}
 }
@@ -311,7 +311,7 @@ Selection::toggle (RegionView* r)
 		remove (*i);
 	}
 
-	RegionsChanged ();
+	emit_regions_changed ();
 }
 
 void
@@ -331,7 +331,7 @@ Selection::toggle (vector<RegionView*>& r)
 		}
 	}
 
-	RegionsChanged ();
+	emit_regions_changed ();
 }
 
 long
@@ -431,7 +431,7 @@ Selection::add (vector<RegionView*>& v)
 		clear_time(); // enforce object/range exclusivity
 		clear_tracks(); // enforce object/track exclusivity
 		clear_triggers ();
-		RegionsChanged ();
+		emit_regions_changed ();
 	}
 }
 
@@ -453,7 +453,7 @@ Selection::add (const RegionSelection& rs)
 		clear_time(); // enforce object/range exclusivity
 		clear_tracks(); // enforce object/track exclusivity
 		clear_triggers ();
-		RegionsChanged ();
+		emit_regions_changed ();
 	}
 }
 
@@ -466,7 +466,7 @@ Selection::add (RegionView* r)
 			clear_time(); // enforce object/range exclusivity
 			clear_tracks(); // enforce object/track exclusivity
 			clear_triggers ();
-			RegionsChanged ();
+			emit_regions_changed ();
 		}
 	}
 }
@@ -629,7 +629,7 @@ void
 Selection::remove (RegionView* r)
 {
 	if (regions.remove (r)) {
-		RegionsChanged ();
+		emit_regions_changed ();
 	}
 }
 
@@ -637,7 +637,7 @@ void
 Selection::remove (vector<RegionView*> rv)
 {
 	if (regions.remove (rv)) {
-		RegionsChanged ();
+		emit_regions_changed ();
 	}
 }
 
@@ -716,7 +716,7 @@ Selection::set (const RegionSelection& rs)
 	}
 	clear_objects();
 	regions = rs;
-	RegionsChanged(); /* EMIT SIGNAL */
+	emit_regions_changed(); /* EMIT SIGNAL */
 }
 
 void
@@ -1703,3 +1703,19 @@ Selection::toggle (TriggerEntry* te)
 	TriggersChanged ();
 }
 
+
+void
+Selection::emit_regions_changed ()
+{
+	if (!idle_regions_changed_connection.connected ()) {
+		idle_regions_changed_connection = Glib::signal_idle().connect (sigc::mem_fun (*this, &Selection::idle_regions_changed));
+	}
+}
+
+bool
+Selection::idle_regions_changed ()
+{
+	RegionsChanged ();
+	idle_regions_changed_connection.disconnect();
+	return false;
+}
