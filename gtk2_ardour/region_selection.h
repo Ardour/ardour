@@ -59,7 +59,7 @@ public:
 	Temporal::timepos_t start_time () const;
 	Temporal::timepos_t end_time () const;
 
-	const std::list<RegionView *>& by_layer() const { return _bylayer; }
+	const std::list<RegionView *>& by_layer();
 	void  by_position (std::list<RegionView*>&) const;
 	void  by_track (std::list<RegionView*>&) const;
 
@@ -74,5 +74,6 @@ private:
 	void add_to_layer (RegionView *);
 
 	std::list<RegionView *> _bylayer; ///< list of regions sorted by layer
+	bool _needs_sorting;
 };
 

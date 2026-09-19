@@ -38,6 +38,7 @@ using namespace PBD;
 /** Construct an empty RegionSelection.
  */
 RegionSelection::RegionSelection ()
+	: _needs_sorting (false)
 {
 }
 
@@ -78,6 +79,7 @@ RegionSelection::clear_all()
 	clear();
 	pending.clear ();
 	_bylayer.clear();
+	_needs_sorting = false;
 }
 
 /**
@@ -176,21 +178,31 @@ RegionSelection::remove (vector<RegionView*> rv)
 void
 RegionSelection::add_to_layer (RegionView * rv)
 {
-	// insert it into layer sorted position
-
-	list<RegionView*>::iterator i;
-
-	for (i = _bylayer.begin(); i != _bylayer.end(); ++i)
-	{
-		if (rv->region()->layer() < (*i)->region()->layer()) {
-			_bylayer.insert(i, rv);
-			return;
-		}
-	}
-
-	// insert at end if we get here
-	_bylayer.insert(i, rv);
+	_bylayer.push_back (rv);
+	_needs_sorting = true;
 }
+
+
+struct RegionSortByLayer {
+	bool operator() (const RegionView* a, const RegionView* b) const {
+		return a->region()->layer() < b->region()->layer();
+	}
+};
+
+
+/** Returns the list of regions by layer (sort it if needed).
+ */
+ const std::list<RegionView *>&
+ RegionSelection::by_layer ()
+ {
+	 if (_needs_sorting) {
+		 RegionSortByLayer sorter;
+		 _bylayer.sort (sorter);
+		 _needs_sorting = false;
+	 }
+
+	 return _bylayer;
+ }
 
 struct RegionSortByTime {
 	bool operator() (const RegionView* a, const RegionView* b) const {
