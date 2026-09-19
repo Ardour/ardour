@@ -31,6 +31,7 @@
 #include <glibmm.h>
 
 #include "pbd/cpus.h"
+#include "pbd/file_utils.h"
 #include "pbd/history_owner.h"
 #include "pbd/stateful_diff_command.h"
 #include "pbd/openuri.h"
@@ -515,6 +516,12 @@ LuaBindings::common (lua_State* L)
 
 		.addFunction ("open_uri", (bool (*) (const std::string&))&PBD::open_uri)
 		.addFunction ("open_uri", &PBD::open_folder)
+
+		.addFunction ("equivalent_paths", &PBD::equivalent_paths)
+		.addFunction ("exists_and_writable", &PBD::exists_and_writable)
+		.addFunction ("clear_directory", &PBD::clear_directory)
+		.addFunction ("remove_directory", &PBD::remove_directory)
+		.addFunction ("tmp_writable_directory", &PBD::tmp_writable_directory)
 
 		.beginClass <PBD::ID> ("ID")
 		.addConstructor <void (*) (std::string)> ()
