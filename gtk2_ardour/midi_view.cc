@@ -4255,7 +4255,9 @@ MidiView::_duplicate_notes (int times)
 		Temporal::Beats lno (_midi_region->source_beats_to_absolute_time (last_note_time + delta).beats());
 		if (lno > _midi_region->end_position().beats()) {
 			apply_note_diff (true, true);
-			_midi_region->playlist()->clear_owned_changes ();
+			if (_midi_region->playlist()) {
+				_midi_region->playlist()->clear_owned_changes ();
+			}
 			_midi_region->trim_end (timepos_t (lno));
 			_editing_context.add_command (new StatefulDiffCommand (_midi_region));
 			_editing_context.commit_reversible_command ();
