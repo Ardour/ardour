@@ -1976,7 +1976,7 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	options.attach (src_combo, 7, 8, 0, 1, FILL, SHRINK, 2, 0);
 
 	options.attach (copy_files_btn, 7, 8, 1, 2, FILL, SHRINK, 2, 0);
-	options.attach (transient_btn, 8, 9, 1, 2, FILL, SHRINK, 2, 0);
+	// options.attach (transient_btn, 8, 9, 1, 2, FILL, SHRINK, 2, 0);
 
 	str.clear ();
 	str.push_back (_("by track number"));
@@ -2016,7 +2016,7 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	channel_combo.signal_changed().connect (sigc::mem_fun (*this, &SoundFileOmega::reset_options_noret));
 
 	copy_files_btn.set_active (true);
-	transient_btn.set_active (true);
+	// transient_btn.set_active (true);
 
 	vpacker.pack_start (options, false, true);
 
