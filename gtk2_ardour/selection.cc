@@ -306,9 +306,9 @@ Selection::toggle (RegionView* r)
 	RegionSelection::iterator i;
 
 	if ((i = find (regions.begin(), regions.end(), r)) == regions.end()) {
-		add (r);
+		regions.add (r);
 	} else {
-		remove (*i);
+		regions.remove (*i);
 	}
 
 	RegionsChanged ();
@@ -325,9 +325,9 @@ Selection::toggle (vector<RegionView*>& r)
 
 	for (vector<RegionView*>::iterator x = r.begin(); x != r.end(); ++x) {
 		if ((i = find (regions.begin(), regions.end(), (*x))) == regions.end()) {
-			add ((*x));
+			regions.add ((*x));
 		} else {
-			remove (*x);
+			regions.remove (*x);
 		}
 	}
 
@@ -1702,4 +1702,3 @@ Selection::toggle (TriggerEntry* te)
 	}
 	TriggersChanged ();
 }
-
