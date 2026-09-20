@@ -31,6 +31,7 @@ ExportSMFWriter::ExportSMFWriter ()
 	: _pos (0)
 	, _last_ev_time_samples (0)
 {
+	_for_export = true;
 }
 
 ExportSMFWriter::~ExportSMFWriter ()

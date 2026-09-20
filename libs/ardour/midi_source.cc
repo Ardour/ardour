@@ -41,6 +41,7 @@
 
 #include "evoral/Control.h"
 #include "evoral/EventSink.h"
+#include "evoral/SMF.h"
 
 #include "ardour/debug.h"
 #include "ardour/file_source.h"
@@ -51,6 +52,7 @@
 #include "ardour/midi_state_tracker.h"
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
+#include "ardour/smf_source.h"
 #include "ardour/source_factory.h"
 #include "ardour/tempo.h"
 #include "ardour/evoral_types_convert.h"
@@ -409,7 +411,11 @@ MidiSource::export_write_to (const ReaderLock& lock, std::shared_ptr<MidiSource>
 		return -1;
 	}
 
-	_model->write_section_to (newsrc, newsrc_lock, begin, end, true);
+	{
+		std::shared_ptr<SMFSource> smf (std::dynamic_pointer_cast<SMFSource> (newsrc));
+		Evoral::SMF::ExportControl ec (std::dynamic_pointer_cast<Evoral::SMF> (smf));
+		_model->write_section_to (newsrc, newsrc_lock, begin, end, true);
+	}
 
 	newsrc->flush_midi(newsrc_lock);
 

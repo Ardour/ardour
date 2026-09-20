@@ -55,6 +55,7 @@ SMF::SMF()
 	, _n_note_on_events (0)
 	, _has_pgm_change (false)
 	, _num_channels (0)
+	, _for_export (false)
 	{};
 
 SMF::~SMF()
@@ -533,13 +534,13 @@ SMF::append_event_delta (uint32_t delta_t, uint32_t size, const uint8_t* buf, ev
 	 */
 
 	uint8_t const c = buf[0] & 0xf0;
-	bool const store_id = (
-		c == MIDI_CMD_NOTE_ON ||
-		c == MIDI_CMD_NOTE_OFF ||
-		c == MIDI_CMD_NOTE_PRESSURE ||
-		c == MIDI_CMD_PGM_CHANGE ||
-		(c == MIDI_CMD_CONTROL && (buf[1] == MIDI_CTL_MSB_BANK || buf[1] == MIDI_CTL_LSB_BANK))
-	                       );
+	bool const store_id = (!_for_export && (
+		                       (c == MIDI_CMD_NOTE_ON ||
+		                        c == MIDI_CMD_NOTE_OFF ||
+		                        c == MIDI_CMD_NOTE_PRESSURE ||
+		                        c == MIDI_CMD_PGM_CHANGE ||
+		                        (c == MIDI_CMD_CONTROL && (buf[1] == MIDI_CTL_MSB_BANK || buf[1] == MIDI_CTL_LSB_BANK))
+			                       )));
 
 	if (store_id && note_id >= 0) {
 		int idlen;
@@ -634,6 +635,8 @@ SMF::end_write (string const & path)
 			 (void) smf_track_add_eot_pulses (trk, their_pulses);
 		}
 	}
+
+	std::cerr << "SMF::end write with for export = " << _for_export << std::endl;
 
 	if (smf_save(_smf, f) != 0) {
 		fclose(f);

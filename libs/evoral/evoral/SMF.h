@@ -155,6 +155,17 @@ public:
 
 	std::shared_ptr<Temporal::TempoMap> tempo_map (bool& provided) const;
 
+	void mark_for_export (bool yn) { _for_export = yn; }
+
+	class ExportControl {
+	  public:
+		ExportControl (std::shared_ptr<SMF> s) : smf (s) { smf->mark_for_export (true); };
+		~ExportControl () { smf->mark_for_export (false); }
+
+	  private:
+		std::shared_ptr<SMF> smf;
+	};
+
   private:
 	smf_t*       _smf;
 	smf_track_t* _smf_track;
@@ -169,6 +180,7 @@ public:
 	bool         _has_pgm_change;
 	int          _num_channels;
 	UsedChannels _used_channels;
+	bool         _for_export;
 
 	void end_track ();
 };
