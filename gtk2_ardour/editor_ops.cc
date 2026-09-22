@@ -121,6 +121,7 @@
 #include "route_time_axis.h"
 #include "selection.h"
 #include "selection_templates.h"
+#include "signal_merger.h"
 #include "streamview.h"
 #include "strip_silence_dialog.h"
 #include "tempo_map_change.h"
@@ -279,6 +280,9 @@ Editor::split_regions_at (timepos_t const & where, RegionSelection& regions)
 
 	/* the Split action will likely create new regions; we want them all assigned to the same region-group */
 	Region::RegionGroupRetainer rgr;
+
+	/* the selection selection might change multiple times, merge signals */
+	sigc::signal_merger sm (&selection->RegionsChanged);
 
 	begin_reversible_command (_("split"));
 
@@ -4762,6 +4766,9 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 	timepos_t first_position = timepos_t::max (Temporal::AudioTime);
 
 	PlaylistSet freezelist;
+
+	/* merge Selection::RegionsChanged signals */
+	sigc::signal_merger sm (&selection->RegionsChanged);
 
 	/* get ordering correct before we cut/copy */
 

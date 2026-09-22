@@ -714,6 +714,9 @@ Selection::set (const RegionSelection& rs)
 		clear_time(); // enforce region/object exclusivity
 		clear_tracks(); // enforce object/track exclusivity
 	}
+
+	sigc::signal_merger sb (&RegionsChanged);
+
 	clear_objects();
 	regions = rs;
 	RegionsChanged(); /* EMIT SIGNAL */
@@ -727,6 +730,8 @@ Selection::set (RegionView* r, bool /*also_clear_tracks*/)
 		clear_tracks(); // enforce object/track exclusivity
 	}
 	if (!regions.contains (r) || regions.size() != 1) {
+		sigc::signal_merger sb (&RegionsChanged);
+
 		clear_objects ();
 		add (r);
 	}
@@ -739,6 +744,8 @@ Selection::set (vector<RegionView*>& v)
 		clear_time(); // enforce region/object exclusivity
 		clear_tracks(); // enforce object/track exclusivity
 	}
+
+	sigc::signal_merger sb (&RegionsChanged);
 
 	clear_objects();
 

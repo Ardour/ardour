@@ -57,6 +57,7 @@
 #include "mixer_strip.h"
 #include "note_base.h"
 #include "pianoroll.h"
+#include "signal_merger.h"
 #include "selection_properties_box.h"
 #include "sfdb_ui.h"
 
@@ -649,6 +650,9 @@ Editor::set_selected_regionview_from_click (bool press, SelectionOperation op)
 	if (press) {
 		button_release_can_deselect = false;
 	}
+
+	/* merge Selection::RegionsChanged signals */
+	sigc::signal_merger sm (&selection->RegionsChanged);
 
 	if (op == SelectionToggle || op == SelectionSet) {
 

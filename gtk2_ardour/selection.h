@@ -42,6 +42,7 @@
 #include "point_selection.h"
 #include "marker_selection.h"
 #include "midi_selection.h"
+#include "signal_merger.h"
 #include "trigger_selection.h"
 
 class TimeAxisView;
@@ -99,7 +100,7 @@ public:
 	// Selection& operator= (const Selection& other);
 
 	sigc::signal<void> TracksChanged;
-	sigc::signal<void> RegionsChanged;
+	sigc::mergeable_signal<void> RegionsChanged;
 	sigc::signal<void> TimeChanged;
 	sigc::signal<void> LinesChanged;
 	sigc::signal<void> PlaylistsChanged;
