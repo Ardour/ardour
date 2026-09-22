@@ -140,7 +140,8 @@ PianoRollHeaderBase::render (ArdourCanvas::Rect const & self, ArdourCanvas::Rect
 
 	double y2 = min (self.y1, (ArdourCanvas::Coord) _midi_context.contents_height());
 	double context_note_height = _midi_context.note_height();
-	double font_size = min(15.0 * UIConfiguration::instance().get_ui_scale(), max(10.0 * UIConfiguration::instance().get_ui_scale(), (int)context_note_height * 0.7));
+	double ui_scale = UIConfiguration::instance().get_ui_scale();
+	double font_size = min(15.0 * ui_scale, max(10.0 * ui_scale, (int)context_note_height * 0.7));
 
 	//Reduce the frequency of Pango layout resizing
 	//if (int(_old_context_note_height) != int(context_note_height)) {
@@ -318,7 +319,7 @@ PianoRollHeaderBase::render (ArdourCanvas::Rect const & self, ArdourCanvas::Rect
 
 
 		Gtkmm2ext::set_source_rgba (cr, bg);
-		cr->rectangle (x, y, kbd_width, heights[n]);
+		cr->rectangle (x, y, kbd_width * ui_scale, heights[n]);
 		cr->fill ();
 
 		if ((oct_rel == 4 || oct_rel == 11) && y > 0 && h > 3) {
@@ -330,7 +331,7 @@ PianoRollHeaderBase::render (ArdourCanvas::Rect const & self, ArdourCanvas::Rect
 			   which are rects
 			*/
 			cr->move_to (x, y + 0.5);
-			cr->line_to (x + kbd_width, y + 0.5);
+			cr->line_to (x + kbd_width * ui_scale, y + 0.5);
 			cr->stroke ();
 		}
 	}
@@ -369,7 +370,7 @@ PianoRollHeaderBase::render (ArdourCanvas::Rect const & self, ArdourCanvas::Rect
 
 				pango_layout_get_pixel_size (_layout->gobj(), &c_width, &c_height);
 
-				cr->move_to (x + kbd_width / 2 - c_width / 2, y + h / 2 - c_height / 2);
+				cr->move_to (x + kbd_width * ui_scale / 2 - c_width / 2, y + h / 2 - c_height / 2);
 				_layout->show_in_cairo_context (cr);
 			} else {
 				/* Cn text shown to left of keys */

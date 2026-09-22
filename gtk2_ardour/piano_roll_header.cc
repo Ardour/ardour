@@ -136,7 +136,7 @@ PianoRollHeader::on_size_request (Gtk::Requisition* r)
 		_scroomer_size = 20.f * UIConfiguration::instance().get_ui_scale();
 	}
 
-	r->width = _scroomer_size + 20.f;
+	r->width = _scroomer_size + 20.f * UIConfiguration::instance().get_ui_scale();
 }
 
 double
