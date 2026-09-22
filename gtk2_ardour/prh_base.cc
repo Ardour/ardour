@@ -52,8 +52,6 @@ PianoRollHeaderBase::PianoRollHeaderBase (MidiViewBackground& bg)
 	: _midi_context (bg)
 	, _adj (_midi_context.note_range_adjustment)
 	, _font_descript (UIConfiguration::instance().get_NormalFont())
-	, _font_descript_big_c (UIConfiguration::instance().get_NormalFont())
-	, _font_descript_midnam (UIConfiguration::instance().get_NormalFont())
 	, _highlighted_note (NO_MIDI_NOTE)
 	, _clicked_note (NO_MIDI_NOTE)
 	, _dragging (false)
@@ -80,10 +78,6 @@ void
 PianoRollHeaderBase::alloc_layouts (Glib::RefPtr<Pango::Context> context)
 {
 	_layout = Pango::Layout::create (context);
-	_big_c_layout = Pango::Layout::create (context);
-	_font_descript_big_c.set_absolute_size (10.0 * Pango::SCALE);
-	_big_c_layout->set_font_description(_font_descript_big_c);
-	_midnam_layout = Pango::Layout::create (context);
 }
 
 bool
@@ -146,24 +140,20 @@ PianoRollHeaderBase::render (ArdourCanvas::Rect const & self, ArdourCanvas::Rect
 
 	double y2 = min (self.y1, (ArdourCanvas::Coord) _midi_context.contents_height());
 	double context_note_height = _midi_context.note_height();
+	double font_size = min(15.0 * UIConfiguration::instance().get_ui_scale(), max(10.0 * UIConfiguration::instance().get_ui_scale(), (int)context_note_height * 0.7));
 
 	//Reduce the frequency of Pango layout resizing
 	//if (int(_old_context_note_height) != int(context_note_height)) {
-	//Set Pango layout keyboard c's size
-	_font_descript.set_absolute_size (min(15.0 * Pango::SCALE, max(10.0 * Pango::SCALE, (int)context_note_height * 0.5 * Pango::SCALE)));
+	//Set Pango layout of midnam display and keyboard c's size
+	_font_descript.set_absolute_size (font_size * Pango::SCALE);
 	_layout->set_font_description(_font_descript);
 
 	//change mode of midnam display
-	if (context_note_height >= 8.0) {
+	if (context_note_height > font_size) {
 		_mini_map_display = false;
 	} else {
 		_mini_map_display = true;
 	}
-
-	//Set Pango layout midnam size
-	_font_descript_midnam.set_absolute_size (min(15.0 * Pango::SCALE, max(7.0 * Pango::SCALE, (int)context_note_height * 0.7 * Pango::SCALE)));
-
-	_midnam_layout->set_font_description(_font_descript_midnam);
 
 	lowest = max(_midi_context.lowest_note(), _midi_context.y_to_note(y2));
 
@@ -230,13 +220,13 @@ PianoRollHeaderBase::render (ArdourCanvas::Rect const & self, ArdourCanvas::Rect
 
 			NoteName const & note (note_names[numbers[n]]);
 
-			_midnam_layout->set_text (note.name);
-			pango_layout_get_pixel_size (_midnam_layout->gobj (), &size_x, &size_y);
+			_layout->set_text (note.name);
+			pango_layout_get_pixel_size (_layout->gobj (), &size_x, &size_y);
 
 			set_source_rgba (cr, textc);
 			cr->move_to (4.f,  y + context_note_height / 2 - size_y / 2);
 			if (!_mini_map_display) {
-				_midnam_layout->show_in_cairo_context (cr);
+				_layout->show_in_cairo_context (cr);
 			} else {
 				/* Too small for text, just show a thing rect where the
 				   text would have been.
@@ -372,7 +362,7 @@ PianoRollHeaderBase::render (ArdourCanvas::Rect const & self, ArdourCanvas::Rect
 				str << 'G' << cn;
 			}
 
-			if (context_note_height > 12.){
+			if (context_note_height > font_size){
 				/* Cn text shown in keys */
 				set_source_rgba (cr, black);
 				_layout->set_text (str.str());
@@ -384,11 +374,11 @@ PianoRollHeaderBase::render (ArdourCanvas::Rect const & self, ArdourCanvas::Rect
 			} else {
 				/* Cn text shown to left of keys */
 				set_source_rgba (cr, textc);
-				_big_c_layout->set_text (str.str());
+				_layout->set_text (str.str());
 
-				pango_layout_get_pixel_size (_big_c_layout->gobj(), &c_width, &c_height);
+				pango_layout_get_pixel_size (_layout->gobj(), &c_width, &c_height);
 				 cr->move_to (x - c_width - 4, y + h / 2 - c_height / 2);
-				_big_c_layout->show_in_cairo_context (cr);
+				_layout->show_in_cairo_context (cr);
 			}
 		}
 	}

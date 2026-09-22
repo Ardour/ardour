@@ -75,11 +75,7 @@ class PianoRollHeaderBase : virtual public sigc::trackable {
 	Gtk::Adjustment&    _adj;
 	uint8_t             _event[3];
 	mutable Glib::RefPtr<Pango::Layout> _layout;
-	mutable Glib::RefPtr<Pango::Layout> _big_c_layout;
-	mutable Glib::RefPtr<Pango::Layout> _midnam_layout;
 	mutable Pango::FontDescription _font_descript;
-	Pango::FontDescription _font_descript_big_c;
-	mutable Pango::FontDescription _font_descript_midnam;
 	bool _active_notes[128];
 	uint8_t _highlighted_note;
 	uint8_t _clicked_note;
