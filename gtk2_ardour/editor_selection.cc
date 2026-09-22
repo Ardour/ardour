@@ -1678,7 +1678,7 @@ void
 Editor::region_selection_changed ()
 {
 	_regions->block_change_connection (true);
-	editor_regions_selection_changed_connection.block(true);
+	region_selection_changed_connection.block(true);
 
 	if (_region_selection_change_updates_region_list) {
 		_regions->unselect_all ();
@@ -1693,7 +1693,7 @@ Editor::region_selection_changed ()
 	}
 
 	_regions->block_change_connection (false);
-	editor_regions_selection_changed_connection.block(false);
+	region_selection_changed_connection.block(false);
 
 	sensitize_the_right_region_actions (false);
 

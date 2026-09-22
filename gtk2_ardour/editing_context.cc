@@ -278,7 +278,7 @@ EditingContext::EditingContext (std::string const & name)
 	note_mode_button.set_active_color (UIConfiguration::instance().color ("alert:yellow"));
 
 	selection->PointsChanged.connect (sigc::mem_fun(*this, &EditingContext::point_selection_changed));
-	selection->RegionsChanged.connect (sigc::mem_fun(*this, &EditingContext::region_selection_changed));
+	region_selection_changed_connection = selection->RegionsChanged.connect (sigc::mem_fun(*this, &EditingContext::region_selection_changed));
 
 	for (int i = 0; i < 16; i++) {
 		char buf[4];

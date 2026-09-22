@@ -1817,7 +1817,6 @@ private:
 	void handle_gui_changes (std::string const&, void*);
 	void region_selection_changed ();
 	void catch_up_on_midi_selection ();
-	sigc::connection editor_regions_selection_changed_connection;
 	void sensitize_all_region_actions (bool);
 	void sensitize_the_right_region_actions (bool because_canvas_crossing);
 	bool _all_region_actions_sensitized;

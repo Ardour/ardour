@@ -456,8 +456,6 @@ Editor::Editor ()
 
 	ZoomChanged.connect (sigc::mem_fun (*this, &Editor::update_section_rects));
 
-	editor_regions_selection_changed_connection = selection->RegionsChanged.connect (sigc::mem_fun(*this, &Editor::region_selection_changed));
-
 	selection->MarkersChanged.connect (sigc::mem_fun(*this, &Editor::marker_selection_changed));
 
 	edit_controls_vbox.set_spacing (0);

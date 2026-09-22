@@ -547,6 +547,8 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	void pianoroll_edit ();
 	virtual void midi_view_selection_changed (SimpleMidiNoteSelection& selection) {}
 
+	sigc::connection region_selection_changed_connection;
+
   protected:
 	std::string _name;
 	bool within_track_canvas;
