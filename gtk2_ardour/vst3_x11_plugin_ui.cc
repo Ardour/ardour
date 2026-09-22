@@ -128,18 +128,19 @@ VST3X11PluginUI::resize_callback (int width, int height)
 	if (!view || _resize_in_progress) {
 		return;
 	}
-	if (view->canResize() == kResultTrue) {
-		gint xx, yy;
-		if (gtk_widget_translate_coordinates (
-		    GTK_WIDGET(_gui_widget.gobj()),
-		    GTK_WIDGET(get_toplevel()->gobj()),
-		    0, 0, &xx, &yy))
-		{
-			get_window()->resize (width + xx, height + yy);
-		}
+
+	_req_width  = width;
+	_req_height = height;
+
+	gint xx, yy;
+	if (view->canResize() == kResultTrue
+	    && gtk_widget_translate_coordinates (
+	        GTK_WIDGET(_gui_widget.gobj()),
+	        GTK_WIDGET(get_toplevel()->gobj()),
+	        0, 0, &xx, &yy))
+	{
+		get_window()->resize (width + xx, height + yy);
 	} else {
-		_req_width  = width;
-		_req_height = height;
 		_gui_widget.queue_resize ();
 	}
 }
