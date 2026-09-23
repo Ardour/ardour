@@ -4895,6 +4895,22 @@ MidiView::selection_as_notelist (Notes& selected, bool allow_all_if_none_selecte
 }
 
 void
+MidiView::notes_as_notelist (Notes& n) const
+{
+	if (_visible_channel >= 0) {
+		for (auto const & [ note, gui ] : _events) {
+			if (note->channel() == _visible_channel) {
+				n.insert (note);
+			}
+		}
+	} else {
+		for (auto const & [ note, gui ] : _events) {
+			n.insert (note);
+		}
+	}
+}
+
+void
 MidiView::selection_as_notevector (std::vector<std::shared_ptr<NoteType> > & selected, bool allow_all_if_none_selected)
 {
 	bool had_selected = false;
