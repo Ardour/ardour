@@ -2959,6 +2959,9 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 					*/
 					dragging_view.view->trim_front_ending ();
 				}
+
+				dragging_view.view->drag_end ();
+
 				if (_preserve_fade_anchor && dragging_view.anchored_fade_length) {
 					AudioRegionView* arv = dynamic_cast<AudioRegionView*> (dragging_view.view);
 					if (arv) {
@@ -2983,6 +2986,9 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 						ar->set_fade_out_active (true);
 					}
 				}
+
+				dragging_view.view->drag_end ();
+
 				if (_jump_position_when_done) {
 					dragging_view.view->region ()->set_position (timepos_t (dragging_view.initial_end).earlier (dragging_view.view->region ()->length ()));
 				}
