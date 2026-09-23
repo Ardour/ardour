@@ -2180,6 +2180,11 @@ EditingContext::quantize_region ()
 void
 EditingContext::quantize_regions (const MidiViews& rs)
 {
+	/* Note that the semantics of this are different to
+	   MidiView::quantize_selected_regions(), since it acts on all
+	   (editable) notes in the MidiView.
+	*/
+
 	EC_LOCAL_TEMPO_SCOPE;
 
 	if (rs.empty()) {
@@ -2192,9 +2197,12 @@ EditingContext::quantize_regions (const MidiViews& rs)
 		return;
 	}
 
-	if (!quant->empty()) {
-		apply_midi_note_edit_op (*quant, rs);
+	if (quant->empty()) {
+		delete quant;
+		return;
 	}
+
+	apply_midi_note_edit_op_no_selection (*quant, rs);
 
 	delete quant;
 }
@@ -2363,6 +2371,22 @@ EditingContext::apply_midi_note_edit_op_to_region (MidiOperator& op, MidiView& m
 	return op (mrv.midi_region()->model(), pos.beats(), v);
 }
 
+PBD::Command*
+EditingContext::apply_midi_note_edit_op_to_region_no_selection (MidiOperator& op, MidiView& mrv)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	Evoral::Sequence<Temporal::Beats>::Notes all_notes;
+	mrv.notes_as_notelist (all_notes);
+
+	std::vector<Evoral::Sequence<Temporal::Beats>::Notes> v;
+	v.push_back (all_notes);
+
+	timepos_t pos = mrv.midi_region()->source_position();
+
+	return op (mrv.midi_region()->model(), pos.beats(), v);
+}
+
 void
 EditingContext::apply_midi_note_edit_op (MidiOperator& op, const RegionSelection& rs)
 {
@@ -2387,6 +2411,38 @@ EditingContext::apply_midi_note_edit_op (MidiOperator& op, const MidiViews& rs)
 	for (auto & mv : views) {
 
 		Command* cmd = apply_midi_note_edit_op_to_region (op, *mv);
+		if (cmd) {
+			if (!in_command) {
+				begin_reversible_command (op.name ());
+				in_command = true;
+			}
+			(*cmd)();
+			add_command (cmd);
+			}
+	}
+
+	if (in_command) {
+		commit_reversible_command ();
+		_session->set_dirty ();
+	}
+}
+
+void
+EditingContext::apply_midi_note_edit_op_no_selection (MidiOperator& op, const MidiViews& rs)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	if (rs.empty()) {
+		return;
+	}
+
+	bool in_command = false;
+
+	std::vector<MidiView*> views = filter_to_unique_midi_region_views (rs);
+
+	for (auto & mv : views) {
+
+		Command* cmd = apply_midi_note_edit_op_to_region_no_selection (op, *mv);
 		if (cmd) {
 			if (!in_command) {
 				begin_reversible_command (op.name ());
