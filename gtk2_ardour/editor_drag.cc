@@ -2676,8 +2676,8 @@ VideoTimeLineDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 	XMLNode& after = ARDOUR_UI::instance ()->video_timeline->get_state ();
 	editing_context.session ()->add_command (new MementoCommand<VideoTimeLine> (*(ARDOUR_UI::instance ()->video_timeline), &before, &after));
 
-	for (list<AVDraggingView>::iterator i = _views.begin (); i != _views.end (); ++i) {
-		i->view->drag_end ();
+	for (list<AVDraggingView>::iterator i = _views.begin (); i != _views.end (); ++i) {	
+	i->view->drag_end ();
 		i->view->region ()->resume_property_changes ();
 
 		editing_context.session ()->add_command (new StatefulDiffCommand (i->view->region ()));
@@ -2951,40 +2951,40 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 		motion (event, false);
 
 		if (_operation == StartTrim) {
-			for (list<DraggingView>::const_iterator i = _views.begin (); i != _views.end (); ++i) {
+			for (auto const & dragging_view: _views) {
 				{
 					/* This must happen before the region's StatefulDiffCommand is created, as it may
 					   `correct' (ahem) the region's _start from being negative to being zero.  It
 					   needs to be zero in the undo record.
 					*/
-					i->view->trim_front_ending ();
+					dragging_view.view->trim_front_ending ();
 				}
-				if (_preserve_fade_anchor && i->anchored_fade_length) {
-					AudioRegionView* arv = dynamic_cast<AudioRegionView*> (i->view);
+				if (_preserve_fade_anchor && dragging_view.anchored_fade_length) {
+					AudioRegionView* arv = dynamic_cast<AudioRegionView*> (dragging_view.view);
 					if (arv) {
 						std::shared_ptr<AudioRegion> ar (arv->audio_region ());
-						arv->reset_fade_in_shape_width (ar, i->anchored_fade_length);
-						ar->set_fade_in_length (i->anchored_fade_length);
+						arv->reset_fade_in_shape_width (ar, dragging_view.anchored_fade_length);
+						ar->set_fade_in_length (dragging_view.anchored_fade_length);
 						ar->set_fade_in_active (true);
 					}
 				}
 				if (_jump_position_when_done) {
-					i->view->region ()->set_position (timepos_t (i->initial_position));
+					dragging_view.view->region ()->set_position (timepos_t (dragging_view.initial_position));
 				}
 			}
 		} else if (_operation == EndTrim) {
-			for (list<DraggingView>::const_iterator i = _views.begin (); i != _views.end (); ++i) {
-				if (_preserve_fade_anchor && i->anchored_fade_length) {
-					AudioRegionView* arv = dynamic_cast<AudioRegionView*> (i->view);
+			for (auto const & dragging_view: _views) {
+				if (_preserve_fade_anchor && dragging_view.anchored_fade_length) {
+					AudioRegionView* arv = dynamic_cast<AudioRegionView*> (dragging_view.view);
 					if (arv) {
 						std::shared_ptr<AudioRegion> ar (arv->audio_region ());
-						arv->reset_fade_out_shape_width (ar, i->anchored_fade_length);
-						ar->set_fade_out_length (i->anchored_fade_length);
+						arv->reset_fade_out_shape_width (ar, dragging_view.anchored_fade_length);
+						ar->set_fade_out_length (dragging_view.anchored_fade_length);
 						ar->set_fade_out_active (true);
 					}
 				}
 				if (_jump_position_when_done) {
-					i->view->region ()->set_position (timepos_t (i->initial_end).earlier (i->view->region ()->length ()));
+					dragging_view.view->region ()->set_position (timepos_t (dragging_view.initial_end).earlier (dragging_view.view->region ()->length ()));
 				}
 			}
 		}
@@ -2992,8 +2992,8 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 		if (!editing_context.get_selection().selected (_primary)) {
 			_primary->thaw_after_trim ();
 		} else {
-			for (list<DraggingView>::const_iterator i = _views.begin (); i != _views.end (); ++i) {
-				i->view->thaw_after_trim ();
+			for (auto const & dragging_view: _views) {
+				dragging_view.view->thaw_after_trim ();
 			}
 		}
 
@@ -3020,8 +3020,8 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 		}
 	}
 
-	for (list<DraggingView>::const_iterator i = _views.begin (); i != _views.end (); ++i) {
-		i->view->region ()->resume_property_changes ();
+	for (auto const & dragging_view: _views) {
+		dragging_view.view->region ()->resume_property_changes ();
 	}
 }
 
