@@ -2301,6 +2301,7 @@ private:
 	bool bbt_to_grid (Temporal::BBT_Offset const & bbt, Editing::GridType& gt) const;
 
 	MidiInspector* _midi_inspector;
+	Gtk::ScrolledWindow* midi_inspector_scrolled_window;
 	ARDOUR::Quantize* get_quantize_op ();
 	void midi_view_selection_changed (SimpleMidiNoteSelection selection);
 	sigc::connection midi_view_selection_connection;
