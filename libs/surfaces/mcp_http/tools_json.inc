@@ -3626,6 +3626,84 @@ R"mcp(
         },
         "additionalProperties": true
       }
+    },
+    {
+      "name": "actions_list",
+      "title": "List GUI Actions",
+      "description": "List Ardour GUI actions (menu items and key-bindable operations) with their path, label, toggle state and whether they are currently enabled. Optional case-insensitive filter matched against path and label, e.g. 'marker' or 'zoom'.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "filter": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5000
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "total",
+          "truncated",
+          "actions"
+        ],
+        "properties": {
+          "total": {
+            "type": "integer"
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "actions": {
+            "type": "array"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "action_invoke",
+      "title": "Invoke GUI Action",
+      "description": "Trigger one Ardour GUI action by its path (Group/action-name, as returned by actions_list), exactly as if chosen from the menu, e.g. Editor/show-marker-lines or Editor/zoom-to-session. For toggle actions, optional state sets it on or off instead of flipping it.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "state": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "invoked",
+          "action"
+        ],
+        "properties": {
+          "invoked": {
+            "type": "boolean"
+          },
+          "action": {
+            "type": "object"
+          },
+          "previouslyActive": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": true
+      }
     }
   ]
 }

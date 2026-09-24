@@ -123,6 +123,18 @@ The server applies port changes immediately after committing the setting.
 - `midi_note/get_json`
 - `midi_note/import_json`
 
+## GUI Actions
+- `actions/list`
+- `action/invoke`
+
+These reach everything bound to a menu item or a keyboard shortcut, including
+view settings that have no dedicated tool, for example
+`Editor/show-marker-lines`, `Editor/zoom-to-session` or
+`Common/toggle-editor-and-mixer`. `actions/list` takes an optional `filter`
+to find the path of an action; `action/invoke` runs it on the GUI thread, and
+for toggle actions an optional `state` sets it on or off instead of flipping
+it. Both need the GUI; they fail cleanly when it does not respond.
+
 ## Bulk MIDI JSON Notes
 
 Use the JSON tools for fast note generation and round-trip editing:
@@ -159,6 +171,7 @@ Use these with your MCP-capable assistant to get started quickly.
 - "Set loop from bar 32 for 8 bars and enable loop."
 - "Go to marker Verse 2 and start playback."
 - "Arm global record, then go to start."
+- "Show marker lines and zoom to the whole session."
 
 ## Track Setup
 - "Create tracks for a live band: lead vocal, two backing vocals, two guitars, bass, stereo drums, stereo keys."

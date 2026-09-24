@@ -75,6 +75,8 @@
 #include "ardour/tempo.h"
 #include "ardour/track.h"
 
+#include "gtkmm2ext/actions.h"
+
 #include "mcp_http_server.h"
 
 namespace pt = boost::property_tree;
@@ -232,7 +234,9 @@ canonical_tool_name (std::string tool_name)
 		"region",
 		"plugin",
 		"midi_region",
-		"midi_note"
+		"midi_note",
+		"actions",
+		"action"
 	};
 
 	for (size_t i = 0; i < (sizeof (known_groups) / sizeof (known_groups[0])); ++i) {
@@ -7986,6 +7990,225 @@ dispatch_midi_region_tool_call (ARDOUR::Session& session, const std::string& too
 	return false;
 }
 
+/* GUI actions (menu items and key-bindable operations, e.g.
+ * "Editor/show-marker-lines"). GTK is not thread-safe, so every access to the
+ * ActionManager happens on the GUI event loop while the HTTP thread waits.
+ */
+
+struct GuiActionInfo {
+	std::string path;
+	std::string label;
+	std::string tooltip;
+	bool        toggle;
+	bool        active;
+	bool        sensitive;
+};
+
+static GuiActionInfo
+gui_action_info (const std::string& path, const Glib::RefPtr<Gtk::Action>& act)
+{
+	GuiActionInfo info;
+	info.path      = path;
+	info.label     = act->get_label ();
+	info.tooltip   = act->get_tooltip ();
+	info.sensitive = act->get_sensitive ();
+
+	Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic (act);
+	info.toggle = (bool)tact;
+	info.active = tact ? tact->get_active () : false;
+	return info;
+}
+
+static std::string
+gui_action_json (const GuiActionInfo& a)
+{
+	std::ostringstream os;
+	os << "{\"path\":\"" << json_escape (a.path) << "\""
+	   << ",\"label\":\"" << json_escape (a.label) << "\"";
+	if (!a.tooltip.empty ()) {
+		os << ",\"tooltip\":\"" << json_escape (a.tooltip) << "\"";
+	}
+	os << ",\"toggle\":" << (a.toggle ? "true" : "false");
+	if (a.toggle) {
+		os << ",\"active\":" << (a.active ? "true" : "false");
+	}
+	os << ",\"sensitive\":" << (a.sensitive ? "true" : "false") << "}";
+	return os.str ();
+}
+
+/* Run @a f on the GUI event loop and wait up to @a timeout_ms for it.
+ * @a f must only capture state it co-owns, since on timeout it may still run
+ * after this returns.
+ */
+static bool
+run_in_gui_thread (PBD::EventLoop* event_loop, const std::function<void ()>& f, int timeout_ms)
+{
+	if (!event_loop) {
+		return false;
+	}
+
+	struct Done {
+		std::mutex              mutex;
+		std::condition_variable cv;
+		bool                    done = false;
+	};
+	std::shared_ptr<Done> done (new Done);
+
+	const bool queued = event_loop->call_slot (MISSING_INVALIDATOR, [done, f] () {
+		f ();
+		{
+			std::lock_guard<std::mutex> lk (done->mutex);
+			done->done = true;
+		}
+		done->cv.notify_one ();
+	});
+
+	if (!queued) {
+		return false;
+	}
+
+	std::unique_lock<std::mutex> lk (done->mutex);
+	return done->cv.wait_for (lk, std::chrono::milliseconds (timeout_ms), [&] { return done->done; });
+}
+
+static std::string
+to_lower_ascii (std::string s)
+{
+	std::transform (s.begin (), s.end (), s.begin (), [] (unsigned char c) { return std::tolower (c); });
+	return s;
+}
+
+static std::string
+handle_actions_list_tool (PBD::EventLoop* event_loop, const pt::ptree& root, const std::string& id)
+{
+	const std::string filter = to_lower_ascii (root.get<std::string> ("params.arguments.filter", ""));
+	const int64_t     limit  = root.get<int64_t> ("params.arguments.limit", 200);
+	if (limit < 1 || limit > 5000) {
+		return jsonrpc_error (id, -32602, "Invalid limit (expected 1..5000)");
+	}
+
+	std::shared_ptr<std::vector<GuiActionInfo>> found (new std::vector<GuiActionInfo>);
+
+	const bool ok = run_in_gui_thread (event_loop, [found, filter] () {
+		std::vector<std::string>                   paths, labels, tooltips, keys;
+		std::vector<Glib::RefPtr<Gtk::Action>>     acts;
+		ActionManager::get_all_actions (paths, labels, tooltips, keys, acts);
+		for (size_t i = 0; i < paths.size (); ++i) {
+			if (!filter.empty ()
+			    && to_lower_ascii (paths[i]).find (filter) == std::string::npos
+			    && to_lower_ascii (labels[i]).find (filter) == std::string::npos) {
+				continue;
+			}
+			found->push_back (gui_action_info (paths[i], acts[i]));
+		}
+	}, 5000);
+
+	if (!ok) {
+		return jsonrpc_error (id, -32000, "GUI did not respond (is Ardour running with its GUI?)");
+	}
+
+	std::sort (found->begin (), found->end (), [] (const GuiActionInfo& a, const GuiActionInfo& b) { return a.path < b.path; });
+
+	std::ostringstream structured;
+	structured << "{\"total\":" << found->size ()
+	           << ",\"truncated\":" << ((int64_t)found->size () > limit ? "true" : "false")
+	           << ",\"actions\":[";
+	for (size_t i = 0; i < found->size () && (int64_t)i < limit; ++i) {
+		structured << (i ? "," : "") << gui_action_json ((*found)[i]);
+	}
+	structured << "]}";
+
+	return jsonrpc_result (
+	    id,
+	    std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"GUI actions\"}],\"structuredContent\":") + structured.str () + "}");
+}
+
+static std::string
+handle_action_invoke_tool (PBD::EventLoop* event_loop, const pt::ptree& root, const std::string& id)
+{
+	const std::string         path  = root.get<std::string> ("params.arguments.path", "");
+	const std::optional<bool> state = get_optional_std<bool> (root, "params.arguments.state");
+
+	if (path.empty () || path.find ('/') == std::string::npos) {
+		return jsonrpc_error (id, -32602, "Invalid path (expected Group/action-name, e.g. Editor/show-marker-lines)");
+	}
+
+	struct Result {
+		bool          found = false;
+		bool          toggle = false;
+		bool          sensitive = false;
+		bool          before = false;
+		GuiActionInfo after;
+	};
+	std::shared_ptr<Result> r (new Result);
+
+	const bool ok = run_in_gui_thread (event_loop, [r, path, state] () {
+		/* look it up in the full list rather than with ActionManager::get_action (),
+		 * which prints a stack trace for unknown names */
+		std::vector<std::string>               paths, labels, tooltips, keys;
+		std::vector<Glib::RefPtr<Gtk::Action>> acts;
+		ActionManager::get_all_actions (paths, labels, tooltips, keys, acts);
+		for (size_t i = 0; i < paths.size (); ++i) {
+			if (paths[i] != path) {
+				continue;
+			}
+			Glib::RefPtr<Gtk::Action>       act  = acts[i];
+			Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic (act);
+			r->found     = true;
+			r->toggle    = (bool)tact;
+			r->sensitive = act->get_sensitive ();
+			r->before    = tact ? tact->get_active () : false;
+			if (r->sensitive && (tact || !state)) {
+				if (tact && state) {
+					tact->set_active (*state);
+				} else {
+					act->activate ();
+				}
+			}
+			r->after = gui_action_info (path, act);
+			return;
+		}
+	}, 10000);
+
+	if (!ok) {
+		return jsonrpc_error (id, -32000, "GUI did not respond (is Ardour running with its GUI?)");
+	}
+	if (!r->found) {
+		return jsonrpc_error (id, -32602, "Unknown action (use actions/list to find its path)");
+	}
+	if (state && !r->toggle) {
+		return jsonrpc_error (id, -32602, "state is only valid for toggle actions");
+	}
+	if (!r->sensitive) {
+		return jsonrpc_error (id, -32000, "Action is currently disabled (insensitive) in the GUI");
+	}
+
+	std::ostringstream structured;
+	structured << "{\"invoked\":true,\"action\":" << gui_action_json (r->after);
+	if (r->toggle) {
+		structured << ",\"previouslyActive\":" << (r->before ? "true" : "false");
+	}
+	structured << "}";
+
+	return jsonrpc_result (
+	    id,
+	    std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"GUI action invoked\"}],\"structuredContent\":") + structured.str () + "}");
+}
+
+static bool
+dispatch_action_tool_call (PBD::EventLoop* event_loop, const std::string& tool_name, const pt::ptree& root, const std::string& id, std::string& response)
+{
+	if (tool_name == "actions/list") {
+		response = handle_actions_list_tool (event_loop, root, id);
+		return true;
+	}
+	if (tool_name == "action/invoke") {
+		response = handle_action_invoke_tool (event_loop, root, id);
+		return true;
+	}
+	return false;
+}
+
 std::string
 MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 {
@@ -8097,6 +8320,11 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 		std::string midi_region_tool_response;
 		if (dispatch_midi_region_tool_call (_session, tool_name, root, id, midi_region_tool_response)) {
 			return midi_region_tool_response;
+		}
+
+		std::string action_tool_response;
+		if (dispatch_action_tool_call (_event_loop, tool_name, root, id, action_tool_response)) {
+			return action_tool_response;
 		}
 
 		return jsonrpc_error (id, -32602, "Unknown tool name");
