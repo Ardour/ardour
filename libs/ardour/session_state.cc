@@ -1839,7 +1839,7 @@ XMLNode&
 Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, bool only_used_assets) const
 {
 	LocaleGuard lg;
-	XMLNode* node = new XMLNode("Session");
+	XMLNode* node = new XMLNode (X_("Session"));
 	XMLNode* child;
 
 	PBD::Unwinder<bool> uw (Automatable::skip_saving_automation, save_template);
