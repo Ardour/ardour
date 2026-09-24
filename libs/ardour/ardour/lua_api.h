@@ -455,12 +455,15 @@ namespace ARDOUR { namespace LuaAPI {
 	 *  @param with_tempo_map import the SMF tempo map into the session
 	 *  @param with_markers   import SMF markers / text meta-events
 	 *  @param split_channels create a track per channel rather than per SMF track
+	 *  @param split_at_markers additionally split every imported region at each
+	 *                          SMF section marker (0x06) and name the pieces after
+	 *                          the marker, so each song part is its own region
 	 *  @return the list of newly created MIDI tracks (empty on failure)
 	 */
 	std::list<std::shared_ptr<ARDOUR::MidiTrack> >
 		import_midi (ARDOUR::Session*, std::string const& path,
 		             bool with_tempo_map = true, bool with_markers = true,
-		             bool split_channels = false);
+		             bool split_channels = false, bool split_at_markers = false);
 
 } } /* namespace */
 

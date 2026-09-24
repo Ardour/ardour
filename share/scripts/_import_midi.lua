@@ -12,7 +12,8 @@ This is a thin example wrapper around the libardour Lua binding:
     ARDOUR.LuaAPI.import_midi (session, path,
                                with_tempo_map,   -- import the SMF tempo map
                                with_markers,     -- import SMF markers / text meta-events
-                               split_channels)   -- one track per channel instead of per SMF track
+                               split_channels,   -- one track per channel instead of per SMF track
+                               split_at_markers) -- cut each track at every section marker (Part A/B/...)
 
 The binding lives in libardour (not in the GTK layer), so the very same
 call also works headless from the `ardour6-lua` / `ardour9-lua`
@@ -43,6 +44,7 @@ function factory () return function ()
 		{ type = "checkbox", key = "tempo_map",  title = "Import tempo map",            default = true  },
 		{ type = "checkbox", key = "markers",    title = "Import markers / meta-events", default = true  },
 		{ type = "checkbox", key = "split",      title = "Split channels into tracks",   default = false },
+		{ type = "checkbox", key = "split_marks", title = "Split each track at section markers", default = false },
 	}
 
 	local rv = LuaDialog.Dialog ("Import MIDI File", dialog_options):run ()
@@ -54,7 +56,8 @@ function factory () return function ()
 	local tracks = ARDOUR.LuaAPI.import_midi (Session, rv['path'],
 	                                          rv['tempo_map'],
 	                                          rv['markers'],
-	                                          rv['split'])
+	                                          rv['split'],
+	                                          rv['split_marks'])
 
 	-- `tracks` is a MidiTrackList; #...:table() gives its length.
 	local n = #tracks:table ()
