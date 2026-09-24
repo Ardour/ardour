@@ -2415,17 +2415,19 @@ Playlist::get_template ()
 XMLNode&
 Playlist::state (bool full_state) const
 {
-	bool empty = true;
+	bool all_transient = true;
 
-	for (auto const & r : regions) {
-		if (!r->transient()) {
-			empty = false;
-			break;
+	if (!regions.empty()) {
+		for (auto const & r : regions) {
+			if (!r->transient()) {
+				all_transient = false;
+				break;
+			}
 		}
-	}
 
-	if (empty) {
-		throw no_state();
+		if (all_transient) {
+			throw no_state();
+		}
 	}
 
 	XMLNode* node = new XMLNode (X_("Playlist"));
