@@ -684,20 +684,20 @@ RegionDrag::RegionDrag (Editor& e, ArdourCanvas::Item* i, RegionView* p, list<Re
 	TrackViewList track_views = _editor.track_views;
 	track_views.sort (TimeAxisViewStripableSorter ());
 
-	for (TrackViewList::iterator i = track_views.begin (); i != track_views.end (); ++i) {
-		_time_axis_views.push_back (*i);
+	for (auto & tv : track_views) {
+		_time_axis_views.push_back (tv);
 
-		TimeAxisView::Children children_list = (*i)->get_child_list ();
-		for (TimeAxisView::Children::iterator j = children_list.begin (); j != children_list.end (); ++j) {
-			_time_axis_views.push_back (j->get ());
+		TimeAxisView::Children children = tv->get_child_list ();
+		for (auto & child : children) {
+			_time_axis_views.push_back (child.get ());
 		}
 	}
 
 	/* the list of views can be empty at this point if this is a region list-insert drag
 	 */
 
-	for (list<RegionView*>::const_iterator i = v.begin (); i != v.end (); ++i) {
-		_views.push_back (DraggingView (*i, this, &(*i)->get_time_axis_view ()));
+	for (auto const & rv : v) {
+		_views.push_back (DraggingView (rv, this, &rv->get_time_axis_view ()));
 	}
 
 	RegionView::RegionViewGoingAway.connect (death_connection, invalidator (*this), std::bind (&RegionDrag::region_going_away, this, _1), gui_context ());
