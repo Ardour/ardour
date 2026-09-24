@@ -3,7 +3,8 @@
 # Import a (multi-track) MIDI file into a fresh Ardour session, splitting it
 # into one track per channel, launch the Ardour GUI on it under PipeWire/JACK,
 # connect the master output to the laptop speakers, and enable Ardour's MCP
-# server so an AI assistant can drive the session live.
+# server so the session can be remote-controlled live (by an AI assistant, a
+# script or any other MCP / JSON-RPC client).
 #
 # Usage:  ./import_and_play.sh [file.mid] [session-dir]
 #
