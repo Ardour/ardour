@@ -6194,6 +6194,13 @@ handle_midi_note_add_tool (ARDOUR::Session& session, pt::ptree& root, const std:
 	    std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"MIDI note added\"}],\"structuredContent\":") + structured.str () + "}");
 }
 
+static bool
+note_starts_in_region (const std::shared_ptr<ARDOUR::MidiRegion>& region, const std::shared_ptr<Evoral::Note<Temporal::Beats>>& note)
+{
+	const Temporal::Beats start = region->source_beats_to_region_time (note->time ()).beats ();
+	return start >= Temporal::Beats () && start < region->length ().beats ();
+}
+
 static std::string
 handle_midi_note_list_tool (ARDOUR::Session& session, pt::ptree& root, const std::string& id)
 {
@@ -6218,11 +6225,18 @@ handle_midi_note_list_tool (ARDOUR::Session& session, pt::ptree& root, const std
 		return jsonrpc_error (id, -32000, "MIDI region model not available");
 	}
 
+	/* Regions made by splitting share one MIDI source, so the model also
+	 * holds the notes of the sibling regions. */
+	const bool include_outside = root.get<bool> ("params.arguments.includeOutsideRegion", false);
+
 	std::vector<std::string>        notes_json;
 	const ARDOUR::MidiModel::Notes& notes = model->notes ();
 	for (ARDOUR::MidiModel::Notes::const_iterator it = notes.begin (); it != notes.end (); ++it) {
 		const std::shared_ptr<Evoral::Note<Temporal::Beats>>& note = *it;
 		if (!note) {
+			continue;
+		}
+		if (!include_outside && !note_starts_in_region (midi_region, note)) {
 			continue;
 		}
 		notes_json.push_back (midi_note_json (region, note, "list"));
@@ -7990,6 +8004,248 @@ dispatch_midi_region_tool_call (ARDOUR::Session& session, const std::string& too
 	return false;
 }
 
+/* Part-oriented editing: after splitting at section markers each song part is
+ * its own region, named after its marker, so parts can be addressed by name.
+ */
+
+/* Resolve regionId, or trackId + regionName (unique on that track's playlist). */
+static bool
+resolve_region_by_id_or_name (ARDOUR::Session& session, const pt::ptree& root, std::shared_ptr<ARDOUR::Region>& region, std::string& error)
+{
+	const std::string region_id   = root.get<std::string> ("params.arguments.regionId", "");
+	const std::string track_id    = root.get<std::string> ("params.arguments.trackId", "");
+	const std::string region_name = root.get<std::string> ("params.arguments.regionName", "");
+
+	if (!region_id.empty ()) {
+		if (!track_id.empty () || !region_name.empty ()) {
+			error = "Provide either regionId or trackId + regionName, not both";
+			return false;
+		}
+		region = region_by_mcp_id (region_id);
+		if (!region) {
+			error = "regionId not found";
+			return false;
+		}
+		return true;
+	}
+
+	if (track_id.empty () || region_name.empty ()) {
+		error = "Missing regionId (or trackId + regionName)";
+		return false;
+	}
+
+	const std::shared_ptr<ARDOUR::Track> track = std::dynamic_pointer_cast<ARDOUR::Track> (route_by_mcp_id (session, track_id));
+	if (!track || !track->playlist ()) {
+		error = "trackId is not a track";
+		return false;
+	}
+
+	std::vector<std::shared_ptr<ARDOUR::Region>> matches;
+	std::shared_ptr<ARDOUR::RegionList>          rl = track->playlist ()->region_list ();
+	for (auto const& r : *rl) {
+		if (r->name () == region_name) {
+			matches.push_back (r);
+		}
+	}
+
+	if (matches.empty ()) {
+		error = "No region named '" + region_name + "' on this track";
+		return false;
+	}
+	if (matches.size () > 1) {
+		error = "Several regions are named '" + region_name + "' on this track; use regionId";
+		return false;
+	}
+	region = matches.front ();
+	return true;
+}
+
+static std::string
+handle_region_rename_tool (ARDOUR::Session& session, const pt::ptree& root, const std::string& id)
+{
+	const std::string new_name = root.get<std::string> ("params.arguments.newName", "");
+	if (new_name.empty ()) {
+		return jsonrpc_error (id, -32602, "Missing newName");
+	}
+
+	std::shared_ptr<ARDOUR::Region> region;
+	std::string                     error;
+	if (!resolve_region_by_id_or_name (session, root, region, error)) {
+		return jsonrpc_error (id, -32602, error);
+	}
+
+	const std::string old_name = region->name ();
+
+	session.begin_reversible_command ("rename region");
+	region->clear_changes ();
+	region->set_name (new_name);
+	session.add_command (new PBD::StatefulDiffCommand (region));
+	session.commit_reversible_command ();
+
+	std::ostringstream structured;
+	structured << "{\"oldName\":\"" << json_escape (old_name) << "\""
+	           << ",\"region\":" << midi_region_brief_json (region) << "}";
+
+	return jsonrpc_result (
+	    id,
+	    std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Region renamed\"}],\"structuredContent\":") + structured.str () + "}");
+}
+
+static std::string
+handle_region_transpose_tool (ARDOUR::Session& session, const pt::ptree& root, const std::string& id)
+{
+	const std::optional<int64_t> semitones_opt = get_optional_std<int64_t> (root, "params.arguments.semitones");
+	if (!semitones_opt || *semitones_opt == 0 || *semitones_opt < -127 || *semitones_opt > 127) {
+		return jsonrpc_error (id, -32602, "Invalid semitones (expected a non-zero integer in -127..127, e.g. -12 for an octave down)");
+	}
+	const int semitones = (int)*semitones_opt;
+
+	std::shared_ptr<ARDOUR::Region> region;
+	std::string                     error;
+	if (!resolve_region_by_id_or_name (session, root, region, error)) {
+		return jsonrpc_error (id, -32602, error);
+	}
+	const std::shared_ptr<ARDOUR::MidiRegion> midi_region = std::dynamic_pointer_cast<ARDOUR::MidiRegion> (region);
+	if (!midi_region) {
+		return jsonrpc_error (id, -32602, "Region is not a MIDI region");
+	}
+	const std::shared_ptr<ARDOUR::MidiModel> model = midi_region->model ();
+	if (!model) {
+		return jsonrpc_error (id, -32000, "MIDI region model not available");
+	}
+
+	std::vector<std::shared_ptr<Evoral::Note<Temporal::Beats>>> selected;
+	int                                                         lo = 127, hi = 0;
+	for (auto const& note : model->notes ()) {
+		if (!note || !note_starts_in_region (midi_region, note)) {
+			continue;
+		}
+		selected.push_back (note);
+		lo = std::min (lo, (int)note->note ());
+		hi = std::max (hi, (int)note->note ());
+	}
+
+	if (selected.empty ()) {
+		return jsonrpc_error (id, -32000, "Region contains no notes");
+	}
+	if (lo + semitones < 0 || hi + semitones > 127) {
+		return jsonrpc_error (id, -32602, "Transposition would move notes outside the MIDI range 0..127; nothing changed");
+	}
+
+	ARDOUR::MidiModel::NoteDiffCommand* cmd = model->new_note_diff_command ("transpose region");
+	for (auto const& note : selected) {
+		cmd->change (note, ARDOUR::MidiModel::NoteDiffCommand::NoteNumber, (uint8_t)(note->note () + semitones));
+	}
+	model->apply_diff_command_as_commit (session, cmd);
+
+	std::ostringstream structured;
+	structured << "{\"region\":" << midi_region_brief_json (region)
+	           << ",\"semitones\":" << semitones
+	           << ",\"notesTransposed\":" << selected.size ()
+	           << ",\"pitchRangeBefore\":[" << lo << "," << hi << "]"
+	           << ",\"pitchRangeAfter\":[" << (lo + semitones) << "," << (hi + semitones) << "]}";
+
+	return jsonrpc_result (
+	    id,
+	    std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Region transposed\"}],\"structuredContent\":") + structured.str () + "}");
+}
+
+static std::string
+handle_track_split_at_markers_tool (ARDOUR::Session& session, const pt::ptree& root, const std::string& id)
+{
+	const std::string track_id = root.get<std::string> ("params.arguments.trackId", "");
+
+	std::vector<std::shared_ptr<ARDOUR::Track>> tracks;
+	if (!track_id.empty ()) {
+		const std::shared_ptr<ARDOUR::Track> track = std::dynamic_pointer_cast<ARDOUR::Track> (route_by_mcp_id (session, track_id));
+		if (!track) {
+			return jsonrpc_error (id, -32602, "trackId is not a track");
+		}
+		tracks.push_back (track);
+	} else {
+		std::shared_ptr<ARDOUR::RouteList const> routes = session.get_routes ();
+		for (auto const& r : *routes) {
+			std::shared_ptr<ARDOUR::Track> track = std::dynamic_pointer_cast<ARDOUR::Track> (r);
+			if (track && !track->is_hidden ()) {
+				tracks.push_back (track);
+			}
+		}
+	}
+
+	/* plain markers and arrangement sections, not ranges, cues or xruns */
+	std::map<Temporal::timepos_t, std::string> marks;
+	for (auto const& loc : session.locations ()->list ()) {
+		if (loc->is_mark () && !loc->is_cue_marker () && !loc->is_xrun () && !loc->is_session_range ()) {
+			marks[loc->start ()] = loc->name ();
+		}
+	}
+	if (marks.empty ()) {
+		return jsonrpc_error (id, -32000, "Session has no markers to split at");
+	}
+
+	session.begin_reversible_command ("split at markers");
+
+	std::ostringstream tracks_json;
+	for (size_t ti = 0; ti < tracks.size (); ++ti) {
+		const std::shared_ptr<ARDOUR::Playlist> playlist = tracks[ti]->playlist ();
+		if (!playlist) {
+			continue;
+		}
+
+		playlist->clear_changes ();
+		for (auto const& mk : marks) {
+			playlist->split (mk.first);
+		}
+		session.add_command (new PBD::StatefulDiffCommand (playlist));
+
+		std::shared_ptr<ARDOUR::RegionList> rl = playlist->region_list ();
+		size_t                              named = 0;
+		for (auto const& r : *rl) {
+			auto it = marks.find (r->position ());
+			if (it == marks.end () || r->name () == it->second) {
+				continue;
+			}
+			r->clear_changes ();
+			r->set_name (it->second);
+			session.add_command (new PBD::StatefulDiffCommand (r));
+			++named;
+		}
+
+		tracks_json << (ti ? "," : "")
+		            << "{\"id\":\"" << json_escape (tracks[ti]->id ().to_s ()) << "\""
+		            << ",\"name\":\"" << json_escape (tracks[ti]->name ()) << "\""
+		            << ",\"regions\":" << rl->size ()
+		            << ",\"regionsNamed\":" << named << "}";
+	}
+
+	session.commit_reversible_command ();
+
+	std::ostringstream structured;
+	structured << "{\"markers\":" << marks.size () << ",\"tracks\":[" << tracks_json.str () << "]}";
+
+	return jsonrpc_result (
+	    id,
+	    std::string ("{\"content\":[{\"type\":\"text\",\"text\":\"Split at markers\"}],\"structuredContent\":") + structured.str () + "}");
+}
+
+static bool
+dispatch_part_tool_call (ARDOUR::Session& session, const std::string& tool_name, const pt::ptree& root, const std::string& id, std::string& response)
+{
+	if (tool_name == "region/transpose") {
+		response = handle_region_transpose_tool (session, root, id);
+		return true;
+	}
+	if (tool_name == "region/rename") {
+		response = handle_region_rename_tool (session, root, id);
+		return true;
+	}
+	if (tool_name == "track/split_at_markers") {
+		response = handle_track_split_at_markers_tool (session, root, id);
+		return true;
+	}
+	return false;
+}
+
 /* GUI actions (menu items and key-bindable operations, e.g.
  * "Editor/show-marker-lines"). GTK is not thread-safe, so every access to the
  * ActionManager happens on the GUI event loop while the HTTP thread waits.
@@ -8320,6 +8576,11 @@ MCPHttpServer::dispatch_jsonrpc (const std::string& payload) const
 		std::string midi_region_tool_response;
 		if (dispatch_midi_region_tool_call (_session, tool_name, root, id, midi_region_tool_response)) {
 			return midi_region_tool_response;
+		}
+
+		std::string part_tool_response;
+		if (dispatch_part_tool_call (_session, tool_name, root, id, part_tool_response)) {
+			return part_tool_response;
 		}
 
 		std::string action_tool_response;
