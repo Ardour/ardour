@@ -2324,7 +2324,9 @@ RouteUI::route_gui_changed (PropertyChange const& what_changed)
 		_session->selection().select_stripable_and_maybe_group (_route, SelectionRemove, false, false);
 	}
 
-	check_rec_enable_sensitivity ();
+	if (what_changed.contains (Properties::transient)) {
+		check_rec_enable_sensitivity ();
+	}
 }
 
 void
