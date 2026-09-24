@@ -304,7 +304,7 @@ LUFSMeter::upsample_x2 (int chn, float const x)
 		r[i] = r[i + 1];
 	}
 
-	return std::max (u[0], u[1]);
+	return std::max (fabsf(u[0]), fabsf(u[1]));
 }
 
 float
