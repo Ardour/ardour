@@ -697,6 +697,9 @@ RegionDrag::RegionDrag (Editor& e, ArdourCanvas::Item* i, RegionView* p, list<Re
 	 */
 
 	for (auto const & rv : v) {
+		if (rv->region()->transient()) {
+			_y_constrained = true;
+		}
 		_views.push_back (DraggingView (rv, this, &rv->get_time_axis_view ()));
 	}
 
