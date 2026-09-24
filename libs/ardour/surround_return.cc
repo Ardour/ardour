@@ -911,7 +911,7 @@ SurroundReturn::integrated_loudness () const
 float
 SurroundReturn::max_dbtp () const
 {
-	return _lufs_meter.dbtp ();
+	return _lufs_meter.max_dbtp ();
 }
 
 int

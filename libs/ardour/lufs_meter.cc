@@ -141,6 +141,8 @@ LUFSMeter::reset ()
 	_block_cnt  = 0;
 	_pow_idx    = 0;
 	_dbtp       = 0;
+	_max_dbtp   = 0;
+	_rst_dbtp = true;
 
 	memset (_power, 0, 8 * sizeof (float));
 
@@ -271,9 +273,17 @@ LUFSMeter::max_momentary () const
 }
 
 float
-LUFSMeter::dbtp () const
+LUFSMeter::dbtp ()
 {
-	return accurate_coefficient_to_dB (_dbtp);
+	float rv = _dbtp;
+	_rst_dbtp = true;
+	return accurate_coefficient_to_dB (rv);
+}
+
+float
+LUFSMeter::max_dbtp () const
+{
+	return accurate_coefficient_to_dB (_max_dbtp);
 }
 
 float
@@ -369,11 +379,14 @@ LUFSMeter::upsample_x4 (int chn, float const x)
 void
 LUFSMeter::calc_true_peak (float const** data, const uint32_t n_samples)
 {
+	float dbtp = _rst_dbtp ? 0 : _dbtp;
 	for (uint32_t c = 0; c < _n_channels; ++c) {
 		float const* d = data[c];
 		for (uint32_t i = 0; i < n_samples; ++i) {
 			float peak = upsample (c, d[i]);
-			_dbtp      = std::max (_dbtp, peak);
+			dbtp       = std::max (dbtp, peak);
 		}
 	}
+	_dbtp = dbtp;
+	_max_dbtp = std::max (dbtp, _max_dbtp);
 }
