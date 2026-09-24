@@ -17,6 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include <cstring>
+#include <map>
 #include <vamp-hostsdk/PluginLoader.h>
 
 #include "pbd/basename.h"
@@ -1222,7 +1223,8 @@ LuaAPI::event_buffer (std::shared_ptr<Evoral::Event<Temporal::Beats> > ev)
 
 std::list<std::shared_ptr<MidiTrack> >
 LuaAPI::import_midi (Session* s, std::string const& path,
-                     bool with_tempo_map, bool with_markers, bool split_channels)
+                     bool with_tempo_map, bool with_markers, bool split_channels,
+                     bool split_at_markers)
 {
 	std::list<std::shared_ptr<MidiTrack> > new_tracks;
 
@@ -1380,21 +1382,55 @@ LuaAPI::import_midi (Session* s, std::string const& path,
 	 *    flooded. Regions are imported at the session start, so a marker's
 	 *    musical position maps directly to its session position.
 	 */
-	if (with_markers) {
+	if (with_markers || split_at_markers) {
+		/* marker position -> text, ordered by position */
+		std::map<timepos_t, std::string> marks;
+
 		Evoral::SMF smf;
 		if (smf.open (path, 1, false) == 0) {
 			smf.load_markers ();
-			Locations* locs = s->locations ();
 			const double ppqn = (double) smf.ppqn ();
 			for (auto const& m : smf.markers ()) {
 				if (m.meta_type != 0x06) {
 					continue;
 				}
 				timepos_t mpos (Temporal::Beats::from_double (m.time_pulses / ppqn));
-				Location* loc = new Location (*s, mpos, mpos, m.text, Location::IsMark);
-				locs->add (loc, false);
+				marks[mpos] = m.text;
 			}
 			smf.close ();
+		}
+
+		if (with_markers) {
+			Locations* locs = s->locations ();
+			for (auto const& mk : marks) {
+				Location* loc = new Location (*s, mk.first, mk.first, mk.second, Location::IsMark);
+				locs->add (loc, false);
+			}
+		}
+
+		/* 5. optionally cut every imported region at each section marker so
+		 *    each song part becomes its own region, named after the marker.
+		 *    Playlist::split() is a no-op at a region boundary or outside any
+		 *    region, so it is safe to apply every marker to every track.
+		 */
+		if (split_at_markers) {
+			for (auto const& track : new_tracks) {
+				std::shared_ptr<Playlist> playlist = track->playlist ();
+				for (auto const& mk : marks) {
+					playlist->split (mk.first);
+				}
+				/* name each piece after the marker it starts on. Bind the
+				 * shared_ptr to a local first: iterating *region_list()
+				 * directly would free the list at the end of the init
+				 * expression (pre-C++23 range-for temporary lifetime). */
+				std::shared_ptr<RegionList> rl = playlist->region_list ();
+				for (auto const& r : *rl) {
+					auto it = marks.find (r->position ());
+					if (it != marks.end ()) {
+						r->set_name (it->second);
+					}
+				}
+			}
 		}
 	}
 

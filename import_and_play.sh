@@ -6,6 +6,11 @@
 #
 # Usage:  ./import_and_play.sh [file.mid] [session-dir]
 #
+# Env options:
+#   SF2=<path>          General-MIDI soundfont (default FluidR3_GM.sf2)
+#   SPLIT_AT_MARKERS=1  cut each track into one region per section marker
+#                       (Part A, Part B, ...) named after the marker
+#
 # Phase 1 runs headless (ardour-lua, dummy backend) with an ISOLATED config so
 # it cannot change your real Ardour audio settings. Phase 2 launches the GUI
 # with your normal config (JACK via pw-jack). Phase 3 wires master -> speakers.
@@ -22,6 +27,8 @@ SPEAKERS="Built-in Audio Analog Stereo"      # the default PipeWire sink (laptop
 #   MuseScore_General_Full.sf2 (489 MB, higher quality)
 #   TimGM6mb.sf2             (6 MB, fast to load)
 SF2="${SF2:-/usr/share/sounds/sf2/FluidR3_GM.sf2}"
+# Split each track into one region per section marker? (empty/0 = no)
+case "${SPLIT_AT_MARKERS:-0}" in 1|true|yes|on) SPLIT_AT_MARKERS=true;; *) SPLIT_AT_MARKERS=false;; esac
 
 [ -f "$MIDI" ] || { echo "No such MIDI file: $MIDI" >&2; exit 1; }
 
@@ -36,8 +43,8 @@ LUA="$(mktemp "${TMPDIR:-/tmp}/import_XXXXXX.lua")"
 cat > "$LUA" <<EOF
 local s = create_session("$SESSION_DIR", "$NAME", $RATE)
 assert(s, "session creation failed")
--- import_midi(session, path, with_tempo_map, with_markers, split_channels)
-local tr = ARDOUR.LuaAPI.import_midi(s, "$MIDI", true, true, true)
+-- import_midi(session, path, with_tempo_map, with_markers, split_channels, split_at_markers)
+local tr = ARDOUR.LuaAPI.import_midi(s, "$MIDI", true, true, true, $SPLIT_AT_MARKERS)
 print(string.format("IMPORTED %d MIDI track(s)", #tr:table()))
 
 -- Put ACE a-fluidsynth at the top of each track so MIDI -> GM audio. The
