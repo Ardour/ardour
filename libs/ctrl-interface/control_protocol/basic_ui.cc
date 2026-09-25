@@ -576,19 +576,19 @@ BasicUI::arm_tracks_toggle_punch ()
 		   (we already did some of the session checks)
 		*/
 		if (session->get_play_loop()) {
-            if (!Config->get_loop_is_mode()) {
-                session->request_play_loop (false, false);
-            }
-        } else if (session->get_play_range () ) {
-            session->request_play_range (0, true);
-        }
+			if (!Config->get_loop_is_mode()) {
+				session->request_play_loop (false, false);
+			}
+		} else if (session->get_play_range () ) {
+			session->request_play_range (0, true);
+		}
 		session->request_roll ();
-    } else {
-        session->request_stop ();
-        if (any_armed) {    // disable all
-            session->set_controls (acl, false, PBD::Controllable::NoGroup);
-        }
-    }
+	} else {
+		session->request_stop ();
+		if (any_armed) {    // disable all
+			session->set_controls (acl, false, PBD::Controllable::NoGroup);
+		}
+	}
 }
 
 /* Same thing as arm_tracks_toggle_punch,
@@ -597,49 +597,49 @@ BasicUI::arm_tracks_toggle_punch ()
 void
 BasicUI::toggle_punch ()
 {
-    if (!session) {
-        return;
-    }
+	if (!session) {
+		return;
+	}
 
-    if (session->is_auditioning()) {
-        return;
-    }
+	if (session->is_auditioning()) {
+		return;
+	}
 
-    if (session->config.get_external_sync()) {
-        switch (TransportMasterManager::instance().current()->type()) {
-        case Engine:
-            break;
-        default:
-            /* transport controlled by the master */
-            return;
-        }
-    }
+	if (session->config.get_external_sync()) {
+		switch (TransportMasterManager::instance().current()->type()) {
+			case Engine:
+				break;
+			default:
+			/* transport controlled by the master */
+				return;
+		}
+	}
 
-    if (session->ntracks() == 0) {
-        /* must enable tracks first */
-        return;
-    }
+	if (session->ntracks() == 0) {
+		/* must enable tracks first */
+		return;
+	}
 
-    bool rolling = transport_rolling();
+	bool rolling = transport_rolling();
 
-    if (!rolling) {
-        if (session->record_status() == RecordState::Disabled) {
-            session->maybe_enable_record ();
-        }
-        /* Below is essentially transport_play
-           (we already did some of the session checks)
-        */
-        if (session->get_play_loop()) {
-            if (!Config->get_loop_is_mode()) {
-                session->request_play_loop (false, false);
-            }
-        } else if (session->get_play_range () ) {
-            session->request_play_range (0, true);
-        }
-        session->request_roll ();
-    } else {
-        session->request_stop ();
-    }
+	if (!rolling) {
+		if (session->record_status() == RecordState::Disabled) {
+			session->maybe_enable_record ();
+		}
+		/* Below is essentially transport_play
+		   (we already did some of the session checks)
+		*/
+		if (session->get_play_loop()) {
+			if (!Config->get_loop_is_mode()) {
+				session->request_play_loop (false, false);
+			}
+		} else if (session->get_play_range () ) {
+			session->request_play_range (0, true);
+		}
+		session->request_roll ();
+	} else {
+		session->request_stop ();
+	}
 }
 
 void
