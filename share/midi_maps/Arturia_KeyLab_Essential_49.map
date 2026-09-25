@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.0.0" name="KeyLab Essential 49" manufacturer="Arturia">
+<!--
+    Arturia KeyLab Essential 49 in its normal (Analog Lab) mode, not in DAW mode.
+
+    The keyboard has two MIDI ports and both must be connected to Ardour's
+    "MIDI Control In":
+      * "MIDI" port: faders and encoders as CCs on the keyboard's current
+        MIDI channel (the channel of the keys, pitch bend and modulation
+        wheel), so they are bound on all 16 channels below; pads as notes
+        36-43 on channel 10.
+      * "DAW" port: transport and utility buttons, as Mackie Control notes on
+        channel 1, whatever the mode.
+
+    Faders and encoders are absolute and not motorized: Ardour only follows a
+    fader once its movement crosses the current value, so nothing jumps. The
+    threshold additionally drops any step larger than itself, which loses the
+    fader as soon as it is moved quickly (steps of 25 were measured), so it is
+    set to its maximum: the crossing rule alone already prevents jumps.
+    Encoder 9 (CC 17) and the pads are left free; the pads are meant to play
+    a drum track.
+-->
+  <DeviceInfo bank-size="8" threshold="127"/>
+
+<!-- Faders 1-8 and master fader, then encoders 1-8 (pan), repeated for each
+     MIDI channel: Generic MIDI bindings are per channel, and these controls
+     follow the keyboard's channel. -->
+  <!-- channel 1 -->
+  <Binding channel="1" ctl="73" uri="/route/gain B1"/>
+  <Binding channel="1" ctl="75" uri="/route/gain B2"/>
+  <Binding channel="1" ctl="79" uri="/route/gain B3"/>
+  <Binding channel="1" ctl="72" uri="/route/gain B4"/>
+  <Binding channel="1" ctl="80" uri="/route/gain B5"/>
+  <Binding channel="1" ctl="81" uri="/route/gain B6"/>
+  <Binding channel="1" ctl="82" uri="/route/gain B7"/>
+  <Binding channel="1" ctl="83" uri="/route/gain B8"/>
+  <Binding channel="1" ctl="85" uri="/bus/gain master"/>
+  <Binding channel="1" ctl="74" uri="/route/pandirection B1"/>
+  <Binding channel="1" ctl="71" uri="/route/pandirection B2"/>
+  <Binding channel="1" ctl="76" uri="/route/pandirection B3"/>
+  <Binding channel="1" ctl="77" uri="/route/pandirection B4"/>
+  <Binding channel="1" ctl="93" uri="/route/pandirection B5"/>
+  <Binding channel="1" ctl="18" uri="/route/pandirection B6"/>
+  <Binding channel="1" ctl="19" uri="/route/pandirection B7"/>
+  <Binding channel="1" ctl="16" uri="/route/pandirection B8"/>
+  <!-- channel 2 -->
+  <Binding channel="2" ctl="73" uri="/route/gain B1"/>
+  <Binding channel="2" ctl="75" uri="/route/gain B2"/>
+  <Binding channel="2" ctl="79" uri="/route/gain B3"/>
+  <Binding channel="2" ctl="72" uri="/route/gain B4"/>
+  <Binding channel="2" ctl="80" uri="/route/gain B5"/>
+  <Binding channel="2" ctl="81" uri="/route/gain B6"/>
+  <Binding channel="2" ctl="82" uri="/route/gain B7"/>
+  <Binding channel="2" ctl="83" uri="/route/gain B8"/>
+  <Binding channel="2" ctl="85" uri="/bus/gain master"/>
+  <Binding channel="2" ctl="74" uri="/route/pandirection B1"/>
+  <Binding channel="2" ctl="71" uri="/route/pandirection B2"/>
+  <Binding channel="2" ctl="76" uri="/route/pandirection B3"/>
+  <Binding channel="2" ctl="77" uri="/route/pandirection B4"/>
+  <Binding channel="2" ctl="93" uri="/route/pandirection B5"/>
+  <Binding channel="2" ctl="18" uri="/route/pandirection B6"/>
+  <Binding channel="2" ctl="19" uri="/route/pandirection B7"/>
+  <Binding channel="2" ctl="16" uri="/route/pandirection B8"/>
+  <!-- channel 3 -->
+  <Binding channel="3" ctl="73" uri="/route/gain B1"/>
+  <Binding channel="3" ctl="75" uri="/route/gain B2"/>
+  <Binding channel="3" ctl="79" uri="/route/gain B3"/>
+  <Binding channel="3" ctl="72" uri="/route/gain B4"/>
+  <Binding channel="3" ctl="80" uri="/route/gain B5"/>
+  <Binding channel="3" ctl="81" uri="/route/gain B6"/>
+  <Binding channel="3" ctl="82" uri="/route/gain B7"/>
+  <Binding channel="3" ctl="83" uri="/route/gain B8"/>
+  <Binding channel="3" ctl="85" uri="/bus/gain master"/>
+  <Binding channel="3" ctl="74" uri="/route/pandirection B1"/>
+  <Binding channel="3" ctl="71" uri="/route/pandirection B2"/>
+  <Binding channel="3" ctl="76" uri="/route/pandirection B3"/>
+  <Binding channel="3" ctl="77" uri="/route/pandirection B4"/>
+  <Binding channel="3" ctl="93" uri="/route/pandirection B5"/>
+  <Binding channel="3" ctl="18" uri="/route/pandirection B6"/>
+  <Binding channel="3" ctl="19" uri="/route/pandirection B7"/>
+  <Binding channel="3" ctl="16" uri="/route/pandirection B8"/>
+  <!-- channel 4 -->
+  <Binding channel="4" ctl="73" uri="/route/gain B1"/>
+  <Binding channel="4" ctl="75" uri="/route/gain B2"/>
+  <Binding channel="4" ctl="79" uri="/route/gain B3"/>
+  <Binding channel="4" ctl="72" uri="/route/gain B4"/>
+  <Binding channel="4" ctl="80" uri="/route/gain B5"/>
+  <Binding channel="4" ctl="81" uri="/route/gain B6"/>
+  <Binding channel="4" ctl="82" uri="/route/gain B7"/>
+  <Binding channel="4" ctl="83" uri="/route/gain B8"/>
+  <Binding channel="4" ctl="85" uri="/bus/gain master"/>
+  <Binding channel="4" ctl="74" uri="/route/pandirection B1"/>
+  <Binding channel="4" ctl="71" uri="/route/pandirection B2"/>
+  <Binding channel="4" ctl="76" uri="/route/pandirection B3"/>
+  <Binding channel="4" ctl="77" uri="/route/pandirection B4"/>
+  <Binding channel="4" ctl="93" uri="/route/pandirection B5"/>
+  <Binding channel="4" ctl="18" uri="/route/pandirection B6"/>
+  <Binding channel="4" ctl="19" uri="/route/pandirection B7"/>
+  <Binding channel="4" ctl="16" uri="/route/pandirection B8"/>
+  <!-- channel 5 -->
+  <Binding channel="5" ctl="73" uri="/route/gain B1"/>
+  <Binding channel="5" ctl="75" uri="/route/gain B2"/>
+  <Binding channel="5" ctl="79" uri="/route/gain B3"/>
+  <Binding channel="5" ctl="72" uri="/route/gain B4"/>
+  <Binding channel="5" ctl="80" uri="/route/gain B5"/>
+  <Binding channel="5" ctl="81" uri="/route/gain B6"/>
+  <Binding channel="5" ctl="82" uri="/route/gain B7"/>
+  <Binding channel="5" ctl="83" uri="/route/gain B8"/>
+  <Binding channel="5" ctl="85" uri="/bus/gain master"/>
+  <Binding channel="5" ctl="74" uri="/route/pandirection B1"/>
+  <Binding channel="5" ctl="71" uri="/route/pandirection B2"/>
+  <Binding channel="5" ctl="76" uri="/route/pandirection B3"/>
+  <Binding channel="5" ctl="77" uri="/route/pandirection B4"/>
+  <Binding channel="5" ctl="93" uri="/route/pandirection B5"/>
+  <Binding channel="5" ctl="18" uri="/route/pandirection B6"/>
+  <Binding channel="5" ctl="19" uri="/route/pandirection B7"/>
+  <Binding channel="5" ctl="16" uri="/route/pandirection B8"/>
+  <!-- channel 6 -->
+  <Binding channel="6" ctl="73" uri="/route/gain B1"/>
+  <Binding channel="6" ctl="75" uri="/route/gain B2"/>
+  <Binding channel="6" ctl="79" uri="/route/gain B3"/>
+  <Binding channel="6" ctl="72" uri="/route/gain B4"/>
+  <Binding channel="6" ctl="80" uri="/route/gain B5"/>
+  <Binding channel="6" ctl="81" uri="/route/gain B6"/>
+  <Binding channel="6" ctl="82" uri="/route/gain B7"/>
+  <Binding channel="6" ctl="83" uri="/route/gain B8"/>
+  <Binding channel="6" ctl="85" uri="/bus/gain master"/>
+  <Binding channel="6" ctl="74" uri="/route/pandirection B1"/>
+  <Binding channel="6" ctl="71" uri="/route/pandirection B2"/>
+  <Binding channel="6" ctl="76" uri="/route/pandirection B3"/>
+  <Binding channel="6" ctl="77" uri="/route/pandirection B4"/>
+  <Binding channel="6" ctl="93" uri="/route/pandirection B5"/>
+  <Binding channel="6" ctl="18" uri="/route/pandirection B6"/>
+  <Binding channel="6" ctl="19" uri="/route/pandirection B7"/>
+  <Binding channel="6" ctl="16" uri="/route/pandirection B8"/>
+  <!-- channel 7 -->
+  <Binding channel="7" ctl="73" uri="/route/gain B1"/>
+  <Binding channel="7" ctl="75" uri="/route/gain B2"/>
+  <Binding channel="7" ctl="79" uri="/route/gain B3"/>
+  <Binding channel="7" ctl="72" uri="/route/gain B4"/>
+  <Binding channel="7" ctl="80" uri="/route/gain B5"/>
+  <Binding channel="7" ctl="81" uri="/route/gain B6"/>
+  <Binding channel="7" ctl="82" uri="/route/gain B7"/>
+  <Binding channel="7" ctl="83" uri="/route/gain B8"/>
+  <Binding channel="7" ctl="85" uri="/bus/gain master"/>
+  <Binding channel="7" ctl="74" uri="/route/pandirection B1"/>
+  <Binding channel="7" ctl="71" uri="/route/pandirection B2"/>
+  <Binding channel="7" ctl="76" uri="/route/pandirection B3"/>
+  <Binding channel="7" ctl="77" uri="/route/pandirection B4"/>
+  <Binding channel="7" ctl="93" uri="/route/pandirection B5"/>
+  <Binding channel="7" ctl="18" uri="/route/pandirection B6"/>
+  <Binding channel="7" ctl="19" uri="/route/pandirection B7"/>
+  <Binding channel="7" ctl="16" uri="/route/pandirection B8"/>
+  <!-- channel 8 -->
+  <Binding channel="8" ctl="73" uri="/route/gain B1"/>
+  <Binding channel="8" ctl="75" uri="/route/gain B2"/>
+  <Binding channel="8" ctl="79" uri="/route/gain B3"/>
+  <Binding channel="8" ctl="72" uri="/route/gain B4"/>
+  <Binding channel="8" ctl="80" uri="/route/gain B5"/>
+  <Binding channel="8" ctl="81" uri="/route/gain B6"/>
+  <Binding channel="8" ctl="82" uri="/route/gain B7"/>
+  <Binding channel="8" ctl="83" uri="/route/gain B8"/>
+  <Binding channel="8" ctl="85" uri="/bus/gain master"/>
+  <Binding channel="8" ctl="74" uri="/route/pandirection B1"/>
+  <Binding channel="8" ctl="71" uri="/route/pandirection B2"/>
+  <Binding channel="8" ctl="76" uri="/route/pandirection B3"/>
+  <Binding channel="8" ctl="77" uri="/route/pandirection B4"/>
+  <Binding channel="8" ctl="93" uri="/route/pandirection B5"/>
+  <Binding channel="8" ctl="18" uri="/route/pandirection B6"/>
+  <Binding channel="8" ctl="19" uri="/route/pandirection B7"/>
+  <Binding channel="8" ctl="16" uri="/route/pandirection B8"/>
+  <!-- channel 9 -->
+  <Binding channel="9" ctl="73" uri="/route/gain B1"/>
+  <Binding channel="9" ctl="75" uri="/route/gain B2"/>
+  <Binding channel="9" ctl="79" uri="/route/gain B3"/>
+  <Binding channel="9" ctl="72" uri="/route/gain B4"/>
+  <Binding channel="9" ctl="80" uri="/route/gain B5"/>
+  <Binding channel="9" ctl="81" uri="/route/gain B6"/>
+  <Binding channel="9" ctl="82" uri="/route/gain B7"/>
+  <Binding channel="9" ctl="83" uri="/route/gain B8"/>
+  <Binding channel="9" ctl="85" uri="/bus/gain master"/>
+  <Binding channel="9" ctl="74" uri="/route/pandirection B1"/>
+  <Binding channel="9" ctl="71" uri="/route/pandirection B2"/>
+  <Binding channel="9" ctl="76" uri="/route/pandirection B3"/>
+  <Binding channel="9" ctl="77" uri="/route/pandirection B4"/>
+  <Binding channel="9" ctl="93" uri="/route/pandirection B5"/>
+  <Binding channel="9" ctl="18" uri="/route/pandirection B6"/>
+  <Binding channel="9" ctl="19" uri="/route/pandirection B7"/>
+  <Binding channel="9" ctl="16" uri="/route/pandirection B8"/>
+  <!-- channel 10 -->
+  <Binding channel="10" ctl="73" uri="/route/gain B1"/>
+  <Binding channel="10" ctl="75" uri="/route/gain B2"/>
+  <Binding channel="10" ctl="79" uri="/route/gain B3"/>
+  <Binding channel="10" ctl="72" uri="/route/gain B4"/>
+  <Binding channel="10" ctl="80" uri="/route/gain B5"/>
+  <Binding channel="10" ctl="81" uri="/route/gain B6"/>
+  <Binding channel="10" ctl="82" uri="/route/gain B7"/>
+  <Binding channel="10" ctl="83" uri="/route/gain B8"/>
+  <Binding channel="10" ctl="85" uri="/bus/gain master"/>
+  <Binding channel="10" ctl="74" uri="/route/pandirection B1"/>
+  <Binding channel="10" ctl="71" uri="/route/pandirection B2"/>
+  <Binding channel="10" ctl="76" uri="/route/pandirection B3"/>
+  <Binding channel="10" ctl="77" uri="/route/pandirection B4"/>
+  <Binding channel="10" ctl="93" uri="/route/pandirection B5"/>
+  <Binding channel="10" ctl="18" uri="/route/pandirection B6"/>
+  <Binding channel="10" ctl="19" uri="/route/pandirection B7"/>
+  <Binding channel="10" ctl="16" uri="/route/pandirection B8"/>
+  <!-- channel 11 -->
+  <Binding channel="11" ctl="73" uri="/route/gain B1"/>
+  <Binding channel="11" ctl="75" uri="/route/gain B2"/>
+  <Binding channel="11" ctl="79" uri="/route/gain B3"/>
+  <Binding channel="11" ctl="72" uri="/route/gain B4"/>
+  <Binding channel="11" ctl="80" uri="/route/gain B5"/>
+  <Binding channel="11" ctl="81" uri="/route/gain B6"/>
+  <Binding channel="11" ctl="82" uri="/route/gain B7"/>
+  <Binding channel="11" ctl="83" uri="/route/gain B8"/>
+  <Binding channel="11" ctl="85" uri="/bus/gain master"/>
+  <Binding channel="11" ctl="74" uri="/route/pandirection B1"/>
+  <Binding channel="11" ctl="71" uri="/route/pandirection B2"/>
+  <Binding channel="11" ctl="76" uri="/route/pandirection B3"/>
+  <Binding channel="11" ctl="77" uri="/route/pandirection B4"/>
+  <Binding channel="11" ctl="93" uri="/route/pandirection B5"/>
+  <Binding channel="11" ctl="18" uri="/route/pandirection B6"/>
+  <Binding channel="11" ctl="19" uri="/route/pandirection B7"/>
+  <Binding channel="11" ctl="16" uri="/route/pandirection B8"/>
+  <!-- channel 12 -->
+  <Binding channel="12" ctl="73" uri="/route/gain B1"/>
+  <Binding channel="12" ctl="75" uri="/route/gain B2"/>
+  <Binding channel="12" ctl="79" uri="/route/gain B3"/>
+  <Binding channel="12" ctl="72" uri="/route/gain B4"/>
+  <Binding channel="12" ctl="80" uri="/route/gain B5"/>
+  <Binding channel="12" ctl="81" uri="/route/gain B6"/>
+  <Binding channel="12" ctl="82" uri="/route/gain B7"/>
+  <Binding channel="12" ctl="83" uri="/route/gain B8"/>
+  <Binding channel="12" ctl="85" uri="/bus/gain master"/>
+  <Binding channel="12" ctl="74" uri="/route/pandirection B1"/>
+  <Binding channel="12" ctl="71" uri="/route/pandirection B2"/>
+  <Binding channel="12" ctl="76" uri="/route/pandirection B3"/>
+  <Binding channel="12" ctl="77" uri="/route/pandirection B4"/>
+  <Binding channel="12" ctl="93" uri="/route/pandirection B5"/>
+  <Binding channel="12" ctl="18" uri="/route/pandirection B6"/>
+  <Binding channel="12" ctl="19" uri="/route/pandirection B7"/>
+  <Binding channel="12" ctl="16" uri="/route/pandirection B8"/>
+  <!-- channel 13 -->
+  <Binding channel="13" ctl="73" uri="/route/gain B1"/>
+  <Binding channel="13" ctl="75" uri="/route/gain B2"/>
+  <Binding channel="13" ctl="79" uri="/route/gain B3"/>
+  <Binding channel="13" ctl="72" uri="/route/gain B4"/>
+  <Binding channel="13" ctl="80" uri="/route/gain B5"/>
+  <Binding channel="13" ctl="81" uri="/route/gain B6"/>
+  <Binding channel="13" ctl="82" uri="/route/gain B7"/>
+  <Binding channel="13" ctl="83" uri="/route/gain B8"/>
+  <Binding channel="13" ctl="85" uri="/bus/gain master"/>
+  <Binding channel="13" ctl="74" uri="/route/pandirection B1"/>
+  <Binding channel="13" ctl="71" uri="/route/pandirection B2"/>
+  <Binding channel="13" ctl="76" uri="/route/pandirection B3"/>
+  <Binding channel="13" ctl="77" uri="/route/pandirection B4"/>
+  <Binding channel="13" ctl="93" uri="/route/pandirection B5"/>
+  <Binding channel="13" ctl="18" uri="/route/pandirection B6"/>
+  <Binding channel="13" ctl="19" uri="/route/pandirection B7"/>
+  <Binding channel="13" ctl="16" uri="/route/pandirection B8"/>
+  <!-- channel 14 -->
+  <Binding channel="14" ctl="73" uri="/route/gain B1"/>
+  <Binding channel="14" ctl="75" uri="/route/gain B2"/>
+  <Binding channel="14" ctl="79" uri="/route/gain B3"/>
+  <Binding channel="14" ctl="72" uri="/route/gain B4"/>
+  <Binding channel="14" ctl="80" uri="/route/gain B5"/>
+  <Binding channel="14" ctl="81" uri="/route/gain B6"/>
+  <Binding channel="14" ctl="82" uri="/route/gain B7"/>
+  <Binding channel="14" ctl="83" uri="/route/gain B8"/>
+  <Binding channel="14" ctl="85" uri="/bus/gain master"/>
+  <Binding channel="14" ctl="74" uri="/route/pandirection B1"/>
+  <Binding channel="14" ctl="71" uri="/route/pandirection B2"/>
+  <Binding channel="14" ctl="76" uri="/route/pandirection B3"/>
+  <Binding channel="14" ctl="77" uri="/route/pandirection B4"/>
+  <Binding channel="14" ctl="93" uri="/route/pandirection B5"/>
+  <Binding channel="14" ctl="18" uri="/route/pandirection B6"/>
+  <Binding channel="14" ctl="19" uri="/route/pandirection B7"/>
+  <Binding channel="14" ctl="16" uri="/route/pandirection B8"/>
+  <!-- channel 15 -->
+  <Binding channel="15" ctl="73" uri="/route/gain B1"/>
+  <Binding channel="15" ctl="75" uri="/route/gain B2"/>
+  <Binding channel="15" ctl="79" uri="/route/gain B3"/>
+  <Binding channel="15" ctl="72" uri="/route/gain B4"/>
+  <Binding channel="15" ctl="80" uri="/route/gain B5"/>
+  <Binding channel="15" ctl="81" uri="/route/gain B6"/>
+  <Binding channel="15" ctl="82" uri="/route/gain B7"/>
+  <Binding channel="15" ctl="83" uri="/route/gain B8"/>
+  <Binding channel="15" ctl="85" uri="/bus/gain master"/>
+  <Binding channel="15" ctl="74" uri="/route/pandirection B1"/>
+  <Binding channel="15" ctl="71" uri="/route/pandirection B2"/>
+  <Binding channel="15" ctl="76" uri="/route/pandirection B3"/>
+  <Binding channel="15" ctl="77" uri="/route/pandirection B4"/>
+  <Binding channel="15" ctl="93" uri="/route/pandirection B5"/>
+  <Binding channel="15" ctl="18" uri="/route/pandirection B6"/>
+  <Binding channel="15" ctl="19" uri="/route/pandirection B7"/>
+  <Binding channel="15" ctl="16" uri="/route/pandirection B8"/>
+  <!-- channel 16 -->
+  <Binding channel="16" ctl="73" uri="/route/gain B1"/>
+  <Binding channel="16" ctl="75" uri="/route/gain B2"/>
+  <Binding channel="16" ctl="79" uri="/route/gain B3"/>
+  <Binding channel="16" ctl="72" uri="/route/gain B4"/>
+  <Binding channel="16" ctl="80" uri="/route/gain B5"/>
+  <Binding channel="16" ctl="81" uri="/route/gain B6"/>
+  <Binding channel="16" ctl="82" uri="/route/gain B7"/>
+  <Binding channel="16" ctl="83" uri="/route/gain B8"/>
+  <Binding channel="16" ctl="85" uri="/bus/gain master"/>
+  <Binding channel="16" ctl="74" uri="/route/pandirection B1"/>
+  <Binding channel="16" ctl="71" uri="/route/pandirection B2"/>
+  <Binding channel="16" ctl="76" uri="/route/pandirection B3"/>
+  <Binding channel="16" ctl="77" uri="/route/pandirection B4"/>
+  <Binding channel="16" ctl="93" uri="/route/pandirection B5"/>
+  <Binding channel="16" ctl="18" uri="/route/pandirection B6"/>
+  <Binding channel="16" ctl="19" uri="/route/pandirection B7"/>
+  <Binding channel="16" ctl="16" uri="/route/pandirection B8"/>
+
+<!-- Transport buttons (DAW port). -->
+  <Binding channel="1" note="91" action="Transport/Rewind"/>
+  <Binding channel="1" note="92" action="Transport/Forward"/>
+  <Binding channel="1" note="93" function="transport-stop"/>
+  <Binding channel="1" note="94" function="transport-roll"/>
+  <Binding channel="1" note="95" action="Transport/Record"/>
+  <Binding channel="1" note="86" action="Transport/Loop"/>
+
+<!-- Utility buttons (DAW port). The Punch button sends notes 87 and 88
+     together, so only one of them is bound. -->
+  <Binding channel="1" note="80" action="Common/Save"/>
+  <Binding channel="1" note="81" action="Editing/undo"/>
+  <Binding channel="1" note="87" action="Transport/TogglePunch"/>
+  <Binding channel="1" note="89" action="Transport/ToggleClick"/>
+</ArdourMIDIBindings>
