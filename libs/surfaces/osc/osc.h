@@ -451,6 +451,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK(toggle_punch_out);
 	PATH_CALLBACK(rec_enable_toggle);
 	PATH_CALLBACK(toggle_all_rec_enables);
+		PATH_CALLBACK(arm_tracks_toggle_punch);
+    PATH_CALLBACK(toggle_punch);
 	PATH_CALLBACK(all_tracks_rec_in);
 	PATH_CALLBACK(all_tracks_rec_out);
 	PATH_CALLBACK(cancel_all_solos);
