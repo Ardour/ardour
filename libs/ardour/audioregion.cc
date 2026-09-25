@@ -623,6 +623,11 @@ AudioRegion::read_at (Sample*     buf,
 	assert (cnt >= 0);
 	uint32_t const n_chn = n_channels ();
 
+	if (_session.exporting() && transient()) {
+		/* pretend we read it */
+		return cnt;
+	}
+
 	if (n_chn == 0) {
 		return 0;
 	}
@@ -1104,6 +1109,11 @@ samplecnt_t
 AudioRegion::read_from_sources (SourceList const & srcs, samplecnt_t limit, Sample* buf, samplepos_t pos, samplecnt_t cnt, uint32_t chan_n) const
 {
 	sampleoffset_t const internal_offset = pos - position().samples();
+
+	if (_session.exporting() && transient()) {
+		/* pretend we read it */
+		return cnt;
+	}
 
 	if (internal_offset >= limit) {
 		return 0;
@@ -2451,6 +2461,11 @@ AudioRegion::do_export (std::string const& path) const
 	const uint32_t    n_chn      = n_channels ();
 	const samplecnt_t chunk_size = 8192;
 	Sample            buf[chunk_size];
+
+	if (_session.exporting() && transient()) {
+		/* pretend we read it */
+		return true;
+	}
 
 	const int format = SF_FORMAT_FLAC | SF_FORMAT_PCM_24; // TODO preference or option
 
