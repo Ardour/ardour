@@ -257,6 +257,9 @@ class MackieControlProtocol
 
 	// bank switching
 	int switch_banks (uint32_t first_remote_id, bool force = false);
+	/* position in @a sorted of the first stripable of the current bank */
+	uint32_t current_bank_index (Sorted const &) const;
+	int switch_banks_to_index (Sorted const &, uint32_t index);
 	void prev_track ();
 	void next_track ();
 
