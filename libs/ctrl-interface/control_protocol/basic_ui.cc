@@ -547,8 +547,8 @@ BasicUI::arm_tracks_toggle_punch ()
 			default:
 				/* transport controlled by the master */
 				return;
-        }
-    }
+		}
+	}
 
 	if (session->ntracks() == 0) {
 		return; // must enable tracks first
@@ -610,7 +610,7 @@ BasicUI::toggle_punch ()
 			case Engine:
 				break;
 			default:
-			/* transport controlled by the master */
+				/* transport controlled by the master */
 				return;
 		}
 	}
