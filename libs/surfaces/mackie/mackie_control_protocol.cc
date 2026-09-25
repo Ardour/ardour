@@ -369,8 +369,13 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 	bool exists = false;
 	Sorted::iterator first = sorted.end();
 
+	/* initial is an order number, which need not belong to any stripable
+	 * listed here: bank 0 is requested at startup, but order 0 is usually
+	 * the master (excluded above), so the first track is order 1. Start the
+	 * bank at the first stripable at or after it.
+	 */
 	for (auto s = sorted.begin(); s != sorted.end(); ++s) {
-		if ((*s)->presentation_info().order() == initial) {
+		if ((*s)->presentation_info().order() >= initial) {
 			first = s;
 			exists = true;
 			break;
@@ -381,7 +386,7 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 		return -1;
 	}
 
-	if (sorted.size() <= strip_cnt && _current_initial_bank == 0 && !force) {
+	if (sorted.size() <= strip_cnt && _current_initial_bank <= sorted.front()->presentation_info().order() && !force) {
 		/* no banking - not enough stripables to fill all strips and we're
 		 * not at the first one.
 		 */
@@ -390,7 +395,7 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 		return -1;
 	}
 
-	_current_initial_bank = initial;
+	_current_initial_bank = (*first)->presentation_info().order();
 	_current_selected_track = -1;
 
 	// Map current bank of stripables onto each surface(+strip)
