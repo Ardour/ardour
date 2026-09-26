@@ -522,6 +522,126 @@ BasicUI::toggle_all_rec_enables ()
 	session->toggle_all_tracks_record_enabled ();
 }
 
+/* Essentially:
+   1) Arm/disarm tracks, 2) master record enable/disable, 3) transport start/stop
+   (e.g. it might:
+   - arm all tracks if none are armed, record enable,
+   and start recording
+   - disarm all tracks, and transport stop)
+*/
+void
+BasicUI::arm_tracks_toggle_punch ()
+{
+	if (!session) {
+		return;
+	}
+
+	if (session->is_auditioning()) {
+		return;
+	}
+
+	if (session->config.get_external_sync()) {
+		switch (TransportMasterManager::instance().current()->type()) {
+			case Engine:
+				break;
+			default:
+				/* transport controlled by the master */
+				return;
+		}
+	}
+
+	if (session->ntracks() == 0) {
+		return; // must enable tracks first
+	}
+
+	std::shared_ptr<AutomationControlList> acl (route_list_to_control_list (session->get_routes(), &Stripable::rec_enable_control));
+
+	bool any_armed = false;
+
+	for (auto const & c : *acl) {
+		if (c->get_value()) {
+			any_armed = true;
+		}
+	}
+
+	bool rolling = transport_rolling();
+	if (!rolling) {
+		if (!any_armed) {   // enable all
+			session->set_controls (acl, true, PBD::Controllable::NoGroup);
+		}
+		if (session->record_status() == RecordState::Disabled) {
+			session->maybe_enable_record ();
+		}
+		/* Below is essentially transport_play
+		   (we already did some of the session checks)
+		*/
+		if (session->get_play_loop()) {
+			if (!Config->get_loop_is_mode()) {
+				session->request_play_loop (false, false);
+			}
+		} else if (session->get_play_range () ) {
+			session->request_play_range (0, true);
+		}
+		session->request_roll ();
+	} else {
+		session->request_stop ();
+		if (any_armed) {    // disable all
+			session->set_controls (acl, false, PBD::Controllable::NoGroup);
+		}
+	}
+}
+
+/* Same thing as arm_tracks_toggle_punch,
+   aside from the fact it does not arm tracks.
+*/
+void
+BasicUI::toggle_punch ()
+{
+	if (!session) {
+		return;
+	}
+
+	if (session->is_auditioning()) {
+		return;
+	}
+
+	if (session->config.get_external_sync()) {
+		switch (TransportMasterManager::instance().current()->type()) {
+			case Engine:
+				break;
+			default:
+				/* transport controlled by the master */
+				return;
+		}
+	}
+
+	if (session->ntracks() == 0) {
+		/* must enable tracks first */
+		return;
+	}
+
+	bool rolling = transport_rolling();
+
+	if (!rolling) {
+		if (session->record_status() == RecordState::Disabled) {
+			session->maybe_enable_record ();
+		}
+		/* Below is essentially transport_play
+		   (we already did some of the session checks)
+		*/
+		if (session->get_play_loop()) {
+			if (!Config->get_loop_is_mode()) {
+				session->request_play_loop (false, false);
+			}
+		} else if (session->get_play_range () ) {
+			session->request_play_range (0, true);
+		}
+		session->request_roll ();
+	} else {
+		session->request_stop ();
+	}
+}
+
 void
 BasicUI::toggle_punch_in ()
 {
