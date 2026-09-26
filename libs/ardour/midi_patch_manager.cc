@@ -22,6 +22,8 @@
 
 #include <memory>
 
+#include <cxxabi.h>
+
 #include <glibmm/fileutils.h>
 
 #include "pbd/error.h"
@@ -170,6 +172,14 @@ MidiPatchManager::load_midi_name_document (const std::string& file_path)
 	std::shared_ptr<MIDINameDocument> document;
 	try {
 		document = std::shared_ptr<MIDINameDocument>(new MIDINameDocument(file_path));
+	}
+	catch (abi::__forced_unwind&) {
+		/* thread cancellation (e.g. pthread_cancel_all() at shutdown) unwinds
+		 * via this exception; it must be re-thrown so the unwind reaches the
+		 * thread's top frame. Swallowing it in the catch (...) below makes glibc
+		 * abort with "FATAL: exception not rethrown".
+		 */
+		throw;
 	}
 	catch (...) {
 		error << string_compose(_("Error parsing MIDI patch file %1"), file_path)
