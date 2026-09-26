@@ -42,6 +42,7 @@ inline static void clamp_to_0_127(uint8_t &val)
 	}
 }
 
+uint8_t get_preferred_midi_channel_from_chn_mask (uint16_t chn_mask);
 
 void
 build_controller_menu (Gtk::Menu& menu, ARDOUR::InstrumentInfo const & instrument_info, uint16_t channel_mask,
