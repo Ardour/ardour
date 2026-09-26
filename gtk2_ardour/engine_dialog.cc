@@ -1030,7 +1030,7 @@ EngineControl::backend_changed ()
 	string                                  backend_name = backend_combo.get_active_text ();
 	std::shared_ptr<ARDOUR::AudioBackend> backend;
 
-	if (!(backend = ARDOUR::AudioEngine::instance ()->set_backend (backend_name, ARDOUR_COMMAND_LINE::backend_client_name, ""))) {
+	if (!(backend = ARDOUR::AudioEngine::instance ()->set_backend (backend_name, ARDOUR_COMMAND_LINE::backend_session_id, ""))) {
 		/* eh? setting the backend failed... how ? */
 		/* A: stale config contains a backend that does not exist in current build */
 		return;
@@ -1152,7 +1152,7 @@ EngineControl::get_default_device (const string&         current_device_name,
 	using namespace ARDOUR;
 
 	string default_device_name =
-	    AudioBackend::get_standard_device_name (AudioBackend::DeviceDefault);
+	    AudioBackend::get_default_device_name ();
 
 	vector<string>::const_iterator i;
 
@@ -1164,7 +1164,7 @@ EngineControl::get_default_device (const string&         current_device_name,
 	}
 
 	string none_device_name =
-	    AudioBackend::get_standard_device_name (AudioBackend::DeviceNone);
+	    AudioBackend::get_none_device_name ();
 
 	// Use the first device that isn't "None"
 	for (i = available_devices.begin (); i != available_devices.end (); ++i) {
@@ -1587,7 +1587,7 @@ EngineControl::input_device_changed ()
 
 	std::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance ()->current_backend ();
 	if (backend && backend->match_input_output_devices_or_none ()) {
-		const std::string& dev_none = ARDOUR::AudioBackend::get_standard_device_name (ARDOUR::AudioBackend::DeviceNone);
+		const std::string& dev_none = ARDOUR::AudioBackend::get_none_device_name ();
 
 		if (get_output_device_name () != dev_none && get_input_device_name () != dev_none && get_input_device_name () != get_output_device_name ()) {
 			block_changed_signals ();
@@ -1609,7 +1609,7 @@ EngineControl::output_device_changed ()
 	DEBUG_ECONTROL ("output_device_changed");
 	std::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance ()->current_backend ();
 	if (backend && backend->match_input_output_devices_or_none ()) {
-		const std::string& dev_none = ARDOUR::AudioBackend::get_standard_device_name (ARDOUR::AudioBackend::DeviceNone);
+		const std::string& dev_none = ARDOUR::AudioBackend::get_none_device_name ();
 
 		if (get_input_device_name () != dev_none && get_input_device_name () != dev_none && get_input_device_name () != get_output_device_name ()) {
 			block_changed_signals ();
@@ -2213,7 +2213,7 @@ EngineControl::set_current_state (const State& state)
 
 	std::shared_ptr<ARDOUR::AudioBackend> backend;
 
-	if (!(backend = ARDOUR::AudioEngine::instance ()->set_backend (state->backend, ARDOUR_COMMAND_LINE::backend_client_name, ""))) {
+	if (!(backend = ARDOUR::AudioEngine::instance ()->set_backend (state->backend, ARDOUR_COMMAND_LINE::backend_session_id, ""))) {
 		DEBUG_ECONTROL (string_compose ("Unable to set backend to %1", state->backend));
 		// this shouldn't happen as the invalid backend names should have been
 		// removed from the list of states.
@@ -2495,7 +2495,7 @@ EngineControl::push_state_to_backend (bool start)
 		error << string_compose (_("Cannot set buffer size to %1"), get_buffer_size ()) << endmsg;
 		return 1;
 	}
-	if (change_nperiods && backend->set_peridod_size (get_nperiods ())) {
+	if (change_nperiods && backend->set_period_size (get_nperiods ())) {
 		error << string_compose (_("Cannot set periods to %1"), get_nperiods ()) << endmsg;
 		return 1;
 	}

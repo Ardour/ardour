@@ -331,12 +331,6 @@ PulseAudioBackend::name () const
 	return X_("PulseAudio");
 }
 
-bool
-PulseAudioBackend::is_realtime () const
-{
-	return true;
-}
-
 std::vector<AudioBackend::DeviceStatus>
 PulseAudioBackend::enumerate_devices () const
 {
@@ -481,7 +475,7 @@ std::vector<std::string>
 PulseAudioBackend::enumerate_midi_options () const
 {
 	std::vector<std::string> midi_options;
-	midi_options.push_back (get_standard_device_name (DeviceNone));
+	midi_options.push_back (get_none_device_name ());
 	return midi_options;
 }
 
@@ -500,7 +494,7 @@ PulseAudioBackend::set_midi_option (const std::string& opt)
 std::string
 PulseAudioBackend::midi_option () const
 {
-	return get_standard_device_name (DeviceNone);
+	return get_none_device_name ();
 }
 
 /* External control app */
@@ -1089,7 +1083,7 @@ PulseAudioBackend::main_process_thread ()
 static std::shared_ptr<PulseAudioBackend> _instance;
 
 static std::shared_ptr<AudioBackend> backend_factory (AudioEngine& e);
-static int instantiate (const std::string& arg1, const std::string& /* arg2 */);
+static int instantiate (const std::string& client_name, const std::string& /* session_id */);
 static int  deinstantiate ();
 static bool already_configured ();
 static bool available ();
@@ -1113,9 +1107,9 @@ backend_factory (AudioEngine& e)
 }
 
 static int
-instantiate (const std::string& arg1, const std::string& /* arg2 */)
+instantiate (const std::string& client_name, const std::string& /* session_id */)
 {
-	s_instance_name = arg1;
+	s_instance_name = client_name;
 	return 0;
 }
 

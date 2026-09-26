@@ -29,7 +29,7 @@ extern bool        show_key_actions;
 extern bool        show_actions;
 extern bool        no_splash;
 extern bool        just_version;
-extern std::string backend_client_name;
+extern std::string backend_session_id;
 extern bool        new_session;
 extern bool        try_hw_optimization;
 extern bool        no_connect_ports;
