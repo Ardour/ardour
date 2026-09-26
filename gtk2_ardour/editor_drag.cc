@@ -3439,8 +3439,16 @@ void
 BBTMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (!movement_occurred) {
-		/* reset thread local tempo map to the original state */
-		_editor.abort_tempo_map_edit ();
+		/* reset thread local tempo map to the original state.
+		 *
+		 * Note: DO NOT call _editor.abort_tempo_map_edit ();
+		 * because that will recreate all UI elements and
+		 * invalidate _marker (used below).
+		 *
+		 * If no movement occurred, Editor::tempo_map_changed
+		 * does not need to be called.
+		 */
+		TempoMap::abort_update ();
 
 		if (was_double_click ()) {
 			_editor.edit_bbt (*_marker);
@@ -3470,12 +3478,12 @@ BBTMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 void
 BBTMarkerDrag::aborted (bool moved)
 {
-	if (moved) {
-		/* reset the marker back to the point's position
-		 */
-
-		_marker->set_position (_marker->mt_point ().time ());
-	}
+	_editor.abort_tempo_map_edit ();
+	/* above call results in Editor::tempo_map_changed.
+	 * This recreates BBT markers via Editor::reset_bbt_marks.
+	 * This re-creates the marker, so we don't have to move
+	 * _marker back to the original position.
+	 */
 }
 
 /******************************************************************************/
