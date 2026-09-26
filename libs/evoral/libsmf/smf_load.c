@@ -786,9 +786,8 @@ smf_event_length_is_valid(const smf_event_t *event)
 
 	expected = expected_message_length(event->midi_buffer[0],
 			&(event->midi_buffer[1]), event->midi_buffer_length - 1);
-	if (expected < 0 || event->midi_buffer_length != (size_t)expected) {
+	if (expected < 0 || event->midi_buffer_length != (size_t)expected)
 		return (0);
-	}
 
 	return (1);
 }

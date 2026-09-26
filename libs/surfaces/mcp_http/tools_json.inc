@@ -3043,12 +3043,15 @@ R"mcp(
     {
       "name": "midi_note_list",
       "title": "List MIDI Notes",
-      "description": "List all MIDI notes in a MIDI region.",
+      "description": "List the MIDI notes of a MIDI region: only the notes starting inside the region, unless includeOutsideRegion=true (regions made by splitting share one MIDI source holding the notes of all the pieces).",
       "inputSchema": {
         "type": "object",
         "properties": {
           "regionId": {
             "type": "string"
+          },
+          "includeOutsideRegion": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -3621,6 +3624,210 @@ R"mcp(
             "additionalProperties": true
           },
           "warnings": {
+            "type": "array"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "actions_list",
+      "title": "List GUI Actions",
+      "description": "List Ardour GUI actions (menu items and key-bindable operations) with their path, label, toggle state and whether they are currently enabled. Optional case-insensitive filter matched against path and label, e.g. 'marker' or 'zoom'.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "filter": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5000
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "total",
+          "truncated",
+          "actions"
+        ],
+        "properties": {
+          "total": {
+            "type": "integer"
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "actions": {
+            "type": "array"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "action_invoke",
+      "title": "Invoke GUI Action",
+      "description": "Trigger one Ardour GUI action by its path (Group/action-name, as returned by actions_list), exactly as if chosen from the menu, e.g. Editor/show-marker-lines or Editor/zoom-to-session. For toggle actions, optional state sets it on or off instead of flipping it.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "state": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "invoked",
+          "action"
+        ],
+        "properties": {
+          "invoked": {
+            "type": "boolean"
+          },
+          "action": {
+            "type": "object"
+          },
+          "previouslyActive": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "region_transpose",
+      "title": "Transpose Region",
+      "description": "Transpose every note of one MIDI region by a number of semitones (e.g. -12 = one octave down), as one undoable step. Address the region by regionId, or by trackId + regionName (e.g. a song part such as 'Part F-2' after splitting at markers). Only notes starting inside the region are changed; other regions made by splitting the same MIDI file are not affected, but copies of this region share its notes. Nothing changes if a note would leave the MIDI range.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "regionId": {
+            "type": "string"
+          },
+          "trackId": {
+            "type": "string"
+          },
+          "regionName": {
+            "type": "string"
+          },
+          "semitones": {
+            "type": "integer",
+            "minimum": -127,
+            "maximum": 127
+          }
+        },
+        "required": [
+          "semitones"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "region",
+          "semitones",
+          "notesTransposed"
+        ],
+        "properties": {
+          "region": {
+            "type": "object"
+          },
+          "semitones": {
+            "type": "integer"
+          },
+          "notesTransposed": {
+            "type": "integer"
+          },
+          "pitchRangeBefore": {
+            "type": "array"
+          },
+          "pitchRangeAfter": {
+            "type": "array"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "region_rename",
+      "title": "Rename Region",
+      "description": "Rename one region (undoable). Address it by regionId, or by trackId + regionName.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "regionId": {
+            "type": "string"
+          },
+          "trackId": {
+            "type": "string"
+          },
+          "regionName": {
+            "type": "string"
+          },
+          "newName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "newName"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "oldName",
+          "region"
+        ],
+        "properties": {
+          "oldName": {
+            "type": "string"
+          },
+          "region": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "track_split_at_markers",
+      "title": "Split Track At Markers",
+      "description": "Split the regions of one track (trackId), or of every visible track if trackId is omitted, at each session marker and arrangement section, naming each piece that starts at a marker after it (e.g. 'Part A-1', 'Part B-2'), so every song part becomes its own region. One undoable step.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "trackId": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "markers",
+          "tracks"
+        ],
+        "properties": {
+          "markers": {
+            "type": "integer"
+          },
+          "tracks": {
             "type": "array"
           }
         },
