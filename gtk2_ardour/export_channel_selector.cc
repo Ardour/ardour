@@ -139,6 +139,9 @@ PortExportChannelSelector::fill_route_list ()
 		if ((*it)->is_main_bus ()) {
 			continue;
 		}
+		if ((*it)->is_transient()) {
+			continue;
+		}
 		if ((*it)->output()->n_ports ().n_audio () > 0) {
 			channel_view.add_route ((*it)->output().get());
 		}
