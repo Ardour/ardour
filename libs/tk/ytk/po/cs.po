@@ -11,13 +11,13 @@
 # Jakub Friedl <jfriedl@suse.cz>, 2006.
 # Lukas Novotny <lukasnov@cvs.gnome.org>, 2006.
 # Petr Kovar <pknbe@volny.cz>, 2007, 2008, 2009, 2010.
-# Martin Vlk <martin@vlkk.cz>, 2024.
+# SPDX-FileCopyrightText: 2024, 2026 Martin Vlk <martin@vlkk.cz>
 msgid ""
 msgstr ""
 "Project-Id-Version: gtk+\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-05 15:38+0200\n"
-"PO-Revision-Date: 2024-01-13 14:45+0100\n"
+"POT-Creation-Date: 2026-06-07 12:00+0200\n"
+"PO-Revision-Date: 2026-06-07 18:33+0200\n"
 "Last-Translator: Martin Vlk <martin@vlkk.cz>\n"
 "Language-Team: Czech <translation-team-cs@lists.sourceforge.net>\n"
 "Language: cs\n"
@@ -25,7 +25,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
-"X-Generator: Lokalize 21.12.3\n"
+"X-Generator: Lokalize 23.08.5\n"
 
 #: gtkaboutdialog.c:245
 msgid "Could not show link"
@@ -640,20 +640,20 @@ msgstr "PŘÍZNAKY"
 msgid "GTK+ debugging flags to unset"
 msgstr "Ladicí příznaky GTK+, jejichž nastavení zruší"
 
-#: gtkmain.c:698
+#: gtkmain.c:706
 msgid "default:LTR"
 msgstr "default:LTR"
 
-#: gtkmain.c:763
+#: gtkmain.c:771
 #, c-format
 msgid "Cannot open display: %s"
 msgstr "Nelze otevřít displej: %s"
 
-#: gtkmain.c:800
+#: gtkmain.c:808
 msgid "GTK+ Options"
 msgstr "Přepínače GTK+"
 
-#: gtkmain.c:800
+#: gtkmain.c:808
 msgid "Show GTK+ Options"
 msgstr "Zobrazit přepínače GTK+"
 
@@ -808,117 +808,117 @@ msgstr "Poskytuje vizuální indikaci průběhu"
 #: gtkstock.c:315
 msgctxt "Stock label"
 msgid "Information"
-msgstr ""
+msgstr "Informace"
 
 #: gtkstock.c:316
 msgctxt "Stock label"
 msgid "Warning"
-msgstr ""
+msgstr "Varování"
 
 #: gtkstock.c:317
 msgctxt "Stock label"
 msgid "Error"
-msgstr ""
+msgstr "Chyba"
 
 #: gtkstock.c:318
 msgctxt "Stock label"
 msgid "Question"
-msgstr ""
+msgstr "Dotaz"
 
 #: gtkstock.c:323
 msgctxt "Stock label"
 msgid "_About"
-msgstr ""
+msgstr "_O programu"
 
 #: gtkstock.c:324
 msgctxt "Stock label"
 msgid "_Add"
-msgstr ""
+msgstr "_Přidat"
 
 #: gtkstock.c:325
 msgctxt "Stock label"
 msgid "_Apply"
-msgstr ""
+msgstr "P_oužít"
 
 #: gtkstock.c:326
 msgctxt "Stock label"
 msgid "_Bold"
-msgstr ""
+msgstr "T_učné"
 
 #: gtkstock.c:327
 msgctxt "Stock label"
 msgid "_Cancel"
-msgstr ""
+msgstr "_Zrušit"
 
 #: gtkstock.c:328
 msgctxt "Stock label"
 msgid "_CD-Rom"
-msgstr ""
+msgstr "_CD-Rom"
 
 #: gtkstock.c:329
 msgctxt "Stock label"
 msgid "_Clear"
-msgstr ""
+msgstr "_Vyčistit"
 
 #: gtkstock.c:330
 msgctxt "Stock label"
 msgid "_Close"
-msgstr ""
+msgstr "Z_avřít"
 
 #: gtkstock.c:331
 msgctxt "Stock label"
 msgid "C_onnect"
-msgstr ""
+msgstr "Přip_ojit"
 
 #: gtkstock.c:332
 msgctxt "Stock label"
 msgid "_Convert"
-msgstr ""
+msgstr "Převé_st"
 
 #: gtkstock.c:333
 msgctxt "Stock label"
 msgid "_Copy"
-msgstr ""
+msgstr "_Kopírovat"
 
 #: gtkstock.c:334
 msgctxt "Stock label"
 msgid "Cu_t"
-msgstr ""
+msgstr "Vy_jmout"
 
 #: gtkstock.c:335
 msgctxt "Stock label"
 msgid "_Delete"
-msgstr ""
+msgstr "Sma_zat"
 
 #: gtkstock.c:336
 msgctxt "Stock label"
 msgid "_Discard"
-msgstr ""
+msgstr "Sk_artovat"
 
 #: gtkstock.c:337
 msgctxt "Stock label"
 msgid "_Disconnect"
-msgstr ""
+msgstr "Odpoj_it"
 
 #: gtkstock.c:338
 msgctxt "Stock label"
 msgid "_Execute"
-msgstr ""
+msgstr "Sp_ustit"
 
 #: gtkstock.c:339
 msgctxt "Stock label"
 msgid "_Edit"
-msgstr ""
+msgstr "Up_ravit"
 
 #: gtkstock.c:340
 msgctxt "Stock label"
 msgid "_Find"
-msgstr ""
+msgstr "_Najít"
 
 #: gtkstock.c:341
 msgctxt "Stock label"
 msgid "Find and _Replace"
-msgstr ""
+msgstr "Najít a na_hradit"
 
 #: gtkstock.c:342
 msgctxt "Stock label"
@@ -1444,3 +1444,4 @@ msgstr "Neočekávaná data znaků na řádku %d, znak %d"
 #: gtkuimanager.c:2444
 msgid "Empty"
 msgstr "Prázdný"
+
