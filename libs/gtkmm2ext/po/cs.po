@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-02 16:24+0200\n"
+"POT-Creation-Date: 2026-09-27 19:03+0200\n"
 "PO-Revision-Date: 2025-12-26 15:32+0100\n"
 "Last-Translator: Martin Vlk <martin@vlkk.cz>\n"
 "Language-Team: Czech <translation-team-cs@lists.sourceforge.net>\n"
@@ -25,10 +25,6 @@ msgstr "Neznámý název činnosti: %1/%2"
 #: action_model.cc:56 action_model.cc:157
 msgid "Disabled"
 msgstr "Zakázáno"
-
-#: bindings.cc:519
-msgid "Escape"
-msgstr "Escape"
 
 #: bindings.cc:951 bindings.cc:953
 msgid "Window"
@@ -160,6 +156,9 @@ msgstr "Nelze přejmenovat váš vlastní soubor s přiřazením kláves (%1)"
 #: textviewer.cc:32
 msgid "Close"
 msgstr "Zavřít"
+
+#~ msgid "Escape"
+#~ msgstr "Escape"
 
 #~ msgid "Main_menu"
 #~ msgstr "Main_menu"
