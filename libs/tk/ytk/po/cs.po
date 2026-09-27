@@ -11,13 +11,13 @@
 # Jakub Friedl <jfriedl@suse.cz>, 2006.
 # Lukas Novotny <lukasnov@cvs.gnome.org>, 2006.
 # Petr Kovar <pknbe@volny.cz>, 2007, 2008, 2009, 2010.
-# Martin Vlk <martin@vlkk.cz>, 2024.
+# SPDX-FileCopyrightText: 2024, 2026 Martin Vlk <martin@vlkk.cz>
 msgid ""
 msgstr ""
 "Project-Id-Version: gtk+\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-05 15:38+0200\n"
-"PO-Revision-Date: 2024-01-13 14:45+0100\n"
+"POT-Creation-Date: 2026-06-07 12:00+0200\n"
+"PO-Revision-Date: 2026-09-28 09:42+0200\n"
 "Last-Translator: Martin Vlk <martin@vlkk.cz>\n"
 "Language-Team: Czech <translation-team-cs@lists.sourceforge.net>\n"
 "Language: cs\n"
@@ -25,7 +25,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
-"X-Generator: Lokalize 21.12.3\n"
+"X-Generator: Lokalize 23.08.5\n"
 
 #: gtkaboutdialog.c:245
 msgid "Could not show link"
@@ -640,20 +640,20 @@ msgstr "PŘÍZNAKY"
 msgid "GTK+ debugging flags to unset"
 msgstr "Ladicí příznaky GTK+, jejichž nastavení zruší"
 
-#: gtkmain.c:698
+#: gtkmain.c:706
 msgid "default:LTR"
 msgstr "default:LTR"
 
-#: gtkmain.c:763
+#: gtkmain.c:771
 #, c-format
 msgid "Cannot open display: %s"
 msgstr "Nelze otevřít displej: %s"
 
-#: gtkmain.c:800
+#: gtkmain.c:808
 msgid "GTK+ Options"
 msgstr "Přepínače GTK+"
 
-#: gtkmain.c:800
+#: gtkmain.c:808
 msgid "Show GTK+ Options"
 msgstr "Zobrazit přepínače GTK+"
 
@@ -808,467 +808,467 @@ msgstr "Poskytuje vizuální indikaci průběhu"
 #: gtkstock.c:315
 msgctxt "Stock label"
 msgid "Information"
-msgstr ""
+msgstr "Informace"
 
 #: gtkstock.c:316
 msgctxt "Stock label"
 msgid "Warning"
-msgstr ""
+msgstr "Varování"
 
 #: gtkstock.c:317
 msgctxt "Stock label"
 msgid "Error"
-msgstr ""
+msgstr "Chyba"
 
 #: gtkstock.c:318
 msgctxt "Stock label"
 msgid "Question"
-msgstr ""
+msgstr "Dotaz"
 
 #: gtkstock.c:323
 msgctxt "Stock label"
 msgid "_About"
-msgstr ""
+msgstr "_O programu"
 
 #: gtkstock.c:324
 msgctxt "Stock label"
 msgid "_Add"
-msgstr ""
+msgstr "_Přidat"
 
 #: gtkstock.c:325
 msgctxt "Stock label"
 msgid "_Apply"
-msgstr ""
+msgstr "P_oužít"
 
 #: gtkstock.c:326
 msgctxt "Stock label"
 msgid "_Bold"
-msgstr ""
+msgstr "T_učné"
 
 #: gtkstock.c:327
 msgctxt "Stock label"
 msgid "_Cancel"
-msgstr ""
+msgstr "_Zrušit"
 
 #: gtkstock.c:328
 msgctxt "Stock label"
 msgid "_CD-Rom"
-msgstr ""
+msgstr "_CD-Rom"
 
 #: gtkstock.c:329
 msgctxt "Stock label"
 msgid "_Clear"
-msgstr ""
+msgstr "_Vyčistit"
 
 #: gtkstock.c:330
 msgctxt "Stock label"
 msgid "_Close"
-msgstr ""
+msgstr "Z_avřít"
 
 #: gtkstock.c:331
 msgctxt "Stock label"
 msgid "C_onnect"
-msgstr ""
+msgstr "Přip_ojit"
 
 #: gtkstock.c:332
 msgctxt "Stock label"
 msgid "_Convert"
-msgstr ""
+msgstr "Převé_st"
 
 #: gtkstock.c:333
 msgctxt "Stock label"
 msgid "_Copy"
-msgstr ""
+msgstr "_Kopírovat"
 
 #: gtkstock.c:334
 msgctxt "Stock label"
 msgid "Cu_t"
-msgstr ""
+msgstr "Vy_jmout"
 
 #: gtkstock.c:335
 msgctxt "Stock label"
 msgid "_Delete"
-msgstr ""
+msgstr "Sma_zat"
 
 #: gtkstock.c:336
 msgctxt "Stock label"
 msgid "_Discard"
-msgstr ""
+msgstr "Sk_artovat"
 
 #: gtkstock.c:337
 msgctxt "Stock label"
 msgid "_Disconnect"
-msgstr ""
+msgstr "Odpoj_it"
 
 #: gtkstock.c:338
 msgctxt "Stock label"
 msgid "_Execute"
-msgstr ""
+msgstr "Sp_ustit"
 
 #: gtkstock.c:339
 msgctxt "Stock label"
 msgid "_Edit"
-msgstr ""
+msgstr "Up_ravit"
 
 #: gtkstock.c:340
 msgctxt "Stock label"
 msgid "_Find"
-msgstr ""
+msgstr "_Najít"
 
 #: gtkstock.c:341
 msgctxt "Stock label"
 msgid "Find and _Replace"
-msgstr ""
+msgstr "Najít a na_hradit"
 
 #: gtkstock.c:342
 msgctxt "Stock label"
 msgid "_Floppy"
-msgstr ""
+msgstr "Diske_ta"
 
 #: gtkstock.c:343
 msgctxt "Stock label"
 msgid "_Fullscreen"
-msgstr ""
+msgstr "Ce_lá obrazovka"
 
 #: gtkstock.c:344
 msgctxt "Stock label"
 msgid "_Leave Fullscreen"
-msgstr ""
+msgstr "Ukončit ce_lou obrazovku"
 
 #: gtkstock.c:346
 msgctxt "Stock label, navigation"
 msgid "_Bottom"
-msgstr ""
+msgstr "_Naspod"
 
 #: gtkstock.c:348
 msgctxt "Stock label, navigation"
 msgid "_First"
-msgstr ""
+msgstr "P_rvní"
 
 #: gtkstock.c:350
 msgctxt "Stock label, navigation"
 msgid "_Last"
-msgstr ""
+msgstr "Posle_dní"
 
 #: gtkstock.c:352
 msgctxt "Stock label, navigation"
 msgid "_Top"
-msgstr ""
+msgstr "Naho_ru"
 
 #: gtkstock.c:354
 msgctxt "Stock label, navigation"
 msgid "_Back"
-msgstr ""
+msgstr "_Zpět"
 
 #: gtkstock.c:356
 msgctxt "Stock label, navigation"
 msgid "_Down"
-msgstr ""
+msgstr "_Dolů"
 
 #: gtkstock.c:358
 msgctxt "Stock label, navigation"
 msgid "_Forward"
-msgstr ""
+msgstr "_Vpřed"
 
 #: gtkstock.c:360
 msgctxt "Stock label, navigation"
 msgid "_Up"
-msgstr ""
+msgstr "Nahor_u"
 
 #: gtkstock.c:361
 msgctxt "Stock label"
 msgid "_Harddisk"
-msgstr ""
+msgstr "_Pevný disk"
 
 #: gtkstock.c:362
 msgctxt "Stock label"
 msgid "_Help"
-msgstr ""
+msgstr "_Nápověda"
 
 #: gtkstock.c:363
 msgctxt "Stock label"
 msgid "_Home"
-msgstr ""
+msgstr "_Domů"
 
 #: gtkstock.c:364
 msgctxt "Stock label"
 msgid "Increase Indent"
-msgstr ""
+msgstr "Zvětšit odsazení"
 
 #: gtkstock.c:365
 msgctxt "Stock label"
 msgid "Decrease Indent"
-msgstr ""
+msgstr "Zmenšit odsazení"
 
 #: gtkstock.c:366
 msgctxt "Stock label"
 msgid "_Index"
-msgstr ""
+msgstr "_Index"
 
 #: gtkstock.c:367
 msgctxt "Stock label"
 msgid "_Information"
-msgstr ""
+msgstr "_Informace"
 
 #: gtkstock.c:368
 msgctxt "Stock label"
 msgid "_Italic"
-msgstr ""
+msgstr "_Skloněné"
 
 #: gtkstock.c:369
 msgctxt "Stock label"
 msgid "_Jump to"
-msgstr ""
+msgstr "Pře_jít na"
 
 #: gtkstock.c:371
 msgctxt "Stock label"
 msgid "_Center"
-msgstr ""
+msgstr "_Střed"
 
 #: gtkstock.c:373
 msgctxt "Stock label"
 msgid "_Fill"
-msgstr ""
+msgstr "_Vyplnit"
 
 #: gtkstock.c:375
 msgctxt "Stock label"
 msgid "_Left"
-msgstr ""
+msgstr "_Vlevo"
 
 #: gtkstock.c:377
 msgctxt "Stock label"
 msgid "_Right"
-msgstr ""
+msgstr "Vp_ravo"
 
 #: gtkstock.c:380
 msgctxt "Stock label, media"
 msgid "_Forward"
-msgstr ""
+msgstr "Vpře_d"
 
 #: gtkstock.c:382
 msgctxt "Stock label, media"
 msgid "_Next"
-msgstr ""
+msgstr "_Další"
 
 #: gtkstock.c:384
 msgctxt "Stock label, media"
 msgid "P_ause"
-msgstr ""
+msgstr "P_auza"
 
 #: gtkstock.c:386
 msgctxt "Stock label, media"
 msgid "_Play"
-msgstr ""
+msgstr "_Přehrát"
 
 #: gtkstock.c:388
 msgctxt "Stock label, media"
 msgid "Pre_vious"
-msgstr ""
+msgstr "Předcho_zí"
 
 #: gtkstock.c:390
 msgctxt "Stock label, media"
 msgid "_Record"
-msgstr ""
+msgstr "Nah_rávat"
 
 #: gtkstock.c:392
 msgctxt "Stock label, media"
 msgid "R_ewind"
-msgstr ""
+msgstr "Př_etočit"
 
 #: gtkstock.c:394
 msgctxt "Stock label, media"
 msgid "_Stop"
-msgstr ""
+msgstr "Za_stavit"
 
 #: gtkstock.c:395
 msgctxt "Stock label"
 msgid "_Network"
-msgstr ""
+msgstr "_Síť"
 
 #: gtkstock.c:396
 msgctxt "Stock label"
 msgid "_New"
-msgstr ""
+msgstr "_Nový"
 
 #: gtkstock.c:397
 msgctxt "Stock label"
 msgid "_No"
-msgstr ""
+msgstr "_Ne"
 
 #: gtkstock.c:398
 msgctxt "Stock label"
 msgid "_OK"
-msgstr ""
+msgstr "_OK"
 
 #: gtkstock.c:399
 msgctxt "Stock label"
 msgid "_Open"
-msgstr ""
+msgstr "_Otevřít"
 
 #: gtkstock.c:401
 msgctxt "Stock label"
 msgid "Landscape"
-msgstr ""
+msgstr "Na šířku"
 
 #: gtkstock.c:403
 msgctxt "Stock label"
 msgid "Portrait"
-msgstr ""
+msgstr "Na výšku"
 
 #: gtkstock.c:405
 msgctxt "Stock label"
 msgid "Reverse landscape"
-msgstr ""
+msgstr "Opačně na šířku"
 
 #: gtkstock.c:407
 msgctxt "Stock label"
 msgid "Reverse portrait"
-msgstr ""
+msgstr "Opačně na výšku"
 
 #: gtkstock.c:408
 msgctxt "Stock label"
 msgid "Page Set_up"
-msgstr ""
+msgstr "Nastavení strá_nky"
 
 #: gtkstock.c:409
 msgctxt "Stock label"
 msgid "_Paste"
-msgstr ""
+msgstr "V_ložit"
 
 #: gtkstock.c:410
 msgctxt "Stock label"
 msgid "_Preferences"
-msgstr ""
+msgstr "_Předvolby"
 
 #: gtkstock.c:411
 msgctxt "Stock label"
 msgid "_Print"
-msgstr ""
+msgstr "Tis_k"
 
 #: gtkstock.c:412
 msgctxt "Stock label"
 msgid "Print Pre_view"
-msgstr ""
+msgstr "Náh_led tisku"
 
 #: gtkstock.c:413
 msgctxt "Stock label"
 msgid "_Properties"
-msgstr ""
+msgstr "Vlastnos_ti"
 
 #: gtkstock.c:414
 msgctxt "Stock label"
 msgid "_Quit"
-msgstr ""
+msgstr "Ode_jít"
 
 #: gtkstock.c:415
 msgctxt "Stock label"
 msgid "_Redo"
-msgstr ""
+msgstr "_Znovu"
 
 #: gtkstock.c:416
 msgctxt "Stock label"
 msgid "_Refresh"
-msgstr ""
+msgstr "Obno_vit"
 
 #: gtkstock.c:417
 msgctxt "Stock label"
 msgid "_Remove"
-msgstr ""
+msgstr "V_yjmout"
 
 #: gtkstock.c:418
 msgctxt "Stock label"
 msgid "_Revert"
-msgstr ""
+msgstr "V_rátit"
 
 #: gtkstock.c:419
 msgctxt "Stock label"
 msgid "_Save"
-msgstr ""
+msgstr "Ulož_it"
 
 #: gtkstock.c:420
 msgctxt "Stock label"
 msgid "Save _As"
-msgstr ""
+msgstr "Uložit j_ako"
 
 #: gtkstock.c:421
 msgctxt "Stock label"
 msgid "Select _All"
-msgstr ""
+msgstr "Vybr_at vše"
 
 #: gtkstock.c:422
 msgctxt "Stock label"
 msgid "_Color"
-msgstr ""
+msgstr "_Barva"
 
 #: gtkstock.c:423
 msgctxt "Stock label"
 msgid "_Font"
-msgstr ""
+msgstr "_Písmo"
 
 #: gtkstock.c:425
 msgctxt "Stock label"
 msgid "_Ascending"
-msgstr ""
+msgstr "Od p_rvního"
 
 #: gtkstock.c:427
 msgctxt "Stock label"
 msgid "_Descending"
-msgstr ""
+msgstr "Od posle_dního"
 
 #: gtkstock.c:428
 msgctxt "Stock label"
 msgid "_Spell Check"
-msgstr ""
+msgstr "Pravopi_s"
 
 #: gtkstock.c:429
 msgctxt "Stock label"
 msgid "_Stop"
-msgstr ""
+msgstr "_Stop"
 
 #: gtkstock.c:431
 msgctxt "Stock label"
 msgid "_Strikethrough"
-msgstr ""
+msgstr "Prošk_rtnutí"
 
 #: gtkstock.c:432
 msgctxt "Stock label"
 msgid "_Undelete"
-msgstr ""
+msgstr "Zr_ušit smazání"
 
 #: gtkstock.c:434
 msgctxt "Stock label"
 msgid "_Underline"
-msgstr ""
+msgstr "P_odtržení"
 
 #: gtkstock.c:435
 msgctxt "Stock label"
 msgid "_Undo"
-msgstr ""
+msgstr "_Vrátit"
 
 #: gtkstock.c:436
 msgctxt "Stock label"
 msgid "_Yes"
-msgstr ""
+msgstr "_Ano"
 
 #: gtkstock.c:438
 msgctxt "Stock label"
 msgid "_Normal Size"
-msgstr ""
+msgstr "_Normální velikost"
 
 #: gtkstock.c:440
 msgctxt "Stock label"
 msgid "Best _Fit"
-msgstr ""
+msgstr "_Vše"
 
 #: gtkstock.c:441
 msgctxt "Stock label"
 msgid "Zoom _In"
-msgstr ""
+msgstr "Př_iblížit"
 
 #: gtkstock.c:442
 msgctxt "Stock label"
 msgid "Zoom _Out"
-msgstr ""
+msgstr "_Oddálit"
 
 #: gtktextbufferrichtext.c:652
 #, c-format
@@ -1444,3 +1444,5 @@ msgstr "Neočekávaná data znaků na řádku %d, znak %d"
 #: gtkuimanager.c:2444
 msgid "Empty"
 msgstr "Prázdný"
+
+
