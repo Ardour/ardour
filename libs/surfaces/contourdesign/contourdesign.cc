@@ -285,8 +285,8 @@ get_usb_device (uint16_t vendor_id, uint16_t product_id, libusb_device** device)
 			goto out;
 		}
 		if (desc.idVendor == vendor_id && desc.idProduct == product_id) {
-//			*device = dev;
-			*device = libusb_ref_device(dev);
+			*device = dev;
+			libusb_ref_device(dev);
 			break;
 		}
 	}
@@ -329,6 +329,7 @@ ContourDesignControlProtocol::acquire_device ()
 	}
 
 	err = libusb_open (dev, &_dev_handle);
+	libusb_unref_device (dev);
 	if (err != LIBUSB_SUCCESS) {
 		return err;
 	}
