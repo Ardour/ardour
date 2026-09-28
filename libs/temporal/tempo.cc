@@ -1731,6 +1731,24 @@ TempoMap::core_add_bartime (MusicTimePoint* mtp, bool& replaced)
 	MusicTimes::iterator m;
 	const superclock_t sclock_limit = mtp->sclock();
 
+	/* Must remove any existing tempo/meter markers at this location */
+
+	for (auto mi = _meters.begin(); mi != _meters.end(); ++mi) {
+		if (mi->sclock() == sclock_limit) {
+			core_remove_meter (*mi);
+			remove_point (*mi);
+			break;
+		}
+	}
+
+	for (auto ti = _tempos.begin(); ti != _tempos.end(); ++ti) {
+		if (ti->sclock() == sclock_limit) {
+			core_remove_tempo (*ti);
+			remove_point (*ti);
+			break;
+		}
+	}
+
 	for (m = _bartimes.begin(); m != _bartimes.end() && m->sclock() < sclock_limit; ++m);
 
 	if (m != _bartimes.end()) {
