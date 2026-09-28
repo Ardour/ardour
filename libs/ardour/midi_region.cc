@@ -235,6 +235,11 @@ MidiRegion::_read_at (const SourceList&              /*srcs*/,
 
 	assert(chan_n == 0);
 
+	if (_session.exporting() && transient()) {
+		/* pretend we read it */
+		return to_read;
+	}
+
 	if (muted()) {
 		return timecnt_t(); /* read nothing */
 	}
@@ -313,6 +318,10 @@ MidiRegion::render_range (Evoral::EventSink<samplepos_t>& dst,
 	/* precondition: caller has verified that we cover the desired section */
 
 	assert(chan_n == 0);
+
+	if (_session.exporting() && transient()) {
+		return 0; /* read nothing */;
+	}
 
 	if (muted()) {
 		return 0; /* read nothing */

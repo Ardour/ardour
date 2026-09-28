@@ -516,8 +516,8 @@ Bindings::activate (KeyboardKey kb, Operation op)
 		/* sadly we need to special case one possible action, because
 		   Escape is used to break drags.
 		*/
-		if (!action || action->get_name() != _("Escape")) {
-			return true;
+		if (!action || action->get_name() != X_("Escape")) {
+			return false;
 		}
 	}
 

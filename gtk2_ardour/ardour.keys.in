@@ -306,7 +306,7 @@ This mode provides many different operations on both regions and control points,
 
 ;; this one is super-global, so we put it in the session group but don't show
 ;; it on cheat sheets etc.
-@gedt|Main/Escape|Escape|break drag or deselect all
+@gedt|Main/Escape|				Escape|break drag or deselect all
 
 ;; keypad
 

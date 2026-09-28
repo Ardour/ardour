@@ -383,6 +383,7 @@ Editor::Editor ()
 	, _visible_marker_types (all_marker_types)
 	, _visible_range_types (all_range_types)
 	, _midi_inspector (nullptr)
+	, midi_inspector_scrolled_window (nullptr)
 	, xcursor (nullptr)
 {
 	/* we are a singleton */
@@ -699,10 +700,10 @@ Editor::Editor ()
 	 * one). So ... fall back to C API.
 	 */
 
-	Gtk::ScrolledWindow* sw = wrap (GTK_SCROLLED_WINDOW (gtk_scrolled_window_new (nullptr, nullptr)));
-	sw->set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-	sw->add (*_midi_inspector);
-	add_notebook_page (_("MIDI Tools"), _("MIDI Tools"), *sw);
+	midi_inspector_scrolled_window = wrap (GTK_SCROLLED_WINDOW (gtk_scrolled_window_new (nullptr, nullptr)));
+	midi_inspector_scrolled_window->set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+	midi_inspector_scrolled_window->add (*_midi_inspector);
+	add_notebook_page (_("MIDI Tools"), _("MIDI Tools"), *midi_inspector_scrolled_window);
 
 	_notebook_tab2.set_index (4);
 

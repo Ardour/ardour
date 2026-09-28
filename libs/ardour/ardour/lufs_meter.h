@@ -18,6 +18,7 @@
 #ifndef _lufs_meter_h_
 #define _lufs_meter_h_
 
+#include <atomic>
 #include <cstdint>
 #include <functional>
 #include <map>
@@ -41,7 +42,8 @@ public:
 	float integrated_loudness () const;
 	float momentary () const;
 	float max_momentary () const;
-	float dbtp () const;
+	float dbtp ();
+	float max_dbtp () const;
 
 private:
 	void init ();
@@ -80,6 +82,9 @@ private:
 	float    _maxloudn_M;
 	float    _integrated;
 	float    _dbtp;
+	float    _max_dbtp;
+
+	std::atomic<bool> _rst_dbtp;
 
 #if defined(_MSC_VER)
 	typedef std::map<int, uint32_t> History;

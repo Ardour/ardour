@@ -684,20 +684,23 @@ RegionDrag::RegionDrag (Editor& e, ArdourCanvas::Item* i, RegionView* p, list<Re
 	TrackViewList track_views = _editor.track_views;
 	track_views.sort (TimeAxisViewStripableSorter ());
 
-	for (TrackViewList::iterator i = track_views.begin (); i != track_views.end (); ++i) {
-		_time_axis_views.push_back (*i);
+	for (auto & tv : track_views) {
+		_time_axis_views.push_back (tv);
 
-		TimeAxisView::Children children_list = (*i)->get_child_list ();
-		for (TimeAxisView::Children::iterator j = children_list.begin (); j != children_list.end (); ++j) {
-			_time_axis_views.push_back (j->get ());
+		TimeAxisView::Children children = tv->get_child_list ();
+		for (auto & child : children) {
+			_time_axis_views.push_back (child.get ());
 		}
 	}
 
 	/* the list of views can be empty at this point if this is a region list-insert drag
 	 */
 
-	for (list<RegionView*>::const_iterator i = v.begin (); i != v.end (); ++i) {
-		_views.push_back (DraggingView (*i, this, &(*i)->get_time_axis_view ()));
+	for (auto const & rv : v) {
+		if (rv->region()->transient()) {
+			_y_constrained = true;
+		}
+		_views.push_back (DraggingView (rv, this, &rv->get_time_axis_view ()));
 	}
 
 	RegionView::RegionViewGoingAway.connect (death_connection, invalidator (*this), std::bind (&RegionDrag::region_going_away, this, _1), gui_context ());
@@ -2794,7 +2797,13 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 
 		for (list<DraggingView>::const_iterator i = _views.begin (); i != _views.end (); ++i) {
 			RegionView* rv = i->view;
-			rv->region ()->playlist ()->clear_owned_changes ();
+
+			std::shared_ptr<Playlist> pl = rv->region ()->playlist ();
+			insert_result                = _editor.motion_frozen_playlists.insert (pl);
+
+			if (insert_result.second) {
+				pl->clear_owned_changes ();
+			}
 
 			if (_operation == StartTrim) {
 				rv->trim_front_starting ();
@@ -2807,9 +2816,6 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 			if (arv) {
 				arv->temporarily_hide_envelope ();
 			}
-
-			std::shared_ptr<Playlist> pl = rv->region ()->playlist ();
-			insert_result                = _editor.motion_frozen_playlists.insert (pl);
 
 			if (insert_result.second) {
 				pl->freeze ();
@@ -3436,8 +3442,16 @@ void
 BBTMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (!movement_occurred) {
-		/* reset thread local tempo map to the original state */
-		_editor.abort_tempo_map_edit ();
+		/* reset thread local tempo map to the original state.
+		 *
+		 * Note: DO NOT call _editor.abort_tempo_map_edit ();
+		 * because that will recreate all UI elements and
+		 * invalidate _marker (used below).
+		 *
+		 * If no movement occurred, Editor::tempo_map_changed
+		 * does not need to be called.
+		 */
+		TempoMap::abort_update ();
 
 		if (was_double_click ()) {
 			_editor.edit_bbt (*_marker);
@@ -3467,12 +3481,12 @@ BBTMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 void
 BBTMarkerDrag::aborted (bool moved)
 {
-	if (moved) {
-		/* reset the marker back to the point's position
-		 */
-
-		_marker->set_position (_marker->mt_point ().time ());
-	}
+	_editor.abort_tempo_map_edit ();
+	/* above call results in Editor::tempo_map_changed.
+	 * This recreates BBT markers via Editor::reset_bbt_marks.
+	 * This re-creates the marker, so we don't have to move
+	 * _marker back to the original position.
+	 */
 }
 
 /******************************************************************************/

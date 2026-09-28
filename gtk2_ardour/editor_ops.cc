@@ -9684,13 +9684,18 @@ Editor::get_quantize_op ()
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	QuantizeWidget* qw (_midi_inspector->quantize_widget);
+	if (_the_notebook.get_current_page() == _the_notebook.page_num (*midi_inspector_scrolled_window)) {
 
-	return new Quantize (qw->snap_start(),
-	                     qw->snap_end(),
-	                     qw->start_grid_size(),
-	                     qw->end_grid_size(),
-	                     qw->strength(),
-	                     qw->swing(),
-	                     qw->threshold());
+		QuantizeWidget* qw (_midi_inspector->quantize_widget);
+
+		return new Quantize (qw->snap_start(),
+		                     qw->snap_end(),
+		                     qw->start_grid_size(),
+		                     qw->end_grid_size(),
+		                     qw->strength(),
+		                     qw->swing(),
+		                     qw->threshold());
+	}
+
+	return EditingContext::get_quantize_op ();
 }

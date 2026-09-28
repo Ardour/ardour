@@ -409,7 +409,9 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	ARDOUR::Strum* get_strum_op (bool, bool);
 	void apply_midi_note_edit_op (ARDOUR::MidiOperator& op, const RegionSelection& rs);
 	void apply_midi_note_edit_op (ARDOUR::MidiOperator& op, const MidiViews& rs);
+	void apply_midi_note_edit_op_no_selection (ARDOUR::MidiOperator& op, const MidiViews& rs);
 	PBD::Command* apply_midi_note_edit_op_to_region (ARDOUR::MidiOperator& op, MidiView& mrv);
+	PBD::Command* apply_midi_note_edit_op_to_region_no_selection (ARDOUR::MidiOperator& op, MidiView& mrv);
 	virtual void midi_action (void (MidiView::*method)());
 	std::vector<MidiView*> filter_to_unique_midi_region_views (RegionSelection const & rs) const;
 	std::vector<MidiView*> filter_to_unique_midi_region_views (MidiViews const & ms) const;
