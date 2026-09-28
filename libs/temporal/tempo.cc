@@ -2898,13 +2898,12 @@ TempoMap::get_tempo_and_meter_bbt (TempoPoint const *& t, MeterPoint const *& m,
 	if (_bartimes.empty() || bbt.reference() == 0) {
 		p = _points.begin();
 	} else {
-		MusicTimes::const_iterator mtp;
+		/* find point to use to begin walk for tempo & meter */
 
-		for (mtp = _bartimes.begin(); mtp != _bartimes.end() && mtp->sclock() < bbt.reference(); ++mtp);
+		for (p = _points.begin(); p != _points.end() && p->sclock() < bbt.reference(); ++p);
 
-		if (mtp != _bartimes.end()) {
-			p = _points.s_iterator_to (*(static_cast<Point const *> (&(*mtp))));
-		} else {
+		if (p == _points.end()) {
+			/* Use final bartime */
 			p = _points.s_iterator_to (*(static_cast<Point const *> (&_bartimes.back())));
 		}
 	}
@@ -2935,8 +2934,11 @@ TempoMap::get_tempo_and_meter_bbt (TempoPoint const *& t, MeterPoint const *& m,
 		TempoPoint const * tpp;
 		MeterPoint const * mpp;
 
-		if (dynamic_cast<MusicTimePoint const *> (&(*p)) != 0) {
-			if (p->sclock() != bbt.reference()) {
+		if (dynamic_cast<MusicTimePoint const *> (&(*p)) != nullptr) {
+			/* do not walk past a BBT marker if the starting point
+			   was a BBT marker.
+			*/
+			if (p->sclock() > bbt.reference()) {
 				break;
 			}
 		}
