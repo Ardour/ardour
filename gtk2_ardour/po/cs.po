@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-27 19:03+0200\n"
-"PO-Revision-Date: 2026-05-02 16:30+0200\n"
+"PO-Revision-Date: 2026-09-28 10:21+0200\n"
 "Last-Translator: Martin Vlk <martin@vlkk.cz>\n"
 "Language-Team: Czech <translation-team-cs@lists.sourceforge.net>\n"
 "Language: cs\n"
@@ -444,6 +444,16 @@ msgid ""
 "\tNicolas Faure <sub26nico@laposte.net>\n"
 "\tJean-Emmanuel Doucet <jean-emmanuel.doucet@groolot.net>\n"
 msgstr ""
+"Francouzština:\n"
+"\tAlain Fréhel <alain.frehel@free.fr>\n"
+"\tChristophe Combelles <ccomb@free.fr>\n"
+"\tMartin Blanchard\n"
+"\tRomain Arnaud <roming22@gmail.com>\n"
+"\tOlivier Humbert <trebmuh@librazik.org>\n"
+"\tFrédéric Rech <fred_rech@laposte.net>\n"
+"\tJulien Taverna <jujudusud@gmail.com>\n"
+"\tNicolas Faure <sub26nico@laposte.net>\n"
+"\tJean-Emmanuel Doucet <jean-emmanuel.doucet@groolot.net>\n"
 
 #: about.cc:246
 msgid ""
@@ -713,7 +723,7 @@ msgstr "Nástroj:"
 
 #: add_route_dialog.cc:84
 msgid "Show on Cue Page"
-msgstr "Zobrazit na stránce řadiče"
+msgstr "Zobrazit na stránce scén"
 
 #: add_route_dialog.cc:102 add_route_dialog.cc:595 add_route_dialog.cc:616
 #: add_route_dialog.cc:622
@@ -735,19 +745,19 @@ msgstr "Počet stop k přidání"
 
 #: add_route_dialog.cc:106 add_route_dialog.cc:123
 msgid "A name for the track(s)"
-msgstr "Název pro stopu(y)"
+msgstr "Název pro stopy"
 
 #: add_route_dialog.cc:108
 msgid "Mono, stereo, or multi-channel operation for the track(s)"
-msgstr "Mono, stereo nebo vícekanálová operace pro stopu(y)"
+msgstr "Mono, stereo nebo vícekanálová operace pro stopy"
 
 #: add_route_dialog.cc:110
 msgid "Mono or stereo operation for the track(s)"
-msgstr ""
+msgstr "Mono nebo stereo operace pro stopy"
 
 #: add_route_dialog.cc:112 add_route_dialog.cc:125
 msgid "A group which the track(s) will be assigned to"
-msgstr "Skupina, ke které bude stopa(y) přiřazena"
+msgstr "Skupina, ke které budou stopy přiřazeny"
 
 #: add_route_dialog.cc:114 add_route_dialog.cc:127 add_route_dialog.cc:139
 #: add_route_dialog.cc:153
@@ -1102,11 +1112,11 @@ msgstr "Zpětná vazba"
 
 #: application_bar.cc:123
 msgid "Rec Cues"
-msgstr "Řadiče pro nahrávání"
+msgstr "Nahrávání scén"
 
 #: application_bar.cc:124
 msgid "Play Cues"
-msgstr "Řadiče pro přehrávání"
+msgstr "Přehrávání scén"
 
 #: application_bar.cc:156
 msgid "LogestSync|M-Clk"
@@ -1157,6 +1167,12 @@ msgid ""
 "<b>SoundOnSound</b>: Behaves like <i>Layered</i>, except underlying regions "
 "will be audible."
 msgstr ""
+"<b>Vrstveno</b>: Nové nahrávky budou přidány jako oblasti do vrstvy nad "
+"stávajícími oblastmi.\n"
+"<b>Nevrstveno</b>: Stávající oblast bude rozdělena a nahrazena "
+"nově nahranou oblastí.\n"
+"<b>ZvukPřesZvuk</b>: Chová se jako <i>Vrstveno</i>, ale stávající oblasti "
+"budou slyšet."
 
 #: application_bar.cc:431
 msgid ""
@@ -1223,15 +1239,15 @@ msgid ""
 "<b>When enabled</b>, triggering Cues will result in Cue Markers added to the "
 "timeline"
 msgstr ""
-"<b>Pokud povoleno</b>, při spuštění řadičů se do časové osy přidají značky "
-"řadičů."
+"<b>Pokud povoleno</b>, při spuštění scén se do časové osy přidají značky "
+"scén."
 
 #: application_bar.cc:437
 msgid ""
 "<b>When enabled</b>, Cue Markers will trigger the associated Cue when passed "
 "on the timeline"
 msgstr ""
-"<b>Pokud povoleno</b>, značky řadičů spustí přiřazený řadič, když projde na "
+"<b>Pokud povoleno</b>, značky scén spustí přiřazenou scénu, když projde na "
 "časové ose."
 
 #: application_bar.cc:438
@@ -1432,7 +1448,7 @@ msgstr "Nahrávání"
 
 #: ardour_ui.cc:349
 msgid "Window|Cue"
-msgstr "Řadič"
+msgstr "Scény"
 
 #: ardour_ui.cc:367
 msgid "Your configuration files were copied. You can now restart %1."
@@ -1691,7 +1707,7 @@ msgstr "I/O latence: %1%2%3"
 
 #: ardour_ui.cc:1489
 msgid "ambiguous"
-msgstr ""
+msgstr "nejednoznačný"
 
 #: ardour_ui.cc:1528
 msgid "You cannot add a track without a session already loaded."
@@ -1745,6 +1761,9 @@ msgid ""
 "\n"
 "You cannot simultaneously record cues and to the timeline."
 msgstr ""
+"Máte jednu nebo více stop zapnutých pro nahrávání ve scénách.\n"
+"\n"
+"Nemůžete zároveň nahrávat do scén i do časové osy."
 
 #: ardour_ui.cc:1797
 msgid ""
@@ -1961,6 +1980,12 @@ msgid ""
 "%1 can recover any changes for\n"
 "you or it can ignore them.\n"
 msgstr ""
+"Vypadá to, že tato relace byla změněna\n"
+"bez uložení, nebo v průběhu nahrávání\n"
+"když se %1, nebo počítač, vypnul.\n"
+"\n"
+"%1 vám může obnovit změny\n"
+"nebo je můžete ignorovat.\n"
 
 #: ardour_ui.cc:3031
 msgid "Ignore crash data"
@@ -2231,7 +2256,7 @@ msgstr "Nahrávač"
 
 #: ardour_ui_ed.cc:181
 msgid "Cue Grid"
-msgstr "Mřížka řadičů"
+msgstr "Mřížka scén"
 
 #: ardour_ui_ed.cc:182 ardour_ui_ed.cc:770 ardour_ui_ed.cc:771
 #: ardour_ui_ed.cc:772 ardour_ui_ed.cc:773 ardour_ui_ed.cc:774
@@ -2557,47 +2582,47 @@ msgstr "Skočit na místní čas"
 
 #: ardour_ui_ed.cc:424 ardour_ui_ed.cc:427
 msgid "Begin/End Numpad Marker Jump"
-msgstr ""
+msgstr "Skok na začátek/konec značky pomocí číselných kláves"
 
 #: ardour_ui_ed.cc:430
 msgid "Toggle Roll"
-msgstr ""
+msgstr "Přepnout rolování"
 
 #: ardour_ui_ed.cc:436
 msgid "Fast Forward"
-msgstr ""
+msgstr "Rychle vpřed"
 
 #: ardour_ui_ed.cc:439
 msgid "Record Enable"
-msgstr ""
+msgstr "Umožnit nahrávání"
 
 #: ardour_ui_ed.cc:442
 msgid "Toggle Auto Loop"
-msgstr ""
+msgstr "Přepnout Auto Loop"
 
 #: ardour_ui_ed.cc:445
 msgid "Stop Recording & Loop"
-msgstr ""
+msgstr "Zastavit nahrávání & loop"
 
 #: ardour_ui_ed.cc:448
 msgid "Toggle Punch"
-msgstr ""
+msgstr "Přepnout přepis"
 
 #: ardour_ui_ed.cc:451
 msgid "Toggle Metronome"
-msgstr ""
+msgstr "Přepnout metronom"
 
 #: ardour_ui_ed.cc:454
 msgid "Toggle Auto Return"
-msgstr ""
+msgstr "Přepnout automatický návrat"
 
 #: ardour_ui_ed.cc:457
 msgid "Toggle Follow Edits"
-msgstr ""
+msgstr "Přepnout následování úprav"
 
 #: ardour_ui_ed.cc:461
 msgid "Focus On Clock"
-msgstr "Zaostřit na ukazatel času"
+msgstr "Zaměřit na ukazatel času"
 
 #: ardour_ui_ed.cc:467 ardour_ui_ed.cc:478
 msgid "Bars & Beats"
@@ -2931,7 +2956,7 @@ msgstr "Ukázat nahrávač"
 
 #: ardour_ui_ed.cc:780
 msgid "Show Cues"
-msgstr "Zobrazit řadiče"
+msgstr "Zobrazit scény"
 
 #: ardour_ui_ed.cc:786 ardour_ui_ed.cc:787 ardour_ui_ed.cc:788
 #: ardour_ui_ed.cc:789 ardour_ui_ed.cc:790 ardour_ui_ed.cc:796
@@ -6099,7 +6124,7 @@ msgstr "Ukazatele polohy postavit na značky"
 
 #: editor_actions.cc:132 trigger_page.cc:69 trigger_page.cc:231
 msgid "Cues"
-msgstr "Řadiče"
+msgstr "Scény"
 
 #: editor_actions.cc:133
 msgid "Meter falloff"
@@ -6810,7 +6835,7 @@ msgstr "Pouze CD značky"
 
 #: editor_actions.cc:591
 msgid "Only Cue Markers"
-msgstr "Pouze značky řadičů"
+msgstr "Pouze narážky"
 
 #: editor_actions.cc:592
 msgid "Only Scene Markers"
@@ -7170,19 +7195,19 @@ msgstr "Vložit oblast ze seznamu zdrojů"
 
 #: editor_actions.cc:1496
 msgid "Convert Region Cue Markers to CD Markers"
-msgstr "Převést značky řadičů oblasti na značky na CD"
+msgstr "Převést značky narážek oblasti na značky na CD"
 
 #: editor_actions.cc:1497
 msgid "Convert Region Cue Markers to Location Markers"
-msgstr "Převést značky řadičů oblasti na značky polohy"
+msgstr "Převést značky narážek oblasti na značky polohy"
 
 #: editor_actions.cc:1498
 msgid "Add Region Cue Marker"
-msgstr "Přidat značku řadiče oblasti"
+msgstr "Přidat narážku oblasti"
 
 #: editor_actions.cc:1499
 msgid "Clear Region Cue Markers"
-msgstr "Smazat značky řadičů oblasti"
+msgstr "Smazat narážky oblasti"
 
 #: editor_actions.cc:1500
 msgid "Set Sync Position"
@@ -7497,7 +7522,7 @@ msgstr "malovat noty"
 
 #: editor_drag.cc:7319
 msgid "Edit Cue Marker Name"
-msgstr "Upravit název značky řadiče"
+msgstr "Upravit název narážky"
 
 #: editor_route_groups.cc:92
 msgid "Col"
@@ -7948,7 +7973,7 @@ msgstr "přidat značku"
 
 #: editor_ops.cc:1989
 msgid "cue %1"
-msgstr "řadič %1"
+msgstr "narážka %1"
 
 #: editor_ops.cc:1991
 msgid "section"
@@ -7988,7 +8013,7 @@ msgstr "smazat rozsahy"
 
 #: editor_ops.cc:2334
 msgid "clear cues"
-msgstr "smazat řadiče"
+msgstr "smazat narážky"
 
 #: editor_ops.cc:2352 editor_ops.cc:2368
 msgid "clear locations"
@@ -8659,19 +8684,19 @@ msgstr "Přesunují se vložené soubory do složky se sezením"
 
 #: editor_ops.cc:8906
 msgid "New Cue Marker Name"
-msgstr "Nový název značky řadiče"
+msgstr "Nový název narážky"
 
 #: editor_ops.cc:8955
 msgid "add cue marker"
-msgstr "Přidat značku řadiče"
+msgstr "přidat narážku"
 
 #: editor_ops.cc:8997
 msgid "remove cue marker"
-msgstr "Odstranit značku řadiče"
+msgstr "odstranit narážku"
 
 #: editor_ops.cc:9057
 msgid "clear cue markers"
-msgstr "Smazat značky řadičů"
+msgstr "smazat narážky"
 
 #: editor_ops.cc:9109
 msgid "region markers -> global markers"
@@ -8815,11 +8840,11 @@ msgstr "Stopa/Sběrnice viditelná?"
 
 #: editor_routes.cc:32 route_list_base.cc:85 trigger_route_list.cc:32
 msgid "Cues|C"
-msgstr "Ř"
+msgstr "S"
 
 #: editor_routes.cc:32 route_list_base.cc:85 trigger_route_list.cc:32
 msgid "Visible on Cues window ?"
-msgstr "Viditelné v okně s řadiči?"
+msgstr "Viditelné v okně scén ?"
 
 #: editor_routes.cc:33 route_list_base.cc:86 trigger_route_list.cc:33
 msgid "Track/Bus active ?"
@@ -8879,15 +8904,15 @@ msgstr "Značka CD stopy"
 
 #: editor_rulers.cc:319
 msgid "Cue Marker..."
-msgstr ""
+msgstr "Narážka..."
 
 #: editor_rulers.cc:323
 msgid "Stop All Cues"
-msgstr "Zastavit všechny řadiče"
+msgstr "Zastavit všechny scény"
 
 #: editor_rulers.cc:325
 msgid "Cue %1"
-msgstr "Řadič %1"
+msgstr "Scéna %1"
 
 #: editor_rulers.cc:331 export_timespan_selector.cc:404
 #: export_timespan_selector.cc:524 virtual_keyboard_window.cc:174
@@ -8904,7 +8929,7 @@ msgstr "Všechna umístění"
 
 #: editor_rulers.cc:342
 msgid "All Cues"
-msgstr "Všechny řadiče"
+msgstr "Všechny scény"
 
 #: editor_rulers.cc:343
 msgid "All Xruns"
@@ -16333,7 +16358,7 @@ msgstr "Zobrazit druhý časový údaj"
 
 #: rc_option_editor.cc:3055
 msgid "Display Cue Rec/Play Controls"
-msgstr "Zobrazit ovládání Rec/Play pro Cue"
+msgstr "Zobrazit ovládání Rec/Play pro scény"
 
 #: rc_option_editor.cc:3063
 msgid "Display Selection Clock"
@@ -16658,7 +16683,7 @@ msgstr "Zorazovat značky xrun v oblastech"
 
 #: rc_option_editor.cc:3348
 msgid "Show cue markers in regions"
-msgstr "Zobrazovat značky cue v oblastech"
+msgstr "Zobrazovat značky scén v oblastech"
 
 #: rc_option_editor.cc:3356
 msgid "Show gain envelopes in audio regions"
@@ -20430,7 +20455,7 @@ msgstr ""
 msgid ""
 "Cues containing clips disables implicit (auto) disk monitoring for the track"
 msgstr ""
-"Narážky obsahující klipy vypnou implicitní (automatické) sledování disku pro "
+"Scény obsahující klipy vypnou implicitní (automatické) sledování disku pro "
 "danou stopu"
 
 #: session_option_editor.cc:285
@@ -21186,7 +21211,7 @@ msgstr "Legato:"
 
 #: slot_properties_box.cc:299
 msgid "Cue Isolate:"
-msgstr "Narážka pro izolaci:"
+msgstr "Izolace scény:"
 
 #: slot_properties_box.cc:327
 msgid "Follow Count:"
@@ -21285,7 +21310,7 @@ msgid ""
 "If selected, this slot will not respond to Cue events (either starting or "
 "stopping)"
 msgstr ""
-"Při výběru nebude tato pozice reagovat na Cue události (buď start nebo stop)"
+"Při výběru nebude tato pozice reagovat na události scény (buď start nebo stop)"
 
 #: slot_properties_box.cc:634
 msgid "Gain (dB):"
@@ -21418,7 +21443,7 @@ msgstr ""
 "stávajících\n"
 "funkcí pro úpravy může být nefunkčních. Kromě toho se rychle vyvíjí "
 "funkčnost editace MIDI klipů\n"
-"na stránce řadiče, ale pokud vidíte tuto zprávu, není\n"
+"na stránce scén, ale pokud vidíte tuto zprávu, není\n"
 "v tuto chvíli považována za dokončenou.\n"
 "1) Prosím <b>NEPOUŽÍVEJTE</b> tento software s očekáváním, že je stabilní "
 "nebo spolehlivý\n"
@@ -22587,15 +22612,15 @@ msgstr ""
 
 #: trigger_page.cc:440 trigger_page.cc:445
 msgid "Window|Cues"
-msgstr "Narážky"
+msgstr "Scény"
 
 #: trigger_page.cc:975
 msgid "Cue Page: Show Sidebar List"
-msgstr "Panel řadiče: zobrazit seznam v postranní liště"
+msgstr "Panel scén: zobrazit seznam v postranní liště"
 
 #: trigger_page.cc:978
 msgid "Cue Page: Show Properties Bottom"
-msgstr "Panel řadiče: zobrazit vlastnosti dole"
+msgstr "Panel scén: zobrazit vlastnosti dole"
 
 #: trigger_page.cc:981 trigger_page.cc:982
 msgid "Clear Selected Slot"
@@ -22603,7 +22628,7 @@ msgstr "Vyprázdnit vybranou pozici"
 
 #: trigger_page.cc:986
 msgid "Trigger Cue %1"
-msgstr "Spustit narážku %1"
+msgstr "Spustit scénu %1"
 
 #: trigger_page.cc:994
 msgid "Trigger Slot %1/%2"
@@ -22611,19 +22636,19 @@ msgstr "Spouštěcí pozice %1/%2"
 
 #: trigger_page.cc:999 trigger_page.cc:1000
 msgid "Stop Cues %1"
-msgstr "Zastavit narážky %1"
+msgstr "Zastavit scény %1"
 
 #: trigger_page.cc:1003
 msgid "Stop all cues now"
-msgstr "Zastavit ihned všechny narážky"
+msgstr "Zastavit ihned všechny scény"
 
 #: trigger_page.cc:1004
 msgid "Stop all cues soon"
-msgstr "Zastavit brzy všechny narážky"
+msgstr "Zastavit brzy všechny scény"
 
 #: trigger_strip.cc:145
 msgid "Switch controls from cue launching to cue recording"
-msgstr "Přepnout ovladače ze spuštění na nahrávání"
+msgstr "Přepnout ovladače scény ze spuštění na nahrávání"
 
 #: trigger_master.cc:129
 msgid ""
@@ -22675,7 +22700,7 @@ msgstr "Kvantizace..."
 
 #: trigger_ui.cc:565
 msgid "Cue Isolate"
-msgstr "Izolace narážky"
+msgstr "Izolace scény"
 
 #: trigger_ui.cc:701
 msgid "Trigger"
@@ -24228,3 +24253,4 @@ msgstr "Vstupní video soubor"
 
 #~ msgid "Color file for %1 not found along %2"
 #~ msgstr "Soubor s barvou pro %1 nebyl pod %2 nalezen"
+
