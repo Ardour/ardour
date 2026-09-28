@@ -18,7 +18,6 @@
  */
 
 #include <iostream>
-//#include <mutex>
 
 #ifdef COMPILER_MSVC
 #define _WINSOCKAPI_
@@ -69,9 +68,7 @@ ContourDesignControlProtocol::ContourDesignControlProtocol (Session& session)
 	, _jog_distance ()
 	, _gui (0)
 {
-//	libusb_init_option _init_options[] = { {LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_DEBUG}, };
-//	libusb_init_context (0,_init_options, 1);
-	libusb_init(0);
+	libusb_init (0);
 //	libusb_set_debug(0, LIBUSB_LOG_LEVEL_WARNING);
 
 	_shuttle_speeds.push_back (0.50);
@@ -97,8 +94,6 @@ ContourDesignControlProtocol::~ContourDesignControlProtocol ()
 bool
 ContourDesignControlProtocol::available ()
 {
-//	libusb_init_option _init_options[] = { {LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_WARNING}, };
-//	bool rv = LIBUSB_SUCCESS == libusb_init_context (0, _init_options, 1);
 	bool rv = LIBUSB_SUCCESS == libusb_init (0);
 	if (rv) {
 		libusb_exit (0);
@@ -376,17 +371,10 @@ ContourDesignControlProtocol::release_device ()
 		return;
 	}
 
-//	int completed = 0;
-//	while (!completed){
-//		libusb_handle_events_completed(0, &completed);
-//	}
 
 	if (_usb_transfer) {
-//		std::mutex transfer_mtx;
-//		std::lock_guard<std::mutex> transfer_guard(transfer_mtx);
 		int lusbCancelled = libusb_cancel_transfer (_usb_transfer);
 		while ( (_usb_transfer->status != LIBUSB_TRANSFER_CANCELLED) && lusbCancelled != LIBUSB_ERROR_NOT_FOUND){
-//			handle_event();
 			libusb_handle_events(0);
 		}
 		libusb_free_transfer (_usb_transfer);
