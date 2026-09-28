@@ -2797,7 +2797,13 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 
 		for (list<DraggingView>::const_iterator i = _views.begin (); i != _views.end (); ++i) {
 			RegionView* rv = i->view;
-			rv->region ()->playlist ()->clear_owned_changes ();
+
+			std::shared_ptr<Playlist> pl = rv->region ()->playlist ();
+			insert_result                = _editor.motion_frozen_playlists.insert (pl);
+
+			if (insert_result.second) {
+				pl->clear_owned_changes ();
+			}
 
 			if (_operation == StartTrim) {
 				rv->trim_front_starting ();
@@ -2810,9 +2816,6 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 			if (arv) {
 				arv->temporarily_hide_envelope ();
 			}
-
-			std::shared_ptr<Playlist> pl = rv->region ()->playlist ();
-			insert_result                = _editor.motion_frozen_playlists.insert (pl);
 
 			if (insert_result.second) {
 				pl->freeze ();
