@@ -1202,6 +1202,10 @@ VST3PI::VST3PI (std::shared_ptr<ARDOUR::VST3PluginModule> m, std::string unique_
 		throw failed_constructor ();
 	}
 
+#if !(defined PLATFORM_WINDOWS || defined __APPLE__) /* Linux only */
+	_restart_component_is_synced = m->has_symbol ("yabridge_version");
+#endif
+
 	PFactoryInfo fi;
 	if (factory->getFactoryInfo (&fi) == kResultTrue) {
 		/* work around issue with UADx VST3s not recognizing
@@ -1210,14 +1214,15 @@ VST3PI::VST3PI (std::shared_ptr<ARDOUR::VST3PluginModule> m, std::string unique_
 		if (0 == strcmp (fi.vendor, "Universal Audio (UADx)")) {
 			_no_kMono = true;
 		}
+		if (0 == strcmp (fi.vendor, "CWITEC")) {
+			/* TX16Wx - #10498 */
+			_restart_component_is_synced = true;
+		}
 	}
 
-#if !(defined PLATFORM_WINDOWS || defined __APPLE__) /* Linux only */
-	_restart_component_is_synced = m->has_symbol ("yabridge_version");
 	if (_restart_component_is_synced) {
 		DEBUG_TRACE (DEBUG::VST3Config, "VST3PI detected yabridge\n");
 	}
-#endif
 
 #ifndef NDEBUG
 	if (DEBUG_ENABLED (DEBUG::VST3Config)) {
