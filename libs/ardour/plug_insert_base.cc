@@ -186,7 +186,7 @@ PlugInsertBase::set_control_ids (const XMLNode& node, int version, bool by_value
 			(*iter)->get_property (X_("parameter"), p);
 		}
 
-		if (p == (uint32_t)-1) {
+		if (p == (uint32_t)-1 && !control (Evoral::Parameter (PluginAutomation, 0, p))) {
 			continue;
 		}
 
@@ -416,6 +416,30 @@ double
 PlugInsertBase::PluginPropertyControl::get_value () const
 {
 	return _value.to_double ();
+}
+
+PlugInsertBase::HostBypassControl::HostBypassControl (Session&                        s,
+                                                      const Evoral::Parameter&        param,
+                                                      const ParameterDescriptor&      desc,
+                                                      std::shared_ptr<AutomationList> list)
+	: AutomationControl (s, param, desc, list, _("Plugin Enable"))
+{
+}
+
+void
+PlugInsertBase::HostBypassControl::actually_set_value (double val, PBD::Controllable::GroupControlDisposition gcd)
+{
+	/* Call parent class to update automation list and trigger Changed signal */
+	AutomationControl::actually_set_value (val, gcd);
+}
+
+XMLNode&
+PlugInsertBase::HostBypassControl::get_state () const
+{
+	XMLNode& node (AutomationControl::get_state ());
+	uint32_t param_id = parameter ().id ();
+	node.set_property (X_("parameter"), param_id);
+	return node;
 }
 
 std::ostream& operator<<(std::ostream& o, const ARDOUR::PlugInsertBase::Match& m)
