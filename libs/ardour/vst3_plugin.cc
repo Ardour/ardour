@@ -1668,8 +1668,9 @@ VST3PI::restartComponent (int32 flags)
 		 * and restart the EditController.
 		 */
 		Stripable* s = dynamic_cast<Stripable*> (_owner);
-		assert (s);
-		s->session ().butler ()->delegate ([&]() { deactivate(); activate (); } );
+		if (s) {
+			s->session ().butler ()->delegate ([this]() { deactivate(); activate (); } );
+		}
 	}
 	if (flags & Vst::kIoTitlesChanged) {
 		/* Input and/or Output bus titles have changed
