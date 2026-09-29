@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-27 19:03+0200\n"
-"PO-Revision-Date: 2026-09-28 10:21+0200\n"
+"PO-Revision-Date: 2026-09-29 19:08+0200\n"
 "Last-Translator: Martin Vlk <martin@vlkk.cz>\n"
 "Language-Team: Czech <translation-team-cs@lists.sourceforge.net>\n"
 "Language: cs\n"
@@ -3407,12 +3407,16 @@ msgid ""
 "Session Archiving failed.\n"
 "Cannot setup LZMA compression."
 msgstr ""
+"Selhala archivace sezení.\n"
+"Nemohu nastavit LZMA kompresi."
 
 #: ardour_ui_session.cc:1114
 msgid ""
 "Session Archiving failed.\n"
 "Cannot setup initialze streaming archive."
 msgstr ""
+"Selhala archivace sezení.\n"
+"Nemohu nastavit archiv streamingu."
 
 #: ardour_ui_session.cc:1144
 msgid ""
@@ -3586,19 +3590,19 @@ msgstr "%1: Neodstranitelná chyba"
 
 #: ardour_ui_startup.cc:589
 msgid "Detecting Audio/MIDI Devices"
-msgstr ""
+msgstr "Rozpoznávám zařízení audio/MIDI"
 
 #: ardour_ui_startup.cc:590
 msgid "Detecting Audio/MIDI Devices..."
-msgstr ""
+msgstr "Rozpoznávám zařízení audio/MIDI..."
 
 #: ardour_ui_startup.cc:600
 msgid "Audio/MIDI Devices detection complete. Elapsed time: %1 ms"
-msgstr ""
+msgstr "Rozpoznávání zařízení audio/MIDI je dokončeno. Doba trvání %1 ms"
 
 #: ardour_ui_startup.cc:601
 msgid "Continuing Startup..."
-msgstr ""
+msgstr "Pokračuji ve spouštění..."
 
 #: ardour_ui_startup.cc:696 new_user_wizard.cc:344
 msgid "%1 is ready for use"
@@ -4131,113 +4135,115 @@ msgstr "Přejmenovat kanál"
 
 #: chord_box.cc:59
 msgid "Arpeggiate"
-msgstr ""
+msgstr "Rozloženě"
 
 #: chord_box.cc:60
 msgid "3-Note Chords (Triads)"
-msgstr ""
+msgstr "3-tónové akordy (trojhlas)"
 
 #: chord_box.cc:61
 msgid "4-Note Chords (Tetrads)"
-msgstr ""
+msgstr "4-tónové akordy (čtyřhlas)"
 
 #: chord_box.cc:62
 msgid "Extended Chords"
-msgstr ""
+msgstr "Rozšířené akordy"
 
 #: chord_box.cc:63
 msgid "Inversions"
-msgstr ""
+msgstr "Inverze"
 
 #: chord_box.cc:64
 msgid "Drop Notes"
-msgstr ""
+msgstr "Snížené noty"
 
 #: chord_box.cc:77 scale_dialog.cc:90
 msgid "Twelve Tone"
-msgstr ""
+msgstr "12-ti tónové"
 
 #: chord_box.cc:274
 msgid "Move Up"
-msgstr ""
+msgstr "Posun nahoru"
 
 #: chord_box.cc:276
 msgid "Move the lowest pitch in the selected chord up by 1 octave"
-msgstr ""
+msgstr "Posuň nejnižší tón ve vybraném akordu o 1 oktávu nahoru"
 
 #: chord_box.cc:281
 msgid "Move Down"
-msgstr ""
+msgstr "Posun dolů"
 
 #: chord_box.cc:283
 msgid "Move the highest pitch in the selected chord down by 1 octave"
-msgstr ""
+msgstr "Posuň nejvyšší tón ve vybraném akordu o 1 oktávu dolů"
 
 #: chord_box.cc:298
 msgid "Drop 2"
-msgstr ""
+msgstr "Sniž 2"
 
 #: chord_box.cc:299
 msgid "Move the 2nd lowest pitch in the selected chord down by 1 octave"
-msgstr ""
+msgstr "Posuň druhý nejnižší tón ve vybraném akordu o 1 oktávu dolů"
 
 #: chord_box.cc:305
 msgid "Drop 3"
-msgstr ""
+msgstr "Sniž 3"
 
 #: chord_box.cc:306
 msgid "Move the 3rd lowest pitch in the selected chord down by 1 octave"
-msgstr ""
+msgstr "Posuň třetí nejnižší tón ve vybraném akordu o 1 oktávu dolů"
 
 #: chord_box.cc:313
 msgid "Drop 2 + 4"
-msgstr ""
+msgstr "Sniž 2 + 4"
 
 #: chord_box.cc:314
 msgid ""
 "Move the 2nd &amp; 4th lowest pitches in the selected chord down by 1 octave "
 "(tetrads only)"
 msgstr ""
+"Posuň druhý a čtvrtý nejnižší tón ve vybraném akordu o 1 oktávu dolů "
+"(pouze pro čtyřhlas)"
 
 #: chord_dialog.cc:36
 msgid "Chord Editor"
-msgstr ""
+msgstr "Úpravy akordů"
 
 #: chord_dialog.cc:39
 msgid "Add a new chord"
-msgstr ""
+msgstr "Přidej nový akord"
 
 #: chord_dialog.cc:44
 msgid "Select a chord below"
-msgstr ""
+msgstr "Vyber akord vespod"
 
 #: chord_editor.cc:39
 msgid "Canonical name"
-msgstr ""
+msgstr "Základní název"
 
 #: chord_editor.cc:40
 msgid "Preferred short name"
-msgstr ""
+msgstr "Preferovaný krátký název"
 
 #: chord_editor.cc:41
 msgid "Other names"
-msgstr ""
+msgstr "Další názvy"
 
 #: chord_editor.cc:70
 msgid "Long, maximally descriptive, canonical name for this chord"
-msgstr ""
+msgstr "Dlouhý, co nejpopisnější, základní název tohoto akordu"
 
 #: chord_editor.cc:71
 msgid "Your preferred short name for this chord"
-msgstr ""
+msgstr "Vámi preferovaný krátký název pro tento akord"
 
 #: chord_editor.cc:72
 msgid "Comma-separated list of other names for this chord (optional)"
-msgstr ""
+msgstr "Čárkami oddělený seznam dalších názvů pro tento akord (volitelné)"
 
 #: chord_editor.cc:86
 msgid "Chord contains the following intervals from root"
-msgstr ""
+msgstr "Akord obsahuje tyto intervaly od základního tónu"
 
 #: color_theme_manager.cc:61
 msgid "Restore Defaults"
@@ -4911,51 +4917,51 @@ msgstr "Zdvojit výběr not"
 
 #: editing_context.cc:624
 msgid "Add minor 2nd (1 semitone)"
-msgstr ""
+msgstr "Vlož zmenšenou sekundu (1 půltón)"
 
 #: editing_context.cc:625
 msgid "Add major 2nd (2 semitones)"
-msgstr ""
+msgstr "Vlož velkou sekundu (2 půltóny)"
 
 #: editing_context.cc:626
 msgid "Add minor 3rd (3 semitones)"
-msgstr ""
+msgstr "Vlož zmenšenou tercii (3 půltóny)"
 
 #: editing_context.cc:627
 msgid "Add major 3rd (4 semitones)"
-msgstr ""
+msgstr "Vlož velkou tercii (4 půltóny)"
 
 #: editing_context.cc:628
 msgid "Add perfect 4th (5 semitones)"
-msgstr ""
+msgstr "Vlož čistou kvartu (5 půltónů)"
 
 #: editing_context.cc:629
 msgid "Add tritone (6 semitones)"
-msgstr ""
+msgstr "Vlož tritón/zvětšenou kvartu (6 půltónů)"
 
 #: editing_context.cc:630
 msgid "Add perfect 5th (7 semitones)"
-msgstr ""
+msgstr "Vlož čistou kvintu (7 půltónů)"
 
 #: editing_context.cc:631
 msgid "Add minor 6th (8 semitones)"
-msgstr ""
+msgstr "Vlož zmenšenou sixtu (8 půltónů)"
 
 #: editing_context.cc:632
 msgid "Add major 6th (9 semitones)"
-msgstr ""
+msgstr "Vlož čistou sixtu (9 půltónů)"
 
 #: editing_context.cc:633
 msgid "Add minor 7th (10 semitones)"
-msgstr ""
+msgstr "Vlož zmenšenou septimu (10 půltónů)"
 
 #: editing_context.cc:634
 msgid "Add major 7th (11 semitones)"
-msgstr ""
+msgstr "Vlož čistou septimu (11 půltónů)"
 
 #: editing_context.cc:635
 msgid "Add octave (12 semitones)"
-msgstr ""
+msgstr "Vlož oktávu (12 půltónů)"
 
 #: editing_context.cc:639
 msgid "Move Note Start Earlier (fine)"
@@ -5095,11 +5101,11 @@ msgstr "Snížit velocity (dynamiku MIDI) (jemné, nepřesné, ne-relativní)"
 
 #: editing_context.cc:683
 msgid "Duplicate Notes"
-msgstr ""
+msgstr "Duplikovat noty"
 
 #: editing_context.cc:684
 msgid "Multi-Duplicate Notes"
-msgstr ""
+msgstr "Vícenásobně duplikovat noty"
 
 #: editing_context.cc:686
 msgid "Transpose Up (octave)"
@@ -5198,7 +5204,7 @@ msgstr "Dynamika %d"
 
 #: editing_context.cc:782
 msgid "No Chord"
-msgstr ""
+msgstr "Žádný akord"
 
 #: editing_context.cc:1356 editor_actions.cc:164
 msgid "Triplets"
@@ -5253,7 +5259,7 @@ msgstr "Brnknout dozadu"
 
 #: editing_context.cc:2280
 msgid "Add note interval of %1 semitones"
-msgstr ""
+msgstr "Vložit tónový interval %1 půltónů"
 
 #: editing_context.cc:2522
 msgid "Len:"
@@ -5312,7 +5318,7 @@ msgstr "Znovu (%1)"
 
 #: editing_context.cc:4340
 msgid "Pianoroll Window"
-msgstr ""
+msgstr "Okno pianoroll"
 
 #: editor.cc:188 editor_actions.cc:557
 msgid "Marker"
@@ -5480,7 +5486,7 @@ msgstr "Rozsahy a značky"
 
 #: editor.cc:706
 msgid "MIDI Tools"
-msgstr ""
+msgstr "MIDI nástroje"
 
 #: editor.cc:1267
 msgid "Window|Editor"
@@ -6243,23 +6249,23 @@ msgstr "Ukázat seznam editoru"
 
 #: editor_actions.cc:193 mixer_ui.cc:3974
 msgid "Show/Hide Right Panel"
-msgstr ""
+msgstr "Ukaž/skryj pravý panel"
 
 #: editor_actions.cc:196
 msgid "Show Editor Mixer"
-msgstr "Ukázat panel směšovače"
+msgstr "Ukaž panel směšovače"
 
 #: editor_actions.cc:198 mixer_ui.cc:3970
 msgid "Show/Hide Left Panel"
-msgstr ""
+msgstr "Ukaž/skryj levý panel"
 
 #: editor_actions.cc:201
 msgid "Show Editor Properties Box"
-msgstr "Ukázat panel vlastností editoru"
+msgstr "Ukaž panel vlastností editoru"
 
 #: editor_actions.cc:203 mixer_ui.cc:3980
 msgid "Show/Hide Bottom Panel"
-msgstr ""
+msgstr "Ukaž/skryj spodní panel"
 
 #: editor_actions.cc:206
 msgid "Playhead to Next Region Boundary"
@@ -6916,7 +6922,7 @@ msgstr "Ukázat shrnutí"
 
 #: editor_actions.cc:674
 msgid "Show Vertical Summary"
-msgstr ""
+msgstr "Ukaž vertikální souhrn"
 
 #: editor_actions.cc:676
 msgid "Show Group Tabs"
@@ -7732,7 +7738,7 @@ msgstr "Přesunout značku na ukazatele polohy"
 
 #: editor_markers.cc:1149
 msgid "Edit Marker"
-msgstr ""
+msgstr "Uprav značku"
 
 #: editor_markers.cc:1154
 msgid "Create Range to Next Marker"
@@ -7851,7 +7857,7 @@ msgstr "Změna scény"
 
 #: editor_markers.cc:1937
 msgid "Use scene change"
-msgstr ""
+msgstr "Použij změnu scény"
 
 #: editor_markers.cc:1984
 msgid "edit marker"
@@ -11639,7 +11645,7 @@ msgstr "Vyvést jako MIDI: %1"
 
 #: midi_inspector.cc:34
 msgid "Chord Editing"
-msgstr ""
+msgstr "Úpravy akordů"
 
 #: midi_inspector.cc:36 region_editor_window.cc:28
 msgid "Region Properties"
@@ -11809,7 +11815,7 @@ msgstr "Barevný režim"
 
 #: midi_time_axis.cc:759
 msgid "Key Enforcement"
-msgstr ""
+msgstr "Vynucení tóniny"
 
 #: midi_time_axis.cc:797
 msgid "MIDNAM Selector for %1"
@@ -11857,7 +11863,7 @@ msgstr "Barvy kanálů"
 
 #: midi_time_axis.cc:1161
 msgid "Pitch Colors"
-msgstr ""
+msgstr "Barvy tónů"
 
 #: midi_time_axis.cc:1168
 msgid "Track Color"
@@ -11927,43 +11933,43 @@ msgstr "Nová velocity (dynamiku MIDI)"
 
 #: midi_view.cc:872
 msgid "channel edit"
-msgstr "Upravit kanál"
+msgstr "upravit kanál"
 
 #: midi_view.cc:912
 msgid "velocity edit"
-msgstr "Upravit velocity (dynamiku MIDI)"
+msgstr "upravit velocitu (dynamiku MIDI)"
 
 #: midi_view.cc:982
 msgid "add chord"
-msgstr ""
+msgstr "přidat akord"
 
 #: midi_view.cc:1000
 msgid "add note"
-msgstr "Přidat notu"
+msgstr "přidat notu"
 
 #: midi_view.cc:1052
 msgid "add interval"
-msgstr ""
+msgstr "přidat interval"
 
 #: midi_view.cc:1114
 msgid "invert chord (up)"
-msgstr ""
+msgstr "invertovat akord (nahoru)"
 
 #: midi_view.cc:1117
 msgid "invert chord (down)"
-msgstr ""
+msgstr "invertovat akord (dolů)"
 
 #: midi_view.cc:1155
 msgid "drop notes"
-msgstr ""
+msgstr "snížit tón"
 
 #: midi_view.cc:1195
 msgid "replace chord"
-msgstr ""
+msgstr "vyměnit akord"
 
 #: midi_view.cc:2442
 msgid "step add"
-msgstr "Přidat krok"
+msgstr "přidat krok"
 
 #: midi_view.cc:2547 midi_view.cc:2572
 msgid "alter patch change"
@@ -12059,11 +12065,11 @@ msgstr "Posunout MIDI o %1"
 
 #: midi_view_background.cc:484
 msgid "Show notes-in-scale in MIDI backgrounds"
-msgstr ""
+msgstr "Ukázat noty stupnice na pozadí MIDI"
 
 #: midi_view_background.cc:489
 msgid "Don't show non-scale ghost notes while drawing/editing"
-msgstr ""
+msgstr "Nezobrazovat noty mimo stupnici při kreslení/úpravách"
 
 #: midi_view_background.cc:494
 msgid "Don't allow mouse edits to create non-scale notes"
