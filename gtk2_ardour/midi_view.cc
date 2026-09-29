@@ -3467,7 +3467,7 @@ MidiView::note_dropped (NoteBase *, timecnt_t const & d_qn, int8_t dnote, bool c
 				continue;
 			}
 
-			new_pitch = (conformed_pitch & 0xf7);
+			new_pitch = (conformed_pitch & 0x7f);
 
 			copy_event->note()->set_time (new_time);
 			last_note_off = std::max (last_note_off, copy_event->note()->end_time());
