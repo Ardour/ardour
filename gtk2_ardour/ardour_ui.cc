@@ -3016,20 +3016,20 @@ ARDOUR_UI::pending_state_dialog ()
 {
 	HBox* hbox = manage (new HBox());
 	Image* image = manage (new Image (Stock::DIALOG_QUESTION, ICON_SIZE_DIALOG));
-	ArdourDialog dialog (_("Crash Recovery"), true);
+	ArdourDialog dialog (_("Recover Unsaved Changes?"), true);
 	Label  message (string_compose (_("\
-This session appears to have been modified\n\
-without being saved or in the middle of recording\n\
-when %1 or the computer was shutdown.\n\
+%1 found unsaved changes for this\n\
+session. It may have been open or recroding when\n\
+%1 or the computer shut down unexpectedly.\n\
 \n\
-%1 can recover any changes for\n\
-you or it can ignore them.\n"), PROGRAM_NAME));
+Choose whether to recover unsaved\n\
+changes or open the last saved version.\n"), PROGRAM_NAME));
 	image->set_alignment(ALIGN_CENTER, ALIGN_START);
 	hbox->pack_start (*image, PACK_EXPAND_WIDGET, 12);
 	hbox->pack_end (message, PACK_EXPAND_PADDING, 12);
 	dialog.get_vbox()->pack_start(*hbox, PACK_EXPAND_PADDING, 6);
-	dialog.add_button (_("Ignore crash data"), RESPONSE_REJECT);
-	dialog.add_button (_("Recover from crash"), RESPONSE_ACCEPT);
+	dialog.add_button (_("Open Last Saved"), RESPONSE_REJECT);
+	dialog.add_button (_("Recover Changes"), RESPONSE_ACCEPT);
 	dialog.set_default_response (RESPONSE_ACCEPT);
 	dialog.set_position (WIN_POS_CENTER);
 	message.show();
