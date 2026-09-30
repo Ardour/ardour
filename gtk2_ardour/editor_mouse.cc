@@ -773,11 +773,12 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	case MouseContent:
 		switch (item_type) {
 		case NoteItem:
-			/* Existing note: allow trimming/motion */
 			if ((note = reinterpret_cast<NoteBase*> (item->get_data ("notebase")))) {
 				if (note->big_enough_to_trim() && note->mouse_near_ends()) {
+					/* Note is big and pointer is near the end, trim */
 					_drags->set (new NoteResizeDrag (*this, item), event, get_canvas_cursor());
 				} else {
+					/* Drag note */
 					_drags->set (new NoteDrag (*this, item), event);
 				}
 			}
@@ -1179,6 +1180,9 @@ bool
 Editor::button_press_handler_2 (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
 	Editing::MouseMode const eff = effective_mouse_mode ();
+
+	NoteBase* note = NULL;
+
 	switch (eff) {
 	case MouseObject:
 		if (_drags->active ()) {
@@ -1232,6 +1236,24 @@ Editor::button_press_handler_2 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	case MouseRange:
 		/* relax till release */
 		return true;
+		break;
+
+	case MouseContent:
+		switch (item_type) {
+		case NoteItem:
+			if ((note = reinterpret_cast<NoteBase*> (item->get_data ("notebase")))) {
+				if (note->big_enough_to_trim() && note->mouse_near_ends()) {
+					/* Note is big and pointer is near the end, trim */
+					_drags->set (new NoteResizeDrag (*this, item), event, get_canvas_cursor());
+				} else {
+					/* Drag note */
+					_drags->set (new NoteDrag (*this, item), event);
+				}
+			}
+			return true;
+		default:
+			break;
+		}
 		break;
 
 	default:
