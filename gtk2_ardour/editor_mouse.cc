@@ -1231,6 +1231,16 @@ Editor::button_press_handler_2 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		break;
 
 	case MouseDraw:
+		switch (item_type) {
+		case ControlPointItem:
+			_drags->set (new ControlPointDrag (*this, item), event);
+			return true;
+		case VelocityItem:
+			_drags->set (new LollipopDrag (*this, item), event);
+			return true;
+		default:
+			break;
+		}
 		return false;
 
 	case MouseRange:
