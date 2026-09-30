@@ -1251,6 +1251,9 @@ Editor::button_press_handler_2 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				}
 			}
 			return true;
+		case ControlPointItem:
+			_drags->set (new ControlPointDrag (*this, item), event);
+			return true;
 		default:
 			break;
 		}
