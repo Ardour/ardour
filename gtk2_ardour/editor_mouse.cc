@@ -647,11 +647,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		return true;
 		break;
 
-	case VelocityItem:
-		_drags->set (new LollipopDrag (*this, item), event);
-		return true;
-		break;
-
 	default:
 		break;
 	}
@@ -806,6 +801,10 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case RegionItem:
 			/* rubberband drag to select region gain points */
 			_drags->set (new RubberbandSelectDrag (*this, item, [&](GdkEvent* ev, timepos_t const & pos) { return this->rb_click (ev, pos); }), event);
+			return true;
+			break;
+		case VelocityItem:
+			_drags->set (new LollipopDrag (*this, item), event);
 			return true;
 			break;
 		case VelocityBaseItem:
@@ -979,6 +978,11 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 				break;
 
+			case VelocityItem:
+				_drags->set (new LollipopDrag (*this, item), event);
+				return true;
+				break;
+				
 			default:
 				break;
 			}
