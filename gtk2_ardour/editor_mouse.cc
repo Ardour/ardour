@@ -1137,16 +1137,17 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				_drags->set (new RegionCreateDrag (*this, item, clicked_axisview), event);
 			}
 			return true;
-		case RegionItem: {
-			RegionView* rv;
-			if ((rv = dynamic_cast<RegionView*> (clicked_regionview))) {
-				ArdourCanvas::Rectangle* r = dynamic_cast<ArdourCanvas::Rectangle*> (rv->get_canvas_frame());
-				_drags->set (new AutomationDrawDrag (*this, rv->get_canvas_group(), *r, true, Temporal::AudioTime,
-				                                     [&](GdkEvent* ev, timepos_t const & pos) { return rb_click (ev, pos); }), event);
+		case RegionItem:
+			{
+				RegionView* rv;
+				if ((rv = dynamic_cast<RegionView*> (clicked_regionview))) {
+					ArdourCanvas::Rectangle* r = dynamic_cast<ArdourCanvas::Rectangle*> (rv->get_canvas_frame());
+					_drags->set (new AutomationDrawDrag (*this, rv->get_canvas_group(), *r, true, Temporal::AudioTime,
+					                                     [&](GdkEvent* ev, timepos_t const & pos) { return rb_click (ev, pos); }), event);
+					return true;
+				}
+				break;
 			}
-		}
-			break;
-
 		default:
 			break;
 		}
