@@ -6822,6 +6822,32 @@ MidiVerticalSelectDrag::deselect_things ()
 	/* XXX */
 }
 
+
+MidiLollipopsSelectDrag::MidiLollipopsSelectDrag (EditingContext& ec, ArdourCanvas::Item* i, std::function<bool(GdkEvent*,Temporal::timepos_t const &)> click_functor)
+	: RubberbandSelectDrag (ec, i, click_functor)
+{
+	DEBUG_TRACE (DEBUG::Drags, "New MidiLollipopsSelectDrag\n");
+	_display = reinterpret_cast<VelocityDisplay*> (_item->get_data ("ghostregionview"));
+}
+
+void
+MidiLollipopsSelectDrag::select_things (int button_state, timepos_t const& x1, timepos_t const& x2, double y1, double y2, bool drag_in_progress)
+{
+	if (drag_in_progress) {
+		/* We just want to select things at the end of the drag, not during it */
+		return;
+	}
+
+	ArdourCanvas::Rectangle& base = _display->base_item ();
+	double const origin = (base.item_to_canvas (base.get())).y0 - _bounding_item->canvas_origin().y;
+
+	y1 -= origin;
+	y2 -= origin;
+
+	_display->midi_view ().select_notes_by_velocity (x1, x2, _display->y_position_to_velocity(y2), _display->y_position_to_velocity(y1),
+	    Keyboard::modifier_state_contains (button_state, Keyboard::TertiaryModifier));
+}
+
 NoteCreateDrag::NoteCreateDrag (EditingContext& ec, ArdourCanvas::Item* i, MidiView* mv)
 	: Drag (ec, i, Temporal::BeatTime, ec.get_trackview_group())
 	, _midi_view (mv)

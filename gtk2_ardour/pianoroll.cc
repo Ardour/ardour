@@ -1195,9 +1195,13 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 	case VelocityBaseItem:
 		switch (mouse_mode) {
 		case Editing::MouseContent:
-			/* rubberband drag to select notes */
-			_drags->set (new RubberbandSelectDrag (*this, item, [&](GdkEvent* ev, timepos_t const & pos) { return _active_view->velocity_rb_click (ev, pos); }), event);
-			break;
+			{
+				/* rubberband drag to select lollipops */
+				MidiLollipopsSelectDrag* lsd = new MidiLollipopsSelectDrag (*this, item, [&](GdkEvent* ev, timepos_t const & pos) { _active_view->clear_note_selection (); return true; });
+				lsd->set_bounding_item (data_group);
+				_drags->set (lsd, event);
+				break;
+			}
 		case Editing::MouseDraw:
 			_drags->set (new VelocityLineDrag (*this, *static_cast<ArdourCanvas::Rectangle*>(item), false, Temporal::BeatTime), event);
 			break;

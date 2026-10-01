@@ -1362,6 +1362,18 @@ private:
 	MidiView* _midi_view;
 };
 
+/** A RubberbandSelectDrag for selecting MIDI notes by velocity */
+class MidiLollipopsSelectDrag : public RubberbandSelectDrag
+{
+public:
+	MidiLollipopsSelectDrag (EditingContext&, ArdourCanvas::Item *, std::function<bool(GdkEvent*,Temporal::timepos_t const &)> click_functor);
+
+	void select_things (int, Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, bool);
+
+private:
+	VelocityDisplay* _display;
+};
+
 /** Region drag in time-FX mode */
 class TimeFXDrag : public RegionDrag
 {

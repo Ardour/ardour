@@ -3080,6 +3080,38 @@ MidiView::update_drag_selection(timepos_t const & start, timepos_t const & end, 
 }
 
 void
+MidiView::select_notes_by_velocity (timepos_t const & start, timepos_t const & end, int velocity_min, int velocity_max, bool add)
+{
+	if (!_midi_region) {
+		return;
+	}
+
+    if (!add && !_selection.empty()) {
+		clear_note_selection ();
+	}
+
+	// Convert to local coordinates
+	double x0;
+	double x1;
+
+	if (_on_timeline) {
+		x0 = _editing_context.sample_to_pixel_unrounded (max<samplepos_t>(0, _midi_region->region_relative_position (start).samples()));
+		x1 = _editing_context.sample_to_pixel_unrounded (max<samplepos_t>(0, _midi_region->region_relative_position (end).samples()));
+	} else {
+		x0 = _editing_context.sample_to_pixel_unrounded (max<samplepos_t>(0, start.samples()));
+		x1 = _editing_context.sample_to_pixel_unrounded (max<samplepos_t>(0, end.samples()));
+	}
+
+	for (auto & [ note, gui ] : _events) {
+        if (x0 <= gui->x0 () && gui->x0 () <= x1 && velocity_min <= note->velocity () && note->velocity () <= velocity_max) {
+            if (!gui->selected() && note_editable (gui)) {
+                add_to_selection (gui);
+            }
+        }
+	}
+}
+
+void
 MidiView::update_vertical_drag_selection (double y1, double y2, bool extend)
 {
 	if (y1 > y2) {

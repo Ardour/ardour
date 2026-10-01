@@ -243,6 +243,8 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	void select_matching_notes (uint8_t notenum, uint16_t channel_mask, bool add, bool extend);
 	void toggle_matching_notes (uint8_t notenum, uint16_t channel_mask);
 
+	void select_notes_by_velocity (Temporal::timepos_t const & start, Temporal::timepos_t const & end, int velocity_min, int velocity_max, bool add);
+
 	/** Test if a note is within this region's range
 	 *
 	 * @param note the note to test
