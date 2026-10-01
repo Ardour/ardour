@@ -40,9 +40,6 @@
 
 using namespace PBD;
 using namespace Temporal;
-using std::cerr;
-using std::cout;
-using std::endl;
 using Temporal::superclock_t;
 
 std::string Tempo::xml_node_name = X_("Tempo");
@@ -627,7 +624,7 @@ TempoPoint::superclock_at (Temporal::Beats const & qn) const
 			 * at.
 			 */
 
-			std::cerr << "CASE 1: " << *this << endl << " scpqn = " << superclocks_per_quarter_note() << std::endl;
+			std::cerr << "CASE 1: " << *this << std::endl << " scpqn = " << superclocks_per_quarter_note() << std::endl;
 			std::cerr << " for " << qn << " @ " << _quarters << " | " << _sclock << " + log (" << log_expr << ") "
 			          << " omega = " << _omega
 			          << std::endl;
@@ -1610,7 +1607,7 @@ TempoMap::set_tempo (Tempo const & t, timepos_t const & time)
 
 #ifndef NDEBUG
 	if (DEBUG_ENABLED (DEBUG::TemporalMap)) {
-		dump (cerr);
+		dump (std::cerr);
 	}
 #endif
 
@@ -1730,6 +1727,24 @@ TempoMap::core_add_bartime (MusicTimePoint* mtp, bool& replaced)
 {
 	MusicTimes::iterator m;
 	const superclock_t sclock_limit = mtp->sclock();
+
+	/* Must remove any existing tempo/meter markers at this location */
+
+	for (auto mi = _meters.begin(); mi != _meters.end(); ++mi) {
+		if (mi->sclock() == sclock_limit) {
+			core_remove_meter (*mi);
+			remove_point (*mi);
+			break;
+		}
+	}
+
+	for (auto ti = _tempos.begin(); ti != _tempos.end(); ++ti) {
+		if (ti->sclock() == sclock_limit) {
+			core_remove_tempo (*ti);
+			remove_point (*ti);
+			break;
+		}
+	}
 
 	for (m = _bartimes.begin(); m != _bartimes.end() && m->sclock() < sclock_limit; ++m);
 
@@ -2710,17 +2725,17 @@ TempoMap::dump (std::ostream& ostr) const
 	ostr << "\n\nTEMPO MAP @ " << this << ":\n" << std::dec;
 	ostr << "... tempos...\n";
 	for (Tempos::const_iterator t = _tempos.begin(); t != _tempos.end(); ++t) {
-		ostr << &*t << ' ' << *t << endl;
+		ostr << &*t << ' ' << *t << std::endl;
 	}
 
 	ostr << "... meters...\n";
 	for (Meters::const_iterator m = _meters.begin(); m != _meters.end(); ++m) {
-		ostr << &*m << ' ' << *m << endl;
+		ostr << &*m << ' ' << *m << std::endl;
 	}
 
 	ostr << "... bartimes...\n";
 	for (MusicTimes::const_iterator m = _bartimes.begin(); m != _bartimes.end(); ++m) {
-		ostr << &*m << ' ' << *m << endl;
+		ostr << &*m << ' ' << *m << std::endl;
 	}
 	ostr << "... all points ...\n";
 	for (Points::const_iterator p = _points.begin(); p != _points.end(); ++p) {
@@ -2736,7 +2751,7 @@ TempoMap::dump (std::ostream& ostr) const
 		if (dynamic_cast<MeterPoint const *> (&(*p))) {
 			ostr << " Meter";
 		}
-		ostr << endl;
+		ostr << std::endl;
 	}
 	ostr << "------------\n\n\n";
 }
@@ -2880,13 +2895,12 @@ TempoMap::get_tempo_and_meter_bbt (TempoPoint const *& t, MeterPoint const *& m,
 	if (_bartimes.empty() || bbt.reference() == 0) {
 		p = _points.begin();
 	} else {
-		MusicTimes::const_iterator mtp;
+		/* find point to use to begin walk for tempo & meter */
 
-		for (mtp = _bartimes.begin(); mtp != _bartimes.end() && mtp->sclock() < bbt.reference(); ++mtp);
+		for (p = _points.begin(); p != _points.end() && p->sclock() < bbt.reference(); ++p);
 
-		if (mtp != _bartimes.end()) {
-			p = _points.s_iterator_to (*(static_cast<Point const *> (&(*mtp))));
-		} else {
+		if (p == _points.end()) {
+			/* Use final bartime */
 			p = _points.s_iterator_to (*(static_cast<Point const *> (&_bartimes.back())));
 		}
 	}
@@ -2917,8 +2931,11 @@ TempoMap::get_tempo_and_meter_bbt (TempoPoint const *& t, MeterPoint const *& m,
 		TempoPoint const * tpp;
 		MeterPoint const * mpp;
 
-		if (dynamic_cast<MusicTimePoint const *> (&(*p)) != 0) {
-			if (p->sclock() != bbt.reference()) {
+		if (dynamic_cast<MusicTimePoint const *> (&(*p)) != nullptr) {
+			/* do not walk past a BBT marker if the starting point
+			   was a BBT marker.
+			*/
+			if (p->sclock() > bbt.reference()) {
 				break;
 			}
 		}
@@ -4950,13 +4967,13 @@ TempoMap::parse_tempo_state_3x (const XMLNode& node, LegacyTempoState& lts)
 
 	if (!node.get_property ("frame", lts.sample)) {
 		error << _("Legacy tempo section XML does not have a \"frame\" node - map will be ignored") << endmsg;
-		cerr << _("Legacy tempo section XML does not have a \"frame\" node - map will be ignored") << endl;
+		std::cerr << _("Legacy tempo section XML does not have a \"frame\" node - map will be ignored") << std::endl;
 		return -1;
 	}
 
 	if (!node.get_property ("pulse", lts.pulses)) {
 		error << _("Legacy tempo section XML does not have a \"pulse\" node - map will be ignored") << endmsg;
-		cerr << _("Legacy tempo section XML does not have a \"pulse\" node - map will be ignored") << endl;
+		std::cerr << _("Legacy tempo section XML does not have a \"pulse\" node - map will be ignored") << std::endl;
 		return -1;
 	}
 
@@ -5030,7 +5047,7 @@ TempoMap::parse_meter_state_3x (const XMLNode& node, LegacyMeterState& lms)
 
 	if (!node.get_property ("pulse", lms.pulses)) {
 		error << _("Legacy meter section XML does not have a \"pulse\" node - map will be ignored") << endmsg;
-		cerr << _("Legacy meter section XML does not have a \"pulse\" node - map will be ignored") << endl;
+		std::cerr << _("Legacy meter section XML does not have a \"pulse\" node - map will be ignored") << std::endl;
 		return -1;
 	}
 

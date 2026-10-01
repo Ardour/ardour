@@ -1287,11 +1287,12 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 }
 
 bool
-Pianoroll::button_press_handler_2 (ArdourCanvas::Item*, GdkEvent*, ItemType)
+Pianoroll::button_press_handler_2 (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
-	EC_LOCAL_TEMPO_SCOPE;
-
-	return true;
+	/* For now we treat middle-clicks like left-clicks
+	 * and let the Drag decide what to do with it (e.g. axis constraint)
+	 */
+	return button_press_handler_1 (item, event, item_type);
 }
 
 bool
