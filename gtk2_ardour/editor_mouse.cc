@@ -652,17 +652,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		return true;
 		break;
 
-	case VelocityBaseItem:
-		{
-			VelocityDisplay* vd = static_cast<VelocityDisplay*> (item->get_data ("ghostregionview"));
-			VelocityGhostRegion* grv = dynamic_cast<VelocityGhostRegion*> (vd);
-			if (grv) {
-				_drags->set (new VelocityLineDrag (*this, grv->base_item(), true, Temporal::BeatTime), event);
-			}
-		}
-		return true;
-		break;
-
 	default:
 		break;
 	}
@@ -819,7 +808,10 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			_drags->set (new RubberbandSelectDrag (*this, item, [&](GdkEvent* ev, timepos_t const & pos) { return this->rb_click (ev, pos); }), event);
 			return true;
 			break;
-
+		case VelocityBaseItem:
+			_drags->set (new RubberbandSelectDrag (*this, item, [&](GdkEvent* ev, timepos_t const & pos) { return this->rb_click (ev, pos); }), event);
+			return true;
+			break;
 		default:
 			break;
 		}
@@ -1144,6 +1136,16 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 					ArdourCanvas::Rectangle* r = dynamic_cast<ArdourCanvas::Rectangle*> (rv->get_canvas_frame());
 					_drags->set (new AutomationDrawDrag (*this, rv->get_canvas_group(), *r, true, Temporal::AudioTime,
 					                                     [&](GdkEvent* ev, timepos_t const & pos) { return rb_click (ev, pos); }), event);
+					return true;
+				}
+				break;
+			}
+		case VelocityBaseItem:
+			{
+				VelocityDisplay* vd = static_cast<VelocityDisplay*> (item->get_data ("ghostregionview"));
+				VelocityGhostRegion* grv = dynamic_cast<VelocityGhostRegion*> (vd);
+				if (grv) {
+					_drags->set (new VelocityLineDrag (*this, grv->base_item(), true, Temporal::BeatTime), event);
 					return true;
 				}
 				break;
