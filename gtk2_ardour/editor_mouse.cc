@@ -982,7 +982,11 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				_drags->set (new LollipopDrag (*this, item), event);
 				return true;
 				break;
-				
+
+			case VelocityBaseItem:
+				_drags->set (new RubberbandSelectDrag (*this, item, [&](GdkEvent* ev, timepos_t const & pos) { return this->rb_click (ev, pos); }), event);
+				return true;
+				break;
 			default:
 				break;
 			}
