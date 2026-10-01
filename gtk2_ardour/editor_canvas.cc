@@ -606,6 +606,9 @@ Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_headers)
 		return;
 	}
 
+	allow_vert = autoscroll_vertical_allowed && allow_vert;
+	allow_horiz = autoscroll_horizontal_allowed && allow_horiz;
+
 	/* define a rectangular boundary for scrolling. If the mouse moves
 	 * outside of this area and/or continue to be outside of this area,
 	 * then we will continuously auto-scroll the canvas in the appropriate
@@ -765,7 +768,7 @@ Editor::autoscroll_canvas ()
 	VisualChange vc;
 	bool vertical_motion = false;
 
-	if (autoscroll_horizontal_allowed) {
+	if (autoscroll_horizontal_active) {
 
 		samplepos_t new_sample = _leftmost_sample;
 
@@ -813,7 +816,7 @@ Editor::autoscroll_canvas ()
 		}
 	}
 
-	if (autoscroll_vertical_allowed) {
+	if (autoscroll_vertical_active) {
 
 		// const double vertical_pos = vertical_adjustment.get_value();
 		const int speed_factor = 10;
@@ -913,7 +916,7 @@ Editor::autoscroll_canvas ()
 		 * move back to zero
 		 */
 
-		if (autoscroll_horizontal_allowed) {
+		if (autoscroll_horizontal_active) {
 			x = min (max ((ArdourCanvas::Coord) x, 0.0), autoscroll_boundary.x1);
 		} else {
 			x = min (max ((ArdourCanvas::Coord) x, autoscroll_boundary.x0), autoscroll_boundary.x1);
@@ -948,8 +951,8 @@ Editor::start_canvas_autoscroll (bool allow_horiz, bool allow_vert, const Ardour
 
 	stop_canvas_autoscroll ();
 
-	autoscroll_horizontal_allowed = allow_horiz;
-	autoscroll_vertical_allowed = allow_vert;
+	autoscroll_horizontal_active = allow_horiz;
+	autoscroll_vertical_active = allow_vert;
 	autoscroll_boundary = boundary;
 
 	/* do the first scroll right now

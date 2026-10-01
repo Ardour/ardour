@@ -807,6 +807,8 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	sigc::connection autoscroll_connection;
 	bool autoscroll_horizontal_allowed;
 	bool autoscroll_vertical_allowed;
+	bool autoscroll_horizontal_active;
+	bool autoscroll_vertical_active;
 	uint32_t autoscroll_cnt;
 	ArdourCanvas::Rect autoscroll_boundary;
 
