@@ -6951,11 +6951,11 @@ NoteCreateDrag::finished (GdkEvent* ev, bool had_movement)
 		length = _note[0].distance (_note[1]).abs ().beats ();
 	}
 
-	/* create_note_at() implements UNDO for us */
 	if (UIConfiguration::instance().get_select_last_drawn_note_only()) {
 		_midi_view->clear_note_selection ();
 	}
 
+	/* create_note_at() implements UNDO for us */
 	_midi_view->create_note_at (timepos_t (start), _drag_rect->y0 (), length, ev->button.state, false);
 }
 
@@ -7020,6 +7020,10 @@ HitCreateDrag::finished (GdkEvent* event, bool had_movement)
 
 	/* Percussive hits are as short as possible */
 	Beats length (0, 1);
+
+	if (UIConfiguration::instance().get_select_last_drawn_note_only()) {
+		_midi_view->clear_note_selection ();
+	}
 
 	/* create_note_at() implements UNDO for us */
 	_midi_view->create_note_at (timepos_t (start), _y, length, event->button.state, false);
