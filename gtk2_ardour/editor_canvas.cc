@@ -1411,6 +1411,12 @@ Editor::which_canvas_cursor(ItemType type) const
 			break;
 		case NoteItem:
 			cursor = _cursors->grabber_note;
+		case VelocityItem:
+			cursor = _cursors->up_down;
+			break;
+		case VelocityBaseItem:
+			cursor = _cursors->grabber;
+			break;
 		default:
 			break;
 		}
