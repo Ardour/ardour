@@ -3402,7 +3402,7 @@ MidiView::note_dropped (NoteBase *, timecnt_t const & d_qn, int8_t dnote, bool c
 
 			Temporal::Beats new_time = sel->note()->time() + d_qn.beats ();
 			uint8_t original_pitch = sel->note()->note();
-			uint8_t new_pitch      = original_pitch + dnote - highest_note_difference;
+			int new_pitch          = original_pitch + dnote - highest_note_difference;
 
 			if (new_time < Temporal::Beats()) {
 				continue;
@@ -3425,8 +3425,8 @@ MidiView::note_dropped (NoteBase *, timecnt_t const & d_qn, int8_t dnote, bool c
 			// keep notes in standard midi range
 			clamp_to_0_127(new_pitch);
 
-			lowest_note_in_selection  = std::min(lowest_note_in_selection,  new_pitch);
-			highest_note_in_selection = std::max(highest_note_in_selection, new_pitch);
+			lowest_note_in_selection  = std::min(lowest_note_in_selection,  (uint8_t) new_pitch);
+			highest_note_in_selection = std::max(highest_note_in_selection, (uint8_t) new_pitch);
 
 			if (new_pitch != original_pitch) {
 				note_diff_add_change (sel, MidiModel::NoteDiffCommand::NoteNumber, new_pitch);
@@ -3454,7 +3454,7 @@ MidiView::note_dropped (NoteBase *, timecnt_t const & d_qn, int8_t dnote, bool c
 			/* update time */
 			Temporal::Beats new_time = copy_event->note()->time() + d_qn.beats();
 			uint8_t original_pitch = copy_event->note()->note();
-			uint8_t new_pitch      = original_pitch + dnote - highest_note_difference;
+			int new_pitch          = original_pitch + dnote - highest_note_difference;
 
 
 			if (new_time < Temporal::Beats()) {
@@ -3479,8 +3479,8 @@ MidiView::note_dropped (NoteBase *, timecnt_t const & d_qn, int8_t dnote, bool c
 			// keep notes in standard midi range
 			clamp_to_0_127(new_pitch);
 
-			lowest_note_in_selection  = std::min(lowest_note_in_selection,  new_pitch);
-			highest_note_in_selection = std::max(highest_note_in_selection, new_pitch);
+			lowest_note_in_selection  = std::min(lowest_note_in_selection,  (uint8_t) new_pitch);
+			highest_note_in_selection = std::max(highest_note_in_selection, (uint8_t) new_pitch);
 
 			note_diff_add_note (copy_event->note(), true);
 
@@ -3890,7 +3890,7 @@ MidiView::abort_resizing ()
 void
 MidiView::change_note_velocity(NoteBase* event, int8_t velocity, bool relative)
 {
-	uint8_t new_velocity;
+	int new_velocity;
 
 	if (relative) {
 		new_velocity = event->note()->velocity() + velocity;
@@ -3907,7 +3907,7 @@ MidiView::change_note_velocity(NoteBase* event, int8_t velocity, bool relative)
 uint8_t
 MidiView::change_note_note (NoteBase* event, int8_t note, bool relative)
 {
-	uint8_t new_note;
+	int new_note;
 
 	if (relative) {
 		new_note = event->note()->note() + note;
