@@ -140,6 +140,7 @@ class PianorollMidiView : public MidiView
 
 	bool update_drag_selection (Temporal::timepos_t const & start, Temporal::timepos_t const & end, double y0, double y1, bool extend, bool drag_in_progress);
 	void update_vertical_drag_selection (double last_y, double y, bool extend);
+	void select_notes_by_velocity (Temporal::timepos_t const & start, Temporal::timepos_t const & end, int velocity_min, int velocity_max, bool add);
 
 	double _height;
 

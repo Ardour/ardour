@@ -365,6 +365,19 @@ PianorollMidiView::update_vertical_drag_selection (double y1, double y2, bool ex
     }
 }
 
+void
+PianorollMidiView::select_notes_by_velocity (Temporal::timepos_t const & start, Temporal::timepos_t const & end, int velocity_min, int velocity_max, bool add)
+{
+    Pianoroll* p = static_cast<Pianoroll*>(&_editing_context);
+
+    if (p->editing_policy () == Pianoroll::ActiveView) {
+        MidiView::select_notes_by_velocity (start, end, velocity_min, velocity_max, add);
+    } else if (p->editing_policy () == Pianoroll::AllViews) {
+        for (auto & [region,view] : p->get_region_view_map ()) {
+            view->MidiView::select_notes_by_velocity (start, end, velocity_min, velocity_max, add);
+		}
+    }
+}
 
 void
 PianorollMidiView::swap_automation_channel (int new_channel)
