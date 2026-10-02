@@ -504,8 +504,8 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 	void trim_note(NoteBase* ev, ARDOUR::MidiModel::TimeType start_delta,
 	               ARDOUR::MidiModel::TimeType end_delta);
 
-	bool update_drag_selection (Temporal::timepos_t const & start, Temporal::timepos_t const & end, double y0, double y1, bool extend, bool drag_in_progress);
-	void update_vertical_drag_selection (double last_y, double y, bool extend);
+	virtual bool update_drag_selection (Temporal::timepos_t const & start, Temporal::timepos_t const & end, double y0, double y1, bool extend, bool drag_in_progress);
+	virtual void update_vertical_drag_selection (double last_y, double y, bool extend);
 
 	void add_to_selection (NoteBase*);
 	void remove_from_selection (NoteBase*);

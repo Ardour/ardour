@@ -330,6 +330,42 @@ PianorollMidiView::update_hit (Hit* h)
 	}
 }
 
+
+bool
+PianorollMidiView::update_drag_selection(timepos_t const & start, timepos_t const & end, double gy0, double gy1, bool extend, bool drag_in_progress)
+{
+    Pianoroll* p = static_cast<Pianoroll*>(&_editing_context);
+
+    if (p->editing_policy () == Pianoroll::ActiveView) {
+        return MidiView::update_drag_selection (start, end, gy0, gy1, extend, drag_in_progress);
+    } else if (p->editing_policy () == Pianoroll::AllViews) {
+        bool ret = false;
+        for (auto & [region,view] : p->get_region_view_map ()) {
+            if (view->MidiView::update_drag_selection (start, end, gy0, gy1, extend, drag_in_progress)) {
+                ret = true;
+            }
+		}
+        return ret;
+    }
+
+    return false;
+}
+
+void
+PianorollMidiView::update_vertical_drag_selection (double y1, double y2, bool extend)
+{
+    Pianoroll* p = static_cast<Pianoroll*>(&_editing_context);
+
+    if (p->editing_policy () == Pianoroll::ActiveView) {
+        MidiView::update_vertical_drag_selection (y1, y2, extend);
+    } else if (p->editing_policy () == Pianoroll::AllViews) {
+        for (auto & [region,view] : p->get_region_view_map ()) {
+            view->MidiView::update_vertical_drag_selection (y1, y2, extend);
+		}
+    }
+}
+
+
 void
 PianorollMidiView::swap_automation_channel (int new_channel)
 {

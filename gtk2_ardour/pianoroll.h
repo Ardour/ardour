@@ -205,6 +205,9 @@ class Pianoroll : public CueEditor, public SlipDraggable
 	void our_midi_view_selection_changed ();
 	void set_inspector_visibility (bool);
 
+	typedef std::map<std::shared_ptr<ARDOUR::Region>, PianorollMidiView*> RegionMidiViewMap;
+	RegionMidiViewMap get_region_view_map () {return region_view_map;}
+
   protected:
 	Temporal::timepos_t snap_to_grid (Temporal::timepos_t const & start,
 	                                  Temporal::RoundMode   direction,
@@ -268,7 +271,6 @@ class Pianoroll : public CueEditor, public SlipDraggable
 
 	PianorollMidiBackground* bg;
 
-	typedef std::map<std::shared_ptr<ARDOUR::Region>, PianorollMidiView*> RegionMidiViewMap;
 	RegionMidiViewMap region_view_map;
 	void region_going_away (std::weak_ptr<ARDOUR::Region> region);
 

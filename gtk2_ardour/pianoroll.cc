@@ -1151,6 +1151,11 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 			_drags->set (new RegionSlipContentsDrag (*this, item, this, sdl, Temporal::AudioTime), event);
 			return true;
 		}
+		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier)) {
+			if (mouse_mode == Editing::MouseContent && _editing_policy == AllViews) {
+				midi_action(&MidiView::clear_selection);
+			}
+		}
 		return false;
 
 	case NoteItem:
@@ -1197,7 +1202,7 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 		case Editing::MouseContent:
 			{
 				/* rubberband drag to select lollipops */
-				MidiLollipopsSelectDrag* lsd = new MidiLollipopsSelectDrag (*this, item, [&](GdkEvent* ev, timepos_t const & pos) { _active_view->clear_note_selection (); return true; });
+				MidiLollipopsSelectDrag* lsd = new MidiLollipopsSelectDrag (*this, item, [&](GdkEvent* ev, timepos_t const & pos) { midi_action(&MidiView::clear_selection); return true; });
 				lsd->set_bounding_item (data_group);
 				_drags->set (lsd, event);
 				break;
@@ -1217,7 +1222,7 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 			/* rubberband drag to select automation points */
 			param = automation_by_y (event->button.y);
 			if (param.type() != NullAutomation) {
-				_drags->set (new RubberbandSelectDrag (*this, item, [this,param](GdkEvent* ev, timepos_t const & pos) { return _active_view->automation_rb_click (ev, pos, param); }), event);
+				_drags->set (new RubberbandSelectDrag (*this, item, [this,param](GdkEvent* ev, timepos_t const & pos) { midi_action(&MidiView::clear_selection); return true; }), event);
 			}
 			break;
 		case Editing::MouseDraw:
