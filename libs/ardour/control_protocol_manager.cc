@@ -368,9 +368,6 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi, bool lock_required)
 		cerr << "Programming error: ControlProtocolManager::teardown() called for " << cpi.name << ", but it was not found in control_protocols" << endl;
 	}
 
-	if (lock_required) {
-		lm.release ();
-	}
 
 	cpi.protocol = 0;
 	delete (Glib::Module*)cpi.descriptor->module;
@@ -381,6 +378,10 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi, bool lock_required)
 	cpi.descriptor = 0;
 
 	ProtocolStatusChange (&cpi);
+
+	if (lock_required) {
+		lm.release ();
+	}
 
 	return 0;
 }
@@ -642,6 +643,7 @@ ControlProtocolManager::midi_connectivity_established (bool yn)
 void
 ControlProtocolManager::probe_midi_control_protocols ()
 {
+	PBD::RWLock::ReaderLock lm (_protocols_lock);
 	if (!Config->get_auto_enable_surfaces ()) {
 		return;
 	}
