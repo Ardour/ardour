@@ -42,6 +42,8 @@ public:
 	float integrated_loudness () const;
 	float momentary () const;
 	float max_momentary () const;
+	float short_term () const;
+	float max_short_term () const;
 	float dbtp ();
 	float max_dbtp () const;
 
@@ -73,13 +75,15 @@ private:
 	float    _frag_pwr;
 	uint32_t _block_cnt;
 	float    _block_pwr;
-	float    _power[8];
+	float    _power[32];
 	uint32_t _pow_idx;
 	float    _thresh_rel;
 
 	float    _momentary_l;
+	float    _short_l;
 
 	float    _maxloudn_M;
+	float    _maxloudn_S;
 	float    _integrated;
 	float    _dbtp;
 	float    _max_dbtp;

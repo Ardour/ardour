@@ -134,6 +134,7 @@ LUFSMeter::reset ()
 	_frag_pwr = 1e-30f;
 
 	_maxloudn_M = -200;
+	_maxloudn_S = -200;
 	_integrated = -200;
 
 	_thresh_rel = -70;
@@ -144,7 +145,7 @@ LUFSMeter::reset ()
 	_max_dbtp   = 0;
 	_rst_dbtp = true;
 
-	memset (_power, 0, 8 * sizeof (float));
+	memset (_power, 0, 32 * sizeof (float));
 
 	_hist.clear ();
 }
@@ -168,16 +169,22 @@ LUFSMeter::run (float const** data, uint32_t n_samples)
 			/* every 100 ms */
 
 			_power[_pow_idx++] = _frag_pwr / (float)_n_fragment;
-			_pow_idx &= 7;
+			_pow_idx &= 31;
 			_frag_pwr = 1e-30f;
 			_frag_pos = _n_fragment;
 
 			const float sum_m      = sumfrag (4); // 400ms
-			const float loudness_m = -0.691f + 10.f * log10f (sum_m);
+			const float loudness_m = -0.691f + 10.f * log10f (sum_m + 1e-21);
 
 			_momentary_l = loudness_m;
 
 			_maxloudn_M = std::max<float> (_maxloudn_M, loudness_m);
+
+			const float sum_s      = sumfrag (30); // 3sec
+			const float loudness_s = -0.691f + 10.f * log10f (sum_s + 1e-21);
+
+			_short_l = loudness_s;
+			_maxloudn_S = std::max<float> (_maxloudn_S, loudness_s);
 
 			/* observe 400ms window every 100ms */
 			if (loudness_m > -70.f) {
@@ -247,9 +254,9 @@ float
 LUFSMeter::sumfrag (uint32_t n_frag) const
 {
 	float s = 0;
-	int   k = (8 + _pow_idx - n_frag) & 7;
+	int   k = (32 + _pow_idx - n_frag) & 31;
 	for (uint32_t i = 0; i < n_frag; i++) {
-		s += _power[(i + k) & 7];
+		s += _power[(i + k) & 31];
 	}
 	return s / n_frag;
 }
@@ -267,9 +274,21 @@ LUFSMeter::momentary () const
 }
 
 float
+LUFSMeter::short_term () const
+{
+	return _short_l;
+}
+
+float
 LUFSMeter::max_momentary () const
 {
 	return _maxloudn_M;
+}
+
+float
+LUFSMeter::max_short_term () const
+{
+	return _maxloudn_S;
 }
 
 float
