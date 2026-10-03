@@ -205,6 +205,9 @@ Editor::initialize_canvas ()
 
 	ARDOUR_UI::instance()->video_timeline = new VideoTimeLine(this, videotl_group, (timebar_height * videotl_bar_height));
 
+	/* after vidoe-tools message */
+	BootMessage (_("Setting up Editor Canvas"));
+
 	range_bar_drag_rect = new ArdourCanvas::Rectangle (range_marker_group, ArdourCanvas::Rect (0.0, 0.0, 100, timebar_height));
 	CANVAS_DEBUG_NAME (range_bar_drag_rect, "range drag");
 	range_bar_drag_rect->set_outline (false);
