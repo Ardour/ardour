@@ -3079,11 +3079,11 @@ MidiView::update_drag_selection(timepos_t const & start, timepos_t const & end, 
 	}
 }
 
-void
+bool
 MidiView::select_notes_by_velocity (timepos_t const & start, timepos_t const & end, int velocity_min, int velocity_max, bool add)
 {
 	if (!_midi_region) {
-		return;
+		return false;
 	}
 
     if (!add && !_selection.empty()) {
@@ -3109,6 +3109,15 @@ MidiView::select_notes_by_velocity (timepos_t const & start, timepos_t const & e
             }
         }
 	}
+
+    selection_changed ();
+
+    if (!_selection.empty()) {
+        return true;
+    } else {
+        /* let default rubberband selection know that we can select control points */
+        return false;
+    }
 }
 
 void
