@@ -29,6 +29,7 @@
 
 #include "pbd/failed_constructor.h"
 
+#include "ardour/rc_configuration.h"
 #include "ardour/dB.h"
 #include "ardour/lufs_meter.h"
 
@@ -294,9 +295,7 @@ LUFSMeter::max_short_term () const
 float
 LUFSMeter::dbtp ()
 {
-	float rv = _dbtp;
-	_rst_dbtp = true;
-	return accurate_coefficient_to_dB (rv);
+	return accurate_coefficient_to_dB (_dbtp);
 }
 
 float
@@ -398,6 +397,12 @@ LUFSMeter::upsample_x4 (int chn, float const x)
 void
 LUFSMeter::calc_true_peak (float const** data, const uint32_t n_samples)
 {
+	float const cfg_db_s = Config->get_meter_falloff ();
+#ifdef _GNU_SOURCE
+	float const falloff = exp10f (-0.05f * cfg_db_s * n_samples / _samplerate);
+#else
+	float const falloff = powf (10.f, -0.05f * cfg_db_s * n_samples / _samplerate);
+#endif
 	const bool reset = _rst_dbtp.exchange (false);
 
 	float dbtp = reset ? 0 : _dbtp * falloff;
