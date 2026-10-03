@@ -398,7 +398,9 @@ LUFSMeter::upsample_x4 (int chn, float const x)
 void
 LUFSMeter::calc_true_peak (float const** data, const uint32_t n_samples)
 {
-	float dbtp = _rst_dbtp ? 0 : _dbtp;
+	const bool reset = _rst_dbtp.exchange (false);
+
+	float dbtp = reset ? 0 : _dbtp * falloff;
 	for (uint32_t c = 0; c < _n_channels; ++c) {
 		float const* d = data[c];
 		for (uint32_t i = 0; i < n_samples; ++i) {
