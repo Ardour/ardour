@@ -103,9 +103,9 @@
       </AvailableForChannels>
       <UsesNoteNameList Name="General MIDI Drums"/>
       <UsesControlNameList Name="Controls"/>
-      <PatchBank Name="Patches" ROM="false">
+      <PatchBank Name="Drums" ROM="false">
         <MIDICommands>
-          <ControlChange Control="120" Value="120"/>
+          <ControlChange Control="0" Value="1"/>
           <ControlChange Control="32" Value="0"/>
         </MIDICommands>
         <UsesPatchNameList Name="General MIDI Drum Patches"/>
