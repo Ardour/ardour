@@ -1153,7 +1153,7 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 		}
 		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier)) {
 			if (mouse_mode == Editing::MouseContent && _editing_policy == AllViews) {
-				midi_action(&MidiView::clear_selection);
+				midi_action(&PianorollMidiView::clear_selection);
 			}
 		}
 		return false;
@@ -1544,6 +1544,27 @@ Pianoroll::set_mouse_mode (Editing::MouseMode m, bool force)
 
 void
 Pianoroll::midi_action (void (MidiView::*method)())
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	if (_editing_policy == ActiveView) {
+
+		if (!_active_view) {
+			return;
+		}
+
+		(_active_view->*method) ();
+
+	} else if (_editing_policy == AllViews) {
+
+		for (auto & [region,view] : region_view_map) {
+			(view->*method) ();
+		}
+	}
+}
+
+void
+Pianoroll::midi_action (void (PianorollMidiView::*method)())
 {
 	EC_LOCAL_TEMPO_SCOPE;
 

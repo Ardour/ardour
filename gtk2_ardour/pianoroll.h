@@ -135,6 +135,7 @@ class Pianoroll : public CueEditor, public SlipDraggable
 	void set_mouse_mode (Editing::MouseMode, bool force = false);
 
 	void midi_action (void (MidiView::*method)());
+	void midi_action (void (PianorollMidiView::*method)());
 
 	std::list<SelectableOwner*> selectable_owners();
 	void select_all_within (Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, std::list<SelectableOwner*> const &, ARDOUR::SelectionOperation, bool);
