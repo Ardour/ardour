@@ -658,10 +658,10 @@ PianorollMidiView::AutomationLane::set_height (double h)
 void
 PianorollMidiView::point_selection_changed ()
 {
-	AutomationLane* lane = automation_lane_by_param (active_automation_parameter);
-
-	if (lane && lane->line) {
-		lane->line->set_selected_points (_editing_context.get_selection().points);
+	for (auto & [param,lane] : automation_map) {
+		if (lane->line) {
+			lane->line->set_selected_points (_editing_context.get_selection().points);
+		}
 	}
 }
 

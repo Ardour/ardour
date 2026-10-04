@@ -2424,8 +2424,15 @@ Pianoroll::point_selection_changed ()
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	if (_active_view) {
+	if (_editing_policy == ActiveView && _active_view) {
+
 		_active_view->point_selection_changed ();
+
+	} else if (_editing_policy == AllViews) {
+
+		for (auto & [region,view] : region_view_map) {
+			view->point_selection_changed ();
+		}
 	}
 }
 
@@ -2647,6 +2654,7 @@ Pianoroll::select_all_within (Temporal::timepos_t const & start, Temporal::timep
 		return;
 	}
 
+	point_selection_changed ();
 }
 
 void
