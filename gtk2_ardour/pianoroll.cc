@@ -1612,11 +1612,7 @@ Pianoroll::escape ()
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	if (!_active_view) {
-		return;
-	}
-
-	_active_view->clear_selection ();
+	midi_action (&PianorollMidiView::clear_selection);
 }
 
 Gdk::Cursor*
