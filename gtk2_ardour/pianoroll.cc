@@ -258,6 +258,11 @@ Pianoroll::update_pitch_colors ()
 void
 Pianoroll::set_editing_policy (EditingPolicy ep)
 {
+	if (_editing_policy == AllViews && ep == ActiveView) {
+		/* clear selection to avoid keeping things that we won't be able to interact with */
+		midi_action(&PianorollMidiView::clear_selection);
+	}
+
 	_editing_policy = ep;
 	std::string txt;
 	switch (_editing_policy) {
