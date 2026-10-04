@@ -6759,8 +6759,8 @@ PatchChangeDrag::setup_pointer_offset ()
 	_pointer_offset = _region_view->midi_region()->source_beats_to_absolute_time (_patch_change->patch ()->time ()).distance (raw_grab_time ());
 }
 
-MidiRubberbandSelectDrag::MidiRubberbandSelectDrag (EditingContext& ec, MidiView* mv)
-	: RubberbandSelectDrag (ec, mv->drag_group (), [](GdkEvent*,timepos_t const&) { return true; })
+MidiRubberbandSelectDrag::MidiRubberbandSelectDrag (EditingContext& ec, MidiView* mv, std::function<bool(GdkEvent*,timepos_t const &)> cf)
+	: RubberbandSelectDrag (ec, mv->drag_group (), cf)
 	, _midi_view (mv)
 {
 }

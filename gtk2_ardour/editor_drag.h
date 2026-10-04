@@ -1339,7 +1339,7 @@ public:
 class MidiRubberbandSelectDrag : public RubberbandSelectDrag
 {
   public:
-	MidiRubberbandSelectDrag (EditingContext&, MidiView *);
+	MidiRubberbandSelectDrag (EditingContext&, MidiView *, std::function<bool(GdkEvent*,Temporal::timepos_t const &)> click_functor);
 
 	void select_things (int, Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, bool);
 	void deselect_things ();
