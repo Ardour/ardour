@@ -2563,78 +2563,48 @@ Pianoroll::select_all_within (Temporal::timepos_t const & start, Temporal::timep
 
 	std::list<Selectable*> found;
 
-	AutomationLane* lane (nullptr);
-	Evoral::Parameter param (NullAutomation);
-	ArdourCanvas::Duple top (0., y0);
-	ArdourCanvas::Duple bottom (0., y1);
+	ArdourCanvas::Rect select_rect (0., y0, 0, y1);
 
-	for (auto & [p,l] : automation_lanes) {
-		ArdourCanvas::Rect r (l->group->get().translate (l->group->position()));
-		if (r.contains (top)) {
-			lane = l;
-			param = p;
-			break;
+	for (auto & [param,lane] : automation_lanes) {
+
+		if (param.type() == MidiVelocityAutomation || param.type() == NullAutomation) {
+			continue;
 		}
-		if (r.contains (bottom)) {
-			lane = l;
-			param = p;
-			break;
-		}
-	}
 
-	if (param.type() == NullAutomation) {
-		return;
-	}
+		ArdourCanvas::Rect lane_rect (lane->group->get().translate (lane->group->position()));
 
-	double topfrac;
-	double botfrac;
+		if (lane_rect.intersection (select_rect)) {
 
-	/* translate y0 and y1 to use the top of the automation area as the * origin */
+			/* translate y0 and y1 to use the top of the automation area as the * origin */
+			double automation_origin = lane->group->position().y;
 
-	double automation_origin = lane->group->position().y;
+			double topfrac = 1.0 - ((y0 - automation_origin) / lane->height());
+			double botfrac = 1.0 - ((y1 - automation_origin) / lane->height());
 
-	y0 -= automation_origin;
-	y1 -= automation_origin;
+			/* clamping merely for aesthetic, it is not really needed here */
+			if (topfrac > 1.0) topfrac = 1.0;
+			if (botfrac < 0.0) botfrac = 0.0;
 
-	if (y0 < 0. && lane->height() <= y1) {
+			if (_editing_policy == ActiveView) {
+				_active_view->get_selectables (param, start, end, botfrac, topfrac, found);
+			} else if (_editing_policy == AllViews) {
+				for (auto & [region,view] : region_view_map) {
+					view->get_selectables (param, start, end, botfrac, topfrac, found);
+				}
+			}
 
-		/* _y_position is below top, mybot is above bot, so we're fully
-		   covered vertically.
-		*/
-
-		topfrac = 1.0;
-		botfrac = 0.0;
-
-	} else {
-
-		/* top and bot are within _y_position .. mybot */
-
-		topfrac = 1.0 - (y0 / lane->height());
-		botfrac = 1.0 - (y1 / lane->height());
-
-	}
-
-	if (_editing_policy == ActiveView) {
-
-		_active_view->get_selectables (param, start, end, botfrac, topfrac, found);
-
-	} else if (_editing_policy == AllViews) {
-
-		for (auto & [region,view] : region_view_map) {
-			view->get_selectables (param, start, end, botfrac, topfrac, found);
 		}
 	}
 
-	if (found.empty()) {
+	if (found.empty() && op == SelectionSet) {
 		if (_editing_policy == ActiveView) {
 			_active_view->clear_selection ();
+		} else if (_editing_policy == AllViews) {
+			for (auto & [region,view] : region_view_map) {
+				view->clear_selection ();
+			}
 		}
-
-	} else if (_editing_policy == AllViews) {
-
-		for (auto & [region,view] : region_view_map) {
-			view->clear_selection ();
-		}
+		return;
 	}
 
 	if (preserve_if_selected && op != SelectionToggle) {
