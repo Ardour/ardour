@@ -1201,8 +1201,15 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 		switch (mouse_mode) {
 		case Editing::MouseContent:
 			{
-				/* rubberband drag to select lollipops */
-				MidiLollipopsSelectDrag* lsd = new MidiLollipopsSelectDrag (*this, item, [&](GdkEvent* ev, timepos_t const & pos) { midi_action(&MidiView::clear_selection); return true; });
+				if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier)) {
+					if (mouse_mode == Editing::MouseContent) {
+						midi_action(&PianorollMidiView::clear_selection);
+					}
+				}
+				/* rubberband drag to select lollipops
+				 * this will fallback to control points
+				 */
+				MidiLollipopsSelectDrag* lsd = new MidiLollipopsSelectDrag (*this, item, [&](GdkEvent* ev, timepos_t const & pos) { midi_action(&PianorollMidiView::clear_selection); return true; });
 				lsd->set_bounding_item (data_group);
 				_drags->set (lsd, event);
 				break;
@@ -1218,20 +1225,27 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 
 	case AutomationTrackItem:
 		switch (mouse_mode) {
-		case Editing::MouseContent:
-			/* rubberband drag to select automation points */
-			param = automation_by_y (event->button.y);
-			if (param.type() != NullAutomation) {
-				_drags->set (new RubberbandSelectDrag (*this, item, [this,param](GdkEvent* ev, timepos_t const & pos) { midi_action(&MidiView::clear_selection); return true; }), event);
+		case Editing::MouseContent: {
+			/* rubberband drag to select automation points
+			 * We use MidiRubberbandSelectDrag here to allow selecting notes too
+			 * and fallback to control points if no note is selected
+			 */
+			if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier)) {
+				midi_action(&PianorollMidiView::clear_selection);
 			}
+			MidiRubberbandSelectDrag* sd = new MidiRubberbandSelectDrag (*this, _active_view, [this](GdkEvent* ev, timepos_t const & pos) { midi_action(&PianorollMidiView::clear_selection); return true; });
+			sd->set_bounding_item (data_group);
+			_drags->set (sd, event);
 			break;
-		case Editing::MouseDraw:
+		}
+		case Editing::MouseDraw: {
 			param = automation_by_y (event->button.y);
 			if (param.type() != NullAutomation) {
 				_drags->set (new AutomationDrawDrag (*this, nullptr, *static_cast<ArdourCanvas::Rectangle*>(item), false, Temporal::BeatTime,
 				                                     [this,param](GdkEvent* ev, timepos_t const & pos) { return _active_view->automation_rb_click (ev, pos, param); }), event);
 			}
 			break;
+		}
 		default:
 			break;
 		}
