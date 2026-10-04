@@ -73,6 +73,7 @@ class PianorollMidiView : public MidiView
 
 	void point_selection_changed ();
 	void clear_selection ();
+	void clear_point_selection ();
 
 	sigc::signal<void> AutomationStateChange;
 

@@ -669,6 +669,12 @@ void
 PianorollMidiView::clear_selection ()
 {
 	MidiView::clear_note_selection ();
+	clear_point_selection();
+}
+
+void
+PianorollMidiView::clear_point_selection ()
+{
 	PointSelection empty;
 
 	for (auto & [param,lane] : automation_map) {

@@ -260,7 +260,11 @@ Pianoroll::set_editing_policy (EditingPolicy ep)
 {
 	if (_editing_policy == AllViews && ep == ActiveView) {
 		/* clear selection to avoid keeping things that we won't be able to interact with */
-		midi_action(&PianorollMidiView::clear_selection);
+		for (auto & [region,view] : region_view_map) {
+			if (view != _active_view) {
+				view->clear_selection ();
+			}
+		}
 	}
 
 	_editing_policy = ep;
@@ -1157,7 +1161,7 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 			return true;
 		}
 		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier)) {
-			if (mouse_mode == Editing::MouseContent && _editing_policy == AllViews) {
+			if (mouse_mode == Editing::MouseContent) {
 				midi_action(&PianorollMidiView::clear_selection);
 			}
 		}
@@ -3116,6 +3120,9 @@ Pianoroll::our_midi_view_selection_changed ()
 	std::sort (pitches.begin(), pitches.end());
 	std::string name = midi_inspector->chord_box->identify_chord (pitches);
 	midi_inspector->chord_box->show_chord (name);
+
+	/* ensure control points vs note exclusivity */
+	midi_action(&PianorollMidiView::clear_point_selection);
 }
 
 bool
