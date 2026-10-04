@@ -204,6 +204,11 @@ PianorollMidiView::scroll (GdkEventScroll* ev)
 			_editing_context.temporal_zoom_step_mouse_focus (false);
 			return true;
 		}
+        if (!UIConfiguration::instance().get_scroll_velocity_editing ()) {
+            if (_midi_context.scroll (ev)) {
+                return true;
+            }
+        }
 		break;
 	case GDK_SCROLL_DOWN:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollHorizontalModifier)) {
@@ -214,6 +219,11 @@ PianorollMidiView::scroll (GdkEventScroll* ev)
 			_editing_context.temporal_zoom_step_mouse_focus (true);
 			return true;
 		}
+        if (!UIConfiguration::instance().get_scroll_velocity_editing ()) {
+            if (_midi_context.scroll (ev)) {
+                return true;
+            }
+        }
 		break;
 	default:
 		break;
