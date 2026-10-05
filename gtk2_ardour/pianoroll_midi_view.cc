@@ -692,6 +692,8 @@ PianorollMidiView::clear_point_selection ()
 			lane->line->set_selected_points (empty);
 		}
 	}
+
+    _editing_context.get_selection().clear_points ();
 }
 
 void
