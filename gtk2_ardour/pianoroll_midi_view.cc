@@ -832,6 +832,8 @@ PianorollMidiView::cut_copy_points (Editing::CutCopyOp op, timepos_t const & ear
 			_editing_context.add_command (new MementoCommand<AutomationList> (*al.get(), i->second.state, &(al->get_state ())));
 		}
 	}
+
+    clear_point_selection ();
 }
 
 void
