@@ -368,7 +368,6 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi, bool lock_required)
 		cerr << "Programming error: ControlProtocolManager::teardown() called for " << cpi.name << ", but it was not found in control_protocols" << endl;
 	}
 
-
 	cpi.protocol = 0;
 	delete (Glib::Module*)cpi.descriptor->module;
 	/* cpi->descriptor is now inaccessible since dlclose() or equivalent
@@ -377,11 +376,11 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi, bool lock_required)
 	 */
 	cpi.descriptor = 0;
 
-	ProtocolStatusChange (&cpi);
-
 	if (lock_required) {
 		lm.release ();
 	}
+
+	ProtocolStatusChange (&cpi);
 
 	return 0;
 }
