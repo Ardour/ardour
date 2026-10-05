@@ -3105,7 +3105,7 @@ EditingContext::select_automation_line (GdkEventButton* event, ArdourCanvas::Ite
 	al->grab_item().canvas_to_item (mx, my);
 
 	uint32_t before, after;
-	samplecnt_t const  where = (samplecnt_t) floor (canvas_to_timeline (mx) * samples_per_pixel);
+	samplecnt_t const  where = pixel_to_sample (mx);
 
 	if (!al || !al->control_points_adjacent (where, before, after)) {
 		return;
