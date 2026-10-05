@@ -700,7 +700,7 @@ MidiView::button_press (GdkEventButton* ev)
 	} else {
 
 		if (m == MouseContent) {
-			selection_drag = new MidiRubberbandSelectDrag (_editing_context, this, [this](GdkEvent*,timepos_t const&) { clear_selection (); return true; });
+			selection_drag = new MidiRubberbandSelectDrag (_editing_context, this, [this](GdkEvent*,timepos_t const&) { return true; });
 			selection_drag->set_bounding_item (_editing_context.get_trackview_group());
 			_editing_context.drags()->set (selection_drag, (GdkEvent *) ev);
 
