@@ -2182,11 +2182,13 @@ MidiView::update_sustained (Note* ev)
 		ev->set_outline_all ();
 	}
 
-	bool visible ((y0 >= 0) && (y1 <= _midi_context.contents_height()));
-
-	if (!visible) {
+	if (!_midi_context.note_visible (note->note())) {
 		ev->hide ();
 	} else {
+		if (y1 > _midi_context.contents_height()) {
+			/* Crop last note if needed(see comment in MidiViewBackground::note_height) */
+			ev->set_y1 (_midi_context.contents_height() - 1);
+		}
 		ev->show ();
 	}
 
@@ -2329,12 +2331,16 @@ MidiView::update_hit (Hit* ev)
 		x = _editing_context.sample_to_pixel (timepos_t (note->time()).samples());
 	}
 
-	const double diamond_size = std::max(1., floor(note_height()) - 2.);
-	double y = 1.5 + note_to_y (note->note()) + diamond_size * .5;
+	double diamond_size = std::max(1., floor(note_height()) - 2.);
+	double y = .5 + note_to_y (note->note()) + diamond_size * .5;
 
-	if (y <= 0 || y >= height()) {
+	if (!_midi_context.note_visible (note->note())) {
 		ev->hide();
 	} else {
+        if (y + diamond_size * .5 > _midi_context.contents_height() - 2) {
+            /* Crop last note if needed (see comment in MidiViewBackground::note_height) */
+            diamond_size -= y + diamond_size * .5 - _midi_context.contents_height() + 2;
+        }
 		ev->show();
 	}
 
