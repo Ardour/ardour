@@ -383,4 +383,8 @@ class Pianoroll : public CueEditor, public SlipDraggable
 
 	void set_sensitivities ();
 	PianorollMidiView* empty_view;
+
+	bool set_selected_control_point_from_click (bool press, ARDOUR::SelectionOperation op = ARDOUR::SelectionSet);
+	ControlPoint*      clicked_control_point;
+	bool               _control_point_toggled_on_press;
 };

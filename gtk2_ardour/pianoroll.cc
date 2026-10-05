@@ -1044,6 +1044,8 @@ Pianoroll::canvas_control_point_event (GdkEvent* event, ArdourCanvas::Item* item
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
+	clicked_control_point = cp;
+
 	return typed_event (item, event, ControlPointItem);
 }
 
@@ -1149,9 +1151,12 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 	EC_LOCAL_TEMPO_SCOPE;
 
 	NoteBase* note = nullptr;
-	Evoral::Parameter param (NullAutomation);
-
+	Evoral::Parameter param = automation_by_y (event->button.y);
+	ARDOUR::SelectionOperation op = ArdourKeyboard::selection_type (event->button.state);
 	Editing::MouseMode mouse_mode = current_mouse_mode();
+
+	_mouse_changed_selection = false;
+
 	switch (item_type) {
 	case StreamItem:
 		if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::slip_contents_modifier ())) {
@@ -1173,33 +1178,17 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 			if (note->big_enough_to_trim() && note->mouse_near_ends()) {
 				_drags->set (new NoteResizeDrag (*this, item), event, get_canvas_cursor());
 			} else {
-				NoteDrag* nd = new NoteDrag (*this, item);
-				nd->set_bounding_item (data_group);
-				_drags->set (nd, event);
+				_drags->set (new NoteDrag (*this, item), event);
 			}
 		}
 		return true;
 
-	case ControlPointItem:
-		if (mouse_mode == Editing::MouseContent) {
-			ControlPointDrag* cpd = new ControlPointDrag (*this, item);
-
-			ControlPoint* cp = reinterpret_cast<ControlPoint*> (item->get_data ("control_point"));
-			if (cp) {
-				AutomationLine& line (cp->line());
-				Evoral::Parameter line_param (line.the_list()->parameter());
-				for (auto & [param,lane] : automation_lanes) {
-					if (param == line_param) {
-						cpd->set_bounding_item (lane->group);
-						break;
-					}
-				}
-			}
-			_drags->set (cpd, event);
-		}
+	case ControlPointItem: {
+		_mouse_changed_selection |= set_selected_control_point_from_click (true, op);
+		_drags->set (new ControlPointDrag (*this, item), event);
 		return true;
 		break;
-
+	}
 	case VelocityItem:
 		/* mouse mode independent - always allow drags */
 		_drags->set (new LollipopDrag (*this, item), event);
@@ -1218,9 +1207,7 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 				/* rubberband drag to select lollipops
 				 * this will fallback to control points
 				 */
-				MidiLollipopsSelectDrag* lsd = new MidiLollipopsSelectDrag (*this, item, [&](GdkEvent* ev, timepos_t const & pos) { midi_action(&PianorollMidiView::clear_selection); return true; });
-				lsd->set_bounding_item (data_group);
-				_drags->set (lsd, event);
+				_drags->set (new MidiLollipopsSelectDrag (*this, item, [&](GdkEvent* ev, timepos_t const & pos) { midi_action(&PianorollMidiView::clear_selection); return true; }), event);
 				break;
 			}
 		case Editing::MouseDraw:
@@ -1242,14 +1229,13 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 			if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier)) {
 				midi_action(&PianorollMidiView::clear_selection);
 			}
-			MidiRubberbandSelectDrag* sd = new MidiRubberbandSelectDrag (*this, _active_view, [this](GdkEvent* ev, timepos_t const & pos) { midi_action(&PianorollMidiView::clear_selection); return true; });
-			sd->set_bounding_item (data_group);
-			_drags->set (sd, event);
+			if (param.type () != NullAutomation) {
+				_drags->set (new MidiRubberbandSelectDrag (*this, _active_view, [this,param](GdkEvent* ev,timepos_t const & pos) { return _active_view->automation_rb_click (ev, pos, param); }), event);
+			}
 			break;
 		}
 		case Editing::MouseDraw: {
-			param = automation_by_y (event->button.y);
-			if (param.type() != NullAutomation) {
+			if (param.type () != NullAutomation) {
 				_drags->set (new AutomationDrawDrag (*this, nullptr, *static_cast<ArdourCanvas::Rectangle*>(item), false, Temporal::BeatTime,
 				                                     [this,param](GdkEvent* ev, timepos_t const & pos) { return _active_view->automation_rb_click (ev, pos, param); }), event);
 			}
@@ -1261,26 +1247,17 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 		return true;
 		break;
 
-	case EditorAutomationLineItem: {
-		ARDOUR::SelectionOperation op = ArdourKeyboard::selection_type (event->button.state);
-		select_automation_line (&event->button, item, op);
-		if (mouse_mode == Editing::MouseContent) {
-			LineDrag* ld = new LineDrag (*this, item, [&](GdkEvent* ev,timepos_t const & pos, double) { _active_view->line_drag_click (ev, pos); });
-			AutomationLine* line = reinterpret_cast<AutomationLine*> (item->get_data ("line"));
-			if (line) {
-				Evoral::Parameter line_param (line->the_list()->parameter());
-				for (auto & [param,lane] : automation_lanes) {
-					if (param == line_param) {
-						ld->set_bounding_item (lane->group);
-						break;
-					}
-				}
+	case EditorAutomationLineItem:
+		if (param.type () != NullAutomation) {
+			select_automation_line (&event->button, item, op);
+			if (mouse_mode == Editing::MouseContent) {
+				_drags->set (new LineDrag (*this, item, [this,param](GdkEvent* ev,timepos_t const & pos, double) { _active_view->automation_rb_click (ev, pos, param); }), event);
+			} else if (mouse_mode == Editing::MouseDraw) {
+				_drags->set (new AutomationDrawDrag (*this, nullptr, *static_cast<ArdourCanvas::Rectangle*>(item), false, Temporal::BeatTime,
+													 [this,param](GdkEvent* ev, timepos_t const & pos) { return _active_view->automation_rb_click (ev, pos, param); }), event);
 			}
-			_drags->set (ld, event);
+			return true;
 		}
-		return true;
-	}
-
 	case ClipStartItem: {
 		ArdourCanvas::Rectangle* r = dynamic_cast<ArdourCanvas::Rectangle*> (item);
 		if (r) {
@@ -1330,9 +1307,10 @@ Pianoroll::button_press_handler_2 (ArdourCanvas::Item* item, GdkEvent* event, It
 bool
 Pianoroll::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
-	NoteBase* e;
-
 	EC_LOCAL_TEMPO_SCOPE;
+
+	NoteBase* e;
+	ARDOUR::SelectionOperation op = ArdourKeyboard::selection_type (event->button.state);
 
 	if (!Keyboard::is_context_menu_event (&event->button)) {
 
@@ -1383,12 +1361,22 @@ Pianoroll::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, It
 				return true;
 			}
 			break;
+		case ControlPointItem:
+			_mouse_changed_selection |= set_selected_control_point_from_click (false, op);
 		default:
 			break;
 		}
 
 		popup_note_context_menu (item, event);
 		return true;
+	}
+
+	if (_mouse_changed_selection) {
+		midi_action(&MidiView::clear_note_selection);
+		begin_reversible_selection_op (X_("Button Selection"));
+		commit_reversible_selection_op ();
+		_mouse_changed_selection = false;
+		point_selection_changed ();
 	}
 
 	return false;
@@ -2644,6 +2632,75 @@ Pianoroll::select_all_within (Temporal::timepos_t const & start, Temporal::timep
 	}
 
 	point_selection_changed ();
+}
+
+bool
+Pianoroll::set_selected_control_point_from_click (bool press, SelectionOperation op)
+{
+	if (!clicked_control_point) {
+		return false;
+	}
+
+	bool ret = false;
+
+	switch (op) {
+	case SelectionSet:
+		if (!selection->selected (clicked_control_point)) {
+			selection->set (clicked_control_point);
+			ret = true;
+		} else {
+			/* clicked on an already selected point */
+			if (press) {
+				break;
+			} else {
+				if (selection->points.size() > 1) {
+					selection->set (clicked_control_point);
+					ret = true;
+				}
+			}
+		}
+		break;
+
+	case SelectionAdd:
+		if (press) {
+			selection->add (clicked_control_point);
+			ret = true;
+		}
+		break;
+	case SelectionToggle:
+
+		/* This is a bit of a hack; if we Primary-Click-Drag a control
+		   point (for push drag) we want the point we clicked on to be
+		   selected, otherwise we end up confusingly dragging an
+		   unselected point.  So here we ensure that the point is selected
+		   after the press, and if we subsequently get a release (meaning no
+		   drag occurred) we set things up so that the toggle has happened.
+		*/
+		if (press && !selection->selected (clicked_control_point)) {
+			/* This is the button press, and the control point is not selected; make it so,
+			   in case this press leads to a drag.  Also note that having done this, we don't
+			   need to toggle again on release.
+			*/
+			selection->toggle (clicked_control_point);
+			_control_point_toggled_on_press = true;
+			ret = true;
+		} else if (!press && !_control_point_toggled_on_press) {
+			/* This is the release, and the point wasn't toggled on the press, so do it now */
+			selection->toggle (clicked_control_point);
+			ret = true;
+		} else {
+			/* Reset our flag */
+			_control_point_toggled_on_press = false;
+		}
+		break;
+	case SelectionExtend:
+		/* XXX */
+		break;
+	default:
+		break;
+	}
+
+	return ret;
 }
 
 void
