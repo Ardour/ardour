@@ -3064,7 +3064,7 @@ MidiView::update_drag_selection(timepos_t const & start, timepos_t const & end, 
 	// We probably need a tree to be able to find events in O(log(n)) time.
 
 	for (auto & [ note, gui ] : _events) {
-		if (gui->x0() < x1 && gui->x1() > x0 && gui->y0() < y1 && gui->y1() > y0) {
+		if (gui->x0() < x1 && gui->x1() > x0 && gui->y0() < y1 && gui->y1() > y0 && _midi_context.note_visible(note->note())) {
 			// Rectangles intersect
 			if (!gui->selected() && note_editable (gui)) {
 				add_to_selection (gui);
