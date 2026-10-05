@@ -825,6 +825,8 @@ PianorollMidiView::cut_copy_points (Editing::CutCopyOp op, timepos_t const & ear
 			al->erase (selected_point->model ());
 		}
 
+		clear_point_selection ();
+
 		/* Thaw the lists and add undo records for them */
 		for (Lists::iterator i = lists.begin(); i != lists.end(); ++i) {
 			std::shared_ptr<AutomationList> al = i->first;
@@ -832,8 +834,6 @@ PianorollMidiView::cut_copy_points (Editing::CutCopyOp op, timepos_t const & ear
 			_editing_context.add_command (new MementoCommand<AutomationList> (*al.get(), i->second.state, &(al->get_state ())));
 		}
 	}
-
-    clear_point_selection ();
 }
 
 void
