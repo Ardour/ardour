@@ -1324,26 +1324,18 @@ Pianoroll::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, It
 			}
 		}
 
-		if (event->button.button == 2) {
-			switch (current_mouse_mode()) {
-			case Editing::MouseContent:
-			case Editing::MouseDraw:
-				switch (item_type) {
-				case NoteItem:
-					e = reinterpret_cast<NoteBase*> (item->get_data ("notebase"));
-					assert (e);
-					if (midi_view()) {
-						midi_view()->delete_note (e->note());
-					}
-					return true;
-				default:
-					break;
+		if (Keyboard::is_delete_event (&event->button)) {
+			switch (item_type) {
+			case NoteItem:
+				e = reinterpret_cast<NoteBase*> (item->get_data ("notebase"));
+				assert (e);
+				if (midi_view()) {
+					midi_view()->delete_note (e->note());
 				}
-				break;
+				return true;
 			default:
 				break;
 			}
-			return true;
 		}
 
 	} else {

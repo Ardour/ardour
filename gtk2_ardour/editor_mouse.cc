@@ -1767,16 +1767,9 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 
 		case MouseDraw:
-			if (item_type == NoteItem) {
-				remove_midi_note (item, event);
-			}
-			return true;
+			break;
 
 		case MouseContent:
-			if (item_type == NoteItem) {
-				remove_midi_note (item, event);
-				return true;
-			}
 			break;
 
 		case MouseRange:
