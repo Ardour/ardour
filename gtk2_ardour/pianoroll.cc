@@ -1310,6 +1310,7 @@ Pianoroll::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, It
 	EC_LOCAL_TEMPO_SCOPE;
 
 	NoteBase* e;
+	ControlPoint* control_point;
 	ARDOUR::SelectionOperation op = ArdourKeyboard::selection_type (event->button.state);
 
 	if (!Keyboard::is_context_menu_event (&event->button)) {
@@ -1326,12 +1327,28 @@ Pianoroll::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, It
 
 		if (Keyboard::is_delete_event (&event->button)) {
 			switch (item_type) {
+			case VelocityItem:
+				[[fallthrough]];
 			case NoteItem:
 				e = reinterpret_cast<NoteBase*> (item->get_data ("notebase"));
 				assert (e);
 				if (midi_view()) {
 					midi_view()->delete_note (e->note());
 				}
+				return true;
+			case ControlPointItem:
+				control_point = reinterpret_cast<ControlPoint *> (item->get_data ("control_point"));
+				if (control_point) {
+					control_point->line().remove_point (*control_point);
+				}
+				return true;
+			default:
+				break;
+			}
+		} else {
+			switch (item_type) {
+			case ControlPointItem:
+				_mouse_changed_selection |= set_selected_control_point_from_click (false, op);
 				return true;
 			default:
 				break;
@@ -1353,8 +1370,6 @@ Pianoroll::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, It
 				return true;
 			}
 			break;
-		case ControlPointItem:
-			_mouse_changed_selection |= set_selected_control_point_from_click (false, op);
 		default:
 			break;
 		}
