@@ -7407,7 +7407,7 @@ LollipopDrag::start_grab (GdkEvent *ev, Gdk::Cursor* c)
 {
 	Drag::start_grab (ev, c);
 
-	NoteBase* note = static_cast<NoteBase*> (_primary->get_data (X_("note")));
+	NoteBase* note = static_cast<NoteBase*> (_primary->get_data (X_("notebase")));
 	MidiView& view (_display->midi_view());
 
 	bool add = Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier);
@@ -7432,7 +7432,7 @@ LollipopDrag::finished (GdkEvent *ev, bool did_move)
 	}
 
 	int velocity = _display->y_position_to_velocity (_primary->y0());
-	NoteBase* note = static_cast<NoteBase*> (_primary->get_data (X_("note")));
+	NoteBase* note = static_cast<NoteBase*> (_primary->get_data (X_("notebase")));
 
 	_display->midi_view().set_velocity (note, velocity);
 }
@@ -7446,7 +7446,7 @@ LollipopDrag::aborted (bool)
 void
 LollipopDrag::setup_pointer_offset ()
 {
-	NoteBase* note = static_cast<NoteBase*> (_primary->get_data (X_("note")));
+	NoteBase* note = static_cast<NoteBase*> (_primary->get_data (X_("notebase")));
 
 	if (_display->midi_view().show_source()) {
 		_pointer_offset = timepos_t (note->note()->time ()).distance (raw_grab_time ());

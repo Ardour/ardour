@@ -188,7 +188,7 @@ VelocityDisplay::add_note (NoteBase* nb)
 	l->set_ignore_events (!_sensitive);
 	l->raise_to_top ();
 	l->set_data (X_("ghostregionview"), this);
-	l->set_data (X_("note"), nb);
+	l->set_data (X_("notebase"), nb);
 	l->set_outline_color (_outline);
 	color_ghost_event (event);
 
