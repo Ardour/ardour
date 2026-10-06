@@ -2094,8 +2094,14 @@ EditingContext::popup_note_context_menu (ArdourCanvas::Item* item, GdkEvent* eve
 	items.push_back(MenuElem(_("Transform..."), sigc::bind(sigc::mem_fun(*this, &EditingContext::transform_regions), mvs)));
 	items.push_back (SeparatorElem());
 	items.push_back(MenuElem(_("Strum Forward"), sigc::bind(sigc::mem_fun(*this, &EditingContext::strum_notes), mvs, true)));
+	if (sel_size < 2) {
+		items.back().set_sensitive (false);
+	}
 	items.push_back(MenuElem(_("Strum Backward"), sigc::bind(sigc::mem_fun(*this, &EditingContext::strum_notes), mvs, false)));
-
+	if (sel_size < 2) {
+		items.back().set_sensitive (false);
+	}
+	
 	_note_context_menu.popup (event->button.button, event->button.time);
 }
 
