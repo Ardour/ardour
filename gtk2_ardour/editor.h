@@ -1481,7 +1481,6 @@ private:
 	void region_view_item_click (AudioRegionView&, GdkEventButton*);
 
 	bool can_remove_control_point (ArdourCanvas::Item*);
-	void remove_control_point (ArdourCanvas::Item*);
 
 	/* Canvas event handlers */
 
@@ -1649,7 +1648,6 @@ private:
 	void edit_tempo_marker (TempoMarker&);
 	void edit_meter_marker (MeterMarker&);
 	void edit_bbt_marker (BBTMarker&);
-	void edit_control_point (ArdourCanvas::Item*);
 	void edit_region (RegionView*);
 
 	void edit_current_meter ();

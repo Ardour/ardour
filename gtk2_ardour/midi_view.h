@@ -706,7 +706,6 @@ class MidiView : public virtual sigc::trackable, public LineMerger
 
 	void color_note (NoteBase*, int channel);
 	virtual bool post_paste (Temporal::timepos_t const & pos, const ::Selection& selection, PasteContext& ctx) { return false; }
-	bool show_context_menu (GdkEventButton*);
 
 	void _duplicate_notes (int times);
 	bool chord_is_selected () const;

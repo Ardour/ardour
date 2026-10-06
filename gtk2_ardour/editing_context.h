@@ -514,6 +514,10 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 	void enable_automation_bindings ();
 	void disable_automation_bindings ();
 
+	void edit_control_point (ArdourCanvas::Item*);
+	void remove_control_point (ArdourCanvas::Item* item);
+	virtual bool can_remove_control_point (ArdourCanvas::Item*) { return true; }
+
 	/* playhead/screen stuff */
 
 	void set_stationary_playhead (bool yn);
@@ -530,8 +534,6 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider,
 		const AutomationLine* line; ///< line this came from
 		std::shared_ptr<Evoral::ControlList> copy; ///< copied events for the cut buffer
 	};
-
-	virtual Gtk::Menu* get_single_region_context_menu ();
 
 	bool get_midi_chord (int root_pitch, std::vector<int>& pitches, bool& arpeggiate) const { return false; }
 	Glib::RefPtr<Gtk::RadioAction> draw_chord_action (int num);

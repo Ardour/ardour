@@ -39,6 +39,7 @@
 #include "ardour_ui.h"
 #include "automation_line.h"
 #include "control_point.h"
+#include "control_point_dialog.h"
 #include "edit_note_dialog.h"
 #include "editing_context.h"
 #include "editing_convert.h"
@@ -2353,6 +2354,58 @@ EditingContext::note_edit_done (int r, EditNoteDialog* d)
 	delete d;
 }
 
+void
+EditingContext::edit_control_point (ArdourCanvas::Item* item)
+{
+	ControlPoint* p = reinterpret_cast<ControlPoint *> (item->get_data ("control_point"));
+
+	if (p == 0) {
+		fatal << _("programming error: control point canvas item has no control point object pointer!") << endmsg;
+		abort(); /*NOTREACHED*/
+	}
+
+	std::vector<ControlPoint*> cps;
+
+	for (auto const& cp : selection->points) {
+		if (&cp->line() == &p->line ()) {
+			cps.push_back (cp);
+		}
+	}
+
+	assert (cps.size() > 0);
+
+	ControlPointDialog d (p, cps.size() > 1);
+
+	if (d.run () != RESPONSE_ACCEPT) {
+		return;
+	}
+
+	if (d.all_selected_points ()) {
+		p->line().modify_points_y (cps, d.get_y_fraction ());
+	} else {
+		cps.clear ();
+		cps.push_back (p);
+		p->line().modify_points_y (cps, d.get_y_fraction ());
+	}
+}
+
+void
+EditingContext::remove_control_point (ArdourCanvas::Item* item)
+{
+	if (!can_remove_control_point (item)) {
+		return;
+	}
+
+	ControlPoint* control_point;
+
+	if ((control_point = reinterpret_cast<ControlPoint *> (item->get_data ("control_point"))) == 0) {
+		fatal << _("programming error: control point canvas item has no control point object pointer!") << endmsg;
+		abort(); /*NOTREACHED*/
+	}
+
+	control_point->line().remove_point (*control_point);
+}
+
 PBD::Command*
 EditingContext::apply_midi_note_edit_op_to_region (MidiOperator& op, MidiView& mrv)
 {
@@ -4249,12 +4302,6 @@ EditingContext::scroll_right_half_page ()
 	} else {
 		reset_x_origin (max_samplepos - current_page_samples());
 	}
-}
-
-Gtk::Menu*
-EditingContext::get_single_region_context_menu ()
-{
-	return nullptr;
 }
 
 void
