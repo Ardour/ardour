@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Arturia KeyLab Essential in DAW mode with the Mackie Control protocol,
+  connected through its "DAW" MIDI port.
+
+  The faders have neither motors nor touch sensing. The keyboard also stops
+  sending a fader after receiving a position for it until the physical fader
+  reaches that position, so Ardour must not echo fader moves back to it.
+-->
+<MackieProtocolDevice>
+  <Name value="KeyLab Essential"/>
+  <Manufacturer value="Arturia"/>
+  <Strips value="8"/>
+  <TimecodeDisplay value="no"/>
+  <TwoCharacterDisplay value="no"/>
+  <Extenders value="0"/>
+  <MasterPosition value="0"/>
+  <GlobalControls value="yes"/>
+  <JogWheel value="yes"/>
+  <TouchSenseFaders value="no"/>
+  <MotorizedFaders value="no"/>
+  <NoHandShake value="yes"/>
+  <HasMeters value="no"/>
+  <MasterFader value="yes"/>
+</MackieProtocolDevice>

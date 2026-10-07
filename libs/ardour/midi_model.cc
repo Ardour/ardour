@@ -1299,7 +1299,7 @@ MidiModel::write_to (std::shared_ptr<MidiSource>     source,
 	source->mark_streaming_midi_write_started (source_lock, Sustained);
 
 	for (Evoral::Sequence<TimeType>::const_iterator i = begin(TimeType(), true); i != end(); ++i) {
-		source->append_event_beats (source_lock, *i);
+		source->append_event_beats (source_lock, *i, i->is_smf_meta_event());
 	}
 
 	source->mark_streaming_write_completed (source_lock, timecnt_t (duration()));
@@ -1329,7 +1329,7 @@ MidiModel::sync_to_source (const Source::WriterLock& source_lock)
 	_midi_source.mark_streaming_midi_write_started (source_lock, Sustained);
 
 	for (Evoral::Sequence<TimeType>::const_iterator i = begin(TimeType(), true); i != end(); ++i) {
-		_midi_source.append_event_beats(source_lock, *i);
+		_midi_source.append_event_beats(source_lock, *i, i->is_smf_meta_event());
 	}
 
 	_midi_source.mark_streaming_write_completed (source_lock, timecnt_t (duration()));
@@ -1386,7 +1386,7 @@ MidiModel::write_section_to (std::shared_ptr<MidiSource>     source,
 				mst.add (mev.note(), mev.channel(), mev.velocity());
 				source->append_event_beats(source_lock, mev);
 			} else {
-				source->append_event_beats(source_lock, mev);
+				source->append_event_beats(source_lock, mev, mev.is_smf_meta_event());
 			}
 		}
 	}
