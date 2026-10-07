@@ -1494,8 +1494,8 @@ Editor::register_region_actions ()
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EditPointRegions), "clear-region-cue-markers", _("Clear Region Cue Markers"), sigc::mem_fun (*this, &Editor::clear_region_markers));
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EditPointRegions), "set-region-sync-position", _("Set Sync Position"), sigc::mem_fun (*this, &Editor::set_region_sync_position));
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EditPointRegions), "place-transient", _("Place Transient"), sigc::mem_fun (*this, &Editor::place_transient));
-	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EditPointRegions), "trim-front", _("Trim Start at Edit Point"), sigc::mem_fun (*this, &Editor::trim_region_front));
-	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EditPointRegions), "trim-back", _("Trim End at Edit Point"), sigc::mem_fun (*this, &Editor::trim_region_back));
+	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EditPointRegions|EnteredRegions), "trim-front", _("Trim Start at Edit Point"), sigc::mem_fun (*this, &Editor::trim_region_front));
+	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EditPointRegions|EnteredRegions), "trim-back", _("Trim End at Edit Point"), sigc::mem_fun (*this, &Editor::trim_region_back));
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EditPointRegions), "align-regions-start", _("Align Start"), sigc::bind (sigc::mem_fun(*this, &Editor::align_regions), ARDOUR::Start));
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EditPointRegions), "align-regions-start-relative", _("Align Start Relative"), sigc::bind (sigc::mem_fun (*this, &Editor::align_regions_relative), ARDOUR::Start));
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EditPointRegions), "align-regions-end", _("Align End"), sigc::bind (sigc::mem_fun (*this, &Editor::align_regions), ARDOUR::End));
