@@ -1,0 +1,35 @@
+name: Build Ardour Cloud
+
+on:
+  workflow_dispatch: # Allows manual trigger from UI
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential python3 \
+            libglib2.0-dev libgtk-3-dev libjack-jackd2-dev libasound2-dev libpulse-dev \
+            libserd-dev libsord-dev libsratom-dev liblv2-dev lilv-utils libaubio-dev \
+            libfftw3-dev libogg-dev libvorbis-dev libflac-dev libsndfile1-dev liblo-dev \
+            libcurl4-openssl-dev libarchive-dev libboost-all-dev libtag1-dev \
+            libwebsockets-dev libxml2-dev libsigc++-2.0-dev libglibmm-2.4-dev \
+            libcairomm-1.0-dev libpangomm-1.4-dev libgtkmm-2.4-dev
+
+      - name: Configure
+        run: ./waf configure --optimize
+
+      - name: Compile
+        run: ./waf -j$(nproc)
+
+      - name: Upload Built Binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ardour-Cloud-Build
+          path: build/gtk2_ardour/
