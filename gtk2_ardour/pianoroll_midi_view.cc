@@ -280,6 +280,9 @@ PianorollMidiView::ghosts_model_changed ()
 		lane->velocity_display->clear();
 		for (auto & ev : _events) {
 			lane->velocity_display->add_note (ev.second);
+			if (ev.second->selected ()) {
+				lane->velocity_display->note_selected (ev.second);
+			}
 		}
 	}
 }
