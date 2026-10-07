@@ -1817,13 +1817,11 @@ private:
 	void catch_up_on_midi_selection ();
 	void sensitize_all_region_actions (bool);
 	void sensitize_the_right_region_actions (bool because_canvas_crossing);
-	bool _all_region_actions_sensitized;
 	/** Flag to block region action handlers from doing what they normally do;
 	 *  I tried Gtk::Action::block_activate() but this doesn't work (ie it doesn't
 	 *  block) when setting a ToggleAction's active state.
 	 */
 	bool _ignore_region_action;
-	bool _last_region_menu_was_main;
 	void point_selection_changed ();
 	void marker_selection_changed ();
 
