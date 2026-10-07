@@ -1316,11 +1316,15 @@ Pianoroll::button_press_handler_3 (ArdourCanvas::Item* item, GdkEvent* event, It
 	if (Keyboard::is_context_menu_event (&event->button)) {
 
 		switch (item_type) {
+		case VelocityItem:
+			[[fallthrough]];
 		case NoteItem:
 			popup_note_context_menu (item, event);
 			break;
 		case ControlPointItem:
 			popup_control_point_context_menu (item, event);
+			break;
+		case EditorAutomationLineItem:
 			break;
 		default:
 			popup_region_context_menu (item, event);
