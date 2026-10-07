@@ -44,8 +44,11 @@ public:
 	float max_momentary () const;
 	float short_term () const;
 	float max_short_term () const;
+	float lu_range () const;
+	void  lu_range_min_max (float& range_min, float& range_max) const;
 	float dbtp ();
 	float max_dbtp () const;
+
 
 private:
 	void init ();
@@ -78,9 +81,13 @@ private:
 	float    _power[32];
 	uint32_t _pow_idx;
 	float    _thresh_rel;
+	uint32_t _lu_s_div;
 
 	float    _momentary_l;
 	float    _short_l;
+
+	float    _range_min;
+	float    _range_max;
 
 	float    _maxloudn_M;
 	float    _maxloudn_S;
@@ -96,7 +103,8 @@ private:
 	typedef std::map<int, uint32_t, std::less<int>, PBD::StackAllocator<std::pair<const int, uint32_t>, 1000>> History;
 #endif
 
-	History _hist;
+	History _hist_m;
+	History _hist_s;
 
 	struct FilterState {
 		void reset ();

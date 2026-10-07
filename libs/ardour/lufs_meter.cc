@@ -134,13 +134,18 @@ LUFSMeter::reset ()
 	_frag_pos = _n_fragment;
 	_frag_pwr = 1e-30f;
 
-	_maxloudn_M = -200;
-	_maxloudn_S = -200;
-	_integrated = -200;
+	_maxloudn_M  = -200;
+	_maxloudn_S  = -200;
+	_integrated  = -200;
+	_range_min   = -200;
+	_range_max   = -200;
+	_momentary_l = -200;
+	_short_l     = -200;
 
 	_thresh_rel = -70;
 	_block_pwr  = 0.0;
 	_block_cnt  = 0;
+	_lu_s_div   = 0;
 	_pow_idx    = 0;
 	_dbtp       = 0;
 	_max_dbtp   = 0;
@@ -148,7 +153,8 @@ LUFSMeter::reset ()
 
 	memset (_power, 0, 32 * sizeof (float));
 
-	_hist.clear ();
+	_hist_m.clear ();
+	_hist_s.clear ();
 }
 
 void
@@ -196,30 +202,79 @@ LUFSMeter::run (float const** data, uint32_t n_samples)
 			}
 
 			if (loudness_m > -100.f) {
-				_hist[round (loudness_m * 10.f)] += 1;
+				_hist_m[round (loudness_m * 10.f)] += 1;
 			}
 
-			if (_hist.size () == 0) {
-				continue;
-			}
-
-			if (_thresh_rel < (--_hist.end ())->first * 0.1) {
-				int b = _thresh_rel * 10.f;
-				while (_hist.find (b) == _hist.end ()) {
-					++b; // += .1LU
+			if (++_lu_s_div == 5) {
+				_lu_s_div = 0;
+				if (loudness_s >= -70.f) {
+					_hist_s[std::min <int> (50, round (loudness_s * 10.f))] += 1;
 				}
+			}
+
+			if (_hist_m.size () > 0) {
+				if (_thresh_rel < (--_hist_m.end ())->first * 0.1) {
+					int b = _thresh_rel * 10.f;
+					while (_hist_m.find (b) == _hist_m.end ()) {
+						++b; // += .1LU
+					}
+					int    n   = 0;
+					double sum = 0.0;
+
+					for (auto i = _hist_m.find (b); i != _hist_m.end (); ++i) {
+						n += i->second;
+						const double s = powf (10.0, (i->first * 0.1 + 0.691) * 0.1);
+						sum += i->second * s;
+					}
+					if (n > 0) {
+						_integrated = -0.691f + 10.f * log10f (sum / n);
+					}
+				}
+			}
+
+			if (_hist_s.size () > 0 && _lu_s_div == 0) {
 				int    n   = 0;
 				double sum = 0.0;
-
-				for (auto i = _hist.find (b); i != _hist.end (); ++i) {
-					n += i->second;
-					const double s = powf (10.0, (i->first * 0.1 + 0.691) * 0.1);
-					sum += i->second * s;
+				for (auto const& i : _hist_s) {
+					n += i.second;
+					sum += i.second * pow (10.0, i.first * 0.01);
 				}
-				if (n > 0) {
-					_integrated = -0.691f + 10.f * log10f (sum / n);
+
+				int b = (int)(floorf (100 * log10f (sum / n))) - 200;
+
+				n = 0;
+				for (auto const& i : _hist_s) {
+					if (i.first < b) {
+						continue;
+					}
+					n += i.second;
+				}
+
+				float l = .10 * n;
+				float u = .95 * n;
+				float s = 0.0;
+
+				for (auto const& i : _hist_s) {
+					if (i.first < b) {
+						continue;
+					}
+					s += i.second;
+					if (s >= l) {
+						_range_min = i.first / 10.f;
+						break;
+					}
+				}
+
+				s = n;
+				for (auto i = _hist_s.rbegin (); i != _hist_s.rend(); ++i) {
+					s -= i->second;
+					if (s <= u) {
+						_range_max = i->first / 10.f;
+						break;
+					}
 				}
 			}
+
 		}
 	}
 }
@@ -291,6 +346,21 @@ LUFSMeter::max_short_term () const
 {
 	return _maxloudn_S;
 }
+
+float
+LUFSMeter::lu_range () const
+{
+	return _range_max - _range_min;
+}
+
+void
+LUFSMeter::lu_range_min_max (float& range_min, float& range_max) const
+{
+	range_min = _range_min;
+	range_max = _range_max;
+}
+
+
 
 float
 LUFSMeter::dbtp ()
