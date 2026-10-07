@@ -6496,7 +6496,7 @@ Editor::fade_range ()
 void
 Editor::set_fade_length (bool in)
 {
-	RegionSelection rs = get_regions_from_selection_and_entered ();
+	RegionSelection rs = get_regions_from_selection_and_edit_point ();
 
 	if (rs.empty()) {
 		return;
