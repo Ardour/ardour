@@ -132,8 +132,6 @@ class Pianoroll : public CueEditor, public SlipDraggable
 	double max_extents_scale() const { return 1.2; }
 	void set_samples_per_pixel (samplecnt_t);
 
-	void set_mouse_mode (Editing::MouseMode, bool force = false);
-
 	void midi_action (void (MidiView::*method)());
 	void midi_action (void (PianorollMidiView::*method)());
 

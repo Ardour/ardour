@@ -326,13 +326,6 @@ CueEditor::reposition_and_zoom (samplepos_t pos, double spp)
 }
 
 void
-CueEditor::set_mouse_mode (Editing::MouseMode, bool force)
-{
-	EC_LOCAL_TEMPO_SCOPE;
-
-}
-
-void
 CueEditor::step_mouse_mode (bool next)
 {
 	EC_LOCAL_TEMPO_SCOPE;
@@ -1224,6 +1217,14 @@ CueEditor::mouse_mode_chosen (Editing::MouseMode m)
 		 * jiffy.
 		 */
 		old_mouse_mode = m;
+		return;
+	}
+
+	if (m != Editing::MouseDraw && m != Editing::MouseContent) {
+		/* restrict possible mouse modes
+		 * XXX: maybe not register all mouse mode radio actions in EditingContext instead ?
+		 */
+		set_mouse_mode (old_mouse_mode);
 		return;
 	}
 

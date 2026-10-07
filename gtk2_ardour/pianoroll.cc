@@ -1533,16 +1533,6 @@ Pianoroll::key_press_handler (ArdourCanvas::Item*, GdkEvent* ev, ItemType)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-
-	switch (ev->key.keyval) {
-	case GDK_d:
-		set_mouse_mode (Editing::MouseDraw);
-		break;
-	case GDK_e:
-		set_mouse_mode (Editing::MouseContent);
-		break;
-	}
-
 	return true;
 }
 
@@ -1552,18 +1542,6 @@ Pianoroll::key_release_handler (ArdourCanvas::Item*, GdkEvent*, ItemType)
 	EC_LOCAL_TEMPO_SCOPE;
 
 	return true;
-}
-
-void
-Pianoroll::set_mouse_mode (Editing::MouseMode m, bool force)
-{
-	EC_LOCAL_TEMPO_SCOPE;
-
-	if (m != Editing::MouseDraw && m != Editing::MouseContent) {
-		return;
-	}
-
-	EditingContext::set_mouse_mode (m, force);
 }
 
 void
