@@ -260,6 +260,16 @@ Track::set_state (const XMLNode& node, int version)
 		find_and_use_playlist (DataType::MIDI, PBD::ID (playlist_id));
 	}
 
+	/* the session file can be damaged in such a way that the
+	   playlist attribute is missing or references a playlist object
+	   that was never saved. A track without a playlist will crash the
+	   UI, so repair the damage by giving the track a fresh playlist.
+	 */
+	if (!_playlists[data_type()]) {
+		warning << string_compose (_("Track \"%1\" has no playlist in the session file, creating a new one"), name()) << endmsg;
+		use_new_playlist (data_type());
+	}
+
 	XMLNodeList nlist = node.children();
 	for (XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		child = *niter;
