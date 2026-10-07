@@ -54,6 +54,7 @@ struct ExportSettings
 		, _sample_format (ExportFormatBase::SF_16)
 		, _normalize (false)
 		, _bwf (false)
+		, _warmup_seconds (1)
 	{}
 
 	std::string samplerate () const
@@ -82,10 +83,12 @@ struct ExportSettings
 	ExportFormatBase::SampleFormat _sample_format;
 	bool _normalize;
 	bool _bwf;
+	uint32_t _warmup_seconds;
 };
 
 static int export_session (Session *session,
 		std::string outfile,
+		std::string route_name,
 		ExportSettings const& settings)
 {
 	ExportTimespanPtr tsp = session->get_export_handler()->add_timespan();
@@ -137,18 +140,43 @@ static int export_session (Session *session,
 	tsp->set_range (start, end);
 	tsp->set_range_id ("session");
 
-	/* add master outs as default */
-	IO* master_out = session->master_out()->output().get();
-	if (!master_out) {
-		PBD::warning << _("Export Util: No Master Out Ports to Connect for Audio Export") << endmsg;
+	/* Use the requested route's outputs, or the master outputs by default. */
+	std::shared_ptr<Route> source_route;
+	if (route_name.empty ()) {
+		source_route = session->master_out ();
+		if (!source_route) {
+			cerr << "Export Util: Session has no master bus; use --route to select an audio route\n";
+			return -1;
+		}
+	} else {
+		source_route = session->route_by_name (route_name);
+		if (!source_route) {
+			cerr << "Export Util: Route '" << route_name << "' was not found\n";
+			return -1;
+		}
+	}
+
+	IO* source_out = source_route->output().get();
+	if (!source_out || source_out->n_ports().n_audio() == 0) {
+		cerr << "Export Util: Route '" << source_route->name () << "' has no audio output ports\n";
 		return -1;
 	}
 
-	for (uint32_t n = 0; n < master_out->n_ports().n_audio(); ++n) {
-		PortExportChannel * channel = new PortExportChannel ();
-		channel->add_port (master_out->audio (n));
-		ExportChannelPtr chan_ptr (channel);
-		ccp->register_channel (chan_ptr);
+	if (route_name.empty ()) {
+		for (uint32_t n = 0; n < source_out->n_ports().n_audio(); ++n) {
+			PortExportChannel * channel = new PortExportChannel ();
+			channel->add_port (source_out->audio (n));
+			ExportChannelPtr chan_ptr (channel);
+			ccp->register_channel (chan_ptr);
+		}
+	} else {
+		std::list<ExportChannelPtr> channels;
+		RouteExportChannel::create_from_route (channels, source_route);
+		if (channels.empty ()) {
+			cerr << "Export Util: Route '" << source_route->name () << "' has no exportable audio channels\n";
+			return -1;
+		}
+		ccp->register_channels (channels);
 	}
 
 	/* output filename */
@@ -226,12 +254,14 @@ static void usage () {
   -h, --help                 display this help and exit\n\
   -n, --normalize            normalize signal level (to 0dBFS)\n\
   -o, --output  <file>       export output file name\n\
+  -r, --route <name>         export named route/bus instead of the master\n\
   -s, --samplerate <rate>    samplerate to use\n\
+  -w, --warmup <seconds>     wait before export for asynchronous plugins\n\
   -V, --version              print version information and exit\n\
 \n");
 	printf ("\n\
 This tool exports the session-range of a given ardour-session to a wave file,\n\
-using the master-bus outputs.\n\
+using the master-bus outputs, or a named route selected with --route.\n\
 By default a 16bit signed .wav file at session-rate is exported.\n\
 If the no output-file is given, the session's export dir is used.\n\
 \n\
@@ -247,8 +277,9 @@ int main (int argc, char* argv[])
 {
 	ExportSettings settings;
 	std::string outfile;
+	std::string route_name;
 
-	const char *optstring = "b:Bhno:s:V";
+	const char *optstring = "b:Bhno:r:s:w:V";
 
 	const struct option longopts[] = {
 		{ "bitdepth",   1, 0, 'b' },
@@ -256,7 +287,9 @@ int main (int argc, char* argv[])
 		{ "help",       0, 0, 'h' },
 		{ "normalize",  0, 0, 'n' },
 		{ "output",     1, 0, 'o' },
+		{ "route",      1, 0, 'r' },
 		{ "samplerate", 1, 0, 's' },
+		{ "warmup",     1, 0, 'w' },
 		{ "version",    0, 0, 'V' },
 	};
 
@@ -300,6 +333,10 @@ int main (int argc, char* argv[])
 				outfile = optarg;
 				break;
 
+			case 'r':
+				route_name = optarg;
+				break;
+
 			case 's':
 				{
 					const int sr = atoi (optarg);
@@ -308,6 +345,18 @@ int main (int argc, char* argv[])
 					} else {
 						fprintf(stderr, "Invalid Samplerate\n");
 					}
+				}
+				break;
+
+			case 'w':
+				{
+					char* endptr = 0;
+					unsigned long const seconds = strtoul (optarg, &endptr, 10);
+					if (!*optarg || *endptr || seconds < 1 || seconds > 3600) {
+						cerr << "Invalid warmup time (expected 1..3600 seconds)\n";
+						::exit (EXIT_FAILURE);
+					}
+					settings._warmup_seconds = seconds;
 				}
 				break;
 
@@ -338,14 +387,17 @@ int main (int argc, char* argv[])
 
 	s = SessionUtils::load_session (argv[optind], argv[optind+1]);
 
+	cout << "* Waiting " << settings._warmup_seconds << " seconds for plugins to initialize" << endl;
+	Glib::usleep (settings._warmup_seconds * G_USEC_PER_SEC);
+
 	if (settings._samplerate == 0) {
 		settings._samplerate = s->nominal_sample_rate ();
 	}
 
-	export_session (s, outfile, settings);
+	int const result = export_session (s, outfile, route_name, settings);
 
 	SessionUtils::unload_session(s);
 	SessionUtils::cleanup();
 
-	return 0;
+	return result == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
