@@ -71,6 +71,10 @@ LUFSMeter::LUFSMeter (double samplerate, uint32_t n_channels)
 		_z[c] = new float[48];
 	}
 
+	for (int i = -700; i < 50; ++i) {
+		power_table[i] = powf (10.f, i * 0.01f);
+	}
+
 	init ();
 	reset ();
 }
@@ -233,34 +237,28 @@ LUFSMeter::run (float const** data, uint32_t n_samples)
 			}
 
 			if (_hist_s.size () > 0 && _lu_s_div == 0) {
-				int    n   = 0;
-				double sum = 0.0;
+				int   n   = 0;
+				float sum = 0.0;
 				for (auto const& i : _hist_s) {
 					n += i.second;
-					sum += i.second * pow (10.0, i.first * 0.01);
+					sum += i.second * power_table[i.first];
 				}
 
 				int b = (int)(floorf (100 * log10f (sum / n))) - 200;
 
 				n = 0;
-				for (auto const& i : _hist_s) {
-					if (i.first < b) {
-						continue;
-					}
-					n += i.second;
+				for (auto i = _hist_s.lower_bound (b); i != _hist_s.end (); ++i) {
+					n += i->second;
 				}
 
-				float l = .10 * n;
-				float u = .95 * n;
+				float l = .10f * n;
+				float u = .95f * n;
 				float s = 0.0;
 
-				for (auto const& i : _hist_s) {
-					if (i.first < b) {
-						continue;
-					}
-					s += i.second;
+				for (auto i = _hist_s.lower_bound (b); i != _hist_s.end (); ++i) {
+					s += i->second;
 					if (s >= l) {
-						_range_min = i.first / 10.f;
+						_range_min = i->first / 10.f;
 						break;
 					}
 				}

@@ -106,6 +106,8 @@ private:
 	History _hist_m;
 	History _hist_s;
 
+	std::map<int, float> power_table;
+
 	struct FilterState {
 		void reset ();
 		void sanitize ();
