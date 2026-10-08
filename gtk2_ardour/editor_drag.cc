@@ -4923,6 +4923,15 @@ ControlPointDrag::motion (GdkEvent* event, bool first_motion)
 		float const initial_fraction = 1.0 - (_fixed_grab_y / _point->line ().height ());
 		editing_context.begin_reversible_command (_("automation event move"));
 		_point->line ().start_drag_single (_point, _fixed_grab_x, initial_fraction);
+		_dragged_lines.push_back(&_point->line ());
+
+		/* we may have selected points in other automation lines, start drag of them too */
+		for (auto & point : editing_context.get_selection ().points) {
+			if (std::find(_dragged_lines.begin(), _dragged_lines.end(), &point->line ()) == _dragged_lines.end()) {
+				_dragged_lines.push_back(&point->line ());
+				point->line ().start_drag_single (point, _fixed_grab_x, initial_fraction);
+			}
+		}
 	}
 
 	pair<float, float> result;
@@ -4932,6 +4941,14 @@ ControlPointDrag::motion (GdkEvent* event, bool first_motion)
 	timepos_t const offset = _point->line ().get_origin ().shift_earlier (_point->line ().offset ());
 	double px = _point->get_x () + editing_context.time_to_pixel_unrounded (offset);
 	editing_context.set_snapped_cursor_position (timepos_t (editing_context.pixel_to_sample (px)));
+
+	/* move other selected lines, if any */
+	for (std::vector<AutomationLine*>::iterator line = _dragged_lines.begin (); line != _dragged_lines.end (); ++line) {
+		if (*line != &_point->line ()) {
+			(*line)->drag_motion (dt, fraction, false, _pushing);
+		}
+	}
+
 }
 
 void
@@ -4944,7 +4961,12 @@ ControlPointDrag::finished (GdkEvent* event, bool movement_occurred)
 		}
 
 	} else {
-		_point->line ().end_drag (_pushing);
+
+		for (std::vector<AutomationLine*>::iterator line = _dragged_lines.begin (); line != _dragged_lines.end (); ++line) {
+			(*line)->end_drag (_pushing);
+		}
+		_dragged_lines.clear ();
+
 		editing_context.commit_reversible_command ();
 	}
 }
@@ -4952,7 +4974,10 @@ ControlPointDrag::finished (GdkEvent* event, bool movement_occurred)
 void
 ControlPointDrag::aborted (bool)
 {
-	_point->line ().reset ();
+	for (std::vector<AutomationLine*>::iterator line = _dragged_lines.begin (); line != _dragged_lines.end (); ++line) {
+		(*line)->reset ();
+	}
+	_dragged_lines.clear ();
 }
 
 bool

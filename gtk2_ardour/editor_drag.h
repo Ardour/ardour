@@ -1252,6 +1252,8 @@ private:
 	static double _zero_gain_fraction;
 
 	Temporal::timecnt_t total_dt (GdkEvent*) const;
+
+	std::vector<AutomationLine*> _dragged_lines;
 };
 
 /** Gain or automation line drag */
