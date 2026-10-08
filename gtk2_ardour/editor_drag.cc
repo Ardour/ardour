@@ -4811,7 +4811,6 @@ ControlPointDrag::ControlPointDrag (EditingContext& e, ArdourCanvas::Item* i)
 	, _fixed_grab_y (0.0)
 	, _cumulative_y_drag (0.0)
 	, _pushing (false)
-	, _final_index (0)
 {
 	if (_zero_gain_fraction < 0.0) {
 		_zero_gain_fraction = gain_to_slider_position_with_max (dB_to_coefficient (0.0), Config->get_max_gain ());
@@ -4927,7 +4926,7 @@ ControlPointDrag::motion (GdkEvent* event, bool first_motion)
 	}
 
 	pair<float, float> result;
-	result = _point->line ().drag_motion (dt, fraction, false, _pushing, _final_index);
+	result = _point->line ().drag_motion (dt, fraction, false, _pushing);
 	show_verbose_cursor_text (_point->line ().get_verbose_cursor_relative_string (result.first, result.second));
 
 	timepos_t const offset = _point->line ().get_origin ().shift_earlier (_point->line ().offset ());
@@ -4945,7 +4944,7 @@ ControlPointDrag::finished (GdkEvent* event, bool movement_occurred)
 		}
 
 	} else {
-		_point->line ().end_drag (_pushing, _final_index);
+		_point->line ().end_drag (_pushing);
 		editing_context.commit_reversible_command ();
 	}
 }
@@ -5053,7 +5052,6 @@ LineDrag::motion (GdkEvent* event, bool first_move)
 	cy = min ((double)_line->height (), cy);
 
 	double const fraction = 1.0 - (cy / _line->height ());
-	uint32_t     ignored;
 
 	if (first_move) {
 		float const initial_fraction = 1.0 - (_fixed_grab_y / _line->height ());
@@ -5065,7 +5063,7 @@ LineDrag::motion (GdkEvent* event, bool first_move)
 	/* we are ignoring x position for this drag, so we can just pass in anything */
 	pair<float, float> result;
 
-	result = _line->drag_motion (timecnt_t (time_domain ()), fraction, true, false, ignored);
+	result = _line->drag_motion (timecnt_t (time_domain ()), fraction, true, false);
 	show_verbose_cursor_text (_line->get_verbose_cursor_relative_string (result.first, result.second));
 }
 
@@ -5074,7 +5072,7 @@ LineDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (movement_occurred) {
 		motion (event, false);
-		_line->end_drag (false, 0);
+		_line->end_drag (false);
 		if (have_command) {
 			editing_context.commit_reversible_command ();
 			have_command = false;
@@ -6653,8 +6651,7 @@ AutomationRangeDrag::motion (GdkEvent*, bool first_move)
 		float const f = y_fraction (current_pointer_y ());
 		/* we are ignoring x position for this drag, so we can just pass in anything */
 		pair<float, float> result;
-		uint32_t           ignored;
-		result = l->line->drag_motion (timecnt_t (time_domain ()), f, true, false, ignored);
+		result = l->line->drag_motion (timecnt_t (time_domain ()), f, true, false);
 		show_verbose_cursor_text (l->line->get_verbose_cursor_relative_string (result.first, result.second));
 	}
 }
@@ -6668,7 +6665,7 @@ AutomationRangeDrag::finished (GdkEvent* event, bool motion_occurred)
 
 	motion (event, false);
 	for (list<Line>::iterator i = _lines.begin (); i != _lines.end (); ++i) {
-		i->line->end_drag (false, 0);
+		i->line->end_drag (false);
 	}
 
 	editing_context.commit_reversible_command ();

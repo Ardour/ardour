@@ -43,7 +43,7 @@ public:
 	void start_drag_single (ControlPoint*, double, float);
 	void start_drag_line (uint32_t, uint32_t, float);
 	void start_drag_multiple (std::list<ControlPoint*>, float, XMLNode*);
-	void end_drag (bool with_push, uint32_t final_index);
+	void end_drag (bool with_push);
 	void end_draw_merge ();
 	void enable_automation ();
 	void remove_point (ControlPoint&);

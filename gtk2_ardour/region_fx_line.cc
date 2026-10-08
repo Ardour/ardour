@@ -68,10 +68,10 @@ RegionFxLine::enable_automation ()
 }
 
 void
-RegionFxLine::end_drag (bool with_push, uint32_t final_index)
+RegionFxLine::end_drag (bool with_push)
 {
 	enable_automation ();
-	EditorAutomationLine::end_drag (with_push, final_index);
+	EditorAutomationLine::end_drag (with_push);
 }
 
 void
