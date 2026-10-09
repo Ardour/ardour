@@ -109,6 +109,10 @@ interpolate_gain (double from, double to, double fraction, double upper)
 		return to;
 	}
 
+	/* remove denormals */
+	from += TINY_NUMBER;
+	to += TINY_NUMBER;
+
 	// this is expensive -- optimize
 	double g0 = gain_to_position (from * 2. / upper);
 	double g1 = gain_to_position (to * 2. / upper);
