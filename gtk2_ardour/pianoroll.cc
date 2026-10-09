@@ -1173,11 +1173,6 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 			_drags->set (new RegionSlipContentsDrag (*this, item, this, sdl, Temporal::AudioTime), event);
 			return true;
 		}
-		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier)) {
-			if (mouse_mode == Editing::MouseContent) {
-				midi_action(&PianorollMidiView::clear_selection);
-			}
-		}
 		return false;
 
 	case NoteItem:
@@ -1206,11 +1201,6 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 		switch (mouse_mode) {
 		case Editing::MouseContent:
 			{
-				if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier)) {
-					if (mouse_mode == Editing::MouseContent) {
-						midi_action(&PianorollMidiView::clear_selection);
-					}
-				}
 				/* rubberband drag to select lollipops
 				 * this will fallback to control points
 				 */
@@ -1233,9 +1223,6 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 			 * We use MidiRubberbandSelectDrag here to allow selecting notes too
 			 * and fallback to control points if no note is selected
 			 */
-			if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier)) {
-				midi_action(&PianorollMidiView::clear_selection);
-			}
 			if (param.type () != NullAutomation) {
 				_drags->set (new MidiRubberbandSelectDrag (*this, _active_view, [this,param](GdkEvent* ev,timepos_t const & pos) { return _active_view->automation_rb_click (ev, pos, param); }), event);
 			}
@@ -2730,13 +2717,11 @@ Pianoroll::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType
 
 	switch (item_type) {
 		case ControlPointItem:
-			/* for object/track exclusivity, we don't call set_selected_track_as_side_effect (op); */
-			if (eff_mouse_mode != Editing::MouseRange) {
-				if (event->button.button != 3) {
-					_mouse_changed_selection |= set_selected_control_point_from_click (press, op);
-				} else {
-					_mouse_changed_selection |= set_selected_control_point_from_click (press, SelectionSet);
-				}
+			midi_action(&PianorollMidiView::clear_note_selection);
+			if (event->button.button != 3) {
+				_mouse_changed_selection |= set_selected_control_point_from_click (press, op);
+			} else {
+				_mouse_changed_selection |= set_selected_control_point_from_click (press, SelectionSet);
 			}
 			break;
 		case EditorAutomationLineItem:
@@ -2757,7 +2742,15 @@ Pianoroll::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType
 				}
 			}
 			break;
-
+		case StreamItem:
+			[[fallthrough]];
+		case AutomationTrackItem:
+			[[fallthrough]];
+		case VelocityBaseItem:
+			if (press && eff_mouse_mode == Editing::MouseContent && op == SelectionSet) {
+				midi_action(&PianorollMidiView::clear_selection);
+			}
+			break;
 		default:
 			break;
 	}
