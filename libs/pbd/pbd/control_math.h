@@ -102,12 +102,11 @@ interpolate_logarithmic (double from, double to, double fraction, double /*lower
 }
 
 static inline double
-interpolate_gain (double f, double t, double fraction, double upper)
+interpolate_gain (double from, double to, double fraction, double upper)
 {
-	double from = f + TINY_NUMBER; //kill denormals before we use them for anything
-	double to = t + TINY_NUMBER; //kill denormals before we use them for anything
-	if ( fabs(to-from) < TINY_NUMBER ){
-		 return to;
+	if ( fabs(to - from) < TINY_NUMBER ){
+		/* short-circuit interpolation if the change is negligeable */
+		return to;
 	}
 
 	// this is expensive -- optimize
