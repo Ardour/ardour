@@ -263,6 +263,8 @@ private:
 	Temporal::timepos_t _offset;
 	uint32_t _drag_final_index;
 
+	double _inf_recovery_val;
+
 	bool is_stepped() const;
 	void update_visibility ();
 	void reset_line_coords (ControlPoint&);
