@@ -3008,6 +3008,102 @@ region_info_json (
 	return ss.str ();
 }
 
+/* The endpoint has no authentication, so it only serves local, non-browser
+ * clients: the Host header must name the loopback interface (defeats DNS
+ * rebinding) and an Origin header, which browsers add to cross-site and
+ * POST requests, must be a loopback origin (defeats requests from web pages).
+ */
+static bool
+is_loopback_hostname (std::string host)
+{
+	std::transform (host.begin (), host.end (), host.begin (), [] (unsigned char c) { return std::tolower (c); });
+	return host == "127.0.0.1" || host == "localhost" || host == "[::1]";
+}
+
+/* "[::1]:4820" -> "[::1]", "localhost:4820" -> "localhost" */
+static std::string
+strip_port (const std::string& authority)
+{
+	const std::string::size_type colon   = authority.rfind (':');
+	const std::string::size_type bracket = authority.rfind (']');
+	if (colon == std::string::npos || (bracket != std::string::npos && colon < bracket)) {
+		return authority;
+	}
+	return authority.substr (0, colon);
+}
+
+/* Returns false if the header is present but cannot be read; an absent
+ * header yields true and an empty value.
+ */
+static bool
+copy_header (struct lws* wsi, enum lws_token_indexes token, std::string& value)
+{
+	value.clear ();
+
+	const int len = lws_hdr_total_length (wsi, token);
+	if (len <= 0) {
+		return true;
+	}
+
+	std::vector<char> buf (len + 1, '\0');
+	if (lws_hdr_copy (wsi, buf.data (), len + 1, token) < 0) {
+		return false;
+	}
+
+	value = buf.data ();
+	return true;
+}
+
+static bool
+is_loopback_origin (const std::string& origin)
+{
+	std::string rest;
+	if (origin.compare (0, 7, "http://") == 0) {
+		rest = origin.substr (7);
+	} else if (origin.compare (0, 8, "https://") == 0) {
+		rest = origin.substr (8);
+	} else {
+		return false; /* includes the opaque origin "null" */
+	}
+	return is_loopback_hostname (strip_port (rest));
+}
+
+static bool
+request_is_local (struct lws* wsi)
+{
+	std::string host;
+	std::string origin;
+
+	if (!copy_header (wsi, WSI_TOKEN_HOST, host) || !copy_header (wsi, WSI_TOKEN_ORIGIN, origin)) {
+		return false;
+	}
+	if (!host.empty () && !is_loopback_hostname (strip_port (host))) {
+		return false;
+	}
+	if (!origin.empty () && !is_loopback_origin (origin)) {
+		return false;
+	}
+	return true;
+}
+
+/* Browsers can send text/plain POSTs cross-site without a CORS preflight;
+ * requiring application/json closes that path even without an Origin header.
+ */
+static bool
+is_json_content_type (struct lws* wsi)
+{
+	std::string ctype;
+	if (!copy_header (wsi, WSI_TOKEN_HTTP_CONTENT_TYPE, ctype)) {
+		return false;
+	}
+	std::transform (ctype.begin (), ctype.end (), ctype.begin (), [] (unsigned char c) { return std::tolower (c); });
+	const std::string json = "application/json";
+	if (ctype.compare (0, json.size (), json) != 0) {
+		return false;
+	}
+	return ctype.size () == json.size () || ctype[json.size ()] == ';' || ctype[json.size ()] == ' ';
+}
+
 } // namespace
 
 MCPHttpServer::MCPHttpServer (ARDOUR::Session& session, uint16_t port, int debug_level, PBD::EventLoop* event_loop)
@@ -3045,6 +3141,7 @@ MCPHttpServer::start ()
 #endif
 
 	_info.port      = _port;
+	_info.iface     = "127.0.0.1"; /* unauthenticated endpoint: never listen on other interfaces */
 	_info.protocols = _protocols;
 	_info.gid       = -1;
 	_info.uid       = -1;
@@ -3147,6 +3244,13 @@ MCPHttpServer::handle_http (struct lws* wsi, ClientContext& ctx)
 	char        uri[1024];
 	std::string path;
 
+	if (!request_is_local (wsi)) {
+		if (debug_level () >= 1) {
+			PBD::warning << "MCPHttp: rejected request with non-local Host or Origin header" << endmsg;
+		}
+		return send_http_status (wsi, 403);
+	}
+
 	if (lws_hdr_copy (wsi, uri, sizeof (uri), WSI_TOKEN_GET_URI) > 0) {
 		path = uri;
 
@@ -3162,6 +3266,9 @@ MCPHttpServer::handle_http (struct lws* wsi, ClientContext& ctx)
 		path = uri;
 
 		if (path == "/mcp") {
+			if (!is_json_content_type (wsi)) {
+				return send_http_status (wsi, 415);
+			}
 			ctx.mcp_post = true;
 			return 0;
 		}
