@@ -261,7 +261,6 @@ private:
 	 *  a +ve offset means that the 0 on the line is at _offset in the list
 	 */
 	Temporal::timepos_t _offset;
-	uint32_t _drag_final_index;
 
 	double _inf_recovery_val;
 
