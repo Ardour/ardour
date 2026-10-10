@@ -776,9 +776,16 @@ AutomationLine::drag_motion (timecnt_t const & pdt, float fraction, bool ignore_
 		_drag_had_movement = true;
 	}
 
-	/* OK, now on to the stuff related to *this* motion event. First, for
-	 * each contiguous range, figure out the maximum x-axis motion we are
-	 * allowed (because of neighbouring points that are not moving.
+	/* OK, now on to the stuff related to *this* motion event. First,
+	 * ensure we are not moving a x-locked point within a contiguous range
+	 */
+
+	if (!_drag_points.front()->can_slide() || !_drag_points.back()->can_slide()) {
+		dt = timecnt_t (0);
+	}
+
+	/* Then, figure out the maximum x-axis motion we are allowed
+	 * (because of neighbouring points that are not moving).
 	 *
 	 * if we are moving forwards with push, we don't need to do this,
 	 * since all later points will move too.
@@ -788,12 +795,6 @@ AutomationLine::drag_motion (timecnt_t const & pdt, float fraction, bool ignore_
 		const timepos_t line_limit = maximum_time() + _offset;
 		for (auto const & ccp : contiguous_points){
 			dt = ccp->clamp_dt (dt, line_limit);
-		}
-		if (!_drag_points.front()->can_slide() || !_drag_points.back()->can_slide()) {
-			/* ControlPointDrag::motion only checks if grabbed point can slide
-			 * ensure we are not moving a x-locked point within a contiguous range
-			 */
-			dt = timecnt_t (0);
 		}
 	}
 
