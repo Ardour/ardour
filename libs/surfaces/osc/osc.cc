@@ -455,6 +455,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, X_("/transport_speed"), "", transport_speed);
 		REGISTER_CALLBACK (serv, X_("/record_enabled"), "", record_enabled);
 		REGISTER_CALLBACK (serv, X_("/is_recording"), "", is_recording);
+		REGISTER_CALLBACK (serv, X_("/is_recording"), "f", is_recording);
 		REGISTER_CALLBACK (serv, X_("/set_transport_speed"), "f", set_transport_speed);
 		// locate ii is position and bool roll
 		REGISTER_CALLBACK (serv, X_("/locate"), "ii", locate);
@@ -490,10 +491,15 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, X_("/rec_enable_toggle"), "f", rec_enable_toggle);
 		REGISTER_CALLBACK (serv, X_("/toggle_all_rec_enables"), "", toggle_all_rec_enables);
 		REGISTER_CALLBACK (serv, X_("/toggle_all_rec_enables"), "f", toggle_all_rec_enables);
+		REGISTER_CALLBACK (serv, X_("/arm_tracks_toggle_punch"), "", arm_tracks_toggle_punch);
+		REGISTER_CALLBACK (serv, X_("/arm_tracks_toggle_punch"), "f", arm_tracks_toggle_punch);
+		REGISTER_CALLBACK (serv, X_("/toggle_punch"), "", toggle_punch);
+		REGISTER_CALLBACK (serv, X_("/toggle_punch"), "f", toggle_punch);
 		REGISTER_CALLBACK (serv, X_("/all_tracks_rec_in"), "", all_tracks_rec_in);
 		REGISTER_CALLBACK (serv, X_("/all_tracks_rec_in"), "f", all_tracks_rec_in);
 		REGISTER_CALLBACK (serv, X_("/all_tracks_rec_out"), "", all_tracks_rec_out);
 		REGISTER_CALLBACK (serv, X_("/all_tracks_rec_out"), "f", all_tracks_rec_out);
+		REGISTER_CALLBACK (serv, X_("/cancel_all_solos"), "", cancel_all_solos);
 		REGISTER_CALLBACK (serv, X_("/cancel_all_solos"), "f", cancel_all_solos);
 		REGISTER_CALLBACK (serv, X_("/remove_marker"), "", remove_marker_at_playhead);
 		REGISTER_CALLBACK (serv, X_("/remove_marker"), "f", remove_marker_at_playhead);

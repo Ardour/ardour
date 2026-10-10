@@ -52,7 +52,17 @@ mountpoint (string path)
 	const char *cpath = path.c_str();
 	char best[PATH_MAX+1];
 
-	if ((mntf = setmntent ("/etc/mtab", "r")) == 0) {
+	mntf = setmntent ("/etc/mtab", "r");
+
+	if (!mntf) {
+		mntf = setmntent ("/proc/self/mounts", "r");
+	}
+
+	if (!mntf) {
+		mntf = setmntent ("/proc/mounts", "r");
+	}
+
+	if (!mntf) {
 		return "";
 	}
 

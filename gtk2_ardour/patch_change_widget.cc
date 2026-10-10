@@ -529,7 +529,21 @@ PatchChangeWidget::select_channel (uint8_t chn)
 	if ((pi = std::dynamic_pointer_cast<PluginInsert> (_route->the_instrument ())) && pi->plugin ()->knows_bank_patch ()) {
 		pi->plugin ()->BankPatchChange.connect (_ac_connections, invalidator (*this),
 		                                        std::bind (&PatchChangeWidget::bankpatch_changed, this, _1), gui_context ());
-	} else if (std::dynamic_pointer_cast<MidiTrack> (_route)) {
+		/* plugin already provides correct bank + patch */
+		refill_banks ();
+		return;
+	}
+
+	if (!_route->automation_control (Evoral::Parameter (MidiCCAutomation, chn, MIDI_CTL_MSB_BANK), false)) {
+		/* if there is no bank control for the given channel yet, switch bank to the first one fo the given CNS
+		 * This is useful for drums, on bank 128. Later, allow a user to freely change banks. */
+		std::shared_ptr<MIDI::Name::ChannelNameSet> cns = _info.get_patches (_channel);
+		if (cns && cns->patch_banks().size() > 0) {
+			select_bank (cns->patch_banks().front()->number());
+		}
+	}
+
+	if (std::dynamic_pointer_cast<MidiTrack> (_route)) {
 		std::shared_ptr<AutomationControl> bank_msb = _route->automation_control (Evoral::Parameter (MidiCCAutomation, chn, MIDI_CTL_MSB_BANK), true);
 		std::shared_ptr<AutomationControl> bank_lsb = _route->automation_control (Evoral::Parameter (MidiCCAutomation, chn, MIDI_CTL_LSB_BANK), true);
 		std::shared_ptr<AutomationControl> program  = _route->automation_control (Evoral::Parameter (MidiPgmChangeAutomation, chn), true);

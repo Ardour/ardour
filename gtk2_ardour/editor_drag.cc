@@ -2797,7 +2797,13 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 
 		for (list<DraggingView>::const_iterator i = _views.begin (); i != _views.end (); ++i) {
 			RegionView* rv = i->view;
-			rv->region ()->playlist ()->clear_owned_changes ();
+
+			std::shared_ptr<Playlist> pl = rv->region ()->playlist ();
+			insert_result                = _editor.motion_frozen_playlists.insert (pl);
+
+			if (insert_result.second) {
+				pl->clear_owned_changes ();
+			}
 
 			if (_operation == StartTrim) {
 				rv->trim_front_starting ();
@@ -2810,9 +2816,6 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 			if (arv) {
 				arv->temporarily_hide_envelope ();
 			}
-
-			std::shared_ptr<Playlist> pl = rv->region ()->playlist ();
-			insert_result                = _editor.motion_frozen_playlists.insert (pl);
 
 			if (insert_result.second) {
 				pl->freeze ();
@@ -4808,7 +4811,6 @@ ControlPointDrag::ControlPointDrag (EditingContext& e, ArdourCanvas::Item* i)
 	, _fixed_grab_y (0.0)
 	, _cumulative_y_drag (0.0)
 	, _pushing (false)
-	, _final_index (0)
 {
 	if (_zero_gain_fraction < 0.0) {
 		_zero_gain_fraction = gain_to_slider_position_with_max (dB_to_coefficient (0.0), Config->get_max_gain ());
@@ -4921,15 +4923,32 @@ ControlPointDrag::motion (GdkEvent* event, bool first_motion)
 		float const initial_fraction = 1.0 - (_fixed_grab_y / _point->line ().height ());
 		editing_context.begin_reversible_command (_("automation event move"));
 		_point->line ().start_drag_single (_point, _fixed_grab_x, initial_fraction);
+		_dragged_lines.push_back(&_point->line ());
+
+		/* we may have selected points in other automation lines, start drag of them too */
+		for (auto & point : editing_context.get_selection ().points) {
+			if (std::find(_dragged_lines.begin(), _dragged_lines.end(), &point->line ()) == _dragged_lines.end()) {
+				_dragged_lines.push_back(&point->line ());
+				point->line ().start_drag_single (point, _fixed_grab_x, initial_fraction);
+			}
+		}
 	}
 
 	pair<float, float> result;
-	result = _point->line ().drag_motion (dt, fraction, false, _pushing, _final_index);
+	result = _point->line ().drag_motion (dt, fraction, false, _pushing);
 	show_verbose_cursor_text (_point->line ().get_verbose_cursor_relative_string (result.first, result.second));
 
 	timepos_t const offset = _point->line ().get_origin ().shift_earlier (_point->line ().offset ());
 	double px = _point->get_x () + editing_context.time_to_pixel_unrounded (offset);
 	editing_context.set_snapped_cursor_position (timepos_t (editing_context.pixel_to_sample (px)));
+
+	/* move other selected lines, if any */
+	for (std::vector<AutomationLine*>::iterator line = _dragged_lines.begin (); line != _dragged_lines.end (); ++line) {
+		if (*line != &_point->line ()) {
+			(*line)->drag_motion (dt, fraction, false, _pushing);
+		}
+	}
+
 }
 
 void
@@ -4942,7 +4961,12 @@ ControlPointDrag::finished (GdkEvent* event, bool movement_occurred)
 		}
 
 	} else {
-		_point->line ().end_drag (_pushing, _final_index);
+
+		for (std::vector<AutomationLine*>::iterator line = _dragged_lines.begin (); line != _dragged_lines.end (); ++line) {
+			(*line)->end_drag (_pushing);
+		}
+		_dragged_lines.clear ();
+
 		editing_context.commit_reversible_command ();
 	}
 }
@@ -4950,7 +4974,10 @@ ControlPointDrag::finished (GdkEvent* event, bool movement_occurred)
 void
 ControlPointDrag::aborted (bool)
 {
-	_point->line ().reset ();
+	for (std::vector<AutomationLine*>::iterator line = _dragged_lines.begin (); line != _dragged_lines.end (); ++line) {
+		(*line)->reset ();
+	}
+	_dragged_lines.clear ();
 }
 
 bool
@@ -5050,7 +5077,6 @@ LineDrag::motion (GdkEvent* event, bool first_move)
 	cy = min ((double)_line->height (), cy);
 
 	double const fraction = 1.0 - (cy / _line->height ());
-	uint32_t     ignored;
 
 	if (first_move) {
 		float const initial_fraction = 1.0 - (_fixed_grab_y / _line->height ());
@@ -5062,7 +5088,7 @@ LineDrag::motion (GdkEvent* event, bool first_move)
 	/* we are ignoring x position for this drag, so we can just pass in anything */
 	pair<float, float> result;
 
-	result = _line->drag_motion (timecnt_t (time_domain ()), fraction, true, false, ignored);
+	result = _line->drag_motion (timecnt_t (time_domain ()), fraction, true, false);
 	show_verbose_cursor_text (_line->get_verbose_cursor_relative_string (result.first, result.second));
 }
 
@@ -5071,7 +5097,7 @@ LineDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (movement_occurred) {
 		motion (event, false);
-		_line->end_drag (false, 0);
+		_line->end_drag (false);
 		if (have_command) {
 			editing_context.commit_reversible_command ();
 			have_command = false;
@@ -6650,8 +6676,7 @@ AutomationRangeDrag::motion (GdkEvent*, bool first_move)
 		float const f = y_fraction (current_pointer_y ());
 		/* we are ignoring x position for this drag, so we can just pass in anything */
 		pair<float, float> result;
-		uint32_t           ignored;
-		result = l->line->drag_motion (timecnt_t (time_domain ()), f, true, false, ignored);
+		result = l->line->drag_motion (timecnt_t (time_domain ()), f, true, false);
 		show_verbose_cursor_text (l->line->get_verbose_cursor_relative_string (result.first, result.second));
 	}
 }
@@ -6665,7 +6690,7 @@ AutomationRangeDrag::finished (GdkEvent* event, bool motion_occurred)
 
 	motion (event, false);
 	for (list<Line>::iterator i = _lines.begin (); i != _lines.end (); ++i) {
-		i->line->end_drag (false, 0);
+		i->line->end_drag (false);
 	}
 
 	editing_context.commit_reversible_command ();
@@ -6756,8 +6781,8 @@ PatchChangeDrag::setup_pointer_offset ()
 	_pointer_offset = _region_view->midi_region()->source_beats_to_absolute_time (_patch_change->patch ()->time ()).distance (raw_grab_time ());
 }
 
-MidiRubberbandSelectDrag::MidiRubberbandSelectDrag (EditingContext& ec, MidiView* mv)
-	: RubberbandSelectDrag (ec, mv->drag_group (), [](GdkEvent*,timepos_t const&) { return true; })
+MidiRubberbandSelectDrag::MidiRubberbandSelectDrag (EditingContext& ec, MidiView* mv, std::function<bool(GdkEvent*,timepos_t const &)> cf)
+	: RubberbandSelectDrag (ec, mv->drag_group (), cf)
 	, _midi_view (mv)
 {
 }
@@ -6817,6 +6842,33 @@ void
 MidiVerticalSelectDrag::deselect_things ()
 {
 	/* XXX */
+}
+
+
+MidiLollipopsSelectDrag::MidiLollipopsSelectDrag (EditingContext& ec, ArdourCanvas::Item* i, std::function<bool(GdkEvent*,Temporal::timepos_t const &)> click_functor)
+	: RubberbandSelectDrag (ec, i, click_functor)
+{
+	DEBUG_TRACE (DEBUG::Drags, "New MidiLollipopsSelectDrag\n");
+	_display = reinterpret_cast<VelocityDisplay*> (_item->get_data ("ghostregionview"));
+}
+
+void
+MidiLollipopsSelectDrag::select_things (int button_state, timepos_t const& x1, timepos_t const& x2, double y1, double y2, bool drag_in_progress)
+{
+	if (drag_in_progress) {
+		/* We just want to select things at the end of the drag, not during it */
+		return;
+	}
+
+	ArdourCanvas::Rectangle& base = _display->base_item ();
+	double const origin = (base.item_to_canvas (base.get())).y0 - _bounding_item->canvas_origin().y;
+
+	bool notes_selected = _display->midi_view ().select_notes_by_velocity (x1, x2, _display->y_position_to_velocity(y2 - origin), _display->y_position_to_velocity(y1 - origin),
+	    Keyboard::modifier_state_contains (button_state, Keyboard::TertiaryModifier));
+
+	if (!notes_selected) {
+		RubberbandSelectDrag::select_things (button_state, x1, x2, y1, y2, drag_in_progress);
+	}
 }
 
 NoteCreateDrag::NoteCreateDrag (EditingContext& ec, ArdourCanvas::Item* i, MidiView* mv)
@@ -6922,11 +6974,11 @@ NoteCreateDrag::finished (GdkEvent* ev, bool had_movement)
 		length = _note[0].distance (_note[1]).abs ().beats ();
 	}
 
-	/* create_note_at() implements UNDO for us */
 	if (UIConfiguration::instance().get_select_last_drawn_note_only()) {
 		_midi_view->clear_note_selection ();
 	}
 
+	/* create_note_at() implements UNDO for us */
 	_midi_view->create_note_at (timepos_t (start), _drag_rect->y0 (), length, ev->button.state, false);
 }
 
@@ -6991,6 +7043,10 @@ HitCreateDrag::finished (GdkEvent* event, bool had_movement)
 
 	/* Percussive hits are as short as possible */
 	Beats length (0, 1);
+
+	if (UIConfiguration::instance().get_select_last_drawn_note_only()) {
+		_midi_view->clear_note_selection ();
+	}
 
 	/* create_note_at() implements UNDO for us */
 	_midi_view->create_note_at (timepos_t (start), _y, length, event->button.state, false);
@@ -7373,7 +7429,7 @@ LollipopDrag::start_grab (GdkEvent *ev, Gdk::Cursor* c)
 {
 	Drag::start_grab (ev, c);
 
-	NoteBase* note = static_cast<NoteBase*> (_primary->get_data (X_("note")));
+	NoteBase* note = static_cast<NoteBase*> (_primary->get_data (X_("notebase")));
 	MidiView& view (_display->midi_view());
 
 	bool add = Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier);
@@ -7398,7 +7454,7 @@ LollipopDrag::finished (GdkEvent *ev, bool did_move)
 	}
 
 	int velocity = _display->y_position_to_velocity (_primary->y0());
-	NoteBase* note = static_cast<NoteBase*> (_primary->get_data (X_("note")));
+	NoteBase* note = static_cast<NoteBase*> (_primary->get_data (X_("notebase")));
 
 	_display->midi_view().set_velocity (note, velocity);
 }
@@ -7412,7 +7468,7 @@ LollipopDrag::aborted (bool)
 void
 LollipopDrag::setup_pointer_offset ()
 {
-	NoteBase* note = static_cast<NoteBase*> (_primary->get_data (X_("note")));
+	NoteBase* note = static_cast<NoteBase*> (_primary->get_data (X_("notebase")));
 
 	if (_display->midi_view().show_source()) {
 		_pointer_offset = timepos_t (note->note()->time ()).distance (raw_grab_time ());

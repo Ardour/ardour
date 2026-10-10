@@ -326,13 +326,6 @@ CueEditor::reposition_and_zoom (samplepos_t pos, double spp)
 }
 
 void
-CueEditor::set_mouse_mode (Editing::MouseMode, bool force)
-{
-	EC_LOCAL_TEMPO_SCOPE;
-
-}
-
-void
 CueEditor::step_mouse_mode (bool next)
 {
 	EC_LOCAL_TEMPO_SCOPE;
@@ -846,6 +839,9 @@ CueEditor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_header
 		return;
 	}
 
+	allow_vert = autoscroll_vertical_allowed && allow_vert;
+	allow_horiz = autoscroll_horizontal_allowed && allow_horiz;
+
 	/* define a rectangular boundary for scrolling. If the mouse moves
 	 * outside of this area and/or continue to be outside of this area,
 	 * then we will continuously auto-scroll the canvas in the appropriate
@@ -932,7 +928,7 @@ CueEditor::autoscroll_canvas ()
 	VisualChange vc;
 	bool vertical_motion = false;
 
-	if (autoscroll_horizontal_allowed) {
+	if (autoscroll_horizontal_active) {
 
 		samplepos_t new_sample = _leftmost_sample;
 
@@ -980,7 +976,7 @@ CueEditor::autoscroll_canvas ()
 		}
 	}
 
-	if (autoscroll_vertical_allowed) {
+	if (autoscroll_vertical_active) {
 
 		// const double vertical_pos = vertical_adjustment.get_value();
 		const int speed_factor = 10;
@@ -1083,7 +1079,7 @@ CueEditor::autoscroll_canvas ()
 		 * move back to zero
 		 */
 
-		if (autoscroll_horizontal_allowed) {
+		if (autoscroll_horizontal_active) {
 			x = min (max ((ArdourCanvas::Coord) x, 0.0), autoscroll_boundary.x1);
 		} else {
 			x = min (max ((ArdourCanvas::Coord) x, autoscroll_boundary.x0), autoscroll_boundary.x1);
@@ -1123,8 +1119,8 @@ CueEditor::start_canvas_autoscroll (bool allow_horiz, bool allow_vert, const Ard
 
 	stop_canvas_autoscroll ();
 
-	autoscroll_horizontal_allowed = allow_horiz;
-	autoscroll_vertical_allowed = allow_vert;
+	autoscroll_horizontal_active = allow_horiz;
+	autoscroll_vertical_active = allow_vert;
 	autoscroll_boundary = boundary;
 
 	/* do the first scroll right now
@@ -1221,6 +1217,14 @@ CueEditor::mouse_mode_chosen (Editing::MouseMode m)
 		 * jiffy.
 		 */
 		old_mouse_mode = m;
+		return;
+	}
+
+	if (m != Editing::MouseDraw && m != Editing::MouseContent) {
+		/* restrict possible mouse modes
+		 * XXX: maybe not register all mouse mode radio actions in EditingContext instead ?
+		 */
+		set_mouse_mode (old_mouse_mode);
 		return;
 	}
 

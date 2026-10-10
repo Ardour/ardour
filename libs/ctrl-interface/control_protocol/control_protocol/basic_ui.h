@@ -156,6 +156,8 @@ class LIBCONTROLCP_API BasicUI {
 
 	void rec_enable_toggle ();
 	void toggle_all_rec_enables ();
+	void arm_tracks_toggle_punch ();
+	void toggle_punch ();
 
 	void all_tracks_rec_in ();
 	void all_tracks_rec_out ();

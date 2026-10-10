@@ -39,6 +39,7 @@
 #include "ardour_ui.h"
 #include "automation_line.h"
 #include "control_point.h"
+#include "control_point_dialog.h"
 #include "edit_note_dialog.h"
 #include "editing_context.h"
 #include "editing_convert.h"
@@ -184,8 +185,10 @@ EditingContext::EditingContext (std::string const & name)
 	, horizontal_adjustment (0.0, 0.0, 1e16)
 	, own_bindings (nullptr)
 	, visual_change_queued (false)
-	, autoscroll_horizontal_allowed (false)
-	, autoscroll_vertical_allowed (false)
+	, autoscroll_horizontal_allowed (true)
+	, autoscroll_vertical_allowed (true)
+	, autoscroll_horizontal_active (false)
+	, autoscroll_vertical_active (false)
 	, autoscroll_cnt (0)
 	, _mouse_changed_selection (false)
 	, entered_marker (nullptr)
@@ -2091,8 +2094,14 @@ EditingContext::popup_note_context_menu (ArdourCanvas::Item* item, GdkEvent* eve
 	items.push_back(MenuElem(_("Transform..."), sigc::bind(sigc::mem_fun(*this, &EditingContext::transform_regions), mvs)));
 	items.push_back (SeparatorElem());
 	items.push_back(MenuElem(_("Strum Forward"), sigc::bind(sigc::mem_fun(*this, &EditingContext::strum_notes), mvs, true)));
+	if (sel_size < 2) {
+		items.back().set_sensitive (false);
+	}
 	items.push_back(MenuElem(_("Strum Backward"), sigc::bind(sigc::mem_fun(*this, &EditingContext::strum_notes), mvs, false)));
-
+	if (sel_size < 2) {
+		items.back().set_sensitive (false);
+	}
+	
 	_note_context_menu.popup (event->button.button, event->button.time);
 }
 
@@ -2349,6 +2358,58 @@ EditingContext::note_edit_done (int r, EditNoteDialog* d)
 
 	d->done (r);
 	delete d;
+}
+
+void
+EditingContext::edit_control_point (ArdourCanvas::Item* item)
+{
+	ControlPoint* p = reinterpret_cast<ControlPoint *> (item->get_data ("control_point"));
+
+	if (p == 0) {
+		fatal << _("programming error: control point canvas item has no control point object pointer!") << endmsg;
+		abort(); /*NOTREACHED*/
+	}
+
+	std::vector<ControlPoint*> cps;
+
+	for (auto const& cp : selection->points) {
+		if (&cp->line() == &p->line ()) {
+			cps.push_back (cp);
+		}
+	}
+
+	assert (cps.size() > 0);
+
+	ControlPointDialog d (p, cps.size() > 1);
+
+	if (d.run () != RESPONSE_ACCEPT) {
+		return;
+	}
+
+	if (d.all_selected_points ()) {
+		p->line().modify_points_y (cps, d.get_y_fraction ());
+	} else {
+		cps.clear ();
+		cps.push_back (p);
+		p->line().modify_points_y (cps, d.get_y_fraction ());
+	}
+}
+
+void
+EditingContext::remove_control_point (ArdourCanvas::Item* item)
+{
+	if (!can_remove_control_point (item)) {
+		return;
+	}
+
+	ControlPoint* control_point;
+
+	if ((control_point = reinterpret_cast<ControlPoint *> (item->get_data ("control_point"))) == 0) {
+		fatal << _("programming error: control point canvas item has no control point object pointer!") << endmsg;
+		abort(); /*NOTREACHED*/
+	}
+
+	control_point->line().remove_point (*control_point);
 }
 
 PBD::Command*
@@ -3103,7 +3164,7 @@ EditingContext::select_automation_line (GdkEventButton* event, ArdourCanvas::Ite
 	al->grab_item().canvas_to_item (mx, my);
 
 	uint32_t before, after;
-	samplecnt_t const  where = (samplecnt_t) floor (canvas_to_timeline (mx) * samples_per_pixel);
+	samplecnt_t const  where = pixel_to_sample (mx);
 
 	if (!al || !al->control_points_adjacent (where, before, after)) {
 		return;
@@ -4247,12 +4308,6 @@ EditingContext::scroll_right_half_page ()
 	} else {
 		reset_x_origin (max_samplepos - current_page_samples());
 	}
-}
-
-Gtk::Menu*
-EditingContext::get_single_region_context_menu ()
-{
-	return nullptr;
 }
 
 void

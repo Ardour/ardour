@@ -29,6 +29,7 @@
 
 #include "pbd/failed_constructor.h"
 
+#include "ardour/rc_configuration.h"
 #include "ardour/dB.h"
 #include "ardour/lufs_meter.h"
 
@@ -68,6 +69,10 @@ LUFSMeter::LUFSMeter (double samplerate, uint32_t n_channels)
 
 	for (uint32_t c = 0; c < 5; ++c) {
 		_z[c] = new float[48];
+	}
+
+	for (int i = -700; i < 50; ++i) {
+		power_table[i] = powf (10.f, i * 0.01f);
 	}
 
 	init ();
@@ -133,20 +138,27 @@ LUFSMeter::reset ()
 	_frag_pos = _n_fragment;
 	_frag_pwr = 1e-30f;
 
-	_maxloudn_M = -200;
-	_integrated = -200;
+	_maxloudn_M  = -200;
+	_maxloudn_S  = -200;
+	_integrated  = -200;
+	_range_min   = -200;
+	_range_max   = -200;
+	_momentary_l = -200;
+	_short_l     = -200;
 
 	_thresh_rel = -70;
 	_block_pwr  = 0.0;
 	_block_cnt  = 0;
+	_lu_s_div   = 0;
 	_pow_idx    = 0;
 	_dbtp       = 0;
 	_max_dbtp   = 0;
 	_rst_dbtp = true;
 
-	memset (_power, 0, 8 * sizeof (float));
+	memset (_power, 0, 32 * sizeof (float));
 
-	_hist.clear ();
+	_hist_m.clear ();
+	_hist_s.clear ();
 }
 
 void
@@ -168,16 +180,22 @@ LUFSMeter::run (float const** data, uint32_t n_samples)
 			/* every 100 ms */
 
 			_power[_pow_idx++] = _frag_pwr / (float)_n_fragment;
-			_pow_idx &= 7;
+			_pow_idx &= 31;
 			_frag_pwr = 1e-30f;
 			_frag_pos = _n_fragment;
 
 			const float sum_m      = sumfrag (4); // 400ms
-			const float loudness_m = -0.691f + 10.f * log10f (sum_m);
+			const float loudness_m = -0.691f + 10.f * log10f (sum_m + 1e-21);
 
 			_momentary_l = loudness_m;
 
 			_maxloudn_M = std::max<float> (_maxloudn_M, loudness_m);
+
+			const float sum_s      = sumfrag (30); // 3sec
+			const float loudness_s = -0.691f + 10.f * log10f (sum_s + 1e-21);
+
+			_short_l = loudness_s;
+			_maxloudn_S = std::max<float> (_maxloudn_S, loudness_s);
 
 			/* observe 400ms window every 100ms */
 			if (loudness_m > -70.f) {
@@ -188,30 +206,73 @@ LUFSMeter::run (float const** data, uint32_t n_samples)
 			}
 
 			if (loudness_m > -100.f) {
-				_hist[round (loudness_m * 10.f)] += 1;
+				_hist_m[round (loudness_m * 10.f)] += 1;
 			}
 
-			if (_hist.size () == 0) {
-				continue;
-			}
-
-			if (_thresh_rel < (--_hist.end ())->first * 0.1) {
-				int b = _thresh_rel * 10.f;
-				while (_hist.find (b) == _hist.end ()) {
-					++b; // += .1LU
+			if (++_lu_s_div == 5) {
+				_lu_s_div = 0;
+				if (loudness_s >= -70.f) {
+					_hist_s[std::min <int> (50, round (loudness_s * 10.f))] += 1;
 				}
-				int    n   = 0;
-				double sum = 0.0;
+			}
 
-				for (auto i = _hist.find (b); i != _hist.end (); ++i) {
+			if (_hist_m.size () > 0) {
+				if (_thresh_rel < (--_hist_m.end ())->first * 0.1) {
+					int b = _thresh_rel * 10.f;
+					while (_hist_m.find (b) == _hist_m.end ()) {
+						++b; // += .1LU
+					}
+					int    n   = 0;
+					double sum = 0.0;
+
+					for (auto i = _hist_m.find (b); i != _hist_m.end (); ++i) {
+						n += i->second;
+						const double s = powf (10.0, (i->first * 0.1 + 0.691) * 0.1);
+						sum += i->second * s;
+					}
+					if (n > 0) {
+						_integrated = -0.691f + 10.f * log10f (sum / n);
+					}
+				}
+			}
+
+			if (_hist_s.size () > 0 && _lu_s_div == 0) {
+				int   n   = 0;
+				float sum = 0.0;
+				for (auto const& i : _hist_s) {
+					n += i.second;
+					sum += i.second * power_table[i.first];
+				}
+
+				int b = (int)(floorf (100 * log10f (sum / n))) - 200;
+
+				n = 0;
+				for (auto i = _hist_s.lower_bound (b); i != _hist_s.end (); ++i) {
 					n += i->second;
-					const double s = powf (10.0, (i->first * 0.1 + 0.691) * 0.1);
-					sum += i->second * s;
 				}
-				if (n > 0) {
-					_integrated = -0.691f + 10.f * log10f (sum / n);
+
+				float l = .10f * n;
+				float u = .95f * n;
+				float s = 0.0;
+
+				for (auto i = _hist_s.lower_bound (b); i != _hist_s.end (); ++i) {
+					s += i->second;
+					if (s >= l) {
+						_range_min = i->first / 10.f;
+						break;
+					}
+				}
+
+				s = n;
+				for (auto i = _hist_s.rbegin (); i != _hist_s.rend(); ++i) {
+					s -= i->second;
+					if (s <= u) {
+						_range_max = i->first / 10.f;
+						break;
+					}
 				}
 			}
+
 		}
 	}
 }
@@ -247,9 +308,9 @@ float
 LUFSMeter::sumfrag (uint32_t n_frag) const
 {
 	float s = 0;
-	int   k = (8 + _pow_idx - n_frag) & 7;
+	int   k = (32 + _pow_idx - n_frag) & 31;
 	for (uint32_t i = 0; i < n_frag; i++) {
-		s += _power[(i + k) & 7];
+		s += _power[(i + k) & 31];
 	}
 	return s / n_frag;
 }
@@ -267,17 +328,42 @@ LUFSMeter::momentary () const
 }
 
 float
+LUFSMeter::short_term () const
+{
+	return _short_l;
+}
+
+float
 LUFSMeter::max_momentary () const
 {
 	return _maxloudn_M;
 }
 
 float
+LUFSMeter::max_short_term () const
+{
+	return _maxloudn_S;
+}
+
+float
+LUFSMeter::lu_range () const
+{
+	return _range_max - _range_min;
+}
+
+void
+LUFSMeter::lu_range_min_max (float& range_min, float& range_max) const
+{
+	range_min = _range_min;
+	range_max = _range_max;
+}
+
+
+
+float
 LUFSMeter::dbtp ()
 {
-	float rv = _dbtp;
-	_rst_dbtp = true;
-	return accurate_coefficient_to_dB (rv);
+	return accurate_coefficient_to_dB (_dbtp);
 }
 
 float
@@ -379,7 +465,15 @@ LUFSMeter::upsample_x4 (int chn, float const x)
 void
 LUFSMeter::calc_true_peak (float const** data, const uint32_t n_samples)
 {
-	float dbtp = _rst_dbtp ? 0 : _dbtp;
+	float const cfg_db_s = Config->get_meter_falloff ();
+#ifdef _GNU_SOURCE
+	float const falloff = exp10f (-0.05f * cfg_db_s * n_samples / _samplerate);
+#else
+	float const falloff = powf (10.f, -0.05f * cfg_db_s * n_samples / _samplerate);
+#endif
+	const bool reset = _rst_dbtp.exchange (false);
+
+	float dbtp = reset ? 0 : _dbtp * falloff;
 	for (uint32_t c = 0; c < _n_channels; ++c) {
 		float const* d = data[c];
 		for (uint32_t i = 0; i < n_samples; ++i) {

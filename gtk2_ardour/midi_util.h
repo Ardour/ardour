@@ -33,15 +33,14 @@ namespace ARDOUR {
 	class InstrumentInfo;
 }
 
-inline static void clamp_to_0_127(uint8_t &val)
+inline static void clamp_to_0_127(int &val)
 {
-	if ((127 < val) && (val < 192)) {
+	if (val > 127) {
 		val = 127;
-	} else if ((192 <= val) && (val < 255)) {
+	} else if (val < 0) {
 		val = 0;
 	}
 }
-
 
 void
 build_controller_menu (Gtk::Menu& menu, ARDOUR::InstrumentInfo const & instrument_info, uint16_t channel_mask,

@@ -258,6 +258,15 @@ Pianoroll::update_pitch_colors ()
 void
 Pianoroll::set_editing_policy (EditingPolicy ep)
 {
+	if (_editing_policy == AllViews && ep == ActiveView) {
+		/* clear selection to avoid keeping things that we won't be able to interact with */
+		for (auto & [region,view] : region_view_map) {
+			if (view != _active_view) {
+				view->clear_selection ();
+			}
+		}
+	}
+
 	_editing_policy = ep;
 	std::string txt;
 	switch (_editing_policy) {
@@ -1035,6 +1044,8 @@ Pianoroll::canvas_control_point_event (GdkEvent* event, ArdourCanvas::Item* item
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
+	clicked_control_point = cp;
+
 	return typed_event (item, event, ControlPointItem);
 }
 
@@ -1113,6 +1124,14 @@ Pianoroll::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, Item
 		return false;
 	}
 
+	button_selection (item, event, item_type);
+
+	if (!_drags->active () && (Keyboard::is_delete_event (&event->button))) {
+
+		/* handled by button release */
+		return true;
+	}
+
 	switch (event->button.button) {
 	case 1:
 		return button_press_handler_1 (item, event, item_type);
@@ -1123,6 +1142,7 @@ Pianoroll::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, Item
 		break;
 
 	case 3:
+		return button_press_handler_3 (item, event, item_type);
 		break;
 
 	default:
@@ -1140,9 +1160,11 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 	EC_LOCAL_TEMPO_SCOPE;
 
 	NoteBase* note = nullptr;
-	Evoral::Parameter param (NullAutomation);
-
+	Evoral::Parameter param = automation_by_y (event->button.y);
 	Editing::MouseMode mouse_mode = current_mouse_mode();
+
+	_mouse_changed_selection = false;
+
 	switch (item_type) {
 	case StreamItem:
 		if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::slip_contents_modifier ())) {
@@ -1159,33 +1181,16 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 			if (note->big_enough_to_trim() && note->mouse_near_ends()) {
 				_drags->set (new NoteResizeDrag (*this, item), event, get_canvas_cursor());
 			} else {
-				NoteDrag* nd = new NoteDrag (*this, item);
-				nd->set_bounding_item (data_group);
-				_drags->set (nd, event);
+				_drags->set (new NoteDrag (*this, item), event);
 			}
 		}
 		return true;
 
-	case ControlPointItem:
-		if (mouse_mode == Editing::MouseContent) {
-			ControlPointDrag* cpd = new ControlPointDrag (*this, item);
-
-			ControlPoint* cp = reinterpret_cast<ControlPoint*> (item->get_data ("control_point"));
-			if (cp) {
-				AutomationLine& line (cp->line());
-				Evoral::Parameter line_param (line.the_list()->parameter());
-				for (auto & [param,lane] : automation_lanes) {
-					if (param == line_param) {
-						cpd->set_bounding_item (lane->group);
-						break;
-					}
-				}
-			}
-			_drags->set (cpd, event);
-		}
+	case ControlPointItem: {
+		_drags->set (new ControlPointDrag (*this, item), event);
 		return true;
 		break;
-
+	}
 	case VelocityItem:
 		/* mouse mode independent - always allow drags */
 		_drags->set (new LollipopDrag (*this, item), event);
@@ -1195,9 +1200,13 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 	case VelocityBaseItem:
 		switch (mouse_mode) {
 		case Editing::MouseContent:
-			/* rubberband drag to select notes */
-			_drags->set (new RubberbandSelectDrag (*this, item, [&](GdkEvent* ev, timepos_t const & pos) { return _active_view->velocity_rb_click (ev, pos); }), event);
-			break;
+			{
+				/* rubberband drag to select lollipops
+				 * this will fallback to control points
+				 */
+				_drags->set (new MidiLollipopsSelectDrag (*this, item, [&](GdkEvent* ev, timepos_t const & pos) { midi_action(&PianorollMidiView::clear_selection); return true; }), event);
+				break;
+			}
 		case Editing::MouseDraw:
 			_drags->set (new VelocityLineDrag (*this, *static_cast<ArdourCanvas::Rectangle*>(item), false, Temporal::BeatTime), event);
 			break;
@@ -1209,46 +1218,39 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 
 	case AutomationTrackItem:
 		switch (mouse_mode) {
-		case Editing::MouseContent:
-			/* rubberband drag to select automation points */
-			param = automation_by_y (event->button.y);
-			if (param.type() != NullAutomation) {
-				_drags->set (new RubberbandSelectDrag (*this, item, [this,param](GdkEvent* ev, timepos_t const & pos) { return _active_view->automation_rb_click (ev, pos, param); }), event);
+		case Editing::MouseContent: {
+			/* rubberband drag to select automation points
+			 * We use MidiRubberbandSelectDrag here to allow selecting notes too
+			 * and fallback to control points if no note is selected
+			 */
+			if (param.type () != NullAutomation) {
+				_drags->set (new MidiRubberbandSelectDrag (*this, _active_view, [this,param](GdkEvent* ev,timepos_t const & pos) { return _active_view->automation_rb_click (ev, pos, param); }), event);
 			}
 			break;
-		case Editing::MouseDraw:
-			param = automation_by_y (event->button.y);
-			if (param.type() != NullAutomation) {
+		}
+		case Editing::MouseDraw: {
+			if (param.type () != NullAutomation) {
 				_drags->set (new AutomationDrawDrag (*this, nullptr, *static_cast<ArdourCanvas::Rectangle*>(item), false, Temporal::BeatTime,
 				                                     [this,param](GdkEvent* ev, timepos_t const & pos) { return _active_view->automation_rb_click (ev, pos, param); }), event);
 			}
 			break;
+		}
 		default:
 			break;
 		}
 		return true;
 		break;
 
-	case EditorAutomationLineItem: {
-		ARDOUR::SelectionOperation op = ArdourKeyboard::selection_type (event->button.state);
-		select_automation_line (&event->button, item, op);
-		if (mouse_mode == Editing::MouseContent) {
-			LineDrag* ld = new LineDrag (*this, item, [&](GdkEvent* ev,timepos_t const & pos, double) { _active_view->line_drag_click (ev, pos); });
-			AutomationLine* line = reinterpret_cast<AutomationLine*> (item->get_data ("line"));
-			if (line) {
-				Evoral::Parameter line_param (line->the_list()->parameter());
-				for (auto & [param,lane] : automation_lanes) {
-					if (param == line_param) {
-						ld->set_bounding_item (lane->group);
-						break;
-					}
-				}
+	case EditorAutomationLineItem:
+		if (param.type () != NullAutomation) {
+			if (mouse_mode == Editing::MouseContent) {
+				_drags->set (new LineDrag (*this, item, [this,param](GdkEvent* ev,timepos_t const & pos, double) { _active_view->automation_rb_click (ev, pos, param); }), event);
+			} else if (mouse_mode == Editing::MouseDraw) {
+				_drags->set (new AutomationDrawDrag (*this, nullptr, *static_cast<ArdourCanvas::Rectangle*>(item), false, Temporal::BeatTime,
+													 [this,param](GdkEvent* ev, timepos_t const & pos) { return _active_view->automation_rb_click (ev, pos, param); }), event);
 			}
-			_drags->set (ld, event);
+			return true;
 		}
-		return true;
-	}
-
 	case ClipStartItem: {
 		ArdourCanvas::Rectangle* r = dynamic_cast<ArdourCanvas::Rectangle*> (item);
 		if (r) {
@@ -1287,19 +1289,49 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 }
 
 bool
-Pianoroll::button_press_handler_2 (ArdourCanvas::Item*, GdkEvent*, ItemType)
+Pianoroll::button_press_handler_2 (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
-	EC_LOCAL_TEMPO_SCOPE;
-
-	return true;
+	/* For now we treat middle-clicks like left-clicks
+	 * and let the Drag decide what to do with it (e.g. axis constraint)
+	 */
+	return button_press_handler_1 (item, event, item_type);
 }
+
+bool
+Pianoroll::button_press_handler_3 (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
+{
+	if (Keyboard::is_context_menu_event (&event->button)) {
+
+		switch (item_type) {
+		case VelocityItem:
+			[[fallthrough]];
+		case NoteItem:
+			popup_note_context_menu (item, event);
+			break;
+		case ControlPointItem:
+			popup_control_point_context_menu (item, event);
+			break;
+		case EditorAutomationLineItem:
+			break;
+		default:
+			popup_region_context_menu (item, event);
+			break;
+		}
+
+		return true;
+	}
+
+	return false;
+}
+
 
 bool
 Pianoroll::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
-	NoteBase* e;
-
 	EC_LOCAL_TEMPO_SCOPE;
+
+	NoteBase* note;
+	ControlPoint* control_point;
 
 	if (!Keyboard::is_context_menu_event (&event->button)) {
 
@@ -1313,52 +1345,56 @@ Pianoroll::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, It
 			}
 		}
 
-		if (event->button.button == 2) {
-			switch (current_mouse_mode()) {
-			case Editing::MouseContent:
-			case Editing::MouseDraw:
-				switch (item_type) {
-				case NoteItem:
-					e = reinterpret_cast<NoteBase*> (item->get_data ("notebase"));
-					assert (e);
-					if (midi_view()) {
-						midi_view()->delete_note (e->note());
-					}
-					return true;
-				default:
-					break;
-				}
-				break;
-			default:
-				break;
-			}
-			return true;
-		}
+	}
 
-	} else {
+	if (!_drags->active () && Keyboard::is_delete_event (&event->button)) {
 
 		switch (item_type) {
+		case VelocityItem:
+			[[fallthrough]];
 		case NoteItem:
-			if (internal_editing()) {
-				popup_note_context_menu (item, event);
-				return true;
+			note = reinterpret_cast<NoteBase*> (item->get_data ("notebase"));
+			if (note) {
+				note->midi_view().delete_note (note->note());
 			}
 			break;
-		case RegionItem:
-			if (internal_editing()) {
-				popup_region_context_menu (item, event);
-				return true;
+		case ControlPointItem:
+			control_point = reinterpret_cast<ControlPoint *> (item->get_data ("control_point"));
+			if (control_point) {
+				control_point->line().remove_point (*control_point);
 			}
 			break;
 		default:
 			break;
 		}
-
-		popup_note_context_menu (item, event);
 		return true;
+
+	}
+
+	if (event->button.button == 1) {
+		/* do any (de)selection operations that should occur on button release */
+		button_selection (item, event, item_type);
 	}
 
 	return false;
+}
+
+
+void
+Pianoroll::popup_control_point_context_menu (ArdourCanvas::Item* item, GdkEvent* event)
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	using namespace Gtk;
+	using namespace Menu_Helpers;
+
+	Menu* m = new Menu;
+	MenuList& items (m->items());
+
+	items.push_back (MenuElem (_("Edit..."), sigc::bind (sigc::mem_fun (*this, &EditingContext::edit_control_point), item)));
+	items.push_back (MenuElem (_("Delete"), sigc::bind (sigc::mem_fun (*this, &EditingContext::remove_control_point), item)));
+
+	m->popup (event->button.button, event->button.time);
 }
 
 void
@@ -1366,36 +1402,25 @@ Pianoroll::popup_region_context_menu (ArdourCanvas::Item* item, GdkEvent* event)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	using namespace Gtk::Menu_Helpers;
+	using namespace Gtk;
+	using namespace Menu_Helpers;
 
-	if (!_active_view) {
-		return;
+	Menu* m = new Menu;
+	MenuList& items (m->items());
+
+	items.push_back (MenuElem (_("Quantize..."), sigc::mem_fun (*this, &EditingContext::quantize_region)));
+	items.push_back (MenuElem (_("Legatize"), sigc::bind(sigc::mem_fun (*this, &EditingContext::legatize_region), false)));
+	items.push_back (MenuElem (_("Transform..."), sigc::mem_fun (*this, &EditingContext::transform_region)));
+	items.push_back (MenuElem (_("Remove Overlap"), sigc::bind(sigc::mem_fun (*this, &EditingContext::legatize_region), true)));
+	// items.push_back (MenuElem (_("Insert Patch Change..."), sigc::bind (sigc::mem_fun (*this, &EditingContext::insert_patch_change), false)));
+	// items.push_back (MenuElem (_("Insert Patch Change..."), sigc::bind (sigc::mem_fun (*this, &EditingContext::insert_patch_change), true)));
+
+	Menu* am = build_automation_menu ();
+	if (am) {
+		items.push_back (MenuElem (_("Automation"), *am));
 	}
 
-	const uint32_t sel_size = _active_view->selection_size ();
-	MidiViews mvs ({_active_view});
-
-	MenuList& items = _region_context_menu.items();
-	items.clear();
-
-	if (sel_size > 0) {
-		items.push_back (MenuElem(_("Delete"), sigc::mem_fun (*_active_view, &MidiView::delete_selection)));
-	}
-
-	items.push_back(MenuElem(_("Edit..."), sigc::bind(sigc::mem_fun(*this, &EditingContext::edit_notes), _active_view)));
-	items.push_back(MenuElem(_("Transpose..."),  sigc::bind(sigc::mem_fun(*this, &EditingContext::transpose_regions), mvs)));
-	items.push_back(MenuElem(_("Legatize"), sigc::bind(sigc::mem_fun(*this, &EditingContext::legatize_regions), mvs, false)));
-	if (sel_size < 2) {
-		items.back().set_sensitive (false);
-	}
-	items.push_back(MenuElem(_("Quantize..."), sigc::bind(sigc::mem_fun(*this, &EditingContext::quantize_regions), mvs)));
-	items.push_back(MenuElem(_("Remove Overlap"), sigc::bind(sigc::mem_fun(*this, &EditingContext::legatize_regions), mvs, true)));
-	if (sel_size < 2) {
-		items.back().set_sensitive (false);
-	}
-	items.push_back(MenuElem(_("Transform..."), sigc::bind(sigc::mem_fun(*this, &EditingContext::transform_regions), mvs)));
-
-	_region_context_menu.popup (event->button.button, event->button.time);
+	m->popup (event->button.button, event->button.time);
 }
 
 bool
@@ -1499,16 +1524,6 @@ Pianoroll::key_press_handler (ArdourCanvas::Item*, GdkEvent* ev, ItemType)
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-
-	switch (ev->key.keyval) {
-	case GDK_d:
-		set_mouse_mode (Editing::MouseDraw);
-		break;
-	case GDK_e:
-		set_mouse_mode (Editing::MouseContent);
-		break;
-	}
-
 	return true;
 }
 
@@ -1518,18 +1533,6 @@ Pianoroll::key_release_handler (ArdourCanvas::Item*, GdkEvent*, ItemType)
 	EC_LOCAL_TEMPO_SCOPE;
 
 	return true;
-}
-
-void
-Pianoroll::set_mouse_mode (Editing::MouseMode m, bool force)
-{
-	EC_LOCAL_TEMPO_SCOPE;
-
-	if (m != Editing::MouseDraw && m != Editing::MouseContent) {
-		return;
-	}
-
-	EditingContext::set_mouse_mode (m, force);
 }
 
 void
@@ -1554,15 +1557,32 @@ Pianoroll::midi_action (void (MidiView::*method)())
 }
 
 void
+Pianoroll::midi_action (void (PianorollMidiView::*method)())
+{
+	EC_LOCAL_TEMPO_SCOPE;
+
+	if (_editing_policy == ActiveView) {
+
+		if (!_active_view) {
+			return;
+		}
+
+		(_active_view->*method) ();
+
+	} else if (_editing_policy == AllViews) {
+
+		for (auto & [region,view] : region_view_map) {
+			(view->*method) ();
+		}
+	}
+}
+
+void
 Pianoroll::escape ()
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	if (!_active_view) {
-		return;
-	}
-
-	_active_view->clear_selection ();
+	midi_action (&PianorollMidiView::clear_selection);
 }
 
 Gdk::Cursor*
@@ -2393,8 +2413,15 @@ Pianoroll::point_selection_changed ()
 {
 	EC_LOCAL_TEMPO_SCOPE;
 
-	if (_active_view) {
+	if (_editing_policy == ActiveView && _active_view) {
+
 		_active_view->point_selection_changed ();
+
+	} else if (_editing_policy == AllViews) {
+
+		for (auto & [region,view] : region_view_map) {
+			view->point_selection_changed ();
+		}
 	}
 }
 
@@ -2511,78 +2538,48 @@ Pianoroll::select_all_within (Temporal::timepos_t const & start, Temporal::timep
 
 	std::list<Selectable*> found;
 
-	AutomationLane* lane (nullptr);
-	Evoral::Parameter param (NullAutomation);
-	ArdourCanvas::Duple top (0., y0);
-	ArdourCanvas::Duple bottom (0., y1);
+	ArdourCanvas::Rect select_rect (0., y0, 0, y1);
 
-	for (auto & [p,l] : automation_lanes) {
-		ArdourCanvas::Rect r (l->group->get().translate (l->group->position()));
-		if (r.contains (top)) {
-			lane = l;
-			param = p;
-			break;
+	for (auto & [param,lane] : automation_lanes) {
+
+		if (param.type() == MidiVelocityAutomation || param.type() == NullAutomation) {
+			continue;
 		}
-		if (r.contains (bottom)) {
-			lane = l;
-			param = p;
-			break;
-		}
-	}
 
-	if (param.type() == NullAutomation) {
-		return;
-	}
+		ArdourCanvas::Rect lane_rect (lane->group->get().translate (lane->group->position()));
 
-	double topfrac;
-	double botfrac;
+		if (lane_rect.intersection (select_rect)) {
 
-	/* translate y0 and y1 to use the top of the automation area as the * origin */
+			/* translate y0 and y1 to use the top of the automation area as the * origin */
+			double automation_origin = lane->group->position().y;
 
-	double automation_origin = lane->group->position().y;
+			double topfrac = 1.0 - ((y0 - automation_origin) / lane->height());
+			double botfrac = 1.0 - ((y1 - automation_origin) / lane->height());
 
-	y0 -= automation_origin;
-	y1 -= automation_origin;
+			/* clamping merely for aesthetic, it is not really needed here */
+			if (topfrac > 1.0) topfrac = 1.0;
+			if (botfrac < 0.0) botfrac = 0.0;
 
-	if (y0 < 0. && lane->height() <= y1) {
+			if (_editing_policy == ActiveView) {
+				_active_view->get_selectables (param, start, end, botfrac, topfrac, found);
+			} else if (_editing_policy == AllViews) {
+				for (auto & [region,view] : region_view_map) {
+					view->get_selectables (param, start, end, botfrac, topfrac, found);
+				}
+			}
 
-		/* _y_position is below top, mybot is above bot, so we're fully
-		   covered vertically.
-		*/
-
-		topfrac = 1.0;
-		botfrac = 0.0;
-
-	} else {
-
-		/* top and bot are within _y_position .. mybot */
-
-		topfrac = 1.0 - (y0 / lane->height());
-		botfrac = 1.0 - (y1 / lane->height());
-
-	}
-
-	if (_editing_policy == ActiveView) {
-
-		_active_view->get_selectables (param, start, end, botfrac, topfrac, found);
-
-	} else if (_editing_policy == AllViews) {
-
-		for (auto & [region,view] : region_view_map) {
-			view->get_selectables (param, start, end, botfrac, topfrac, found);
 		}
 	}
 
-	if (found.empty()) {
+	if (found.empty() && op == SelectionSet) {
 		if (_editing_policy == ActiveView) {
 			_active_view->clear_selection ();
+		} else if (_editing_policy == AllViews) {
+			for (auto & [region,view] : region_view_map) {
+				view->clear_selection ();
+			}
 		}
-
-	} else if (_editing_policy == AllViews) {
-
-		for (auto & [region,view] : region_view_map) {
-			view->clear_selection ();
-		}
+		return;
 	}
 
 	if (preserve_if_selected && op != SelectionToggle) {
@@ -2616,6 +2613,153 @@ Pianoroll::select_all_within (Temporal::timepos_t const & start, Temporal::timep
 		return;
 	}
 
+	point_selection_changed ();
+}
+
+bool
+Pianoroll::set_selected_control_point_from_click (bool press, SelectionOperation op)
+{
+	if (!clicked_control_point) {
+		return false;
+	}
+
+	bool ret = false;
+
+	switch (op) {
+	case SelectionSet:
+		if (!selection->selected (clicked_control_point)) {
+			selection->set (clicked_control_point);
+			ret = true;
+		} else {
+			/* clicked on an already selected point */
+			if (press) {
+				break;
+			} else {
+				if (selection->points.size() > 1) {
+					selection->set (clicked_control_point);
+					ret = true;
+				}
+			}
+		}
+		break;
+
+	case SelectionAdd:
+		if (press) {
+			selection->add (clicked_control_point);
+			ret = true;
+		}
+		break;
+	case SelectionToggle:
+
+		/* This is a bit of a hack; if we Primary-Click-Drag a control
+		   point (for push drag) we want the point we clicked on to be
+		   selected, otherwise we end up confusingly dragging an
+		   unselected point.  So here we ensure that the point is selected
+		   after the press, and if we subsequently get a release (meaning no
+		   drag occurred) we set things up so that the toggle has happened.
+		*/
+		if (press && !selection->selected (clicked_control_point)) {
+			/* This is the button press, and the control point is not selected; make it so,
+			   in case this press leads to a drag.  Also note that having done this, we don't
+			   need to toggle again on release.
+			*/
+			selection->toggle (clicked_control_point);
+			_control_point_toggled_on_press = true;
+			ret = true;
+		} else if (!press && !_control_point_toggled_on_press) {
+			/* This is the release, and the point wasn't toggled on the press, so do it now */
+			selection->toggle (clicked_control_point);
+			ret = true;
+		} else {
+			/* Reset our flag */
+			_control_point_toggled_on_press = false;
+		}
+		break;
+	case SelectionExtend:
+		/* XXX */
+		break;
+	default:
+		break;
+	}
+
+	return ret;
+}
+
+void
+Pianoroll::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
+{
+	/* see Editor::button_selection in editor_mouse.cc */
+
+	EC_LOCAL_TEMPO_SCOPE;
+
+	auto eff_mouse_mode = effective_mouse_mode ();
+
+	if (event->type == GDK_BUTTON_PRESS || event->type == GDK_BUTTON_RELEASE) {
+
+		if ((event->button.state & Keyboard::RelevantModifierKeyMask) && event->button.button != 1) {
+
+			/* almost no selection action on modified button-2 or button-3 events */
+
+			if ((item_type != RegionItem && event->button.button != 2)
+			    /* for selection of control points prior to delete (shift-right click) */
+			    && !(item_type == ControlPointItem && event->button.button == 3 && event->type == GDK_BUTTON_PRESS)) {
+				return;
+			}
+		}
+	}
+
+	SelectionOperation op = ArdourKeyboard::selection_type (event->button.state);
+	bool press = (event->type == GDK_BUTTON_PRESS);
+
+	if (press) {
+		_mouse_changed_selection = false;
+	}
+
+	switch (item_type) {
+		case ControlPointItem:
+			midi_action(&PianorollMidiView::clear_note_selection);
+			if (event->button.button != 3) {
+				_mouse_changed_selection |= set_selected_control_point_from_click (press, op);
+			} else {
+				_mouse_changed_selection |= set_selected_control_point_from_click (press, SelectionSet);
+			}
+			break;
+		case EditorAutomationLineItem:
+			if (eff_mouse_mode != Editing::MouseDraw) {
+				select_automation_line (&event->button, item, op);
+			}
+			break;
+		case NoteItem:
+			if (press && event->button.button == 3) {
+				NoteBase* cnote = reinterpret_cast<NoteBase*> (item->get_data ("notebase"));
+				assert (cnote);
+				if (cnote->midi_view().selection_size() == 0 || !cnote->selected()) {
+					selection->clear_points();
+					cnote->midi_view().unique_select (cnote);
+					/* we won't get the release, so store the selection change now */
+					begin_reversible_selection_op (X_("Button 3 Note Selection"));
+					commit_reversible_selection_op ();
+				}
+			}
+			break;
+		case StreamItem:
+			[[fallthrough]];
+		case AutomationTrackItem:
+			[[fallthrough]];
+		case VelocityBaseItem:
+			if (press && eff_mouse_mode == Editing::MouseContent && op == SelectionSet) {
+				midi_action(&PianorollMidiView::clear_selection);
+			}
+			break;
+		default:
+			break;
+	}
+
+	if ((!press) && _mouse_changed_selection) {
+		begin_reversible_selection_op (X_("Button Selection"));
+		commit_reversible_selection_op ();
+		_mouse_changed_selection = false;
+	}
 }
 
 void
@@ -3020,30 +3164,6 @@ Pianoroll::build_automation_menu ()
 	return automation_menu;
 }
 
-Gtk::Menu*
-Pianoroll::get_single_region_context_menu ()
-{
-	using namespace Gtk;
-	using namespace Menu_Helpers;
-
-	Menu* m = new Menu;
-	MenuList& items (m->items());
-
-	items.push_back (MenuElem (_("Quantize..."), sigc::mem_fun (*this, &EditingContext::quantize_region)));
-	items.push_back (MenuElem (_("Legatize"), sigc::bind(sigc::mem_fun (*this, &EditingContext::legatize_region), false)));
-	items.push_back (MenuElem (_("Transform..."), sigc::mem_fun (*this, &EditingContext::transform_region)));
-	items.push_back (MenuElem (_("Remove Overlap"), sigc::bind(sigc::mem_fun (*this, &EditingContext::legatize_region), true)));
-	// items.push_back (MenuElem (_("Insert Patch Change..."), sigc::bind (sigc::mem_fun (*this, &EditingContext::insert_patch_change), false)));
-	// items.push_back (MenuElem (_("Insert Patch Change..."), sigc::bind (sigc::mem_fun (*this, &EditingContext::insert_patch_change), true)));
-
-	Gtk::Menu* am = build_automation_menu ();
-	if (am) {
-		items.push_back (MenuElem (_("Automation"), *am));
-	}
-
-	return m;
-}
-
 EditingContext::MidiViews
 Pianoroll::midiviews_from_region_selection (RegionSelection const &) const
 {
@@ -3088,6 +3208,9 @@ Pianoroll::our_midi_view_selection_changed ()
 	std::sort (pitches.begin(), pitches.end());
 	std::string name = midi_inspector->chord_box->identify_chord (pitches);
 	midi_inspector->chord_box->show_chord (name);
+
+	/* ensure control points vs note exclusivity */
+	midi_action(&PianorollMidiView::clear_point_selection);
 }
 
 bool

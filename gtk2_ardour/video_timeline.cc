@@ -66,6 +66,9 @@ VideoTimeLine::VideoTimeLine (PublicEditor *ed, ArdourCanvas::Container *vbg, in
 	_flush_frames = false;
 	vmonitor=0;
 	reopen_vmonitor=false;
+
+	BootMessage (_("Detecing video tools"));
+
 	find_xjadeo();
 	find_harvid();
 	video_server_url = video_get_server_url(Config);

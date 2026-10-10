@@ -1249,10 +1249,11 @@ private:
 	double _fixed_grab_y;
 	double _cumulative_y_drag;
 	bool     _pushing;
-        uint32_t _final_index;
 	static double _zero_gain_fraction;
 
 	Temporal::timecnt_t total_dt (GdkEvent*) const;
+
+	std::vector<AutomationLine*> _dragged_lines;
 };
 
 /** Gain or automation line drag */
@@ -1339,7 +1340,7 @@ public:
 class MidiRubberbandSelectDrag : public RubberbandSelectDrag
 {
   public:
-	MidiRubberbandSelectDrag (EditingContext&, MidiView *);
+	MidiRubberbandSelectDrag (EditingContext&, MidiView *, std::function<bool(GdkEvent*,Temporal::timepos_t const &)> click_functor);
 
 	void select_things (int, Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, bool);
 	void deselect_things ();
@@ -1360,6 +1361,18 @@ public:
 
 private:
 	MidiView* _midi_view;
+};
+
+/** A RubberbandSelectDrag for selecting MIDI notes by velocity */
+class MidiLollipopsSelectDrag : public RubberbandSelectDrag
+{
+public:
+	MidiLollipopsSelectDrag (EditingContext&, ArdourCanvas::Item *, std::function<bool(GdkEvent*,Temporal::timepos_t const &)> click_functor);
+
+	void select_things (int, Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, bool);
+
+private:
+	VelocityDisplay* _display;
 };
 
 /** Region drag in time-FX mode */

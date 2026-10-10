@@ -110,6 +110,7 @@ AutomationLine::AutomationLine (const string&                   name,
 	, _parent_group (parent)
 	, _drag_base (drag_base)
 	, _offset (0)
+	, _inf_recovery_val (0)
 	, _maximum_time (timepos_t::max (al->time_domain()))
 	, _fill (false)
 	, _desc (desc)
@@ -727,7 +728,7 @@ AutomationLine::dt_to_dx (timepos_t const & pos, timecnt_t const & dt)
  *  @return x position and y fraction that were actually used (once clamped).
  */
 pair<float, float>
-AutomationLine::drag_motion (timecnt_t const & pdt, float fraction, bool ignore_x, bool with_push, uint32_t& final_index)
+AutomationLine::drag_motion (timecnt_t const & pdt, float fraction, bool ignore_x, bool with_push)
 {
 	if (_drag_points.empty()) {
 		return pair<float, float> (fraction, _desc.is_linear () ? 0.0f : 1.0f);
@@ -775,9 +776,16 @@ AutomationLine::drag_motion (timecnt_t const & pdt, float fraction, bool ignore_
 		_drag_had_movement = true;
 	}
 
-	/* OK, now on to the stuff related to *this* motion event. First, for
-	 * each contiguous range, figure out the maximum x-axis motion we are
-	 * allowed (because of neighbouring points that are not moving.
+	/* OK, now on to the stuff related to *this* motion event. First,
+	 * ensure we are not moving a x-locked point within a contiguous range
+	 */
+
+	if (!_drag_points.front()->can_slide() || !_drag_points.back()->can_slide()) {
+		dt = timecnt_t (0);
+	}
+
+	/* Then, figure out the maximum x-axis motion we are allowed
+	 * (because of neighbouring points that are not moving).
 	 *
 	 * if we are moving forwards with push, we don't need to do this,
 	 * since all later points will move too.
@@ -787,12 +795,6 @@ AutomationLine::drag_motion (timecnt_t const & pdt, float fraction, bool ignore_
 		const timepos_t line_limit = maximum_time() + _offset;
 		for (auto const & ccp : contiguous_points){
 			dt = ccp->clamp_dt (dt, line_limit);
-		}
-		if (!_drag_points.front()->can_slide() || !_drag_points.back()->can_slide()) {
-			/* ControlPointDrag::motion only checks if grabbed point can slide
-			 * ensure we are not moving a x-locked point within a contiguous range
-			 */
-			dt = timecnt_t (0);
 		}
 	}
 
@@ -804,6 +806,8 @@ AutomationLine::drag_motion (timecnt_t const & pdt, float fraction, bool ignore_
 		view_to_model_coord_y (value0);
 		view_to_model_coord_y (value1);
 		delta_value = compute_delta (value0, value1);
+		/* store absolute value in case we need to recover from -inf */
+		_inf_recovery_val = value1;
 	}
 
 	/* special case -inf */
@@ -835,15 +839,31 @@ AutomationLine::drag_motion (timecnt_t const & pdt, float fraction, bool ignore_
 		}
 
 		if (with_push) {
-			final_index = contiguous_points.back()->back()->view_index () + 1;
+			/* move all pushed points, between contiguous sets of selected points
+			 * and after the last selected point
+			 */
 			ControlPoint* p;
-			uint32_t i = final_index;
+			vector<CCP>::iterator next_ccp;
+			uint32_t start;
+			uint32_t end;
 
-			while ((p = nth (i)) != 0 && p->can_slide()) {
+			for (vector<CCP>::iterator ccp = contiguous_points.begin(); ccp != contiguous_points.end(); ++ccp) {
 
-				p->move_to (dt_to_dx ((*p->model())->when, dt), p->get_y(), ControlPoint::Full);
-				reset_line_coords (*p);
-				++i;
+				if ((*ccp) != contiguous_points.back()) {
+					next_ccp = ccp + 1;
+					start = (*ccp)->back()->view_index () + 1;
+					end = (*next_ccp)->front()->view_index () - 1;
+				} else {
+					start = (*ccp)->back()->view_index () + 1;
+					end = control_points.size() - 1;
+				}
+
+				for (uint32_t i = start; i <= end; i++) {
+					if ((p = nth (i)) != 0 && p->can_slide()) {
+						p->move_to (dt_to_dx ((*p->model())->when, dt), p->get_y(), ControlPoint::Full);
+						reset_line_coords (*p);
+					}
+				}
 			}
 		}
 
@@ -875,7 +895,7 @@ AutomationLine::drag_motion (timecnt_t const & pdt, float fraction, bool ignore_
 
 /** Should be called to indicate the end of a drag */
 void
-AutomationLine::end_drag (bool with_push, uint32_t final_index)
+AutomationLine::end_drag (bool with_push)
 {
 	if (!_drag_had_movement) {
 		return;
@@ -885,11 +905,30 @@ AutomationLine::end_drag (bool with_push, uint32_t final_index)
 	bool moved = sync_model_with_view_points (_drag_points);
 
 	if (with_push) {
+		/* sync all pushed points, between contiguous sets of selected points
+		 * and after the last selected point
+		 */
 		ControlPoint* p;
-		uint32_t i = final_index;
-		while ((p = nth (i)) != 0 && p->can_slide()) {
-			moved = sync_model_with_view_point (*p) || moved;
-			++i;
+		vector<CCP>::iterator next_ccp;
+		uint32_t start;
+		uint32_t end;
+
+		for (vector<CCP>::iterator ccp = contiguous_points.begin(); ccp != contiguous_points.end(); ++ccp) {
+
+				if ((*ccp) != contiguous_points.back()) {
+					next_ccp = ccp + 1;
+					start = (*ccp)->back()->view_index () + 1;
+					end = (*next_ccp)->front()->view_index () - 1;
+				} else {
+					start = (*ccp)->back()->view_index () + 1;
+					end = control_points.size() - 1;
+				}
+
+				for (uint32_t i = start; i <= end; i++) {
+					if ((p = nth (i)) != 0 && p->can_slide()) {
+						moved = sync_model_with_view_point (*p) || moved;
+					}
+				}
 		}
 	}
 
@@ -907,6 +946,13 @@ AutomationLine::end_drag (bool with_push, uint32_t final_index)
 
 	_editing_context.session()->set_dirty ();
 	did_push = false;
+
+	if (with_push) {
+		/* we may have pushed some points beyond the region's end and these will be truncated,
+		 * make sure the we're up to date.
+		 */
+		reset();
+	}
 
 	contiguous_points.clear ();
 }
@@ -1605,8 +1651,7 @@ AutomationLine::apply_delta (double& val, double delta) const
 {
 	if (val == 0 && !_desc.is_linear () && delta >= 1.0) {
 		/* recover from -inf */
-		val = 1.0 / _height;
-		view_to_model_coord_y (val);
+		val = _inf_recovery_val;
 		return;
 	}
 	val = _desc.apply_delta (val, delta);

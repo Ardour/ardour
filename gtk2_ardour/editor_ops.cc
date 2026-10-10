@@ -6496,7 +6496,7 @@ Editor::fade_range ()
 void
 Editor::set_fade_length (bool in)
 {
-	RegionSelection rs = get_regions_from_selection_and_entered ();
+	RegionSelection rs = get_regions_from_selection_and_edit_point ();
 
 	if (rs.empty()) {
 		return;
@@ -6510,24 +6510,21 @@ Editor::set_fade_length (bool in)
 	timecnt_t len;
 	char const * cmd;
 
-	if (pos > rv->region()->last_sample() || pos < rv->region()->first_sample()) {
-		/* edit point is outside the relevant region */
-		return;
-	}
-
 	if (in) {
 		if (pos <= rv->region()->position()) {
-			/* can't do it */
-			return;
+			/* min fade-in length */
+			len = timecnt_t (0);
+		} else {
+			len = rv->region()->position().distance (pos);
 		}
-		len = rv->region()->position().distance (pos);
 		cmd = _("set fade in length");
 	} else {
 		if (pos >= rv->region()->last_sample()) {
-			/* can't do it */
-			return;
+			/* min fade-out length */
+			len = timecnt_t (0);
+		} else {
+			len = pos.distance (rv->region()->nt_last());
 		}
-		len = pos.distance (rv->region()->nt_last());
 		cmd = _("set fade out length");
 	}
 

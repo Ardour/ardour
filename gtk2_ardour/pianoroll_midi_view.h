@@ -73,6 +73,7 @@ class PianorollMidiView : public MidiView
 
 	void point_selection_changed ();
 	void clear_selection ();
+	void clear_point_selection ();
 
 	sigc::signal<void> AutomationStateChange;
 
@@ -137,6 +138,10 @@ class PianorollMidiView : public MidiView
 
 	void update_sustained (Note *);
 	void update_hit (Hit *);
+
+	bool update_drag_selection (Temporal::timepos_t const & start, Temporal::timepos_t const & end, double y0, double y1, bool extend, bool drag_in_progress);
+	void update_vertical_drag_selection (double last_y, double y, bool extend);
+	bool select_notes_by_velocity (Temporal::timepos_t const & start, Temporal::timepos_t const & end, int velocity_min, int velocity_max, bool add);
 
 	double _height;
 

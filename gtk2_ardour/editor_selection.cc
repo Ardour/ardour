@@ -1330,8 +1330,6 @@ Editor::sensitize_all_region_actions (bool s)
 	for (Glib::ListHandle<Glib::RefPtr<Action> >::iterator i = all.begin(); i != all.end(); ++i) {
 		(*i)->set_sensitive (s);
 	}
-
-	_all_region_actions_sensitized = s;
 }
 
 /** Sensitize region-based actions.
@@ -1670,8 +1668,6 @@ Editor::sensitize_the_right_region_actions (bool because_canvas_crossing)
 	}
 
 	_ignore_region_action = false;
-
-	_all_region_actions_sensitized = false;
 }
 
 void

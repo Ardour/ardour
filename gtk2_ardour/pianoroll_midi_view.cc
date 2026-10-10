@@ -204,6 +204,11 @@ PianorollMidiView::scroll (GdkEventScroll* ev)
 			_editing_context.temporal_zoom_step_mouse_focus (false);
 			return true;
 		}
+        if (!UIConfiguration::instance().get_scroll_velocity_editing ()) {
+            if (_midi_context.scroll (ev)) {
+                return true;
+            }
+        }
 		break;
 	case GDK_SCROLL_DOWN:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollHorizontalModifier)) {
@@ -214,6 +219,11 @@ PianorollMidiView::scroll (GdkEventScroll* ev)
 			_editing_context.temporal_zoom_step_mouse_focus (true);
 			return true;
 		}
+        if (!UIConfiguration::instance().get_scroll_velocity_editing ()) {
+            if (_midi_context.scroll (ev)) {
+                return true;
+            }
+        }
 		break;
 	default:
 		break;
@@ -270,6 +280,9 @@ PianorollMidiView::ghosts_model_changed ()
 		lane->velocity_display->clear();
 		for (auto & ev : _events) {
 			lane->velocity_display->add_note (ev.second);
+			if (ev.second->selected ()) {
+				lane->velocity_display->note_selected (ev.second);
+			}
 		}
 	}
 }
@@ -328,6 +341,61 @@ PianorollMidiView::update_hit (Hit* h)
 	if (lane) {
 		lane->velocity_display->update_note (h);
 	}
+}
+
+
+bool
+PianorollMidiView::update_drag_selection(timepos_t const & start, timepos_t const & end, double gy0, double gy1, bool extend, bool drag_in_progress)
+{
+    Pianoroll* p = static_cast<Pianoroll*>(&_editing_context);
+
+    if (p->editing_policy () == Pianoroll::ActiveView) {
+        return MidiView::update_drag_selection (start, end, gy0, gy1, extend, drag_in_progress);
+    } else if (p->editing_policy () == Pianoroll::AllViews) {
+        bool ret = false;
+        for (auto & [region,view] : p->get_region_view_map ()) {
+            if (view->MidiView::update_drag_selection (start, end, gy0, gy1, extend, drag_in_progress)) {
+                ret = true;
+            }
+		}
+        return ret;
+    }
+
+    return false;
+}
+
+void
+PianorollMidiView::update_vertical_drag_selection (double y1, double y2, bool extend)
+{
+    Pianoroll* p = static_cast<Pianoroll*>(&_editing_context);
+
+    if (p->editing_policy () == Pianoroll::ActiveView) {
+        MidiView::update_vertical_drag_selection (y1, y2, extend);
+    } else if (p->editing_policy () == Pianoroll::AllViews) {
+        for (auto & [region,view] : p->get_region_view_map ()) {
+            view->MidiView::update_vertical_drag_selection (y1, y2, extend);
+		}
+    }
+}
+
+bool
+PianorollMidiView::select_notes_by_velocity (Temporal::timepos_t const & start, Temporal::timepos_t const & end, int velocity_min, int velocity_max, bool add)
+{
+    Pianoroll* p = static_cast<Pianoroll*>(&_editing_context);
+
+    if (p->editing_policy () == Pianoroll::ActiveView) {
+        return MidiView::select_notes_by_velocity (start, end, velocity_min, velocity_max, add);
+    } else if (p->editing_policy () == Pianoroll::AllViews) {
+        bool ret = false;
+        for (auto & [region,view] : p->get_region_view_map ()) {
+            if (view->MidiView::select_notes_by_velocity (start, end, velocity_min, velocity_max, add)) {
+                ret = true;
+            }
+		}
+        return ret;
+    }
+
+    return false;
 }
 
 void
@@ -603,10 +671,10 @@ PianorollMidiView::AutomationLane::set_height (double h)
 void
 PianorollMidiView::point_selection_changed ()
 {
-	AutomationLane* lane = automation_lane_by_param (active_automation_parameter);
-
-	if (lane && lane->line) {
-		lane->line->set_selected_points (_editing_context.get_selection().points);
+	for (auto & [param,lane] : automation_map) {
+		if (lane->line) {
+			lane->line->set_selected_points (_editing_context.get_selection().points);
+		}
 	}
 }
 
@@ -614,6 +682,12 @@ void
 PianorollMidiView::clear_selection ()
 {
 	MidiView::clear_note_selection ();
+	clear_point_selection();
+}
+
+void
+PianorollMidiView::clear_point_selection ()
+{
 	PointSelection empty;
 
 	for (auto & [param,lane] : automation_map) {
@@ -621,6 +695,8 @@ PianorollMidiView::clear_selection ()
 			lane->line->set_selected_points (empty);
 		}
 	}
+
+    _editing_context.get_selection().clear_points ();
 }
 
 void
@@ -751,6 +827,8 @@ PianorollMidiView::cut_copy_points (Editing::CutCopyOp op, timepos_t const & ear
 			std::shared_ptr<AutomationList> al = line.the_list();
 			al->erase (selected_point->model ());
 		}
+
+		clear_point_selection ();
 
 		/* Thaw the lists and add undo records for them */
 		for (Lists::iterator i = lists.begin(); i != lists.end(); ++i) {

@@ -59,12 +59,13 @@ TransportMasterManager::create ()
 
 	_instance = new TransportMasterManager;
 
+	/* these are always present and not nonremovable */
+	_instance->set_default_configuration ();
+
 	XMLNode* tmm_node = Config->transport_master_state ();
 
 	if (tmm_node) {
 		_instance->set_state (*tmm_node, Stateful::current_state_version);
-	} else {
-		_instance->set_default_configuration ();
 	}
 
 	return *_instance;
@@ -73,18 +74,17 @@ TransportMasterManager::create ()
 int
 TransportMasterManager::set_default_configuration ()
 {
+	DEBUG_TRACE (DEBUG::Slave, "TransportMasterManager::set_default_configuration\n");
+	PBD::RWLock::WriterLock lm (_lock);
+	assert ( _transport_masters.empty ());
 	try {
+		_current_master.reset ();
 
-		clear ();
-
-		/* setup default transport masters. Most people will never need any
-		   others
-		*/
-
-		add (Engine, X_("JACK Transport"), false);
-		add (MTC, X_("MTC"), false);
-		add (LTC, X_("LTC"), false);
-		add (MIDIClock, X_("MIDI Clock"), false);
+		add_locked (TransportMaster::factory (Engine, X_("JACK Transport"), false));
+		add_locked (TransportMaster::factory (WallClock, X_("Wall Clock"), false));
+		add_locked (TransportMaster::factory (MTC, X_("MTC"), false));
+		add_locked (TransportMaster::factory (LTC, X_("LTC"), false));
+		add_locked (TransportMaster::factory (MIDIClock, X_("MIDI Clock"), false));
 
 	} catch (...) {
 		return -1;
@@ -398,12 +398,12 @@ TransportMasterManager::init_transport_master_dll (double speed, samplepos_t pos
 }
 
 int
-TransportMasterManager::add (SyncSource type, std::string const & name, bool removeable)
+TransportMasterManager::add (SyncSource type, std::string const & name)
 {
 	int ret = 0;
 	std::shared_ptr<TransportMaster> tm;
 
-	DEBUG_TRACE (DEBUG::Slave, string_compose ("adding new transport master, type %1 name %2 removeable %3\n", enum_2_string (type), name, removeable));
+	DEBUG_TRACE (DEBUG::Slave, string_compose ("adding new transport master, type %1 name %2\n", enum_2_string (type), name));
 
 	{
 		PBD::RWLock::WriterLock lm (_lock);
@@ -415,7 +415,7 @@ TransportMasterManager::add (SyncSource type, std::string const & name, bool rem
 			}
 		}
 
-		tm = TransportMaster::factory (type, name, removeable);
+		tm = TransportMaster::factory (type, name, true);
 
 		if (!tm) {
 			return -1;
@@ -478,6 +478,13 @@ TransportMasterManager::remove (std::string const & name)
 	return ret;
 }
 
+std::shared_ptr<TransportMaster>
+TransportMasterManager::current() const
+{
+	PBD::RWLock::ReaderLock lm (_lock);
+	return _current_master;
+}
+
 int
 TransportMasterManager::set_current_locked (std::shared_ptr<TransportMaster> c)
 {
@@ -490,7 +497,7 @@ TransportMasterManager::set_current_locked (std::shared_ptr<TransportMaster> c)
 
 	maybe_restore_tc_format ();
 
-	if (!c->usable()) {
+	if (!c || !c->usable()) {
 		return -1;
 	}
 
@@ -613,22 +620,27 @@ TransportMasterManager::set_state (XMLNode const & node, int version)
 	{
 		PBD::RWLock::WriterLock lm (_lock);
 
-		_current_master.reset ();
-#if 0
-		boost_debug_list_ptrs ();
-#endif
+		for (auto const c: children) {
+			bool removeable;
+			if (!c->get_property (X_("removeable"), removeable)) {
+				continue;
+			}
 
-		/* TramsportMasters live for the entire life of the
-		 * program. TransportMasterManager::set_state() should only be
-		 * called at the start of the program, and there should be no
-		 * transport masters at that time.
-		 */
+			/* non-removable factory TMs are always present */
+			if (!removeable) {
+				std::string name;
+				if (!c->get_property (X_("name"), name)) {
+					continue;
+				}
+				for (auto const& tm: _transport_masters) {
+					if (tm->name() == name) {
+						tm->set_state (*c, version);
+					}
+				}
+				continue;
+			}
 
-		assert (_transport_masters.empty());
-
-		for (XMLNodeList::const_iterator c = children.begin(); c != children.end(); ++c) {
-
-			std::shared_ptr<TransportMaster> tm = TransportMaster::factory (**c);
+			std::shared_ptr<TransportMaster> tm = TransportMaster::factory (*c);
 
 			if (!tm) {
 				continue;
@@ -640,17 +652,18 @@ TransportMasterManager::set_state (XMLNode const & node, int version)
 				continue;
 			}
 
-			/* we know it is the last thing added to the list of masters */
+			_transport_masters.back()->set_state (*c, version);
+		}
 
-			_transport_masters.back()->set_state (**c, version);
+		std::string current_master;
+		if (node.get_property (X_("current"), current_master)) {
+			for (auto const& tm: _transport_masters) {
+				if (tm->name() == current_master) {
+					set_current_locked (tm);
+				}
+			}
 		}
 	}
-
-	/* fallback choice, lives on until ::restart() is called after the
-	 * engine is running.
-	 */
-
-	set_current (MTC);
 
 	return 0;
 }
@@ -718,34 +731,15 @@ TransportMasterManager::engine_stopped ()
 void
 TransportMasterManager::restart ()
 {
-	XMLNode* node;
-
-	if ((node = Config->transport_master_state()) != 0) {
-
-		{
-			PBD::RWLock::ReaderLock lm (_lock);
-
-			for (TransportMasters::const_iterator tm = _transport_masters.begin(); tm != _transport_masters.end(); ++tm) {
-				(*tm)->connect_port_using_state ();
-				(*tm)->reset (false);
-			}
+	if (!_transport_masters.empty ()) {
+		for (auto const& tm : _transport_masters) {
+				tm->connect_port_using_state ();
+				tm->reset (false);
 		}
-
-		/* engine is running, connections are viable ... try to set current */
-
-		std::string current_master;
-
-		if (node->get_property (X_("current"), current_master)) {
-
-			/* may fal if current_master is not usable */
-
-			set_current (current_master);
-		}
-
 	} else {
 		if (TransportMasterManager::instance().set_default_configuration ()) {
-			error << _("Cannot initialize transport master manager") << endmsg;
-			/* XXX now what? */
+			fatal << _("Cannot initialize transport master manager") << endmsg;
+			abort(); /*NOTREACHED*/
 		}
 	}
 }

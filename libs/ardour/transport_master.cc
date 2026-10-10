@@ -387,6 +387,9 @@ TransportMaster::factory (SyncSource type, std::string const& name, bool removea
 		case Engine:
 			tm.reset (new Engine_TransportMaster (*AudioEngine::instance()));
 			break;
+		case WallClock:
+			tm.reset (new WallClock_TransportMaster (name));
+			break;
 		default:
 			break;
 		}
@@ -447,7 +450,18 @@ TransportMaster::display_name (bool sh) const
 		} else {
 			return name();
 		}
+
+	case WallClock:
+		if (sh) {
+			if (name().length() <= 4) {
+				return name();
+			}
+			return S_("SyncSource|Now");
+		} else {
+			return name();
+		}
 	}
+
 	/* GRRRR .... stupid, stupid gcc - you can't get here from there, all enum values are handled */
 	return S_("SyncSource|JACK");
 }

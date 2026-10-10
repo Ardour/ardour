@@ -104,14 +104,14 @@ AudioRegionGainLine::remove_point (ControlPoint& cp)
 }
 
 void
-AudioRegionGainLine::end_drag (bool with_push, uint32_t final_index)
+AudioRegionGainLine::end_drag (bool with_push)
 {
 	if (!arv.audio_region()->envelope_active()) {
 		arv.audio_region()->set_envelope_active(true);
 		trackview.session()->add_command(new MementoCommand<AudioRegion>(*(arv.audio_region().get()), 0, &arv.audio_region()->get_state()));
 	}
 
-	RegionFxLine::end_drag (with_push, final_index);
+	RegionFxLine::end_drag (with_push);
 }
 
 void

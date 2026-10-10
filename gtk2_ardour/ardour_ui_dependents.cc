@@ -252,6 +252,8 @@ tab_window_root_drop (GtkNotebook* src,
 int
 ARDOUR_UI::setup_windows ()
 {
+	BootMessage (_("Setting up GUI"));
+
 	_tabs.set_show_border(false);
 	_tabs.signal_switch_page().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_switch));
 	_tabs.signal_page_added().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_page_added));

@@ -32,7 +32,7 @@ public:
 
 	RegionView& region_view () { return _rv; }
 
-	void end_drag (bool with_push, uint32_t final_index);
+	void end_drag (bool with_push);
 	void end_draw_merge ();
 
 	virtual void enable_automation ();

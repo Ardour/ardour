@@ -1426,11 +1426,6 @@ Editor::register_region_actions ()
 	/* Separate under selected regions: XXX not sure what this does */
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "separate-under-region", _("Separate Under"), sigc::mem_fun (*this, &Editor::separate_under_selected_regions));
 
-	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "set-fade-in-length", _("Set Fade In Length"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_length), true));
-	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "alternate-set-fade-in-length", _("Set Fade In Length"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_length), true));
-	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "set-fade-out-length", _("Set Fade Out Length"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_length), false));
-	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "alternate-set-fade-out-length", _("Set Fade Out Length"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_length), false));
-
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "set-tempo-from-region", _("Set Tempo from Region = Bar"), sigc::mem_fun (*this, &Editor::set_tempo_from_region));
 
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "split-region-at-transients", _("Split at Percussion Onsets"), sigc::mem_fun(*this, &Editor::split_region_at_transients));
@@ -1499,8 +1494,8 @@ Editor::register_region_actions ()
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EditPointRegions), "clear-region-cue-markers", _("Clear Region Cue Markers"), sigc::mem_fun (*this, &Editor::clear_region_markers));
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EditPointRegions), "set-region-sync-position", _("Set Sync Position"), sigc::mem_fun (*this, &Editor::set_region_sync_position));
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EditPointRegions), "place-transient", _("Place Transient"), sigc::mem_fun (*this, &Editor::place_transient));
-	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EditPointRegions), "trim-front", _("Trim Start at Edit Point"), sigc::mem_fun (*this, &Editor::trim_region_front));
-	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EditPointRegions), "trim-back", _("Trim End at Edit Point"), sigc::mem_fun (*this, &Editor::trim_region_back));
+	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EditPointRegions|EnteredRegions), "trim-front", _("Trim Start at Edit Point"), sigc::mem_fun (*this, &Editor::trim_region_front));
+	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EditPointRegions|EnteredRegions), "trim-back", _("Trim End at Edit Point"), sigc::mem_fun (*this, &Editor::trim_region_back));
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EditPointRegions), "align-regions-start", _("Align Start"), sigc::bind (sigc::mem_fun(*this, &Editor::align_regions), ARDOUR::Start));
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EditPointRegions), "align-regions-start-relative", _("Align Start Relative"), sigc::bind (sigc::mem_fun (*this, &Editor::align_regions_relative), ARDOUR::Start));
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EditPointRegions), "align-regions-end", _("Align End"), sigc::bind (sigc::mem_fun (*this, &Editor::align_regions), ARDOUR::End));
@@ -1509,8 +1504,13 @@ Editor::register_region_actions ()
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EditPointRegions), "align-regions-sync-relative", _("Align Sync Relative"), sigc::bind (sigc::mem_fun (*this, &Editor::align_regions_relative), ARDOUR::SyncPoint));
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EditPointRegions), "choose-top-region", _("Choose Top..."), sigc::bind (sigc::mem_fun (*this, &Editor::change_region_layering_order), false));
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EditPointRegions), "choose-top-region-context-menu", _("Choose Top..."), sigc::bind (sigc::mem_fun (*this, &Editor::change_region_layering_order), true));
+	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EditPointRegions|EnteredRegions), "set-fade-in-length", _("Set Fade In Length"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_length), true));
+	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EditPointRegions|EnteredRegions), "alternate-set-fade-in-length", _("Set Fade In Length"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_length), true));
+	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EditPointRegions|EnteredRegions), "set-fade-out-length", _("Set Fade Out Length"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_length), false));
+	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EditPointRegions|EnteredRegions), "alternate-set-fade-out-length", _("Set Fade Out Length"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_length), false));
 
-	/* desensitize them all by default. region selection will change this */
+
+	/* desensitize them all by default. region selection & entered region will change this */
 	sensitize_all_region_actions (false);
 }
 

@@ -106,8 +106,8 @@ public:
 	virtual void start_drag_single (ControlPoint*, double, float);
 	virtual void start_drag_line (uint32_t, uint32_t, float);
 	virtual void start_drag_multiple (std::list<ControlPoint*>, float, XMLNode *);
-	virtual std::pair<float, float> drag_motion (Temporal::timecnt_t const &, float, bool, bool with_push, uint32_t& final_index);
-	virtual void end_drag (bool with_push, uint32_t final_index);
+	virtual std::pair<float, float> drag_motion (Temporal::timecnt_t const &, float, bool, bool with_push);
+	virtual void end_drag (bool with_push);
 	virtual void end_draw_merge () {}
 
 	ControlPoint* nth (uint32_t);
@@ -261,6 +261,8 @@ private:
 	 *  a +ve offset means that the 0 on the line is at _offset in the list
 	 */
 	Temporal::timepos_t _offset;
+
+	double _inf_recovery_val;
 
 	bool is_stepped() const;
 	void update_visibility ();

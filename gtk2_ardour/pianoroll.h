@@ -132,9 +132,8 @@ class Pianoroll : public CueEditor, public SlipDraggable
 	double max_extents_scale() const { return 1.2; }
 	void set_samples_per_pixel (samplecnt_t);
 
-	void set_mouse_mode (Editing::MouseMode, bool force = false);
-
 	void midi_action (void (MidiView::*method)());
+	void midi_action (void (PianorollMidiView::*method)());
 
 	std::list<SelectableOwner*> selectable_owners();
 	void select_all_within (Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, std::list<SelectableOwner*> const &, ARDOUR::SelectionOperation, bool);
@@ -205,6 +204,9 @@ class Pianoroll : public CueEditor, public SlipDraggable
 	void our_midi_view_selection_changed ();
 	void set_inspector_visibility (bool);
 
+	typedef std::map<std::shared_ptr<ARDOUR::Region>, PianorollMidiView*> RegionMidiViewMap;
+	RegionMidiViewMap get_region_view_map () {return region_view_map;}
+
   protected:
 	Temporal::timepos_t snap_to_grid (Temporal::timepos_t const & start,
 	                                  Temporal::RoundMode   direction,
@@ -218,6 +220,7 @@ class Pianoroll : public CueEditor, public SlipDraggable
 	bool button_press_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool button_press_handler_1 (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool button_press_handler_2 (ArdourCanvas::Item*, GdkEvent*, ItemType);
+	bool button_press_handler_3 (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool button_release_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool button_press_dispatch (GdkEventButton*);
 	bool button_release_dispatch (GdkEventButton*);
@@ -268,7 +271,6 @@ class Pianoroll : public CueEditor, public SlipDraggable
 
 	PianorollMidiBackground* bg;
 
-	typedef std::map<std::shared_ptr<ARDOUR::Region>, PianorollMidiView*> RegionMidiViewMap;
 	RegionMidiViewMap region_view_map;
 	void region_going_away (std::weak_ptr<ARDOUR::Region> region);
 
@@ -331,6 +333,7 @@ class Pianoroll : public CueEditor, public SlipDraggable
 
 	Gtk::Menu _region_context_menu;
 	void popup_region_context_menu (ArdourCanvas::Item* item, GdkEvent* event);
+	void popup_control_point_context_menu (ArdourCanvas::Item* item, GdkEvent* event);
 
 	void set_note_selection (uint8_t note);
 	void add_note_selection (uint8_t note);
@@ -349,7 +352,6 @@ class Pianoroll : public CueEditor, public SlipDraggable
 	void parameter_changed (std::string param);
 	void set_from_rsu (RegionUISettings&);
 
-	Gtk::Menu* get_single_region_context_menu ();
 	MidiViews midiviews_from_region_selection (RegionSelection const &) const;
 
 	void setup_colors ();
@@ -380,4 +382,9 @@ class Pianoroll : public CueEditor, public SlipDraggable
 
 	void set_sensitivities ();
 	PianorollMidiView* empty_view;
+
+	void button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type);
+	bool set_selected_control_point_from_click (bool press, ARDOUR::SelectionOperation op = ARDOUR::SelectionSet);
+	ControlPoint*      clicked_control_point;
+	bool               _control_point_toggled_on_press;
 };

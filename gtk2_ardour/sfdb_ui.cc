@@ -1546,7 +1546,7 @@ SoundFileOmega::reset_options ()
 		action_combo.set_sensitive (false);
 		sort_combo.set_sensitive (false);
 		where_combo.set_sensitive (false);
-		transient_btn.set_active (true);
+		// transient_btn.set_active (true);
 		copy_files_btn.set_active (true);
 		copy_files_btn.set_sensitive (false);
 		midi_track_name_combo.set_sensitive (false);

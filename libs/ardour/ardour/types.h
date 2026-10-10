@@ -664,6 +664,7 @@ enum SyncSource {
 	MTC,
 	MIDIClock,
 	LTC,
+	WallClock,
 };
 
 enum TransportRequestSource {
@@ -673,6 +674,7 @@ enum TransportRequestSource {
 	TRS_LTC,
 	TRS_MMC,
 	TRS_UI,
+	TRS_WallClock,
 };
 
 enum TransportRequestType {

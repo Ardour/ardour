@@ -522,6 +522,58 @@ BasicUI::toggle_all_rec_enables ()
 	session->toggle_all_tracks_record_enabled ();
 }
 
+/* Essentially:
+   1) Arm/disarm tracks, 2) master record enable/disable, 3) transport start/stop
+   (e.g. it might:
+   - arm all tracks if none are armed, record enable,
+   and start recording
+   - disarm all tracks, and transport stop)
+*/
+void
+BasicUI::arm_tracks_toggle_punch ()
+{
+	if (!transport_rolling()) {
+		/* enable all rec-enabled tracks if there are none */
+		if (!session->have_rec_enabled_track()) {
+			toggle_all_rec_enables();
+		}
+		/* rec-enable if it is disabled */
+		if (session->record_status() == Disabled) {
+			rec_enable_toggle();
+		}
+		/* start transport */
+		transport_play();
+	}
+	else {
+		/* stop transport (master rec disabled during this) */
+		transport_stop();
+		/* disable all rec-enabled tracks */
+		if (session->have_rec_enabled_track()) {
+			toggle_all_rec_enables();
+		}
+	}
+}
+
+/* Same thing as arm_tracks_toggle_punch,
+   aside from the fact it does not arm tracks.
+*/
+void
+BasicUI::toggle_punch ()
+{
+	if (!transport_rolling()) {
+		/* rec-enable if it is disabled */
+		if (session->record_status() == Disabled) {
+			rec_enable_toggle();
+		}
+		/* start transport */
+		transport_play();
+	}
+	else {
+		/* stop transport (master rec disabled during this) */
+		transport_stop();
+	}
+}
+
 void
 BasicUI::toggle_punch_in ()
 {
