@@ -1035,10 +1035,10 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 		.addFunction ("select_all_tracks", &PublicEditor::select_all_tracks)
 		.addFunction ("deselect_all", &PublicEditor::deselect_all)
 
-#if 0 // TimeAxisView&  can't be bound (pure virtual fn)
 		.addFunction ("set_selected_track", &PublicEditor::set_selected_track)
-		.addFunction ("set_selected_mixer_strip", &PublicEditor::set_selected_mixer_strip)
 		.addFunction ("ensure_time_axis_view_is_visible", &PublicEditor::ensure_time_axis_view_is_visible)
+#if 0 // TimeAxisView&  can't be bound (pure virtual fn)
+		.addFunction ("set_selected_mixer_strip", &PublicEditor::set_selected_mixer_strip)
 #endif
 		.addFunction ("hide_track_in_display", &PublicEditor::hide_track_in_display)
 		.addFunction ("show_track_in_display", &PublicEditor::show_track_in_display)
