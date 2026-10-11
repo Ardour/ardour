@@ -194,7 +194,7 @@ EditorGroupTabs::add_menu_items (Gtk::Menu* m, std::shared_ptr<RouteGroup> g)
 		MenuList& items = m->items ();
 		std::weak_ptr<RouteGroup> wg (g);
 
-		items.push_back (MenuElem (_("Fit to Window"), [&wg,this]() { std::shared_ptr<RouteGroup> g (wg.lock()); if (g) { _editor.fit_route_group (g); }}));
+		items.push_back (MenuElem (_("Fit to Window"), [wg,this]() { std::shared_ptr<RouteGroup> g (wg.lock()); if (g) { _editor.fit_route_group (g); }}));
 	}
 }
 
