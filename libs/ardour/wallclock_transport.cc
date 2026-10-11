@@ -20,6 +20,8 @@
 #include "ardour/session.h"
 #include "ardour/transport_master.h"
 
+#include "pbd/localtime_r.h"
+
 using namespace ARDOUR;
 using namespace PBD;
 
