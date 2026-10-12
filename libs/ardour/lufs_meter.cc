@@ -50,9 +50,11 @@ LUFSMeter::FilterState::sanitize ()
 	z4 = !isfinite_local (z4) ? 0 : z4;
 }
 
-LUFSMeter::LUFSMeter (double samplerate, uint32_t n_channels)
+LUFSMeter::LUFSMeter (double samplerate, uint32_t n_channels, bool lu_hist)
 	: _samplerate (samplerate)
 	, _n_channels (n_channels)
+	, _lu_history (lu_hist)
+	, _rb (_lu_history ? 128 : 4)
 {
 	if (_n_channels > 5 || _n_channels == 0) {
 		throw failed_constructor ();
@@ -234,9 +236,20 @@ LUFSMeter::run (float const** data, uint32_t n_samples)
 			}
 
 			if (++_lu_s_div == 5) {
+				/* every 500ms */
 				_lu_s_div = 0;
 				if (loudness_s >= -70.f) {
 					_hist_s[std::min <int> (50, round (loudness_s * 10.f))] += 1;
+				}
+
+				if (_lu_history) {
+					LUHistory lh = {
+						_integrated,
+						loudness_s,
+						loudness_m
+					};
+					/* This may overflow when the UI does not read it */
+					_rb.write (&lh, 1);
 				}
 			}
 

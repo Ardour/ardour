@@ -24,6 +24,7 @@
 #include <map>
 
 #include "pbd/stack_allocator.h"
+#include "pbd/ringbuffer.h"
 
 #include "ardour/libardour_visibility.h"
 
@@ -32,7 +33,7 @@ namespace ARDOUR {
 class LIBARDOUR_API LUFSMeter
 {
 public:
-	LUFSMeter (double samplerate, uint32_t n_channels);
+	LUFSMeter (double samplerate, uint32_t n_channels, bool with_hist = false);
 	LUFSMeter (LUFSMeter const& other) = delete;
 	~LUFSMeter ();
 
@@ -48,6 +49,24 @@ public:
 	void  lu_range_min_max (float& range_min, float& range_max) const;
 	float dbtp ();
 	float max_dbtp () const;
+
+	struct LUHistory {
+		float integrated;
+		float short_term;
+		float momentary;
+	};
+
+	size_t hist_read (LUHistory* dest, size_t cnt) {
+		return _rb.read (dest, cnt);
+	}
+
+	size_t hist_read_space () const {
+		return _rb.read_space ();
+	}
+
+	void host_increment_read_idx (size_t cnt) {
+		_rb.increment_read_idx (cnt);
+	}
 
 private:
 	void init ();
@@ -119,6 +138,10 @@ private:
 
 	FilterState _fst[5];
 	float*      _z[5];
+
+	bool _lu_history;
+
+	PBD::RingBuffer<LUHistory> _rb;
 };
 
 } // namespace ARDOUR
