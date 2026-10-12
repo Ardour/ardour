@@ -119,7 +119,7 @@ public:
 	virtual void remove_note (NoteBase*);
 	virtual void note_selected (NoteBase*) {}
 
-	void model_changed();
+	virtual void model_changed();
 	void view_changed();
 	void clear_events();
 

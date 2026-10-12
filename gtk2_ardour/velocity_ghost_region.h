@@ -50,5 +50,6 @@ class VelocityGhostRegion : public MidiGhostRegion, public VelocityDisplay
   private:
 	bool base_event (GdkEvent*);
 	bool lollevent (GdkEvent*, GhostEvent*);
-};
 
+	void model_changed();
+};

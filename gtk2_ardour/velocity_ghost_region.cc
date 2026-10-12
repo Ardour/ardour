@@ -123,3 +123,15 @@ VelocityGhostRegion::update_hit (GhostEvent* gev)
 {
 	update_note (gev);
 }
+
+void
+VelocityGhostRegion::model_changed ()
+{
+	/* show all notes (lollipops), regardless of the MRV's current note range */
+	for (GhostEvent::EventList::iterator i = MidiGhostRegion::events.begin(); i != MidiGhostRegion::events.end(); ++i) {
+		std::shared_ptr<GhostEvent::NoteType> note = i->first;
+		GhostEvent* cne = i->second;
+		update_note (cne);
+		cne->item->show ();
+	}
+}
