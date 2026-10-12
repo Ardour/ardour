@@ -621,7 +621,7 @@ CueEditor::solo_button_press (GdkEventButton* ev)
 		return true;
 	}
 
-	_track->solo_control()->set_value (!_track->solo_control()->get_value(), PBD::Controllable::NoGroup);
+	_session->set_control (_track->solo_control(), _track->solo_control()->get_value () ? 0 : 1, PBD::Controllable::NoGroup);
 
 	return true;
 }
