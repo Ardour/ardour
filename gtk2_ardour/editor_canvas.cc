@@ -46,6 +46,7 @@
 #include "canvas/debug.h"
 
 #include "ardour_ui.h"
+#include "audio_region_view.h"
 #include "automation_time_axis.h"
 #include "control_point.h"
 #include "editor.h"
@@ -1442,6 +1443,35 @@ Editor::which_canvas_cursor(ItemType type) const
 			break;
 		case NoteItem:
 			cursor = _cursors->grabber_note;
+			break;
+		case SelectionItem:
+			{
+				/* Indicate if AutomationRangeDrag is possible */
+				double x, y;
+				get_pointer_position (x, y);
+				pair<TimeAxisView*, int> tvp = trackview_by_y_position (y, false);
+
+				if (dynamic_cast<AutomationTimeAxisView*> (tvp.first)) {
+					/* automation track */
+					cursor = _cursors->expand_up_down;
+				} else if (tvp.first) {
+					/* audio region fx line */
+					RegionSelection regions;
+					TrackViewList tracks;
+					samplepos_t sample;
+					bool in_track_canvas; /* ignored */
+
+					tracks.push_back(tvp.first);
+					mouse_sample (sample, in_track_canvas);
+					timepos_t where (sample);
+					get_regions_at (regions, where, tracks);
+
+					if (!regions.empty () && dynamic_cast<AudioRegionView*> (regions.front ())) {
+						cursor = _cursors->expand_up_down;
+					}
+				}
+				break;
+			}
 		default:
 			break;
 		}
