@@ -1312,14 +1312,14 @@ Editor::button_press_handler_3 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case FadeInHandleItem:
 		case FadeInTrimHandleItem:
 		case StartCrossFadeItem:
-			popup_xfade_in_context_menu (1, event->button.time, item, item_type);
+			popup_xfade_in_context_menu (event->button.button, event->button.time, item, item_type);
 			break;
 
 		case FadeOutItem:
 		case FadeOutHandleItem:
 		case FadeOutTrimHandleItem:
 		case EndCrossFadeItem:
-			popup_xfade_out_context_menu (1, event->button.time, item, item_type);
+			popup_xfade_out_context_menu (event->button.button, event->button.time, item, item_type);
 			break;
 
 		case LeftFrameHandle:
@@ -1327,21 +1327,21 @@ Editor::button_press_handler_3 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 
 		case StreamItem:
-			popup_track_context_menu (1, event->button.time, item_type, false);
+			popup_track_context_menu (event->button.button, event->button.time, item_type, false);
 			break;
 
 		case RegionItem:
 		case RegionViewNameHighlight:
 		case RegionViewName:
-			popup_track_context_menu (1, event->button.time, item_type, false);
+			popup_track_context_menu (event->button.button, event->button.time, item_type, false);
 			break;
 
 		case SelectionItem:
-			popup_track_context_menu (1, event->button.time, item_type, true);
+			popup_track_context_menu (event->button.button, event->button.time, item_type, true);
 			break;
 
 		case AutomationTrackItem:
-			popup_track_context_menu (1, event->button.time, item_type, false);
+			popup_track_context_menu (event->button.button, event->button.time, item_type, false);
 			break;
 
 		case MarkerBarItem:
@@ -1375,7 +1375,7 @@ Editor::button_press_handler_3 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 
 		case CrossfadeViewItem:
-			popup_track_context_menu (1, event->button.time, item_type, false);
+			popup_track_context_menu (event->button.button, event->button.time, item_type, false);
 			break;
 
 		case ControlPointItem:
