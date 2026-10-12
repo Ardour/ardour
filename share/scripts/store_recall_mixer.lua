@@ -381,8 +381,8 @@ function factory() return function()
 					if proc and not(proc:isnil()) then old_order:push_back(proc) end
 				end
 				rt:reorder_processors(old_order, nil)
-				if muted  then rt:mute_control():set_value(1, 1) else rt:mute_control():set_value(0, 1) end
-				if soloed then rt:solo_control():set_value(1, 1) else rt:solo_control():set_value(0, 1) end
+				if muted  then Session:set_control (rt:mute_control(), 1, 1) else Session:set_control (rt:mute_control(), 0, 1) end
+				if soloed then Session:set_control (rt:solo_control(), 1, 1) else Session:set_control (rt:solo_control(), 0, 1) end
 				rt:gain_control():set_value(gc, 1)
 				rt:trim_control():set_value(tc, 1)
 				if pc ~= false then rt:pan_azimuth_control():set_value(pc, 1) end

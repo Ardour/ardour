@@ -172,7 +172,7 @@ CC121::solo ()
 	if (!_current_stripable) {
 		return;
 	}
-	_current_stripable->solo_control()->set_value (!_current_stripable->solo_control()->soloed(), PBD::Controllable::UseGroup);
+	session->set_control (_current_stripable->solo_control(), _current_stripable->solo_control()->soloed() ? 0 : 1, PBD::Controllable::UseGroup);
 }
 
 void

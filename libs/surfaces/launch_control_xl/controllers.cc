@@ -1230,7 +1230,7 @@ LaunchControlXL::dm_solo_switch()
 	}
 
 	if (first_selected_stripable()->solo_control()) {
-		first_selected_stripable()->solo_control()->set_value(!first_selected_stripable()->solo_control()->get_value(), PBD::Controllable::NoGroup);
+		session->set_control (first_selected_stripable()->solo_control(), first_selected_stripable()->solo_control()->get_value() ? 0 : 1, PBD::Controllable::NoGroup);
 	}
 }
 
