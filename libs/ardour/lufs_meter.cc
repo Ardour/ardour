@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016,2023 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2016-2026 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -131,6 +131,27 @@ LUFSMeter::init ()
 void
 LUFSMeter::reset ()
 {
+	/* reset value so they are immediatly
+	 * cleared when read from he calling thread.
+	 */
+	_maxloudn_M  = -200;
+	_maxloudn_S  = -200;
+	_integrated  = -200;
+	_range_min   = -200;
+	_range_max   = -200;
+	_momentary_l = -200;
+	_short_l     = -200;
+	_dbtp        = 0;
+	_max_dbtp    = 0;
+
+	/* set flags to reset in sync */
+	_rst_dbtp = true;
+	_rst_lufs = true;
+}
+
+void
+LUFSMeter::clear ()
+{
 	for (uint32_t c = 0; c < _n_channels; ++c) {
 		_fst[c].reset ();
 		memset (_z[c], 0, 48 * sizeof (float));
@@ -145,15 +166,14 @@ LUFSMeter::reset ()
 	_range_max   = -200;
 	_momentary_l = -200;
 	_short_l     = -200;
+	_dbtp        = 0;
+	_max_dbtp    = 0;
 
 	_thresh_rel = -70;
 	_block_pwr  = 0.0;
 	_block_cnt  = 0;
 	_lu_s_div   = 0;
 	_pow_idx    = 0;
-	_dbtp       = 0;
-	_max_dbtp   = 0;
-	_rst_dbtp = true;
 
 	memset (_power, 0, 32 * sizeof (float));
 
@@ -164,6 +184,10 @@ LUFSMeter::reset ()
 void
 LUFSMeter::run (float const** data, uint32_t n_samples)
 {
+	if (_rst_lufs.exchange (false)) {
+		clear ();
+	}
+
 	uint32_t offset = 0;
 
 	calc_true_peak (data, n_samples);
