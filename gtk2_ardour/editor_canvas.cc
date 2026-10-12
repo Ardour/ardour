@@ -1453,7 +1453,7 @@ Editor::which_canvas_cursor(ItemType type) const
 
 				if (dynamic_cast<AutomationTimeAxisView*> (tvp.first)) {
 					/* automation track */
-					cursor = _cursors->expand_up_down;
+					cursor = _cursors->up_down;
 				} else if (tvp.first) {
 					/* audio region fx line */
 					RegionSelection regions;
@@ -1467,7 +1467,7 @@ Editor::which_canvas_cursor(ItemType type) const
 					get_regions_at (regions, where, tracks);
 
 					if (!regions.empty () && dynamic_cast<AudioRegionView*> (regions.front ())) {
-						cursor = _cursors->expand_up_down;
+						cursor = _cursors->up_down;
 					}
 				}
 				break;
