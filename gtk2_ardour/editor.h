@@ -1091,6 +1091,7 @@ private:
 	bool button_press_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool button_press_handler_1 (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool button_press_handler_2 (ArdourCanvas::Item*, GdkEvent*, ItemType);
+	bool button_press_handler_3 (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool button_release_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool button_press_dispatch (GdkEventButton*);
 	bool button_release_dispatch (GdkEventButton*);
