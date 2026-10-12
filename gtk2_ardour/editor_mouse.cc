@@ -1147,6 +1147,10 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				}
 				break;
 			}
+		case VelocityItem:
+			_drags->set (new LollipopDrag (*this, item), event);
+			return true;
+			break;
 		case VelocityBaseItem:
 			{
 				VelocityDisplay* vd = static_cast<VelocityDisplay*> (item->get_data ("ghostregionview"));

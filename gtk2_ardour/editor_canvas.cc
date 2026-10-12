@@ -1472,6 +1472,9 @@ Editor::which_canvas_cursor(ItemType type) const
 				}
 				break;
 			}
+		case VelocityItem:
+			cursor = _cursors->up_down;
+			break;
 		default:
 			break;
 		}
