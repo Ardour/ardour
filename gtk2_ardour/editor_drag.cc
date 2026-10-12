@@ -2679,7 +2679,7 @@ VideoTimeLineDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 	XMLNode& after = ARDOUR_UI::instance ()->video_timeline->get_state ();
 	editing_context.session ()->add_command (new MementoCommand<VideoTimeLine> (*(ARDOUR_UI::instance ()->video_timeline), &before, &after));
 
-	for (list<AVDraggingView>::iterator i = _views.begin (); i != _views.end (); ++i) {	
+	for (list<AVDraggingView>::iterator i = _views.begin (); i != _views.end (); ++i) {
 	i->view->drag_end ();
 		i->view->region ()->resume_property_changes ();
 
@@ -6554,20 +6554,29 @@ AutomationRangeDrag::motion (GdkEvent*, bool first_move)
 		if (!_ranges.empty ()) {
 			/* add guard points */
 			for (list<TimelineRange>::const_iterator i = _ranges.begin (); i != _ranges.end (); ++i) {
-				timepos_t const half = (i->start () + i->end ()).scale (ratio_t (1, 2));
+
 
 				for (list<Line>::iterator j = _lines.begin (); j != _lines.end (); ++j) {
-					if (j->range.first > i->start () || j->range.second < i->start ()) {
-						continue;
-					}
 
 					std::shared_ptr<AutomationList> the_list = j->line->the_list ();
+
+					/* convert range time domain to the line's time domain */
+					timepos_t start = i->start ();
+					timepos_t end = i->end ();
+					start.set_time_domain (the_list->time_domain ());
+					end.set_time_domain (the_list->time_domain ());
+
+					timepos_t const half = (start + end).scale (ratio_t (1, 2));
+
+					if (j->range.first > start || j->range.second < start) {
+						continue;
+					}
 
 					/* j is the line that this audio range starts in; fade into it;
 					 * 64 samples length plucked out of thin air.
 					 */
 
-					timepos_t a = i->start () + timepos_t (64);
+					timepos_t a = start + timepos_t (64);
 					if (a > half) {
 						a = half;
 					}
@@ -6576,13 +6585,8 @@ AutomationRangeDrag::motion (GdkEvent*, bool first_move)
 					 * relative to the line origin
 					*/
 
-					timepos_t p (j->line->get_origin ().distance (i->start ()));
+					timepos_t p (j->line->get_origin ().distance (start));
 					timepos_t q (j->line->get_origin ().distance (a));
-
-					/* XXX arguably ControlList::editor_add() should do this */
-
-					p.set_time_domain (the_list->time_domain ());
-					q.set_time_domain (the_list->time_domain ());
 
 					/* get start&end values to use for guard points *before* we add points to the list */
 					/* in the case where no data exists on the line, p_value = q_value = initial_value */
@@ -6601,28 +6605,32 @@ AutomationRangeDrag::motion (GdkEvent*, bool first_move)
 
 				/* same thing for the end */
 				for (list<Line>::iterator j = _lines.begin (); j != _lines.end (); ++j) {
-					if (j->range.first > i->end () || j->range.second < i->end ()) {
-						continue;
-					}
 
 					std::shared_ptr<AutomationList> the_list = j->line->the_list ();
+
+					/* convert range time domain to the line's time domain */
+					timepos_t start = i->start ();
+					timepos_t end = i->end ();
+					start.set_time_domain (the_list->time_domain ());
+					end.set_time_domain (the_list->time_domain ());
+
+					timepos_t const half = (start + end).scale (ratio_t (1, 2));
+
+					if (j->range.first > end || j->range.second < end) {
+						continue;
+					}
 
 					/* j is the line that this audio range starts in; fade out of it;
 					 * 64 samples length plucked out of thin air.
 					 */
 
-					timepos_t b = i->end ().earlier (timepos_t (64));
+					timepos_t b = end.earlier (timepos_t (64));
 					if (b < half) {
 						b = half;
 					}
 
 					timepos_t p (j->line->get_origin ().distance (b));
-					timepos_t q (j->line->get_origin ().distance (i->end ()));
-
-					/* XXX arguably ControlList::editor_add() should do this */
-
-					p.set_time_domain (the_list->time_domain ());
-					q.set_time_domain (the_list->time_domain ());
+					timepos_t q (j->line->get_origin ().distance (end));
 
 					XMLNode&   before = the_list->get_state ();
 					bool const add_p  = the_list->editor_add (p, value (the_list, p), false);
@@ -6641,6 +6649,7 @@ AutomationRangeDrag::motion (GdkEvent*, bool first_move)
 			 * points lists in the Line structs.
 			 */
 			for (list<Line>::iterator i = _lines.begin (); i != _lines.end (); ++i) {
+				std::shared_ptr<AutomationList> the_list = i->line->the_list ();
 				uint32_t const N = i->line->npoints ();
 				for (uint32_t j = 0; j < N; ++j) {
 					/* here's a control point on this line */
@@ -6654,7 +6663,17 @@ AutomationRangeDrag::motion (GdkEvent*, bool first_move)
 
 					/* see if it's inside a range */
 					list<TimelineRange>::const_iterator k = _ranges.begin ();
-					while (k != _ranges.end () && (k->start () >= w || k->end () <= w)) {
+					while (k != _ranges.end ()) {
+
+						/* convert range time domain to the line's time domain before comparing */
+						timepos_t start = k->start ();
+						timepos_t end = k->end ();
+						start.set_time_domain (the_list->time_domain ());
+						end.set_time_domain (the_list->time_domain ());
+						if (start < w && end > w) {
+							break;
+						}
+
 						++k;
 					}
 
