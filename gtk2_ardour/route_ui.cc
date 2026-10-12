@@ -706,7 +706,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 				}
 
 				DisplaySuspender ds;
-				_route->solo_control()->set_value (1.0, Controllable::NoGroup);
+				_session->set_control (_route->solo_control(), 1.0, Controllable::NoGroup);
 
 				/* select exclusively soloed track */
 				if (!_solo_release && UIConfiguration::instance().get_exclusive_solo_selects_route ()) {
