@@ -1535,6 +1535,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 
 			auto toggle = [this](std::string const& path) {
 				Gtk::TreeModel::Row row = *(devices_store->get_iter (path));
+				std::cerr << "toggled row " << path << std::endl;
 				row[devices_model.enabled] = !row[devices_model.enabled];
 			};
 
@@ -1550,55 +1551,54 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 
 			ControlProtocolManager& m = ControlProtocolManager::instance ();
 			m.ProtocolStatusChange.connect (protocol_status_connection, MISSING_INVALIDATOR,
-					std::bind (&ControlSurfacesOptions::protocol_status_changed, this, _1), gui_context());
+			                                std::bind (&ControlSurfacesOptions::protocol_status_changed, this, _1, _2), gui_context());
 
 			active_store->signal_row_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::active_view_changed));
 			active_view.signal_button_press_event().connect_notify (sigc::bind(sigc::mem_fun(*this, &ControlSurfacesOptions::edit_clicked), &active_view, &active_model));
 			devices_store->signal_row_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::devices_view_changed));
-			devices_view.signal_button_press_event().connect_notify (sigc::bind(sigc::mem_fun(*this, &ControlSurfacesOptions::edit_clicked), &devices_view, &devices_model));
 		}
 
 		template <class T, class U, class V>
 		Gtk::TreeViewColumn* append_toggle_row (TreeView* view, Gtk::TreeModelColumn<T> const& col_state, Gtk::TreeModelColumn<U> const& col_viz, Gtk::TreeModelColumn<V> const& col_text, sigc::slot<void, std::string> cb)
 		{
-			Gtk::TreeViewColumn* tvc = manage (new Gtk::TreeViewColumn ());
-			tvc->set_resizable (false);
-			tvc->set_expand (false);
-			tvc->set_spacing (8);
+			Gtk::TreeViewColumn* col = manage (new Gtk::TreeViewColumn ());
+			col->set_resizable (false);
+			col->set_expand (false);
+			col->set_spacing (8);
 
-			Gtk::CellRendererToggle* tgc = manage (new Gtk::CellRendererToggle());
-			tgc->property_activatable () = true;
-			tgc->property_radio ()       = false;
-			tgc->signal_toggled ().connect (cb);
+			Gtk::CellRendererToggle* toggle_renderer = manage (new Gtk::CellRendererToggle());
+			toggle_renderer->property_activatable () = true;
+			toggle_renderer->property_radio ()       = false;
+			toggle_renderer->signal_toggled ().connect (cb);
 
-			tvc->pack_start(*tgc, false);
-			tvc->add_attribute (tgc->property_active (), col_state);
-			tvc->add_attribute (tgc->property_visible (), col_viz);
+			col->pack_start(*toggle_renderer, false);
+			col->add_attribute (toggle_renderer->property_active (), col_state);
+			col->add_attribute (toggle_renderer->property_visible (), col_viz);
 
-			Gtk::CellRendererText* txc = manage (new Gtk::CellRendererText());
-			txc->property_mode() = Gtk::CELL_RENDERER_MODE_ACTIVATABLE;
+			Gtk::CellRendererText* text_renderer = manage (new Gtk::CellRendererText());
+			text_renderer->property_mode() = Gtk::CELL_RENDERER_MODE_ACTIVATABLE;
 
-			tvc->pack_start(*txc);
-			tvc->add_attribute (txc->property_text (), col_text);
+			col->pack_start(*text_renderer);
+			col->add_attribute (text_renderer->property_text (), col_text);
 
-			view->append_column (*tvc);
-			return tvc;
+			view->append_column (*col);
+			return col;
 		}
 
 		template <class U>
 		Gtk::TreeViewColumn* append_button (TreeView* view,  Gtk::TreeModelColumn<U> const& col_viz, std::string label, sigc::slot<void, std::string> cb)
 		{
-			Gtkmm2ext::CellRendererButton* btc = manage (new Gtkmm2ext::CellRendererButton());
-			btc->property_label () = label;
-			btc->signal_clicked ().connect (cb);
+			Gtkmm2ext::CellRendererButton* button_renderer = manage (new Gtkmm2ext::CellRendererButton());
+			button_renderer->property_label () = label;
+			button_renderer->signal_clicked ().connect (cb);
 
-			Gtk::TreeViewColumn* tvc = manage (new Gtk::TreeViewColumn ("", *btc));
-			tvc->set_resizable (false);
-			tvc->set_expand (false);
-			tvc->add_attribute (*btc, "visible", col_viz);
+			Gtk::TreeViewColumn* col = manage (new Gtk::TreeViewColumn ("", *button_renderer));
+			col->set_resizable (false);
+			col->set_expand (false);
+			col->add_attribute (*button_renderer, "visible", col_viz);
 
-			view->append_column (*tvc);
-			return tvc;
+			view->append_column (*col);
+			return col;
 		}
 
 		void parameter_changed (std::string const &)
@@ -1613,16 +1613,19 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			std::unordered_set<std::string> manufacturers;
 
 			ControlProtocolManager& m = ControlProtocolManager::instance ();
-			for (auto const& i : m.control_protocol_infos ()) {
-				for (const auto& man : i->descriptor->enumerate()) {
+			for (auto const& cpi : m.control_protocol_infos ()) {
+
+				/* list all known device names for this protocol (there may be none) */
+
+				for (auto const & [manufacturer_name,device_names] : cpi->descriptor->enumerate()) {
 					TreeModel::Row manufacturer;
 					bool found = false;
 
 					TreeModel::Children rows = devices_store->children();
 
-					if (manufacturers.find(man.first) != manufacturers.end()) {
+					if (manufacturers.find (manufacturer_name) != manufacturers.end()) {
 						for (const auto& row : rows) {
-							if ((std::string)row[devices_model.name] == man.first) {
+							if ((std::string)row[devices_model.name] == manufacturer_name) {
 								found = true;
 								manufacturer = row;
 								break;
@@ -1631,24 +1634,25 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 					}
 
 					if (!found) {
-						manufacturers.insert(man.first);
+						/* top level manufacturer name */
+						manufacturers.insert(manufacturer_name);
 
 						manufacturer = *devices_store->append ();
-						manufacturer[devices_model.name] = man.first;
+						manufacturer[devices_model.name] = manufacturer_name;
 					}
 
-					if (man.second.empty()) {
-						manufacturer[devices_model.enabled] = 0 != i->protocol;
-						manufacturer[devices_model.protocol_info] = i;
+					if (device_names.empty()) {
+						manufacturer[devices_model.enabled] = (bool) cpi->active ();
+						manufacturer[devices_model.protocol_info] = cpi;
 						manufacturer[devices_model.is_device] = true;
 					} else {
 						manufacturer[devices_model.is_device] = false;
 
-						for (const auto& dev : man.second) {
+						for (const auto& device_name : device_names) {
 							TreeModel::Row device = *devices_store->append (manufacturer.children());
-							device[devices_model.name] = dev;
-							device[devices_model.enabled] = dev == i->config;
-							device[devices_model.protocol_info] = i;
+							device[devices_model.name] = device_name;
+							device[devices_model.enabled] = (bool) cpi->get_instance (device_name);
+							device[devices_model.protocol_info] = cpi;
 							device[devices_model.is_device] = true;
 						}
 					}
@@ -1674,24 +1678,29 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			TreeModelColumn<string> name;
 			TreeModelColumn<bool> enabled;
 			TreeModelColumn<ControlProtocolInfo*> protocol_info;
+			TreeModelColumn<ControlProtocol*> instance;
 			TreeModelColumn<bool> is_device;
 			TreeModelColumn<bool> has_editor;
 		};
 
-		void update_active_view_for (ControlProtocolInfo* cpi, bool enabled) {
+		void update_active_view_for (ControlProtocolInfo& cpi, ControlProtocol* instance, bool enabled) {
 			_ignore_view_change++;
+
 			if (enabled) {
+				assert (instance);
 				TreeModel::Row device = *(active_store->append ());
-				device[devices_model.name] = cpi->config;
+				device[devices_model.name] = instance->device_name();
 				device[devices_model.enabled] = true;
-				device[devices_model.protocol_info] = cpi;
-				device[devices_model.has_editor] = cpi->protocol->has_editor ();
-			} else {
+				device[devices_model.protocol_info] = &cpi;
+				device[devices_model.has_editor] = instance->has_editor ();
+
+			} else if (instance) {
+
 				TreeModel::Children rows = active_store->children();
 
 				for (TreeModel::Children::iterator x = rows.begin(); x != rows.end();) {
 					string const active_name ((*x)[active_model.name]);
-					if (active_name == cpi->config) {
+					if (active_name == instance->device_name()) {
 						x = active_store->erase(x);
 					} else {
 						++x;
@@ -1701,7 +1710,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			_ignore_view_change--;
 		}
 
-		void protocol_status_changed (ControlProtocolInfo* cpi) {
+		void protocol_status_changed (ControlProtocolInfo* cpi, std::string changed_device_name) {
 			/* find the row */
 			TreeModel::Children manufacturers = devices_store->children();
 
@@ -1711,15 +1720,18 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			 * activate or deactivate.
 			 */
 
-			for (const auto& manufacturer : manufacturers) {
-				string const devices_name ((*manufacturer)[devices_model.name]);
+			ControlProtocol* cp =  cpi->get_instance (changed_device_name);
+			bool enabled = bool (cp);
 
-				if (cpi->config == devices_name) {
+			for (const auto& manufacturer : manufacturers) {
+
+				string const device_name ((*manufacturer)[devices_model.name]);
+
+				if (changed_device_name == device_name) {
 					_protocol_change++;
 					_ignore_view_change++;
-					bool enabled = (bool) cpi->protocol;
 					(*manufacturer)[devices_model.enabled] = enabled;
-					update_active_view_for (cpi, enabled);
+					update_active_view_for (*cpi, cp, enabled);
 					_ignore_view_change--;
 					_protocol_change--;
 					return;
@@ -1733,13 +1745,12 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 				TreeModel::Children devices = manufacturer->children();
 
 				for (const auto& device : devices) {
-					string const devices_name ((*device)[devices_model.name]);
-					if (cpi->config == devices_name) {
+					string const device_name ((*device)[devices_model.name]);
+					if (changed_device_name == device_name) {
 						_protocol_change++;
 						_ignore_view_change++;
-						bool enabled = (bool) cpi->protocol;
 						(*device)[devices_model.enabled] = enabled;
-						update_active_view_for (cpi, enabled);
+						update_active_view_for (*cpi, cp, enabled);
 						_ignore_view_change--;
 						_protocol_change--;
 						return;
@@ -1763,7 +1774,8 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 
 			ControlProtocolManager& m = ControlProtocolManager::instance ();
 			bool const should_be_enabled = r[active_model.enabled];
-			bool const currently_enabled = (cpi->protocol != 0);
+			ControlProtocol* cp = cpi->get_instance (r[active_model.name]);
+			bool const currently_enabled = (bool) (cp);
 
 			if (should_be_enabled) {
 				if (currently_enabled) {
@@ -1775,41 +1787,48 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 				if (m.activate (*cpi, name)) {
 					_ignore_view_change++;
 					r[active_model.enabled] = false;
+					r[active_model.instance] = nullptr;
 					_ignore_view_change--;
 				}
 			} else {
 				if (m.deactivate (*cpi)) {
 					_ignore_view_change++;
 					r[active_model.enabled] = true;
+					r[active_model.instance] = cp;
 					_ignore_view_change--;
 				}
 			}
 		}
 
-		void devices_view_changed (TreeModel::Path const &, TreeModel::iterator const & i)
+		void devices_view_changed (TreeModel::Path const & path, TreeModel::iterator const & i)
 		{
 			TreeModel::Row r = *i;
 
 			if (_ignore_view_change) {
+				std::cerr << "ignored\n";
 				return;
 			}
 
 			ControlProtocolInfo* cpi = r[devices_model.protocol_info];
 			if (!cpi) {
+				std::cerr << "no CPI\n";
 				return;
 			}
 
 			ControlProtocolManager& m = ControlProtocolManager::instance ();
 			bool const should_be_enabled = r[devices_model.enabled];
-			bool const currently_enabled = (cpi->protocol != 0);
+			bool const currently_enabled = (bool) (cpi->get_instance (r[devices_model.name]));
+
+			string const nom (r[devices_model.name]);
+			std::cerr << "DVC path " << path.to_string() << " for " << cpi->name << " as " << nom << " SBE " << should_be_enabled << " CE " << currently_enabled << std::endl;
 
 			if (should_be_enabled) {
 				if (currently_enabled) {
-					m.deactivate (*cpi);
-					/* ports don't vanish instantly, ya' know! */
-					Glib::usleep (500);
+					/* do nothing */
+					return;
 				}
 				string const name (r[devices_model.name]);
+				std::cerr << "activate as " << name << std::endl;
 				if (m.activate (*cpi, name)) {
 					std::cerr << "failed\n";
 					_ignore_view_change++;
@@ -1817,6 +1836,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 					_ignore_view_change--;
 				}
 			} else {
+				std::cerr << "deactivate\n";
 				if (m.deactivate (*cpi)) {
 					_ignore_view_change++;
 					r[devices_model.enabled] = true;
@@ -1828,16 +1848,15 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 		void edit_btn_clicked (TreeView* view, ControlSurfacesModelColumns* model, TreeModel::Row* row)
 		{
 			std::string name;
-			ControlProtocolInfo* cpi;
 
 			if (!(*row)[model->enabled]) {
 				return;
 			}
-			cpi = (*row)[model->protocol_info];
-			if (!cpi || !cpi->protocol || !cpi->protocol->has_editor ()) {
+			ControlProtocol* cp = (*row)[model->instance];
+			if (!cp->has_editor()) {
 				return;
 			}
-			Box* box = (Box*) cpi->protocol->get_gui ();
+			Box* box = (Box*) cp->get_gui ();
 			if (!box) {
 				return;
 			}
@@ -1867,7 +1886,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			}
 
 			TreeModel::Row row = *((view->get_selection()->get_selected()));
-			edit_btn_clicked(view, model, &row);
+			edit_btn_clicked (view, model, &row);
 		}
 
 		Glib::RefPtr<TreeStore> active_store;
