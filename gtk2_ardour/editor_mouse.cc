@@ -1694,6 +1694,8 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		}
 
 		switch (eff) {
+		case MouseContent:
+			[[fallthrough]];
 		case MouseDraw:
 			switch (item_type) {
 			case RegionItem:
