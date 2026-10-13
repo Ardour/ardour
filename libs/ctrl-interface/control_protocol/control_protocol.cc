@@ -42,6 +42,8 @@
 #include "ardour/selection.h"
 #include "control_protocol/control_protocol.h"
 
+#include "pbd/i18n.h"
+
 using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
@@ -67,12 +69,14 @@ StripableNotificationList ControlProtocol::_last_selected;
 PBD::ScopedConnection ControlProtocol::selection_connection;
 bool ControlProtocol::selection_connected = false;
 
-const std::string ControlProtocol::state_node_name ("Protocol");
+const std::string ControlProtocol::state_node_name (X_("Protocol"));
 
-ControlProtocol::ControlProtocol (Session& s, string str)
+ControlProtocol::ControlProtocol (Session& s, string const & nom, string const & devname)
 	: BasicUI (s)
-	, _name (str)
+	, _name (nom)
+	, _device_name (devname)
 	, glib_event_callback (std::bind (&ControlProtocol::event_loop_precall, this))
+	, _users (0)
 	, _active (false)
 {
 	if (!selection_connected) {
@@ -84,6 +88,26 @@ ControlProtocol::ControlProtocol (Session& s, string str)
 
 ControlProtocol::~ControlProtocol ()
 {
+	PBD::stacktrace (std::cerr, 12);
+}
+
+void
+ControlProtocol::increment_users ()
+{
+	if (_users++ == 0) {
+		set_active (true);
+	}
+}
+
+void
+ControlProtocol::decrement_users ()
+{
+	if (_users > 0) {
+		_users--;
+	}
+	if (_users == 0) {
+		set_active (false);
+	}
 }
 
 void
@@ -343,6 +367,7 @@ ControlProtocol::get_state () const
 	XMLNode* node = new XMLNode (state_node_name);
 
 	node->set_property ("name", _name);
+	node->set_property ("device-name", _device_name);
 	node->set_property ("feedback", get_feedback());
 
 	return *node;

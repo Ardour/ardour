@@ -146,7 +146,7 @@ FaderPort8::FaderPort8 (Session& s)
 #elif defined FADERPORT2
 	: ControlProtocol (s, _("PreSonus FaderPort2"))
 #else
-	: ControlProtocol (s, _("PreSonus FaderPort8"))
+	  : ControlProtocol (s, _("PreSonus FaderPort8"))
 #endif
 	, AbstractUI<FaderPort8Request> (name())
 	, _connection_state (ConnectionState (0))
