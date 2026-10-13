@@ -193,7 +193,6 @@ private:
 	PBD::ScopedConnection _port_connection;
 
 	std::string _current_binding;
-	std::string _config;
 	uint32_t _bank_size;
 	uint32_t _current_bank;
 	/** true if this surface is motorised.  If it is, we assume
