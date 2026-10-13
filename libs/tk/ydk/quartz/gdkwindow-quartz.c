@@ -646,8 +646,6 @@ void _update_offscreen(GdkWindow *window) {
   private = (GdkWindowObject *)window;
   impl = private->impl;
 
-  fprintf(stderr, "update offscreen\n");
-
   if (impl->view) {
     if (impl->offscreen) {
       CFRelease(impl->offscreen);

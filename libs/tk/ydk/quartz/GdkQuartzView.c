@@ -841,8 +841,7 @@ static int showInvalidation = 0;
   impl->in_paint_rect_count--;
 
   if (impl->offscreen) {
-    fprintf(stderr, "offscreen blit %d,%d %d,%d\n",
-      private->x, private->y, private->width, private->height);
+    //fprintf(stderr, "offscreen blit %d,%d %d,%d\n", private->x, private->y, private->width, private->height);
     CGContextRef cg;
     CGContextFlush(impl->offscreen);
     CGImageRef img = CGBitmapContextCreateImage(impl->offscreen);
@@ -1015,7 +1014,9 @@ static int showInvalidation = 0;
 	int w = rect.size.width * scale;
 	int h = rect.size.height * scale;
 	int stride = (w * 4 + 255) & ~255;
-	fprintf(stderr, "scale:%f  %d x %d @ %d\n", scale, w, h, stride);
+#ifndef NDEBUG
+	fprintf (stderr, "Update Tracking: scale: %f %d x %d @ %d\n", scale, w, h, stride);
+#endif
 	CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
 	impl->offscreen = CGBitmapContextCreate(NULL,
 		w, h,
