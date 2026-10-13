@@ -120,9 +120,9 @@ MACKIE_NAMESPACE::MackieControlProtocol* MACKIE_NAMESPACE::MackieControlProtocol
 
 MackieControlProtocol::MackieControlProtocol (Session& session, std::string const & config)
 #ifdef UF8
-	: ControlProtocol (session, _("SSL 360: UF8 UF1"), config)
+	: ControlProtocol (session, _("SSL 360: UF8 UF1"))
 #else
-        : ControlProtocol (session, _("Mackie"), config)
+	: ControlProtocol (session, _("Mackie"))
 #endif
 	, AbstractUI<MackieControlUIRequest> (name())
 	, _current_initial_bank (0)

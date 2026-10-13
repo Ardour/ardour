@@ -46,17 +46,13 @@ class PluginInsert;
 class LIBCONTROLCP_API ControlProtocol : public PBD::Stateful, public PBD::ScopedConnectionList, public BasicUI
 {
 public:
-	ControlProtocol (Session&, std::string const & name, std::string const & device_name = std::string());
+	ControlProtocol (Session&, std::string name);
 	virtual ~ControlProtocol ();
 
 	virtual std::string name () const { return _name; }
-	std::string device_name() const { return _device_name; }
 
+	virtual int set_active (bool yn);
 	virtual bool active () const { return _active; }
-
-	void increment_users ();
-	void decrement_users ();
-	int users () const { return _users; }
 
 	virtual int set_feedback (bool /*yn*/) { return 0; }
 	virtual bool get_feedback () const { return false; }
@@ -64,6 +60,8 @@ public:
 	virtual void midi_connectivity_established (bool) {}
 
 	virtual void stripable_selection_changed () = 0;
+
+	PBD::Signal<void()> ActiveChanged;
 
 	/* signals that a control protocol can emit and other (presumably graphical)
 	 * user interfaces can respond to
@@ -151,14 +149,11 @@ public:
 	static void notify_stripable_selection_changed (StripableNotificationListPtr);
 
 protected:
-	virtual int set_active (bool yn);
-
 	void next_track (uint32_t initial_id);
 	void prev_track (uint32_t initial_id);
 
 	std::vector<std::shared_ptr<ARDOUR::Route> > route_table;
 	std::string _name;
-	std::string _device_name;
 	GlibEventLoopCallback glib_event_callback;
 	virtual void event_loop_precall ();
 	void install_precall_handler (Glib::RefPtr<Glib::MainContext>);
@@ -166,7 +161,6 @@ protected:
 private:
 	LIBCONTROLCP_LOCAL ControlProtocol (const ControlProtocol&); /* noncopyable */
 
-	int  _users;
 	bool _active;
 
 	static StripableNotificationList          _last_selected;

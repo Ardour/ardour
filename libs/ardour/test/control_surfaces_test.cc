@@ -53,7 +53,7 @@ ControlSurfacesTest::instantiateAndTeardownTest ()
 		}
 
 		std::cout << "ControlSurfacesTest: " << i->name << "\n";
-		if (i->active()) {
+		if (i->protocol && i->protocol->active()) {
 			/* may already be active because of user preferences */
 			m.deactivate (*i);
 		}

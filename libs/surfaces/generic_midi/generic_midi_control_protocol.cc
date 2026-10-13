@@ -79,20 +79,19 @@ using namespace Glib;
 using namespace std;
 
 GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s, std::string const & config)
-	: ControlProtocol (s, _("Generic MIDI"), config)
+	: ControlProtocol (s, _("Generic MIDI"))
 	, AbstractUI<GenericMIDIRequest> (name())
 	, connection_state (ConnectionState (0))
+	, _config (config)
 	, _motorised (false)
 	, _threshold (10)
 	, gui (0)
 {
 	std::shared_ptr<ARDOUR::Port> inp;
 	std::shared_ptr<ARDOUR::Port> outp;
-	std::string input_port_name (string_compose (_("%1 Control In"), config));
-	std::string output_port_name (string_compose (_("%1 Control Out"), config));
 
-	inp  = AudioEngine::instance()->register_input_port (DataType::MIDI, input_port_name, true);
-	outp = AudioEngine::instance()->register_output_port (DataType::MIDI, output_port_name, true);
+	inp  = AudioEngine::instance()->register_input_port (DataType::MIDI, _("MIDI Control In"), true);
+	outp = AudioEngine::instance()->register_output_port (DataType::MIDI, _("MIDI Control Out"), true);
 
 	if (inp == 0 || outp == 0) {
 		throw failed_constructor();
@@ -101,8 +100,8 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s, std::string 
 	_input_port = std::dynamic_pointer_cast<AsyncMIDIPort>(inp);
 	_output_port = std::dynamic_pointer_cast<AsyncMIDIPort>(outp);
 
-	_input_bundle.reset (new ARDOUR::Bundle (input_port_name, true));
-	_output_bundle.reset (new ARDOUR::Bundle (output_port_name, false));
+	_input_bundle.reset (new ARDOUR::Bundle (_("Generic MIDI Control In"), true));
+	_output_bundle.reset (new ARDOUR::Bundle (_("Generic MIDI Control Out"), false));
 
 	_input_bundle->add_channel (
 		"",
@@ -332,7 +331,7 @@ GenericMidiControlProtocol::set_active (bool yn)
 		BaseUI::run ();
 
 		for (list<GenericMidiControlProtocol::MapInfo>::iterator x = map_info.begin(); x != map_info.end(); ++x) {
-			if (_device_name == x->name) {
+			if (_config == x->name) {
 				load_bindings (x->path);
 				break;
 			}
@@ -687,7 +686,7 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 
 	std::string str;
 	// midi map has to be loaded first so learned binding can go on top
-	if (_device_name.empty() && node.get_property ("binding", str)) {
+	if (_config.empty() && node.get_property ("binding", str)) {
 		for (list<MapInfo>::iterator x = map_info.begin(); x != map_info.end(); ++x) {
 			if (str == (*x).name) {
 				load_bindings ((*x).path);
