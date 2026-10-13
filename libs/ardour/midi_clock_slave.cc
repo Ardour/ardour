@@ -143,7 +143,8 @@ MIDIClock_TransportMaster::pre_process (MIDI::pframes_t nframes, samplepos_t now
 	_midi_port->read_and_parse_entire_midi_buffer_with_no_speed_adjustment (nframes, parser, now);
 
 	if (session_pos) {
-		const samplepos_t current_pos = current.position + ((now - current.timestamp) * current.speed);
+		const float speed = _session->transport_state_rolling () ? current.speed : 0;
+		const samplepos_t current_pos = current.position + ((now - current.timestamp) * speed);
 		_current_delta = current_pos - *session_pos;
 	} else {
 		_current_delta = 0;
@@ -309,7 +310,7 @@ MIDIClock_TransportMaster::start (Parser& /*parser*/, samplepos_t timestamp)
 	}
 
 	_running = true;
-	current.update (0, current.timestamp, 0);
+	current.update (0, timestamp, 0);
 }
 
 void
@@ -354,7 +355,7 @@ MIDIClock_TransportMaster::stop (Parser& /*parser*/, samplepos_t timestamp)
 		//
 		// find out the last MIDI beat: go back #midi_clocks mod 6
 		// and lets hope the tempo didnt change in those last 6 beats :)
-		current.update (current.position - (midi_clock_count % 6) * one_ppqn_in_samples, current.timestamp, 0);
+		current.update (current.position - (midi_clock_count % 6) * one_ppqn_in_samples, timestamp, 0);
 	}
 }
 
@@ -390,7 +391,7 @@ MIDIClock_TransportMaster::position (Parser& /*parser*/, MIDI::byte* message, si
 bool
 MIDIClock_TransportMaster::locked () const
 {
-	return true;
+	return midi_clock_count > 2;
 }
 
 bool
