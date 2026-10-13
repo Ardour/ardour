@@ -1003,6 +1003,30 @@ static int showInvalidation = 0;
 		  userData: nil
 		  assumeInside: NO];
 #endif
+
+  if (impl->offscreen) {
+	CFRelease(impl->offscreen);
+	impl->offscreen = NULL;
+
+	CALayer *layer = [impl->view layer];
+
+	CGFloat scale = 1.0;
+	scale = [impl->toplevel backingScaleFactor];
+	int w = rect.size.width * scale;
+	int h = rect.size.height * scale;
+	int stride = (w * 4 + 255) & ~255;
+	fprintf(stderr, "scale:%f  %d x %d @ %d\n", scale, w, h, stride);
+	CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+	impl->offscreen = CGBitmapContextCreate(NULL,
+		w, h,
+		8,
+		stride,
+		colorSpace,
+		kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little);
+	CGContextScaleCTM(impl->offscreen, scale, scale);
+	CGColorSpaceRelease(colorSpace);
+  }
+
 }
 
 -(void)viewDidMoveToWindow
