@@ -843,7 +843,10 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 
 		} else if (Keyboard::is_context_menu_event (ev)) {
 
-			/* do this on release */
+			build_record_menu ();
+			if (_record_menu) {
+				_record_menu->popup (ev->button, ev->time);
+			}
 
 		} else {
 
@@ -1051,13 +1054,6 @@ RouteUI::step_edit_changed (bool yn)
 bool
 RouteUI::rec_enable_release (GdkEventButton* ev)
 {
-	if (is_track () && Keyboard::is_context_menu_event (ev)) {
-		build_record_menu ();
-		if (_record_menu) {
-			_record_menu->popup (ev->button, ev->time);
-		}
-	}
-
 	return false;
 }
 
