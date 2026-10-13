@@ -498,6 +498,28 @@ int
 ControlProtocolManager::teardown (ControlProtocolInfo& cpi)
 {
 	cpi.teardown ();
+
+	PBD::RWLock::WriterLock lm (_protocols_lock, PBD::RWLock::NotLock);
+
+	list<ControlProtocol*>::iterator p = find (_control_protocols.begin (), _control_protocols.end (), cpi.protocol);
+	if (p != _control_protocols.end ()) {
+		_control_protocols.erase (p);
+	} else {
+		cerr << "Programming error: ControlProtocolManager::teardown() called for " << cpi.name << ", but it was not found in control_protocols" << endl;
+	}
+
+	if (lock_required) {
+		lm.release ();
+	}
+
+	cpi.protocol = 0;
+	delete (Glib::Module*)cpi.descriptor->module;
+	/* cpi->descriptor is now inaccessible since dlclose() or equivalent
+	 * has been performed, and the descriptor is (or could be) a static
+	 * object made accessible by dlopen().
+	 */
+	cpi.descriptor = 0;
+
 	ProtocolStatusChange (&cpi, std::string());
 
 	return 0;
