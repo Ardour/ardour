@@ -738,6 +738,14 @@ Editor::Editor ()
 
 	RegionView::RegionViewGoingAway.connect (*this, invalidator (*this),  std::bind (&Editor::catch_vanishing_regionview, this, _1), gui_context());
 
+	/* keep track of the track context menu state
+	 * NOTE: we use signal_selection_done instead of signal_hide
+	 * because the latter emits before the menu action callback
+	 */
+	track_context_menu.signal_selection_done().connect ([this]() { in_track_context_menu = false;});
+	track_selection_context_menu.signal_selection_done().connect ([this]() { in_track_context_menu = false;});
+	track_region_context_menu.signal_selection_done().connect ([this]() { in_track_context_menu = false;});
+
 	/* nudge stuff */
 
 	nudge_forward_button.set_name ("nudge button");
@@ -1653,6 +1661,7 @@ Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, 
 	*/
 	sensitize_the_right_region_actions (false);
 
+	in_track_context_menu = true;
 	menu->popup (button, time);
 }
 
@@ -4054,7 +4063,9 @@ Editor::_get_preferred_edit_position (EditIgnoreOption ignore, bool from_context
 	if (from_outside_canvas && (ep == EditAtMouse)) {
 		ep = EditAtPlayhead;
 	} else if (from_context_menu && (ep == EditAtMouse)) {
-		return timepos_t (canvas_event_sample (&context_click_event, 0, 0));
+		where = timepos_t (canvas_event_sample (&context_click_event, 0, 0));
+		snap_to (where);
+		return where;
 	}
 
 	if (entered_marker) {
@@ -4104,8 +4115,15 @@ Editor::_get_preferred_edit_position (EditIgnoreOption ignore, bool from_context
 	default:
 	case EditAtMouse:
 		if (!mouse_sample (ms, ignored)) {
-			/* XXX not right but what can we do ? */
-			return timepos_t ();
+			if (in_track_context_menu) {
+				/* we are in a context menu action that didn't set from_context_menu */
+				where = timepos_t (canvas_event_sample (&context_click_event, 0, 0));
+				snap_to (where);
+				break;
+			} else {
+				/* XXX not right but what can we do ? */
+				return timepos_t ();
+			}
 		}
 		where = timepos_t (ms);
 		snap_to (where);

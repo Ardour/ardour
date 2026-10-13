@@ -741,6 +741,7 @@ private:
 	Gtk::Menu track_selection_context_menu;
 
 	GdkEvent context_click_event;
+	bool     in_track_context_menu;
 
 	void popup_track_context_menu (int, int, ItemType, bool);
 	Gtk::Menu* build_track_context_menu ();
