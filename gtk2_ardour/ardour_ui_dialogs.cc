@@ -288,9 +288,11 @@ ARDOUR_UI::unload_session (bool hide_stuff, bool force_unload)
 	{
 		// tear down session specific CPI (owned by rc_config_editor which can remain)
 		ControlProtocolManager& m = ControlProtocolManager::instance ();
-		for (auto const& i : m.control_protocol_infos ()) {
-			if (i && i->protocol && i->protocol->has_editor ()) {
-				i->protocol->tear_down_gui ();
+		for (auto const& cpi : m.control_protocol_infos ()) {
+			for (auto const & instance : cpi->instances) {
+				if (instance->has_editor ()) {
+					instance->tear_down_gui ();
+				}
 			}
 		}
 	}

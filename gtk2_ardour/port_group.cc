@@ -524,9 +524,9 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 	if ((type == DataType::MIDI || type == DataType::NIL)) {
 		ControlProtocolManager& m = ControlProtocolManager::instance ();
 		std::shared_ptr<Bundle> sf (new Bundle (_("Control Surface"), inputs));
-		for (auto const& i : m.control_protocol_infos ()) {
-			if (i->protocol) {
-				list<std::shared_ptr<Bundle> > b = i->protocol->bundles ();
+		for (auto const& cpi : m.control_protocol_infos ()) {
+			for (auto const & instance : cpi->instances) {
+				list<std::shared_ptr<Bundle> > b = instance->bundles ();
 				for (list<std::shared_ptr<Bundle> >::iterator j = b.begin(); j != b.end(); ++j) {
 					if ((*j)->ports_are_inputs() == inputs) {
 						sf->add_channels_from_bundle (*j);
