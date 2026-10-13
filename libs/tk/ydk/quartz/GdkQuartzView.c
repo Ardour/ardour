@@ -841,8 +841,7 @@ static int showInvalidation = 0;
   impl->in_paint_rect_count--;
 
   if (impl->offscreen) {
-    fprintf(stderr, "offscreen blit %d,%d %d,%d\n",
-      private->x, private->y, private->width, private->height);
+    //fprintf(stderr, "offscreen blit %d,%d %d,%d\n", private->x, private->y, private->width, private->height);
     CGContextRef cg;
     CGContextFlush(impl->offscreen);
     CGImageRef img = CGBitmapContextCreateImage(impl->offscreen);
