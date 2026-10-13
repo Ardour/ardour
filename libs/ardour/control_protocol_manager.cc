@@ -95,30 +95,230 @@ usb_hotplug_thread (void* user_data)
 }
 #endif
 
+ControlProtocolInfo::ControlProtocolInfo (ControlProtocolDescriptor& desc, std::string const & pathstr)
+	: automatic (false)
+	, state (nullptr)
+	, name (desc.name)
+	, descriptor (&desc)
+	, session (nullptr)
+	, path (pathstr)
+{
+	DEBUG_TRACE (DEBUG::ControlProtocols, string_compose ("created new CPI for %1 @ %2\n", name, path));
+}
+
 ControlProtocolInfo::~ControlProtocolInfo ()
 {
-	if (protocol && descriptor) {
-		descriptor->destroy (protocol);
-		protocol = 0;
+	drop_all_instances ();
+
+	if (descriptor) {
+		delete (Glib::Module*) descriptor->module;
+		/* cpi->descriptor is now inaccessible since dlclose() or equivalent
+		 * has been performed, and the descriptor is (or could be) a static
+		 * object made accessible by dlopen().
+		 */
+		descriptor = nullptr;
 	}
 
 	delete state;
-	state = 0;
+	state = nullptr;
 
-	if (descriptor) {
-		delete (Glib::Module*)descriptor->module;
-		descriptor = 0;
-	}
 #ifdef HAVE_USB
 	assert (!_hotplug_thread_run);
 #endif
 }
 
+void
+ControlProtocolInfo::set_session (Session& s)
+{
+	session = &s;
+
+	for (auto const & requested_device : requests) {
+		add_instance (s, requested_device);
+	}
+}
+
+XMLNode&
+ControlProtocolInfo::get_state() const
+{
+	XMLNode* state (new XMLNode (X_("ControlProtocol")));
+
+	state->set_property (X_("name"), name);
+	state->set_property (X_("active"), !automatic);
+
+	PBD::RWLock::ReaderLock lm (instance_lock);
+
+	for (auto const & inst : instances) {
+		XMLNode& child_state (inst->get_state ());
+		state->add_child_nocopy (child_state);
+	}
+
+	return *state;
+}
+
+int
+ControlProtocolInfo::set_state (XMLNode const & node, int)
+{
+	if (node.name().empty()) {
+		return 0;
+	}
+
+
+	return 0;
+}
+
+ControlProtocol*
+ControlProtocolInfo::get_instance (std::string device_name)
+{
+	if (instances.empty()) {
+		return nullptr;
+	}
+
+	PBD::RWLock::ReaderLock lm (instance_lock);
+
+	if (device_name.empty()) {
+		assert (instances.size() == 0);
+		return instances.front();
+	}
+
+	for (auto & inst : instances) {
+		if (inst->device_name() == device_name) {
+			return inst;
+		}
+	}
+
+	return nullptr;
+}
+
+ControlProtocol*
+ControlProtocolInfo::add_instance (Session& session, std::string device_name)
+{
+	ControlProtocol* cp = descriptor->initialize (&session, device_name);
+
+	PBD::RWLock::WriterLock lm (instance_lock);
+
+	if (cp) {
+		instances.push_back (cp);
+	}
+
+	return cp;
+}
+
+bool
+ControlProtocolInfo::remove_instance (std::string device_name)
+{
+	{
+		PBD::RWLock::ReaderLock lm (instance_lock);
+
+		if (instances.empty()) {
+			return false;
+		}
+
+		if (device_name.empty()) {
+			assert (instances.size() == 1);
+			/* let the loop below do the work */
+		}
+	}
+
+
+	PBD::RWLock::WriterLock lm (instance_lock);
+	bool found = false;
+
+	for (auto ii = instances.begin(); ii != instances.end(); ++ii) {
+		if ((*ii)->device_name() == device_name) {
+			descriptor->destroy (*ii);
+			delete *ii;
+			instances.erase (ii);
+			found = true;
+			break;
+		}
+	}
+
+	return found;
+}
+
+void
+ControlProtocolInfo::drop_all_instances ()
+{
+	PBD::RWLock::ReaderLock lm (instance_lock);
+
+	for (auto & inst : instances) {
+		descriptor->destroy (inst);
+		delete inst;
+	}
+	instances.clear ();
+}
+
+void
+ControlProtocolInfo::teardown ()
+{
+	{
+		PBD::RWLock::ReaderLock lm (instance_lock);
+		if (instances.empty()) {
+			return;
+		}
+	}
+
+	/* save current state */
+
+	delete state;
+	state = &get_state ();
+	state->set_property (X_("active"), false);
+
+	drop_all_instances ();
+}
+
 bool
 ControlProtocolInfo::active () const
 {
-	return protocol && protocol->active ();
+	PBD::RWLock::ReaderLock lm (instance_lock);
+
+	/* true if any instance is active */
+	for (auto const & inst : instances) {
+		if (inst->active ()) {
+			return true;
+		}
+	}
+	return false;
 }
+
+bool
+ControlProtocolInfo::is_active (std::string const & device_name)
+{
+	PBD::RWLock::ReaderLock lm (instance_lock);
+
+	if (device_name.empty()) {
+		assert (instances.size() == 1);
+	}
+
+	for (auto const & inst : instances) {
+		if (inst->device_name() == device_name && inst->active()) {
+			return true;
+		}
+	}
+	return false;
+}
+
+void
+ControlProtocolInfo::midi_connectivity_established (bool yn)
+{
+	PBD::RWLock::ReaderLock lm (instance_lock);
+
+	for (auto & instance : instances) {
+		instance->midi_connectivity_established (yn);
+	}
+}
+
+void
+ControlProtocolInfo::stripable_selection_changed (StripableNotificationListPtr sp)
+{
+	PBD::RWLock::ReaderLock lm (instance_lock);
+
+	for (auto & instance : instances) {
+		instance->stripable_selection_changed ();
+	}
+}
+
+/* -------------------- */
 
 ControlProtocolManager::ControlProtocolManager ()
 {
@@ -128,15 +328,8 @@ ControlProtocolManager::~ControlProtocolManager ()
 {
 	PBD::RWLock::WriterLock lm (_protocols_lock);
 
-	for (auto const& p : _control_protocols) {
-		delete p;
-	}
-
-	_control_protocols.clear ();
-
-	for (auto const& p : _control_protocol_info) {
-		p->protocol = 0; // protocol was already destroyed above.
-		delete p;
+	for (auto const & cpi : _control_protocol_info) {
+		delete cpi;
 	}
 
 	_control_protocol_info.clear ();
@@ -162,10 +355,8 @@ ControlProtocolManager::set_session (Session* s)
 		return;
 	}
 
-	for (auto const& p : _control_protocol_info) {
-		if (p->requested) {
-			(void)activate (*p, p->config);
-		}
+	for (auto const & cpi : _control_protocol_info) {
+		cpi->set_session (*s);
 	}
 
 	CoreSelection::StripableAutomationControls sac;
@@ -204,18 +395,18 @@ ControlProtocolManager::set_session (Session* s)
 }
 
 int
-ControlProtocolManager::activate (ControlProtocolInfo& cpi, std::string const & config)
+ControlProtocolManager::activate (ControlProtocolInfo& cpi, std::string device_name)
 {
+	assert (_session);
+
 	PBD::RWLock::WriterLock lm (_protocols_lock);
 	ControlProtocol*        cp;
 
-	if (cpi.protocol && cpi.protocol->active ()) {
+	if ((cp = cpi.get_instance (device_name)) != nullptr) {
 		return 0;
 	}
 
-	cpi.requested = true;
-
-	if ((cp = instantiate (cpi, config)) == 0) {
+	if (!(cp = cpi.add_instance (*_session, device_name))) {
 		return -1;
 	}
 
@@ -238,20 +429,26 @@ ControlProtocolManager::activate (ControlProtocolInfo& cpi, std::string const & 
 		cp->set_state (XMLNode (""), Stateful::loading_state_version);
 	}
 
-	if (cp->set_active (true)) {
+	if (!cp->active()) {
 		error << string_compose (_("Control protocol support for %1 failed to activate"), cpi.name) << endmsg;
-		teardown (cpi, false);
+		deactivate (cpi);
 	}
 
 	return 0;
 }
 
 int
-ControlProtocolManager::deactivate (ControlProtocolInfo& cpi)
+ControlProtocolManager::deactivate (ControlProtocolInfo& cpi, std::string device_name)
 {
-	cpi.requested = false;
-	return teardown (cpi, true);
+	if (!cpi.remove_instance (device_name)) {
+		return -1;
+	}
+
+	ProtocolStatusChange (&cpi,  device_name); /* EMIT SIGNAL */
+
+	return 0;
 }
+
 
 void
 ControlProtocolManager::session_going_away ()
@@ -271,101 +468,48 @@ ControlProtocolManager::drop_protocols ()
 
 	PBD::RWLock::WriterLock lm (_protocols_lock);
 
-	for (auto const& p : _control_protocol_info) {
-		// mark existing protocols as requested
-		// otherwise the ControlProtocol instances are not recreated in set_session
-		if (p->protocol) {
-			p->requested = true;
-			p->protocol  = 0;
-			ProtocolStatusChange (p); /* EMIT SIGNAL */
-		}
+	for (auto const& cpi : _control_protocol_info) {
+		cpi->drop_all_instances ();
 	}
-
-	for (auto const& p : _control_protocols) {
-		delete p;
-	}
-
-	_control_protocols.clear ();
 }
 
 ControlProtocol*
-ControlProtocolManager::instantiate (ControlProtocolInfo& cpi, std::string const & config)
+ControlProtocolManager::instantiate (ControlProtocolInfo& cpi, std::string device_name)
 {
 	/* CALLER MUST HOLD LOCK */
 
-	if (_session == 0) {
-		return 0;
+	if (!_session) {
+		return nullptr;
 	}
 
-	if (!cpi.descriptor) {
-		cpi.descriptor = get_descriptor (cpi.path);
-	}
+	ControlProtocol* cp = cpi.add_instance (*_session, device_name);
 
-	DEBUG_TRACE (DEBUG::ControlProtocols, string_compose ("instantiating %1 as [%2]\n", cpi.name, config));
-
-	if (cpi.descriptor == 0) {
-		error << string_compose (_("control protocol name \"%1\" has no descriptor"), cpi.name) << endmsg;
-		return 0;
-	}
-
-	DEBUG_TRACE (DEBUG::ControlProtocols, string_compose ("initializing %1\n", cpi.name));
-
-	cpi.config = config;
-
-	if ((cpi.protocol = cpi.descriptor->initialize (_session, config)) == 0) {
+	if (!cp) {
 		error << string_compose (_("control protocol name \"%1\" could not be initialized"), cpi.name) << endmsg;
-		cpi.config = string();
-		return 0;
+		return nullptr;
 	}
 
-	_control_protocols.push_back (cpi.protocol);
+	ProtocolStatusChange (&cpi, device_name);
 
-	ProtocolStatusChange (&cpi);
-
-	return cpi.protocol;
+	return cp;
 }
 
 int
-ControlProtocolManager::teardown (ControlProtocolInfo& cpi, bool lock_required)
+ControlProtocolManager::teardown (ControlProtocolInfo& cpi)
 {
-	if (!cpi.protocol) {
-		/* we could still have a descriptor even if the protocol was
-		   never instantiated. Close the associated module (shared
-		   object/DLL) and make sure we forget about it.
-		*/
-
-		if (cpi.descriptor) {
-			cerr << "Closing descriptor for CPI anyway\n";
-			delete (Glib::Module*)cpi.descriptor->module;
-			cpi.descriptor = 0;
-		}
-
-		return 0;
-	}
-
-	if (!cpi.descriptor) {
-		return 0;
-	}
-
-	/* save current state */
-
-	delete cpi.state;
-	cpi.state = new XMLNode (cpi.protocol->get_state ());
-	cpi.state->set_property (X_("active"), false);
-
-	cpi.descriptor->destroy (cpi.protocol);
+	cpi.teardown ();
 
 	PBD::RWLock::WriterLock lm (_protocols_lock, PBD::RWLock::NotLock);
-	if (lock_required) {
-		/* the lock is required when the protocol is torn down by a user from the GUI. */
-		lm.acquire ();
-	}
 
 	list<ControlProtocol*>::iterator p = find (_control_protocols.begin (), _control_protocols.end (), cpi.protocol);
 	if (p != _control_protocols.end ()) {
 		_control_protocols.erase (p);
 	} else {
 		cerr << "Programming error: ControlProtocolManager::teardown() called for " << cpi.name << ", but it was not found in control_protocols" << endl;
+	}
+
+	if (lock_required) {
+		lm.release ();
 	}
 
 	cpi.protocol = 0;
@@ -376,11 +520,7 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi, bool lock_required)
 	 */
 	cpi.descriptor = 0;
 
-	if (lock_required) {
-		lm.release ();
-	}
-
-	ProtocolStatusChange (&cpi);
+	ProtocolStatusChange (&cpi, std::string());
 
 	return 0;
 }
@@ -455,25 +595,15 @@ ControlProtocolManager::control_protocol_discover (string path)
 #endif
 
 	if ((descriptor = get_descriptor (path)) != 0) {
+		/* test function exists, then call it to check if the protocol can be used */
 		if (descriptor->available && !descriptor->available ()) {
 			warning << string_compose (_("Control protocol %1 not usable"), descriptor->name) << endmsg;
 			delete (Glib::Module*)descriptor->module;
 		} else {
-			ControlProtocolInfo* cpi = new ControlProtocolInfo ();
-
-			cpi->descriptor = descriptor;
-			cpi->name       = descriptor->name;
-			cpi->path       = path;
-			cpi->protocol   = 0;
-			cpi->requested  = false;
-			cpi->automatic  = false;
-			cpi->state      = 0;
-			cpi->config     = {};
-
+			ControlProtocolInfo* cpi = new ControlProtocolInfo (*descriptor, path);
 			_control_protocol_info.push_back (cpi);
 
-			DEBUG_TRACE (DEBUG::ControlProtocols,
-			             string_compose (_("Control surface protocol discovered: \"%1\"\n"), cpi->name));
+			DEBUG_TRACE (DEBUG::ControlProtocols, string_compose (_("Control surface protocol discovered: \"%1\"\n"), cpi->name));
 		}
 	}
 
@@ -524,12 +654,12 @@ ControlProtocolManager::foreach_known_protocol (std::function<void (const Contro
 ControlProtocolInfo*
 ControlProtocolManager::cpi_by_name (string name)
 {
-	for (auto const& p : _control_protocol_info) {
-		if (name == p->name) {
-			return p;
+	for (auto const& cpi : _control_protocol_info) {
+		if (name == cpi->name) {
+			return cpi;
 		}
 	}
-	return 0;
+	return nullptr;
 }
 
 int
@@ -537,6 +667,8 @@ ControlProtocolManager::set_state (const XMLNode& node, int session_specific_sta
 {
 	XMLNodeList          clist;
 	XMLNodeConstIterator citer;
+
+	drop_protocols ();
 
 	PBD::RWLock::WriterLock lm (_protocols_lock);
 
@@ -546,44 +678,54 @@ ControlProtocolManager::set_state (const XMLNode& node, int session_specific_sta
 		XMLNode const* child = *citer;
 
 		if (child->name () == X_("Protocol")) {
-			bool        active;
+
 			std::string name;
-			std::string config;
-			if (!child->get_property (X_("active"), active) ||
-			    !child->get_property (X_("name"), name) ||
-			    !child->get_property (X_("config"), config)) {
+
+			if (!child->get_property (X_("name"), name)) {
 				continue;
 			}
 
 			ControlProtocolInfo* cpi = cpi_by_name (name);
 
-			if (cpi) {
-				DEBUG_TRACE (DEBUG::ControlProtocols, string_compose ("Protocolstate %1 %2\n", name, active ? "active" : "inactive"));
+			if (!cpi) {
+				std::cerr << "protocol " << name << " not found\n";
+				continue;
+			}
 
-				if (active) {
-					delete cpi->state;
-					cpi->state = new XMLNode (**citer);
-					cpi->state->set_property (X_("session-state"), session_specific_state ? true : false);
-					cpi->config = config;
-					if (_session) {
-						instantiate (*cpi, config);
-					} else {
-						cpi->requested = true;
-					}
+			bool        active;
+			std::string device_name;
+
+			node.get_property (X_("active"), active);
+
+			if (!node.get_property (X_("device_name"), device_name)) {
+				/* For a while, v9.x used "config" for this information */
+				std::string config;
+				if (node.get_property (X_("config"), config)) {
+					device_name = config;
+				}
+			}
+
+			DEBUG_TRACE (DEBUG::ControlProtocols, string_compose ("Protocolstate %1 %2\n", name, active ? "active" : "inactive"));
+
+			if (active) {
+				if (_session) {
+					cpi->set_session (*_session);
+					cpi->set_state (*child, session_specific_state);
 				} else {
-					if (!cpi->state) {
-						cpi->state = new XMLNode (**citer);
-						cpi->state->set_property (X_("active"), false);
-						cpi->state->set_property (X_("session-state"), session_specific_state ? true : false);
-					}
-					cpi->requested = false;
-					if (_session) {
-						teardown (*cpi, false);
-					}
+					cpi->add_request (device_name);
 				}
 			} else {
-				std::cerr << "protocol " << name << " not found\n";
+				if (!cpi->state) {
+					cpi->state = new XMLNode (**citer);
+					cpi->state->set_property (X_("active"), false);
+					cpi->state->set_property (X_("session-state"), session_specific_state ? true : false);
+				}
+				cpi->requested = false;
+				if (_session) {
+					teardown (*cpi);
+				}
 			}
+
 		}
 	}
 
@@ -596,24 +738,8 @@ ControlProtocolManager::get_state () const
 	XMLNode*                root = new XMLNode (state_node_name);
 	PBD::RWLock::ReaderLock lm (_protocols_lock);
 
-	for (auto const& p : _control_protocol_info) {
-		if (p->protocol) {
-			XMLNode& child_state (p->protocol->get_state ());
-			child_state.set_property (X_("active"), !p->automatic);
-			child_state.set_property (X_("config"), p->config);
-			delete (p->state);
-			p->state = new XMLNode (child_state);
-			root->add_child_nocopy (child_state);
-		} else if (p->state) {
-			XMLNode* child_state = new XMLNode (*p->state);
-			child_state->set_property (X_("active"), false);
-			root->add_child_nocopy (*child_state);
-		} else {
-			XMLNode* child_state = new XMLNode (X_("Protocol"));
-			child_state->set_property (X_("name"), p->name);
-			child_state->set_property (X_("active"), false);
-			root->add_child_nocopy (*child_state);
-		}
+	for (auto const & cpi : _control_protocol_info) {
+		root->add_child_nocopy (cpi->get_state ());
 	}
 
 	return *root;
@@ -634,8 +760,8 @@ ControlProtocolManager::midi_connectivity_established (bool yn)
 {
 	PBD::RWLock::ReaderLock lm (_protocols_lock);
 
-	for (auto const& p : _control_protocols) {
-		p->midi_connectivity_established (yn);
+	for (auto const& cpi : _control_protocol_info) {
+		cpi->midi_connectivity_established (yn);
 	}
 }
 
@@ -655,25 +781,26 @@ ControlProtocolManager::probe_midi_control_protocols ()
 		if (!cpi->descriptor->probe_port) {
 			continue;
 		}
-		bool active = 0 != cpi->protocol;
+		bool active = cpi->active();
 		bool found  = cpi->descriptor->probe_port ();
 
 		if (!active && found) {
 			cpi->automatic = true;
 
-			string device_config;
+			string device_name;
 
-			if (cpi->config.empty()) {
+			if (cpi->instances.empty()) {
 				auto en = cpi->descriptor->enumerate ();
 				if (!en.empty()) {
 					if (!en.begin()->second.empty()) {
-						device_config = en.begin()->second.front();
+						device_name = en.begin()->second.front();
 					}
 				}
 			}
 			lm.release();
-			activate (*cpi, device_config);
+			activate (*cpi, device_name);
 		} else if (active && cpi->automatic && !found) {
+
 			cpi->automatic = false;
 			lm.release();
 			deactivate (*cpi);
@@ -701,7 +828,7 @@ ControlProtocolManager::probe_usb_control_protocols (bool arrived, uint16_t vend
 			continue;
 		}
 
-		bool active = 0 != cpi->protocol;
+		bool active = cpi->active();
 
 		if (!active && arrived) {
 			cpi->automatic = true;
@@ -733,9 +860,9 @@ ControlProtocolManager::stripable_selection_changed (StripableNotificationListPt
 	{
 		PBD::RWLock::ReaderLock lm (_protocols_lock);
 
-		for (auto const& p : _control_protocols) {
-			DEBUG_TRACE (DEBUG::Selection, string_compose ("selection change notification for surface \"%1\"\n", p->name ()));
-			p->stripable_selection_changed ();
+		for (auto const& cpi : _control_protocol_info) {
+			DEBUG_TRACE (DEBUG::Selection, string_compose ("selection change notification for surface \"%1\"\n", cpi->name));
+			cpi->stripable_selection_changed (sp);
 		}
 	}
 }

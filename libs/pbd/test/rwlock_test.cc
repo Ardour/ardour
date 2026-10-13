@@ -58,7 +58,7 @@ RWLockTest::run_thread_test ()
 	}
 
 	sched_yield ();
-	g_usleep (100);
+	g_usleep (500);
 
 	/* worker thread(s) should hold read-lock by now */
 	RWLock::WriterLock wl (_rwlock, RWLock::NotLock);
