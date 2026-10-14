@@ -43,6 +43,8 @@
 using namespace ARDOUR;
 using namespace PBD;
 
+PBD::Signal<void(LuaProc*, int, int)> LuaProc::AccessLuaScript;
+
 LuaProc::LuaProc (AudioEngine& engine,
                   Session& session,
                   const std::string &script)
@@ -164,6 +166,7 @@ LuaProc::init ()
 		.addFunction ("route", &LuaProc::route)
 		.addFunction ("unique_id", &LuaProc::unique_id)
 		.addFunction ("name", &LuaProc::name)
+		.addFunction ("dispatch", &LuaProc::dispatch)
 		.endClass ()
 		.endNamespace ();
 	lua_mlock (L, 0);
@@ -208,6 +211,18 @@ LuaProc::lua_print (std::string s) {
 	 * (see also fe0e997335c34af0d71e7536fd507e1cab322d24)
 	 */
 	PBD::info << "LuaProc: " << s << endmsg;
+}
+
+void
+LuaProc::dispatch (uint32_t handler_id, int value)
+{
+	/* Called from the RT DSP interpreter (dsp_run).  Emit only: the GUI-side
+	 * connection uses gui_context(), so the actual handler runs on the GUI
+	 * thread, marshalled via PBD::AbstractUI::call_slot.  This is the same
+	 * cross-thread path Ardour treats as RT-callable for Session::request_*
+	 * (luabindings.cc: "functions which can be used from realtime and
+	 * non-realtime contexts").  No load()/pcall()/route mutation on RT. */
+	AccessLuaScript (this, (int) handler_id, value); /* EMIT SIGNAL */
 }
 
 bool
@@ -1216,6 +1231,46 @@ LuaProc::setup_lua_inline_gui (LuaState *lua_gui)
 
 	luabridge::push <float *> (LG, _control_data);
 	lua_setglobal (LG, "CtrlPorts");
+}
+
+void
+LuaProc::setup_lua_handler_gui (LuaState *lua_handler)
+{
+	/* libardour-owned half of the handler interpreter setup.  The GUI-owned
+	 * half (LuaInstance::register_classes/register_hooks + the
+	 * register_handler() prelude + the gui_init() call) is done by
+	 * LuaProcHandlers in gtk2_ardour, which cannot reach _script /
+	 * _control_data / _session.  Compare setup_lua_inline_gui(). */
+	lua_State* LH = lua_handler->getState ();
+	LuaBindings::stddef (LH);
+	LuaBindings::common (LH);
+	LuaBindings::dsp (LH);
+	LuaBindings::osc (LH);
+
+	lua_handler->Print.connect (sigc::mem_fun (*this, &LuaProc::lua_print));
+
+	luabridge::getGlobalNamespace (LH)
+		.beginNamespace ("Ardour")
+		.beginClass <LuaProc> ("LuaProc")
+		.addFunction ("shmem", &LuaProc::instance_shm)
+		.addFunction ("table", &LuaProc::instance_ref)
+		.addFunction ("route", &LuaProc::route)
+		.addFunction ("unique_id", &LuaProc::unique_id)
+		.addFunction ("name", &LuaProc::name)
+		.endClass ()
+		.endNamespace ();
+
+	luabridge::push <Session *> (LH, &_session);
+	lua_setglobal (LH, "Session");
+
+	luabridge::push <LuaProc *> (LH, this);
+	lua_setglobal (LH, "self");
+
+	luabridge::push <float *> (LH, _control_data);
+	lua_setglobal (LH, "CtrlPorts");
+
+	lua_handler->do_command ("function ardour () end");
+	lua_handler->do_command (_script);
 }
 ////////////////////////////////////////////////////////////////////////////////
 
