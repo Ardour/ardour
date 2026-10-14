@@ -120,6 +120,10 @@ mountpoint (string path)
 
 #else // !HAVE_GETMNTENT
 
+#ifdef __linux__
+#error "getmntent is supported on Linux. Is this a configuration error?"
+#endif
+
 #include <sys/param.h>
 #include <sys/ucred.h>
 #include <sys/mount.h>
