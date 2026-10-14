@@ -194,7 +194,6 @@ class DummyAudioBackend : public AudioBackend, public PortEngineSharedImpl
 		/* AUDIOBACKEND API */
 
 		std::string name () const;
-		bool is_realtime () const;
 
 		bool requires_driver_selection() const { return true; }
 		std::string driver_name () const;

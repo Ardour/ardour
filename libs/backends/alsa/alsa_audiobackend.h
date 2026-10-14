@@ -125,7 +125,6 @@ class AlsaAudioBackend : public AudioBackend, public PortEngineSharedImpl
 		/* AUDIOBACKEND API */
 
 		std::string name () const;
-		bool is_realtime () const;
 
 		bool use_separate_input_and_output_devices () const { return true; }
 		bool match_input_output_devices_or_none () const { return false; }
@@ -154,7 +153,7 @@ class AlsaAudioBackend : public AudioBackend, public PortEngineSharedImpl
 		int set_output_device_name (const std::string&);
 		int set_sample_rate (float);
 		int set_buffer_size (uint32_t);
-		int set_peridod_size (uint32_t);
+		int set_period_size (uint32_t);
 		int set_interleaved (bool yn);
 		int set_systemic_input_latency (uint32_t);
 		int set_systemic_output_latency (uint32_t);

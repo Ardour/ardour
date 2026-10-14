@@ -34,11 +34,6 @@ public:
 	PortAudioIO (void);
 	~PortAudioIO (void);
 
-	enum StandardDevices {
-		DeviceNone = -2,
-		DeviceDefault = -1
-	};
-
 	void host_api_list (std::vector<std::string>&);
 	bool set_host_api (const std::string& host_api_name);
 	std::string get_host_api () const { return _host_api_name; }

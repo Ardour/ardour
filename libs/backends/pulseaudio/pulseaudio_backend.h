@@ -102,7 +102,6 @@ public:
 	/* AUDIOBACKEND API */
 
 	std::string name () const;
-	bool is_realtime () const;
 
 	std::vector<DeviceStatus> enumerate_devices () const;
 	std::vector<float> available_sample_rates (const std::string& device) const;

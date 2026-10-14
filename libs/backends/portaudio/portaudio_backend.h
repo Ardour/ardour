@@ -99,7 +99,6 @@ class PortAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 		/* AUDIOBACKEND API */
 
 		std::string name () const;
-		bool is_realtime () const;
 
 		bool requires_driver_selection() const;
 		std::string driver_name () const;
