@@ -516,6 +516,8 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 			}
 			break;
 
+		case VelocityItem:
+			[[fallthrough]];
 		case NoteItem:
 			if (press && event->button.button == 3) {
 				NoteBase* cnote = reinterpret_cast<NoteBase*> (item->get_data ("notebase"));
