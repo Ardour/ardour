@@ -510,6 +510,12 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 			}
 			break;
 
+		case VelocityBaseItem:
+			if (press && eff_mouse_mode != MouseDraw && op == SelectionSet) {
+				midi_action (&MidiRegionView::clear_note_selection);
+			}
+			break;
+
 		case NoteItem:
 			if (press && event->button.button == 3) {
 				NoteBase* cnote = reinterpret_cast<NoteBase*> (item->get_data ("notebase"));
