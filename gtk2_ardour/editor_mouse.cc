@@ -1390,6 +1390,8 @@ Editor::button_press_handler_3 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			popup_control_point_context_menu (item, event);
 			break;
 
+		case VelocityItem:
+			[[fallthrough]];
 		case NoteItem:
 			if (internal_editing()) {
 				popup_note_context_menu (item, event);
