@@ -6883,7 +6883,7 @@ MidiLollipopsSelectDrag::select_things (int button_state, timepos_t const& x1, t
 	double const origin = (base.item_to_canvas (base.get())).y0 - _bounding_item->canvas_origin().y;
 
 	bool notes_selected = _display->midi_view ().select_notes_by_velocity (x1, x2, _display->y_position_to_velocity(y2 - origin), _display->y_position_to_velocity(y1 - origin),
-	    Keyboard::modifier_state_contains (button_state, Keyboard::TertiaryModifier));
+	    ArdourKeyboard::selection_type (button_state));
 
 	if (!notes_selected) {
 		RubberbandSelectDrag::select_things (button_state, x1, x2, y1, y2, drag_in_progress);

@@ -3067,13 +3067,13 @@ MidiView::update_drag_selection(timepos_t const & start, timepos_t const & end, 
 }
 
 bool
-MidiView::select_notes_by_velocity (timepos_t const & start, timepos_t const & end, int velocity_min, int velocity_max, bool add)
+MidiView::select_notes_by_velocity (timepos_t const & start, timepos_t const & end, int velocity_min, int velocity_max, ARDOUR::SelectionOperation op)
 {
 	if (!_midi_region) {
 		return false;
 	}
 
-    if (!add && !_selection.empty()) {
+    if (op == SelectionSet && !_selection.empty()) {
 		clear_note_selection ();
 	}
 
