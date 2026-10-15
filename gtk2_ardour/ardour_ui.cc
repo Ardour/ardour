@@ -1442,7 +1442,11 @@ ARDOUR_UI::update_timecode_format ()
 		std::shared_ptr<TimecodeTransportMaster> tcmaster;
 		std::shared_ptr<TransportMaster> tm = TransportMasterManager::instance().current();
 
+#ifdef WALLCLOCK_TM
 		if (tm && (tm->type() == LTC || tm->type() == MTC || tm->type() == WallClock) && (tcmaster = std::dynamic_pointer_cast<TimecodeTransportMaster>(tm)) != 0 && tm->locked()) {
+#else
+		if (tm && (tm->type() == LTC || tm->type() == MTC) && (tcmaster = std::dynamic_pointer_cast<TimecodeTransportMaster>(tm)) != 0 && tm->locked()) {
+#endif
 			matching = (tcmaster->apparent_timecode_format() == _session->config.get_timecode_format());
 		} else {
 			matching = true;

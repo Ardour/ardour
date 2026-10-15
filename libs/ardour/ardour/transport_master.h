@@ -348,8 +348,10 @@ public:
 				return TRS_MTC;
 			case LTC:
 				return TRS_LTC;
+#ifdef WALLCLOCK_TM
 			case WallClock:
 				return TRS_WallClock;
+#endif
 			case MIDIClock:
 				break;
 		}

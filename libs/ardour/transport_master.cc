@@ -387,9 +387,11 @@ TransportMaster::factory (SyncSource type, std::string const& name, bool removea
 		case Engine:
 			tm.reset (new Engine_TransportMaster (*AudioEngine::instance()));
 			break;
+#ifdef WALLCLOCK_TM
 		case WallClock:
 			tm.reset (new WallClock_TransportMaster (name));
 			break;
+#endif
 		default:
 			break;
 		}
@@ -451,6 +453,7 @@ TransportMaster::display_name (bool sh) const
 			return name();
 		}
 
+#ifdef WALLCLOCK_TM
 	case WallClock:
 		if (sh) {
 			if (name().length() <= 4) {
@@ -460,6 +463,7 @@ TransportMaster::display_name (bool sh) const
 		} else {
 			return name();
 		}
+#endif
 	}
 
 	/* GRRRR .... stupid, stupid gcc - you can't get here from there, all enum values are handled */
