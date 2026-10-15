@@ -53,6 +53,11 @@
 
 #include "pbd/i18n.h"
 
+#ifdef wctl
+#undef wctl
+#endif
+#define wctl(sp) std::weak_ptr((sp))
+
 using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
@@ -179,46 +184,46 @@ OSCSelectObserver::refresh_strip (std::shared_ptr<ARDOUR::Stripable> new_strip, 
 	_strip->presentation_info().PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::pi_changed, this, _1), &_osc);
 	_osc.float_message (X_("/select/hide"), _strip->is_hidden (), addr);
 
-	_strip->mute_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::change_message, this, X_("/select/mute"), _strip->mute_control()), &_osc);
-	_strip->mute_control()->alist()->automation_state_changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::send_automation, this, X_("/select/mute"), _strip->mute_control()), &_osc);
-	change_message (X_("/select/mute"), _strip->mute_control());
-	send_automation (X_("/select/mute"), _strip->mute_control());
+	_strip->mute_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::change_message, this, X_("/select/mute"), wctl (_strip->mute_control())), &_osc);
+	_strip->mute_control()->alist()->automation_state_changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::send_automation, this, X_("/select/mute"), wctl (_strip->mute_control())), &_osc);
+	change_message (X_("/select/mute"), wctl (_strip->mute_control()));
+	send_automation (X_("/select/mute"), wctl (_strip->mute_control()));
 
-	_strip->solo_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::change_message, this, X_("/select/solo"), _strip->solo_control()), &_osc);
-	change_message (X_("/select/solo"), _strip->solo_control());
+	_strip->solo_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::change_message, this, X_("/select/solo"), wctl (_strip->solo_control())), &_osc);
+	change_message (X_("/select/solo"), wctl (_strip->solo_control()));
 
 	if (_strip->solo_isolate_control()) {
-		_strip->solo_isolate_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::change_message, this, X_("/select/solo_iso"), _strip->solo_isolate_control()), &_osc);
-		change_message (X_("/select/solo_iso"), _strip->solo_isolate_control());
+		_strip->solo_isolate_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::change_message, this, X_("/select/solo_iso"), wctl (_strip->solo_isolate_control())), &_osc);
+		change_message (X_("/select/solo_iso"), wctl (_strip->solo_isolate_control()));
 	}
 
 	if (_strip->solo_safe_control()) {
-		_strip->solo_safe_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::change_message, this, X_("/select/solo_safe"), _strip->solo_safe_control()), &_osc);
-		change_message (X_("/select/solo_safe"), _strip->solo_safe_control());
+		_strip->solo_safe_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::change_message, this, X_("/select/solo_safe"), wctl (_strip->solo_safe_control())), &_osc);
+		change_message (X_("/select/solo_safe"), wctl (_strip->solo_safe_control()));
 	}
 
 	std::shared_ptr<Track> track = std::dynamic_pointer_cast<Track> (_strip);
 	if (track) {
-		track->monitoring_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::monitor_status, this, track->monitoring_control()), &_osc);
-		monitor_status (track->monitoring_control());
+		track->monitoring_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::monitor_status, this, wctl (track->monitoring_control())), &_osc);
+		monitor_status (wctl (track->monitoring_control()));
 	}
 
 	std::shared_ptr<AutomationControl> rec_controllable = _strip->rec_enable_control ();
 	if (rec_controllable) {
-		rec_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::change_message, this, X_("/select/recenable"), _strip->rec_enable_control()), &_osc);
-		change_message (X_("/select/recenable"), _strip->rec_enable_control());
+		rec_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::change_message, this, X_("/select/recenable"), wctl (_strip->rec_enable_control())), &_osc);
+		change_message (X_("/select/recenable"), wctl (_strip->rec_enable_control()));
 	}
 
 	std::shared_ptr<AutomationControl> recsafe_controllable = _strip->rec_safe_control ();
 	if (recsafe_controllable) {
-		recsafe_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::change_message, this, X_("/select/record_safe"), _strip->rec_safe_control()), &_osc);
-		change_message (X_("/select/record_safe"), _strip->rec_safe_control());
+		recsafe_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::change_message, this, X_("/select/record_safe"), wctl (_strip->rec_safe_control())), &_osc);
+		change_message (X_("/select/record_safe"), wctl (_strip->rec_safe_control()));
 	}
 
 	std::shared_ptr<AutomationControl> phase_controllable = _strip->phase_control ();
 	if (phase_controllable) {
-		phase_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::change_message, this, X_("/select/polarity"), _strip->phase_control()), &_osc);
-		change_message (X_("/select/polarity"), _strip->phase_control());
+		phase_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::change_message, this, X_("/select/polarity"), wctl (_strip->phase_control())), &_osc);
+		change_message (X_("/select/polarity"), wctl (_strip->phase_control()));
 	}
 
 	_strip->gain_control()->alist()->automation_state_changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::gain_automation, this), &_osc);
@@ -231,10 +236,10 @@ OSCSelectObserver::refresh_strip (std::shared_ptr<ARDOUR::Stripable> new_strip, 
 
 	std::shared_ptr<Controllable> trim_controllable = std::dynamic_pointer_cast<Controllable>(_strip->trim_control());
 	if (trim_controllable) {
-		trim_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::trim_message, this, X_("/select/trimdB"), _strip->trim_control()), &_osc);
-		_strip->trim_control()->alist()->automation_state_changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::send_automation, this, X_("/select/trimdB"), _strip->trim_control()), &_osc);
-		trim_message (X_("/select/trimdB"), _strip->trim_control());
-		send_automation (X_("/select/trimdB"), _strip->trim_control());
+		trim_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::trim_message, this, X_("/select/trimdB"), wctl (_strip->trim_control())), &_osc);
+		_strip->trim_control()->alist()->automation_state_changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::send_automation, this, X_("/select/trimdB"), wctl (_strip->trim_control())), &_osc);
+		trim_message (X_("/select/trimdB"), wctl (_strip->trim_control()));
+		send_automation (X_("/select/trimdB"), wctl (_strip->trim_control()));
 	}
 
 	// sends, plugins and eq
@@ -242,26 +247,26 @@ OSCSelectObserver::refresh_strip (std::shared_ptr<ARDOUR::Stripable> new_strip, 
 
 	// but... MB master send enable is different
 	if (_strip->master_send_enable_controllable ()) {
-		_strip->master_send_enable_controllable ()->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::enable_message, this, X_("/select/master_send_enable"), _strip->master_send_enable_controllable()), &_osc);
-		enable_message (X_("/select/master_send_enable"), _strip->master_send_enable_controllable());
+		_strip->master_send_enable_controllable ()->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::enable_message, this, X_("/select/master_send_enable"), wctl (_strip->master_send_enable_controllable())), &_osc);
+		enable_message (X_("/select/master_send_enable"), wctl (_strip->master_send_enable_controllable()));
 	}
 
 	// Compressor
 	if (_strip->mapped_control (Comp_Enable)) {
-		_strip->mapped_control (Comp_Enable)->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::enable_message, this, X_("/select/comp_enable"), _strip->mapped_control (Comp_Enable)), &_osc);
-		enable_message (X_("/select/comp_enable"), _strip->mapped_control (Comp_Enable));
+		_strip->mapped_control (Comp_Enable)->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::enable_message, this, X_("/select/comp_enable"), wctl (_strip->mapped_control (Comp_Enable))), &_osc);
+		enable_message (X_("/select/comp_enable"), wctl (_strip->mapped_control (Comp_Enable)));
 	}
 	if (_strip->mapped_control (Comp_Threshold)) {
-		_strip->mapped_control (Comp_Threshold)->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::change_message, this, X_("/select/comp_threshold"), _strip->mapped_control (Comp_Threshold)), &_osc);
-		change_message (X_("/select/comp_threshold"), _strip->mapped_control (Comp_Threshold));
+		_strip->mapped_control (Comp_Threshold)->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::change_message, this, X_("/select/comp_threshold"), wctl (_strip->mapped_control (Comp_Threshold))), &_osc);
+		change_message (X_("/select/comp_threshold"), wctl (_strip->mapped_control (Comp_Threshold)));
 	}
 	if (_strip->mapped_control (Comp_Mode)) {
 		_strip->mapped_control (Comp_Mode)->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::comp_mode, this), &_osc);
 		comp_mode ();
 	}
 	if (_strip->mapped_control (Comp_Makeup)) {
-		_strip->mapped_control (Comp_Makeup)->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::change_message, this, X_("/select/comp_makeup"), _strip->mapped_control (Comp_Makeup)), &_osc);
-		change_message (X_("/select/comp_makeup"), _strip->mapped_control (Comp_Makeup));
+		_strip->mapped_control (Comp_Makeup)->Changed.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::change_message, this, X_("/select/comp_makeup"), wctl (_strip->mapped_control (Comp_Makeup))), &_osc);
+		change_message (X_("/select/comp_makeup"), wctl (_strip->mapped_control (Comp_Makeup)));
 	}
 
 	_strip->MappedControlsChanged.connect (strip_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::eq_restart, this, 0), &_osc);
@@ -701,8 +706,8 @@ OSCSelectObserver::panner_changed ()
 			std::shared_ptr<Controllable> pan_controllable = std::dynamic_pointer_cast<Controllable>(_strip->pan_azimuth_control());
 			if (pan_controllable) {
 				std::shared_ptr<AutomationControl>at = std::dynamic_pointer_cast<AutomationControl> (pan_controllable);
-				pan_controllable->Changed.connect (pan_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_stereo_position"), _strip->pan_azimuth_control()), &_osc);
-				at->alist()->automation_state_changed.connect (pan_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::send_automation, this, X_("/select/pan_stereo_position"), _strip->pan_azimuth_control()), &_osc);
+				pan_controllable->Changed.connect (pan_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_stereo_position"), wctl (_strip->pan_azimuth_control())), &_osc);
+				at->alist()->automation_state_changed.connect (pan_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::send_automation, this, X_("/select/pan_stereo_position"), wctl (_strip->pan_azimuth_control())), &_osc);
 				change_message (X_("/select/pan_stereo_position"), _strip->pan_azimuth_control());
 				send_automation (X_("/select/pan_stereo_position"), _strip->pan_azimuth_control());
 			}
@@ -710,23 +715,23 @@ OSCSelectObserver::panner_changed ()
 			std::shared_ptr<Controllable> width_controllable = std::dynamic_pointer_cast<Controllable>(_strip->pan_width_control());
 			if (width_controllable) {
 				std::shared_ptr<AutomationControl>at = std::dynamic_pointer_cast<AutomationControl> (width_controllable);
-				width_controllable->Changed.connect (pan_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_stereo_width"), _strip->pan_width_control()), &_osc);
-				at->alist()->automation_state_changed.connect (pan_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::send_automation, this, X_("/select/pan_stereo_width"), _strip->pan_width_control()), &_osc);
+				width_controllable->Changed.connect (pan_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_stereo_width"), wctl (_strip->pan_width_control())), &_osc);
+				at->alist()->automation_state_changed.connect (pan_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::send_automation, this, X_("/select/pan_stereo_width"), wctl (_strip->pan_width_control())), &_osc);
 				change_message (X_("/select/pan_stereo_width"), _strip->pan_width_control());
 				send_automation (X_("/select/pan_stereo_width"), _strip->pan_width_control());
 			}
 
 			// Rest of possible pan controls... Untested because I can't find a way to get them in the GUI :)
 			if (_strip->pan_elevation_control ()) {
-				_strip->pan_elevation_control()->Changed.connect (pan_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_elevation_position"), _strip->pan_elevation_control()), &_osc);
+				_strip->pan_elevation_control()->Changed.connect (pan_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_elevation_position"), wctl (_strip->pan_elevation_control())), &_osc);
 				change_message (X_("/select/pan_elevation_position"), _strip->pan_elevation_control());
 			}
 			if (_strip->pan_frontback_control ()) {
-				_strip->pan_frontback_control()->Changed.connect (pan_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_frontback_position"), _strip->pan_frontback_control()), &_osc);
+				_strip->pan_frontback_control()->Changed.connect (pan_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_frontback_position"), wctl (_strip->pan_frontback_control())), &_osc);
 				change_message (X_("/select/pan_frontback_position"), _strip->pan_frontback_control());
 			}
 			if (_strip->pan_lfe_control ()) {
-				_strip->pan_lfe_control()->Changed.connect (pan_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_lfe_control"), _strip->pan_lfe_control()), &_osc);
+				_strip->pan_lfe_control()->Changed.connect (pan_connections, MISSING_INVALIDATOR, std::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_lfe_control"), wctl (_strip->pan_lfe_control())), &_osc);
 				change_message (X_("/select/pan_lfe_control"), _strip->pan_lfe_control());
 			}
 		} else {
@@ -834,16 +839,26 @@ OSCSelectObserver::pi_changed (PBD::PropertyChange const& what_changed)
 }
 
 void
-OSCSelectObserver::change_message (string path, std::shared_ptr<Controllable> controllable)
+OSCSelectObserver::change_message (string path, std::weak_ptr<Controllable> wc)
 {
+	std::shared_ptr<Controllable> controllable (wc.lock());
+	if (!controllable) {
+		return;
+	}
+
 	float val = controllable->get_value();
 
 	_osc.float_message (path, (float) controllable->internal_to_interface (val), addr);
 }
 
 void
-OSCSelectObserver::send_automation (string path, std::shared_ptr<PBD::Controllable> control)
+OSCSelectObserver::send_automation (string path, std::weak_ptr<PBD::Controllable> wc)
 {
+	std::shared_ptr<Controllable> control (wc.lock());
+	if (!control) {
+		return;
+	}
+
 	std::shared_ptr<AutomationControl>automate = std::dynamic_pointer_cast<AutomationControl> (control);
 
 	AutoState as = automate->alist()->automation_state();
@@ -878,8 +893,13 @@ OSCSelectObserver::send_automation (string path, std::shared_ptr<PBD::Controllab
 }
 
 void
-OSCSelectObserver::enable_message (string path, std::shared_ptr<Controllable> controllable)
+OSCSelectObserver::enable_message (string path, std::weak_ptr<Controllable> wc)
 {
+	std::shared_ptr<Controllable> controllable (wc.lock());
+	if (!controllable) {
+		return;
+	}
+
 	float val = controllable->get_value();
 	if (val) {
 		_osc.float_message (path, 1, addr);
@@ -899,16 +919,26 @@ OSCSelectObserver::plug_enable (string path, std::shared_ptr<Processor> proc)
 }
 
 void
-OSCSelectObserver::change_message_with_id (string path, uint32_t id, std::shared_ptr<Controllable> controllable)
+OSCSelectObserver::change_message_with_id (string path, uint32_t id, std::weak_ptr<Controllable> wc)
 {
+	std::shared_ptr<Controllable> controllable (wc.lock());
+	if (!controllable) {
+		return;
+	}
+
 	float val = controllable->get_value();
 
 	_osc.float_message_with_id (path, id, (float) controllable->internal_to_interface (val), in_line, addr);
 }
 
 void
-OSCSelectObserver::enable_message_with_id (string path, uint32_t id, std::shared_ptr<Controllable> controllable)
+OSCSelectObserver::enable_message_with_id (string path, uint32_t id, std::weak_ptr<Controllable> wc)
 {
+	std::shared_ptr<Controllable> controllable (wc.lock());
+	if (!controllable) {
+		return;
+	}
+
 	float val = controllable->get_value();
 	if (val) {
 		_osc.float_message_with_id (path, id, 1, in_line, addr);
@@ -918,8 +948,13 @@ OSCSelectObserver::enable_message_with_id (string path, uint32_t id, std::shared
 }
 
 void
-OSCSelectObserver::monitor_status (std::shared_ptr<Controllable> controllable)
+OSCSelectObserver::monitor_status (std::weak_ptr<Controllable> wc)
 {
+	std::shared_ptr<Controllable> controllable (wc.lock());
+	if (!controllable) {
+		return;
+	}
+
 	int disk, input;
 	float val = controllable->get_value();
 	switch ((int) val) {
@@ -941,8 +976,13 @@ OSCSelectObserver::monitor_status (std::shared_ptr<Controllable> controllable)
 }
 
 void
-OSCSelectObserver::trim_message (string path, std::shared_ptr<Controllable> controllable)
+OSCSelectObserver::trim_message (string path, std::weak_ptr<Controllable> wc)
 {
+	std::shared_ptr<Controllable> controllable (wc.lock());
+	if (!controllable) {
+		return;
+	}
+
 	if (_last_trim != controllable->get_value()) {
 		_last_trim = controllable->get_value();
 	} else {

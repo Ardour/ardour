@@ -107,16 +107,16 @@ class OSCSelectObserver
 	void group_sharing (std::shared_ptr<ARDOUR::RouteGroup> rg_c);
 	void comment_changed ();
 	void pi_changed (PBD::PropertyChange const&);
-	void change_message (std::string path, std::shared_ptr<PBD::Controllable> controllable);
-	void enable_message (std::string path, std::shared_ptr<PBD::Controllable> controllable);
+	void change_message (std::string path, std::weak_ptr<PBD::Controllable> controllable);
+	void enable_message (std::string path, std::weak_ptr<PBD::Controllable> controllable);
 	void comp_mode (void);
-	void change_message_with_id (std::string path, uint32_t id, std::shared_ptr<PBD::Controllable> controllable);
-	void enable_message_with_id (std::string path, uint32_t id, std::shared_ptr<PBD::Controllable> controllable);
-	void monitor_status (std::shared_ptr<PBD::Controllable> controllable);
+	void change_message_with_id (std::string path, uint32_t id, std::weak_ptr<PBD::Controllable> controllable);
+	void enable_message_with_id (std::string path, uint32_t id, std::weak_ptr<PBD::Controllable> controllable);
+	void monitor_status (std::weak_ptr<PBD::Controllable> controllable);
 	void gain_message ();
 	void gain_automation ();
-	void send_automation (std::string path, std::shared_ptr<PBD::Controllable> control);
-	void trim_message (std::string path, std::shared_ptr<PBD::Controllable> controllable);
+	void send_automation (std::string path, std::weak_ptr<PBD::Controllable> control);
+	void trim_message (std::string path, std::weak_ptr<PBD::Controllable> controllable);
 	// sends stuff
 	void send_init (void);
 	void send_end (void);
