@@ -80,6 +80,7 @@
 #include "ardour/source_factory.h"
 #include "ardour/session_playlists.h"
 #include "ardour/source.h"
+#include "ardour/srcfilesource.h"
 #include "ardour/strip_silence.h"
 #include "ardour/transient_detector.h"
 #include "ardour/transport_master_manager.h"
@@ -5941,15 +5942,90 @@ Editor::replace_source_for_selected_regions ()
 
 	SourceList replacement_sources;
 	for (uint32_t channel = 0; channel < info.channels; ++channel) {
-		std::shared_ptr<Source> source;
+		std::shared_ptr<AudioFileSource> original;
 		try {
-			source = SourceFactory::createExternal (DataType::AUDIO, *_session, *clip_path, channel, Source::Flag (0), true, true);
+			original = std::dynamic_pointer_cast<AudioFileSource> (
+				SourceFactory::createExternal (
+					DataType::AUDIO,
+					*_session,
+					*clip_path,
+					channel,
+					Source::Flag (0),
+					false,
+					true
+				)
+			);
 		} catch (failed_constructor&) {
 			continue;
 		}
-		if (source) {
-			replacement_sources.push_back (source);
+
+		if (!original) {
+			continue;
 		}
+
+		std::shared_ptr<AudioSource> source_for_copy = original;
+		// resample if sample rates don't match
+		if (original->sample_rate() != _session->sample_rate()) {
+			source_for_copy = std::dynamic_pointer_cast<AudioSource> (
+				std::shared_ptr<SrcFileSource> (
+					new SrcFileSource (*_session, original, ARDOUR::SrcBest)
+				)
+			);
+		}
+
+		std::string path = _session->new_audio_source_path (
+			Glib::path_get_basename (*clip_path),
+			info.channels,
+			channel,
+			false
+		);
+
+		// create a session local copy of the source and write the data to it
+		std::shared_ptr<AudioFileSource> replacement;
+		try {
+			replacement = std::dynamic_pointer_cast<AudioFileSource> (
+				SourceFactory::createWritable (
+					DataType::AUDIO,
+					*_session,
+					path,
+					_session->sample_rate(),
+					true,
+					true
+				)
+			);
+		} catch (failed_constructor&) {
+			continue;
+		}
+
+		if (!replacement) {
+			continue;
+		}
+
+		std::vector<Sample> buffer (4096);
+		samplepos_t pos = 0;
+
+		for (;;) {
+			samplecnt_t nread = source_for_copy->read (buffer.data(), pos, buffer.size(), 0);
+			if (nread <= 0) {
+				break;
+			}
+			replacement->write (buffer.data(), nread);
+			pos += nread;
+		}
+
+		std::shared_ptr<AudioFileSource> afs = std::dynamic_pointer_cast<AudioFileSource> (replacement);
+
+		time_t xnow;
+		time (&xnow);
+		struct tm* now = localtime (&xnow);
+
+		afs->prepare_for_peakfile_writes();
+		afs->update_header (afs->natural_position().samples(), *now, xnow);
+		afs->done_with_peakfile_writes ();
+		afs->mark_immutable ();
+		SourceFactory::setup_peakfile (afs, true);
+
+		replacement_sources.push_back (replacement);
 	}
 
 	if (replacement_sources.empty ()) {
