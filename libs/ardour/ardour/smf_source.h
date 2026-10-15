@@ -85,6 +85,9 @@ public:
 
 	Temporal::Beats duration() const;
 
+	std::string smf_track_name ()       const { return _smf_track_name; }
+	std::string smf_instrument_name ()  const { return _smf_instrument_name; }
+
   protected:
 	void close ();
 	void flush_midi (const WriterLock& lock);
@@ -117,6 +120,9 @@ public:
 	                          timecnt_t const &            cnt);
 
 	void load_model_unlocked (bool force_reload=false);
+
+	std::string _smf_track_name;
+	std::string _smf_instrument_name;
 
 };
 

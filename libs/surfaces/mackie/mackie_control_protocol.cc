@@ -209,12 +209,39 @@ MackieControlProtocol::thread_init ()
 	set_thread_priority ();
 }
 
+/* The current bank is stored as a presentation order, which is not a
+ * position in the sorted stripables: the master (excluded from them) usually
+ * holds order 0, and hidden stripables leave gaps. Bank arithmetic is done
+ * on positions, then converted back to the order of the target stripable.
+ */
+uint32_t
+MackieControlProtocol::current_bank_index (Sorted const & sorted) const
+{
+	for (uint32_t i = 0; i < sorted.size(); ++i) {
+		if (sorted[i]->presentation_info().order() >= _current_initial_bank) {
+			return i;
+		}
+	}
+	return 0;
+}
+
+int
+MackieControlProtocol::switch_banks_to_index (Sorted const & sorted, uint32_t index)
+{
+	if (index >= sorted.size()) {
+		return -1;
+	}
+	return switch_banks (sorted[index]->presentation_info().order());
+}
+
 // go to the previous track.
 void
 MackieControlProtocol::prev_track()
 {
-	if (_current_initial_bank >= 1) {
-		switch_banks (_current_initial_bank - 1);
+	Sorted sorted = get_sorted_stripables();
+	uint32_t index = current_bank_index (sorted);
+	if (index >= 1) {
+		switch_banks_to_index (sorted, index - 1);
 	}
 }
 
@@ -223,9 +250,7 @@ void
 MackieControlProtocol::next_track()
 {
 	Sorted sorted = get_sorted_stripables();
-	if (_current_initial_bank + 1 < sorted.size()) {
-		switch_banks (_current_initial_bank + 1);
-	}
+	switch_banks_to_index (sorted, current_bank_index (sorted) + 1);
 }
 
 bool
@@ -369,8 +394,13 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 	bool exists = false;
 	Sorted::iterator first = sorted.end();
 
+	/* initial is an order number, which need not belong to any stripable
+	 * listed here: bank 0 is requested at startup, but order 0 is usually
+	 * the master (excluded above), so the first track is order 1. Start the
+	 * bank at the first stripable at or after it.
+	 */
 	for (auto s = sorted.begin(); s != sorted.end(); ++s) {
-		if ((*s)->presentation_info().order() == initial) {
+		if ((*s)->presentation_info().order() >= initial) {
 			first = s;
 			exists = true;
 			break;
@@ -381,7 +411,7 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 		return -1;
 	}
 
-	if (sorted.size() <= strip_cnt && _current_initial_bank == 0 && !force) {
+	if (sorted.size() <= strip_cnt && _current_initial_bank <= sorted.front()->presentation_info().order() && !force) {
 		/* no banking - not enough stripables to fill all strips and we're
 		 * not at the first one.
 		 */
@@ -390,7 +420,7 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 		return -1;
 	}
 
-	_current_initial_bank = initial;
+	_current_initial_bank = (*first)->presentation_info().order();
 	_current_selected_track = -1;
 
 	// Map current bank of stripables onto each surface(+strip)
@@ -2403,16 +2433,10 @@ MackieControlProtocol::stripable_selection_changed ()
 		std::shared_ptr<Stripable> ss = ControlProtocol::first_selected_stripable ();
 		if (ss) {
 			if (!is_mapped (ss)) {
-#ifdef MIXBUS
+				/* switch_banks() takes a presentation order: start the
+				 * bank at the selected stripable itself.
+				 */
 				switch_banks (ss->presentation_info().order(), false);
-#else
-				/* In Ardour, sane order values start at 1, due
-				   to master etc. not really being ordered in
-				   any particular way (so zero is a kind of
-				   sentinel value).
-				*/
-				switch_banks (ss->presentation_info().order() - 1, false);
-#endif
 			}
 		}
 	}

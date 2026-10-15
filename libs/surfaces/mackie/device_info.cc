@@ -57,6 +57,7 @@ DeviceInfo::DeviceInfo()
 	, _has_global_controls (true)
 	, _has_jog_wheel (true)
 	, _has_touch_sense_faders (true)
+	, _has_motorized_faders (true)
 	, _uses_logic_control_buttons (false)
 	, _uses_ipmidi (false)
 	, _no_handshake (false)
@@ -340,6 +341,16 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 		_has_touch_sense_faders = false;
 	}
 
+	/* Faders are motorized unless said otherwise: the Mackie protocol
+	 * sends every fader position back to the surface, which only makes
+	 * sense for faders that can move to it.
+	 */
+	if ((child = node.child ("MotorizedFaders")) != 0) {
+		child->get_property ("value", _has_motorized_faders);
+	} else {
+		_has_motorized_faders = true;
+	}
+
 	if ((child = node.child ("UsesIPMIDI")) != 0) {
 		child->get_property ("value", _uses_ipmidi);
 	} else {
@@ -619,6 +630,12 @@ bool
 DeviceInfo::has_touch_sense_faders () const
 {
 	return _has_touch_sense_faders;
+}
+
+bool
+DeviceInfo::has_motorized_faders () const
+{
+	return _has_motorized_faders;
 }
 
 static const char * const devinfo_env_variable_name = "ARDOUR_MCP_PATH";

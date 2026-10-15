@@ -59,6 +59,15 @@ Fader::update_message ()
 		return MidiByteArray();
 	}
 
+	if (mcp && !mcp->device_info().has_motorized_faders()) {
+		/* Faders without motors cannot follow the position we send.
+		 * Some such surfaces (Arturia keyboards) even treat it as a
+		 * pickup target and stop sending until the physical fader
+		 * reaches it, so echoing their own moves back freezes them.
+		 */
+		return MidiByteArray();
+	}
+
 	int posi = lrintf (16383.0 * position);
 
 	if (posi == last_update_position) {

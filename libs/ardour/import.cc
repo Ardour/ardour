@@ -405,34 +405,45 @@ write_midi_type0_data_to_one_file (Evoral::SMF* source, ImportStatus& status, si
 				continue;
 			}
 
-			if (ret == 0) {
-				/* set note id, but we ignored it */
-				continue;
-			}
-
 			if (size > bufsize) {
 				bufsize = size;
 			}
 
-			/* if requested by user, each sourcefile gets only a single channel's data */
+			if (ret > 0) {
+				/* regular MIDI event */
 
-			if (ret > 0 && split_midi_channels) {
-				uint8_t type = buf[0] & 0xf0;
-				uint8_t chan = buf[0] & 0x0f;
-				if (type >= 0x80 && type <= 0xE0) {
-					if (chan != channel) {
-						continue;
+				/* if requested by user, each sourcefile gets only a single channel's data */
+
+				if (split_midi_channels) {
+					uint8_t type = buf[0] & 0xf0;
+					uint8_t chan = buf[0] & 0x0f;
+					if (type >= 0x80 && type <= 0xE0) {
+						if (chan != channel) {
+							continue;
+						}
 					}
 				}
-			}
 
-			smfs->append_event_beats (
-				target_lock,
-				Evoral::Event<Temporal::Beats>(
-					Evoral::MIDI_EVENT,
-					Temporal::Beats::ticks_at_rate(t, source->ppqn()),
-					size,
-					buf));
+				smfs->append_event_beats (
+					target_lock,
+					Evoral::Event<Temporal::Beats>(
+						Evoral::MIDI_EVENT,
+						Temporal::Beats::ticks_at_rate(t, source->ppqn()),
+						size,
+						buf));
+
+			} else if (ret == 0) {
+				/* meta event — write text types (0x01-0x09)
+				   through to preserve them in the SMF file */
+
+				smfs->append_event_beats (
+					target_lock,
+					Evoral::Event<Temporal::Beats>(
+						Evoral::MIDI_EVENT,
+						Temporal::Beats::ticks_at_rate(t, source->ppqn()),
+						size,
+						buf), true); /* allow meta-events */
+			}
 
 			written++;
 

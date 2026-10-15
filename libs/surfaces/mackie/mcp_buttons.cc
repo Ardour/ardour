@@ -117,15 +117,13 @@ MackieControlProtocol::left_press (Button &)
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("bank left with current initial = %1 nstrips = %2 tracks/busses = %3\n",
 							   _current_initial_bank, strip_cnt, sorted.size()));
 
-	if (_current_initial_bank > 0) {
-		uint32_t initial = (_current_initial_bank - 1) / strip_cnt * strip_cnt;
-		while (initial >= sorted.size())
-		{
-			initial -= strip_cnt;
-		}
-		(void) switch_banks (initial);
+	/* go to the start of the previous page of strip_cnt stripables */
+	uint32_t index = current_bank_index (sorted);
+
+	if (index > 0) {
+		(void) switch_banks_to_index (sorted, (index - 1) / strip_cnt * strip_cnt);
 	} else {
-		(void) switch_banks (0);
+		(void) switch_banks_to_index (sorted, 0);
 	}
 
 
@@ -148,15 +146,16 @@ MackieControlProtocol::right_press (Button &)
 	Sorted sorted = get_sorted_stripables();
 	uint32_t strip_cnt = n_strips();
 	uint32_t route_cnt = sorted.size();
-	uint32_t max_bank = route_cnt / strip_cnt * strip_cnt;
 
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("bank right with current initial = %1 nstrips = %2 tracks/busses = %3\n",
 							   _current_initial_bank, strip_cnt, route_cnt));
 
-	if (_current_initial_bank < max_bank) {
-		uint32_t new_initial = (_current_initial_bank / strip_cnt * strip_cnt) + strip_cnt;
-		(void) switch_banks (new_initial);
+	/* go to the start of the next page of strip_cnt stripables, if any */
+	uint32_t next_page = current_bank_index (sorted) / strip_cnt * strip_cnt + strip_cnt;
+
+	if (next_page < route_cnt) {
+		(void) switch_banks_to_index (sorted, next_page);
 	}
 
 	return on;
@@ -727,7 +726,7 @@ MackieControlProtocol::bank_release (Button& b, uint32_t basic_bank_num)
 		bank_num = 8 + basic_bank_num;
 	}
 
-	(void) switch_banks (n_strips() * bank_num);
+	(void) switch_banks_to_index (get_sorted_stripables(), n_strips() * bank_num);
 
 	return on;
 }
