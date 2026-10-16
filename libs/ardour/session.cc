@@ -2749,19 +2749,36 @@ Session::find_route_name (string const & base, uint32_t& id, string& name, bool 
 	}
 
 	/* compare to Route::set_name_sequence */
+#if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
+	Glib::ustring base_ustring (base);
+	Glib::RefPtr<Glib::Regex> sequence_regex = Glib::Regex::create ("^(.*) (\\d+)\\.\\.(\\d+)$");
+	Glib::MatchInfo matches;
+	bool found = sequence_regex->match (base_ustring, matches);
+#else
 	std::regex sequence_regex ("^(.*) (\\d+)\\.\\.(\\d+)$");
 	std::smatch matches;
 	bool found = std::regex_search (base, matches, sequence_regex);
+#endif
 	bool numeric = true;
 
 	if (!found) {
+#if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
+		Glib::RefPtr<Glib::Regex> sequence_regex = Glib::Regex::create ("^(.*) ([[:alpha:]])\\.\\.([[:alpha:]])$");
+		found = sequence_regex->match (base_ustring, matches);
+#else
 		std::regex sequence_regex ("^(.*) ([[:alpha:]])\\.\\.([[:alpha:]])$");
 		found = std::regex_search (base, matches, sequence_regex);
+#endif
 		numeric = false;
 	}
 
+#if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
+	if (found && matches.matches() && matches.get_match_count() == 4) {
+		std::string start (matches.fetch(2));
+#else
 	if (found && !matches.empty() && matches.size() == 4) {
 		std::string start (matches[2]);
+#endif
 		for (uint32_t i = 1; i < id; ++i) {
 			if (numeric) {
 				start = ARDOUR::bump_name_number (start);
@@ -2770,7 +2787,11 @@ Session::find_route_name (string const & base, uint32_t& id, string& name, bool 
 			}
 		}
 		while (id < (UINT_MAX-1)) { // start <= end
+#if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
+			name = string_compose ("%1 %2", std::string(matches.fetch(1)), start);
+#else
 			name = string_compose ("%1 %2", matches[1], start);
+#endif
 
 			if (route_by_name (name) == 0) {
 				return true;

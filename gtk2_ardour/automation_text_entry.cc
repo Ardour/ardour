@@ -19,6 +19,11 @@
 
 #include <regex>
 
+#if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
+#include <glibmm/regex.h>
+#include <glibmm/ustring.h>
+#endif
+
 #include "gtkmm2ext/doi.h"
 #include "gtkmm2ext/utils.h"
 
@@ -86,6 +91,16 @@ AutomationTextEntry::split_units (std::string const & str, std::string & numeric
 		return;
 	}
 
+#if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
+	Glib::ustring ustr (str);
+	Glib::RefPtr<Glib::Regex> units_regex = Glib::Regex::create ("( *[^0-9.,]+)$");
+	Glib::MatchInfo matches;
+
+	units_regex->match (ustr, matches);
+
+	if (matches.matches()) {
+		units = matches.fetch (matches.get_match_count() - 1);
+#else
 	std::regex units_regex ("( *[^0-9.,]+)$");
 	std::smatch matches;
 
@@ -93,6 +108,7 @@ AutomationTextEntry::split_units (std::string const & str, std::string & numeric
 
 	if (!matches.empty()) {
 		units = matches[matches.size() - 1];
+#endif
 
 		numeric = str.substr (0, units.length());
 
