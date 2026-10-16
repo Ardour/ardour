@@ -25,6 +25,10 @@ SOFTWARE.
 #include <vector>
 #include <stdexcept>
 
+#if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
+#include <glibmm.h>
+#endif
+
 #include "ardour/scala_file.h"
 
 enum current_entry_map {
@@ -48,18 +52,37 @@ read_kbm (std::ifstream& input_file)
 	kbm keyboard_mapping;
 
 #ifdef SCALA_STRICT
+#if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
+	Glib::RefPtr<Glib::Regex> COMMENT_REGEX = Glib::Regex::create ("^!.*");
+	Glib::RefPtr<Glib::Regex> EX = Glib::Regex::create ("^[ \t]*[x]{1}.*");
+#else
 	std::regex COMMENT_REGEX = std::regex("^!.*");
 	std::regex EX = std::regex("^[ \t]*[x]{1}.*");
+#endif
+#else
+#if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
+	Glib::RefPtr<Glib::Regex> COMMENT_REGEX = Glib::Regex::create ("[ \t]*!.*");
+	Glib::RefPtr<Glib::Regex> EX = Glib::Regex::create ("^[ \t]*[xX]{1}.*");
 #else
 	std::regex COMMENT_REGEX = std::regex("[ \t]*!.*");
 	std::regex EX = std::regex("^[ \t]*[xX]{1}.*");
 #endif
+#endif
 
 	while (input_file) {
 		getline(input_file, buffer);
-		if (std::regex_match (buffer, COMMENT_REGEX)) {
+#if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
+		if (COMMENT_REGEX->match (buffer))
+#else
+		if (std::regex_match (buffer, COMMENT_REGEX))
+#endif
+		{
 			// Ignore comments
+#if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
+		} else if (Glib::Regex::create ("[ \t]*")->match (buffer)) {
+#else
 		} else if (std::regex_match (buffer, std::regex("[ \t]*") )) {
+#endif
 			// Blank line. If we're in strict mode this means end of file.
 			// Stop parsing.
 #ifdef SCALA_STRICT
@@ -97,7 +120,11 @@ read_kbm (std::ifstream& input_file)
 				break;
 			case ACTUAL_MAP:
 				// This one is a little more complicated.  If we have an x
+#if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
+				if (EX->match (buffer)) {
+#else
 				if (std::regex_match (buffer, EX)) {
+#endif
 					// A non-entry
 					keyboard_mapping.add_mapping(KBM_NON_ENTRY);
 				} else {

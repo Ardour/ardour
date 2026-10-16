@@ -28,6 +28,10 @@ SOFTWARE.
 #include <math.h>
 #include <stdexcept>
 
+#if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
+#include <glibmm.h>
+#endif
+
 #include "ardour/scala_file.h"
 
 namespace scala {
@@ -52,7 +56,12 @@ read_scl (std::ifstream& input_file)
 #endif
 	int numerator, denominator;
 	std::string buffer;
+#if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
+	std::smatch match;
+	Glib::MatchInfo trimmed;
+#else
 	std::smatch match, trimmed;
+#endif
 	scale scala_scale;
 #ifdef SCALA_STRICT
 	bool description_parsed = false ;
@@ -61,14 +70,26 @@ read_scl (std::ifstream& input_file)
 #ifdef SCALA_STRICT
 	std::regex COMMENT_REGEX = std::regex("^!.*");
 #else
+#if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
+	Glib::RefPtr<Glib::Regex> COMMENT_REGEX = Glib::Regex::create ("[ \t]*!.*");
+#else
 	std::regex COMMENT_REGEX = std::regex("[ \t]*!.*");
+#endif
 #endif
 
 	while (input_file) {
 		getline(input_file, buffer);
+#if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
+		if (COMMENT_REGEX->match (buffer)) {
+#else
 		if (std::regex_match (buffer, COMMENT_REGEX)) {
+#endif
 			// We're defining a comment as the first non-whitespace character being a "!".
+#if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
+		} else if (Glib::Regex::create ("[ \t]*")->match (buffer)) {
+#else
 		} else if (std::regex_match (buffer, std::regex("[ \t]*") )) {
+#endif
 			// Blank line. Discard. This may be an extension of the format.
 #ifdef SCALA_STRICT
 			if (description_parsed) {
@@ -84,8 +105,14 @@ read_scl (std::ifstream& input_file)
 
 		} else {
 			// Extract the part after optional leading whitespace and before an optional space and label
+#if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
+			Glib::RefPtr<Glib::Regex> regex = Glib::Regex::create ("([ \t]*)([^ \t]*)(.*)");
+			regex->match (buffer, trimmed);
+			std::string entry = std::string(trimmed.fetch(2)); /* Might be empty */
+#else
 			std::regex_search(buffer, trimmed, std::regex("([ \t]*)([^ \t]*)(.*)"));
 			std::string entry = trimmed[2]; /* Might be empty */
+#endif
 			if (non_commnets_processed == 0) {
 				// First non-comment is the description. Can be ignored
 				non_commnets_processed = non_commnets_processed + 1;
@@ -103,18 +130,30 @@ read_scl (std::ifstream& input_file)
 				non_commnets_processed = non_commnets_processed + 1;
 				continue;
 			}
+#if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
+			else if (Glib::Regex::create (".*[.]+.*")->match (entry)) {
+#else
 			else if (std::regex_match (entry, std::regex(".*[.]+.*") )) {
+#endif
 				// Cent values *must* have a period. It's the law.
 				double cents = std::stod(entry);
 				scala_scale.add_degree(*new degree(cents));
 			}
+#if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
+			else if (Glib::Regex::create (".*[/]{1}.*")->match (entry)) {
+#else
 			else if (std::regex_match (entry, std::regex(".*[/]{1}.*") )) {
+#endif
 				// A ratio
 				std::regex_search(entry, match, std::regex("(.*)/(.*)"));
 				numerator = std::stoi(match.str(1));
 				denominator = std::stoi(match.str(2));
 				scala_scale.add_degree(*new degree(numerator, denominator));
+#if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
+			} else if (Glib::Regex::create("[0-9]*")->match(entry)) {
+#else
 			} else if (std::regex_match (entry, std::regex("[0-9]*") )) {
+#endif
 				// According to the standard, single numbers should be treated as ratios
 				numerator = std::stoi(entry);
 				denominator = 1;

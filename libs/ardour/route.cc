@@ -5094,21 +5094,43 @@ bool Route::set_name_sequence (std::string const& str)
 		return false;
 	}
 
+#if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
+	Glib::ustring ustr (str);
+	Glib::RefPtr<Glib::Regex> sequence_regex = Glib::Regex::create ("^(.*)(\\d+)\\.\\.(\\d+)(.*)$");
+	Glib::MatchInfo matches;
+	bool found = sequence_regex->match (ustr, matches);
+#else
 	std::regex sequence_regex ("^(.*)(\\d+)\\.\\.(\\d+)(.*)$");
 	std::smatch matches;
 	bool found = std::regex_search (str, matches, sequence_regex);
+#endif
 	bool numeric = true;
 
 	if (!found) {
+#if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
+	    Glib::RefPtr<Glib::Regex> sequence_regex = Glib::Regex::create ("^(.*)([[:alpha:]])\\.\\.([[:alpha:]])(.*)$");
+	    found = sequence_regex->match (ustr, matches);
+#else
 		std::regex sequence_regex ("^(.*)([[:alpha:]])\\.\\.([[:alpha:]])(.*)$");
 		found = std::regex_search (str, matches, sequence_regex);
+#endif
 		numeric = false;
 	}
 
-	if (found && !matches.empty() && matches.size() == 5) {
+#if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
+	if (found && matches.matches() && matches.get_match_count() == 5)
+#else
+	if (found && !matches.empty() && matches.size() == 5)
+#endif
+	{
 		bool rv  = true;
+#if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
+		std::string start (matches.fetch(2));
+		std::string end   (matches.fetch(3));
+#else
 		std::string start (matches[2]);
 		std::string end   (matches[3]);
+#endif
 		bool lowcase = !std::isupper(static_cast<unsigned char>(start[0]));
 		if (!numeric) {
 			if (lowcase) {
@@ -5131,7 +5153,11 @@ bool Route::set_name_sequence (std::string const& str)
 					return true;
 				}
 
+#if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
+				rv &= r->set_name (string_compose("%1%2%3", std::string(matches.fetch(1)), start, std::string(matches.fetch(4))));
+#else
 				rv &= r->set_name (string_compose("%1%2%3", matches[1], start, matches[4]));
+#endif
 				if (start == end || !rv) {
 					break;
 				}
