@@ -2572,7 +2572,13 @@ Editor::line_drag_click (GdkEvent* event, timepos_t const & where, double y)
 
 	if ((atv = dynamic_cast<AutomationTimeAxisView*> (clicked_axisview)) != 0) {
 
-		atv->add_automation_event (event, where, y, false);
+		AutomationRegionView* arv;
+
+		if ((arv = dynamic_cast<AutomationRegionView*> (clicked_regionview)) != 0) {
+			arv->add_automation_event (event);
+		} else {
+			atv->add_automation_event (event, where, y, false);
+		}
 
 	} else if (dynamic_cast<AudioTimeAxisView*> (clicked_axisview) != 0) {
 
