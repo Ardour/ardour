@@ -204,6 +204,8 @@ AutomationRegionView::add_automation_event (timepos_t const & w, double y, bool 
 	XMLNode& before = _line->the_list()->get_state();
 
 	if (_line->the_list()->editor_add (when, y, with_guard_points)) {
+		XMLNode& after = _line->the_list()->get_state();
+		std::list<Selectable*> results;
 
 		if (ac->automation_state () == ARDOUR::Off) {
 			view->set_automation_state (ARDOUR::Play);
@@ -214,9 +216,11 @@ AutomationRegionView::add_automation_event (timepos_t const & w, double y, bool 
 
 		view->editor().begin_reversible_command (_("add automation event"));
 
-		XMLNode& after = _line->the_list()->get_state();
-
 		view->session()->add_command (new MementoCommand<ARDOUR::AutomationList> (_line->memento_command_binder(), &before, &after));
+
+		_line->get_selectables (w, w, 0.0, 1.0, results);
+		view->editor ().get_selection ().set (results);
+
 		view->editor().commit_reversible_command ();
 
 		view->session()->set_dirty ();
