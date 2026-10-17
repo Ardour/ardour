@@ -61,12 +61,23 @@ PBD::path_expand (string path)
 
 	/* now do $VAR or ${VAR} substitution, since wordexp isn't reliable */
 
+
+#if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
+	Glib::ustring upath(path);
+	static const Glib::RefPtr<Glib::Regex> var_regex = Glib::Regex::create (R"(\$([A-Za-z_][A-Za-z0-9_]*|\{[A-Za-z_][A-Za-z0-9_]*\}))");
+	Glib::MatchInfo m;
+#else
 	static const std::regex var_regex (R"(\$([A-Za-z_][A-Za-z0-9_]*|\{[A-Za-z_][A-Za-z0-9_]*\}))");
-
 	std::smatch m;
+#endif
 
+#if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
+	while (var_regex->match(upath, m)) {
+		std::string var (m.fetch(1)); // "$FOO" or "${FOO}"
+#else
 	while (std::regex_search (path, m, var_regex)) {
 		std::string var = m[1].str(); // "$FOO" or "${FOO}"
+#endif
 
 		if (var[0] == '{') {
 			var = var.substr(1, var.size() - 2);
@@ -74,7 +85,13 @@ PBD::path_expand (string path)
 
 		const char* val = g_getenv (var.c_str());
 
+#if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
+		int start_pos, end_pos;
+		m.fetch_pos (0, start_pos, end_pos);
+		path.replace (start_pos, end_pos - start_pos, val ? val : "");
+#else
 		path.replace (m.position(0), m.length(0), val ? val : "");
+#endif
 	}
 
 	/* canonicalize */
