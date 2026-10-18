@@ -7,7 +7,7 @@ import os
 import re
 
 # default state file version for this build
-CURRENT_SESSION_FILE_VERSION = 7003
+CURRENT_SESSION_FILE_VERSION = 7004
 
 I18N_PACKAGE = 'ardour'
 
