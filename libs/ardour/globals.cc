@@ -1046,9 +1046,7 @@ ARDOUR::get_available_sync_options ()
 	ret.push_back (MTC);
 	ret.push_back (MIDIClock);
 	ret.push_back (LTC);
-#ifdef WALLCLOCK_TM
 	ret.push_back (WallClock);
-#endif
 
 	return ret;
 }

@@ -467,12 +467,7 @@ setup_enum_writer ()
 	REGISTER_ENUM (Engine);
 	REGISTER_ENUM (MIDIClock);
 	REGISTER_ENUM (LTC);
-#ifdef WALLCLOCK_TM
 	REGISTER_ENUM (WallClock);
-#else
-	// Improve backward compatibility when wallclock gets turned on
-	enum_writer.add_to_hack_table ("WallClock", "Engine");
-#endif
 	REGISTER (_SyncSource);
 
 	REGISTER_ENUM (TR_StartStop);

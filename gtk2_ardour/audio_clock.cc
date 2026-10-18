@@ -1030,12 +1030,10 @@ AudioClock::set_slave_info ()
 
 		switch (tm->type()) {
 		case Engine:
-#ifdef WALLCLOCK_TM
 		case WallClock:
 			_left_btn.set_text (tm->name(), true);
 			_right_btn.set_text ("", true);
 			break;
-#endif
 		case MIDIClock:
 			if (tm) {
 				_left_btn.set_text (tm->display_name(), true);

@@ -81,9 +81,7 @@ TransportMasterManager::set_default_configuration ()
 		_current_master.reset ();
 
 		add_locked (TransportMaster::factory (Engine, X_("JACK Transport"), false));
-#ifdef WALLCLOCK_TM
 		add_locked (TransportMaster::factory (WallClock, X_("Wall Clock"), false));
-#endif
 		add_locked (TransportMaster::factory (MTC, X_("MTC"), false));
 		add_locked (TransportMaster::factory (LTC, X_("LTC"), false));
 		add_locked (TransportMaster::factory (MIDIClock, X_("MIDI Clock"), false));
