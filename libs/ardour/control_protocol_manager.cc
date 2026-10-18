@@ -642,12 +642,12 @@ ControlProtocolManager::midi_connectivity_established (bool yn)
 void
 ControlProtocolManager::probe_midi_control_protocols ()
 {
+	PBD::RWLock::ReaderLock lm (_protocols_lock);
 	if (!Config->get_auto_enable_surfaces ()) {
 		return;
 	}
 	for (auto const& cpi : _control_protocol_info) {
 		/* Note: manual teardown deletes the descriptor */
-		PBD::RWLock::ReaderLock lm (_protocols_lock);
 		if (!cpi->descriptor) {
 			cpi->automatic = false;
 			continue;
@@ -671,11 +671,9 @@ ControlProtocolManager::probe_midi_control_protocols ()
 					}
 				}
 			}
-			lm.release();
 			activate (*cpi, device_config);
 		} else if (active && cpi->automatic && !found) {
 			cpi->automatic = false;
-			lm.release();
 			deactivate (*cpi);
 			/* allow to auto-enable again */
 			if (!cpi->descriptor) {
