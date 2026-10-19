@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Holger Dehnhardt <holger@dehnhardt.org>
+ * Copyright (C) 2026 Holger Dehnhardt <holger@dehnhardt.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,8 @@
 #include "ardour/presentation_info.h"
 #include "ardour/session.h"
 #include "ardour/well_known_enum.h"
+
+#include "pbd/i18n.h"
 
 #include "c1_control.h"
 #include "console1.h"
@@ -143,11 +145,20 @@ Console1::select (const uint32_t i)
 }
 
 void
-Console1::shift (const uint32_t val)
+Console1::shift (const uint32_t value)
 {
 	DEBUG_TRACE (DEBUG::Console1, "shift()\n");
-	shift_state = !shift_state;
-	ShiftChange (val);
+	set_shift_state (value != 0);
+}
+
+void
+Console1::set_shift_state (bool state)
+{
+	if (shift_state == state) {
+		return;
+	}
+	shift_state = state;
+	ShiftChange (shift_state);
 }
 
 void
@@ -249,21 +260,44 @@ Console1::gate (const uint32_t value)
 	session->set_control (_current_stripable->mapped_control (Gate_Enable), value > 0, PBD::Controllable::UseGroup);
 }
 
+/* Harrison gate: key filter enable on the Hard button. SSL gate has no key filter, so Fast Attack takes its place. */
+std::shared_ptr<AutomationControl>
+Console1::gate_hard_control () const
+{
+	if (!_current_stripable) {
+		return nullptr;
+	}
+	std::shared_ptr<AutomationControl> c = _current_stripable->mapped_control (Gate_KeyFilterEnable);
+	return c ? c : _current_stripable->mapped_control (Gate_FastAttack);
+}
+
+/* Harrison gate: key listen on Shift+Hard. SSL gate has no key listen, so the Expand switch (Mode) takes its place. */
+std::shared_ptr<AutomationControl>
+Console1::gate_hard_shift_control () const
+{
+	if (!_current_stripable) {
+		return nullptr;
+	}
+	std::shared_ptr<AutomationControl> c = _current_stripable->mapped_control (Gate_KeyListen);
+	return c ? c : _current_stripable->mapped_control (Gate_Mode);
+}
+
 void
 Console1::gate_scf (const uint32_t value)
 {
-	if (!_current_stripable || !_current_stripable->mapped_control (Gate_KeyFilterEnable))
+	std::shared_ptr<AutomationControl> control = gate_hard_control ();
+	if (!control)
 		return;
-	session->set_control (
-	  _current_stripable->mapped_control (Gate_KeyFilterEnable), value > 0, PBD::Controllable::UseGroup);
+	session->set_control (control, value > 0, PBD::Controllable::UseGroup);
 }
 
 void
 Console1::gate_listen (const uint32_t value)
 {
-	if (!_current_stripable || !_current_stripable->mapped_control (Gate_KeyListen))
+	std::shared_ptr<AutomationControl> control = gate_hard_shift_control ();
+	if (!control)
 		return;
-	session->set_control (_current_stripable->mapped_control (Gate_KeyListen), value > 0, PBD::Controllable::UseGroup);
+	session->set_control (control, value > 0, PBD::Controllable::UseGroup);
 }
 
 void
@@ -302,10 +336,10 @@ Console1::gate_release (const uint32_t value)
 void
 Console1::gate_attack (const uint32_t value)
 {
-	if (!_current_stripable || !_current_stripable->mapped_control (Gate_Attack)) {
+	std::shared_ptr<AutomationControl> control = gate_sustain_control ();
+	if (!control) {
 		return;
 	}
-	std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (Gate_Attack);
 	double freq = midi_to_control (control, value);
 	session->set_control (control, freq, PBD::Controllable::UseGroup);
 }
@@ -321,10 +355,21 @@ Console1::gate_hyst (const uint32_t value)
 	session->set_control (control, freq, PBD::Controllable::UseGroup);
 }
 
+/* Harrison gate: Attack on the sustain knob. SSL gate has no Attack, so Hold takes its place. */
+std::shared_ptr<AutomationControl>
+Console1::gate_sustain_control () const
+{
+	if (!_current_stripable) {
+		return nullptr;
+	}
+	std::shared_ptr<AutomationControl> c = _current_stripable->mapped_control (Gate_Attack);
+	return c ? c : _current_stripable->mapped_control (Gate_Hold);
+}
+
 void
 Console1::gate_hold (const uint32_t value)
 {
-	if (!_current_stripable || !_current_stripable->mapped_control (Gate_Hold)) {
+	if (!_current_stripable || !_current_stripable->mapped_control (Gate_Attack) || !_current_stripable->mapped_control (Gate_Hold)) {
 		return;
 	}
 	std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (Gate_Hold);
@@ -502,10 +547,31 @@ Console1::comp_thresh (const uint32_t value)
 void
 Console1::comp_attack (const uint32_t value)
 {
-	if (!_current_stripable || !_current_stripable->mapped_control (Comp_Attack)) {
+	if (!_current_stripable) {
 		return;
 	}
 	std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (Comp_Attack);
+	if (!control) {
+		/* SSL compressor: the dial steps through the Fast Attack and Peak switches (4 steps of 32)
+		 *
+		 *  MIDI value | Fast Attack | Peak
+		 *  -----------+-------------+-----
+		 *  0 - 31     | off         | off
+		 *  32 - 63    | on          | off
+		 *  64 - 95    | off         | on
+		 *  96 - 127   | on          | on
+		 */
+		std::shared_ptr<AutomationControl> fast = _current_stripable->mapped_control (Comp_FastAttack);
+		std::shared_ptr<AutomationControl> peak = _current_stripable->mapped_control (Comp_RMSPeak);
+		const uint32_t step = std::min<uint32_t> (value, 127) / 32;
+		if (fast) {
+			session->set_control (fast, (step & 1) ? 1.0 : 0.0, PBD::Controllable::UseGroup);
+		}
+		if (peak) {
+			session->set_control (peak, (step & 2) ? 1.0 : 0.0, PBD::Controllable::UseGroup);
+		}
+		return;
+	}
 	double gain = midi_to_control (control, value);
 	session->set_control (control, gain, PBD::Controllable::UseGroup);
 }
@@ -532,13 +598,24 @@ Console1::comp_ratio (const uint32_t value)
 	session->set_control (control, gain, PBD::Controllable::UseGroup);
 }
 
+/* Harrison compressor has Makeup, SSL compressor has Mix */
+std::shared_ptr<AutomationControl>
+Console1::comp_par_control () const
+{
+	if (!_current_stripable) {
+		return nullptr;
+	}
+	std::shared_ptr<AutomationControl> c = _current_stripable->mapped_control (Comp_Makeup);
+	return c ? c : _current_stripable->mapped_control (Comp_Mix);
+}
+
 void
 Console1::comp_makeup (const uint32_t value)
 {
-	if (!_current_stripable || !_current_stripable->mapped_control (Comp_Makeup)) {
+	std::shared_ptr<AutomationControl> control = comp_par_control ();
+	if (!control) {
 		return;
 	}
-	std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (Comp_Makeup);
 	double gain = midi_to_control (control, value);
 	session->set_control (control, gain, PBD::Controllable::UseGroup);
 }
@@ -678,7 +755,13 @@ Console1::map_shift (bool shift)
 	try {
 		ControllerButton* controllerButton = get_button (PRESET);
 		controllerButton->set_led_state (shift);
-		map_stripable_state ();
+		if (in_plugin_state && current_plugin_index >= 0) {
+			/* shifted plugin mappings change which controls are fed back */
+			spill_plugins (current_plugin_index);
+			LabelsChanged ();
+		} else {
+			map_stripable_state ();
+		}
 	} catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
 	}
@@ -698,10 +781,19 @@ Console1::map_plugin_state (bool plugin_state)
 		for (uint32_t i = 0; i < bank_size; ++i) {
 			stop_blinking (ControllerID (FOCUS1 + i));
 		}
+		plugin_meters.clear ();
+		last_output_meter_l = last_output_meter_r = last_gate_meter = last_comp_redux = 0xffffffff;
+		set_shift_state (shift_state_before_plugin);
+		shift_state_before_plugin = false;
 		map_stripable_state ();
 	} else {
-		// I don't plan shift functionality with plugins...
-		shift (0);
+		shift_state_before_plugin = shift_state;
+		current_plugin_index = -1;
+		set_shift_state (false);
+		try {
+			get_button (PRESET)->set_led_state (false);
+		} catch (ControlNotFoundException const&) {
+		}
 		// map all plugin related operations
 	}
 }
@@ -793,9 +885,7 @@ Console1::map_gate_scf ()
 	try {
 		DEBUG_TRACE (DEBUG::Console1, string_compose ("map_gate_scf() - shift: %1\n", shift_state));
 		get_button (ControllerID::HARD_GATE)
-		  ->set_led_state (_current_stripable->mapped_control (Gate_KeyFilterEnable)
-		                     ? _current_stripable->mapped_control (Gate_KeyFilterEnable)->get_value ()
-		                     : false);
+		  ->set_led_state (gate_hard_control () ? gate_hard_control ()->get_value () : false);
 	} catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
 	}
@@ -809,9 +899,7 @@ Console1::map_gate_listen ()
 	try {
 		DEBUG_TRACE (DEBUG::Console1, string_compose ("map_gate_listen() - shift: %1\n", shift_state));
 		get_button (ControllerID::HARD_GATE)
-		  ->set_led_state (_current_stripable->mapped_control (Gate_KeyListen)
-		                     ? _current_stripable->mapped_control (Gate_KeyListen)->get_value ()
-		                     : false);
+		  ->set_led_state (gate_hard_shift_control () ? gate_hard_shift_control ()->get_value () : false);
 	} catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
 	}
@@ -848,8 +936,7 @@ Console1::map_gate_attack ()
 	}
 	ControllerID controllerID = ControllerID::SHAPE_SUSTAIN;
 	if (map_encoder (controllerID)) {
-		std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (Gate_Attack);
-		map_encoder (controllerID, control);
+		map_encoder (controllerID, gate_sustain_control ());
 	}
 }
 
@@ -887,7 +974,10 @@ Console1::map_gate_hold ()
 	}
 	ControllerID controllerID = ControllerID::SHAPE_SUSTAIN;
 	if (map_encoder (controllerID)) {
-		std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (Gate_Hold);
+		/* SSL gate has no Attack; Hold lives on the unshifted sustain knob */
+		std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (Gate_Attack)
+		                                               ? _current_stripable->mapped_control (Gate_Hold)
+		                                               : nullptr;
 		map_encoder (controllerID, control);
 	}
 }
@@ -932,7 +1022,7 @@ Console1::map_eq_mode ()
 	if (!rt) {
 		return;
 	}
-	EQ_MODE current_eq_mode = EQ_MODE (rt->eq_type_control() ? rt->eq_type_control()->get_value() : -1);
+	EQ_MODE current_eq_mode = rt->mixbus_eq_type () == ARDOUR::Route::EQType32C ? EQM_HARRISON : EQM_SSL;
 	DEBUG_TRACE (DEBUG::Console1, string_compose ("map_eq_mode() - mode: %1\n", current_eq_mode));
 	if (current_eq_mode != strip_eq_mode) {
 		strip_eq_mode = current_eq_mode;
@@ -1109,6 +1199,18 @@ Console1::map_comp_attack ()
 	ControllerID controllerID = ControllerID::COMP_ATTACK;
 	if (map_encoder (controllerID)) {
 		std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (Comp_Attack);
+		if (!control) {
+			/* SSL compressor: show the Fast Attack / Peak step in the middle of its range */
+			std::shared_ptr<AutomationControl> fast = _current_stripable->mapped_control (Comp_FastAttack);
+			std::shared_ptr<AutomationControl> peak = _current_stripable->mapped_control (Comp_RMSPeak);
+			const int step = ((fast && fast->get_value () > 0) ? 1 : 0) + ((peak && peak->get_value () > 0) ? 2 : 0);
+			try {
+				get_encoder (controllerID)->set_value (step * 32 + 16);
+			} catch (ControlNotFoundException const&) {
+				DEBUG_TRACE (DEBUG::Console1, "Encoder not found\n");
+			}
+			return;
+		}
 		map_encoder (controllerID, control);
 	}
 }
@@ -1138,8 +1240,7 @@ Console1::map_comp_makeup ()
 {
 	ControllerID controllerID = ControllerID::COMP_PAR;
 	if (map_encoder (controllerID)) {
-		std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (Comp_Makeup);
-		map_encoder (controllerID, control);
+		map_encoder (controllerID, comp_par_control ());
 	}
 }
 
@@ -1159,6 +1260,7 @@ void Console1::eqBandQChangeMapping (bool mapValues)
 	Encoder* lme = get_encoder (LOW_MID_SHAPE);
 	Encoder* hme = get_encoder (HIGH_MID_SHAPE);
 	switch_eq_q_dials = band_q_as_send || (strip_eq_mode == EQM_HARRISON );
+	LabelsChanged ();
 
 	if (!lme || !hme) {
 		DEBUG_TRACE (DEBUG::Console1, "eqBandQChangeMapping: Controller not found \n");

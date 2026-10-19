@@ -16,6 +16,8 @@ def build(bld):
             c1_operations.cc
             c1_plugin_operations.cc
             c1_gui.cc
+            c1_panel.cc
+            c1_plugin_control_assignment.cc
     '''
     obj.defines      = [ 'PACKAGE="ardour_console1"' ]
     obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
