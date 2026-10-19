@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Holger Dehnhardt <holger@dehnhardt.org>
+ * Copyright (C) 2026 Holger Dehnhardt <holger@dehnhardt.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -83,6 +83,7 @@ Console1::build_gui ()
 C1GUI::C1GUI (Console1& p)
   : c1 (p)
   , table (6, 4)
+  , panel (0)
   , swap_solo_mute_cb ()
   , band_q_as_send_cb ()
   , create_plugin_stubs_btn ()
@@ -101,8 +102,17 @@ C1GUI::C1GUI (Console1& p)
 	spath.add_subdirectory_to_paths ("icons");
 	find_file (spath, name, data_file_path);
 	if (!data_file_path.empty ()) {
-		image.set (data_file_path);
-		hpacker.pack_start (image, false, false);
+		panel = manage (new C1Panel (c1, data_file_path));
+		hpacker.pack_start (*panel, false, false);
+
+		edit_labels_cb.set_label (_ ("Edit label positions (drag labels; wheel: width, shift+wheel: height)"));
+		edit_labels_cb.signal_toggled ().connect (sigc::mem_fun (*this, &C1GUI::set_edit_labels));
+		reset_labels_btn.set_label (_ ("Reset positions"));
+		reset_labels_btn.signal_clicked ().connect (sigc::mem_fun (*panel, &C1Panel::reset_positions));
+		label_edit_box.set_spacing (12);
+		label_edit_box.pack_start (edit_labels_cb, false, false);
+		label_edit_box.pack_start (reset_labels_btn, false, false);
+		hpacker.pack_start (label_edit_box, false, false);
 	}
 
 	Gtk::Label* l;
@@ -175,7 +185,13 @@ C1GUI::C1GUI (Console1& p)
 
 	set_spacing (12);
 
-	pack_start (hpacker, false, false);
+	hpacker.show_all ();
+	notebook.append_page (hpacker, _ ("Device Setup"));
+
+	c1.load_mappings ();
+	Gtk::VBox* plugconfig_packer = build_plugin_assignment_page ();
+	notebook.append_page (*plugconfig_packer, _ ("Plugin Mappings"));
+	pack_start (notebook, true, true);
 
 	/* update the port connection combos */
 
@@ -189,9 +205,25 @@ C1GUI::C1GUI (Console1& p)
 	  _port_connections, invalidator (*this), std::bind (&C1GUI::connection_handler, this), gui_context ());
 	c1.ConnectionChange.connect (
 	  _port_connections, invalidator (*this), std::bind (&C1GUI::connection_handler, this), gui_context ());
+
+	c1.PluginStubAdded.connect (
+	  plugin_connections, invalidator (*this), std::bind (&C1GUI::load_plugin_combo_rows, this), gui_context ());
 }
 
-C1GUI::~C1GUI () {}
+C1GUI::~C1GUI ()
+{
+	assign_connection.disconnect ();
+	c1.midi_assign_mode = false;
+}
+
+
+void
+C1GUI::set_edit_labels ()
+{
+	if (panel) {
+		panel->set_edit_mode (edit_labels_cb.get_active ());
+	}
+}
 
 void
 C1GUI::set_swap_solo_mute ()

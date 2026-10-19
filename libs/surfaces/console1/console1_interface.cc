@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Holger Dehnhardt <holger@dehnhardt.org>
+ * Copyright (C) 2026 Holger Dehnhardt <holger@dehnhardt.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

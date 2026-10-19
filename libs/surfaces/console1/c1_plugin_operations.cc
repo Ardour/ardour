@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Holger Dehnhardt <holger@dehnhardt.org>
+ * Copyright (C) 2026 Holger Dehnhardt <holger@dehnhardt.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -96,15 +96,13 @@ Console1::load_mappings ()
 bool
 Console1::load_mapping (XMLNode* mapping_xml)
 {
-	// char tmp[1024];
 	PluginMapping pm;
 	const XMLNodeList& nlist = mapping_xml->children ();
 
 	mapping_xml->get_property ("ID", pm.id);
 	mapping_xml->get_property ("NAME", pm.name);
 
-	XMLNodeConstIterator i;
-	for (i = nlist.begin (); i != nlist.end (); ++i) {
+	for (XMLNodeConstIterator i = nlist.begin (); i != nlist.end (); ++i) {
 		std::string param_id;
 		std::string param_type;
 		std::string param_name;
@@ -115,35 +113,40 @@ Console1::load_mapping (XMLNode* mapping_xml)
 
 		(*i)->get_property ("type", param_type);
 
+		PluginParameterMapping parmap;
 		const XMLNodeList& plist = (*i)->children ();
-
-		XMLNodeConstIterator j;
-		for (j = plist.begin (); j != plist.end (); ++j) {
+		for (XMLNodeConstIterator j = plist.begin (); j != plist.end (); ++j) {
 			if ((*j)->name () == "name") {
 				param_name = (*j)->child_content ();
 			} else if ((*j)->name () == "mapping") {
 				param_mapping = (*j)->child_content ();
+				(*j)->get_property ("shift", parmap.shift);
+				(*j)->get_property ("is_switch", parmap.is_switch);
 			}
 		}
+		parmap.paramIndex = index;
+		parmap.name = param_name;
+		parmap.is_switch = parmap.is_switch || (param_type == "switch");
+		parmap.controllerId = ControllerID::CONTROLLER_NONE;
 		if (!param_mapping.empty ()) {
-			PluginParameterMapping parmap;
-			parmap.paramIndex = index;
-			parmap.name = param_name;
 			ControllerMap::const_iterator m = controllerMap.find (param_mapping);
-			if (m == controllerMap.end ())
-				continue;
-			parmap.controllerId = m->second;
-			parmap.is_switch = (param_type == "switch");
-			pm.parameters[index] = std::move (parmap);
-			pluginMappingMap[pm.id] = pm;
+			if (m != controllerMap.end ()) {
+				parmap.controllerId = m->second;
+			}
 		}
+		pm.parameters[index] = std::move (parmap);
 	}
+	pluginMappingMap[pm.id] = pm;
 	return true;
 }
 
 void
 Console1::create_mapping (const std::shared_ptr<Processor> proc, const std::shared_ptr<Plugin> plugin)
 {
+	if (plugin->unique_id ().empty ()) {
+		warning << string_compose (_ ("Console1: cannot create a mapping stub for '%1', the plugin has no unique id"), plugin->name ()) << endmsg;
+		return;
+	}
 	XMLTree* tree = new XMLTree ();
 	XMLNode node = XMLNode ("c1plugin-mapping");
 	node.set_property ("ID", plugin->unique_id ());
@@ -158,6 +161,8 @@ Console1::create_mapping (const std::shared_ptr<Processor> proc, const std::shar
 		if (n == "hidden") {
 			continue;
 		}
+		ParameterDescriptor parameterDescriptor;
+		plugin->get_parameter_descriptor (n_controls, parameterDescriptor);
 		XMLNode param = XMLNode ("param-mapping");
 		param.set_property ("id", n_controls);
 		XMLNode name = XMLNode ("name");
@@ -165,6 +170,7 @@ Console1::create_mapping (const std::shared_ptr<Processor> proc, const std::shar
 		name.add_child_copy (c);
 		XMLNode mapping = XMLNode ("mapping");
 		mapping.set_property ("shift", "false");
+		mapping.set_property ("is_switch", parameterDescriptor.toggled ? 1 : 0);
 		param.add_child_copy (name);
 		param.add_child_copy (mapping);
 		node.add_child_copy (param);
@@ -172,20 +178,95 @@ Console1::create_mapping (const std::shared_ptr<Processor> proc, const std::shar
 
 	tree->set_root (&node);
 
-	if (!ensure_config_dir ())
-		return;
+	if (ensure_config_dir ()) {
+		std::string filename = Glib::build_filename (
+		  user_config_directory (), config_dir_name, string_compose ("%1.%2", plugin->unique_id (), "xml"));
 
-	std::string filename = Glib::build_filename (
-	  user_config_directory (), config_dir_name, string_compose ("%1.%2", plugin->unique_id (), "xml"));
+		tree->set_filename (filename);
+		if (!tree->write ()) {
+			warning << string_compose (_ ("Console1: could not write mapping stub '%1'"), filename) << endmsg;
+		}
+		load_mapping (&node);
+		PluginStubAdded ();
+	} else {
+		warning << string_compose (_ ("Console1: could not create the mapping directory '%1'"), config_dir_name) << endmsg;
+	}
+	tree->set_root (0);
+	delete tree;
+}
 
-	tree->set_filename (filename);
-	tree->write ();
+void
+Console1::write_plugin_mapping (PluginMapping& mapping)
+{
+	XMLTree* tree = new XMLTree ();
+	XMLNode node = XMLNode ("c1plugin-mapping");
+	node.set_property ("ID", mapping.id);
+	node.set_property ("NAME", mapping.name);
+
+	for (const auto& plugin_param : mapping.parameters) {
+		XMLNode param = XMLNode ("param-mapping");
+		param.set_property ("id", plugin_param.second.paramIndex);
+		XMLNode name = XMLNode ("name");
+		XMLNode c = XMLNode ("c", plugin_param.second.name);
+		name.add_child_copy (c);
+		XMLNode map = XMLNode ("mapping");
+		map.set_property ("shift", plugin_param.second.shift);
+		map.set_property ("is_switch", plugin_param.second.is_switch);
+		XMLNode controller = XMLNode ("c", findControllerNameById (plugin_param.second.controllerId));
+		map.add_child_copy (controller);
+		param.add_child_copy (name);
+		param.add_child_copy (map);
+		node.add_child_copy (param);
+	}
+
+	tree->set_root (&node);
+
+	if (ensure_config_dir ()) {
+		std::string filename = Glib::build_filename (
+		  user_config_directory (), config_dir_name, string_compose ("%1.%2", mapping.id, "xml"));
+
+		tree->set_filename (filename);
+		tree->write ();
+		load_mapping (&node);
+	}
+	tree->set_root (0);
+	delete tree;
+}
+
+const std::string
+Console1::findControllerNameById (const ControllerID id)
+{
+	for (const auto& controller : controllerMap) {
+		if (controller.second == id) {
+			return controller.first;
+		}
+	}
+	return std::string ();
+}
+
+Glib::RefPtr<Gtk::ListStore>
+Console1::getPluginControllerModel ()
+{
+	plugin_controller_model = Gtk::ListStore::create (plugin_controller_columns);
+	for (const auto& controller : controllerMap) {
+		Gtk::TreeModel::Row row = *(plugin_controller_model->append ());
+		row[plugin_controller_columns.controllerId] = controller.second;
+		row[plugin_controller_columns.controllerName] = X_ (controller.first);
+	}
+	return plugin_controller_model;
+}
+
+void
+Console1::reset_midi_assign_mode ()
+{
+	midi_assign_mode = false;
 }
 
 bool
 Console1::select_plugin (const int32_t plugin_index)
 {
 	DEBUG_TRACE (DEBUG::Console1, "Console1::select_plugin\n");
+	midi_assign_mode = false;
 	if (current_plugin_index == plugin_index) {
 		std::shared_ptr<Route> r = std::dynamic_pointer_cast<Route> (_current_stripable);
 		if (!r) {
@@ -217,7 +298,9 @@ bool
 Console1::map_select_plugin (const int32_t plugin_index)
 {
 	DEBUG_TRACE (DEBUG::Console1, "map_select_plugin())\n");
-	if (spill_plugins (plugin_index)) {
+	const bool spilled = spill_plugins (plugin_index);
+	LabelsChanged ();
+	if (spilled) {
 		for (uint32_t i = 0; i < bank_size; ++i) {
 			if ((int)i == plugin_index) {
 				start_blinking (ControllerID (FOCUS1 + i));
@@ -238,6 +321,12 @@ void
 Console1::remove_plugin_operations ()
 {
 	plugin_connections.drop_connections ();
+	plugin_labels.clear ();
+	if (!plugin_meters.empty ()) {
+		plugin_meters.clear ();
+		/* make the built-in meter values be sent again */
+		last_output_meter_l = last_output_meter_r = last_gate_meter = last_comp_redux = 0xffffffff;
+	}
 
 	for (auto& e : encoders) {
 		e.second->set_plugin_action (0);
@@ -245,7 +334,7 @@ Console1::remove_plugin_operations ()
 		e.second->set_value (0);
 	}
 	for (auto& b : buttons) {
-		if (b.first == ControllerID::TRACK_GROUP)
+		if (b.first == ControllerID::TRACK_GROUP || b.first == ControllerID::PRESET)
 			continue;
 		if (b.first >= ControllerID::FOCUS1 && b.first <= ControllerID::FOCUS20)
 			continue;
@@ -341,6 +430,9 @@ Console1::spill_plugins (const int32_t plugin_index)
 	PluginMappingMap::iterator pmmit = pluginMappingMap.find (plugin->unique_id ());
 	mapping_found = (pmmit != pluginMappingMap.end ());
 
+	DEBUG_TRACE (DEBUG::Console1,
+	             string_compose ("spill_plugins: plugin '%1' id '%2' mapping found: %3, create stubs: %4\n",
+	                             plugin->name (), plugin->unique_id (), mapping_found, create_mapping_stubs));
 	if (!mapping_found) {
 		if (create_mapping_stubs) {
 			create_mapping (proc, plugin);
@@ -373,11 +465,32 @@ Console1::spill_plugins (const int32_t plugin_index)
 		if (plugin->parameter_is_audio (n_controls)) {
 			DEBUG_TRACE (DEBUG::Console1, "parameter is audio\n");
 		}
+		if (plugin->parameter_is_output (n_controls)) {
+			PluginParameterMapping ppm = pluginMapping.parameters[n_controls];
+			std::shared_ptr<ReadOnlyControl> ro = plugin_insert->control_output (n_controls);
+			if (ro && ppm.controllerId != ControllerID::CONTROLLER_NONE && meters.count (ppm.controllerId)) {
+				PluginMeter pm;
+				pm.id = ppm.controllerId;
+				pm.control = ro;
+				pm.descriptor = parameterDescriptor;
+				plugin_meters.push_back (pm);
+				plugin_labels[ppm.controllerId] = n;
+			}
+			continue;
+		}
 		if (plugin->parameter_is_input (n_controls)) {
 			std::shared_ptr<AutomationControl> c =
 			  plugin_insert->automation_control (Evoral::Parameter (PluginAutomation, 0, n_controls));
 			if (c) {
 				PluginParameterMapping ppm = pluginMapping.parameters[n_controls];
+				if (ppm.controllerId == ControllerID::CONTROLLER_NONE) {
+					continue;
+				}
+				/* a shifted mapping only drives the control (and its feedback) while shift is active */
+				const bool active = (ppm.shift == shift_state);
+				if (active) {
+					plugin_labels[ppm.controllerId] = n;
+				}
 				bool swtch = false;
 				if (parameterDescriptor.integer_step && parameterDescriptor.upper == 1) {
 					swtch = true;
@@ -395,14 +508,22 @@ Console1::spill_plugins (const int32_t plugin_index)
 							  DEBUG::Console1,
 							  string_compose ("<-Encoder Plugin parameter %1: %2 - %3\n", n_controls, v * 127, v));
 						};
-						e->set_plugin_action ([=] (uint32_t val) {
+						auto action = [=] (uint32_t val) {
 							double v = val / 127.f;
 							c->set_value (parameterDescriptor.from_interface (v, true),
 							              PBD::Controllable::GroupControlDisposition::UseGroup);
 							DEBUG_TRACE (
 							  DEBUG::Console1,
 							  string_compose ("->Encoder Plugin parameter %1: %2 - %3\n", n_controls, val, v));
-						});
+						};
+						if (ppm.shift) {
+							e->set_plugin_shift_action (action);
+						} else {
+							e->set_plugin_action (action);
+						}
+						if (!active) {
+							continue;
+						}
 						c->Changed.connect (
 						  plugin_connections, MISSING_INVALIDATOR, std::bind (plugin_mapping, _1, _2), this);
 						c->Changed (true, PBD::Controllable::GroupControlDisposition::UseGroup);
@@ -421,14 +542,22 @@ Console1::spill_plugins (const int32_t plugin_index)
 							                             n_controls,
 							                             c->get_value ()));
 						};
-						cb->set_plugin_action ([=] (uint32_t val) {
+						auto action = [=] (uint32_t val) {
 							double v = val / 127.f;
 							c->set_value (parameterDescriptor.from_interface (v, true),
 							              PBD::Controllable::GroupControlDisposition::UseGroup);
 							DEBUG_TRACE (
 							  DEBUG::Console1,
 							  string_compose ("->ControllerButton Plugin parameter %1: %2 - %3\n", n_controls, val, v));
-						});
+						};
+						if (ppm.shift) {
+							cb->set_plugin_shift_action (action);
+						} else {
+							cb->set_plugin_action (action);
+						}
+						if (!active) {
+							continue;
+						}
 
 						c->Changed.connect (
 						  plugin_connections, MISSING_INVALIDATOR, std::bind (plugin_mapping, _1, _2), this);

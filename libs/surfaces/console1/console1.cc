@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Holger Dehnhardt <holger@dehnhardt.org>
+ * Copyright (C) 2026 Holger Dehnhardt <holger@dehnhardt.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <algorithm>
+#include <cmath>
 #include <optional>
 
 #include "pbd/controllable.h"
@@ -183,7 +185,10 @@ Console1::begin_using_device ()
 	*/
 
 	load_mappings ();
-	setup_controls ();
+	if (!controls_initialized) {
+		setup_controls ();
+		controls_initialized = true;
+	}
 
 	/* Connection to the blink-timer */
 	Glib::RefPtr<Glib::TimeoutSource> blink_timeout = Glib::TimeoutSource::create (200); // milliseconds
@@ -194,13 +199,59 @@ Console1::begin_using_device ()
 	Glib::RefPtr<Glib::TimeoutSource> periodic_timer = Glib::TimeoutSource::create (100);
 	periodic_connection = periodic_timer->connect (sigc::mem_fun (*this, &Console1::periodic));
 	periodic_timer->attach (main_loop ()->get_context ());
-	connect_session_signals ();
 	connect_internal_signals ();
 	create_strip_inventory ();
 
 	DEBUG_TRACE (DEBUG::Console1, "************** begin_using_device() ********************\n");
 
-	return MIDISurface::begin_using_device ();
+	int ret = MIDISurface::begin_using_device ();
+	if (ret == 0) {
+		if (session->loading ()) {
+			/* the GUI restores its own selection while loading, so wait until that is done */
+			session->SessionLoaded.connect (
+			  session_connections, MISSING_INVALIDATOR, std::bind (&Console1::schedule_initial_selection, this), this);
+		} else {
+			schedule_initial_selection ();
+		}
+	}
+	return ret;
+}
+
+void
+Console1::schedule_initial_selection ()
+{
+	/* The GUI ignores selection changes until its editor and mixer have been attached to the
+	 * session, which happens after SessionLoaded. There is no signal for that, so give it a moment. */
+	initial_selection_connection.disconnect ();
+	Glib::RefPtr<Glib::TimeoutSource> t = Glib::TimeoutSource::create (1000);
+	initial_selection_connection = t->connect ([this] () {
+		select_initial_stripable ();
+		return false;
+	});
+	t->attach (main_loop ()->get_context ());
+}
+
+void
+Console1::select_initial_stripable ()
+{
+	if (!session || !_in_use) {
+		return;
+	}
+	std::shared_ptr<Stripable> s = ControlProtocol::first_selected_stripable ();
+	if (s) {
+		if (s != _current_stripable) {
+			set_current_stripable (s);
+		}
+		/* make sure the GUI shows the selection that was made before it was ready */
+		PBD::PropertyChange pc;
+		pc.add (ARDOUR::Properties::selected);
+		PresentationInfo::send_static_change (pc);
+		return;
+	}
+	if (strip_inventory.empty ()) {
+		return;
+	}
+	select_rid_by_index (0);
 }
 
 int
@@ -209,7 +260,11 @@ Console1::stop_using_device ()
 	DEBUG_TRACE (DEBUG::Console1, "stop_using_device()\n");
 	blink_connection.disconnect ();
 	periodic_connection.disconnect ();
+	initial_selection_connection.disconnect ();
 	stripable_connections.drop_connections ();
+	gate_connections.drop_connections ();
+	eq_connections.drop_connections ();
+	comp_connections.drop_connections ();
 	console1_connections.drop_connections ();
 	MIDISurface::stop_using_device ();
 	return 0;
@@ -442,16 +497,13 @@ Console1::handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes* tb
 	uint32_t value = static_cast<uint32_t> (tb->value);
 DEBUG_TRACE (DEBUG::Console1,
 	             string_compose ("handle_midi_controller_message cn: '%1' val: '%2'\n", controller_number, value));
-	try {
-		Encoder* e = get_encoder (ControllerID (controller_number));
-		if (in_plugin_state && e->plugin_action) {
-			e->plugin_action (value);
-		} else if (shift_state && e->shift_action) {
-			e->shift_action (value);
-		} else {
-			e->action (value);
-		}
+	if (midi_assign_mode && controller_number != ControllerID::PRESET) {
+		SendControllerNumber (controller_number, shift_state);
 		return;
+	}
+	Encoder* e = nullptr;
+	try {
+		e = get_encoder (ControllerID (controller_number));
 	} catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1,
 		             string_compose ("handle_midi_controller_message: encoder not found cn: "
@@ -459,20 +511,25 @@ DEBUG_TRACE (DEBUG::Console1,
 		                             controller_number,
 		                             value));
 	}
-
-	try {
-		ControllerButton* b = get_button (ControllerID (controller_number));
-		if (in_plugin_state && b->plugin_action) {
-			DEBUG_TRACE (DEBUG::Console1, "Executing plugin_action\n");
-			b->plugin_action (value);
-		} else if (shift_state && b->shift_action) {
-			DEBUG_TRACE (DEBUG::Console1, "Executing shift_action\n");
-			b->shift_action (value);
+	if (e) {
+		if (in_plugin_state) {
+			if (shift_state && e->plugin_shift_action) {
+				e->plugin_shift_action (value);
+			} else if (e->plugin_action) {
+				e->plugin_action (value);
+			}
+			return;
+		} else if (shift_state && e->shift_action) {
+			e->shift_action (value);
 		} else {
-			DEBUG_TRACE (DEBUG::Console1, "Executing action\n");
-			b->action (value);
+			e->action (value);
 		}
 		return;
+	}
+
+	ControllerButton* b = nullptr;
+	try {
+		b = get_button (ControllerID (controller_number));
 	} catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1,
 		             string_compose ("handle_midi_controller_message: button not found cn: "
@@ -480,22 +537,51 @@ DEBUG_TRACE (DEBUG::Console1,
 		                             controller_number,
 		                             value));
 	}
-
-	try {
-		MultiStateButton* mb = get_mbutton (ControllerID (controller_number));
-		if (shift_state && mb->shift_action) {
-			mb->shift_action (value);
-		} else {
-			mb->action (value);
+	if (b) {
+		if (in_plugin_state && (b->id () == ControllerID::TRACK_GROUP || b->id () == ControllerID::PRESET)) {
+			b->action (value);
+			return;
 		}
-
+		if (in_plugin_state) {
+			if (shift_state && b->plugin_shift_action) {
+				b->plugin_shift_action (value);
+			} else if (b->plugin_action) {
+				b->plugin_action (value);
+			}
+			return;
+		} else if (shift_state && b->shift_action) {
+			b->shift_action (value);
+		} else {
+			b->action (value);
+		}
 		return;
+	}
+
+	MultiStateButton* mb = nullptr;
+	try {
+		mb = get_mbutton (ControllerID (controller_number));
 	} catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1,
 		             string_compose ("handle_midi_controller_message: mbutton not found cn: "
 		                             "'%1' val: '%2'\n",
 		                             controller_number,
 		                             value));
+	}
+	if (mb) {
+		if (in_plugin_state) {
+			if (shift_state && mb->plugin_shift_action) {
+				mb->plugin_shift_action (value);
+			} else if (mb->plugin_action) {
+				mb->plugin_action (value);
+			}
+			return;
+		} else if (shift_state && mb->shift_action) {
+			mb->shift_action (value);
+		} else {
+			mb->action (value);
+		}
+
+		return;
 	}
 }
 
@@ -538,7 +624,7 @@ Console1::stripable_selection_changed ()
 		return;
 
 	std::shared_ptr<Stripable> r = ControlProtocol::first_selected_stripable ();
-	if (r) {
+	if (r && r != _current_stripable) {
 		set_current_stripable (r);
 	}
 }
@@ -563,15 +649,20 @@ Console1::set_current_stripable (std::shared_ptr<Stripable> r)
 {
 	DEBUG_TRACE (DEBUG::Console1, "set_current_stripable \n");
 	stripable_connections.drop_connections ();
+	gate_connections.drop_connections ();
+	eq_connections.drop_connections ();
+	comp_connections.drop_connections ();
 
 	_current_stripable = r;
 
 	if (_current_stripable) {
 		DEBUG_TRACE (DEBUG::Console1, "current_stripable found:  \n");
 
-		r->MappedControlsChanged.connect (stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::set_current_stripable, this, r), this);
+		r->MappedControlsChanged.connect (stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::mapped_controls_changed, this), this);
 
 		current_plugin_index = -1;
+		plugin_meters.clear ();
+		last_output_meter_l = last_output_meter_r = last_gate_meter = last_comp_redux = 0xffffffff;
 
 		PresentationInfo pi = _current_stripable->presentation_info ();
 
@@ -665,103 +756,10 @@ Console1::set_current_stripable (std::shared_ptr<Stripable> r)
 			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_high_cut, this), this);
 		}
 
-		// Gate Section
-		if (_current_stripable->mapped_control (Gate_Enable)) {
-			_current_stripable->mapped_control (Gate_Enable)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_gate, this), this);
-		}
-
-		if (_current_stripable->mapped_control (Gate_KeyFilterEnable)) {
-			_current_stripable->mapped_control (Gate_KeyFilterEnable)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_gate_scf, this), this);
-		}
-
-		if (_current_stripable->mapped_control (Gate_KeyListen)) {
-			_current_stripable->mapped_control (Gate_KeyListen)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_gate_listen, this), this);
-		}
-
-		if (_current_stripable->mapped_control (Gate_Threshold)) {
-			_current_stripable->mapped_control (Gate_Threshold)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_gate_thresh, this), this);
-		}
-
-		if (_current_stripable->mapped_control (Gate_Depth)) {
-			_current_stripable->mapped_control (Gate_Depth)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_gate_depth, this), this);
-		}
-
-		if (_current_stripable->mapped_control (Gate_Release)) {
-			_current_stripable->mapped_control (Gate_Release)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_gate_release, this), this);
-		}
-
-		if (_current_stripable->mapped_control (Gate_Attack)) {
-			_current_stripable->mapped_control (Gate_Attack)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_gate_attack, this), this);
-		}
-
-		if (_current_stripable->mapped_control (Gate_Hysteresis)) {
-			_current_stripable->mapped_control (Gate_Hysteresis)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_gate_hyst, this), this);
-		}
-
-		if (_current_stripable->mapped_control (Gate_Hold)) {
-			_current_stripable->mapped_control (Gate_Hold)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_gate_hold, this), this);
-		}
-
-		if (_current_stripable->mapped_control (Gate_KeyFilterFreq)) {
-			_current_stripable->mapped_control (Gate_KeyFilterFreq)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_gate_filter_freq, this), this);
-		}
-
-		// EQ Section
-		if (_current_stripable->mapped_control (EQ_Enable)) {
-			_current_stripable->mapped_control (EQ_Enable)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_eq, this), this);
-		}
-#ifdef MIXBUS
-		std::shared_ptr<ARDOUR::Route> rt = std::dynamic_pointer_cast<ARDOUR::Route>( _current_stripable );
-		if (rt) {
-			DEBUG_TRACE(DEBUG::Console1, "Cast to Route ok \n");
-			if (rt->eq_type_control()) {
-				DEBUG_TRACE(DEBUG::Console1, "Control EQ_Mode available \n");
-				rt->eq_type_control()->Changed.connect(
-						stripable_connections, MISSING_INVALIDATOR, std::bind(&Console1::map_eq_mode, this), this);
-			}
-		}
-#endif
-		for (uint32_t i = 0; i < _current_stripable->eq_band_cnt (); ++i) {
-			if (_current_stripable->mapped_control (EQ_BandFreq, i)) {
-				_current_stripable->mapped_control (EQ_BandFreq, i)->Changed.connect (
-				  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_eq_freq, this, i), this);
-			}
-			if (_current_stripable->mapped_control (EQ_BandGain, i)) {
-				_current_stripable->mapped_control (EQ_BandGain, i)->Changed.connect (
-				  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_eq_gain, this, i), this);
-			}
-		}
-
-		if (_current_stripable->mapped_control (EQ_BandQ, 1) && !band_q_as_send ) {
-			_current_stripable->mapped_control (EQ_BandQ, 1)->Changed.connect (
-					stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_eq_band_q, this, 1), this);
-		}
-
-		if (_current_stripable->mapped_control (EQ_BandQ, 2) && !band_q_as_send) {
-			_current_stripable->mapped_control (EQ_BandQ, 2)->Changed.connect (
-					stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_eq_band_q, this, 2), this);
-		}
-
-		if (_current_stripable->mapped_control (EQ_BandShape, 0)) {
-			_current_stripable->mapped_control (EQ_BandShape, 0)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_eq_low_shape, this), this);
-		}
-
-		if (_current_stripable->mapped_control (EQ_BandShape, 3)) {
-			_current_stripable->mapped_control (EQ_BandShape, 3)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_eq_high_shape, this), this);
-		}
+		// Gate, EQ and Comp can switch their type, so their listeners are managed separately
+		connect_gate_controls ();
+		connect_eq_controls ();
+		connect_comp_controls ();
 
 		// Drive
 		if (_current_stripable->mapped_control (TapeDrive_Drive)) {
@@ -778,47 +776,6 @@ Console1::set_current_stripable (std::shared_ptr<Stripable> r)
 				  std::bind (&Console1::map_mb_send_level, this, i),
 				  this);
 			}
-		}
-
-		// Comp Section
-		if (_current_stripable->mapped_control (Comp_Enable)) {
-			_current_stripable->mapped_control (Comp_Enable)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_comp, this), this);
-		}
-
-		if (_current_stripable->mapped_control (Comp_Mode)) {
-			_current_stripable->mapped_control (Comp_Mode)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_comp_mode, this), this);
-		}
-
-		if (_current_stripable->mapped_control (Comp_Threshold)) {
-			_current_stripable->mapped_control (Comp_Threshold)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_comp_thresh, this), this);
-		}
-
-		if (_current_stripable->mapped_control (Comp_Attack)) {
-			_current_stripable->mapped_control (Comp_Attack)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_comp_attack, this), this);
-		}
-
-		if (_current_stripable->mapped_control (Comp_Release)) {
-			_current_stripable->mapped_control (Comp_Release)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_comp_release, this), this);
-		}
-
-		if (_current_stripable->mapped_control (Comp_Ratio)) {
-			_current_stripable->mapped_control (Comp_Ratio)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_comp_ratio, this), this);
-		}
-
-		if (_current_stripable->mapped_control (Comp_Makeup)) {
-			_current_stripable->mapped_control (Comp_Makeup)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_comp_makeup, this), this);
-		}
-
-		if (_current_stripable->mapped_control (Comp_KeyFilterFreq)) {
-			_current_stripable->mapped_control (Comp_KeyFilterFreq)->Changed.connect (
-			  stripable_connections, MISSING_INVALIDATOR, std::bind (&Console1::map_comp_emph, this), this);
 		}
 
 		uint32_t index = get_index_by_inventory_order (pi.order ());
@@ -839,8 +796,169 @@ Console1::set_current_stripable (std::shared_ptr<Stripable> r)
 	}
 
 	// ToDo: subscribe to the fader automation modes so we can light the LEDs
+	// map_shift() also maps the complete stripable state
 	map_shift (shift_state);
-	map_stripable_state ();
+	LabelsChanged ();
+}
+
+void
+Console1::connect_gate_controls ()
+{
+	gate_connections.drop_connections ();
+	if (!_current_stripable) {
+		return;
+	}
+	auto hook = [this] (std::shared_ptr<AutomationControl> c, std::function<void ()> f) {
+		if (c) {
+			c->Changed.connect (gate_connections, MISSING_INVALIDATOR, [f] (bool, PBD::Controllable::GroupControlDisposition) { f (); }, this);
+		}
+	};
+	std::shared_ptr<Stripable> s = _current_stripable;
+
+	hook (s->mapped_control (Gate_Enable), std::bind (&Console1::map_gate, this));
+	hook (s->mapped_control (Gate_KeyFilterEnable), std::bind (&Console1::map_gate_scf, this));
+	hook (s->mapped_control (Gate_FastAttack), std::bind (&Console1::map_gate_scf, this));
+	hook (s->mapped_control (Gate_Mode), std::bind (&Console1::map_gate_listen, this));
+	hook (s->mapped_control (Gate_KeyListen), std::bind (&Console1::map_gate_listen, this));
+	hook (s->mapped_control (Gate_Threshold), std::bind (&Console1::map_gate_thresh, this));
+	hook (s->mapped_control (Gate_Depth), std::bind (&Console1::map_gate_depth, this));
+	hook (s->mapped_control (Gate_Release), std::bind (&Console1::map_gate_release, this));
+	hook (s->mapped_control (Gate_Attack), std::bind (&Console1::map_gate_attack, this));
+	hook (s->mapped_control (Gate_Hysteresis), std::bind (&Console1::map_gate_hyst, this));
+	hook (s->mapped_control (Gate_Hold), std::bind (&Console1::map_gate_hold, this));
+	hook (s->mapped_control (Gate_Hold), std::bind (&Console1::map_gate_attack, this));
+	hook (s->mapped_control (Gate_KeyFilterFreq), std::bind (&Console1::map_gate_filter_freq, this));
+}
+
+void
+Console1::connect_eq_controls ()
+{
+	eq_connections.drop_connections ();
+	if (!_current_stripable) {
+		return;
+	}
+	auto hook = [this] (std::shared_ptr<AutomationControl> c, std::function<void ()> f) {
+		if (c) {
+			c->Changed.connect (eq_connections, MISSING_INVALIDATOR, [f] (bool, PBD::Controllable::GroupControlDisposition) { f (); }, this);
+		}
+	};
+	std::shared_ptr<Stripable> s = _current_stripable;
+
+	hook (s->mapped_control (EQ_Enable), std::bind (&Console1::map_eq, this));
+	for (uint32_t i = 0; i < s->eq_band_cnt (); ++i) {
+		hook (s->mapped_control (EQ_BandFreq, i), std::bind (&Console1::map_eq_freq, this, i));
+		hook (s->mapped_control (EQ_BandGain, i), std::bind (&Console1::map_eq_gain, this, i));
+	}
+	if (!band_q_as_send) {
+		hook (s->mapped_control (EQ_BandQ, 1), std::bind (&Console1::map_eq_band_q, this, 1));
+		hook (s->mapped_control (EQ_BandQ, 2), std::bind (&Console1::map_eq_band_q, this, 2));
+	}
+	hook (s->mapped_control (EQ_BandShape, 0), std::bind (&Console1::map_eq_low_shape, this));
+	hook (s->mapped_control (EQ_BandShape, 3), std::bind (&Console1::map_eq_high_shape, this));
+}
+
+void
+Console1::connect_comp_controls ()
+{
+	comp_connections.drop_connections ();
+	if (!_current_stripable) {
+		return;
+	}
+	auto hook = [this] (std::shared_ptr<AutomationControl> c, std::function<void ()> f) {
+		if (c) {
+			c->Changed.connect (comp_connections, MISSING_INVALIDATOR, [f] (bool, PBD::Controllable::GroupControlDisposition) { f (); }, this);
+		}
+	};
+	std::shared_ptr<Stripable> s = _current_stripable;
+
+	hook (s->mapped_control (Comp_Enable), std::bind (&Console1::map_comp, this));
+	hook (s->mapped_control (Comp_Mode), std::bind (&Console1::map_comp_mode, this));
+	hook (s->mapped_control (Comp_Threshold), std::bind (&Console1::map_comp_thresh, this));
+	hook (s->mapped_control (Comp_Attack), std::bind (&Console1::map_comp_attack, this));
+	hook (s->mapped_control (Comp_FastAttack), std::bind (&Console1::map_comp_attack, this));
+	hook (s->mapped_control (Comp_RMSPeak), std::bind (&Console1::map_comp_attack, this));
+	hook (s->mapped_control (Comp_Release), std::bind (&Console1::map_comp_release, this));
+	hook (s->mapped_control (Comp_Ratio), std::bind (&Console1::map_comp_ratio, this));
+	hook (s->mapped_control (Comp_Makeup), std::bind (&Console1::map_comp_makeup, this));
+	hook (s->mapped_control (Comp_Mix), std::bind (&Console1::map_comp_makeup, this));
+	hook (s->mapped_control (Comp_KeyFilterFreq), std::bind (&Console1::map_comp_emph, this));
+}
+
+void
+Console1::mapped_controls_changed ()
+{
+	/* A gate, EQ or compressor type switch replaces the mapped controls of
+	 * that section only, so just those listeners and mappings are rebuilt. */
+	if (!_current_stripable) {
+		return;
+	}
+	DEBUG_TRACE (DEBUG::Console1, "mapped_controls_changed\n");
+#ifdef MIXBUS
+	if (std::shared_ptr<ARDOUR::Route> rt = std::dynamic_pointer_cast<ARDOUR::Route> (_current_stripable)) {
+		DEBUG_TRACE (DEBUG::Console1, string_compose ("Remapping Gate (%1), EQ (%2) and Comp (%3) after type change\n",
+		             rt->mixbus_gate_type () == ARDOUR::Route::GateSSL ? "SSL" : "Harrison",
+		             rt->mixbus_eq_type () == ARDOUR::Route::EQType9kJ ? "SSL" : "Harrison",
+		             rt->mixbus_comp_type () == ARDOUR::Route::CompSSL ? "SSL" : "Harrison"));
+	}
+#endif
+
+	gate_redux_meter = _current_stripable->mapped_output (Gate_Redux);
+	comp_redux_meter = _current_stripable->mapped_output (Comp_Redux);
+
+	connect_gate_controls ();
+	connect_eq_controls ();
+	connect_comp_controls ();
+
+	if (!in_plugin_state) {
+		map_gate_section ();
+		map_eq_section ();
+		map_comp_section ();
+	}
+	LabelsChanged ();
+}
+
+void
+Console1::map_gate_section ()
+{
+	map_gate ();
+	map_gate_scf ();
+	map_gate_listen ();
+	map_gate_thresh ();
+	map_gate_attack ();
+	map_gate_release ();
+	map_gate_depth ();
+	map_gate_hyst ();
+	map_gate_hold ();
+	map_gate_filter_freq ();
+}
+
+void
+Console1::map_eq_section ()
+{
+	map_eq ();
+	map_eq_mode ();
+	for (uint32_t i = 0; i < _current_stripable->eq_band_cnt (); ++i) {
+		map_eq_freq (i);
+		map_eq_gain (i);
+		if ((!switch_eq_q_dials) && i > 0 && i < 3) {
+			map_eq_band_q (i);
+		}
+	}
+	map_eq_low_shape ();
+	map_eq_high_shape ();
+}
+
+void
+Console1::map_comp_section ()
+{
+	map_comp ();
+	map_comp_mode ();
+	map_comp_thresh ();
+	map_comp_attack ();
+	map_comp_release ();
+	map_comp_ratio ();
+	map_comp_makeup ();
+	map_comp_emph ();
 }
 
 void
@@ -867,29 +985,10 @@ Console1::map_stripable_state ()
 		map_high_cut ();
 
 		// Gate Section
-		map_gate ();
-		map_gate_scf ();
-		map_gate_listen ();
-		map_gate_thresh ();
-		map_gate_attack ();
-		map_gate_release ();
-		map_gate_depth ();
-		map_gate_hyst ();
-		map_gate_hold ();
-		map_gate_filter_freq ();
+		map_gate_section ();
 
 		// EQ Section
-		map_eq ();
-		map_eq_mode();
-		for (uint32_t i = 0; i < _current_stripable->eq_band_cnt(); ++i) {
-			map_eq_freq (i);
-			map_eq_gain (i);
-			if( (!switch_eq_q_dials) && i > 0 && i < 3 ) {
-				map_eq_band_q (i);
-			}
-		}
-		map_eq_low_shape ();
-		map_eq_high_shape ();
+		map_eq_section ();
 
 		for (int i = 0; i < 12; ++i) {
 			map_mb_send_level (i);
@@ -899,14 +998,7 @@ Console1::map_stripable_state ()
 		map_drive ();
 
 		// Comp Section
-		map_comp ();
-		map_comp_mode ();
-		map_comp_thresh ();
-		map_comp_attack ();
-		map_comp_release ();
-		map_comp_ratio ();
-		map_comp_makeup ();
-		map_comp_emph ();
+		map_comp_section ();
 
 		if (_current_stripable == session->monitor_out ()) {
 			// map_cut();
@@ -1004,6 +1096,7 @@ bool
 Console1::periodic ()
 {
 	periodic_update_meter ();
+	update_plugin_meters ();
 	return true;
 }
 
@@ -1026,11 +1119,11 @@ Console1::periodic_update_meter ()
 				}
 			}
 			try {
-				if (val_l != last_output_meter_l) {
+				if (val_l != last_output_meter_l && !plugin_meter_active (OUTPUT_METER_L)) {
 					get_meter (OUTPUT_METER_L)->set_value (val_l);
 					last_output_meter_l = val_l;
 				}
-				if (val_r != last_output_meter_r) {
+				if (val_r != last_output_meter_r && !plugin_meter_active (OUTPUT_METER_R)) {
 					get_meter (OUTPUT_METER_R)->set_value (val_r);
 					last_output_meter_r = val_r;
 				}
@@ -1047,7 +1140,7 @@ Console1::periodic_update_meter ()
 				val = 127 * dB;
 			}
 			try {
-				if (val != last_gate_meter) {
+				if (val != last_gate_meter && !plugin_meter_active (SHAPE_METER)) {
 					get_meter (SHAPE_METER)->set_value (val);
 					last_gate_meter = val;
 				}
@@ -1061,14 +1154,15 @@ Console1::periodic_update_meter ()
 				val = 127;
 			} else {
 				float rx = comp_redux_meter->get_parameter () * 127.f;
-				val = pow (3.3 + 0.11 * rx, 4);
-				val = std::min (127.f, std::max (0.f, rx));
+				val = static_cast<uint32_t> (std::min (127.f, std::max (0.f, rx)));
 			}
+			float smoothed = val * 0.6f + smoothed_comp_redux * 0.4f;
+			smoothed_comp_redux = smoothed;
+			uint32_t output = static_cast<uint32_t> (std::lround (smoothed));
 			try {
-				if (val != last_comp_redux) {
-					last_comp_redux = val;
-					val = val * 0.6 + last_comp_redux * 0.4;
-					get_meter (COMP_METER)->set_value (val);
+				if (output != last_comp_redux && !plugin_meter_active (COMP_METER)) {
+					last_comp_redux = output;
+					get_meter (COMP_METER)->set_value (output);
 				}
 			} catch (ControlNotFoundException const&) {
 				DEBUG_TRACE (DEBUG::Console1, "Meter not found ...\n");
@@ -1077,10 +1171,56 @@ Console1::periodic_update_meter ()
 	}
 }
 
+bool
+Console1::plugin_meter_active (ControllerID id) const
+{
+	if (!in_plugin_state) {
+		return false;
+	}
+	for (const auto& pm : plugin_meters) {
+		if (pm.id == id) {
+			return true;
+		}
+	}
+	return false;
+}
+
+void
+Console1::update_plugin_meters ()
+{
+	if (!in_plugin_state) {
+		return;
+	}
+	for (auto& pm : plugin_meters) {
+		double v = pm.descriptor.to_interface (pm.control->get_parameter (), true);
+		v = std::min (1.0, std::max (0.0, v));
+		/* the reduction meters rest at full scale */
+		if (pm.id == COMP_METER || pm.id == SHAPE_METER) {
+			v = 1.0 - v;
+		}
+		uint32_t val = static_cast<uint32_t> (std::lround (v * 127.0));
+		if (val == pm.last_value) {
+			continue;
+		}
+		pm.last_value = val;
+		try {
+			get_meter (pm.id)->set_value (val);
+		} catch (ControlNotFoundException const&) {
+		}
+	}
+}
+
 float
 Console1::calculate_meter (float dB)
 {
-	return pow ((8.7 + 0.18 * dB), 2.1);
+	if (!std::isfinite (dB)) {
+		return dB > 0.f ? 127.f : 0.f;
+	}
+	float level = 8.7f + 0.18f * dB;
+	if (level <= 0.f) {
+		return 0.f;
+	}
+	return std::min (127.f, std::pow (level, 2.1f));
 }
 
 uint32_t
@@ -1242,6 +1382,11 @@ Console1::select_rid_by_index (uint32_t index)
 		success =  false;
 	}
 	std::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::MixerStripables);
+	if (s && s == _current_stripable) {
+		/* no selection change will be signalled, but the button toggled its own LED */
+		map_select ();
+		return;
+	}
 	if (s) {
 		session->selection ().select_stripable_and_maybe_group (s, SelectionSet, true, false, 0);
 	} else {

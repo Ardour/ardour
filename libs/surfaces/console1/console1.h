@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Holger Dehnhardt <holger@dehnhardt.org>
+ * Copyright (C) 2026 Holger Dehnhardt <holger@dehnhardt.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,11 +22,16 @@
 #include <list>
 #include <map>
 #include <set>
+#include <vector>
 
 #define ABSTRACT_UI_EXPORTS
+#include <ytkmm/liststore.h>
+
 #include "pbd/abstract_ui.h"
 
+#include "ardour/parameter_descriptor.h"
 #include "ardour/presentation_info.h"
+#include "ardour/readonly_control.h"
 
 #include "control_protocol/control_protocol.h"
 #include "control_protocol/types.h"
@@ -132,7 +137,13 @@ public:
 	PBD::Signal<void()> BankChange;
 	PBD::Signal<void(bool)> ShiftChange;
 	PBD::Signal<void(bool)> PluginStateChange;
+	PBD::Signal<void()> PluginStubAdded;
+	sigc::signal2<void, int, bool> SendControllerNumber;
+	bool midi_assign_mode = false;
+	void reset_midi_assign_mode ();
 	PBD::Signal<void(bool)> EQBandQBindingChange;
+	/* emitted when the functions assigned to the controls change (strip, type, plugin) */
+	PBD::Signal<void()> LabelsChanged;
 
 	enum ControllerID
 	{
@@ -210,6 +221,11 @@ public:
 		TRACK_GROUP = 123,
 
 	};
+
+	/* Name of the function a control currently has (depends on shift, plugin mode and strip types) */
+	std::string control_label (ControllerID id) const;
+	bool is_shifted () const { return shift_state; }
+	bool is_in_plugin_state () const { return in_plugin_state; }
 
 	enum EQ_MODE
 	{
@@ -304,6 +320,7 @@ private:
 
 	// Shift button
 	bool shift_state = false;
+	bool shift_state_before_plugin = false;
 
 	// Plugin state
 	bool in_plugin_state = false;
@@ -417,6 +434,9 @@ private:
 
 	std::shared_ptr<ARDOUR::ReadOnlyControl> comp_redux_meter = 0;
 	uint32_t last_comp_redux = 0;
+	float smoothed_comp_redux = 0.f;
+
+	bool controls_initialized = false;
 
 	sigc::connection blink_connection;
 	typedef std::list<ControllerID> Blinkers;
@@ -431,10 +451,36 @@ private:
 	/*void use_master ();
 	void use_monitor ();*/
 	void stripable_selection_changed () override;
+	void select_initial_stripable ();
+	void schedule_initial_selection ();
+	sigc::connection initial_selection_connection;
 	/*PBD::ScopedConnection selection_connection;*/
 	PBD::ScopedConnectionList stripable_connections;
+	PBD::ScopedConnectionList gate_connections;
+	PBD::ScopedConnectionList eq_connections;
+	PBD::ScopedConnectionList comp_connections;
+	void connect_gate_controls ();
+	void connect_eq_controls ();
+	void connect_comp_controls ();
+	void mapped_controls_changed ();
+	void map_gate_section ();
+	void map_eq_section ();
+	void map_comp_section ();
 	PBD::ScopedConnectionList console1_connections;
 	PBD::ScopedConnectionList plugin_connections;
+	std::map<ControllerID, std::string> plugin_labels;
+
+	/* plugin output parameters shown on the console1 meters */
+	struct PluginMeter
+	{
+		ControllerID id;
+		std::shared_ptr<ARDOUR::ReadOnlyControl> control;
+		ARDOUR::ParameterDescriptor descriptor;
+		uint32_t last_value = 0xffffffff;
+	};
+	std::vector<PluginMeter> plugin_meters;
+	bool plugin_meter_active (ControllerID id) const;
+	void update_plugin_meters ();
 
 	void map_stripable_state ();
 
@@ -452,6 +498,7 @@ private:
 	void rude_solo (const uint32_t);
 	void select (const uint32_t i);
 	void shift (const uint32_t);
+	void set_shift_state (bool state);
 	void plugin_state (const uint32_t);
 	void solo (const uint32_t);
 	void trim (const uint32_t value);
@@ -472,6 +519,9 @@ private:
 	void gate_release (const uint32_t value);
 	void gate_attack (const uint32_t value);
 	void gate_hyst (const uint32_t value);
+	std::shared_ptr<ARDOUR::AutomationControl> gate_sustain_control () const;
+	std::shared_ptr<ARDOUR::AutomationControl> gate_hard_control () const;
+	std::shared_ptr<ARDOUR::AutomationControl> gate_hard_shift_control () const;
 	void gate_hold (const uint32_t value);
 	void gate_filter_freq (const uint32_t value);
 
@@ -554,6 +604,7 @@ private:
 	void comp_attack (const uint32_t value);
 	void comp_release (const uint32_t value);
 	void comp_ratio (const uint32_t value);
+	std::shared_ptr<ARDOUR::AutomationControl> comp_par_control () const;
 	void comp_makeup (const uint32_t value);
 	void comp_emph (const uint32_t value);
 
@@ -619,13 +670,14 @@ private:
 	uint32_t control_to_midi (Controllable controllable, float val, uint32_t max_value_for_type = 127);
 	float midi_to_control (Controllable controllable, uint32_t val, uint32_t max_value_for_type = 127);
 
+public:
 	struct PluginParameterMapping
 	{
 		int paramIndex;
 		bool shift = false;
 		bool is_switch = false;
 		std::string name;
-		ControllerID controllerId;
+		ControllerID controllerId = ControllerID::CONTROLLER_NONE;
 	};
 
 	using ParameterMap = std::map<uint32_t, PluginParameterMapping>;
@@ -634,12 +686,34 @@ private:
 	{
 		std::string id;
 		std::string name;
+		bool configured = true;
 		ParameterMap parameters;
 	};
 
+	using PluginMappingMap = std::map<std::string, PluginMapping>;
+	PluginMappingMap pluginMappingMap;
+
+	struct PluginControllerColumns : public Gtk::TreeModel::ColumnRecord
+	{
+		PluginControllerColumns ()
+		{
+			add (controllerName);
+			add (controllerId);
+		}
+		Gtk::TreeModelColumn<std::string> controllerName;
+		Gtk::TreeModelColumn<int> controllerId;
+	};
+	PluginControllerColumns plugin_controller_columns;
+	Glib::RefPtr<Gtk::ListStore> plugin_controller_model;
+	Glib::RefPtr<Gtk::ListStore> getPluginControllerModel ();
+	const std::string findControllerNameById (const ControllerID id);
+	uint32_t load_mappings ();
+	void write_plugin_mapping (PluginMapping& mapping);
+
+private:
+
 	/* plugin handling */
 	bool ensure_config_dir ();
-	uint32_t load_mappings ();
 	bool load_mapping (XMLNode* fin);
 	void create_mapping (const std::shared_ptr<ARDOUR::Processor> proc, const std::shared_ptr<ARDOUR::Plugin> plugin);
 
@@ -653,9 +727,6 @@ private:
 	bool map_select_plugin (const int32_t plugin_index);
 
     void eqBandQChangeMapping (bool mapValues);
-
-    using PluginMappingMap = std::map<std::string, PluginMapping>;
-	PluginMappingMap pluginMappingMap;
 };
 }
 #endif /* ardour_surface_console1_h */

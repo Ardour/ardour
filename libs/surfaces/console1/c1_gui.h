@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Holger Dehnhardt <holger@dehnhardt.org>
+ * Copyright (C) 2026 Holger Dehnhardt <holger@dehnhardt.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #include <string>   
 
 #include <ytkmm/box.h>
+#include <ytkmm/button.h>
 #include <ytkmm/combobox.h>
 #include <ytkmm/checkbutton.h>
 #include <ytkmm/image.h>
@@ -30,12 +31,16 @@
 #include <ytkmm/treestore.h>
 #include <ytkmm/spinbutton.h>
 #include <ytkmm/notebook.h>
+#include <ytkmm/scrolledwindow.h>
+#include <ytkmm/togglebutton.h>
+#include <ytkmm/treeview.h>
 
 namespace Gtk {
 	class CellRendererCombo;
 	class ListStore;
 }
 
+#include "c1_panel.h"
 #include "console1.h"
 
 namespace ArdourSurface {
@@ -53,7 +58,11 @@ private:
 	Gtk::Table table;
 	Gtk::ComboBox input_combo;
 	Gtk::ComboBox output_combo;
-	Gtk::Image image;
+	C1Panel* panel;
+	Gtk::CheckButton edit_labels_cb;
+	Gtk::Button reset_labels_btn;
+	Gtk::HBox label_edit_box;
+	void set_edit_labels ();
 	Gtk::CheckButton swap_solo_mute_cb;
 	Gtk::CheckButton band_q_as_send_cb;
 	Gtk::CheckButton create_plugin_stubs_btn;
@@ -81,6 +90,57 @@ private:
 	void set_swap_solo_mute ();
 	void set_band_q_as_send();
 	void set_create_mapping_stubs();
+
+	/* plugin assignment page (c1_plugin_control_assignment.cc) */
+	struct PluginColumns : public Gtk::TreeModel::ColumnRecord {
+		PluginColumns () {
+			add (plugin_name);
+			add (plugin_id);
+		}
+		Gtk::TreeModelColumn<std::string> plugin_name;
+		Gtk::TreeModelColumn<std::string> plugin_id;
+	};
+
+	struct PluginAssignmentEditorColumns : public Gtk::TreeModel::ColumnRecord {
+		PluginAssignmentEditorColumns () {
+			add (index);
+			add (name);
+			add (is_switch);
+			add (controllerName);
+			add (shift);
+			add (learn);
+		}
+		Gtk::TreeModelColumn<int> index;
+		Gtk::TreeModelColumn<std::string> name;
+		Gtk::TreeModelColumn<bool> is_switch;
+		Gtk::TreeModelColumn<std::string> controllerName;
+		Gtk::TreeModelColumn<bool> shift;
+		Gtk::TreeModelColumn<bool> learn;
+	};
+
+	Gtk::Notebook notebook;
+	Gtk::ScrolledWindow plugin_mapping_scroller;
+	Gtk::ComboBox plugins_combo;
+	Gtk::TreeView plugin_assignment_editor;
+	sigc::signal<void> plugin_assignment_changed;
+	sigc::connection assign_connection;
+	PBD::ScopedConnectionList plugin_connections;
+	PluginColumns plugin_columns;
+	PluginAssignmentEditorColumns plugin_assignment_editor_columns;
+	Glib::RefPtr<Gtk::ListStore> plugin_assignment_store;
+	Console1::PluginMapping plugin_mapping;
+
+	Gtk::VBox* build_plugin_assignment_page ();
+	Gtk::CellRendererCombo* make_action_renderer (Glib::RefPtr<Gtk::ListStore> model, Gtk::TreeModelColumnBase column);
+	void load_plugin_combo_rows ();
+	void build_plugin_assignment_editor ();
+	void change_controller_number (int controllerNumber, bool shiftState);
+	void toggle_learn (const Glib::ustring&);
+	void stop_midi_assign ();
+	void change_controller (const Glib::ustring&, const Gtk::TreeIter&);
+	void toggle_shift (const Glib::ustring&);
+	void active_plugin_changed (Gtk::ComboBox* combo);
+	void write_plugin_assignment ();
 };
 
 }
