@@ -76,13 +76,20 @@ struct IContextInfoProvider2: IContextInfoProvider
 
 	/** Get context information by identifier (floating-point). */
 	virtual Steinberg::tresult PLUGIN_API getContextInfoValue (double& value, Steinberg::FIDString id) = 0;
-		
+
+#ifdef _MSC_VER // MSVC groups polymorphic overloaded functions and lays them out in reverse declaration order.
 	/** Set context information by identifier (floating-point). */
 	virtual Steinberg::tresult PLUGIN_API setContextInfoValue (Steinberg::FIDString id, double value) = 0;
+#endif
 	
 	/** Set context information by identifier (integer). */
 	virtual Steinberg::tresult PLUGIN_API setContextInfoValue (Steinberg::FIDString id, Steinberg::int32 value) = 0;
 	
+#ifndef _MSC_VER
+	/** Set context information by identifier (floating-point). */
+	virtual Steinberg::tresult PLUGIN_API setContextInfoValue (Steinberg::FIDString id, double value) = 0;
+#endif
+
 	/** Set context information by identifier (string). */
 	virtual Steinberg::tresult PLUGIN_API setContextInfoString (Steinberg::FIDString id, Steinberg::Vst::TChar* string) = 0;
 	
