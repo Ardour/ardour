@@ -788,8 +788,6 @@ Session::remove_state (string snapshot_name)
 int
 Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot, bool template_only, bool for_archive, bool only_used_assets)
 {
-	DEBUG_TRACE (DEBUG::Locale, string_compose ("Session::save_state locale '%1'\n", setlocale (LC_NUMERIC, NULL)));
-
 	/* only_used_assets is only possible when archiving */
 	assert (!only_used_assets || for_archive);
 	/* template and archive are exclusive */
@@ -799,15 +797,39 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 	/* pending saves are for current snapshot only */
 	assert (!pending || ((snapshot_name.empty () || snapshot_name == _current_snapshot_name) && !template_only && !for_archive));
 
+	SessionSaveDisposition sd = SaveSnapshot;
+	if (pending) {
+		sd = SavePending;
+	} else if (switch_to_snapshot) {
+		sd = SaveSnapshotAndSwitch;
+	} else if (template_only) {
+		sd = SaveTemplate;
+	} else if (for_archive) {
+		if (only_used_assets) {
+			sd = ArchiveOnlyUsedAssets;
+		} else {
+			sd = ArchiveWithAllSources;
+		}
+	}
+	return save_state_full (snapshot_name, sd);
+
+}
+
+int
+Session::save_state_full (std::string snapshot_name, SessionSaveDisposition ssd)
+{
+	DEBUG_TRACE (DEBUG::Locale, string_compose ("Session::save_state locale '%1'\n", setlocale (LC_NUMERIC, NULL)));
 	XMLTree tree;
 	std::string xml_path(_session_dir->root_path());
 
-	if (!pending) {
+	if (ssd != SavePending) {
 		/* Prevent destructive edits after explicit save or snapshot changes.
 		 * Otherwise this one can delete sources used by other snapshot
 		 */
 		reset_last_capture_sources ();
 	}
+
+	const bool for_archive = ssd == ArchiveOnlyUsedAssets || ssd == ArchiveWithAllSources;
 
 	/* prevent concurrent saves from different threads */
 
@@ -823,24 +845,23 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 
 	if (_suspend_save.load ()) {
 		/* StateProtector cannot be used for templates or save-as */
-		assert (!template_only && !switch_to_snapshot && !for_archive && (snapshot_name.empty () || snapshot_name == _current_snapshot_name));
-		if (pending) {
+		if (ssd == SavePending) {
 			_save_queued_pending = true;
 		} else {
 			_save_queued = true;
 		}
 		return 1;
 	}
-	if (pending) {
+	if (ssd == SavePending) {
 		_save_queued_pending = false;
 	} else {
 		_save_queued = false;
 	}
 
 	snapshot_t fork_state = NormalSave;
-	if (!snapshot_name.empty() && snapshot_name != _current_snapshot_name && !template_only && !pending && !for_archive) {
+	if (!snapshot_name.empty() && snapshot_name != _current_snapshot_name && (ssd == SaveSnapshot || ssd == SaveSnapshotAndSwitch)) {
 		/* snapshot, close midi */
-		fork_state = switch_to_snapshot ? SwitchToSnapshot : SnapshotKeep;
+		fork_state = ssd == SaveSnapshotAndSwitch ? SwitchToSnapshot : SnapshotKeep;
 	}
 
 #ifndef NDEBUG
@@ -864,26 +885,26 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 	SessionSaveUnderway (); /* EMIT SIGNAL */
 
 	bool mark_as_clean = true;
-	if (!snapshot_name.empty() && !switch_to_snapshot) {
+	if (!snapshot_name.empty() && ssd != SaveSnapshotAndSwitch) {
 		mark_as_clean = false;
 	}
 
-	if (template_only) {
+	if (ssd == SaveTemplate || ssd == SaveAsSession) {
 		mark_as_clean = false;
 		tree.set_root (&get_template());
 	} else {
-		tree.set_root (&state (false, fork_state, for_archive, only_used_assets));
+		tree.set_root (&state (false, fork_state, for_archive, ssd == ArchiveOnlyUsedAssets));
 	}
 
 	if (snapshot_name.empty()) {
 		snapshot_name = _current_snapshot_name;
-	} else if (switch_to_snapshot) {
+	} else if (ssd == SaveSnapshotAndSwitch) {
 		set_snapshot_name (snapshot_name);
 	}
 
 	assert (!snapshot_name.empty());
 
-	if (!pending) {
+	if (ssd != SavePending) {
 
 		/* proper save: use statefile_suffix (.ardour in English) */
 
@@ -932,7 +953,7 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 
 	//Mixbus auto-backup mechanism
 	if(Profile->get_mixbus()) {
-		if (pending) {  //"pending" save means it's a backup, or some other non-user-initiated save;  a good time to make a backup
+		if (ssd == SavePending) {  //"pending" save means it's a backup, or some other non-user-initiated save;  a good time to make a backup
 			// make a serialized safety backup
 			// (will make one periodically but only one per hour is left on disk)
 			// these backup files go into a separated folder
@@ -955,8 +976,7 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 		}
 	}
 
-	if (!pending && !for_archive) {
-
+	if (ssd == SaveSnapshot || ssd == SaveSnapshotAndSwitch) {
 		save_history (snapshot_name);
 
 		if (mark_as_clean) {
@@ -975,16 +995,16 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 	}
 #endif
 
-	if (!pending && !for_archive && ! template_only) {
+	if (ssd == SaveSnapshot || ssd == SaveSnapshotAndSwitch) {
 		remove_pending_capture_state ();
 	}
 
-	if (pending) {
+	if (ssd == SavePending) {
 		/* new pending state includes recorded regions. */
 		remove_pending_record_log ();
 	}
 
-	if (!pending && !for_archive && ! template_only) {
+	if (ssd == SaveSnapshot || ssd == SaveSnapshotAndSwitch) {
 		save_misc_port_state ();
 	}
 

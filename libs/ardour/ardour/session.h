@@ -631,6 +631,18 @@ public:
 		FLAC_24BIT
 	};
 
+	enum SessionSaveDisposition {
+		SaveSnapshot,
+		SaveSnapshotAndSwitch,
+		SavePending,
+		SaveTemplate,
+		SaveAsSession,
+		ArchiveWithAllSources,
+		ArchiveOnlyUsedAssets,
+	};
+
+	int save_state_full (std::string snapshot_name = "", SessionSaveDisposition sd = SaveSnapshot);
+
 	int archive_session (const std::string&, const std::string&,
 	                     ArchiveEncode compress_audio = FLAC_16BIT,
 	                     PBD::FileArchive::CompressionLevel compression_level = PBD::FileArchive::CompressGood,
