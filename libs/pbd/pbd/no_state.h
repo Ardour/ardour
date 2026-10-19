@@ -22,7 +22,7 @@
 
 #include "pbd/libpbd_visibility.h"
 
-class LIBPBD_API no_state : public std::exception {
+class LIBPBD_TEMPLATE_API no_state : public std::exception {
   public:
 	virtual const char *what() const throw() { return "no state for XML"; }
 };
