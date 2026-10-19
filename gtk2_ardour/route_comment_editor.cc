@@ -45,9 +45,9 @@ RouteCommentEditor::RouteCommentEditor (std::shared_ptr<Route> r)
 	set_skip_taskbar_hint (true);
 
 	_scroller.add (_comment_area);
-	_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+	_scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	_comment_area.set_name ("MixerTrackCommentArea");
-	_comment_area.set_wrap_mode (WRAP_WORD);
+	_comment_area.set_wrap_mode (WRAP_WORD_CHAR);
 	_comment_area.set_editable (true);
 
 	add (_vbox);
