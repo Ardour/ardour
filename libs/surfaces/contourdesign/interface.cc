@@ -64,6 +64,7 @@ static ControlProtocolDescriptor contourdesign_descriptor = {
 	/* initialize */ new_contourdesign_protocol,
 	/* destroy    */ delete_contourdesign_protocol,
 	/* enumerate  */ enumerate_contourdesign_protocol,
+	/* detected   */ nullptr
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &contourdesign_descriptor; }

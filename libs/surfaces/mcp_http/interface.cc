@@ -55,6 +55,7 @@ static ControlProtocolDescriptor mcp_http_descriptor = {
 	/* initialize */ new_mcp_http_protocol,
 	/* destroy    */ delete_mcp_http_protocol,
 	/* enumerate  */ enumerate_mcp_http_protocol,
+	/* detected   */ nullptr
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor*

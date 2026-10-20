@@ -89,6 +89,7 @@ static ControlProtocolDescriptor lpx_descriptor = {
 	/* initialize */ new_lpx,
 	/* destroy    */ delete_lpx,
 	/* enumerate  */ enumerate_lpx,
+	/* detected   */ nullptr
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &lpx_descriptor; }

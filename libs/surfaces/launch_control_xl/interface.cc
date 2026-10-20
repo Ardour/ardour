@@ -78,6 +78,7 @@ static ControlProtocolDescriptor launch_control_xl_descriptor = {
 	/* initialize */ new_launch_control_xl,
 	/* destroy    */ delete_launch_control_xl,
 	/* enumerate  */ enumerate_launch_control_xl,
+	/* detected   */ nullptr
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &launch_control_xl_descriptor; }

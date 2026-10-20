@@ -72,6 +72,7 @@ static ControlProtocolDescriptor faderport8_midi_descriptor = {
 	/* initialize */ new_faderport8_midi_protocol,
 	/* destroy    */ delete_faderport8_midi_protocol,
 	/* enumerate  */ enumerate_faderport8_midi_protocol,
+	/* detected   */ nullptr
 };
 
 extern "C" ARDOURSURFACE_API
