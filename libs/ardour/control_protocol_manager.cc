@@ -207,9 +207,6 @@ ControlProtocolInfo::~ControlProtocolInfo ()
 		descriptor = nullptr;
 	}
 
-	delete state;
-	state = nullptr;
-
 #ifdef HAVE_USB
 	assert (!_hotplug_thread_run);
 #endif
@@ -218,7 +215,7 @@ ControlProtocolInfo::~ControlProtocolInfo ()
 ControlProtocolDescriptor*
 ControlProtocolInfo::get_descriptor (string path)
 {
-s	Glib::Module*              module     = new Glib::Module (path);
+	Glib::Module*              module     = new Glib::Module (path);
 	ControlProtocolDescriptor* descriptor = 0;
 	ControlProtocolDescriptor* (*dfunc) (void);
 	void* func = 0;
