@@ -22,11 +22,6 @@
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/rgb_macros.h"
 
-#ifdef __APPLE__
-#include <ydk/gdk.h>
-#include "gtkmm2ext/nsglview.h"
-#endif
-
 #include "pbd/i18n.h"
 
 static const char* has_cairo_widget_background_info = "has_cairo_widget_background_info";
@@ -62,7 +57,6 @@ CairoWidget::CairoWidget ()
 	, _name_proxy (this, X_("name"))
 	, _current_parent (0)
 	, _canvas_widget (false)
-	, _nsglview (0)
 #ifdef __APPLE__
 	, _use_image_surface (false)
 #elif defined USE_CAIRO_IMAGE_SURFACE
@@ -88,24 +82,12 @@ CairoWidget::~CairoWidget ()
 void
 CairoWidget::set_canvas_widget ()
 {
-	assert (!_nsglview);
 	assert (!_canvas_widget);
 	ensure_style ();
 	gtk_widget_set_realized (GTK_WIDGET(gobj()), true);
 	_canvas_widget = true;
 	_use_image_surface = false;
 	image_surface.clear ();
-}
-
-void
-CairoWidget::use_nsglview (bool retina)
-{
-	assert (!_nsglview);
-	assert (!_canvas_widget);
-	assert (!get_realized());
-#ifdef ARDOUR_CANVAS_NSVIEW_TAG // patched gdkquartz.h
-	_nsglview = Gtkmm2ext::nsglview_create (this, retina);
-#endif
 }
 
 void
@@ -171,12 +153,6 @@ CairoWidget::background_color ()
 bool
 CairoWidget::on_expose_event (GdkEventExpose *ev)
 {
-#ifdef __APPLE__
-	if (_nsglview) {
-		Gtkmm2ext::nsglview_queue_draw (_nsglview, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
-		return true;
-	}
-#endif
 	Cairo::RefPtr<Cairo::Context> cr;
 	if (_use_image_surface) {
 		if (!image_surface) {
@@ -287,16 +263,6 @@ CairoWidget::on_size_allocate (Gtk::Allocation& alloc)
 		return;
 	}
 
-#ifdef __APPLE__
-	if (_nsglview) {
-		gint xx, yy;
-		gtk_widget_translate_coordinates(
-				GTK_WIDGET(gobj()),
-				GTK_WIDGET(get_toplevel()->gobj()),
-				0, 0, &xx, &yy);
-		Gtkmm2ext::nsglview_resize (_nsglview, xx, yy, alloc.get_width(), alloc.get_height());
-	}
-#endif
 	set_dirty ();
 }
 
@@ -385,40 +351,18 @@ CairoWidget::on_realize ()
 		return;
 	}
 	Gtk::EventBox::on_realize();
-#ifdef __APPLE__
-	if (_nsglview) {
-		Gtkmm2ext::nsglview_overlay (_nsglview, get_window()->gobj());
-	}
-#endif
 }
 
 void
 CairoWidget::on_map ()
 {
 	Gtk::EventBox::on_map();
-#ifdef __APPLE__
-	if (_nsglview) {
-		Gtkmm2ext::nsglview_set_visible (_nsglview, true);
-		Gtk::Allocation a = get_allocation();
-		gint xx, yy;
-		gtk_widget_translate_coordinates(
-				GTK_WIDGET(gobj()),
-				GTK_WIDGET(get_toplevel()->gobj()),
-				0, 0, &xx, &yy);
-		Gtkmm2ext::nsglview_resize (_nsglview, xx, yy, a.get_width(), a.get_height());
-	}
-#endif
 }
 
 void
 CairoWidget::on_unmap ()
 {
 	Gtk::EventBox::on_unmap();
-#ifdef __APPLE__
-	if (_nsglview) {
-		Gtkmm2ext::nsglview_set_visible (_nsglview, false);
-	}
-#endif
 }
 
 void

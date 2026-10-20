@@ -238,11 +238,6 @@ UIConfiguration::pre_gui_init ()
 		g_setenv ("ARDOUR_IMAGE_SURFACE", "1", 1);
 	}
 #endif
-#ifdef __APPLE__
-	if (NSGLDisable == get_nsgl_view_mode()) {
-		g_setenv ("ARDOUR_NSGL", "0", 0);
-	}
-#endif
 	return 0;
 }
 

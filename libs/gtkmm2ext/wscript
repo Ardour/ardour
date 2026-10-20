@@ -82,7 +82,7 @@ def build(bld):
                     'LOCALEDIR="' + os.path.join(
                             autowaf.normpath(bld.env['DATADIR']), 'locale') + '"']
     if sys.platform == 'darwin':
-        obj.source += ['gtkapplication_quartz.mm', 'nsglview.mm']
+        obj.source += ['gtkapplication_quartz.mm']
         obj.uselib += ' OSX'
     else:
         obj.source += ['gtkapplication_x11.c']

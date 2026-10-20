@@ -2953,12 +2953,6 @@ LuaBindings::common (lua_State* L)
 		.addConst ("InhibitAlways", ARDOUR::ScreenSaverMode(InhibitAlways))
 		.endNamespace ()
 
-		.beginNamespace ("AppleNSGLViewMode")
-		.addConst ("NSGLHiRes", ARDOUR::AppleNSGLViewMode(NSGLHiRes))
-		.addConst ("NSGLLoRes", ARDOUR::AppleNSGLViewMode(NSGLLoRes))
-		.addConst ("NSGLDisable", ARDOUR::AppleNSGLViewMode(NSGLDisable))
-		.endNamespace ()
-
 		.beginNamespace ("PluginGUIBehavior")
 		.addConst ("PluginGUIHide", ARDOUR::PluginGUIBehavior(PluginGUIHide))
 		.addConst ("PluginGUIDestroyAny", ARDOUR::PluginGUIBehavior(PluginGUIDestroyAny))
