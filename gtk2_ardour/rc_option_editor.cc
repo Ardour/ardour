@@ -1551,7 +1551,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 
 			ControlProtocolManager& m = ControlProtocolManager::instance ();
 			m.ProtocolStatusChange.connect (protocol_status_connection, MISSING_INVALIDATOR,
-			                                std::bind (&ControlSurfacesOptions::protocol_status_changed, this, _1, _2), gui_context());
+			                                std::bind (&ControlSurfacesOptions::protocol_status_changed, this, _1, _2, _3), gui_context());
 
 			active_store->signal_row_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::active_view_changed));
 			active_view.signal_button_press_event().connect_notify (sigc::bind(sigc::mem_fun(*this, &ControlSurfacesOptions::edit_clicked), &active_view, &active_model));
@@ -1710,7 +1710,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			_ignore_view_change--;
 		}
 
-		void protocol_status_changed (ControlProtocolInfo* cpi, std::string changed_device_name) {
+		void protocol_status_changed (ControlProtocolInfo* cpi, std::string changed_device_name, bool enabled) {
 			/* find the row */
 			TreeModel::Children manufacturers = devices_store->children();
 
@@ -1721,7 +1721,6 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			 */
 
 			ControlProtocol* cp =  cpi->get_instance (changed_device_name);
-			bool enabled = bool (cp);
 
 			for (const auto& manufacturer : manufacturers) {
 
