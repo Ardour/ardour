@@ -3261,22 +3261,6 @@ These settings will only take effect after %1 is restarted.\n\
 	add_option (_("Appearance"), new OptionEditorHeading (_("Graphics Acceleration")));
 #endif
 
-#ifdef __APPLE__
-	ComboOption<AppleNSGLViewMode>* glmode = new ComboOption<AppleNSGLViewMode> (
-		"nsgl-view-mode",
-		_("Render Canvas on openGL texture (requires restart)"),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_nsgl_view_mode),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_nsgl_view_mode)
-		);
-	glmode->add (NSGLHiRes, _("Yes, with Retina scaling"));
-	glmode->add (NSGLLoRes, _("Yes, low resolution"));
-	glmode->add (NSGLDisable, _("No"));
-
-	Gtkmm2ext::UI::instance()->set_tip (glmode->tip_widget(), string_compose (
-				_("Render editor canvas, on a openGL texture which may improve graphics performance.\nThis requires restarting %1 before having an effect"), PROGRAM_NAME));
-	add_option (_("Appearance"), glmode);
-#endif
-
 #ifndef USE_CAIRO_IMAGE_SURFACE
 	_cairo_image_surface = new BoolOption (
 		"cairo-image-surface",
