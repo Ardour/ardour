@@ -172,7 +172,6 @@ AudioClipEditor::build_canvas ()
 
 	_canvas.set_background_color (UIConfiguration::instance().color ("arrange base"));
 	_canvas.signal_event().connect (sigc::mem_fun (*this, &CueEditor::canvas_pre_event), false);
-	_canvas.use_nsglview (UIConfiguration::instance().get_nsgl_view_mode () == NSGLHiRes);
 
 	_canvas.PreRender.connect (sigc::mem_fun(*this, &EditingContext::pre_render));
 

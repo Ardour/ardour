@@ -75,7 +75,6 @@ BBGUI::BBGUI (std::shared_ptr<BeatBox> bb)
 	_canvas_viewport = new GtkCanvasViewport (horizontal_adjustment, vertical_adjustment);
 	_canvas = _canvas_viewport->canvas();
 	_canvas->set_background_color (UIConfiguration::instance().color ("gtk_bases"));
-	_canvas->use_nsglview ();
 
 	_sequencer = new SequencerView (bbox->sequencer(), _canvas->root());
 
