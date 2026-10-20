@@ -891,9 +891,16 @@ Session::save_state_full (std::string snapshot_name, SessionSaveDisposition ssd)
 
 	if (ssd == SaveTemplate || ssd == SaveAsSession) {
 		mark_as_clean = false;
-		tree.set_root (&get_template());
+
+		/* if we don't disable rec-enable, diskstreams
+		 * will believe they need to store their capture
+		 * sources in their state node.
+		 */
+		disable_record (false);
+
+		tree.set_root (&state (ssd, NormalSave));
 	} else {
-		tree.set_root (&state (false, fork_state, for_archive, ssd == ArchiveOnlyUsedAssets));
+		tree.set_root (&state (ssd, fork_state));
 	}
 
 	if (snapshot_name.empty()) {
@@ -1352,20 +1359,7 @@ Session::get_state () const
 {
 	/* this is not directly called, but required by PBD::Stateful */
 	assert (0);
-	return state (false, NormalSave);
-}
-
-XMLNode&
-Session::get_template ()
-{
-	/* if we don't disable rec-enable, diskstreams
-	   will believe they need to store their capture
-	   sources in their state node.
-	*/
-
-	disable_record (false);
-
-	return state (true, NormalSave);
+	return state (SaveSnapshot, NormalSave);
 }
 
 bool
@@ -1856,8 +1850,12 @@ struct route_id_compare {
 } // anon namespace
 
 XMLNode&
-Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, bool only_used_assets) const
+Session::state (SessionSaveDisposition ssd, snapshot_t snapshot_type) const
 {
+	bool for_archive      = ssd == ArchiveOnlyUsedAssets || ssd == ArchiveWithAllSources;
+	bool only_used_assets = ssd == ArchiveOnlyUsedAssets;
+	bool save_template    = ssd == SaveAsSession || ssd == SaveTemplate;
+
 	LocaleGuard lg;
 	XMLNode* node = new XMLNode (X_("Session"));
 	XMLNode* child;
@@ -1872,13 +1870,16 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 	modified_with = string_compose ("%1 %2", PROGRAM_NAME, revision);
 	child->set_property("modified-with", modified_with);
 
-	/* store configuration settings */
+	if (ssd != SaveTemplate) {
+		node->set_property ("sample-rate", _base_sample_rate);
+		node->set_property ("name", _name);
+	}
 
+	/* store configuration settings */
 	if (!save_template) {
 
 		node->set_property ("uuid", _uuid.to_s());
-		node->set_property ("name", _name);
-		node->set_property ("sample-rate", _base_sample_rate);
+		node->set_property ("session-range-is-free", _session_range_is_free);
 
 		if (!_engine_state) {
 			_engine_state = new XMLNode (X_("EngineState"));
@@ -1939,7 +1940,6 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 			child = node->add_child ("Path");
 			child->add_content (p);
 		}
-		node->set_property ("session-range-is-free", _session_range_is_free);
 	}
 
 	/* save the ID counter */
@@ -3635,7 +3635,7 @@ Session::save_template (const string& template_name, const string& description, 
 	XMLNode* root;
 	{
 		PBD::Unwinder<std::string> uw (_template_state_dir, template_dir_path);
-		root = &get_template ();
+		root = &state (SaveTemplate, NormalSave);
 	}
 
 	root->remove_nodes_and_delete (X_("description"));
@@ -6179,7 +6179,7 @@ Session::save_as (SaveAs& saveas)
 
 			{
 				PBD::Unwinder<bool> uw (_no_save_signal, true);
-				save_state ("", false, false, !saveas.include_media);
+				save_state_full ("", saveas.include_media ? SaveSnapshot : SaveAsSession);
 			}
 
 			/* switch back to the way things were */
@@ -6228,7 +6228,7 @@ Session::save_as (SaveAs& saveas)
 				unset_dirty ();
 			}
 
-			save_state ("", false, false, !saveas.include_media);
+			save_state_full ("", saveas.include_media ? SaveSnapshot : SaveAsSession);
 
 			/* the copying above was based on actually discovering files, not just iterating over the sources list.
 			   But if we're going to switch to the new (copied) session, we need to change the paths in the sources also.

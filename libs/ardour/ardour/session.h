@@ -2219,14 +2219,10 @@ private:
 		SwitchToSnapshot
 	};
 
-	XMLNode& state (bool save_template,
-	                snapshot_t snapshot_type = NormalSave,
-	                bool for_archive = false,
-	                bool only_used_assets = false) const;
+	XMLNode& state (SessionSaveDisposition, snapshot_t snapshot_type = NormalSave) const;
 
 	XMLNode& get_state () const;
 	int      set_state (const XMLNode& node, int version); // not idempotent
-	XMLNode& get_template ();
 
 	bool maybe_copy_midifile (snapshot_t, std::shared_ptr<Source> src, XMLNode*);
 
