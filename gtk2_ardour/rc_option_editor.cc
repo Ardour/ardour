@@ -2778,6 +2778,14 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Appearance/Editor"), new OptionEditorHeading (_("General")));
 	add_option (_("Appearance/Editor"),
 	     new BoolOption (
+		     "enable-comping",
+		     _("Enable comping (Comping layer display)"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_enable_comping),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_enable_comping)
+		     ));
+
+	add_option (_("Appearance/Editor"),
+	     new BoolOption (
 		     "show-name-highlight",
 		     _("Use name highlight bars in region displays (requires a restart)"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_name_highlight),
