@@ -333,13 +333,6 @@ Session::post_engine_init ()
 
 		Delivery::reset_panners ();
 
-		/* this will cause the CPM to instantiate any protocols that are in use
-		 * (or mandatory), which will pass it this Session, and then call
-		 * set_state() on each instantiated protocol to match stored state.
-		 */
-
-		ControlProtocolManager::instance().set_session (this);
-
 		_butler->delegate (std::bind (&Session::probe_ctrl_surfaces, this));
 
 		/* This must be done after the ControlProtocolManager set_session above,
@@ -355,11 +348,14 @@ Session::post_engine_init ()
 
 		hookup_io ();
 
-		/* Let control protocols know that we are now all connected, so they
+		/* this will cause the CPM to instantiate any protocols that are in use
+		 * (or mandatory), which will pass it this Session, and then call
+		 *
+		 * Let control protocols know that we are now all connected, so they
 		 * could start talking to surfaces if they want to.
 		 */
 
-		ControlProtocolManager::instance().midi_connectivity_established (true);
+		ControlProtocolManager::instance().establish (*this);
 
 		if (_is_new && !no_auto_connect()) {
 			PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock());
@@ -2750,7 +2746,7 @@ Session::set_state (const XMLNode& node, int version)
 #endif
 
 	if ((child = find_named_node (node, ControlProtocolManager::state_node_name)) != 0) {
-		ControlProtocolManager::instance().set_state (*child, 1 /* here: session-specific state */);
+		ControlProtocolManager::instance().set_state (*child, version);
 	}
 
 	if ((child = find_named_node (node, "Script"))) {
