@@ -83,6 +83,7 @@ static ControlProtocolDescriptor lppro_descriptor = {
 	/* initialize */ new_lppro,
 	/* destroy    */ delete_lppro,
 	/* enumerate  */ enumerate_lppro,
+	/* detected   */ nullptr
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &lppro_descriptor; }

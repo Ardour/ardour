@@ -94,6 +94,7 @@ static ControlProtocolDescriptor lk4_descriptor = {
 	/* initialize */ new_lk4,
 	/* destroy    */ delete_lk4,
 	/* enumerate  */ enumerate_lk4,
+	/* detected   */ nullptr
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &lk4_descriptor; }

@@ -71,13 +71,14 @@ enumerate_us2400_protocol ()
 static ControlProtocolDescriptor us2400_descriptor = {
 	/* name       */ "Tascam US-2400",
 	/* id         */ "uri://ardour.org/surfaces/us2400:0",
-	/* module     */ 0,
-	/* avilable   */ 0,
-	/* probe_port */ 0,
-	/* match usb  */ 0,
+	/* module     */ nullptr,
+	/* avilable   */ nullptr,
+	/* probe_port */ nullptr,
+	/* match usb  */ nullptr,
 	/* initialize */ new_us2400_protocol,
 	/* destroy    */ delete_us2400_protocol,
 	/* enumerate  */ enumerate_us2400_protocol,
+	/* detected   */ nullptr,
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &us2400_descriptor; }

@@ -84,6 +84,7 @@ static ControlProtocolDescriptor push2_descriptor = {
 	/* initialize */ new_push2,
 	/* destroy    */ delete_push2,
 	/* enumerate  */ enumerate_push2,
+	/* detected   */ nullptr
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &push2_descriptor; }

@@ -71,6 +71,7 @@ static ControlProtocolDescriptor generic_midi_descriptor = {
 	/* initialize */ new_generic_midi_protocol,
 	/* destroy    */ delete_generic_midi_protocol,
 	/* enumerate  */ enumerate_generic_midi_protocol,
+	/* detected   */ nullptr
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &generic_midi_descriptor; }

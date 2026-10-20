@@ -67,6 +67,7 @@ static ControlProtocolDescriptor maschine2_descriptor = {
 	/* initialize */ new_maschine2,
 	/* destroy    */ delete_maschine2,
 	/* enumerate  */ enumerate_maschine2,
+	/* detected   */ nullptr
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &maschine2_descriptor; }
