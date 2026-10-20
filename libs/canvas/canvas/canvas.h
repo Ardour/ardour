@@ -220,8 +220,6 @@ public:
 	GtkCanvas ();
 	~GtkCanvas ();
 
-	void use_nsglview (bool retina = true);
-
 	void request_redraw (Rect const &);
 	void request_size (Duple);
 	void grab (Item *);
@@ -324,7 +322,6 @@ private:
 	bool resize_queued;
 	bool _ptr_grabbed;
 
-	void* _nsglview;
 	Cairo::RefPtr<Cairo::Surface> _canvas_image;
 };
 

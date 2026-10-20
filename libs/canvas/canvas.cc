@@ -44,11 +44,6 @@
 #include "canvas/line.h"
 #include "canvas/scroll_group.h"
 
-#ifdef __APPLE__
-#include <ydk/gdk.h>
-#include "gtkmm2ext/nsglview.h"
-#endif
-
 using namespace std;
 using namespace ArdourCanvas;
 
@@ -548,7 +543,6 @@ GtkCanvas::GtkCanvas ()
 	, _in_dtor (false)
 	, resize_queued (false)
 	, _ptr_grabbed (false)
-	, _nsglview (0)
 {
 #ifdef USE_CAIRO_IMAGE_SURFACE /* usually Windows builds */
 	_use_image_surface = true;
@@ -566,11 +560,6 @@ GtkCanvas::GtkCanvas ()
 GtkCanvas::~GtkCanvas ()
 {
 	_in_dtor = true;
-#ifdef __APPLE__
-	if (_nsglview) {
-		Gtkmm2ext::nsglview_destroy (_nsglview);
-	}
-#endif
 }
 
 void
@@ -581,16 +570,6 @@ GtkCanvas::set_single_exposure (bool yn)
 	}
 
 	_single_exposure = yn;
-}
-
-void
-GtkCanvas::use_nsglview (bool retina)
-{
-	assert (!_nsglview);
-	assert (!get_realized());
-#ifdef ARDOUR_CANVAS_NSVIEW_TAG // patched gdkquartz.h
-	_nsglview = Gtkmm2ext::nsglview_create (this, retina);
-#endif
 }
 
 void
@@ -1008,12 +987,6 @@ void
 GtkCanvas::on_realize ()
 {
 	Gtk::EventBox::on_realize();
-#ifdef __APPLE__
-	if (_nsglview) {
-		Gtkmm2ext::nsglview_overlay (_nsglview, get_window()->gobj());
-	}
-#endif
-
 	_root.set_fill (false);
 	_root.set_outline (false);
 }
@@ -1027,17 +1000,6 @@ GtkCanvas::on_size_allocate (Gtk::Allocation& a)
 		_canvas_image.clear ();
 		_canvas_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, a.get_width(), a.get_height());
 	}
-
-#ifdef __APPLE__
-	if (_nsglview) {
-		gint xx, yy;
-		gtk_widget_translate_coordinates(
-				GTK_WIDGET(gobj()),
-				GTK_WIDGET(get_toplevel()->gobj()),
-				0, 0, &xx, &yy);
-		Gtkmm2ext::nsglview_resize (_nsglview, xx, yy, a.get_width(), a.get_height());
-	}
-#endif
 
 	/* call to ensure that entire canvas is marked in the invalidation region */
 	queue_draw ();
@@ -1060,12 +1022,6 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 	if (_in_dtor) {
 		return true;
 	}
-#ifdef __APPLE__
-	if (_nsglview) {
-		return true;
-	}
-#endif
-
 #ifdef CANVAS_PROFILE
 	const int64_t start = g_get_monotonic_time ();
 #endif
@@ -1451,18 +1407,6 @@ void
 GtkCanvas::on_map ()
 {
 	Gtk::EventBox::on_map();
-#ifdef __APPLE__
-	if (_nsglview) {
-		Gtkmm2ext::nsglview_set_visible (_nsglview, true);
-		Gtk::Allocation a = get_allocation();
-		gint xx, yy;
-		gtk_widget_translate_coordinates(
-				GTK_WIDGET(gobj()),
-				GTK_WIDGET(get_toplevel()->gobj()),
-				0, 0, &xx, &yy);
-		Gtkmm2ext::nsglview_resize (_nsglview, xx, yy, a.get_width(), a.get_height());
-	}
-#endif
 }
 
 void
@@ -1470,34 +1414,17 @@ GtkCanvas::on_unmap ()
 {
 	stop_tooltip_timeout ();
 	Gtk::EventBox::on_unmap();
-#ifdef __APPLE__
-	if (_nsglview) {
-		Gtkmm2ext::nsglview_set_visible (_nsglview, false);
-	}
-#endif
 }
 
 void
 GtkCanvas::queue_draw()
 {
-#ifdef __APPLE__
-	if (_nsglview) {
-		Gtkmm2ext::nsglview_queue_draw (_nsglview, 0, 0, get_width (), get_height ());
-		return;
-	}
-#endif
 	Gtk::Widget::queue_draw ();
 }
 
 void
 GtkCanvas::queue_draw_area (int x, int y, int width, int height)
 {
-#ifdef __APPLE__
-	if (_nsglview) {
-		Gtkmm2ext::nsglview_queue_draw (_nsglview, x, y, width, height);
-		return;
-	}
-#endif
 	Gtk::Widget::queue_draw_area (x, y, width, height);
 }
 
