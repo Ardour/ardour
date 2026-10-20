@@ -3131,7 +3131,8 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("n_vcas", &VCAManager::n_vcas)
 		.endClass()
 
-
+#warning paul fix this once robin is back
+#if 0
 		.beginClass <ControlProtocolInfo> ("ControlProtocolInfo")
 		.addData ("name", &ControlProtocolInfo::name)
 		.addFunction ("active", &ControlProtocolInfo::active)
@@ -3139,10 +3140,13 @@ LuaBindings::common (lua_State* L)
 
 		.beginConstStdList <ControlProtocolInfo*> ("ControlProtocolInfoList")
 		.endClass ()
-
+#endif
 		.beginClass <ControlProtocolManager> ("ControlProtocolManager")
 		.addStaticFunction ("manager", &ControlProtocolManager::instance)
+#warning paul this too
+#if 0
 		.addFunction ("control_protocol_infos", &ControlProtocolManager::control_protocol_infos)
+#endif
 		.addFunction ("activate", &ControlProtocolManager::activate)
 		.addFunction ("deactivate", &ControlProtocolManager::deactivate)
 		.endClass()

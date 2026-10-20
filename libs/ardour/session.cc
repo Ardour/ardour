@@ -703,7 +703,7 @@ Session::destroy ()
 	/* shutdown control surface protocols while we still have ports
 	 * and the engine to move data to any devices.
 	 */
-	ControlProtocolManager::instance().drop_protocols ();
+	ControlProtocolManager::instance().disestablish ();
 
 	_engine.remove_session ();
 
