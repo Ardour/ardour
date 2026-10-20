@@ -611,7 +611,9 @@ RegionFxPlugin::truncate_automation_start (timecnt_t start)
 {
 	for (auto const& i : _controls) {
 		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (i.second);
-		ac->alist ()->truncate_start (start);
+		if (ac->alist ()) {
+			ac->alist ()->truncate_start (start);
+		}
 	}
 }
 
@@ -620,7 +622,9 @@ RegionFxPlugin::truncate_automation_end (timepos_t end)
 {
 	for (auto const& i : _controls) {
 		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (i.second);
-		ac->alist ()->truncate_end (end);
+		if (ac->alist ()) {
+			ac->alist ()->truncate_end (end);
+		}
 	}
 }
 
@@ -629,7 +633,9 @@ RegionFxPlugin::x_scale_automation (Temporal::ratio_t r)
 {
 	for (auto const& i : _controls) {
 		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (i.second);
-		ac->alist ()->x_scale (r);
+		if (ac->alist ()) {
+			ac->alist ()->x_scale (r);
+		}
 	}
 }
 
