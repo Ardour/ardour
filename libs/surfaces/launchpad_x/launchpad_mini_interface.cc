@@ -90,6 +90,7 @@ static ControlProtocolDescriptor lpmini_descriptor = {
 	/* initialize */ new_lpmini,
 	/* destroy    */ delete_lpmini,
 	/* enumerate  */ enumerate_lpmini,
+	/* detected   */ nullptr
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &lpmini_descriptor; }

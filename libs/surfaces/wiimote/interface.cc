@@ -57,6 +57,7 @@ static ControlProtocolDescriptor wiimote_descriptor = {
 	/* initialize */ new_wiimote_protocol,
 	/* destroy    */ delete_wiimote_protocol,
 	/* enumerate  */ enumerate_wiimote_protocol,
+	/* detected   */ nullptr
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &wiimote_descriptor; }

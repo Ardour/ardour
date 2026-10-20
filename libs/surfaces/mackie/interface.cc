@@ -81,6 +81,7 @@ static ControlProtocolDescriptor mackie_descriptor = {
 	/* initialize */ new_mackie_protocol,
 	/* destroy    */ delete_mackie_protocol,
 	/* enumerate  */ enumerate_mackie_protocol,
+	/* detected   */ nullptr
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &mackie_descriptor; }

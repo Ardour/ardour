@@ -57,6 +57,7 @@ static ControlProtocolDescriptor ardour_websockets_descriptor = {
 	/* initialize */ new_ardour_websockets_protocol,
 	/* destroy    */ delete_ardour_websockets_protocol,
 	/* enumerate  */ enumerate_ardour_websockets_protocol,
+	/* detected   */ nullptr
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor*

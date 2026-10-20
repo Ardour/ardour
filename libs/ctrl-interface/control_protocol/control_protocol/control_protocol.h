@@ -187,6 +187,7 @@ public:
 	ControlProtocol* (*initialize) (Session*, std::string const & config);
 	void (*destroy) (ControlProtocol*);
 	std::map<std::string, std::vector<std::string>> (*enumerate) ();
+	std::vector<std::string> (*detected) ();
 };
 }
 }

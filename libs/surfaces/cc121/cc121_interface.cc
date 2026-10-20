@@ -66,6 +66,7 @@ static ControlProtocolDescriptor cc121_midi_descriptor = {
 	/* initialize */ new_cc121_midi_protocol,
 	/* destroy    */ delete_cc121_midi_protocol,
 	/* enumerate  */ enumerate_cc121_midi_protocol,
+	/* detected   */ nullptr
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &cc121_midi_descriptor; }

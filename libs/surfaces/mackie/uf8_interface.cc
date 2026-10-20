@@ -86,6 +86,7 @@ static ControlProtocolDescriptor uf8_descriptor = {
 	/* initialize */ new_uf8_protocol,
 	/* destroy    */ delete_uf8_protocol,
 	/* enumerate  */ enumerate_uf8_protocol,
+	/* detected   */ nullptr
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &uf8_descriptor; }

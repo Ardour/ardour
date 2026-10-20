@@ -56,6 +56,7 @@ static ControlProtocolDescriptor osc_descriptor = {
 	/* initialize */ new_osc_protocol,
 	/* destroy    */ delete_osc_protocol,
 	/* enumerate  */ enumerate_osc_protocol,
+	/* detected   */ nullptr
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &osc_descriptor; }

@@ -62,6 +62,7 @@ static ControlProtocolDescriptor console1_descriptor = {
 	/* initialize :        */   new_console1,
 	/* destroy :           */   delete_console1,
 	/* enumerate :         */   enumerate_console1,
+	/* detected   */ nullptr
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &console1_descriptor; }
