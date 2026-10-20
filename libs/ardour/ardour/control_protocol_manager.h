@@ -45,13 +45,12 @@ class LIBARDOUR_API ControlProtocolInfo : public PBD::Stateful
   public:
         bool                          requested;
 	bool                          automatic;
-	XMLNode*                      state;
 	std::string                   name;
 	ControlProtocolDescriptor*    descriptor;
 	mutable PBD::RWLock           instance_lock;
 	std::vector<ControlProtocol*> instances;
 
-	ControlProtocolInfo (ControlProtocolDescriptor& dec, std::string const & path);
+	ControlProtocolInfo (std::string const & path);
 	~ControlProtocolInfo ();
 
 	bool is_active (std::string const & device_name);
@@ -62,14 +61,13 @@ class LIBARDOUR_API ControlProtocolInfo : public PBD::Stateful
 	ControlProtocol* add_instance (Session&, std::string device_name = std::string ());
 	ControlProtocol* get_instance (std::string device_name = std::string ());
 	bool remove_instance (std::string device_name = std::string());
-	void drop_all_instances ();
+	bool remove_instance (ControlProtocol&);
+	void remove_all_instances ();
 
 	int      set_state (const XMLNode&, int version);
 	XMLNode& get_state () const;
 
 	void set_session (Session&);
-	void teardown ();
-	void add_request (std::string device_name = std::string());
 
 	void midi_connectivity_established (bool);
 	void stripable_selection_changed (ARDOUR::StripableNotificationListPtr);
@@ -80,7 +78,7 @@ class LIBARDOUR_API ControlProtocolInfo : public PBD::Stateful
 	Session*                      session;
 	std::string                   path;
 
-	std::vector<std::string>      requests;
+	static ControlProtocolDescriptor* get_descriptor (std::string path);
 };
 
 class LIBARDOUR_API ControlProtocolManager : public PBD::Stateful, public ARDOUR::SessionHandlePtr
@@ -90,16 +88,19 @@ class LIBARDOUR_API ControlProtocolManager : public PBD::Stateful, public ARDOUR
 
 	static ControlProtocolManager& instance ();
 
+	void establish (Session&);
+	void disestablish ();
+
 	void set_session (Session*);
 	void discover_control_protocols ();
-	void foreach_known_protocol (std::function<void (const ControlProtocolInfo*)>);
 	void midi_connectivity_established (bool);
 	void drop_protocols ();
 	void probe_midi_control_protocols ();
 	void probe_usb_control_protocols (bool, uint16_t, uint16_t);
 
-	const std::list<ControlProtocolInfo*>& control_protocol_infos () const
-	{
+	const std::list<ControlProtocolInfo*> control_protocol_infos () const {
+		PBD::RWLock::ReaderLock lm (_protocols_lock);
+		/* return a (shallow) copy */
 		return _control_protocol_info;
 	}
 
@@ -110,8 +111,10 @@ class LIBARDOUR_API ControlProtocolManager : public PBD::Stateful, public ARDOUR
 
 	int      set_state (const XMLNode&, int version);
 	XMLNode& get_state () const;
+	int      use_state ();
+	void     probe ();
 
-	PBD::Signal<void (ControlProtocolInfo*,std::string)> ProtocolStatusChange;
+	PBD::Signal<void (ControlProtocolInfo*,std::string,bool)> ProtocolStatusChange;
 
 	void                                                            stripable_selection_changed (ARDOUR::StripableNotificationListPtr);
 	static PBD::Signal<void (ARDOUR::StripableNotificationListPtr)> StripableSelectionChanged;
@@ -122,14 +125,13 @@ private:
 
 	mutable PBD::RWLock             _protocols_lock;
 	std::list<ControlProtocolInfo*> _control_protocol_info;
+	XMLNode*                        pending_state;
 
 	void session_going_away ();
 
 	int                        control_protocol_discover (std::string path);
-	ControlProtocolDescriptor* get_descriptor (std::string path);
 	ControlProtocolInfo*       cpi_by_name (std::string);
-	ControlProtocol*           instantiate (ControlProtocolInfo&, std::string device_name = std::string());
-	int                        teardown (ControlProtocolInfo&);
+	void                       remove_all_instances (ControlProtocolInfo&);
 };
 
 } // namespace ARDOUR
