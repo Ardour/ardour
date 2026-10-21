@@ -156,6 +156,7 @@ PluginWindowProxy::get_state () const
 void
 PluginWindowProxy::plugin_going_away ()
 {
+	_drop_window_connection.disconnect ();
 	delete _window;
 	_window = 0;
 	WM::Manager::instance ().remove (this);
