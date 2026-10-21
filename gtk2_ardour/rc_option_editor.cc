@@ -1673,6 +1673,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 				add (protocol_info);
 				add (is_device);
 				add (has_editor);
+				add (instance);
 			}
 
 			TreeModelColumn<string> name;
@@ -1688,22 +1689,22 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 
 			if (enabled) {
 				assert (instance);
-				TreeModel::Row device = *(active_store->append ());
-				device[devices_model.name] = instance->device_name();
-				device[devices_model.enabled] = true;
-				device[devices_model.protocol_info] = &cpi;
-				device[devices_model.has_editor] = instance->has_editor ();
+				TreeModel::Row active_device = *(active_store->append ());
+				active_device[active_model.name] = instance->device_name();
+				active_device[active_model.enabled] = true;
+				active_device[active_model.protocol_info] = &cpi;
+				active_device[active_model.instance] = instance;
+				active_device[active_model.has_editor] = instance->has_editor ();
 
 			} else if (instance) {
 
 				TreeModel::Children rows = active_store->children();
 
-				for (TreeModel::Children::iterator x = rows.begin(); x != rows.end();) {
-					string const active_name ((*x)[active_model.name]);
-					if (active_name == instance->device_name()) {
-						x = active_store->erase(x);
-					} else {
-						++x;
+				for (TreeModel::Children::iterator x = rows.begin(); x != rows.end(); ++x) {
+					ControlProtocol* cp = (*x)[active_model.instance];
+					if (cp == instance) {
+						active_store->erase(x);
+						break;
 					}
 				}
 			}
@@ -1725,6 +1726,12 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			for (const auto& manufacturer : manufacturers) {
 
 				string const device_name ((*manufacturer)[devices_model.name]);
+
+				/* Here we handle the case of a 1:1
+				 * manufacturer:device_name pairing. Mark it as
+				 * (enabled|disabled) and update the active
+				 * list appropriately.
+				 */
 
 				if (changed_device_name == device_name) {
 					_protocol_change++;
@@ -1771,32 +1778,17 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 				return;
 			}
 
-			ControlProtocolManager& m = ControlProtocolManager::instance ();
 			bool const should_be_enabled = r[active_model.enabled];
-			ControlProtocol* cp = cpi->get_instance (r[active_model.name]);
-			bool const currently_enabled = (bool) (cp);
+			ControlProtocol* cp = r[active_model.instance];
 
-			if (should_be_enabled) {
-				if (currently_enabled) {
-					m.deactivate (*cpi);
-					/* ports don't vanish instantly, ya' know! */
-					Glib::usleep (500);
-				}
-				string const name (r[active_model.name]);
-				if (m.activate (*cpi, name)) {
-					_ignore_view_change++;
-					r[active_model.enabled] = false;
-					r[active_model.instance] = nullptr;
-					_ignore_view_change--;
-				}
-			} else {
-				if (m.deactivate (*cpi)) {
-					_ignore_view_change++;
-					r[active_model.enabled] = true;
-					r[active_model.instance] = cp;
-					_ignore_view_change--;
-				}
-			}
+			/* the active view can only be used to *deactivate*
+			 * instances, not to activate them.
+			 */
+
+			assert (!should_be_enabled);
+			assert (cp);
+
+			cpi->deactivate (*cp);
 		}
 
 		void devices_view_changed (TreeModel::Path const & path, TreeModel::iterator const & i)
@@ -1809,38 +1801,29 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			}
 
 			ControlProtocolInfo* cpi = r[devices_model.protocol_info];
+
 			if (!cpi) {
 				std::cerr << "no CPI\n";
 				return;
 			}
 
 			ControlProtocolManager& m = ControlProtocolManager::instance ();
-			bool const should_be_enabled = r[devices_model.enabled];
-			bool const currently_enabled = (bool) (cpi->get_instance (r[devices_model.name]));
+			ControlProtocol* cp = r[devices_model.instance];
 
 			string const nom (r[devices_model.name]);
-			std::cerr << "DVC path " << path.to_string() << " for " << cpi->name << " as " << nom << " SBE " << should_be_enabled << " CE " << currently_enabled << std::endl;
+			std::cerr << "DVC path " << path.to_string() << " for " << cpi->name << " as " << nom << " CP " << cp  << std::endl;
 
-			if (should_be_enabled) {
-				if (currently_enabled) {
-					/* do nothing */
-					return;
-				}
+			if (!cp) {
 				string const name (r[devices_model.name]);
 				std::cerr << "activate as " << name << std::endl;
-				if (m.activate (*cpi, name)) {
+				if (!m.activate (*cpi, name)) {
 					std::cerr << "failed\n";
 					_ignore_view_change++;
 					r[devices_model.enabled] = false;
 					_ignore_view_change--;
 				}
 			} else {
-				std::cerr << "deactivate\n";
-				if (m.deactivate (*cpi)) {
-					_ignore_view_change++;
-					r[devices_model.enabled] = true;
-					_ignore_view_change--;
-				}
+				cpi->deactivate (*cp);
 			}
 		}
 
