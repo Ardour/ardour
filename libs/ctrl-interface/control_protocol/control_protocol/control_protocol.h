@@ -52,6 +52,7 @@ public:
 	virtual std::string name () const { return _name; }
 	std::string device_name() const { return _device_name; }
 
+	virtual int set_active (bool yn);
 	virtual bool active () const { return _active; }
 
 	void increment_users ();
@@ -151,8 +152,6 @@ public:
 	static void notify_stripable_selection_changed (StripableNotificationListPtr);
 
 protected:
-	virtual int set_active (bool yn);
-
 	void next_track (uint32_t initial_id);
 	void prev_track (uint32_t initial_id);
 

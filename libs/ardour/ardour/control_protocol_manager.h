@@ -64,6 +64,11 @@ class LIBARDOUR_API ControlProtocolInfo : public PBD::Stateful
 	bool remove_instance (ControlProtocol&);
 	void remove_all_instances ();
 
+	int activate (std::string const &);
+	int activate (ControlProtocol&);
+	int deactivate (std::string const &);
+	int deactivate (ControlProtocol&);
+
 	int      set_state (const XMLNode&, int version);
 	XMLNode& get_state () const;
 

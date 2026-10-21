@@ -333,12 +333,6 @@ Session::post_engine_init ()
 
 		Delivery::reset_panners ();
 
-		_butler->delegate (std::bind (&Session::probe_ctrl_surfaces, this));
-
-		/* This must be done after the ControlProtocolManager set_session above,
-		   as it will set states for ports which the ControlProtocolManager creates.
-		*/
-
 		// XXX set state of MIDI::Port's
 		// MidiPortManager::instance()->set_port_states (Config->midi_port_states ());
 
@@ -356,6 +350,12 @@ Session::post_engine_init ()
 		 */
 
 		ControlProtocolManager::instance().establish (*this);
+
+		/* This must be done after the ControlProtocolManager set_session above,
+		   as it will set states for ports which the ControlProtocolManager creates.
+		*/
+
+		_butler->delegate (std::bind (&Session::probe_ctrl_surfaces, this));
 
 		if (_is_new && !no_auto_connect()) {
 			PBD::Mutex::Lock lm (AudioEngine::instance()->process_lock());
