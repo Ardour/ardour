@@ -280,7 +280,9 @@ ControlProtocolInfo::set_state (XMLNode const & node, int)
 		}
 
 		ControlProtocol* cp = add_instance (*session, device_name);
+		/* not active at this point */
 		cp->set_state (*child, 0);
+		/* may be active now */
 	}
 
 	return 0;
@@ -289,14 +291,15 @@ ControlProtocolInfo::set_state (XMLNode const & node, int)
 ControlProtocol*
 ControlProtocolInfo::get_instance (std::string device_name)
 {
+	PBD::RWLock::ReaderLock lm (instance_lock);
+
 	if (instances.empty()) {
 		return nullptr;
 	}
 
-	PBD::RWLock::ReaderLock lm (instance_lock);
-
 	if (device_name.empty()) {
-		assert (instances.size() == 0);
+		/* control surface that only supports a single, unspecifed device name */
+		assert (instances.size() == 1);
 		return instances.front();
 	}
 
@@ -390,6 +393,40 @@ ControlProtocolInfo::remove_all_instances ()
 		descriptor->destroy (inst);
 		delete inst;
 	}
+}
+
+int
+ControlProtocolInfo::activate (std::string const & device_name)
+{
+	ControlProtocol* cp = get_instance (device_name);
+	if (!cp) {
+		return -1;
+	}
+
+	return activate (*cp);
+}
+
+int
+ControlProtocolInfo::deactivate (std::string const & device_name)
+{
+	ControlProtocol* cp = get_instance (device_name);
+	if (!cp) {
+		return -1;
+	}
+
+	return deactivate (*cp);
+}
+
+int
+ControlProtocolInfo::activate (ControlProtocol& cp)
+{
+	return cp.set_active (true);
+}
+
+int
+ControlProtocolInfo::deactivate (ControlProtocol& cp)
+{
+	return cp.set_active (false);
 }
 
 bool
@@ -510,17 +547,20 @@ ControlProtocolManager::set_session (Session* s)
 int
 ControlProtocolManager::activate (ControlProtocolInfo& cpi, std::string device_name)
 {
+	if (!_session) {
+		PBD::stacktrace (std::cerr, 19);
+	}
 	assert (_session);
 
 	ControlProtocol*        cp;
 
-	if (cpi.get_instance (device_name) != nullptr) {
-		return 0;
+	if ((cp = cpi.get_instance (device_name)) == nullptr) {
+		if ((cp = cpi.add_instance (*_session, device_name)) == nullptr) {
+			return -1;
+		}
 	}
 
-	if (!(cp = cpi.add_instance (*_session, device_name))) {
-		return -1;
-	}
+	cp->set_active (true);
 
 	if (!cp->active()) {
 		error << string_compose (_("Control protocol support for %1 (%2) failed to activate"), cpi.name, device_name) << endmsg;
@@ -533,11 +573,19 @@ ControlProtocolManager::activate (ControlProtocolInfo& cpi, std::string device_n
 int
 ControlProtocolManager::deactivate (ControlProtocolInfo& cpi, std::string device_name)
 {
-	if (!cpi.remove_instance (device_name)) {
+	ControlProtocol* cp = cpi.get_instance (device_name);
+
+	if (!cp) {
 		return -1;
 	}
 
-	ProtocolStatusChange (&cpi,  device_name, false); /* EMIT SIGNAL */
+	if (cp->active()) {
+		cp->set_active (false);
+	}
+
+	if (!cp->active()) {
+		ProtocolStatusChange (&cpi,  device_name, false); /* EMIT SIGNAL */
+	}
 
 	return 0;
 }
