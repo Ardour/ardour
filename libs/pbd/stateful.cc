@@ -423,10 +423,4 @@ Stateful::regenerate_xml_or_string_ids () const
 	}
 }
 
-void
-Stateful::set_regenerate_xml_and_string_ids_in_this_thread (bool yn)
-{
-	_regenerate_xml_or_string_ids = yn;
-}
-
 } // namespace PBD

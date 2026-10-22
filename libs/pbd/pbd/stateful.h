@@ -73,15 +73,17 @@ class /*LIBPBD_API*/ Stateful {
 	LIBPBD_API void set_id (const std::string&);
 	LIBPBD_API void reset_id ();
 
-	/* RAII structure to manage thread-local ID regeneration.
-	 */
+	/* RAII structure to manage thread-local ID regeneration. */
 	struct ForceIDRegeneration {
 		ForceIDRegeneration () {
-			set_regenerate_xml_and_string_ids_in_this_thread (true);
+			_old_val = _regenerate_xml_or_string_ids;
+			_regenerate_xml_or_string_ids = true;
 		}
 		~ForceIDRegeneration () {
-			set_regenerate_xml_and_string_ids_in_this_thread (false);
+			_regenerate_xml_or_string_ids = _old_val;
 		}
+		private:
+			bool _old_val;
 	};
 
 	/* history management */
@@ -142,8 +144,6 @@ class /*LIBPBD_API*/ Stateful {
 
 	PBD::ID           _id;
 	std::atomic<int> _stateful_frozen;
-
-	LIBPBD_API static void set_regenerate_xml_and_string_ids_in_this_thread (bool yn);
 };
 
 } // namespace PBD
