@@ -1251,6 +1251,7 @@ Pianoroll::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, It
 			}
 			return true;
 		}
+		break;
 	case ClipStartItem: {
 		ArdourCanvas::Rectangle* r = dynamic_cast<ArdourCanvas::Rectangle*> (item);
 		if (r) {
