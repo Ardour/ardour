@@ -82,7 +82,7 @@ protected:
 	bool set_position(Temporal::timepos_t const & pos, void* src, double* ignored);
 	void region_resized (const PBD::PropertyChange&);
 	bool canvas_group_event(GdkEvent* ev);
-	void add_automation_event (Temporal::timepos_t const & when, double y, bool with_guard_points);
+	void add_automation_event (GdkEvent* event, Temporal::timepos_t const & when, double y, bool with_guard_points);
 	void mouse_mode_changed ();
 	void entered();
 	void exited();

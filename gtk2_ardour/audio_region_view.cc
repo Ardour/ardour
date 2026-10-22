@@ -71,6 +71,7 @@
 #include "rgb_macros.h"
 #include "gui_thread.h"
 #include "ui_config.h"
+#include "keyboard.h"
 
 #include "pbd/i18n.h"
 
@@ -1485,8 +1486,9 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev, b
 
 	/* compute model y-position */
 	double y;
+	bool ignore_y = ArdourKeyboard::indicates_constraint (ev->button.state) || UIConfiguration::instance().get_new_automation_points_on_lane();
 
-	if (UIConfiguration::instance().get_new_automation_points_on_lane()) {
+	if (ignore_y) {
 		/* new point on the line */
 		y = _fx_line->the_list()->eval (timepos_t (sample_within_region));
 	}  else {

@@ -38,6 +38,7 @@
 #include "editor.h"
 #include "editor_drag.h"
 #include "gui_thread.h"
+#include "keyboard.h"
 #include "mergeable_line.h"
 #include "midi_automation_line.h"
 #include "public_editor.h"
@@ -158,14 +159,14 @@ AutomationRegionView::add_automation_event (GdkEvent* ev)
 
 	PublicEditor& e = trackview.editor ();
 
-	add_automation_event (timepos_t (e.pixel_to_sample (x)), y, false);
+	add_automation_event (ev, timepos_t (e.pixel_to_sample (x)), y, false);
 }
 
 /** @param when Position is global time position
  *  @param y y position, relative to our TimeAxisView.
  */
 void
-AutomationRegionView::add_automation_event (timepos_t const & w, double y, bool with_guard_points)
+AutomationRegionView::add_automation_event (GdkEvent* event, timepos_t const & w, double y, bool with_guard_points)
 {
 	std::shared_ptr<Evoral::Control> c = _region->control(_parameter, true);
 	std::shared_ptr<ARDOUR::AutomationControl> ac = std::dynamic_pointer_cast<ARDOUR::AutomationControl>(c);
@@ -190,6 +191,8 @@ AutomationRegionView::add_automation_event (timepos_t const & w, double y, bool 
 
 	_line->view_to_model_coord_y (y);
 
+	bool ignore_y = ArdourKeyboard::indicates_constraint (event->button.state) || UIConfiguration::instance().get_new_automation_points_on_lane();
+
 	if (c->list()->size () == 0) {
 		/* we need the MidiTrack::MidiControl, not the region's (midi model source) control */
 		std::shared_ptr<ARDOUR::MidiTrack> mt = std::dynamic_pointer_cast<ARDOUR::MidiTrack> (view->parent_stripable ());
@@ -197,7 +200,7 @@ AutomationRegionView::add_automation_event (timepos_t const & w, double y, bool 
 		std::shared_ptr<Evoral::Control> mc = mt->control(_parameter);
 		assert (mc);
 		y = mc->get_double ();
-	} else if (UIConfiguration::instance().get_new_automation_points_on_lane()) {
+	} else if (ignore_y) {
 		y = c->list()->eval (when);
 	}
 

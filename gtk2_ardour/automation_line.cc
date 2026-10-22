@@ -62,6 +62,7 @@
 #include "control_point.h"
 #include "editing_context.h"
 #include "gui_thread.h"
+#include "keyboard.h"
 #include "rgb_macros.h"
 #include "public_editor.h"
 #include "selection.h"
@@ -1839,7 +1840,9 @@ AutomationLine::add (std::shared_ptr<AutomationControl> control, GdkEvent* event
 
 	_editing_context.snap_to_with_modifier (when, event);
 
-	if (!from_kbd && (UIConfiguration::instance().get_new_automation_points_on_lane() || control->list()->size () == 0)) {
+	bool ignore_y = ArdourKeyboard::indicates_constraint (event->button.state) || UIConfiguration::instance().get_new_automation_points_on_lane();
+
+	if (!from_kbd && (ignore_y || control->list()->size () == 0)) {
 		if (control->list()->size () == 0) {
 			y = control->get_value ();
 		} else {
