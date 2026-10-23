@@ -1478,6 +1478,9 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 				case Stacked:
 					track_origin.y += (cv->layers () - i->layer - 1) * cv->child_height ();
 					break;
+				case Comping:
+					track_origin.y += (cv->layers () - i->layer) * cv->child_height ();
+					break;
 				case Expanded:
 					track_origin.y += (cv->layers () - i->layer - 0.5) * 2 * cv->child_height ();
 					break;
@@ -2381,6 +2384,147 @@ RegionCreateDrag::aborted (bool)
 	}
 
 	/* XXX */
+}
+
+CompingSelectDrag::CompingSelectDrag (Editor& e, ArdourCanvas::Item* i, RegionView* rv)
+	: EditorDrag (e, i, e.time_domain (), e.get_trackview_group())
+	, _region_view (rv)
+	, _rect (0)
+{
+	DEBUG_TRACE (DEBUG::Drags, "New CompingSelectDrag\n");
+}
+
+CompingSelectDrag::~CompingSelectDrag ()
+{
+	delete _rect;
+}
+
+void
+CompingSelectDrag::motion (GdkEvent* event, bool)
+{
+	std::shared_ptr<Region> region = _region_view->region ();
+	samplepos_t const rs = region->position().samples ();
+	samplepos_t const re = rs + region->length_samples ();
+	samplepos_t const a = std::max (rs, std::min (re, grab_time().samples ()));
+	samplepos_t const b = std::max (rs, std::min (re, adjusted_current_time (event).samples ()));
+
+	if (!_rect) {
+		_rect = new ArdourCanvas::Rectangle (_region_view->get_canvas_group ());
+		_rect->set_ignore_events (true);
+		_rect->set_outline (false);
+		_rect->set_fill_color (AudioRegionView::comping_source_color ());
+	}
+
+	_rect->set_x0 (_editor.sample_to_pixel (std::min (a, b) - rs));
+	_rect->set_x1 (_editor.sample_to_pixel (std::max (a, b) - rs));
+	_rect->set_y0 (1);
+	_rect->set_y1 (_region_view->height () - 1);
+}
+
+void
+CompingSelectDrag::finished (GdkEvent* event, bool movement_occurred)
+{
+	std::shared_ptr<Region> region = _region_view->region ();
+	samplepos_t start = region->position().samples ();
+	samplepos_t end = start + region->length_samples ();
+
+	if (movement_occurred) {
+		samplepos_t const a = grab_time().samples ();
+		samplepos_t const b = adjusted_current_time (event).samples ();
+		start = std::max (start, std::min (a, b));
+		end = std::min (end, std::max (a, b));
+	}
+
+	delete _rect;
+	_rect = 0;
+	_editor.add_to_comping_layer (_region_view, start, end);
+}
+
+void
+CompingSelectDrag::aborted (bool)
+{
+	delete _rect;
+	_rect = 0;
+}
+
+CompingTrimDrag::CompingTrimDrag (Editor& e, ArdourCanvas::Item* i, RegionView* rv, samplepos_t span_start, samplepos_t span_end, bool at_start)
+	: EditorDrag (e, i, e.time_domain (), e.get_trackview_group())
+	, _region_view (rv)
+	, _span_start (span_start)
+	, _span_end (span_end)
+	, _at_start (at_start)
+	, _rect (0)
+{
+	DEBUG_TRACE (DEBUG::Drags, "New CompingTrimDrag\n");
+}
+
+CompingTrimDrag::~CompingTrimDrag ()
+{
+	delete _rect;
+}
+
+samplepos_t
+CompingTrimDrag::new_edge (GdkEvent* event) const
+{
+	std::shared_ptr<Region> region = _region_view->region ();
+	samplepos_t const rs = region->position().samples ();
+	samplepos_t const re = rs + region->length_samples ();
+	samplepos_t const p = std::max (rs, std::min (re, adjusted_current_time (event).samples ()));
+
+	/* never let the edge cross the opposite one */
+	return _at_start ? std::min (p, _span_end - 1) : std::max (p, _span_start + 1);
+}
+
+void
+CompingTrimDrag::motion (GdkEvent* event, bool)
+{
+	samplepos_t const rs = _region_view->region()->position().samples ();
+	samplepos_t const edge = new_edge (event);
+	samplepos_t const a = _at_start ? edge : _span_start;
+	samplepos_t const b = _at_start ? _span_end : edge;
+
+	if (!_rect) {
+		_rect = new ArdourCanvas::Rectangle (_region_view->get_canvas_group ());
+		_rect->set_ignore_events (true);
+		_rect->set_outline (false);
+		_rect->set_fill_color (AudioRegionView::comping_source_color ());
+	}
+
+	_rect->set_x0 (_editor.sample_to_pixel (a - rs));
+	_rect->set_x1 (_editor.sample_to_pixel (b - rs));
+	_rect->set_y0 (1);
+	_rect->set_y1 (_region_view->height () - 1);
+}
+
+void
+CompingTrimDrag::finished (GdkEvent* event, bool movement_occurred)
+{
+	delete _rect;
+	_rect = 0;
+
+	if (!movement_occurred) {
+		return;
+	}
+
+	samplepos_t const edge = new_edge (event);
+	samplepos_t const old_edge = _at_start ? _span_start : _span_end;
+
+	if (edge == old_edge) {
+		return;
+	}
+
+	if (_at_start) {
+		_editor.add_to_comping_layer (_region_view, std::min (edge, old_edge), std::max (edge, old_edge), edge > old_edge);
+	} else {
+		_editor.add_to_comping_layer (_region_view, std::min (edge, old_edge), std::max (edge, old_edge), edge < old_edge);
+	}
+}
+
+void
+CompingTrimDrag::aborted (bool)
+{
+	delete _rect;
+	_rect = 0;
 }
 
 NoteResizeDrag::NoteResizeDrag (EditingContext& ec, ArdourCanvas::Item* i)

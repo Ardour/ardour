@@ -95,6 +95,24 @@ using namespace Gtk;
 using namespace Editing;
 using namespace Temporal;
 
+/* a take (source) region shown in Comping view */
+static AudioRegionView*
+comping_take_view (RegionView* rv)
+{
+	AudioRegionView* arv = dynamic_cast<AudioRegionView*> (rv);
+	if (arv && arv->get_time_axis_view().layer_display() == Comping && arv->region()->comp_source_id().empty()) {
+		return arv;
+	}
+	return 0;
+}
+
+/* a comp fragment shown in Comping view */
+static bool
+is_comping_fragment (RegionView* rv)
+{
+	return rv && rv->get_time_axis_view().layer_display() == Comping && !rv->region()->comp_source_id().empty();
+}
+
 using Gtkmm2ext::Keyboard;
 
 void
@@ -391,6 +409,11 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 			if (eff_mouse_mode == MouseDraw) {
 				break;
 			}
+			if (clicked_regionview && dynamic_cast<AudioRegionView*> (clicked_regionview) &&
+			    clicked_regionview->get_time_axis_view().layer_display() == Comping) {
+				/* regions are not selected as a whole in Comping view */
+				break;
+			}
 			if (press) {
 				if (eff_mouse_mode != MouseRange) {
 					_mouse_changed_selection = set_selected_regionview_from_click (press, op);
@@ -422,6 +445,10 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 		case FadeOutItem:
 		case StartCrossFadeItem:
 		case EndCrossFadeItem:
+			if (is_comping_fragment (clicked_regionview)) {
+				/* comp fragments are not selected, and must not drag other selected regions along */
+				break;
+			}
 			if (get_smart_mode() || eff_mouse_mode != MouseRange) {
 				_mouse_changed_selection |= set_selected_regionview_from_click (press, op);
 			} else if (event->type == GDK_BUTTON_PRESS) {
@@ -672,6 +699,33 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		}
 	}
 
+	/* comp fragments cannot be trimmed; fades stay available */
+	if (clicked_regionview && is_comping_fragment (clicked_regionview) &&
+	    (item_type == LeftFrameHandle || item_type == RightFrameHandle || item_type == RegionViewNameHighlight ||
+	     item_type == RegionViewName || item_type == FadeInTrimHandleItem || item_type == FadeOutTrimHandleItem)) {
+		return true;
+	}
+
+	if (item_type == RegionItem && clicked_regionview && Keyboard::no_modifier_keys_pressed (&event->button)) {
+		if (AudioRegionView* arv = comping_take_view (clicked_regionview)) {
+			/* in Comping view, the edges of a picked span can be dragged to change its length */
+			samplepos_t span_start;
+			samplepos_t span_end;
+			bool at_start;
+			if (arv->comping_edge_at (canvas_event_sample (event), pixel_to_sample (6), span_start, span_end, at_start)) {
+				_drags->set (new CompingTrimDrag (*this, item, clicked_regionview, span_start, span_end, at_start), event);
+			} else {
+				/* any other click/drag on a take region picks a span for the comp layer */
+				_drags->set (new CompingSelectDrag (*this, item, clicked_regionview), event);
+			}
+			return true;
+		}
+		if (is_comping_fragment (clicked_regionview)) {
+			/* comp fragments are neither selectable nor draggable */
+			return true;
+		}
+	}
+
 	Editing::MouseMode eff = effective_mouse_mode ();
 
 	/* special case: allow drag of region fade in/out in object mode with join object/range enabled */
@@ -837,7 +891,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			{
 				RegionView* rv = reinterpret_cast<RegionView*> (item->get_data("regionview"));
 				assert (rv);
-				_drags->set (new FadeInDrag (*this, item, rv, selection->regions, drag_time_domain (rv->region())), event, _cursors->fade_in);
+				_drags->set (new FadeInDrag (*this, item, rv, is_comping_fragment (rv) ? std::list<RegionView*> (1, rv) : std::list<RegionView*> (selection->regions), drag_time_domain (rv->region())), event, _cursors->fade_in);
 				return true;
 			}
 
@@ -845,7 +899,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			{
 				RegionView* rv = reinterpret_cast<RegionView*> (item->get_data("regionview"));
 				assert (rv);
-				_drags->set (new FadeOutDrag (*this, item, rv, selection->regions,  drag_time_domain (rv->region())), event, _cursors->fade_out);
+				_drags->set (new FadeOutDrag (*this, item, rv, is_comping_fragment (rv) ? std::list<RegionView*> (1, rv) : std::list<RegionView*> (selection->regions),  drag_time_domain (rv->region())), event, _cursors->fade_out);
 				return true;
 			}
 
@@ -1879,6 +1933,21 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, bool from_aut
 		bool ignored;
 		bool peaks_visible = false;
 		samplepos_t where;
+
+		/* Comping view: range-selection cursor over take layers, edge cursor near a picked span's edge */
+		{
+			AudioRegionView* carv = comping_take_view (entered_regionview);
+			if (carv) {
+				samplepos_t cs, ce;
+				bool cat_start;
+				bool const edge = carv->comping_edge_at (canvas_event_sample (event), pixel_to_sample (6), cs, ce, cat_start);
+				set_canvas_cursor (edge ? (cat_start ? cursors()->left_side_trim : cursors()->right_side_trim) : cursors()->selector);
+				_comping_cursor_active = true;
+			} else if (_comping_cursor_active) {
+				_comping_cursor_active = false;
+				set_canvas_cursor (which_track_cursor ());
+			}
+		}
 
 		if (mouse_sample (where, ignored)) {
 

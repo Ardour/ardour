@@ -27,6 +27,7 @@
 
 #include <utility>
 
+#include "enums.h"
 #include "pbd/error.h"
 
 #include "ardour/types.h"
@@ -476,6 +477,7 @@ TimeAxisViewItem::get_item_name() const
 {
 	return item_name;
 }
+
 
 /**
  * Set selection status.
