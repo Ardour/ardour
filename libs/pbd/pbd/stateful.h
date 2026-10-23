@@ -75,6 +75,15 @@ class /*LIBPBD_API*/ Stateful {
 
 	/* RAII structure to manage thread-local ID regeneration. */
 	struct ForceIDRegeneration {
+#ifdef MINGW_NATIVE_TLS
+		ForceIDRegeneration () {
+			_old_val = _regenerate_xml_or_string_ids_ref ();
+			_regenerate_xml_or_string_ids_ref () = true;
+		}
+		~ForceIDRegeneration () {
+			_regenerate_xml_or_string_ids_ref () = _old_val;
+		}
+#else
 		ForceIDRegeneration () {
 			_old_val = _regenerate_xml_or_string_ids;
 			_regenerate_xml_or_string_ids = true;
@@ -82,6 +91,7 @@ class /*LIBPBD_API*/ Stateful {
 		~ForceIDRegeneration () {
 			_regenerate_xml_or_string_ids = _old_val;
 		}
+#endif
 		private:
 			bool _old_val;
 	};
@@ -141,6 +151,9 @@ class /*LIBPBD_API*/ Stateful {
   private:
 	friend struct ForceIDRegeneration;
 	static thread_local bool _regenerate_xml_or_string_ids;
+#ifdef MINGW_NATIVE_TLS
+	static LIBPBD_API bool& _regenerate_xml_or_string_ids_ref ();
+#endif
 
 	PBD::ID           _id;
 	std::atomic<int> _stateful_frozen;

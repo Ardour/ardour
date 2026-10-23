@@ -44,6 +44,13 @@ int Stateful::loading_state_version = 0;
 
 thread_local bool Stateful::_regenerate_xml_or_string_ids (false);
 
+#ifdef MINGW_NATIVE_TLS
+bool& Stateful::_regenerate_xml_or_string_ids_ref ()
+{
+	return _regenerate_xml_or_string_ids;
+}
+#endif
+
 Stateful::Stateful ()
 	: _extra_xml (nullptr)
 	, _instant_xml (nullptr)
