@@ -30,7 +30,7 @@ using namespace PBD;
 using namespace ArdourSurface;
 
 static ControlProtocol*
-new_push2 (Session* s, std::string const & config)
+new_push2 (Session* s, std::string const & device_name)
 {
 	Push2 * p2 = 0;
 

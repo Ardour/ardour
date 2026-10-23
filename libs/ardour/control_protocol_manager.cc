@@ -297,6 +297,12 @@ ControlProtocolInfo::get_instance (std::string device_name)
 		return nullptr;
 	}
 
+	auto en (descriptor->enumerate());
+	if (en.empty() || en.begin()->second.size() <= 1) {
+		/* only 1 device supported, device name is irrelevant */
+		return instances.front();
+	}
+
 	if (device_name.empty()) {
 		/* control surface that only supports a single, unspecifed device name */
 		assert (instances.size() == 1);
@@ -391,7 +397,7 @@ ControlProtocolInfo::remove_all_instances ()
 
 	for (auto & inst : to_be_deleted) {
 		descriptor->destroy (inst);
-		delete inst;
+		/* instance is deleted by descriptor interface */
 	}
 }
 
@@ -399,6 +405,7 @@ int
 ControlProtocolInfo::activate (std::string const & device_name)
 {
 	ControlProtocol* cp = get_instance (device_name);
+
 	if (!cp) {
 		return -1;
 	}
@@ -545,11 +552,8 @@ ControlProtocolManager::set_session (Session* s)
 }
 
 int
-ControlProtocolManager::activate (ControlProtocolInfo& cpi, std::string device_name)
+ControlProtocolManager::activate (bool detected, ControlProtocolInfo& cpi, std::string device_name)
 {
-	if (!_session) {
-		PBD::stacktrace (std::cerr, 19);
-	}
 	assert (_session);
 
 	ControlProtocol*        cp;
@@ -560,18 +564,28 @@ ControlProtocolManager::activate (ControlProtocolInfo& cpi, std::string device_n
 		}
 	}
 
-	cp->set_active (true);
+	bool was_active = cp->active();
+
+	if (detected) {
+		cpi.activate (*cp);
+	} else {
+		cp->set_requested_status (ControlProtocol::RequestedOn);
+	}
 
 	if (!cp->active()) {
 		error << string_compose (_("Control protocol support for %1 (%2) failed to activate"), cpi.name, device_name) << endmsg;
 		cpi.remove_instance (*cp);
 	}
 
+	if (!was_active) {
+		ProtocolStatusChange (&cpi, device_name, true);
+	}
+
 	return 0;
 }
 
 int
-ControlProtocolManager::deactivate (ControlProtocolInfo& cpi, std::string device_name)
+ControlProtocolManager::deactivate (bool detected, ControlProtocolInfo& cpi, std::string device_name)
 {
 	ControlProtocol* cp = cpi.get_instance (device_name);
 
@@ -579,13 +593,23 @@ ControlProtocolManager::deactivate (ControlProtocolInfo& cpi, std::string device
 		return -1;
 	}
 
-	if (cp->active()) {
-		cp->set_active (false);
-	}
+	bool was_active = cp->active();
 
-	if (!cp->active()) {
+	if (was_active) {
+		if (detected) {
+			cpi.deactivate (*cp);
+		} else {
+			cp->set_requested_status (ControlProtocol::RequestedOff);
+		}
+
+		if (cp->active()) {
+			error << string_compose (_("Control protocol support for %1 (%2) failed to activate"), cpi.name, device_name) << endmsg;
+			return -1;
+		}
+
 		ProtocolStatusChange (&cpi,  device_name, false); /* EMIT SIGNAL */
 	}
+
 
 	return 0;
 }
@@ -865,18 +889,29 @@ ControlProtocolManager::probe_midi_control_protocols ()
 			if (cpi->instances.empty()) {
 				auto en = cpi->descriptor->enumerate ();
 				if (!en.empty()) {
-					if (!en.begin()->second.empty()) {
+					/* if there are zero or only 1 device
+					   names provided by enumerate(), this
+					   protocol only supports a single
+					   device type, and device name is
+					   expected to be empty.
+
+					   Otherwise, pick the first one.
+
+					   XXX fix this all by using the
+					   "detected()" descriptor function.
+					*/
+					if (en.begin()->second.size() > 1) {
 						device_name = en.begin()->second.front();
 					}
 				}
 			}
 			lm.release();
-			activate (*cpi, device_name);
+			auto_activate (*cpi, device_name);
 		} else if (active && cpi->automatic && !found) {
 
 			cpi->automatic = false;
 			lm.release();
-			deactivate (*cpi);
+			auto_deactivate (*cpi);
 		}
 	}
 }
@@ -898,10 +933,10 @@ ControlProtocolManager::probe_usb_control_protocols (bool arrived, uint16_t vend
 
 		if (!active && arrived) {
 			cpi->automatic = true;
-			activate (*cpi, {});
+			auto_activate (*cpi, std::string());
 		} else if (active && cpi->automatic && !arrived) {
 			cpi->automatic = false;
-			deactivate (*cpi);
+			auto_deactivate (*cpi, std::string());
 		}
 	}
 }
