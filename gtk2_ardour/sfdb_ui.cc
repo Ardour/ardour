@@ -1837,10 +1837,13 @@ SoundFileOmega::check_link_status (const Session* s, const vector<string>& paths
 		/* can we link ? */
 		if (PBD::hard_link (/*existing file*/(*i).c_str(), tmpc)) {
 			::g_unlink (tmpc);
+		} else {
+			PBD::remove_directory (tmpdir.c_str());
+			return false;
 		}
 	}
 
-	g_rmdir (tmpdir.c_str());
+	PBD::remove_directory (tmpdir.c_str());
 
 	return true;
 }
