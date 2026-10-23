@@ -29,6 +29,10 @@
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
+#if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
+#include <glibmm/regex.h>
+#endif
+
 #include "pbd/compose.h"
 #include "pbd/debug.h"
 #include "pbd/pathexpand.h"
