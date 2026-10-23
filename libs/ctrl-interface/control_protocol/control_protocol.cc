@@ -76,7 +76,7 @@ ControlProtocol::ControlProtocol (Session& s, string const & nom, string const &
 	, _name (nom)
 	, _device_name (devname)
 	, glib_event_callback (std::bind (&ControlProtocol::event_loop_precall, this))
-	, _users (0)
+	, _requested_status (Unrequested)
 	, _active (false)
 {
 	if (!selection_connected) {
@@ -89,25 +89,6 @@ ControlProtocol::ControlProtocol (Session& s, string const & nom, string const &
 ControlProtocol::~ControlProtocol ()
 {
 	PBD::stacktrace (std::cerr, 12);
-}
-
-void
-ControlProtocol::increment_users ()
-{
-	if (_users++ == 0) {
-		set_active (true);
-	}
-}
-
-void
-ControlProtocol::decrement_users ()
-{
-	if (_users > 0) {
-		_users--;
-	}
-	if (_users == 0) {
-		set_active (false);
-	}
 }
 
 void
@@ -128,6 +109,17 @@ ControlProtocol::set_active (bool yn)
 {
 	_active = yn;
 	return 0;
+}
+
+void
+ControlProtocol::set_requested_status (RequestedStatus rs)
+{
+	_requested_status = rs;
+	if (_requested_status == RequestedOn) {
+		set_active (true);
+	} else if (_requested_status == RequestedOff) {
+		set_active (false);
+	}
 }
 
 void

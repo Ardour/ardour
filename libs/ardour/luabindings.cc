@@ -3147,8 +3147,10 @@ LuaBindings::common (lua_State* L)
 #if 0
 		.addFunction ("control_protocol_infos", &ControlProtocolManager::control_protocol_infos)
 #endif
-		.addFunction ("activate", &ControlProtocolManager::activate)
-		.addFunction ("deactivate", &ControlProtocolManager::deactivate)
+		.addFunction ("activate", &ControlProtocolManager::user_activate)
+		.addFunction ("deactivate", &ControlProtocolManager::user_deactivate)
+		.addFunction ("auto_activate", &ControlProtocolManager::auto_activate)
+		.addFunction ("auto_deactivate", &ControlProtocolManager::auto_deactivate)
 		.endClass()
 
 
