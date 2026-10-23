@@ -1535,7 +1535,6 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 
 			auto toggle = [this](std::string const& path) {
 				Gtk::TreeModel::Row row = *(devices_store->get_iter (path));
-				std::cerr << "toggled row " << path << std::endl;
 				row[devices_model.enabled] = !row[devices_model.enabled];
 			};
 
@@ -1684,13 +1683,17 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			TreeModelColumn<bool> has_editor;
 		};
 
-		void update_active_view_for (ControlProtocolInfo& cpi, ControlProtocol* instance, bool enabled) {
+	void update_active_view_for (ControlProtocolInfo& cpi, ControlProtocol* instance, bool enabled, bool single_device) {
 			_ignore_view_change++;
 
 			if (enabled) {
 				assert (instance);
 				TreeModel::Row active_device = *(active_store->append ());
-				active_device[active_model.name] = instance->device_name();
+				if (single_device) {
+					active_device[active_model.name] = instance->name();
+				} else {
+					active_device[active_model.name] = instance->device_name();
+				}
 				active_device[active_model.enabled] = true;
 				active_device[active_model.protocol_info] = &cpi;
 				active_device[active_model.instance] = instance;
@@ -1725,6 +1728,8 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 
 			for (const auto& manufacturer : manufacturers) {
 
+				TreeModel::Children devices = manufacturer->children();
+				bool single_device = (devices.size() == 1);
 				string const device_name ((*manufacturer)[devices_model.name]);
 
 				/* Here we handle the case of a 1:1
@@ -1733,30 +1738,30 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 				 * list appropriately.
 				 */
 
-				if (changed_device_name == device_name) {
+				if (single_device || (changed_device_name == device_name)) {
 					_protocol_change++;
 					_ignore_view_change++;
 					(*manufacturer)[devices_model.enabled] = enabled;
-					update_active_view_for (*cpi, cp, enabled);
+					update_active_view_for (*cpi, cp, enabled, single_device);
 					_ignore_view_change--;
 					_protocol_change--;
-					return;
 				}
 
 				/* Now scan for matching devices in the cases
 				 * of 1-manufacturer-N-devices for a
 				 * cpi->config device name match.
 				 */
-
-				TreeModel::Children devices = manufacturer->children();
-
 				for (const auto& device : devices) {
 					string const device_name ((*device)[devices_model.name]);
-					if (changed_device_name == device_name) {
+					if (single_device || (changed_device_name == device_name)) {
 						_protocol_change++;
 						_ignore_view_change++;
 						(*device)[devices_model.enabled] = enabled;
-						update_active_view_for (*cpi, cp, enabled);
+						(*device)[devices_model.instance] = (enabled ? cp : nullptr);
+						if (!single_device) {
+							/* single device protocols will have populated the active view in the manufacturer loop above. */
+							update_active_view_for (*cpi, cp, enabled, single_device);
+						}
 						_ignore_view_change--;
 						_protocol_change--;
 						return;
@@ -1773,22 +1778,22 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 				return;
 			}
 
+			ControlProtocolManager& m = ControlProtocolManager::instance ();
 			ControlProtocolInfo* cpi = r[active_model.protocol_info];
 			if (!cpi) {
 				return;
 			}
 
 			bool const should_be_enabled = r[active_model.enabled];
-			ControlProtocol* cp = r[active_model.instance];
+			std::string nom = r[active_model.name];
 
 			/* the active view can only be used to *deactivate*
 			 * instances, not to activate them.
 			 */
 
 			assert (!should_be_enabled);
-			assert (cp);
 
-			cpi->deactivate (*cp);
+			m.user_deactivate (*cpi, nom);
 		}
 
 		void devices_view_changed (TreeModel::Path const & path, TreeModel::iterator const & i)
@@ -1796,14 +1801,12 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			TreeModel::Row r = *i;
 
 			if (_ignore_view_change) {
-				std::cerr << "ignored\n";
 				return;
 			}
 
 			ControlProtocolInfo* cpi = r[devices_model.protocol_info];
 
 			if (!cpi) {
-				std::cerr << "no CPI\n";
 				return;
 			}
 
@@ -1811,19 +1814,16 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			ControlProtocol* cp = r[devices_model.instance];
 
 			string const nom (r[devices_model.name]);
-			std::cerr << "DVC path " << path.to_string() << " for " << cpi->name << " as " << nom << " CP " << cp  << std::endl;
 
 			if (!cp) {
 				string const name (r[devices_model.name]);
-				std::cerr << "activate as " << name << std::endl;
-				if (!m.activate (*cpi, name)) {
-					std::cerr << "failed\n";
+				if (m.user_activate (*cpi, name)) {
 					_ignore_view_change++;
 					r[devices_model.enabled] = false;
 					_ignore_view_change--;
 				}
 			} else {
-				cpi->deactivate (*cp);
+				m.user_deactivate (*cpi, nom);
 			}
 		}
 
