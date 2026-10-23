@@ -109,8 +109,19 @@ class LIBARDOUR_API ControlProtocolManager : public PBD::Stateful, public ARDOUR
 		return _control_protocol_info;
 	}
 
-	int activate (ControlProtocolInfo&, std::string device_name = std::string());
-	int deactivate (ControlProtocolInfo&, std::string device_name = std::string());
+	int user_activate (ControlProtocolInfo& cpi, std::string device_name = std::string()) {
+		return activate (false, cpi, device_name);
+	}
+	int user_deactivate (ControlProtocolInfo& cpi, std::string device_name = std::string()) {
+		return deactivate (false, cpi, device_name);
+	}
+
+	int auto_activate (ControlProtocolInfo& cpi, std::string device_name = std::string()) {
+		return activate (true, cpi, device_name);
+	}
+	int auto_deactivate (ControlProtocolInfo& cpi, std::string device_name = std::string()) {
+		return deactivate (true, cpi, device_name);
+	}
 
 	static const std::string state_node_name;
 
@@ -137,6 +148,9 @@ private:
 	int                        control_protocol_discover (std::string path);
 	ControlProtocolInfo*       cpi_by_name (std::string);
 	void                       remove_all_instances (ControlProtocolInfo&);
+
+	int activate (bool detected, ControlProtocolInfo&, std::string device_name = std::string());
+	int deactivate (bool detected, ControlProtocolInfo&, std::string device_name = std::string());
 };
 
 } // namespace ARDOUR

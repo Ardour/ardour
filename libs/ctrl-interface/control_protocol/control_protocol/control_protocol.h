@@ -55,10 +55,6 @@ public:
 	virtual int set_active (bool yn);
 	virtual bool active () const { return _active; }
 
-	void increment_users ();
-	void decrement_users ();
-	int users () const { return _users; }
-
 	virtual int set_feedback (bool /*yn*/) { return 0; }
 	virtual bool get_feedback () const { return false; }
 
@@ -146,6 +142,15 @@ public:
 	XMLNode& get_state () const;
 	int set_state (XMLNode const&, int version);
 
+	enum RequestedStatus {
+		Unrequested,
+		RequestedOff,
+		RequestedOn,
+	};
+
+	virtual void set_requested_status (RequestedStatus);
+	RequestedStatus requested_status() const { return _requested_status; }
+
 	static const std::string state_node_name;
 
 	static StripableNotificationList const& last_selected () { return _last_selected; }
@@ -162,10 +167,11 @@ protected:
 	virtual void event_loop_precall ();
 	void install_precall_handler (Glib::RefPtr<Glib::MainContext>);
 
+	RequestedStatus _requested_status;
+
 private:
 	LIBCONTROLCP_LOCAL ControlProtocol (const ControlProtocol&); /* noncopyable */
 
-	int  _users;
 	bool _active;
 
 	static StripableNotificationList          _last_selected;

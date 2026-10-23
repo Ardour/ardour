@@ -55,13 +55,13 @@ ControlSurfacesTest::instantiateAndTeardownTest ()
 		std::cout << "ControlSurfacesTest: " << i->name << "\n";
 		if (i->active()) {
 			/* may already be active because of user preferences */
-			m.deactivate (*i);
+			m.auto_deactivate (*i);
 		}
 
-		m.activate (*i, {});
-		m.activate (*i, {}); // should be a NO-OP, prints a warning
+		m.auto_activate (*i, {});
+		m.auto_activate (*i, {}); // should be a NO-OP, prints a warning
 
-		m.deactivate (*i);
-		m.deactivate (*i); // should be a NO-OP
+		m.auto_deactivate (*i);
+		m.auto_deactivate (*i); // should be a NO-OP
 	}
 }
