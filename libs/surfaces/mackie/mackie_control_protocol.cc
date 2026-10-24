@@ -359,6 +359,12 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("switch banking to start at %1 force ? %2 current = %3\n", initial, force, _current_initial_bank));
 
+#ifndef MIXBUS
+	initial = std::max (1U, initial);
+#else
+	initial = std::max (0U, initial);
+#endif
+
 	if (initial == _current_initial_bank && !force) {
 		/* everything is as it should be */
 		return 0;
@@ -378,6 +384,7 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 	}
 
 	if (!exists) {
+		DEBUG_TRACE (DEBUG::MackieControl, "initial stripable does not exist!\n");
 		return -1;
 	}
 
