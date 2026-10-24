@@ -376,8 +376,13 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 	Sorted::iterator first = sorted.end();
 
 	for (auto s = sorted.begin(); s != sorted.end(); ++s) {
-		if ((*s)->presentation_info().order() == initial) {
+		/* the desired initial stripable may not be included in the
+		   results from ::get_sorted_stripables() (e.g. because it is
+		   hidden). So look for the first one after it, if necessary.
+		*/
+		if ((*s)->presentation_info().order() >= initial) {
 			first = s;
+			initial = (*s)->presentation_info().order();
 			exists = true;
 			break;
 		}
