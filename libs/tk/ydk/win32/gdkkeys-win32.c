@@ -1288,7 +1288,7 @@ gdk_keymap_get_entries_for_keyval (GdkKeymap     *gdk_keymap,
       else
         keymap = GDK_WIN32_KEYMAP (gdk_keymap);
 
-      update_keymap (gdk_keymap);
+      update_keymap (GDK_KEYMAP (keymap));
 
       for (vk = 0; vk < KEY_STATE_SIZE; vk++)
         {
