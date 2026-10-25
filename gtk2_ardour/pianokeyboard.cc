@@ -73,9 +73,9 @@ APianoKeyboard::annotate_layout (cairo_t* cr, int note) const
 	int h = _notes[note].h;
 
 	int  tw, th;
-	char buf[32];
-	snprintf (buf, 16, "%lc",
-			gdk_keyval_to_unicode (gdk_keyval_to_upper (gdk_keyval_from_name (key_name))));
+	char buf[8];
+	/* UTF-8 for pango, "%lc" depends on the C locale */
+	buf[g_unichar_to_utf8 (gdk_keyval_to_unicode (gdk_keyval_to_upper (gdk_keyval_from_name (key_name))), buf)] = '\0';
 	PangoLayout* pl = pango_cairo_create_layout (cr);
 	pango_layout_set_font_description (pl, _font_cue);
 	pango_layout_set_text (pl, buf, -1);
