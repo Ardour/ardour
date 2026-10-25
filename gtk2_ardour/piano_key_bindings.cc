@@ -133,6 +133,39 @@ PianoKeyBindings::bind_key (const char* key, int note)
 	_note_bindings[note] = key;
 }
 
+static bool
+typeable_without_modifiers (const char* key)
+{
+	GdkKeymapKey* keys;
+	gint          n_keys;
+	bool          rv = false;
+
+	if (!gdk_keymap_get_entries_for_keyval (gdk_keymap_get_default (), gdk_keyval_from_name (key), &keys, &n_keys)) {
+		return false;
+	}
+	for (gint i = 0; i < n_keys; ++i) {
+		if (keys[i].group == 0 && keys[i].level == 0) {
+			rv = true;
+			break;
+		}
+	}
+	g_free (keys);
+	return rv;
+}
+
+/* Bind the first key that the current keyboard layout has (see get_keycode). */
+void
+PianoKeyBindings::bind_key_variants (std::initializer_list<const char*> keys, int note)
+{
+	for (const char* key : keys) {
+		if (typeable_without_modifiers (key)) {
+			bind_key (key, note);
+			return;
+		}
+	}
+	bind_key (*keys.begin (), note);
+}
+
 void
 PianoKeyBindings::clear_notes ()
 {
@@ -199,6 +232,25 @@ PianoKeyBindings::bind_keys_qwertz ()
 	/* The only difference between QWERTY and QWERTZ is that the "y" and "z" are swapped together. */
 	bind_key ("y", 12);
 	bind_key ("z", 33);
+
+	/* Czech and Slovak QWERTZ have letters on the unshifted number row */
+	bind_key_variants ({ "2", "ecaron", "lcaron" }, 25);
+	bind_key_variants ({ "3", "scaron" }, 27);
+	bind_key_variants ({ "5", "rcaron", "tcaron" }, 30);
+	bind_key_variants ({ "6", "zcaron" }, 32);
+	bind_key_variants ({ "7", "yacute" }, 34);
+	bind_key_variants ({ "9", "iacute" }, 37);
+	if (typeable_without_modifiers ("odiaeresis") && typeable_without_modifiers ("eacute")) {
+		/* Hungarian has "0" left of "1" and "ö" in its place */
+		bind_key ("odiaeresis", 39);
+	} else {
+		bind_key_variants ({ "0", "eacute" }, 39);
+	}
+
+	/* ignore */
+	bind_key_variants ({ "1", "plus" }, -4);
+	bind_key_variants ({ "4", "ccaron" }, -5);
+	bind_key_variants ({ "8", "aacute" }, -6);
 }
 
 void
@@ -355,6 +407,24 @@ PianoKeyBindings::bind_keys_basic_qwertz ()
 	bind_key ("o", 25);
 	bind_key ("l", 26);
 	bind_key ("p", 27);
-	bind_key ("semicolon", 28);
-	bind_key ("apostrophe", 29);
+
+	/* National QWERTZ variants differ right of "L". Match both keys,
+	 * since e.g. "§" is also on Swiss keyboards. The last one is the default. */
+	static const char* const right_of_l[][2] = {
+		{ "uring",       "section" },    /* Czech */
+		{ "ocircumflex", "section" },    /* Slovak */
+		{ "lstroke",     "aogonek" },    /* Polish */
+		{ "ccaron",      "cacute" },     /* Croatian, Slovenian, Bosnian, Serbian Latin */
+		{ "eacute",      "aacute" },     /* Hungarian */
+		{ "eacute",      "agrave" },     /* Swiss French */
+		{ "odiaeresis",  "adiaeresis" }, /* German, Austrian, Swiss German */
+	};
+	const size_t n_variants = sizeof (right_of_l) / sizeof (right_of_l[0]);
+
+	size_t v = 0;
+	while (v < n_variants - 1 && !(typeable_without_modifiers (right_of_l[v][0]) && typeable_without_modifiers (right_of_l[v][1]))) {
+		++v;
+	}
+	bind_key (right_of_l[v][0], 28);
+	bind_key (right_of_l[v][1], 29);
 }

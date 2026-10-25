@@ -20,6 +20,7 @@
 #ifndef _PIANO_KEY_BINDINGS_H_
 #define _PIANO_KEY_BINDINGS_H_
 
+#include <initializer_list>
 #include <map>
 #include <string>
 
@@ -54,6 +55,7 @@ public:
 
 private:
 	void bind_key (const char* key, int note);
+	void bind_key_variants (std::initializer_list<const char*> keys, int note);
 	void clear_notes ();
 
 	void bind_keys_qwerty ();
