@@ -286,6 +286,7 @@ public:
 	bool transient ()        const;
 
 	Trimmable::CanTrim can_trim () const;
+	bool trimming_front () const { return _trimming_front; }
 
 	Temporal::TimeDomain position_time_domain () const;
 	void set_position_time_domain (Temporal::TimeDomain ps);
@@ -650,6 +651,8 @@ private:
 
 	virtual void recompute_at_start () = 0;
 	virtual void recompute_at_end () = 0;
+
+	bool _trimming_front;
 
 	PBD::Property<bool>        _muted;
 	PBD::Property<bool>        _opaque;
