@@ -468,7 +468,7 @@ struct ImageSet {
 };
 
 void
-WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* peaks, int n_peaks,
+WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* peaks, gain_t* envelope, int n_peaks,
                       std::shared_ptr<WaveViewDrawRequest> req)
 {
 	const double height = image->get_height();
@@ -505,6 +505,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* peaks
 
 	const Shape shape = req->image->props.shape;
 	const bool logscaled = req->image->props.logscaled;
+	const bool envelope_active = req->image->props.envelope_active;
 
 	if (req->image->props.shape == WaveView::Rectified) {
 
@@ -515,9 +516,10 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* peaks
 
 		if (logscaled) {
 			for (int i = 0; i < n_peaks; ++i) {
+				float env = envelope_active ? envelope[i] : 1.0;
 
 				tips[i].bot = height - 1.0;
-				const double p = alt_log_meter (fast_coefficient_to_dB (max (fabs (peaks[i].max), fabs (peaks[i].min))));
+				const double p = alt_log_meter (fast_coefficient_to_dB (max (fabs (peaks[i].max * env), fabs (peaks[i].min * env))));
 				tips[i].top = y_extent (p, shape, height);
 				tips[i].spread = p * height;
 
@@ -532,9 +534,10 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* peaks
 
 		} else {
 			for (int i = 0; i < n_peaks; ++i) {
+				float env = envelope_active ? envelope[i] : 1.0;
 
 				tips[i].bot = height - 1.0;
-				const double p = max(fabs (peaks[i].max), fabs (peaks[i].min));
+				const double p = max(fabs (peaks[i].max * env), fabs (peaks[i].min * env));
 				tips[i].top = y_extent (p, shape, height);
 				tips[i].spread = p * height;
 				if (p >= clip_level) {
@@ -549,9 +552,11 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* peaks
 
 		if (logscaled) {
 			for (int i = 0; i < n_peaks; ++i) {
+				float env = envelope_active ? envelope[i] : 1.0;
+
 				PeakData p;
-				p.max = peaks[i].max;
-				p.min = peaks[i].min;
+				p.max = peaks[i].max * env;
+				p.min = peaks[i].min * env;
 
 				if (peaks[i].max >= clip_level) {
 					tips[i].clip_max = true;
@@ -582,6 +587,12 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* peaks
 
 		} else {
 			for (int i = 0; i < n_peaks; ++i) {
+				float env = envelope_active ? envelope[i] : 1.0;
+
+				PeakData p;
+				p.max = peaks[i].max * env;
+				p.min = peaks[i].min * env;
+
 				if (peaks[i].max >= clip_level) {
 					tips[i].clip_max = true;
 				}
@@ -589,7 +600,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* peaks
 					tips[i].clip_min = true;
 				}
 
-				compute_tips (peaks[i], tips[i], y_span);
+				compute_tips (p, tips[i], y_span);
 				tips[i].spread = tips[i].bot - tips[i].top;
 			}
 
@@ -923,6 +934,13 @@ WaveView::process_draw_request (std::shared_ptr<WaveViewDrawRequest> req)
 	    region->read_peaks (peaks.get (), n_peaks, props.get_sample_start (),
 	                        props.get_length_samples (), props.channel, props.samples_per_pixel);
 
+	std::unique_ptr<ARDOUR::gain_t[]> envelope (nullptr);
+	if (props.envelope_active) {
+		envelope = std::make_unique<ARDOUR::gain_t[]>(n_peaks);
+		region->read_waveform_envelope (envelope.get(), n_peaks, props.get_sample_start (),
+		                                props.get_length_samples ());
+	}
+
 	if (req->stopped()) {
 		return;
 	}
@@ -953,7 +971,7 @@ WaveView::process_draw_request (std::shared_ptr<WaveViewDrawRequest> req)
 			}
 		}
 
-		draw_image (cairo_image, peaks.get(), n_peaks, req);
+		draw_image (cairo_image, peaks.get(), envelope.get(), n_peaks, req);
 
 	} else {
 		draw_absent_image (cairo_image, peaks.get(), n_peaks);
@@ -1235,6 +1253,28 @@ WaveView::gain_changed ()
 	_props->amplitude = _region->scale_amplitude ();
 	_draw_image_in_gui_thread = true;
 	end_visual_change ();
+}
+
+void
+WaveView::envelope_changed ()
+{
+	uint64_t timestamp = _region->envelope_timestamp ();
+	if (_props->envelope_timestamp != timestamp) {
+		begin_visual_change ();
+		_props->envelope_timestamp = timestamp;
+		end_visual_change ();
+	}
+}
+
+void
+WaveView::envelope_active_changed (bool global_apply_envelope)
+{
+	bool envelope_active = global_apply_envelope && _region->envelope_active ();
+	if (_props->envelope_active != envelope_active) {
+		begin_visual_change ();
+		_props->envelope_active = envelope_active;
+		end_visual_change ();
+	}
 }
 
 void
