@@ -1692,7 +1692,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 				if (single_device) {
 					active_device[active_model.name] = instance->name();
 				} else {
-					active_device[active_model.name] = instance->device_name();
+					active_device[active_model.name] = string_compose ("%1 - %2", instance->name(), instance->device_name());
 				}
 				active_device[active_model.enabled] = true;
 				active_device[active_model.protocol_info] = &cpi;
@@ -1726,11 +1726,15 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 
 			ControlProtocol* cp =  cpi->get_instance (changed_device_name);
 
+			std::cerr << "PSC for " << cpi->name << " as [" << changed_device_name << "] enabled " << enabled << std::endl;
+
 			for (const auto& manufacturer : manufacturers) {
 
 				TreeModel::Children devices = manufacturer->children();
 				bool single_device = (devices.size() == 1);
 				string const device_name ((*manufacturer)[devices_model.name]);
+
+				std::cerr << cpi->name << " devices holds " << devices.size() << std::endl;
 
 				/* Here we handle the case of a 1:1
 				 * manufacturer:device_name pairing. Mark it as
@@ -1742,6 +1746,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 					_protocol_change++;
 					_ignore_view_change++;
 					(*manufacturer)[devices_model.enabled] = enabled;
+					std::cerr << "UAV-man, SD = " << single_device << std::endl;
 					update_active_view_for (*cpi, cp, enabled, single_device);
 					_ignore_view_change--;
 					_protocol_change--;
@@ -1760,6 +1765,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 						(*device)[devices_model.instance] = (enabled ? cp : nullptr);
 						if (!single_device) {
 							/* single device protocols will have populated the active view in the manufacturer loop above. */
+							std::cerr << "UAV-dev, SD = " << single_device << std::endl;
 							update_active_view_for (*cpi, cp, enabled, single_device);
 						}
 						_ignore_view_change--;
