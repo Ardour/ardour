@@ -107,6 +107,7 @@ public:
 
 	void region_changed (const PBD::PropertyChange&);
 	void envelope_active_changed ();
+	void envelope_changed ();
 
 	GhostRegion* add_ghost (TimeAxisView&);
 
@@ -251,4 +252,3 @@ private:
 
 	PBD::ScopedConnection _region_fx_connection;
 };
-
