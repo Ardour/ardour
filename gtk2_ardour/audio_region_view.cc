@@ -1972,6 +1972,7 @@ AudioRegionView::parameter_changed (string const & p)
 	if (p == "show-waveforms") {
 		setup_waveform_visibility ();
 	} else if (p == "apply-envelope-to-waveforms") {
+		audio_region()->set_waveform_envelope_enabled (UIConfiguration::instance().get_apply_envelope_to_waveforms ());
 		envelope_changed ();
 	}
 }
