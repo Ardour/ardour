@@ -1666,6 +1666,19 @@ AudioRegionView::envelope_changed ()
 			waves[n]->envelope_changed ();
 		}
 	}
+
+	AudioGhostRegion* agr;
+
+	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
+		if ((agr = dynamic_cast<AudioGhostRegion*>(*i)) != 0) {
+			for (vector<ArdourWaveView::WaveView*>::iterator w = agr->waves.begin(); w != agr->waves.end(); ++w) {
+				(*w)->envelope_active_changed (global_apply_envelope);
+				if (global_apply_envelope) {
+					(*w)->envelope_changed ();
+				}
+			}
+		}
+	}
 }
 
 void
