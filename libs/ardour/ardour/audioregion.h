@@ -109,11 +109,18 @@ class LIBARDOUR_API AudioRegion : public Region, public AudioReadable
 	std::shared_ptr<AutomationList> inverse_fade_out()  { return _inverse_fade_out.val (); }
 	std::shared_ptr<AutomationList> envelope() { return _envelope.val (); }
 
+	Evoral::ControlList& waveform_envelope () { return _waveform_envelope; }
+	uint64_t envelope_timestamp () { return _envelope_timestamp; }
+	void set_waveform_envelope_enabled (bool state);
+
 	Temporal::Range body_range () const;
 
 	virtual samplecnt_t read_peaks (PeakData *buf, samplecnt_t npeaks,
 	                                samplecnt_t offset, samplecnt_t cnt,
 	                                uint32_t chan_n=0, double samples_per_pixel = 1.0) const;
+
+	void read_waveform_envelope (gain_t *buf, samplecnt_t npoints,
+	                             samplecnt_t offset, samplecnt_t cnt) const;
 
 	/* AudioReadable interface */
 
@@ -263,6 +270,15 @@ class LIBARDOUR_API AudioRegion : public Region, public AudioReadable
 	Automatable            _automatable;
 	uint32_t               _fade_in_suspended;
 	uint32_t               _fade_out_suspended;
+
+	/* waveform_envelope is a copy of _envelope's ControlList:
+	 * when drawing waveforms it is faster to use this instead of
+	 * waiting for a read lock on the region that might be held by the butler
+	 * (especially if the read cache duration is high)
+	 */
+	mutable Evoral::ControlList _waveform_envelope;
+	uint64_t                    _envelope_timestamp;
+	bool                        _waveform_envelope_enabled;
 
 	std::shared_ptr<ARDOUR::Region> get_single_other_xfade_region (bool start) const;
 

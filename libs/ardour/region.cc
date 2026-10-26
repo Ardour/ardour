@@ -246,6 +246,7 @@ Region::register_properties ()
 	, _transient_analysis_start (0) \
 	, _transient_analysis_end (0) \
 	, _soloSelected (false) \
+	, _trimming_front (false) \
 	, _muted (Properties::muted, false) \
 	, _opaque (Properties::opaque, true) \
 	, _locked (Properties::locked, false) \
@@ -279,6 +280,7 @@ Region::register_properties ()
 	, _transient_analysis_start (other->_transient_analysis_start) \
 	, _transient_analysis_end (other->_transient_analysis_end) \
 	, _soloSelected (false) \
+	, _trimming_front (false) \
 	, _muted (Properties::muted, other->_muted) \
 	, _opaque (Properties::opaque, other->_opaque) \
 	, _locked (Properties::locked, other->_locked) \
@@ -1017,6 +1019,7 @@ Region::trim_front (timepos_t const & new_position)
 		return;
 	}
 	modify_front_unchecked (new_position, false);
+	_trimming_front = true;
 }
 
 void
@@ -1107,6 +1110,7 @@ Region::trim_end (timepos_t const & new_endpoint)
 	if (locked()) {
 		return;
 	}
+	_trimming_front = false;
 	modify_end_unchecked (new_endpoint, false);
 }
 

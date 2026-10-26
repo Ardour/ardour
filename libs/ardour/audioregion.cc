@@ -239,6 +239,8 @@ AudioRegion::register_properties ()
 void
 AudioRegion::init ()
 {
+	_waveform_envelope.create_curve ();
+
 	register_properties ();
 
 	suspend_property_changes();
@@ -309,6 +311,8 @@ AudioRegion::AudioRegion (Session& s, timepos_t const &  start, timecnt_t const 
 	, _automatable (s, Temporal::TimeDomainProvider (Temporal::AudioTime))
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
+	, _waveform_envelope (static_cast<Evoral::ControlList> (*envelope()))
+	, _waveform_envelope_enabled (false)
 {
 	init ();
 	assert (_sources.size() == _master_sources.size());
@@ -322,6 +326,8 @@ AudioRegion::AudioRegion (const SourceList& srcs)
 	, _automatable(srcs[0]->session(), Temporal::TimeDomainProvider (Temporal::AudioTime))
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
+	, _waveform_envelope (static_cast<Evoral::ControlList> (*envelope()))
+	, _waveform_envelope_enabled (false)
 {
 	init ();
 	assert (_sources.size() == _master_sources.size());
@@ -337,9 +343,12 @@ AudioRegion::AudioRegion (std::shared_ptr<const AudioRegion> other)
 	, _automatable (other->session(), Temporal::TimeDomainProvider (Temporal::AudioTime))
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
+	, _waveform_envelope (static_cast<Evoral::ControlList> (*envelope()))
+	, _waveform_envelope_enabled (false)
 {
 	/* don't use init here, because we got fade in/out from the other region
 	*/
+	_waveform_envelope.create_curve ();
 	register_properties ();
 	listen_to_my_curves ();
 	connect_to_analysis_changed ();
@@ -366,9 +375,12 @@ AudioRegion::AudioRegion (std::shared_ptr<const AudioRegion> other, timecnt_t co
 	, _automatable (other->session(), Temporal::TimeDomainProvider (Temporal::AudioTime))
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
+	, _waveform_envelope (static_cast<Evoral::ControlList> (*envelope()))
+	, _waveform_envelope_enabled (false)
 {
 	/* don't use init here, because we got fade in/out from the other region
 	*/
+	_waveform_envelope.create_curve ();
 	register_properties ();
 	listen_to_my_curves ();
 	connect_to_analysis_changed ();
@@ -392,8 +404,11 @@ AudioRegion::AudioRegion (std::shared_ptr<const AudioRegion> other, const Source
 	, _automatable (other->session(), Temporal::TimeDomainProvider (Temporal::AudioTime))
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
+	, _waveform_envelope (static_cast<Evoral::ControlList> (*envelope()))
+	, _waveform_envelope_enabled (false)
 {
 	/* make-a-sort-of-copy-with-different-sources constructor (used by audio filter) */
+	_waveform_envelope.create_curve ();
 
 	register_properties ();
 
@@ -418,6 +433,8 @@ AudioRegion::AudioRegion (SourceList& srcs)
 	, _automatable(srcs[0]->session(), Temporal::TimeDomainProvider (Temporal::AudioTime))
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
+	, _waveform_envelope (static_cast<Evoral::ControlList> (*envelope()))
+	, _waveform_envelope_enabled (false)
 {
 	init ();
 
@@ -569,6 +586,28 @@ AudioRegion::read_peaks (PeakData *buf, samplecnt_t npeaks, samplecnt_t offset, 
 	}
 
 	return npeaks;
+}
+
+/** @param buf Buffer to put envelope data in.
+ *  @param npoints Number of points to read (ie the number of PeakDatas in buf)
+ *  @param offset Start position, as an offset from the start of this region's source.
+ *  @param cnt Number of samples to read.
+ */
+void
+AudioRegion::read_waveform_envelope (gain_t *buf, samplecnt_t npoints, samplecnt_t offset, samplecnt_t cnt) const
+{
+	/* convert offset from the start of region source to offset from the start of the region */
+	offset = offset - start_sample ();
+
+	if (trimming_front ()) {
+		/* If we are currently trimming the front of the region, we need to
+		 * update the envelope now to avoid the waveform's envelope from shifting
+		 */
+		timecnt_t tas (timecnt_t::from_samples (length().samples ()));
+		_waveform_envelope.truncate_start (tas);
+	}
+
+	_waveform_envelope.curve().get_vector (timepos_t (offset), timepos_t (offset + cnt), buf, npoints);
 }
 
 /** @param buf Buffer to write data to (existing data will be overwritten).
@@ -1977,7 +2016,23 @@ AudioRegion::fade_out_changed ()
 void
 AudioRegion::envelope_changed ()
 {
+	if (_waveform_envelope_enabled) {
+		_waveform_envelope.copy_events (static_cast<Evoral::ControlList> (*envelope()));
+		_envelope_timestamp = g_get_monotonic_time ();
+	}
+
 	send_change (PropertyChange (Properties::envelope));
+}
+
+void
+AudioRegion::set_waveform_envelope_enabled (bool state)
+{
+	_waveform_envelope_enabled = state;
+
+	if (_waveform_envelope_enabled) {
+		_waveform_envelope.copy_events (static_cast<Evoral::ControlList> (*envelope()));
+		_envelope_timestamp = g_get_monotonic_time ();
+	}
 }
 
 void
