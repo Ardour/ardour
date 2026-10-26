@@ -67,7 +67,7 @@ VideoTimeLine::VideoTimeLine (PublicEditor *ed, ArdourCanvas::Container *vbg, in
 	vmonitor=0;
 	reopen_vmonitor=false;
 
-	BootMessage (_("Detecing video tools"));
+	BootMessage (_("Detecting video tools"));
 
 	find_xjadeo();
 	find_harvid();
