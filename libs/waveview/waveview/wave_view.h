@@ -101,6 +101,8 @@ public:
 
 	void region_resized ();
 	void gain_changed ();
+	void envelope_changed ();
+	void envelope_active_changed (bool global_apply_envelope);
 
 	void set_show_zero_line (bool);
 	bool show_zero_line () const;
@@ -222,7 +224,7 @@ private:
 
 	static void compute_tips (ARDOUR::PeakData const& peak, LineTips& tips, double const effective_height);
 
-	static void draw_image (Cairo::RefPtr<Cairo::ImageSurface>&, ARDOUR::PeakData*, int n_peaks,
+	static void draw_image (Cairo::RefPtr<Cairo::ImageSurface>&, ARDOUR::PeakData*, ARDOUR::gain_t*, int n_peaks,
 	                        std::shared_ptr<WaveViewDrawRequest>);
 	static void draw_absent_image (Cairo::RefPtr<Cairo::ImageSurface>&, ARDOUR::PeakData*, int);
 

@@ -58,6 +58,8 @@ public: // member variables
 	WaveView::Shape       shape;
 	double                gradient_depth;
 	double                start_shift;
+	bool                  envelope_active;
+	uint64_t              envelope_timestamp;
 
 private: // member variables
 
@@ -155,7 +157,9 @@ public: // methods
 		        outline_color == other.outline_color && zero_color == other.zero_color &&
 		        clip_color == other.clip_color && show_zero == other.show_zero &&
 		        logscaled == other.logscaled && shape == other.shape &&
-		        gradient_depth == other.gradient_depth);
+		        gradient_depth == other.gradient_depth &&
+		        envelope_active == other.envelope_active &&
+		        envelope_timestamp == other.envelope_timestamp);
 		// region_start && start_shift??
 	}
 

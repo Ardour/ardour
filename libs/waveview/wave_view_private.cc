@@ -48,6 +48,8 @@ WaveViewProperties::WaveViewProperties (std::shared_ptr<ARDOUR::AudioRegion> reg
     , shape (WaveView::global_shape())
     , gradient_depth (WaveView::global_gradient_depth ())
     , start_shift (0.0) // currently unused
+    , envelope_active (region->envelope_active ())
+    , envelope_timestamp (region->envelope_timestamp ())
     , sample_start (0)
     , sample_end (0)
 {
