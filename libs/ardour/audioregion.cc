@@ -596,6 +596,8 @@ AudioRegion::read_peaks (PeakData *buf, samplecnt_t npeaks, samplecnt_t offset, 
 void
 AudioRegion::read_waveform_envelope (gain_t *buf, samplecnt_t npoints, samplecnt_t offset, samplecnt_t cnt) const
 {
+	PBD::Mutex::Lock wrl (_waveform_lock);
+
 	/* convert offset from the start of region source to offset from the start of the region */
 	offset = offset - start_sample ();
 
