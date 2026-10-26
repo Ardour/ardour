@@ -18,4 +18,6 @@
   <IsV1M value="yes"/>
   <HasQConSecondLCD value="yes"/>
   <HasQConMasterMeters value="yes"/>
+  <DeviceSendingPortRegex value="iCON V1-M MIDI 1"/>
+  <DeviceReceivingPortRegex value="iCON V1-M MIDI 1"/>
 </MackieProtocolDevice>
