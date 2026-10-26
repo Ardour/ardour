@@ -29,6 +29,8 @@
 [all-floating-windows-are-dialogs]
   KDE quirks dialogs window hidden behind
 [allow-non-quarter-pulse]
+[apply-envelope-to-waveforms]
+  waveform envelope apply
 [ask-before-closing-last-window]
 [automation-edit-cancels-auto-hide]
   automation spill touch
