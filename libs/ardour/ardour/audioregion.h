@@ -279,6 +279,7 @@ class LIBARDOUR_API AudioRegion : public Region, public AudioReadable
 	mutable Evoral::ControlList _waveform_envelope;
 	uint64_t                    _envelope_timestamp;
 	bool                        _waveform_envelope_enabled;
+	mutable PBD::Mutex          _waveform_lock;
 
 	std::shared_ptr<ARDOUR::Region> get_single_other_xfade_region (bool start) const;
 
