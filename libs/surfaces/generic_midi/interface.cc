@@ -60,6 +60,12 @@ enumerate_generic_midi_protocol ()
 	return GenericMidiControlProtocol::enumerate();
 }
 
+static std::vector<std::string>
+detected_generic_midi_protocol ()
+{
+	return GenericMidiControlProtocol::detected();
+}
+
 // Field names commented out by JE - 06-01-2010
 static ControlProtocolDescriptor generic_midi_descriptor = {
 	/* name       */ "Generic MIDI",
@@ -71,8 +77,8 @@ static ControlProtocolDescriptor generic_midi_descriptor = {
 	/* initialize */ new_generic_midi_protocol,
 	/* destroy    */ delete_generic_midi_protocol,
 	/* enumerate  */ enumerate_generic_midi_protocol,
-	/* detected   */ nullptr
+	/* detected   */ detected_generic_midi_protocol,
 };
 
-extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &generic_midi_descriptor; }
+extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { GenericMidiControlProtocol::init(); return &generic_midi_descriptor; }
 

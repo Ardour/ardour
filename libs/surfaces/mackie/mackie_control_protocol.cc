@@ -26,6 +26,7 @@
 #include <iostream>
 #include <algorithm>
 #include <cmath>
+#include <regex>
 #include <sstream>
 #include <vector>
 #include <iomanip>
@@ -48,7 +49,9 @@
 #include "pbd/error.h"
 #include "pbd/memento_command.h"
 #include "pbd/convert.h"
+#include "pbd/strsplit.h"
 
+#include "ardour/audioengine.h"
 #include "ardour/audio_track.h"
 #include "ardour/automation_control.h"
 #include "ardour/async_midi_port.h"
@@ -118,11 +121,23 @@ const int MACKIE_NAMESPACE::MackieControlProtocol::MAIN_MODIFIER_MASK = (MackieC
 
 MACKIE_NAMESPACE::MackieControlProtocol* MACKIE_NAMESPACE::MackieControlProtocol::_instance = 0;
 
-MackieControlProtocol::MackieControlProtocol (Session& session, std::string const & config)
+void
+MackieControlProtocol::init ()
+{
+	static bool _init_done = false;
+
+	if (!_init_done) {
+		DeviceInfo::reload_device_info ();
+		DeviceProfile::reload_device_profiles ();
+		_init_done = true;
+	}
+}
+
+MackieControlProtocol::MackieControlProtocol (Session& session, std::string const & device_name)
 #ifdef UF8
-	: ControlProtocol (session, _("SSL 360: UF8 UF1"), config)
+	: ControlProtocol (session, _("SSL 360: UF8 UF1"), device_name)
 #else
-        : ControlProtocol (session, _("Mackie"), config)
+        : ControlProtocol (session, _("Mackie"), device_name)
 #endif
 	, AbstractUI<MackieControlUIRequest> (name())
 	, _current_initial_bank (0)
@@ -144,14 +159,11 @@ MackieControlProtocol::MackieControlProtocol (Session& session, std::string cons
 	, marker_modifier_consumed_by_button (false)
 	, nudge_modifier_consumed_by_button (false)
 {
-	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::MackieControlProtocol\n");
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("MackieControlProtocol::MackieControlProtocol as %1\n", device_name));
 
 	_subview = MACKIE_NAMESPACE::SubviewFactory::instance()->create_subview(Subview::None, *this, std::shared_ptr<Stripable>());
 
-	DeviceInfo::reload_device_info ();
-	DeviceProfile::reload_device_profiles ();
-
-	set_device_info (config);
+	set_device_info (device_name);
 
 	for (int i = 0; i < 9; i++) {
 		_last_bank[i] = 0;
@@ -233,8 +245,8 @@ MackieControlProtocol::stripable_is_locked_to_strip (std::shared_ptr<Stripable> 
 {
 	{
 		PBD::Mutex::Lock lm (surfaces_lock);
-		for (Surfaces::const_iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
-			if ((*si)->stripable_is_locked_to_strip (r)) {
+		for (auto const & surface : surfaces) {
+			if (surface->stripable_is_locked_to_strip (r)) {
 				return true;
 			}
 		}
@@ -450,7 +462,6 @@ std::map<std::string, std::vector<std::string>>
 MackieControlProtocol::enumerate ()
 {
 	std::map<std::string, std::vector<std::string>>	devices;
-	DeviceInfo::reload_device_info();
 
 	for (const auto& device : DeviceInfo::device_info) {
 		if (!device.second.manufacturer().empty()) {
@@ -459,6 +470,56 @@ MackieControlProtocol::enumerate ()
 			} else {
 				devices.insert({device.second.manufacturer(), {device.second.name()}});
 			}
+		}
+	}
+
+	return devices;
+}
+
+std::vector<std::string>
+MackieControlProtocol::detected ()
+{
+	std::vector<string> devices;;
+	std::vector<std::string> midi_inputs;
+	std::vector<std::string> midi_outputs;
+
+	AudioEngine::instance()->get_ports ("", DataType::MIDI, PortFlags (IsPhysical|IsOutput), midi_inputs);
+	AudioEngine::instance()->get_ports ("", DataType::MIDI, PortFlags (IsPhysical|IsInput), midi_outputs);
+
+	if (midi_inputs.empty() || midi_outputs.empty()) {
+		return devices;
+	}
+
+	for (const auto& device : DeviceInfo::device_info) {
+
+		bool have_sending = false;
+		bool have_receiving = false;
+
+		std::string receiving_port (device.second.device_receiving_port_regex());
+		std::string sending_port (device.second.device_sending_port_regex());
+
+		if (!sending_port.empty()) {
+			std::regex rx (sending_port);
+			for (auto const & input : midi_inputs) {
+				if (std::regex_search (input, rx)) {
+					have_sending = true;
+					break;
+				}
+			}
+		}
+
+		if (!receiving_port.empty()) {
+			std::regex rx (receiving_port);
+			for (auto const & output : midi_outputs) {
+				if (std::regex_search (output, rx)) {
+					have_receiving = true;
+					break;
+				}
+			}
+		}
+
+		if (have_receiving && have_sending) {
+			devices.push_back (device.second.name());
 		}
 	}
 
@@ -485,6 +546,9 @@ MackieControlProtocol::set_active (bool yn)
 		if (!_device_info.name().empty()) {
 			set_device (_device_info.name(), true);
 		}
+
+
+		maybe_auto_connect ();
 
 		/* set up periodic task for timecode display and metering and automation
 		 */
@@ -525,6 +589,66 @@ MackieControlProtocol::set_active (bool yn)
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose("MackieControlProtocol::set_active done with yn: '%1'\n", yn));
 
 	return 0;
+}
+
+void
+MackieControlProtocol::maybe_auto_connect ()
+{
+	std::vector<std::string> midi_inputs;
+	std::vector<std::string> midi_outputs;
+
+	AudioEngine::instance()->get_ports ("", DataType::MIDI, PortFlags (IsPhysical|IsOutput), midi_inputs);
+	AudioEngine::instance()->get_ports ("", DataType::MIDI, PortFlags (IsPhysical|IsInput), midi_outputs);
+
+	if (midi_inputs.empty() || midi_outputs.empty()) {
+		return;
+	}
+
+	std::vector<std::string> receiving_ports;
+	std::vector<std::string> sending_ports;
+
+	split (_device_info.device_receiving_port_regex(), receiving_ports, '|');
+	split (_device_info.device_sending_port_regex(), sending_ports, '|');
+
+	if (receiving_ports.empty() || sending_ports.empty()) {
+		return;
+	}
+
+	auto receiving_port = receiving_ports.begin();
+	auto sending_port = sending_ports.begin();
+
+	Surfaces scopy;
+
+	{
+		PBD::Mutex::Lock lm (surfaces_lock);
+		scopy = surfaces;
+	}
+
+	for (auto & surface : scopy) {
+
+		std::regex srx (*sending_port);
+		for (auto const & input : midi_inputs) {
+			if (std::regex_search (input, srx)) {
+				surface->port().input().connect (input);
+				break;
+			}
+		}
+
+		std::regex rrx (*receiving_port);
+		for (auto const & output : midi_outputs) {
+			if (std::regex_search (output, rrx)) {
+				surface->port().output().connect (output);
+				break;
+			}
+		}
+
+		sending_port++;
+		receiving_port++;
+
+		if (sending_port == sending_ports.end() || receiving_port == receiving_ports.end()) {
+			break;
+		}
+	}
 }
 
 bool
@@ -2336,9 +2460,9 @@ MackieControlProtocol::connection_handler (std::weak_ptr<ARDOUR::Port> wp1, std:
 		scopy = surfaces;
 	}
 
-	for (Surfaces::const_iterator s = scopy.begin(); s != scopy.end(); ++s) {
-		if ((*s)->connection_handler (wp1, name1, wp2, name2, yn)) {
-			ConnectionChange (*s);
+	for (auto const & surface : scopy) {
+		if (surface->connection_handler (wp1, name1, wp2, name2, yn)) {
+			ConnectionChange (surface);
 			break;
 		}
 	}

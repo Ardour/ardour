@@ -78,6 +78,14 @@ using namespace PBD;
 using namespace Glib;
 using namespace std;
 
+std::list<GenericMidiControlProtocol::MapInfo> GenericMidiControlProtocol::map_info;
+
+void
+GenericMidiControlProtocol::init ()
+{
+	reload_maps ();
+}
+
 GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s, std::string const & config)
 	: ControlProtocol (s, _("Generic MIDI"), config)
 	, AbstractUI<GenericMIDIRequest> (name())
@@ -148,8 +156,6 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s, std::string 
 	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (_port_connection, MISSING_INVALIDATOR,
 	                                                                      std::bind (&GenericMidiControlProtocol::connection_handler, this, _1, _2, _3, _4, _5),
 	                                                                      this);
-
-	reload_maps ();
 }
 
 GenericMidiControlProtocol::~GenericMidiControlProtocol ()
@@ -218,15 +224,29 @@ GenericMidiControlProtocol::reload_maps ()
 		}
 
 		MapInfo mi;
+		XMLNode* root = tree.root ();
 
-		std::string str;
-		if (!tree.root()->get_property ("name", str)) {
+		if (!root->get_property ("manufacturer", mi.manufacturer)) {
+			error << string_compose ("MIDI binding map at %1 does not contain manufacturer name", fullpath) << endmsg;
+			continue;
+		}
+		if (!root->get_property ("name", mi.name)) {
+			error << string_compose ("MIDI binding map at %1 does not contain device name", fullpath) << endmsg;
 			continue;
 		}
 
-		mi.name = str;
-		mi.path = fullpath;
+		const XMLNodeList& children (root->children());
 
+		for (auto const & child : children) {
+
+			if (child->name() == "DeviceInfo") {
+				child->get_property ("DeviceReceivingPortRegex", mi.receiving_port_regex);
+				child->get_property ("DeviceSendingPortRegex", mi.sending_port_regex);
+				break;
+			}
+		}
+
+		mi.path = fullpath;
 		map_info.push_back (mi);
 	}
 }
@@ -319,6 +339,43 @@ GenericMidiControlProtocol::thread_init ()
 	set_thread_priority ();
 }
 
+void
+GenericMidiControlProtocol::maybe_auto_connect ()
+{
+	std::vector<std::string> midi_inputs;
+	std::vector<std::string> midi_outputs;
+
+	AudioEngine::instance()->get_ports ("", DataType::MIDI, PortFlags (IsPhysical|IsOutput), midi_inputs);
+	AudioEngine::instance()->get_ports ("", DataType::MIDI, PortFlags (IsPhysical|IsInput), midi_outputs);
+
+	if (midi_inputs.empty() || midi_outputs.empty()) {
+		return;
+	}
+
+	if (_device_receiving_port_regex.empty() && _device_sending_port_regex.empty()) {
+		return;
+	}
+
+	if (!_device_sending_port_regex.empty()) {
+		std::regex srx (_device_sending_port_regex);
+		for (auto const & input : midi_inputs) {
+			if (std::regex_search (input, srx)) {
+				_input_port->connect (input);
+				break;
+			}
+		}
+	}
+	if (!_device_receiving_port_regex.empty()) {
+		std::regex rrx (_device_receiving_port_regex);
+		for (auto const & output : midi_outputs) {
+			if (std::regex_search (output, rrx)) {
+				_output_port->connect (output);
+				break;
+			}
+		}
+	}
+}
+
 int
 GenericMidiControlProtocol::set_active (bool yn)
 {
@@ -334,6 +391,7 @@ GenericMidiControlProtocol::set_active (bool yn)
 		for (list<GenericMidiControlProtocol::MapInfo>::iterator x = map_info.begin(); x != map_info.end(); ++x) {
 			if (_device_name == x->name) {
 				load_bindings (x->path);
+				maybe_auto_connect ();
 				break;
 			}
 		}
@@ -772,80 +830,70 @@ GenericMidiControlProtocol::get_feedback () const
 std::map<std::string, std::vector<std::string>>
 GenericMidiControlProtocol::enumerate ()
 {
-	vector<string> midi_maps;
-	Searchpath spath (system_midi_map_search_path());
-	spath += user_midi_map_directory ();
-	std::list<MapInfo> map_inf;
 	std::map<std::string, std::vector<std::string>> devices;
 
-	find_files_matching_filter (midi_maps, spath, midi_map_filter, 0, false, true);
+	for (auto const& info : map_info) {
 
-	if (midi_maps.empty()) {
-		cerr << "No MIDI maps found using " << spath.to_string() << endl;
-		return devices;
-	}
-
-	for (vector<string>::iterator i = midi_maps.begin(); i != midi_maps.end(); ++i) {
-		string fullpath = *i;
-
-		XMLTree tree;
-
-		if (!tree.read (fullpath.c_str())) {
-			continue;
-		}
-
-		MapInfo mi;
-
-		std::string str;
-		if (!tree.root()->get_property ("name", str)) {
-			continue;
-		}
-
-		mi.name = str;
-		mi.path = fullpath;
-
-		map_inf.push_back (mi);
-	}
-
-	for (const auto& info : map_inf) {
-		string xmlpath = info.path;
-		DEBUG_TRACE (DEBUG::GenericMidi, "Get manufacturers: Reading midi map\n");
-		XMLTree state_tree;
-
-		if (!state_tree.read (info.path.c_str())) {
-			error << string_compose(_("Could not understand MIDI bindings file %1"), xmlpath) << endmsg;
-			return devices;
-		}
-
-		XMLNode* root = state_tree.root();
-
-		if (root->name() != X_("ArdourMIDIBindings")) {
-			error << string_compose (_("MIDI Bindings file %1 is not really a MIDI bindings file"), xmlpath) << endmsg;
-			return devices;
-		}
-
-		const XMLProperty* prop;
-
-		if ((prop = root->property ("version")) == 0) {
-			return devices;
-		}
-
-		DEBUG_TRACE (DEBUG::GenericMidi, "Getting manufacturers\n");
-		string manufacturer;
-		string name;
-		if (root->get_property ("manufacturer", manufacturer)) {
-			if ((root->get_property ("name", name))) {
-				if (devices.find(manufacturer) != devices.end()) {
-					devices[manufacturer].push_back(name);
-				} else {
-					devices.insert({manufacturer, {name}});
-				}
-			}
+		if (devices.find (info.manufacturer) != devices.end()) {
+			devices[info.manufacturer].push_back (info.name);
+		} else {
+			devices.insert({info.manufacturer, {info.name}});
 		}
 	}
 
 	return devices;
 }
+
+std::vector<std::string>
+GenericMidiControlProtocol::detected ()
+{
+	std::vector<string> devices;;
+	std::vector<std::string> midi_inputs;
+	std::vector<std::string> midi_outputs;
+
+	AudioEngine::instance()->get_ports ("", DataType::MIDI, PortFlags (IsPhysical|IsOutput), midi_inputs);
+	AudioEngine::instance()->get_ports ("", DataType::MIDI, PortFlags (IsPhysical|IsInput), midi_outputs);
+
+	if (midi_inputs.empty() || midi_outputs.empty()) {
+		return devices;
+	}
+
+	for (auto const & mi : map_info)  {
+
+		bool have_sending = false;
+		bool have_receiving = false;
+
+		std::string receiving_port (mi.receiving_port_regex);
+		std::string sending_port (mi.sending_port_regex);
+
+		if (!sending_port.empty()) {
+			std::regex rx (sending_port);
+			for (auto const & input : midi_inputs) {
+				if (std::regex_search (input, rx)) {
+					have_sending = true;
+					break;
+				}
+			}
+		}
+
+		if (!receiving_port.empty()) {
+			std::regex rx (receiving_port);
+			for (auto const & output : midi_outputs) {
+				if (std::regex_search (output, rx)) {
+					have_receiving = true;
+					break;
+				}
+			}
+		}
+
+		if (have_receiving || have_sending) {
+			devices.push_back (mi.name);
+		}
+	}
+
+	return devices;
+}
+
 
 int
 GenericMidiControlProtocol::load_bindings (const string& xmlpath)
@@ -872,32 +920,38 @@ GenericMidiControlProtocol::load_bindings (const string& xmlpath)
 	}
 
 	const XMLNodeList& children (root->children());
-	XMLNodeConstIterator citer;
 
 	MIDIControllable* mc;
 
 	drop_all ();
 
 	DEBUG_TRACE (DEBUG::GenericMidi, "Loading bindings\n");
-	for (citer = children.begin(); citer != children.end(); ++citer) {
+	for (auto const & child : children) {
 
-		if ((*citer)->name() == "DeviceInfo") {
+		if (child->name() == "DeviceInfo") {
 
-			if ((*citer)->get_property ("bank-size", _bank_size)) {
+			if (child->get_property ("bank-size", _bank_size)) {
 				_current_bank = 0;
 			}
 
-			if (!(*citer)->get_property ("motorized", _motorised)) {
+			if (!child->get_property ("motorized", _motorised)) {
 				_motorised = false;
 			}
 
-			if (!(*citer)->get_property ("threshold", _threshold)) {
+			if (!child->get_property ("threshold", _threshold)) {
 				_threshold = 10;
 			}
+
+			if (!child->get_property ("DeviceReceivingPortRegex", _device_receiving_port_regex)) {
+				_device_receiving_port_regex = std::string();
+			}
+			if (!child->get_property ("DeviceSendingPortRegex", _device_sending_port_regex)) {
+				_device_sending_port_regex = std::string ();
+			}
+
 		}
 
-		if ((*citer)->name() == "Binding") {
-			const XMLNode* child = *citer;
+		if (child->name() == "Binding") {
 
 			if (child->property ("uri")) {
 				/* controllable */
@@ -1905,4 +1959,3 @@ GenericMidiControlProtocol::remove_rid_from_selection (int rid)
 	int id = rid + (_current_bank * _bank_size);
 	ControlProtocol::remove_rid_from_selection (id);
 }
-
