@@ -94,6 +94,8 @@ class DeviceInfo
 	bool follows_selection() const;
 	const std::string& name() const;
 	const std::string& manufacturer() const;
+	const std::string& device_receiving_port_regex() const;
+	const std::string& device_sending_port_regex() const;
 
 	void set_follows_selection (bool);
 
@@ -139,6 +141,8 @@ class DeviceInfo
 	std::string _name;
 	std::string _manufacturer;
 	std::string _global_button_name;
+	std::string _device_receiving_port_regex;
+	std::string _device_sending_port_regex;
 
 	GlobalButtonsInfo _global_buttons;
 	StripButtonsInfo _strip_buttons;

@@ -556,15 +556,20 @@ ControlProtocolManager::activate (bool detected, ControlProtocolInfo& cpi, std::
 {
 	assert (_session);
 
-	ControlProtocol*        cp;
+	ControlProtocol*  cp = nullptr;
+	bool was_active = false;
 
 	if ((cp = cpi.get_instance (device_name)) == nullptr) {
+		std::cerr << cpi.name << " need to create instance for " << device_name << std::endl;
 		if ((cp = cpi.add_instance (*_session, device_name)) == nullptr) {
 			return -1;
 		}
+	} else {
+		was_active = cp->active();
 	}
 
-	bool was_active = cp->active();
+
+	std::cerr << cpi.name << " active ? " << cp->active () << std::endl;
 
 	if (detected) {
 		cpi.activate (*cp);
@@ -801,18 +806,10 @@ ControlProtocolManager::get_state () const
 }
 
 void
-ControlProtocolManager::probe ()
-{
-	probe_midi_control_protocols ();
-}
-
-void
 ControlProtocolManager::establish (Session& s)
 {
 	set_session (&s);
-
 	use_state ();
-	probe ();
 
 	/* Catch up with session selection */
 
@@ -869,49 +866,69 @@ ControlProtocolManager::probe_midi_control_protocols ()
 	PBD::RWLock::ReaderLock lm (_protocols_lock);
 
 	for (auto const& cpi : _control_protocol_info) {
-		/* Note: manual teardown deletes the descriptor */
+
 		PBD::RWLock::ReaderLock lm (_protocols_lock);
+
 		if (!cpi->descriptor) {
 			cpi->automatic = false;
 			continue;
 		}
-		if (!cpi->descriptor->probe_port) {
-			continue;
-		}
+
 		bool active = cpi->active();
-		bool found  = cpi->descriptor->probe_port ();
+		bool found = false;
+		bool single_device = false;
 
-		if (!active && found) {
-			cpi->automatic = true;
+		if (cpi->descriptor->probe_port) {
+			found = cpi->descriptor->probe_port ();
+		}
 
-			string device_name;
+		std::map<std::string,std::vector<std::string>> en;
 
-			if (cpi->instances.empty()) {
-				auto en = cpi->descriptor->enumerate ();
-				if (!en.empty()) {
-					/* if there are zero or only 1 device
+		if (found) {
+			en = cpi->descriptor->enumerate ();
+			single_device = (en.begin()->second.size() == 1);
+		}
+
+		// std::cerr << cpi->name << " F " << found << " SD " << single_device << " A " << active << std::endl
+
+		if (single_device) {
+
+			if (found) {
+
+				if (!active) {
+
+					/* there is only 1 device
 					   names provided by enumerate(), this
 					   protocol only supports a single
 					   device type, and device name is
 					   expected to be empty.
-
-					   Otherwise, pick the first one.
-
-					   XXX fix this all by using the
-					   "detected()" descriptor function.
 					*/
-					if (en.begin()->second.size() > 1) {
-						device_name = en.begin()->second.front();
-					}
+					std::string device_name = en.begin()->second.front();
+					lm.release ();
+					auto_activate (*cpi, device_name);
 				}
-			}
-			lm.release();
-			auto_activate (*cpi, device_name);
-		} else if (active && cpi->automatic && !found) {
 
-			cpi->automatic = false;
+			} else {
+				cpi->automatic = false;
+				lm.release();
+				auto_deactivate (*cpi);
+			}
+
+		} else if (!cpi->active() && cpi->descriptor->detected != nullptr) {
+
+			std::vector<std::string> devices;
+
+			std::cerr << "Running detected() method for " << cpi->name << std::endl;
+
+			devices = cpi->descriptor->detected ();
+
 			lm.release();
-			auto_deactivate (*cpi);
+
+			for (auto const & device_name : devices) {
+				std::cerr << "auto-activate " << cpi->name << " as " << device_name << std::endl;
+				auto_activate (*cpi, device_name);
+			}
+
 		}
 	}
 }

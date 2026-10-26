@@ -1034,8 +1034,8 @@ Surface::turn_it_on ()
 
 	_mcp.device_ready ();
 
-	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
-		(*s)->notify_all ();
+	for (auto & strip : strips) {
+		strip->notify_all ();
 	}
 
 	update_view_mode_display (false);

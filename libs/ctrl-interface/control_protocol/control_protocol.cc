@@ -88,7 +88,6 @@ ControlProtocol::ControlProtocol (Session& s, string const & nom, string const &
 
 ControlProtocol::~ControlProtocol ()
 {
-	PBD::stacktrace (std::cerr, 12);
 }
 
 void

@@ -60,6 +60,8 @@ public:
 
 class GenericMidiControlProtocol : public ARDOUR::ControlProtocol, public AbstractUI<GenericMIDIRequest> {
 public:
+	static void init();
+
 	GenericMidiControlProtocol (ARDOUR::Session&, std::string const & config);
 	virtual ~GenericMidiControlProtocol();
 
@@ -94,6 +96,7 @@ public:
 	void  tear_down_gui ();
 
 	static std::map<std::string, std::vector<std::string>> enumerate ();
+	static std::vector<std::string> detected ();
 	int load_bindings (const std::string&);
 	void drop_bindings ();
 	void drop_all ();
@@ -103,12 +106,17 @@ public:
 	std::string current_binding() const { return _current_binding; }
 
 	struct MapInfo {
-	    std::string name;
-	    std::string path;
+		std::string name;
+		std::string path;
+		std::string manufacturer;
+		std::string sending_port_regex;
+		std::string receiving_port_regex;
 	};
 
-	std::list<MapInfo> map_info;
-	void reload_maps ();
+	static std::list<MapInfo> map_info;
+	static void reload_maps ();
+
+	void maybe_auto_connect ();
 
 	void set_current_bank (uint32_t);
 	void next_bank ();
@@ -202,6 +210,8 @@ private:
 	*/
 	bool _motorised;
 	int _threshold;
+	std::string _device_receiving_port_regex;
+	std::string _device_sending_port_regex;
 
 	mutable void *gui;
 	void build_gui ();

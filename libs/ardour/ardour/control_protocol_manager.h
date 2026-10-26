@@ -128,7 +128,6 @@ class LIBARDOUR_API ControlProtocolManager : public PBD::Stateful, public ARDOUR
 	int      set_state (const XMLNode&, int version);
 	XMLNode& get_state () const;
 	int      use_state ();
-	void     probe ();
 
 	PBD::Signal<void (ControlProtocolInfo*,std::string,bool)> ProtocolStatusChange;
 

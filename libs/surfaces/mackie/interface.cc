@@ -71,6 +71,12 @@ enumerate_mackie_protocol ()
 	return MackieControlProtocol::enumerate();
 }
 
+static std::vector<std::string>
+detected_mackie_protocol ()
+{
+	return MackieControlProtocol::detected ();
+}
+
 static ControlProtocolDescriptor mackie_descriptor = {
 	/* name       */ "Mackie",
 	/* id         */ "uri://ardour.org/surfaces/mackie:0",
@@ -81,7 +87,7 @@ static ControlProtocolDescriptor mackie_descriptor = {
 	/* initialize */ new_mackie_protocol,
 	/* destroy    */ delete_mackie_protocol,
 	/* enumerate  */ enumerate_mackie_protocol,
-	/* detected   */ nullptr
+	/* detected   */ detected_mackie_protocol,
 };
 
-extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &mackie_descriptor; }
+extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { MackieControlProtocol::init(); return &mackie_descriptor; }

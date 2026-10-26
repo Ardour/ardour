@@ -467,6 +467,14 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 		}
 	}
 
+	if ((child = node.child ("DeviceSendingPortRegex")) != 0) {
+		child->get_property ("value", _device_sending_port_regex);
+	}
+
+	if ((child = node.child ("DeviceReceivingPortRegex")) != 0) {
+		child->get_property ("value", _device_receiving_port_regex);
+	}
+
 	return 0;
 }
 
@@ -619,6 +627,18 @@ bool
 DeviceInfo::has_touch_sense_faders () const
 {
 	return _has_touch_sense_faders;
+}
+
+const std::string&
+DeviceInfo::device_receiving_port_regex() const
+{
+	return _device_receiving_port_regex;
+}
+
+const std::string&
+DeviceInfo::device_sending_port_regex() const
+{
+	return _device_sending_port_regex;
 }
 
 static const char * const devinfo_env_variable_name = "ARDOUR_MCP_PATH";
