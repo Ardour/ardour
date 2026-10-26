@@ -92,14 +92,18 @@ PBD::path_expand (string path)
 #if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
 		int start_pos, end_pos;
 		m.fetch_pos (0, start_pos, end_pos);
-		path.replace (start_pos, end_pos - start_pos, val ? val : "");
+		upath.replace (start_pos, end_pos - start_pos, val ? val : "");
 #else
 		path.replace (m.position(0), m.length(0), val ? val : "");
 #endif
 	}
 
 	/* canonicalize */
+#if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
+	return canonical_path (std::string(upath));
+#else
 	return canonical_path (path);
+#endif
 }
 
 string
