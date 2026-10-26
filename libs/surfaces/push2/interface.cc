@@ -32,7 +32,7 @@ using namespace ArdourSurface;
 static ControlProtocol*
 new_push2 (Session* s, std::string const & device_name)
 {
-	Push2 * p2 = 0;
+	Push2 * p2 = nullptr;
 
 	try {
 		p2 = new Push2 (*s);
@@ -42,7 +42,7 @@ new_push2 (Session* s, std::string const & device_name)
 	catch (std::exception & e) {
 		error << "Error instantiating Push2 support: " << e.what() << endmsg;
 		delete p2;
-		p2 = 0;
+		p2 = nullptr;
 	}
 
 	return p2;
