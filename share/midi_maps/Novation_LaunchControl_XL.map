@@ -2,7 +2,7 @@
 <ArdourMIDIBindings version="1.0.0" name="Launch Control XL (generic)" manufacturer="Novation">
 <!-- 2014-10-04 Alois Cochard (alois.cochard@gmail.com)            -->
 
-<DeviceInfo bank-size="8" motorised="yes"/>
+<DeviceInfo bank-size="8" motorized="yes"/>
 
 <Binding channel="9" ctl="13"   uri="/route/send/gain B1 1"/>
 <Binding channel="9" ctl="14"   uri="/route/send/gain B2 1"/>

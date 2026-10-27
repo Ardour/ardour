@@ -9,7 +9,7 @@
 <!-- It will map pads and knobs to channel 16 -->
 <!-- Press the "PROG CHANGE" button to switch pads into PGM mode -->
 
-	<DeviceInfo bank-size="6" motorised="no"/>
+	<DeviceInfo bank-size="6" motorized="no"/>
 
 <!-- Knobs mapped to Ardour Faders - Control Bank A  -->
 

@@ -4,7 +4,7 @@
 <!-- MIDI Mapping for Behringer CMD LC-1 -->
 <!-- 2024-10-29  Toni Link (antonio.josian@gmail.com) -->
 
-	<DeviceInfo bank-size="4" motorised="no"/>
+	<DeviceInfo bank-size="4" motorized="no"/>
 
 <!-- Knobs mapped to selected tracks Sends 1 and 2  -->
 	<Binding channel="8" enc-b="16" uri="/route/send/gain B1 1"/> <!-- Selection 1 Send 1-->

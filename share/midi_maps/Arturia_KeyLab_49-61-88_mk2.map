@@ -183,7 +183,7 @@
     <!-- Encoders, Faders, Buttons -->
     <!-- Control events via KeyLab mkII 61 3:(capture_0) KeyLab mkII 61 MIDI Port -->
     <!-- *NOTE: Audio Lab mode "Next" / "Previous" buttons (MAY) conflict with "USER" mode "Select" toggles. -->
-    <DeviceInfo bank-size="8" motorised="no"/>
+    <DeviceInfo bank-size="8" motorized="no"/>
     <Binding channel="1" ctl="22" function="next-bank"/>						<!-- Part 1 / Next -->
     <Binding channel="1" ctl="23" function="prev-bank"/>						<!-- Part 2 / Previous -->
     <Binding channel="1" ctl="24" action="Mixer/unity-gain"/>					<!-- Live / Bank -->

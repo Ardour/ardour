@@ -13,7 +13,7 @@
 
 <!-- Press the "PROG CHANGE" button to switch pads into PGM mode -->
 
-	<DeviceInfo bank-size="8" motorised="no"/>
+	<DeviceInfo bank-size="8" motorized="no"/>
 
 <!-- Knobs mapped to Ardour Faders  -->
 
