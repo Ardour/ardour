@@ -87,6 +87,11 @@ UI_CONFIG_VARIABLE (ARDOUR::ClockDeltaMode, primary_clock_delta_mode, "primary-c
 UI_CONFIG_VARIABLE (ARDOUR::ClockDeltaMode, secondary_clock_delta_mode, "secondary-clock-delta-mode", NoDelta)
 UI_CONFIG_VARIABLE (ARDOUR::samplecnt_t, clock_display_limit, "clock-display-limit", 359999) /* seconds; default 99h, 0 = unlimited */
 UI_CONFIG_VARIABLE (bool, show_track_meters, "show-track-meters", true)
+#ifdef __APPLE__
+UI_CONFIG_VARIABLE (bool, fastmeter_partial_exposure, "fastmeter-partial-exposure", false)
+#else
+UI_CONFIG_VARIABLE (bool, fastmeter_partial_exposure, "fastmeter-partial-exposure", true)
+#endif
 UI_CONFIG_VARIABLE (bool, follow_edits, "follow-edits", false)
 UI_CONFIG_VARIABLE (ARDOUR::TimeSelectionAfterSectionPaste, after_section_op, "after-section-op", ARDOUR::SectionSelectRetainAndMovePlayhead)
 UI_CONFIG_VARIABLE (bool, super_rapid_clock_update, "super-rapid-clock-update", false)
