@@ -75,7 +75,7 @@ class /*LIBPBD_API*/ Stateful {
 
 	/* RAII structure to manage thread-local ID regeneration. */
 	struct ForceIDRegeneration {
-#ifdef MINGW_NATIVE_TLS
+#if defined (MINGW_NATIVE_TLS) || defined (COMPILER_MSVC)
 		/* Due to Native TLS recently being added, errors come from
 		 * thread_local variables during external linkage.
 		 * See https://github.com/msys2/MINGW-packages/issues/29272 */
@@ -154,7 +154,7 @@ class /*LIBPBD_API*/ Stateful {
   private:
 	friend struct ForceIDRegeneration;
 	static thread_local bool _regenerate_xml_or_string_ids;
-#ifdef MINGW_NATIVE_TLS
+#if defined (MINGW_NATIVE_TLS) || defined (COMPILER_MSVC)
 	static LIBPBD_API bool& _regenerate_xml_or_string_ids_ref ();
 #endif
 
