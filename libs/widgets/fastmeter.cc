@@ -741,6 +741,16 @@ FastMeter::set (float lvl, float peak)
 		return;
 	}
 
+	if (!UIConfigurationBase::instance().get_fastmeter_partial_exposure ()) {
+		/* https://tracker.ardour.org/view.php?id=10293#c30611
+		 * partial exposure on macOS (even with offscreen surface) causes
+		 * the application to spend significant time in CG::DisplayList::executeEntries
+		 * and then CGClipCreateWithPath.
+		 */
+		queue_draw ();
+		return;
+	}
+
 	if (orientation == Vertical) {
 		queue_vertical_redraw (win, old_level);
 	} else {

@@ -49,6 +49,8 @@ public:
 	virtual bool get_widget_prelight () const = 0;
 	virtual Gtkmm2ext::Color color (const std::string&, bool* failed = 0) const = 0;
 
+	virtual bool get_fastmeter_partial_exposure () const = 0;
+
 	virtual Pango::FontDescription get_NormalFont () const = 0;
 	virtual Pango::FontDescription get_SmallFont () const = 0;
 	virtual Pango::FontDescription get_NormalMonospaceFont () const = 0;
