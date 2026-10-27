@@ -40,6 +40,7 @@
 #include "ui_config.h"
 #include "opts.h"
 
+#import <Cocoa/Cocoa.h>
 #include <CoreFoundation/CFLocale.h>
 #import <CoreFoundation/CFString.h>
 #import <Foundation/NSString.h>
@@ -47,6 +48,40 @@
 
 using namespace std;
 using namespace PBD;
+
+@interface DisplayMonitor : NSObject
+- (void)startMonitoring;
+@end
+
+@implementation DisplayMonitor
+
+- (void)startMonitoring {
+    NSNotificationCenter *center = [[NSWorkspace sharedWorkspace] notificationCenter];
+
+    // Register for display sleep (screen goes blank)
+    [center addObserver:self
+               selector:@selector(displayDidSleep:)
+                   name:NSWorkspaceScreensDidSleepNotification
+                 object:nil];
+
+    // Register for display wake
+    [center addObserver:self
+               selector:@selector(displayDidWake:)
+                   name:NSWorkspaceScreensDidWakeNotification
+                 object:nil];
+}
+
+- (void)displayDidSleep:(NSNotification *)notification {
+	    std::cerr << "The screen is now blank/asleep.\n";
+}
+
+- (void)displayDidWake:(NSNotification *)notification {
+	std::cerr << "The screen woke up.\n";
+}
+
+@end
+
+static DisplayMonitor* display_monitor = 0;
 
 void
 set_language_preference ()
@@ -156,6 +191,8 @@ set_language_preference ()
 void
 no_app_nap ()
 {
+	display_monitor = [DisplayMonitor new];
+	[display_monitor startMonitoring];
 
 #ifndef NSActivityLatencyCritical
 #define NSActivityLatencyCritical 0xFF00000000ULL
