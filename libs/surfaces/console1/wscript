@@ -27,3 +27,6 @@ def build(bld):
     obj.uselib       = 'SIGCPP XML OSX GLIBMM GIOMM PANGOMM'
     obj.use          = 'libardour libardour_cp libardour_midisurface libgtkmm2ext libpbd libevoral libtemporal libytkmm'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
+
+    if bld.env['build_target'] == 'msvc':
+        obj.defines += ['NOMINMAX']
