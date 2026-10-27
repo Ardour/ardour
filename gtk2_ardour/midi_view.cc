@@ -742,6 +742,17 @@ MidiView::motion (GdkEventMotion* ev)
 {
 	if (!_editing_context.drags()->active() && !_entered_note && _editing_context.current_mouse_mode() == MouseDraw) {
 
+		if (midi_track()->key_enforcement_policy() & NoDraw) {
+			double x = ev->x;
+			double y = ev->y;
+			_note_group->canvas_to_item (x, y);
+			if (!midi_track()->key()->in_key (y_to_note (y))) {
+				remove_ghost_note ();
+				hide_verbose_cursor ();
+				return false;
+			}
+		}
+
 		if (_ghost_note) {
 			update_ghost_note (ev->x, ev->y, ev->state);
 		} else {
