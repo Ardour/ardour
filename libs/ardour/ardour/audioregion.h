@@ -175,6 +175,8 @@ class LIBARDOUR_API AudioRegion : public Region, public AudioReadable
 
 	void set_fade_before_fx (bool yn);
 
+	void move_automation_to_new_start ();
+
 	int separate_by_channel (std::vector<std::shared_ptr<Region> >&) const;
 
 	bool remove_plugin (std::shared_ptr<RegionFxPlugin>);

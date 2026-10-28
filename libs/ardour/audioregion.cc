@@ -543,6 +543,21 @@ AudioRegion::set_fade_before_fx (bool yn)
 	}
 }
 
+void
+AudioRegion::move_automation_to_new_start ()
+{
+	if (start() != last_start()) {
+		_envelope->shift (timepos_t (0), start().distance (last_start()));
+		foreach_plugin ([&](std::weak_ptr<RegionFxPlugin> wfx)
+		{
+			shared_ptr<RegionFxPlugin> rfx = wfx.lock ();
+			if (rfx) {
+				rfx->shift_automation (timepos_t (0), start().distance (last_start()));
+			}
+		});
+	}
+}
+
 timecnt_t
 AudioRegion::tail () const
 {
@@ -607,6 +622,13 @@ AudioRegion::read_waveform_envelope (gain_t *buf, samplecnt_t npoints, samplecnt
 		 */
 		timecnt_t tas (timecnt_t::from_samples (length().samples ()));
 		_waveform_envelope.truncate_start (tas);
+
+	} else if (moving_start () && Config->get_automation_follows_content ()) {
+		/* If the envelope follows region content during RegionSlipContentsDrag
+		 * we need to shift it manually as the envelope's acctual update will
+		 * only occur when drag ends.
+		 */
+		offset += last_start().distance (start()).samples();
 	}
 
 	_waveform_envelope.curve().get_vector (timepos_t (offset), timepos_t (offset + cnt), buf, npoints);

@@ -629,6 +629,17 @@ RegionFxPlugin::truncate_automation_end (timepos_t end)
 }
 
 void
+RegionFxPlugin::shift_automation (timepos_t const& time, timecnt_t const& distance)
+{
+	for (auto const& i : _controls) {
+		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (i.second);
+		if (ac->alist ()) {
+			ac->alist ()->shift (time, distance);
+		}
+	}
+}
+
+void
 RegionFxPlugin::x_scale_automation (Temporal::ratio_t r)
 {
 	for (auto const& i : _controls) {
