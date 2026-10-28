@@ -1019,7 +1019,9 @@ Region::trim_front (timepos_t const & new_position)
 		return;
 	}
 	modify_front_unchecked (new_position, false);
-	_trimming_front = true;
+	if (property_changes_suspended ()) {
+		_trimming_front = true;
+	}
 }
 
 void
@@ -1110,7 +1112,6 @@ Region::trim_end (timepos_t const & new_endpoint)
 	if (locked()) {
 		return;
 	}
-	_trimming_front = false;
 	modify_end_unchecked (new_endpoint, false);
 }
 
@@ -1678,7 +1679,16 @@ Region::suspend_property_changes ()
 {
 	Stateful::suspend_property_changes ();
 	_last_length = _length;
+	_last_start = _start;
 }
+
+void
+Region::resume_property_changes ()
+{
+	Stateful::resume_property_changes ();
+	_trimming_front = false;
+}
+
 
 void
 Region::mid_thaw (const PropertyChange& what_changed)
