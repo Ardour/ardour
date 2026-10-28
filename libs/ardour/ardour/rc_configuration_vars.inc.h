@@ -116,6 +116,7 @@ CONFIG_VARIABLE (bool, use_osc, "use-osc", false)
 
 CONFIG_VARIABLE (LayerModel, layer_model, "layer-model", Manual)
 CONFIG_VARIABLE (bool, automation_follows_regions, "automation-follows-regions", true)
+CONFIG_VARIABLE (bool, automation_follows_content, "automation-follows-content", false)
 CONFIG_VARIABLE (bool, region_boundaries_from_selected_tracks, "region-boundaries-from-selected-tracks", true)
 CONFIG_VARIABLE (bool, region_boundaries_from_onscreen_tracks, "region-boundaries-from-onscreen_tracks", true)
 CONFIG_VARIABLE (FadeShape, default_fade_shape, "default-fade-shape", FadeConstantPower)
