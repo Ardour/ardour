@@ -293,6 +293,7 @@ public:
 	void recompute_position_from_time_domain ();
 
 	void suspend_property_changes ();
+	void resume_property_changes ();
 
 	bool covers (samplepos_t sample) const {
 		return first_sample() <= sample && sample <= last_sample();
