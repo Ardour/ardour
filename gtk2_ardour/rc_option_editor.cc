@@ -3440,6 +3440,15 @@ These settings will only take effect after %1 is restarted.\n\
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_automation_follows_regions)
 		     ));
 
+	add_option (_("Editor"),
+	 	new BoolOption (
+		    "automation-follows-content",
+		    _("Move region automation and envelope when audio content is shifted"),
+		    sigc::mem_fun (*_rc_config, &RCConfiguration::get_automation_follows_content),
+		    sigc::mem_fun (*_rc_config, &RCConfiguration::set_automation_follows_content)
+ 		    ));
+
+
 	bo = new BoolOption (
 		     "new-automation-points-on-lane",
 		     _("Ignore Y-axis when adding new automation-points"),

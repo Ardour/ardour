@@ -397,6 +397,8 @@
 [auto-return-target-list]
 [automation-follows-regions]
   automation follows regions
+[automation-follows-content]
+  automation follows content
 [automation-interval-msecs]
   automation
 [automation-thinning-factor]
