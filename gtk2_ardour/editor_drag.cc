@@ -807,7 +807,7 @@ RegionSlipContentsDrag::motion (GdkEvent* event, bool first_move)
 }
 
 void
-RegionSlipContentsDrag::finished (GdkEvent*, bool movement_occurred)
+RegionSlipContentsDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (!movement_occurred) {
 		aborted (movement_occurred);
@@ -817,6 +817,11 @@ RegionSlipContentsDrag::finished (GdkEvent*, bool movement_occurred)
 	for (auto & sd: draggables) {
 		editing_context.add_command (new StatefulDiffCommand (sd->region ()));
 		sd->drag_end ();
+		std::shared_ptr<AudioRegion> arv = dynamic_pointer_cast<AudioRegion> (sd->region());
+		if (Config->get_automation_follows_content() && arv) {
+			/* shift envelope & fx lines */
+			arv->move_automation_to_new_start ();
+		}
 		sd->region ()->resume_property_changes ();
 	}
 
