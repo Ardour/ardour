@@ -1012,6 +1012,11 @@ Region::move_start (timecnt_t const & distance)
 	first_edit ();
 
 	if (property_changes_suspended ()) {
+		/* AudioRegion::read_waveform_envelope needs to know about a potential
+		 * RegionSlipContentsDrag to correctly provide envelope data to WaveView.
+		 * property_changes_suspended () is the best fit at our disposal,
+		 * unless we want to make Region more GUI-aware.
+		 */
 		_moving_start = true;
 	}
 
@@ -1026,6 +1031,11 @@ Region::trim_front (timepos_t const & new_position)
 	}
 	modify_front_unchecked (new_position, false);
 	if (property_changes_suspended ()) {
+		/* AudioRegion::read_waveform_envelope needs to know about a potential
+		 * TrimDrag to correctly provide envelope data to WaveView.
+		 * property_changes_suspended () is the best fit at our disposal,
+		 * unless we want to make Region more GUI-aware.
+		 */
 		_trimming_front = true;
 	}
 }
