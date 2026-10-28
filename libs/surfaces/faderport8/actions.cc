@@ -69,10 +69,10 @@ FaderPort8::setup_actions ()
 	BindMethod2 (BtnLoop, pressed, button_loop);
 	BindMethod2 (BtnRecord, pressed, button_record);
 	BindMethod2 (BtnClick, pressed, button_metronom);
-	BindAction (BtnRedo, "Editor", "redo");
+	BindAction (BtnRedo, "Editing", "redo");
 
 	BindAction (BtnSave, "Common", "Save");
-	BindAction (BtnUndo, "Editor", "undo");
+	BindAction (BtnUndo, "Editing", "undo");
 	BindAction (BtnRedo, "Editor", "redo");
 
 #ifdef FP8_MUTESOLO_UNDO
