@@ -507,13 +507,13 @@ BasicUI::apply_mixer_scene (int idx)
 void
 BasicUI::undo ()
 {
-	access_action ("Editor/undo");
+	access_action ("EditorEditing/undo");
 }
 
 void
 BasicUI::redo ()
 {
-	access_action ("Editor/redo");
+	access_action ("EditorEditing/redo");
 }
 
 void

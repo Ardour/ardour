@@ -507,8 +507,8 @@ ContourDesignControlProtocol::setup_default_button_actions ()
 {
  	_button_actions.push_back (make_button_action ("MIDI/panic"));
 	_button_actions.push_back (make_button_action ("Editor/remove-last-capture"));
-	_button_actions.push_back (make_button_action ("Editor/undo"));
-	_button_actions.push_back (make_button_action ("Editor/redo"));
+	_button_actions.push_back (make_button_action ("EditorEditing/undo"));
+	_button_actions.push_back (make_button_action ("EditorEditing/redo"));
 	_button_actions.push_back (make_button_action ("Common/jump-backward-to-mark"));
 	_button_actions.push_back (make_button_action ("Transport/Record"));
 	_button_actions.push_back (make_button_action ("Transport/Stop"));

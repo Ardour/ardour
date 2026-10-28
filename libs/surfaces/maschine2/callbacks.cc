@@ -81,8 +81,8 @@ Maschine2::connect_signals ()
 	_ctrl->button (M2Contols::Grid)->changed.connect (button_connections, invalidator (*this), std::bind (&Maschine2::button_snap_changed, this, _1), gui_context());
 
 	_ctrl->button (M2Contols::Save)->released.connect_same_thread (button_connections, std::bind (&Maschine2::button_action, this, "Common", "Save"));
-	_ctrl->button (M2Contols::Undo)->released.connect_same_thread (button_connections, std::bind (&Maschine2::button_action, this, "Editor", "undo"));
-	_ctrl->button (M2Contols::Redo)->released.connect_same_thread (button_connections, std::bind (&Maschine2::button_action, this, "Editor", "redo"));
+	_ctrl->button (M2Contols::Undo)->released.connect_same_thread (button_connections, std::bind (&Maschine2::button_action, this, "EditorEditing", "undo"));
+	_ctrl->button (M2Contols::Redo)->released.connect_same_thread (button_connections, std::bind (&Maschine2::button_action, this, "EditorEditing", "redo"));
 
 	_ctrl->button (M2Contols::MasterVolume)->released.connect_same_thread (button_connections, std::bind (&Maschine2::handle_master_change, this, MST_VOLUME));
 	_ctrl->button (M2Contols::MasterTempo)->released.connect_same_thread (button_connections, std::bind (&Maschine2::handle_master_change, this, MST_TEMPO));
