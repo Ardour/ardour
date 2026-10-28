@@ -247,6 +247,7 @@ Region::register_properties ()
 	, _transient_analysis_end (0) \
 	, _soloSelected (false) \
 	, _trimming_front (false) \
+	, _moving_start (false) \
 	, _muted (Properties::muted, false) \
 	, _opaque (Properties::opaque, true) \
 	, _locked (Properties::locked, false) \
@@ -281,6 +282,7 @@ Region::register_properties ()
 	, _transient_analysis_end (other->_transient_analysis_end) \
 	, _soloSelected (false) \
 	, _trimming_front (false) \
+	, _moving_start (false) \
 	, _muted (Properties::muted, other->_muted) \
 	, _opaque (Properties::opaque, other->_opaque) \
 	, _locked (Properties::locked, other->_locked) \
@@ -1009,6 +1011,10 @@ Region::move_start (timecnt_t const & distance)
 	_whole_file = false;
 	first_edit ();
 
+	if (property_changes_suspended ()) {
+		_moving_start = true;
+	}
+
 	send_change (Properties::start);
 }
 
@@ -1687,6 +1693,7 @@ Region::resume_property_changes ()
 {
 	Stateful::resume_property_changes ();
 	_trimming_front = false;
+	_moving_start = false;
 }
 
 
