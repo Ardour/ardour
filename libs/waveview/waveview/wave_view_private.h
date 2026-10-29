@@ -60,6 +60,7 @@ public: // member variables
 	double                start_shift;
 	bool                  envelope_active;
 	uint64_t              envelope_timestamp;
+	bool                  envelope_shifting;
 
 private: // member variables
 

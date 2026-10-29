@@ -101,8 +101,10 @@ public:
 
 	void region_resized ();
 	void gain_changed ();
+
 	void envelope_changed ();
 	void envelope_active_changed (bool global_apply_envelope);
+	void set_envelope_shifting (bool);
 
 	void set_show_zero_line (bool);
 	bool show_zero_line () const;
