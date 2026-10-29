@@ -8276,7 +8276,30 @@ Session::maybe_update_tempo_from_midiclock_tempo (float bpm)
 void
 Session::send_mclk_for_cycle (samplepos_t start_sample, samplepos_t end_sample, pframes_t n_samples, samplecnt_t pre_roll)
 {
-	midi_clock->tick (start_sample, end_sample, n_samples, pre_roll);
+	Location* loc = _locations->auto_loop_location ();
+
+	if (loc && get_play_loop () && n_samples > 0 && pre_roll == 0) {
+		const samplepos_t loop_start = loc->start_sample ();
+		const samplepos_t loop_end   = loc->end_sample ();
+		const samplecnt_t looplen    = loop_end - loop_start;
+
+		samplecnt_t remain = n_samples;
+		samplepos_t start  = start_sample;
+
+		while (remain > 0) {
+			if (start >= loop_end) {
+				sampleoffset_t start_off = (start - loop_start) % looplen;
+				start = loop_start + start_off;
+			}
+
+			samplecnt_t move = std::min<samplecnt_t> (remain, loop_end - start);
+			midi_clock->tick (start, start + move, move, 0);
+			remain -= move;
+			start  += move;
+		}
+	} else {
+		midi_clock->tick (start_sample, end_sample, n_samples, pre_roll);
+	}
 }
 
 void

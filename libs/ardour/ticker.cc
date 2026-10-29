@@ -171,10 +171,10 @@ MidiClockTicker::tick (samplepos_t start_sample, samplepos_t end_sample, pframes
 			uint32_t    beat_pos;
 			samplepos_t clk_pos;
 
-			Temporal::TempoMap::use()->midi_clock_beat_at_or_after (start_sample + _mclk_out_latency.max, clk_pos, beat_pos);
+			Temporal::TempoMap::use()->midi_clock_beat_at_or_after (start_sample, clk_pos, beat_pos);
 
 			_beat_pos      = beat_pos;
-			_next_tick     = clk_pos - _mclk_out_latency.max;
+			_next_tick     = clk_pos;
 			_transport_pos = end_sample;
 		}
 
