@@ -1513,7 +1513,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			};
 
 			active_view.append_column_editable (_("Enable"), active_model.enabled);
-			active_view.append_column (_("Control Surface"), active_model.name);
+			active_view.append_column (_("Control Surface"), active_model.device_name);
 			append_button (&active_view, active_model.has_editor, "Settings", click);
 
 			active_view.get_column(1)->set_resizable (true);
@@ -1550,7 +1550,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 
 			ControlProtocolManager& m = ControlProtocolManager::instance ();
 			m.ProtocolStatusChange.connect (protocol_status_connection, MISSING_INVALIDATOR,
-			                                std::bind (&ControlSurfacesOptions::protocol_status_changed, this, _1, _2, _3), gui_context());
+			                                std::bind (&ControlSurfacesOptions::protocol_status_changed, this, _1, _2), gui_context());
 
 			active_store->signal_row_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::active_view_changed));
 			active_view.signal_button_press_event().connect_notify (sigc::bind(sigc::mem_fun(*this, &ControlSurfacesOptions::edit_clicked), &active_view, &active_model));
@@ -1609,53 +1609,50 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 		{
 			_ignore_view_change++;
 			devices_store->clear ();
+
 			std::unordered_set<std::string> manufacturers;
 
 			ControlProtocolManager& m = ControlProtocolManager::instance ();
-			for (auto const& cpi : m.control_protocol_infos ()) {
 
-				/* list all known device names for this protocol (there may be none) */
+			for (auto const & cpdi : m.devices()) {
 
-				for (auto const & [manufacturer_name,device_names] : cpi->descriptor->enumerate()) {
-					TreeModel::Row manufacturer;
-					bool found = false;
+				TreeModel::Row manufacturer;
+				bool found = false;
 
-					TreeModel::Children rows = devices_store->children();
+				ControlProtocolInfo* cpi = m.cpi_by_name (cpdi.protocol_name);
+				if (!cpi) {
+					continue;
+				}
 
-					if (manufacturers.find (manufacturer_name) != manufacturers.end()) {
-						for (const auto& row : rows) {
-							if ((std::string)row[devices_model.name] == manufacturer_name) {
-								found = true;
-								manufacturer = row;
-								break;
-							}
-						}
-					}
+				TreeModel::Children rows = devices_store->children();
 
-					if (!found) {
-						/* top level manufacturer name */
-						manufacturers.insert(manufacturer_name);
-
-						manufacturer = *devices_store->append ();
-						manufacturer[devices_model.name] = manufacturer_name;
-					}
-
-					if (device_names.empty()) {
-						manufacturer[devices_model.enabled] = (bool) cpi->active ();
-						manufacturer[devices_model.protocol_info] = cpi;
-						manufacturer[devices_model.is_device] = true;
-					} else {
-						manufacturer[devices_model.is_device] = false;
-
-						for (const auto& device_name : device_names) {
-							TreeModel::Row device = *devices_store->append (manufacturer.children());
-							device[devices_model.name] = device_name;
-							device[devices_model.enabled] = (bool) cpi->get_instance (device_name);
-							device[devices_model.protocol_info] = cpi;
-							device[devices_model.is_device] = true;
+				if (manufacturers.find (cpdi.manufacturer) != manufacturers.end()) {
+					/* Manufacturer already defined */
+					for (const auto& row : rows) {
+						if ((std::string)row[devices_model.name] == cpdi.manufacturer) {
+							found = true;
+							manufacturer = row;
+							break;
 						}
 					}
 				}
+
+				if (!found) {
+					/* top level manufacturer name */
+					manufacturers.insert(cpdi.manufacturer);
+					manufacturer = *devices_store->append ();
+					manufacturer[devices_model.name] = cpdi.manufacturer;
+				}
+
+				manufacturer[devices_model.is_device] = false;
+
+				TreeModel::Row device = *devices_store->append (manufacturer.children());
+				device[devices_model.name] = cpdi.device_name;
+				device[devices_model.enabled] = (bool) cpi->get_instance (cpdi);
+				device[devices_model.protocol_name] = cpdi.protocol_name;
+				device[devices_model.manufacturer] = cpdi.manufacturer;
+				device[devices_model.device_name] = cpdi.device_name;
+				device[devices_model.is_device] = true;
 			}
 			_ignore_view_change--;
 		}
@@ -1669,21 +1666,25 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			{
 				add (name);
 				add (enabled);
-				add (protocol_info);
+				add (protocol_name);
+				add (manufacturer);
+				add (device_name);
+				add (instance);
 				add (is_device);
 				add (has_editor);
-				add (instance);
 			}
 
 			TreeModelColumn<string> name;
 			TreeModelColumn<bool> enabled;
-			TreeModelColumn<ControlProtocolInfo*> protocol_info;
+			TreeModelColumn<string> protocol_name;
+			TreeModelColumn<string> manufacturer;
+			TreeModelColumn<string> device_name;
 			TreeModelColumn<ControlProtocol*> instance;
 			TreeModelColumn<bool> is_device;
 			TreeModelColumn<bool> has_editor;
 		};
 
-	void update_active_view_for (ControlProtocolInfo& cpi, ControlProtocol* instance, bool enabled, bool single_device) {
+		void update_active_view_for (CPDeviceIdentifier const & cpdi, ControlProtocol* instance, bool enabled, bool single_device) {
 			_ignore_view_change++;
 
 			if (enabled) {
@@ -1695,7 +1696,9 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 					active_device[active_model.name] = string_compose ("%1 - %2", instance->name(), instance->device_name());
 				}
 				active_device[active_model.enabled] = true;
-				active_device[active_model.protocol_info] = &cpi;
+				active_device[active_model.protocol_name] = cpdi.protocol_name;
+				active_device[active_model.manufacturer] = cpdi.manufacturer;
+				active_device[active_model.device_name] = cpdi.device_name;
 				active_device[active_model.instance] = instance;
 				active_device[active_model.has_editor] = instance->has_editor ();
 
@@ -1714,7 +1717,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			_ignore_view_change--;
 		}
 
-		void protocol_status_changed (ControlProtocolInfo* cpi, std::string changed_device_name, bool enabled) {
+		void protocol_status_changed (CPDeviceIdentifier const & cpdi, bool enabled) {
 			/* find the row */
 			TreeModel::Children manufacturers = devices_store->children();
 
@@ -1724,9 +1727,11 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			 * activate or deactivate.
 			 */
 
-			ControlProtocol* cp =  cpi->get_instance (changed_device_name);
+			ControlProtocolManager& m = ControlProtocolManager::instance ();
+			ControlProtocolInfo* cpi = m.cpi_by_name (cpdi.protocol_name);
+			ControlProtocol* cp =  cpi->get_instance (cpdi);
 
-			std::cerr << "PSC for " << cpi->name << " as [" << changed_device_name << "] enabled " << enabled << std::endl;
+			std::cerr << "PSC for " << cpi->name << " as [" << cpdi.device_name << "] enabled " << enabled << std::endl;
 
 			for (const auto& manufacturer : manufacturers) {
 
@@ -1742,12 +1747,12 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 				 * list appropriately.
 				 */
 
-				if (single_device || (changed_device_name == device_name)) {
+				if (single_device || (cpdi.device_name == device_name)) {
 					_protocol_change++;
 					_ignore_view_change++;
 					(*manufacturer)[devices_model.enabled] = enabled;
 					std::cerr << "UAV-man, SD = " << single_device << std::endl;
-					update_active_view_for (*cpi, cp, enabled, single_device);
+					update_active_view_for (cpdi, cp, enabled, single_device);
 					_ignore_view_change--;
 					_protocol_change--;
 				}
@@ -1758,7 +1763,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 				 */
 				for (const auto& device : devices) {
 					string const device_name ((*device)[devices_model.name]);
-					if (single_device || (changed_device_name == device_name)) {
+					if (single_device || (cpdi.device_name == device_name)) {
 						_protocol_change++;
 						_ignore_view_change++;
 						(*device)[devices_model.enabled] = enabled;
@@ -1766,7 +1771,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 						if (!single_device) {
 							/* single device protocols will have populated the active view in the manufacturer loop above. */
 							std::cerr << "UAV-dev, SD = " << single_device << std::endl;
-							update_active_view_for (*cpi, cp, enabled, single_device);
+							update_active_view_for (cpdi, cp, enabled, single_device);
 						}
 						_ignore_view_change--;
 						_protocol_change--;
@@ -1785,11 +1790,6 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			}
 
 			ControlProtocolManager& m = ControlProtocolManager::instance ();
-			ControlProtocolInfo* cpi = r[active_model.protocol_info];
-			if (!cpi) {
-				return;
-			}
-
 			bool const should_be_enabled = r[active_model.enabled];
 			std::string nom = r[active_model.name];
 
@@ -1799,7 +1799,11 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 
 			assert (!should_be_enabled);
 
-			m.user_deactivate (*cpi, nom);
+			string pn = r[active_model.protocol_name];
+			string mn = r[active_model.manufacturer];
+			string dn = r[active_model.device_name];
+
+			m.user_deactivate (CPDeviceIdentifier (pn,mn,dn));
 		}
 
 		void devices_view_changed (TreeModel::Path const & path, TreeModel::iterator const & i)
@@ -1810,26 +1814,25 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 				return;
 			}
 
-			ControlProtocolInfo* cpi = r[devices_model.protocol_info];
-
-			if (!cpi) {
-				return;
-			}
-
 			ControlProtocolManager& m = ControlProtocolManager::instance ();
 			ControlProtocol* cp = r[devices_model.instance];
 
-			string const nom (r[devices_model.name]);
+			string pn = r[devices_model.protocol_name];
+			string mn = r[devices_model.manufacturer];
+			string dn = r[devices_model.device_name];
 
 			if (!cp) {
-				string const name (r[devices_model.name]);
-				if (m.user_activate (*cpi, name)) {
+				if (m.user_activate (CPDeviceIdentifier (pn, mn, dn))) {
 					_ignore_view_change++;
 					r[devices_model.enabled] = false;
 					_ignore_view_change--;
 				}
 			} else {
-				m.user_deactivate (*cpi, nom);
+				string pn = r[devices_model.protocol_name];
+				string mn = r[devices_model.manufacturer];
+				string dn = r[devices_model.device_name];
+
+				m.user_deactivate (CPDeviceIdentifier (pn, mn, dn));
 			}
 		}
 
