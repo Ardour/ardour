@@ -547,12 +547,15 @@ void
 AudioRegion::move_automation_to_new_start ()
 {
 	if (start() != last_start()) {
+		timepos_t tend (len_as_tpos ());
 		_envelope->shift (timepos_t (0), start().distance (last_start()));
+		_envelope->truncate_end (tend);
 		foreach_plugin ([&](std::weak_ptr<RegionFxPlugin> wfx)
 		{
 			shared_ptr<RegionFxPlugin> rfx = wfx.lock ();
 			if (rfx) {
 				rfx->shift_automation (timepos_t (0), start().distance (last_start()));
+				rfx->truncate_automation_end (tend);
 			}
 		});
 	}
