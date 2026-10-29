@@ -36,12 +36,12 @@ using namespace PBD;
 using namespace ArdourSurface::LAUNCHPAD_NAMESPACE;
 
 static ControlProtocol*
-new_lk4 (Session* s, std::string const & config)
+new_lk4 (Session* s, CPDeviceIdentifier const & cpdi)
 {
 	LaunchKey4 * lk4 = nullptr;
 
 	try {
-		lk4 = new LaunchKey4 (*s);
+		lk4 = new LaunchKey4 (*s, cpdi);
 		/* do not set active here - wait for set_state() */
 	}
 	catch (std::exception & e) {
@@ -73,18 +73,21 @@ probe_lk4_midi_protocol ()
 	return LaunchKey4::probe (i, o);
 }
 
-static std::map<std::string, std::vector<std::string>>
+static std::vector<CPDeviceIdentifier>
 enumerate_lk4 ()
 {
-	return {{"Novation", {"Launchkey 4"}}};
+#ifdef LAUNCHPAD_MINI
+	return { CPDeviceIdentifier ("Novation Launchkey", "Novation", "Launchkey Mini") };
+#else
+	return { CPDeviceIdentifier ("Novation Launchkey", "Novation", "Launchkey 4") };
+#endif
 }
 
 static ControlProtocolDescriptor lk4_descriptor = {
+	/* name       */ "Novation Launchkey",
 #ifdef LAUNCHPAD_MINI
-	/* name       */ "Novation Launchkey Mini",
 	/* id         */ "uri://ardour.org/surfaces/launchkey_mini:0",
 #else
-	/* name       */ "Novation Launchkey 4",
 	/* id         */ "uri://ardour.org/surfaces/launchkey4:0",
 #endif
 	/* module     */ 0,

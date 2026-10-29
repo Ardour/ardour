@@ -97,8 +97,8 @@ static void error_callback(int, const char *, const char *)
 }
 #endif
 
-OSC::OSC (Session& s, uint32_t port)
-	: ControlProtocol (s, X_("Open Sound Control (OSC)"))
+OSC::OSC (Session& s, CPDeviceIdentifier const & cpdi, uint32_t port)
+	: ControlProtocol (s, cpdi)
 	, AbstractUI<OSCUIRequest> (name())
 	, local_server (0)
 	, remote_server (0)

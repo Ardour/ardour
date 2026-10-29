@@ -143,12 +143,8 @@ LaunchPadX::probe (std::string& i, std::string& o)
 	return true;
 }
 
-LaunchPadX::LaunchPadX (ARDOUR::Session& s)
-#ifdef LAUNCHPAD_MINI
-	: MIDISurface (s, X_("Novation LaunchPad Mini"), X_("LaunchPad Mini"), true)
-#else
-	: MIDISurface (s, X_("Novation LaunchPad X"), X_("LaunchPad X"), true)
-#endif
+LaunchPadX::LaunchPadX (ARDOUR::Session& s, CPDeviceIdentifier const & cpdi)
+	: MIDISurface (s, cpdi, true)
 	, logo_color (4)
 	, scroll_x_offset  (0)
 	, scroll_y_offset  (0)

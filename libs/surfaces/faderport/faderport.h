@@ -65,7 +65,7 @@ namespace ArdourSurface {
 
 class FaderPort : public MIDISurface {
   public:
-	FaderPort (ARDOUR::Session&);
+	FaderPort (ARDOUR::Session&, ARDOUR::CPDeviceIdentifier const &);
 	virtual ~FaderPort();
 
 	int set_active (bool yn);

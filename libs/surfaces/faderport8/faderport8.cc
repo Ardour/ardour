@@ -140,14 +140,8 @@ FaderPort8::probe (std::string& i, std::string& o)
 	return true;
 }
 
-FaderPort8::FaderPort8 (Session& s)
-#ifdef FADERPORT16
-	: ControlProtocol (s, _("PreSonus FaderPort16"))
-#elif defined FADERPORT2
-	: ControlProtocol (s, _("PreSonus FaderPort2"))
-#else
-	  : ControlProtocol (s, _("PreSonus FaderPort8"))
-#endif
+FaderPort8::FaderPort8 (Session& s, CPDeviceIdentifier const & cpdi)
+	: ControlProtocol (s, cpdi)
 	, AbstractUI<FaderPort8Request> (name())
 	, _connection_state (ConnectionState (0))
 	, _device_active (false)

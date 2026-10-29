@@ -76,7 +76,7 @@ struct OSCUIRequest : public BaseUI::BaseRequestObject {
 class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 {
   public:
-	OSC (ARDOUR::Session&, uint32_t port);
+	OSC (ARDOUR::Session&, ARDOUR::CPDeviceIdentifier const &, uint32_t port);
 	virtual ~OSC();
 
 	XMLNode& get_state () const;

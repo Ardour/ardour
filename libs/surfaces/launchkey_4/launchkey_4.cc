@@ -160,12 +160,8 @@ LaunchKey4::probe (std::string& i, std::string& o)
 	return true;
 }
 
-LaunchKey4::LaunchKey4 (ARDOUR::Session& s)
-#ifdef LAUNCHPAD_MINI
-	: MIDISurface (s, X_("Novation Launchkey Mini"), X_("Launchkey Mini"), true)
-#else
-	: MIDISurface (s, X_("Novation Launchkey 4"), X_("Launchkey MK4"), true)
-#endif
+LaunchKey4::LaunchKey4 (ARDOUR::Session& s, CPDeviceIdentifier const & cpdi)
+	: MIDISurface (s, cpdi, true)
 	, _daw_out_port (nullptr)
 	, _gui (nullptr)
 	, scroll_x_offset (0)

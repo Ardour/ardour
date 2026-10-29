@@ -62,7 +62,7 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol, public Abstra
 public:
 	static void init();
 
-	GenericMidiControlProtocol (ARDOUR::Session&, std::string const & config);
+	GenericMidiControlProtocol (ARDOUR::Session&, ARDOUR::CPDeviceIdentifier const & cpdi);
 	virtual ~GenericMidiControlProtocol();
 
 	void do_request (GenericMIDIRequest*);
@@ -95,8 +95,8 @@ public:
 	void* get_gui () const;
 	void  tear_down_gui ();
 
-	static std::map<std::string, std::vector<std::string>> enumerate ();
-	static std::vector<std::string> detected ();
+	static std::vector<ARDOUR::CPDeviceIdentifier> enumerate ();
+	static std::vector<ARDOUR::CPDeviceIdentifier> detected ();
 	int load_bindings (const std::string&);
 	void drop_bindings ();
 	void drop_all ();

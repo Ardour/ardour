@@ -25,17 +25,12 @@
 using namespace ARDOUR;
 
 static ControlProtocol*
-new_generic_midi_protocol (Session* s, std::string const & config)
+new_generic_midi_protocol (Session* s, CPDeviceIdentifier const & cpdi)
 {
 	GenericMidiControlProtocol* gmcp;
 
-	if (config.empty()) {
-		/* Generic MIDI requires a device name */
-		return nullptr;
-	}
-
 	try {
-		gmcp =  new GenericMidiControlProtocol (*s, config);
+		gmcp =  new GenericMidiControlProtocol (*s, cpdi);
 	} catch (failed_constructor& err) {
 		return 0;
 	}
@@ -54,13 +49,13 @@ delete_generic_midi_protocol (ControlProtocol* cp)
 	delete cp;
 }
 
-static std::map<std::string, std::vector<std::string>>
+static std::vector<CPDeviceIdentifier>
 enumerate_generic_midi_protocol ()
 {
 	return GenericMidiControlProtocol::enumerate();
 }
 
-static std::vector<std::string>
+static std::vector<CPDeviceIdentifier>
 detected_generic_midi_protocol ()
 {
 	return GenericMidiControlProtocol::detected();

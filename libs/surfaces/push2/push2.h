@@ -298,7 +298,7 @@ class Push2 : public MIDISurface
 	};
 
   public:
-	Push2 (ARDOUR::Session&);
+	Push2 (ARDOUR::Session&, ARDOUR::CPDeviceIdentifier const &);
 	~Push2 ();
 
 	static bool available ();

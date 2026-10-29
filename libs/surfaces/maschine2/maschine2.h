@@ -61,7 +61,7 @@ struct Maschine2Request : public BaseUI::BaseRequestObject {
 class Maschine2: public ARDOUR::ControlProtocol, public AbstractUI<Maschine2Request>
 {
 	public:
-		Maschine2 (ARDOUR::Session&);
+	Maschine2 (ARDOUR::Session&, ARDOUR::CPDevice const & cpdi);
 		~Maschine2 ();
 
 		static bool available ();

@@ -28,12 +28,12 @@ using namespace PBD;
 using namespace ArdourSurface;
 
 static ControlProtocol*
-new_maschine2 (Session* s, std::string const & config)
+new_maschine2 (Session* s, CPDeviceIdentifier const & cpdi)
 {
 	Maschine2* m2 = 0;
 
 	try {
-		m2 = new Maschine2 (*s);
+		m2 = new Maschine2 (*s, cpdi);
 	}
 	catch (std::exception & e) {
 		PBD::error << "Failed to instantiate Maschine2: " << e.what() << endmsg;
@@ -51,10 +51,10 @@ delete_maschine2 (ControlProtocol* cp)
 	delete cp;
 }
 
-static std::map<std::string, std::vector<std::string>>
+static std::vector<CPDeviceIdentifier>
 enumerate_maschine2 ()
 {
-	return {{"Native Instruments", {"Maschine 2"}}};
+	return { CPDeviceIdentifier {"NI Maschine2", "Native Instruments", "Maschine 2") };
 }
 
 static ControlProtocolDescriptor maschine2_descriptor = {

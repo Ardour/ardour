@@ -32,12 +32,12 @@ using namespace ArdourSurface;
 using namespace US2400;
 
 static ControlProtocol*
-new_us2400_protocol (Session* s, std::string const & config)
+new_us2400_protocol (Session* s, CPDeviceIdentifier const & cpdi)
 {
 	US2400Protocol* mcp = 0;
 
 	try {
-		mcp = new US2400Protocol (*s);
+		mcp = new US2400Protocol (*s, cpdi);
 		/* do not set active here - wait for set_state() */
 	}
 	catch (exception & e) {
@@ -62,10 +62,10 @@ delete_us2400_protocol (ControlProtocol* cp)
 	}
 }
 
-static std::map<std::string, std::vector<std::string>>
+static std::vector<CPDeviceIdentifier>
 enumerate_us2400_protocol ()
 {
-	return {{"Tascam", {"US-2400"}}};
+	return {CPDeviceIdentifier ("Tascam US2400", "Tascam", "US-2400")};
 }
 
 static ControlProtocolDescriptor us2400_descriptor = {

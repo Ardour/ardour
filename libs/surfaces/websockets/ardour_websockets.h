@@ -54,7 +54,7 @@ class ArdourWebsockets : public ARDOUR::ControlProtocol,
                          public AbstractUI<ArdourWebsocketsUIRequest>
 {
 public:
-	ArdourWebsockets (ARDOUR::Session&);
+	ArdourWebsockets (ARDOUR::Session&, ARDOUR::CPDeviceIdentifier const &);
 	virtual ~ArdourWebsockets ();
 
 	int set_active (bool);

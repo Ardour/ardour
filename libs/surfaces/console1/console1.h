@@ -101,7 +101,7 @@ class Console1 : public MIDISurface
 	friend Encoder;
 
 public:
-	Console1 (ARDOUR::Session&);
+	Console1 (ARDOUR::Session&, ARDOUR::CPDeviceIdentifier const &);
 	~Console1 ();
 
 	void map_p ();

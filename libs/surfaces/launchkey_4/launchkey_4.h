@@ -132,7 +132,7 @@ class LaunchKey4 : public MIDISurface
 		Knob8 = 0x5c,
 	};
 
-	LaunchKey4 (ARDOUR::Session&);
+	LaunchKey4 (ARDOUR::Session&, ARDOUR::CPDeviceIdentifier const &);
 	~LaunchKey4 ();
 
 	static bool available ();

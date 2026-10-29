@@ -24,9 +24,9 @@ using namespace ARDOUR;
 using namespace ArdourSurface;
 
 static ControlProtocol*
-new_mcp_http_protocol (Session* s, std::string const & config)
+new_mcp_http_protocol (Session* s, CPDeviceIdentifier const & cpdi)
 {
-	MCPHttp* surface = new MCPHttp (*s);
+	MCPHttp* surface = new MCPHttp (*s, cpdi);
 
 	surface->set_active (true);
 
@@ -39,14 +39,14 @@ delete_mcp_http_protocol (ControlProtocol* cp)
 	delete cp;
 }
 
-static std::map<std::string, std::vector<std::string>>
+static std::vector<CPDeviceIdentifier>
 enumerate_mcp_http_protocol ()
 {
-	return {{mcp_http_surface_name, {}}};
+	return { CPDeviceIdentifier ("MCP", "LLM Models", mcp_http_surface_name) };
 }
 
 static ControlProtocolDescriptor mcp_http_descriptor = {
-	/* name       */ mcp_http_surface_name,
+	/* name       */ "MCP",
 	/* id         */ mcp_http_surface_id,
 	/* module     */ 0,
 	/* available  */ 0,

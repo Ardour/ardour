@@ -35,12 +35,12 @@ using namespace ArdourSurface;
 using namespace ArdourSurface::MACKIE_NAMESPACE;
 
 static ControlProtocol*
-new_mackie_protocol (Session* s, std::string const & config)
+new_mackie_protocol (Session* s, CPDeviceIdentifier const & cpdi)
 {
 	MackieControlProtocol* mcp = 0;
 
 	try {
-		mcp = new MackieControlProtocol (*s, config);
+		mcp = new MackieControlProtocol (*s, cpdi);
 		/* do not set active here - wait for set_state() */
 	}
 	catch (exception & e) {
@@ -65,20 +65,20 @@ delete_mackie_protocol (ControlProtocol* cp)
 	}
 }
 
-static std::map<std::string, std::vector<std::string>>
+static std::vector<CPDeviceIdentifier>
 enumerate_mackie_protocol ()
 {
 	return MackieControlProtocol::enumerate();
 }
 
-static std::vector<std::string>
+static std::vector<CPDeviceIdentifier>
 detected_mackie_protocol ()
 {
 	return MackieControlProtocol::detected ();
 }
 
 static ControlProtocolDescriptor mackie_descriptor = {
-	/* name       */ "Mackie",
+	/* name       */ "Mackie Control Protocol",
 	/* id         */ "uri://ardour.org/surfaces/mackie:0",
 	/* module     */ 0,
 	/* available  */ 0,

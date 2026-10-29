@@ -36,32 +36,37 @@ ControlSurfacesTest::instantiateAndTeardownTest ()
 	_session->new_audio_track (1, 2, NULL, 1, "Test", PresentationInfo::max_order, Normal);
 
 	ControlProtocolManager& m = ControlProtocolManager::instance ();
-	for (auto const& i : m.control_protocol_infos ()) {
+	for (auto const& cpi : m.control_protocol_infos ()) {
 #if 1
 		/* Push2 needs libcanvas -- which needs pango, which needs a screen
 		 * IA__gdk_pango_context_get_for_screen: assertion 'GDK_IS_SCREEN (screen)' failed
 		 */
-		if (!strcmp (i->descriptor->id, "uri://ardour.org/surfaces/push2:0")) {
+		if (!strcmp (cpi->descriptor->id, "uri://ardour.org/surfaces/push2:0")) {
 			continue;
 		}
 #endif
 		// The WebSockets control surface replaces the global event loop, causing
 		// crashes in later tests once it is deactivates. Until that is fixed, skip
 		// it.
-		if (!strcmp (i->descriptor->id, "uri://ardour.org/surfaces/ardour_websockets:0")) {
+		if (!strcmp (cpi->descriptor->id, "uri://ardour.org/surfaces/ardour_websockets:0")) {
 			continue;
 		}
 
-		std::cout << "ControlSurfacesTest: " << i->name << "\n";
-		if (i->active()) {
+		std::cout << "ControlSurfacesTest: " << cpi->name << "\n";
+		if (cpi->active()) {
 			/* may already be active because of user preferences */
-			m.auto_deactivate (*i);
+			cpi->remove_all_instances ();
 		}
 
-		m.auto_activate (*i, {});
-		m.auto_activate (*i, {}); // should be a NO-OP, prints a warning
+		std::vector<CPDeviceIdentifier> devices = cpi->descriptor->enumerate ();
+		assert (!devices.empty());
 
-		m.auto_deactivate (*i);
-		m.auto_deactivate (*i); // should be a NO-OP
+		CPDeviceIdentifier device (devices.front());
+
+		m.auto_activate (device);
+		m.auto_activate (device); // should be a NO-OP, prints a warning
+
+		m.auto_deactivate (device);
+		m.auto_deactivate (device); // should be a NO-OP
 	}
 }

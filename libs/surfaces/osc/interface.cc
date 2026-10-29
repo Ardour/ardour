@@ -25,9 +25,9 @@ using namespace ARDOUR;
 using namespace ArdourSurface;
 
 static ControlProtocol*
-new_osc_protocol (Session* s, std::string const & config)
+new_osc_protocol (Session* s, CPDeviceIdentifier const & cpdi)
 {
-	OSC* osc = new OSC (*s, Config->get_osc_port());
+	OSC* osc = new OSC (*s, cpdi, Config->get_osc_port());
 
 	osc->set_active (true);
 
@@ -40,10 +40,10 @@ delete_osc_protocol (ControlProtocol* cp)
 	delete cp;
 }
 
-static std::map<std::string, std::vector<std::string>>
+static std::vector<CPDeviceIdentifier>
 enumerate_osc_protocol ()
 {
-	return {{"Open Sound Control (OSC)", {}}};
+	return {CPDeviceIdentifier ("Open Sound Control (OSC)", "OSC", "OSC")};
 }
 
 static ControlProtocolDescriptor osc_descriptor = {

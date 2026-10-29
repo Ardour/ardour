@@ -63,7 +63,7 @@ struct FaderPort8Request : public BaseUI::BaseRequestObject
 class FaderPort8 : public FP8Base, public ARDOUR::ControlProtocol, public AbstractUI<FaderPort8Request>
 {
 public:
-	FaderPort8 (ARDOUR::Session&);
+	FaderPort8 (ARDOUR::Session&, ARDOUR::CPDeviceIdentifier const &);
 	virtual ~FaderPort8();
 
 	static bool probe (std::string&, std::string&);

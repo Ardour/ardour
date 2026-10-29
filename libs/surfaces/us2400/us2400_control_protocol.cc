@@ -98,8 +98,8 @@ const int US2400Protocol::MAIN_MODIFIER_MASK = (US2400Protocol::MODIFIER_OPTION|
 
 US2400Protocol* US2400Protocol::_instance = 0;
 
-US2400Protocol::US2400Protocol (Session& session)
-	: ControlProtocol (session, X_("Tascam US-2400"))
+US2400Protocol::US2400Protocol (Session& session, CPDeviceIdentifier const & cpdi)
+	: ControlProtocol (session, cpdi)
 	, AbstractUI<US2400ControlUIRequest> (name())
 	, _current_initial_bank (0)
 	, _sample_last (0)

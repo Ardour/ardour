@@ -74,7 +74,7 @@ public:
 
 class CC121 : public ARDOUR::ControlProtocol, public AbstractUI<CC121Request> {
   public:
-	CC121 (ARDOUR::Session&);
+	CC121 (ARDOUR::Session&, ARDOUR::CPDeviceIdentifier const &);
 	virtual ~CC121();
 
 	int set_active (bool yn);

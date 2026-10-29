@@ -37,7 +37,7 @@ class WiimoteControlProtocol
 	, public AbstractUI<WiimoteControlUIRequest>
 {
 public:
-	WiimoteControlProtocol (ARDOUR::Session &);
+	WiimoteControlProtocol (ARDOUR::Session &, ARDOUR::CPDeviceIdentifier const &);
 	virtual ~WiimoteControlProtocol ();
 
 	int set_active (bool yn);

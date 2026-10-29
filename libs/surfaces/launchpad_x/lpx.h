@@ -100,7 +100,7 @@ class LaunchPadX : public MIDISurface
 	bool light_logo();
 	void all_pads_out ();
 
-	LaunchPadX (ARDOUR::Session&);
+	LaunchPadX (ARDOUR::Session&, ARDOUR::CPDeviceIdentifier const &);
 	~LaunchPadX ();
 
 	static bool available ();

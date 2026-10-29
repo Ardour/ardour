@@ -41,13 +41,13 @@ using namespace PBD;
 
 #include "pbd/abstract_ui.inc.cc" // instantiate template
 
-MIDISurface::MIDISurface (ARDOUR::Session& s, std::string const & namestr, std::string const & port_prefix, bool use_pad_filter)
-	: ControlProtocol (s, namestr)
-	, AbstractUI<MidiSurfaceRequest> (namestr)
+MIDISurface::MIDISurface (ARDOUR::Session& s, CPDeviceIdentifier const & cpdi, bool use_pad_filter)
+	: ControlProtocol (s, cpdi)
+	, AbstractUI<MidiSurfaceRequest> (cpdi.device_name)
 	, with_pad_filter (use_pad_filter)
 	, _in_use (false)
 	, _data_required (false)
-	, port_name_prefix (port_prefix)
+	, port_name_prefix (cpdi.device_name)
 	, _connection_state (ConnectionState (0))
 {
 }
