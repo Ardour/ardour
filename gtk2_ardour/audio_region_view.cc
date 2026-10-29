@@ -1697,6 +1697,15 @@ AudioRegionView::set_envelope_shifting (bool s)
 	for (uint32_t n = 0; n < waves.size(); ++n) {
 		waves[n]->set_envelope_shifting (s);
 	}
+
+	AudioGhostRegion* agr;
+	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
+		if ((agr = dynamic_cast<AudioGhostRegion*>(*i)) != 0) {
+			for (vector<ArdourWaveView::WaveView*>::iterator w = agr->waves.begin(); w != agr->waves.end(); ++w) {
+				(*w)->set_envelope_shifting (s);
+			}
+		}
+	}
 }
 
 void
