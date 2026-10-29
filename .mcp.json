@@ -1,0 +1,21 @@
+{
+  "mcpServers": {
+    "ardour": {
+      "type": "stdio",
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/home/beengud/raibid-labs/ardour-mcp",
+        "run",
+        "ardour-mcp"
+      ]
+    },
+    "midi-gen": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "/home/beengud/raibid-labs/ardour-mcp/mcp-servers/midi-mcp-server/build/index.js"
+      ]
+    }
+  }
+}
