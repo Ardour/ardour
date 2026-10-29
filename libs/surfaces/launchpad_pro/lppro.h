@@ -125,7 +125,7 @@ class LaunchPadPro : public MIDISurface
 
 	static const PadID all_pad_ids[];
 
-	LaunchPadPro (ARDOUR::Session&);
+	LaunchPadPro (ARDOUR::Session&, ARDOUR::CPDeviceIdentifier const &);
 	~LaunchPadPro ();
 
 	static bool available ();

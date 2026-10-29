@@ -38,8 +38,8 @@ using namespace ArdourSurface;
 
 #include "pbd/abstract_ui.inc.cc" // instantiate template
 
-ArdourWebsockets::ArdourWebsockets (Session& s)
-    : ControlProtocol (s, X_ (surface_name))
+ArdourWebsockets::ArdourWebsockets (Session& s, CPDeviceIdentifier const & cpdi)
+    : ControlProtocol (s, cpdi)
     , AbstractUI<ArdourWebsocketsUIRequest> (name ())
     , _mixer (*this)
     , _transport (*this)

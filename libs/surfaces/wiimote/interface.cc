@@ -28,9 +28,9 @@ using namespace ARDOUR;
 using namespace PBD;
 
 static ControlProtocol*
-new_wiimote_protocol (Session* s, std::string const & config)
+new_wiimote_protocol (Session* s, CPDeviceIdentifier const & cpdi)
 {
-	WiimoteControlProtocol* wmcp = new WiimoteControlProtocol (*s);
+	WiimoteControlProtocol* wmcp = new WiimoteControlProtocol (*s, cpdi);
 	wmcp->set_active (true);
 	return wmcp;
 }
@@ -41,10 +41,10 @@ delete_wiimote_protocol (ControlProtocol* cp)
 	delete cp;
 }
 
-static std::map<std::string, std::vector<std::string>>
+static std::vector<CPDeviceIdentifier>
 enumerate_wiimote_protocol ()
 {
-	return {{"Nintendo", {"Wiimote"}}};
+	return {CPDeviceIdentifier ("Wiimote", "Nintendo", "Wiimote")};
 }
 
 static ControlProtocolDescriptor wiimote_descriptor = {

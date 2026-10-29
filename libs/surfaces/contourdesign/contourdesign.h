@@ -76,7 +76,7 @@ class ContourDesignControlProtocol
 	, public AbstractUI<ContourDesignControlUIRequest>
 {
 public:
-	ContourDesignControlProtocol (ARDOUR::Session &);
+	ContourDesignControlProtocol (ARDOUR::Session &, ARDOUR::CPDeviceIdentifier const &);
 	virtual ~ContourDesignControlProtocol ();
 
 	enum DeviceType {

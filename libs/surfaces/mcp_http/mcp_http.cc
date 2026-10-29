@@ -70,8 +70,8 @@ read_global_protocol_property (const char* key, T& value)
 const char* const ArdourSurface::mcp_http_surface_name = "MCP HTTP Server (Experimental)";
 const char* const ArdourSurface::mcp_http_surface_id   = "uri://ardour.org/surfaces/mcp_http:0";
 
-MCPHttp::MCPHttp (Session& s)
-	: ControlProtocol (s, X_(mcp_http_surface_name))
+MCPHttp::MCPHttp (Session& s, CPDeviceIdentifier const & cpdi)
+	: ControlProtocol (s, cpdi)
 	, _port (4820)
 	, _debug_level (DebugOff)
 	, _event_loop (PBD::EventLoop::get_event_loop_for_thread ())

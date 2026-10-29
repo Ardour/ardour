@@ -65,9 +65,8 @@ using namespace std;
 
 #include "pbd/abstract_ui.inc.cc" // instantiate template
 
-FaderPort::FaderPort (Session& s)
-	: MIDISurface (s, X_("PreSonus FaderPort"), X_("FaderPort"), false)
-	, gui (0)
+FaderPort::FaderPort (Session& s, CPDeviceIdentifier const & cpdi)
+	: MIDISurface (s, cpdi, false)
 	, fader_msb (0)
 	, fader_lsb (0)
 	, fader_is_touched (false)

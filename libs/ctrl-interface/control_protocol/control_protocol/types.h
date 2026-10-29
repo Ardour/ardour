@@ -16,23 +16,45 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_control_protocol_types_h__
-#define __ardour_control_protocol_types_h__
+#pragma once
 
+#include <string>
 #include <memory>
 #include <vector>
 
+#include "control_protocol/visibility.h"
+
 namespace ARDOUR {
-	class Route;
-	class Stripable;
 
-	typedef std::vector<std::weak_ptr<ARDOUR::Route> >    RouteNotificationList;
-	typedef std::shared_ptr<RouteNotificationList>        RouteNotificationListPtr;
-	typedef std::vector<std::shared_ptr<ARDOUR::Route> >  StrongRouteNotificationList;
+class Route;
+class Stripable;
+class ControlProtocolInfo;
+class ControlProtocolManager;
 
-	typedef std::vector<std::weak_ptr<ARDOUR::Stripable> >    StripableNotificationList;
-	typedef std::shared_ptr<StripableNotificationList>        StripableNotificationListPtr;
-	typedef std::vector<std::shared_ptr<ARDOUR::Stripable> >  StrongStripableNotificationList;
-}
+class LIBCONTROLCP_API CPDeviceIdentifier
+{
+  public:
+  CPDeviceIdentifier (std::string const & p, std::string const & m, std::string const & d) : protocol_name (p), manufacturer (m), device_name (d) {}
 
-#endif /* __ardour_control_protocol_types_h__ */
+  const std::string protocol_name;
+  const std::string manufacturer;
+  const std::string device_name;
+
+  bool operator< (CPDeviceIdentifier const & other) const { return protocol_name < other.protocol_name && manufacturer < other.manufacturer && device_name < other.device_name; }
+  bool operator== (CPDeviceIdentifier const & other) const { return protocol_name == other.protocol_name && manufacturer == other.manufacturer && device_name == other.device_name; }
+  bool operator!= (CPDeviceIdentifier const & other) const { return protocol_name != other.protocol_name && manufacturer != other.manufacturer && device_name != other.device_name; }
+
+  std::string to_string() const;
+};
+
+typedef std::vector<std::weak_ptr<ARDOUR::Route> >    RouteNotificationList;
+typedef std::shared_ptr<RouteNotificationList>        RouteNotificationListPtr;
+typedef std::vector<std::shared_ptr<ARDOUR::Route> >  StrongRouteNotificationList;
+
+typedef std::vector<std::weak_ptr<ARDOUR::Stripable> >    StripableNotificationList;
+typedef std::shared_ptr<StripableNotificationList>        StripableNotificationListPtr;
+typedef std::vector<std::shared_ptr<ARDOUR::Stripable> >  StrongStripableNotificationList;
+
+} /* namespace */
+
+std::ostream & operator<< (std::ostream & o, ARDOUR::CPDeviceIdentifier const &);

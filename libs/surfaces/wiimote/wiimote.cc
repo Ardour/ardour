@@ -35,8 +35,8 @@ using namespace std;
 
 void wiimote_control_protocol_mesg_callback (cwiid_wiimote_t *wiimote, int mesg_count, union cwiid_mesg mesg[], timespec *t);
 
-WiimoteControlProtocol::WiimoteControlProtocol (Session& session)
-	: ControlProtocol (session, X_("Wiimote"))
+WiimoteControlProtocol::WiimoteControlProtocol (Session& session, CPDeviceIdentifier const & cpdi)
+	: ControlProtocol (session, cpdi)
 	, AbstractUI<WiimoteControlUIRequest> ("wiimote")
 	, wiimote (0)
 	, idle_source (0)

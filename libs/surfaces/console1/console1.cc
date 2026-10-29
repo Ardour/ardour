@@ -50,8 +50,8 @@ using namespace PBD;
 using namespace Glib;
 using namespace std;
 
-Console1::Console1 (Session& s)
-  : MIDISurface (s, X_ ("Softube Console1"), X_ ("Console1"), false)
+Console1::Console1 (Session& s, CPDeviceIdentifier const & cpdi)
+  : MIDISurface (s, cpdi, false)
   , gui (0)
   , blink_state (false)
   , rec_enable_state (false)

@@ -133,12 +133,8 @@ MackieControlProtocol::init ()
 	}
 }
 
-MackieControlProtocol::MackieControlProtocol (Session& session, std::string const & device_name)
-#ifdef UF8
-	: ControlProtocol (session, _("SSL 360: UF8 UF1"), device_name)
-#else
-        : ControlProtocol (session, _("Mackie"), device_name)
-#endif
+MackieControlProtocol::MackieControlProtocol (Session& session, CPDeviceIdentifier const & cpdi)
+	: ControlProtocol (session, cpdi)
 	, AbstractUI<MackieControlUIRequest> (name())
 	, _current_initial_bank (0)
 	, _timecode_last (10, '\0')
@@ -159,11 +155,11 @@ MackieControlProtocol::MackieControlProtocol (Session& session, std::string cons
 	, marker_modifier_consumed_by_button (false)
 	, nudge_modifier_consumed_by_button (false)
 {
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("MackieControlProtocol::MackieControlProtocol as %1\n", device_name));
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("MackieControlProtocol::MackieControlProtocol as %1\n", cpdi.device_name));
 
 	_subview = MACKIE_NAMESPACE::SubviewFactory::instance()->create_subview(Subview::None, *this, std::shared_ptr<Stripable>());
 
-	set_device_info (device_name);
+	set_device_info (cpdi.device_name);
 
 	for (int i = 0; i < 9; i++) {
 		_last_bank[i] = 0;
@@ -458,28 +454,24 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 	return 0;
 }
 
-std::map<std::string, std::vector<std::string>>
+std::vector<CPDeviceIdentifier>
 MackieControlProtocol::enumerate ()
 {
-	std::map<std::string, std::vector<std::string>>	devices;
+	/* SSL UF8 uses an inline version in its interface.cc implementation */
 
-	for (const auto& device : DeviceInfo::device_info) {
-		if (!device.second.manufacturer().empty()) {
-			if (devices.find(device.second.manufacturer()) != devices.end()) {
-				devices[device.second.manufacturer()].push_back(device.second.name());
-			} else {
-				devices.insert({device.second.manufacturer(), {device.second.name()}});
-			}
-		}
+	std::vector<CPDeviceIdentifier> devices;
+
+	for (const auto& [manufacturer,device] : DeviceInfo::device_info) {
+		devices.push_back (CPDeviceIdentifier ("Mackie Control Protocol", manufacturer, device.name()));
 	}
 
 	return devices;
 }
 
-std::vector<std::string>
+std::vector<CPDeviceIdentifier>
 MackieControlProtocol::detected ()
 {
-	std::vector<string> devices;;
+	std::vector<CPDeviceIdentifier> devices;
 	std::vector<std::string> midi_inputs;
 	std::vector<std::string> midi_outputs;
 
@@ -490,13 +482,13 @@ MackieControlProtocol::detected ()
 		return devices;
 	}
 
-	for (const auto& device : DeviceInfo::device_info) {
+	for (const auto& [manufacturer,device] : DeviceInfo::device_info) {
 
 		bool have_sending = false;
 		bool have_receiving = false;
 
-		std::string receiving_port (device.second.device_receiving_port_regex());
-		std::string sending_port (device.second.device_sending_port_regex());
+		std::string receiving_port (device.device_receiving_port_regex());
+		std::string sending_port (device.device_sending_port_regex());
 
 		if (!sending_port.empty()) {
 			std::regex rx (sending_port);
@@ -519,7 +511,7 @@ MackieControlProtocol::detected ()
 		}
 
 		if (have_receiving && have_sending) {
-			devices.push_back (device.second.name());
+			devices.push_back (CPDeviceIdentifier ("Mackie Control Protocol", device.manufacturer(), device.name()));
 		}
 	}
 

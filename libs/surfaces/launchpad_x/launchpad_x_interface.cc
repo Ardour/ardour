@@ -36,12 +36,12 @@ using namespace PBD;
 using namespace ArdourSurface::LAUNCHPAD_NAMESPACE;
 
 static ControlProtocol*
-new_lpx (Session* s, std::string const & config)
+new_lpx (Session* s, CPDeviceIdentifier const & cpdi)
 {
 	LaunchPadX * lpx = nullptr;
 
 	try {
-		lpx = new LaunchPadX (*s);
+		lpx = new LaunchPadX (*s, cpdi);
 		/* do not set active here - wait for set_state() */
 	}
 	catch (std::exception & e) {
@@ -73,14 +73,14 @@ probe_lpx_midi_protocol ()
 	return LaunchPadX::probe (i, o);
 }
 
-static std::map<std::string, std::vector<std::string>>
+static std::vector<CPDeviceIdentifier>
 enumerate_lpx ()
 {
-	return {{"Novation", {"Launchpad X"}}};
+	return { CPDeviceIdentifier ("Novation Launchpad", "Novation", "Launchpad X") };
 }
 
 static ControlProtocolDescriptor lpx_descriptor = {
-	/* name       */ "Novation Launchpad X",
+	/* name       */ "Novation Launchpad",
 	/* id         */ "uri://ardour.org/surfaces/lpx:0",
 	/* module     */ 0,
 	/* available  */ 0,

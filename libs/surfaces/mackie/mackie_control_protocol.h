@@ -109,7 +109,7 @@ class MackieControlProtocol
 	*/
 	static void init ();
 
-	MackieControlProtocol(ARDOUR::Session &, std::string const & config);
+	MackieControlProtocol(ARDOUR::Session &, ARDOUR::CPDeviceIdentifier const & device);
 	virtual ~MackieControlProtocol();
 
 	static MackieControlProtocol* instance() { return _instance; }
@@ -118,8 +118,8 @@ class MackieControlProtocol
 
 	MACKIE_NAMESPACE::DeviceInfo& device_info() { return _device_info; }
 	MACKIE_NAMESPACE::DeviceProfile& device_profile() { return _device_profile; }
-	static std::map<std::string, std::vector<std::string>> enumerate();
-	static std::vector<std::string> detected();
+	static std::vector<ARDOUR::CPDeviceIdentifier> enumerate();
+	static std::vector<ARDOUR::CPDeviceIdentifier> detected();
 
 	PBD::Signal<void()> DeviceChanged;
 	PBD::Signal<void(std::shared_ptr<MACKIE_NAMESPACE::Surface> )> ConnectionChange;

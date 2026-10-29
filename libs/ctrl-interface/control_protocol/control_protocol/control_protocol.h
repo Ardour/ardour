@@ -19,14 +19,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef ardour_control_protocols_h
-#define ardour_control_protocols_h
+#pragma once
 
 #include <list>
 #include <memory>
 #include <string>
 #include <vector>
 
+#include "pbd/rwlock.h"
 #include "pbd/signals.h"
 #include "pbd/stateful.h"
 #include "pbd/glib_event_source.h"
@@ -46,11 +46,12 @@ class PluginInsert;
 class LIBCONTROLCP_API ControlProtocol : public PBD::Stateful, public PBD::ScopedConnectionList, public BasicUI
 {
 public:
-	ControlProtocol (Session&, std::string const & name, std::string const & device_name = std::string());
+	ControlProtocol (Session&, CPDeviceIdentifier const & cpdi);
 	virtual ~ControlProtocol ();
 
-	virtual std::string name () const { return _name; }
-	std::string device_name() const { return _device_name; }
+	virtual std::string name () const { return cpdi.protocol_name; }
+	std::string device_name() const { return cpdi.device_name; }
+	CPDeviceIdentifier const & device_identifier() const { return cpdi; }
 
 	virtual int set_active (bool yn);
 	virtual bool active () const { return _active; }
@@ -161,8 +162,7 @@ protected:
 	void prev_track (uint32_t initial_id);
 
 	std::vector<std::shared_ptr<ARDOUR::Route> > route_table;
-	std::string _name;
-	std::string _device_name;
+	CPDeviceIdentifier cpdi;
 	GlibEventLoopCallback glib_event_callback;
 	virtual void event_loop_precall ();
 	void install_precall_handler (Glib::RefPtr<Glib::MainContext>);
@@ -180,22 +180,23 @@ private:
 };
 
 extern "C" {
-class ControlProtocolDescriptor
-{
-public:
-	const char* name;                       /* descriptive */
-	const char* id;                         /* unique and version-specific */
-	void*       module;                     /* not for public access */
-	bool (*available) ();                   /* called directly after loading module */
-	bool (*probe_port) ();                  /* called when ports change (PortRegisteredOrUnregistered) */
-	bool (*match_usb) (uint16_t, uint16_t); /* called when USB devices are hotplugged (libusb) */
-	ControlProtocol* (*initialize) (Session*, std::string const & config);
-	void (*destroy) (ControlProtocol*);
-	std::map<std::string, std::vector<std::string>> (*enumerate) ();
-	std::vector<std::string> (*detected) ();
-};
+
+	class ControlProtocolDescriptor  {
+	  public:
+		const char* name;                       /* descriptive */
+		const char* id;                         /* unique and version-specific */
+		void*       module;                     /* not for public access */
+		bool (*available) ();                   /* called directly after loading module */
+		bool (*probe_port) ();                  /* called when ports change (PortRegisteredOrUnregistered) */
+		bool (*match_usb) (uint16_t, uint16_t); /* called when USB devices are hotplugged (libusb) */
+		ControlProtocol* (*initialize) (Session*, CPDeviceIdentifier const &);
+		void (*destroy) (ControlProtocol*);
+		std::vector<CPDeviceIdentifier> (*enumerate) ();
+		std::vector<CPDeviceIdentifier> (*detected) ();
+	};
 }
-}
+
+} // namespace 
 
 /* this is where the strange inheritance pattern hits the wall. A control
    protocol thread/event loop is inherited from AbstractUI, but the precall
@@ -208,6 +209,3 @@ public:
 
 #define CONTROL_PROTOCOL_THREADS_NEED_TEMPO_MAP_DECL() \
 	void maybe_install_precall_handler (Glib::RefPtr<Glib::MainContext> ctxt) { install_precall_handler (ctxt); }
-
-
-#endif // ardour_control_protocols_h

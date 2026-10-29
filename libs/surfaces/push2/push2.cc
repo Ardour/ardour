@@ -140,8 +140,8 @@ Push2::probe (std::string& i, std::string& o)
 	return true;
 }
 
-Push2::Push2 (ARDOUR::Session& s)
-	: MIDISurface (s, X_("Ableton Push 2"), X_("Push 2"), true)
+Push2::Push2 (ARDOUR::Session& s, CPDeviceIdentifier const & cpdi)
+	: MIDISurface (s, cpdi, true)
 	, _handle (0)
 	, _modifier_state (None)
 	, _splash_start (0)

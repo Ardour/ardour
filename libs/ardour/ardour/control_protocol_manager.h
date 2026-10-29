@@ -43,8 +43,6 @@ class Session;
 class LIBARDOUR_API ControlProtocolInfo : public PBD::Stateful
 {
   public:
-        bool                          requested;
-	bool                          automatic;
 	std::string                   name;
 	ControlProtocolDescriptor*    descriptor;
 	mutable PBD::RWLock           instance_lock;
@@ -53,21 +51,20 @@ class LIBARDOUR_API ControlProtocolInfo : public PBD::Stateful
 	ControlProtocolInfo (std::string const & path);
 	~ControlProtocolInfo ();
 
-	bool is_active (std::string const & device_name);
+	bool is_active (CPDeviceIdentifier const &);
 
 	bool active () const;
+	std::vector<CPDeviceIdentifier> active_devices () const;
 
 	ControlProtocolDescriptor*    get_descriptor();
-	ControlProtocol* add_instance (Session&, std::string device_name = std::string ());
-	ControlProtocol* get_instance (std::string device_name = std::string ());
-	bool remove_instance (std::string device_name = std::string());
-	bool remove_instance (ControlProtocol&);
+	ControlProtocol* get_instance (CPDeviceIdentifier const &);
+
+	ControlProtocol* add_instance (Session&, CPDeviceIdentifier const &);
+	bool remove_instance (CPDeviceIdentifier const &);
 	void remove_all_instances ();
 
-	int activate (std::string const &);
-	int activate (ControlProtocol&);
-	int deactivate (std::string const &);
-	int deactivate (ControlProtocol&);
+	int activate (CPDeviceIdentifier const &);
+	int deactivate (CPDeviceIdentifier const &);
 
 	int      set_state (const XMLNode&, int version);
 	XMLNode& get_state () const;
@@ -109,18 +106,18 @@ class LIBARDOUR_API ControlProtocolManager : public PBD::Stateful, public ARDOUR
 		return _control_protocol_info;
 	}
 
-	int user_activate (ControlProtocolInfo& cpi, std::string device_name = std::string()) {
-		return activate (false, cpi, device_name);
+	int user_activate (CPDeviceIdentifier const & cpdi) {
+		return activate (false, cpdi);
 	}
-	int user_deactivate (ControlProtocolInfo& cpi, std::string device_name = std::string()) {
-		return deactivate (false, cpi, device_name);
+	int user_deactivate (CPDeviceIdentifier const & cpdi) {
+		return deactivate (false, cpdi);
 	}
 
-	int auto_activate (ControlProtocolInfo& cpi, std::string device_name = std::string()) {
-		return activate (true, cpi, device_name);
+	int auto_activate (CPDeviceIdentifier const & cpdi) {
+		return activate (true, cpdi);
 	}
-	int auto_deactivate (ControlProtocolInfo& cpi, std::string device_name = std::string()) {
-		return deactivate (true, cpi, device_name);
+	int auto_deactivate (CPDeviceIdentifier const & cpdi) {
+		return deactivate (true, cpdi);
 	}
 
 	static const std::string state_node_name;
@@ -129,10 +126,15 @@ class LIBARDOUR_API ControlProtocolManager : public PBD::Stateful, public ARDOUR
 	XMLNode& get_state () const;
 	int      use_state ();
 
-	PBD::Signal<void (ControlProtocolInfo*,std::string,bool)> ProtocolStatusChange;
+	PBD::Signal<void (CPDeviceIdentifier,bool)> ProtocolStatusChange;
 
 	void                                                            stripable_selection_changed (ARDOUR::StripableNotificationListPtr);
 	static PBD::Signal<void (ARDOUR::StripableNotificationListPtr)> StripableSelectionChanged;
+
+	typedef std::list<CPDeviceIdentifier> SupportedDevices;
+	SupportedDevices const & devices() const { return _devices; }
+
+	ControlProtocolInfo*       cpi_by_name (std::string);
 
 private:
 	ControlProtocolManager ();
@@ -142,14 +144,15 @@ private:
 	std::list<ControlProtocolInfo*> _control_protocol_info;
 	XMLNode*                        pending_state;
 
+	std::list<CPDeviceIdentifier>  _devices;
+
 	void session_going_away ();
 
 	int                        control_protocol_discover (std::string path);
-	ControlProtocolInfo*       cpi_by_name (std::string);
 	void                       remove_all_instances (ControlProtocolInfo&);
 
-	int activate (bool detected, ControlProtocolInfo&, std::string device_name = std::string());
-	int deactivate (bool detected, ControlProtocolInfo&, std::string device_name = std::string());
+	int activate (bool detected, CPDeviceIdentifier const &);
+	int deactivate (bool detected, CPDeviceIdentifier const&);
 };
 
 } // namespace ARDOUR

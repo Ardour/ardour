@@ -89,7 +89,7 @@ class US2400Protocol
 		TrackView,
 	};
 
-	US2400Protocol(ARDOUR::Session &);
+	US2400Protocol(ARDOUR::Session &, ARDOUR::CPDeviceIdentifier const &);
 	virtual ~US2400Protocol();
 
 	static US2400Protocol* instance() { return _instance; }

@@ -32,12 +32,12 @@ using namespace std;
 using namespace ArdourSurface;
 
 static ControlProtocol*
-new_launch_control_xl (Session* s, std::string const & config)
+new_launch_control_xl (Session* s, CPDeviceIdentifier const & cpdi)
 {
 	LaunchControlXL * lcxl = 0;
 
 	try {
-		lcxl = new LaunchControlXL (*s);
+		lcxl = new LaunchControlXL (*s, cpdi);
 		/* do not set active here - wait for set_state() */
 	}
 	catch (exception & e) {
@@ -62,14 +62,14 @@ delete_launch_control_xl (ControlProtocol* cp)
 	}
 }
 
-static std::map<std::string, std::vector<std::string>>
+static std::vector<CPDeviceIdentifier>
 enumerate_launch_control_xl ()
 {
-	return {{"Novation", {"Launch Control XL"}}};
+	return {CPDeviceIdentifier ("Novation Launch Control", "Novation", "Launch Control XL")};
 }
 
 static ControlProtocolDescriptor launch_control_xl_descriptor = {
-	/* name       */ "Novation Launch Control XL",
+	/* name       */ "Novation Launch Control",
 	/* id         */ "uri://ardour.org/surfaces/launch_control_xl:0",
 	/* module     */ 0,
 	/* available  */ 0,

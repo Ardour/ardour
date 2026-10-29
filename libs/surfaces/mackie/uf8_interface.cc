@@ -37,14 +37,14 @@ using namespace ArdourSurface;
 using namespace ArdourSurface::MACKIE_NAMESPACE;
 
 static ControlProtocol*
-new_uf8_protocol (Session* s, std::string const & config)
+new_uf8_protocol (Session* s, CPDeviceIdentifier const & cpdi)
 {
 	MackieControlProtocol* mcp = 0;
 
-	DEBUG_TRACE (DEBUG::MackieControl, "making uf8-protocol");
+	DEBUG_TRACE (DEBUG::MackieControl, cpdi.device_name);
 
 	try {
-		mcp = new MackieControlProtocol (*s, config);
+		mcp = new MackieControlProtocol (*s, cpdi);
 		/* do not set active here - wait for set_state() */
 	}
 	catch (exception & e) {
@@ -69,10 +69,10 @@ delete_uf8_protocol (ControlProtocol* cp)
 	}
 }
 
-static std::map<std::string, std::vector<std::string>>
+static std::vector<CPDeviceIdentifier>
 enumerate_uf8_protocol ()
 {
-	return MackieControlProtocol::enumerate();
+	return {CPDeviceIdentifier ("SSL 360", "SSL", "UF8/UF1")};
 }
 
 // Field names commented out by JE - 06-01-2010

@@ -64,7 +64,7 @@ using namespace PBD;
 
 #include "pbd/i18n.h"
 
-ControlProtocolManager* ControlProtocolManager::_instance       = 0;
+ControlProtocolManager* ControlProtocolManager::_instance       = nullptr;
 const string            ControlProtocolManager::state_node_name = X_("ControlProtocols");
 
 PBD::Signal<void (StripableNotificationListPtr)> ControlProtocolManager::StripableSelectionChanged;
@@ -180,8 +180,7 @@ usb_hotplug_thread (void* user_data)
 #endif
 
 ControlProtocolInfo::ControlProtocolInfo (std::string const & pathstr)
-	: automatic (false)
-	, descriptor (get_descriptor (pathstr))
+	: descriptor (get_descriptor (pathstr))
 	, session (nullptr)
 	, path (pathstr)
 {
@@ -271,6 +270,8 @@ ControlProtocolInfo::set_state (XMLNode const & node, int)
 
 	remove_all_instances ();
 
+#if 0
+
 	for (auto const & child : node.children()) {
 
 		std::string device_name;
@@ -279,17 +280,18 @@ ControlProtocolInfo::set_state (XMLNode const & node, int)
 			continue;
 		}
 
-		ControlProtocol* cp = add_instance (*session, device_name);
+		ControlProtocol* cp = add_instance (*session, );
 		/* not active at this point */
 		cp->set_state (*child, 0);
 		/* may be active now */
 	}
+#endif
 
 	return 0;
 }
 
 ControlProtocol*
-ControlProtocolInfo::get_instance (std::string device_name)
+ControlProtocolInfo::get_instance (CPDeviceIdentifier const & cpdi)
 {
 	PBD::RWLock::ReaderLock lm (instance_lock);
 
@@ -297,20 +299,8 @@ ControlProtocolInfo::get_instance (std::string device_name)
 		return nullptr;
 	}
 
-	auto en (descriptor->enumerate());
-	if (en.empty() || en.begin()->second.size() <= 1) {
-		/* only 1 device supported, device name is irrelevant */
-		return instances.front();
-	}
-
-	if (device_name.empty()) {
-		/* control surface that only supports a single, unspecifed device name */
-		assert (instances.size() == 1);
-		return instances.front();
-	}
-
 	for (auto & inst : instances) {
-		if (inst->device_name() == device_name) {
+		if (inst->device_name() == cpdi.device_name) {
 			return inst;
 		}
 	}
@@ -319,9 +309,9 @@ ControlProtocolInfo::get_instance (std::string device_name)
 }
 
 ControlProtocol*
-ControlProtocolInfo::add_instance (Session& session, std::string device_name)
+ControlProtocolInfo::add_instance (Session& session, CPDeviceIdentifier const & cpdi)
 {
-	ControlProtocol* cp = descriptor->initialize (&session, device_name);
+	ControlProtocol* cp = descriptor->initialize (&session, cpdi);
 
 	if (cp) {
 		PBD::RWLock::WriterLock lm (instance_lock);
@@ -332,44 +322,13 @@ ControlProtocolInfo::add_instance (Session& session, std::string device_name)
 }
 
 bool
-ControlProtocolInfo::remove_instance (ControlProtocol& instance)
+ControlProtocolInfo::remove_instance (CPDeviceIdentifier const & cpdi)
 {
-	PBD::RWLock::WriterLock lm (instance_lock);
-
-	for (auto ii = instances.begin(); ii != instances.end(); ++ii) {
-		if (*ii == &instance) {
-			descriptor->destroy (&instance);
-			delete &instance;
-			instances.erase (ii);
-			return true;
-		}
-	}
-
-	return false;
-}
-
-bool
-ControlProtocolInfo::remove_instance (std::string device_name)
-{
-	{
-		PBD::RWLock::ReaderLock lm (instance_lock);
-
-		if (instances.empty()) {
-			return false;
-		}
-
-		if (device_name.empty()) {
-			assert (instances.size() == 1);
-			/* let the loop below do the work */
-		}
-	}
-
-
 	PBD::RWLock::WriterLock lm (instance_lock);
 	ControlProtocol* to_be_deleted = nullptr;
 
 	for (auto ii = instances.begin(); ii != instances.end(); ++ii) {
-		if ((*ii)->device_name() == device_name) {
+		if ((*ii)->device_name() == cpdi.device_name) {
 			to_be_deleted = *ii;
 			instances.erase (ii);
 			break;
@@ -401,39 +360,40 @@ ControlProtocolInfo::remove_all_instances ()
 	}
 }
 
-int
-ControlProtocolInfo::activate (std::string const & device_name)
+std::vector<CPDeviceIdentifier>
+ControlProtocolInfo::active_devices () const
 {
-	ControlProtocol* cp = get_instance (device_name);
+	std::vector<CPDeviceIdentifier> devices;
+	PBD::RWLock::ReaderLock lm (instance_lock);
+
+	for (auto const & instance : instances) {
+		devices.push_back (instance->device_identifier());
+	}
+
+	return devices;
+}
+
+int
+ControlProtocolInfo::activate (CPDeviceIdentifier const & cpdi)
+{
+	ControlProtocol* cp = get_instance (cpdi);
 
 	if (!cp) {
 		return -1;
 	}
 
-	return activate (*cp);
+	return cp->set_active (true);
 }
 
 int
-ControlProtocolInfo::deactivate (std::string const & device_name)
+ControlProtocolInfo::deactivate (CPDeviceIdentifier const & cpdi)
 {
-	ControlProtocol* cp = get_instance (device_name);
+	ControlProtocol* cp = get_instance (cpdi);
 	if (!cp) {
 		return -1;
 	}
 
-	return deactivate (*cp);
-}
-
-int
-ControlProtocolInfo::activate (ControlProtocol& cp)
-{
-	return cp.set_active (true);
-}
-
-int
-ControlProtocolInfo::deactivate (ControlProtocol& cp)
-{
-	return cp.set_active (false);
+	return cp->set_active (false);
 }
 
 bool
@@ -444,16 +404,12 @@ ControlProtocolInfo::active () const
 }
 
 bool
-ControlProtocolInfo::is_active (std::string const & device_name)
+ControlProtocolInfo::is_active (CPDeviceIdentifier const & cpdi)
 {
 	PBD::RWLock::ReaderLock lm (instance_lock);
 
-	if (device_name.empty()) {
-		assert (instances.size() == 1);
-	}
-
 	for (auto const & inst : instances) {
-		if (inst->device_name() == device_name && inst->active()) {
+		if (inst->device_name() == cpdi.device_name && inst->active()) {
 			return true;
 		}
 	}
@@ -552,16 +508,22 @@ ControlProtocolManager::set_session (Session* s)
 }
 
 int
-ControlProtocolManager::activate (bool detected, ControlProtocolInfo& cpi, std::string device_name)
+ControlProtocolManager::activate (bool detected, CPDeviceIdentifier const & cpdi)
 {
 	assert (_session);
 
+	ControlProtocolInfo* cpi = cpi_by_name (cpdi.protocol_name);
+	if (!cpi) {
+		std::cerr << "CPI for " << cpdi.protocol_name << " not found\n";
+		PBD::stacktrace (std::cerr, 19);
+	}
+	assert (cpi);
 	ControlProtocol*  cp = nullptr;
 	bool was_active = false;
 
-	if ((cp = cpi.get_instance (device_name)) == nullptr) {
-		std::cerr << cpi.name << " need to create instance for " << device_name << std::endl;
-		if ((cp = cpi.add_instance (*_session, device_name)) == nullptr) {
+	if ((cp = cpi->get_instance (cpdi)) == nullptr) {
+		std::cerr << cpi->name << " need to create instance for " << cpdi.device_name << std::endl;
+		if ((cp = cpi->add_instance (*_session, cpdi)) == nullptr) {
 			return -1;
 		}
 	} else {
@@ -569,30 +531,33 @@ ControlProtocolManager::activate (bool detected, ControlProtocolInfo& cpi, std::
 	}
 
 
-	std::cerr << cpi.name << " active ? " << cp->active () << std::endl;
+	std::cerr << cpi->name << " active ? " << cp->active () << std::endl;
 
 	if (detected) {
-		cpi.activate (*cp);
+		cp->set_active (true);
 	} else {
 		cp->set_requested_status (ControlProtocol::RequestedOn);
 	}
 
 	if (!cp->active()) {
-		error << string_compose (_("Control protocol support for %1 (%2) failed to activate"), cpi.name, device_name) << endmsg;
-		cpi.remove_instance (*cp);
+		error << string_compose (_("Control protocol support for %1 (%2) failed to activate"), cpi->name, cpdi.device_name) << endmsg;
+		cpi->remove_instance (cpdi);
 	}
 
 	if (!was_active) {
-		ProtocolStatusChange (&cpi, device_name, true);
+		ProtocolStatusChange (cpdi, true);
 	}
 
 	return 0;
 }
 
 int
-ControlProtocolManager::deactivate (bool detected, ControlProtocolInfo& cpi, std::string device_name)
+ControlProtocolManager::deactivate (bool detected, CPDeviceIdentifier const & cpdi)
 {
-	ControlProtocol* cp = cpi.get_instance (device_name);
+	ControlProtocolInfo* cpi = cpi_by_name (cpdi.protocol_name);
+	assert (cpi);
+
+	ControlProtocol* cp = cpi->get_instance (cpdi);
 
 	if (!cp) {
 		return -1;
@@ -602,19 +567,18 @@ ControlProtocolManager::deactivate (bool detected, ControlProtocolInfo& cpi, std
 
 	if (was_active) {
 		if (detected) {
-			cpi.deactivate (*cp);
+			cpi->deactivate (cpdi);
 		} else {
 			cp->set_requested_status (ControlProtocol::RequestedOff);
 		}
 
 		if (cp->active()) {
-			error << string_compose (_("Control protocol support for %1 (%2) failed to activate"), cpi.name, device_name) << endmsg;
+			error << string_compose (_("Control protocol support for %1 (%2) failed to activate"), cpi->name, cpdi.device_name) << endmsg;
 			return -1;
 		}
 
-		ProtocolStatusChange (&cpi,  device_name, false); /* EMIT SIGNAL */
+		ProtocolStatusChange (cpdi, false); /* EMIT SIGNAL */
 	}
-
 
 	return 0;
 }
@@ -646,8 +610,13 @@ ControlProtocolManager::drop_protocols ()
 void
 ControlProtocolManager::remove_all_instances (ControlProtocolInfo& cpi)
 {
+	std::vector<CPDeviceIdentifier> instances = cpi.active_devices();
+
 	cpi.remove_all_instances ();
-	ProtocolStatusChange (&cpi, std::string(), false);
+
+	for (auto const & cpid : instances) {
+		ProtocolStatusChange (cpid, false);
+	}
 }
 
 struct ControlProtocolOrderByName {
@@ -714,6 +683,12 @@ ControlProtocolManager::discover_control_protocols ()
 			try {
 				ControlProtocolInfo* cpi = new ControlProtocolInfo (module_path);
 				_control_protocol_info.push_back (cpi);
+
+				std::vector<CPDeviceIdentifier> supported = cpi->descriptor->enumerate ();
+				for (auto & device : supported) {
+					_devices.push_back (device);
+				}
+
 			} catch (...) {
 				continue;
 			}
@@ -729,7 +704,9 @@ ControlProtocolManager::cpi_by_name (string name)
 {
 	PBD::RWLock::ReaderLock lm (_protocols_lock);
 
+	std::cerr << "look for " << name << std::endl;
 	for (auto const& cpi : _control_protocol_info) {
+		std::cerr << "\tknown protocl: " << cpi->name << std::endl;
 		if (name == cpi->name) {
 			return cpi;
 		}
@@ -839,7 +816,7 @@ ControlProtocolManager::disestablish ()
 ControlProtocolManager&
 ControlProtocolManager::instance ()
 {
-	if (_instance == 0) {
+	if (!_instance) {
 		_instance = new ControlProtocolManager ();
 	}
 
@@ -867,69 +844,44 @@ ControlProtocolManager::probe_midi_control_protocols ()
 
 	for (auto const& cpi : _control_protocol_info) {
 
-		PBD::RWLock::ReaderLock lm (_protocols_lock);
+		std::vector<CPDeviceIdentifier> detected;
 
-		if (!cpi->descriptor) {
-			cpi->automatic = false;
-			continue;
+		if (cpi->descriptor->detected) {
+			detected = cpi->descriptor->detected();
+		} else if (cpi->descriptor->probe_port && cpi->descriptor->enumerate().size() == 1) {
+			if (cpi->descriptor->probe_port()) {
+				detected.push_back (cpi->descriptor->enumerate().front());
+			}
+		} else {
+			/* Nothing detected/detecable baby! */
 		}
 
-		bool active = cpi->active();
-		bool found = false;
-		bool single_device = false;
+		std::vector<CPDeviceIdentifier> active = cpi->active_devices ();
 
-		if (cpi->descriptor->probe_port) {
-			found = cpi->descriptor->probe_port ();
-		}
+		lm.release ();
 
-		std::map<std::string,std::vector<std::string>> en;
+		/* Remove any instances whose ports have done away */
 
-		if (found) {
-			en = cpi->descriptor->enumerate ();
-			single_device = (en.begin()->second.size() == 1);
-		}
+		for (auto & cpdi : active) {
+			ControlProtocol* cp;
 
-		// std::cerr << cpi->name << " F " << found << " SD " << single_device << " A " << active << std::endl
-
-		if (single_device) {
-
-			if (found) {
-
-				if (!active) {
-
-					/* there is only 1 device
-					   names provided by enumerate(), this
-					   protocol only supports a single
-					   device type, and device name is
-					   expected to be empty.
-					*/
-					std::string device_name = en.begin()->second.front();
-					lm.release ();
-					auto_activate (*cpi, device_name);
+			if ((cp = cpi->get_instance (cpdi))) {
+				/* Don't do this for instances that were not automatically activated. */
+				if (cp->requested_status() == ControlProtocol::Unrequested) {
+					if (std::find (detected.begin(), detected.end(), cpdi) == detected.end()) {
+						auto_deactivate (cpdi);
+					}
 				}
-
-			} else {
-				cpi->automatic = false;
-				lm.release();
-				auto_deactivate (*cpi);
 			}
-
-		} else if (!cpi->active() && cpi->descriptor->detected != nullptr) {
-
-			std::vector<std::string> devices;
-
-			std::cerr << "Running detected() method for " << cpi->name << std::endl;
-
-			devices = cpi->descriptor->detected ();
-
-			lm.release();
-
-			for (auto const & device_name : devices) {
-				std::cerr << "auto-activate " << cpi->name << " as " << device_name << std::endl;
-				auto_activate (*cpi, device_name);
-			}
-
 		}
+
+		for (auto & cpdi : detected) {
+			if (cpi->get_instance (cpdi) == nullptr) {
+				auto_activate (cpdi);
+			}
+		}
+
+		lm.acquire ();
 	}
 }
 
@@ -948,12 +900,18 @@ ControlProtocolManager::probe_usb_control_protocols (bool arrived, uint16_t vend
 
 		bool active = cpi->active();
 
+		/* This is necessarily for protocols that support a single device,
+		 * identifiable via a USB vendor/product duple.
+		 */
+
+		std::vector<CPDeviceIdentifier> devices = cpi->descriptor->enumerate();
+		assert (devices.empty());
+		CPDeviceIdentifier device (devices.front());
+
 		if (!active && arrived) {
-			cpi->automatic = true;
-			auto_activate (*cpi, std::string());
-		} else if (active && cpi->automatic && !arrived) {
-			cpi->automatic = false;
-			auto_deactivate (*cpi, std::string());
+			auto_activate (device);
+		} else if (active && !arrived) {
+			auto_deactivate (device);
 		}
 	}
 }

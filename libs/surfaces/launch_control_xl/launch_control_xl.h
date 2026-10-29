@@ -351,7 +351,7 @@ public:
 	};
 
 public:
-	LaunchControlXL(ARDOUR::Session &);
+	LaunchControlXL(ARDOUR::Session &, ARDOUR::CPDeviceIdentifier const &);
 	~LaunchControlXL();
 
 	std::list<std::shared_ptr<ARDOUR::Bundle> > bundles();

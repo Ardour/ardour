@@ -26,12 +26,12 @@ using namespace ARDOUR;
 using namespace ArdourSurface;
 
 static ControlProtocol*
-new_cc121_midi_protocol (Session* s, std::string const & config)
+new_cc121_midi_protocol (Session* s, CPDeviceIdentifier const & cpdi)
 {
 	CC121* fp;
 
 	try {
-		fp =  new CC121 (*s);
+		fp =  new CC121 (*s, cpdi);
 	} catch (failed_constructor& err) {
 		return 0;
 	}
@@ -50,10 +50,10 @@ delete_cc121_midi_protocol (ControlProtocol* cp)
 	delete cp;
 }
 
-static std::map<std::string, std::vector<std::string>>
+static std::vector<CPDeviceIdentifier>
 enumerate_cc121_midi_protocol ()
 {
-	return {{"Steinberg", {"CC121"}}};
+	return {CPDeviceIdentifier ("Steinberg CC121", "Steinberg", "CC121")};
 }
 
 static ControlProtocolDescriptor cc121_midi_descriptor = {

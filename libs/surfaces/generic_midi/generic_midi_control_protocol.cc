@@ -86,9 +86,9 @@ GenericMidiControlProtocol::init ()
 	reload_maps ();
 }
 
-GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s, std::string const & config)
-	: ControlProtocol (s, _("Generic MIDI"), config)
-	, AbstractUI<GenericMIDIRequest> (name())
+GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s, CPDeviceIdentifier const & cpdi)
+	: ControlProtocol (s, cpdi)
+	, AbstractUI<GenericMIDIRequest> (cpdi.manufacturer + '/' + cpdi.device_name)
 	, connection_state (ConnectionState (0))
 	, _motorised (false)
 	, _threshold (10)
@@ -96,8 +96,8 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s, std::string 
 {
 	std::shared_ptr<ARDOUR::Port> inp;
 	std::shared_ptr<ARDOUR::Port> outp;
-	std::string input_port_name (string_compose (_("%1 Control In"), config));
-	std::string output_port_name (string_compose (_("%1 Control Out"), config));
+	std::string input_port_name (string_compose (_("%1 Control In"), cpdi.device_name));
+	std::string output_port_name (string_compose (_("%1 Control Out"), cpdi.device_name));
 
 	inp  = AudioEngine::instance()->register_input_port (DataType::MIDI, input_port_name, true);
 	outp = AudioEngine::instance()->register_output_port (DataType::MIDI, output_port_name, true);
@@ -389,7 +389,7 @@ GenericMidiControlProtocol::set_active (bool yn)
 		BaseUI::run ();
 
 		for (list<GenericMidiControlProtocol::MapInfo>::iterator x = map_info.begin(); x != map_info.end(); ++x) {
-			if (_device_name == x->name) {
+			if (cpdi.device_name == x->name) {
 				load_bindings (x->path);
 				maybe_auto_connect ();
 				break;
@@ -745,7 +745,7 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 
 	std::string str;
 	// midi map has to be loaded first so learned binding can go on top
-	if (_device_name.empty() && node.get_property ("binding", str)) {
+	if (cpdi.device_name.empty() && node.get_property ("binding", str)) {
 		for (list<MapInfo>::iterator x = map_info.begin(); x != map_info.end(); ++x) {
 			if (str == (*x).name) {
 				load_bindings ((*x).path);
@@ -827,27 +827,22 @@ GenericMidiControlProtocol::get_feedback () const
 	return do_feedback;
 }
 
-std::map<std::string, std::vector<std::string>>
+std::vector<CPDeviceIdentifier>
 GenericMidiControlProtocol::enumerate ()
 {
-	std::map<std::string, std::vector<std::string>> devices;
+	std::vector<CPDeviceIdentifier>devices;
 
 	for (auto const& info : map_info) {
-
-		if (devices.find (info.manufacturer) != devices.end()) {
-			devices[info.manufacturer].push_back (info.name);
-		} else {
-			devices.insert({info.manufacturer, {info.name}});
-		}
+		devices.push_back (CPDeviceIdentifier ("Generic MIDI", info.manufacturer, info.name));
 	}
 
 	return devices;
 }
 
-std::vector<std::string>
+std::vector<CPDeviceIdentifier>
 GenericMidiControlProtocol::detected ()
 {
-	std::vector<string> devices;;
+	std::vector<CPDeviceIdentifier> devices;;
 	std::vector<std::string> midi_inputs;
 	std::vector<std::string> midi_outputs;
 
@@ -887,7 +882,7 @@ GenericMidiControlProtocol::detected ()
 		}
 
 		if (have_receiving || have_sending) {
-			devices.push_back (mi.name);
+			devices.push_back ({"Generic MIDI", mi.manufacturer, mi.name});
 		}
 	}
 

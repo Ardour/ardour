@@ -25,12 +25,12 @@ using namespace ARDOUR;
 using namespace ArdourSurface::FP_NAMESPACE;
 
 static ControlProtocol*
-new_faderport16_midi_protocol (Session* s, std::string const & config)
+new_faderport16_midi_protocol (Session* s, CPDeviceIdentifier const & cpdi)
 {
 	FaderPort8* fp;
 
 	try {
-		fp = new FaderPort8 (*s);
+		fp = new FaderPort8 (*s, cpdi);
 	} catch (failed_constructor& err) {
 		return 0;
 	}
@@ -56,10 +56,10 @@ probe_faderport16_midi_protocol ()
 	return FaderPort8::probe (i, o);
 }
 
-static std::map<std::string, std::vector<std::string>>
+static std::vector<CPDeviceIdentifier>
 enumerate_faderport16_midi_protocol ()
 {
-	return {{"PreSonus", {"FaderPort16"}}};
+	return {CPDeviceIdentifier ("PreSonus FaderPort16", "PreSonus", "FaderPort16")};
 }
 
 static ControlProtocolDescriptor faderport16_midi_descriptor = {

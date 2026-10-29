@@ -71,10 +71,20 @@ bool ControlProtocol::selection_connected = false;
 
 const std::string ControlProtocol::state_node_name (X_("Protocol"));
 
-ControlProtocol::ControlProtocol (Session& s, string const & nom, string const & devname)
+std::ostream&
+operator<< (std::ostream& ostr, CPDeviceIdentifier const & cpid)
+{
+	return ostr << cpid.to_string();
+}
+
+std::string
+CPDeviceIdentifier::to_string() const {
+	return protocol_name + '@' + manufacturer + '/' + device_name;
+}
+
+ControlProtocol::ControlProtocol (Session& s, CPDeviceIdentifier const & di)
 	: BasicUI (s)
-	, _name (nom)
-	, _device_name (devname)
+	, cpdi (di)
 	, glib_event_callback (std::bind (&ControlProtocol::event_loop_precall, this))
 	, _requested_status (Unrequested)
 	, _active (false)
@@ -356,11 +366,11 @@ XMLNode&
 ControlProtocol::get_state () const
 {
 	XMLNode* node = new XMLNode (state_node_name);
-
+#if 0
 	node->set_property ("name", _name);
 	node->set_property ("device-name", _device_name);
 	node->set_property ("feedback", get_feedback());
-
+#endif
 	return *node;
 }
 

@@ -52,8 +52,8 @@ static const uint16_t ShuttleXpress_id = 0x0020;
 static void LIBUSB_CALL event_callback (struct libusb_transfer* transfer);
 
 
-ContourDesignControlProtocol::ContourDesignControlProtocol (Session& session)
-	: ControlProtocol (session, X_("ContourDesign"))
+ContourDesignControlProtocol::ContourDesignControlProtocol (Session& session, CPDeviceIdentifier const & cpdi)
+	: ControlProtocol (session, cpdi)
 	,  AbstractUI<ContourDesignControlUIRequest> ("contourdesign")
 	, _io_source (0)
 	, _dev_handle (0)

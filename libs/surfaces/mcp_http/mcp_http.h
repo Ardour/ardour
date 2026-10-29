@@ -52,7 +52,7 @@ public:
 		DebugVerbose = 2
 	};
 
-	MCPHttp (ARDOUR::Session&);
+	MCPHttp (ARDOUR::Session&, ARDOUR::CPDeviceIdentifier const &);
 	virtual ~MCPHttp ();
 
 	XMLNode& get_state () const override;

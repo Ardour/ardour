@@ -45,7 +45,7 @@ class ARDOURSURFACE_API MIDISurface : public ARDOUR::ControlProtocol
                   , public AbstractUI<MidiSurfaceRequest>
 {
   public:
-	MIDISurface (ARDOUR::Session&, std::string const & name, std::string const & port_name_prefix, bool use_pad_filter);
+	MIDISurface (ARDOUR::Session&, ARDOUR::CPDeviceIdentifier const &, bool use_pad_filter);
 	~MIDISurface ();
 
 	std::shared_ptr<ARDOUR::Port> input_port();

@@ -30,12 +30,12 @@ using namespace PBD;
 using namespace ArdourSurface;
 
 static ControlProtocol*
-new_lppro (Session* s, std::string const & config)
+new_lppro (Session* s, CPDeviceIdentifier const & cpdi)
 {
 	LaunchPadPro * p2 = 0;
 
 	try {
-		p2 = new LaunchPadPro (*s);
+		p2 = new LaunchPadPro (*s, cpdi);
 		/* do not set active here - wait for set_state() */
 	}
 	catch (std::exception & e) {
@@ -67,10 +67,10 @@ probe_lppro_midi_protocol ()
 	return LaunchPadPro::probe (i, o);
 }
 
-static std::map<std::string, std::vector<std::string>>
+static std::vector<CPDeviceIdentifier>
 enumerate_lppro ()
 {
-	return {{"Novation", {"Launchpad Pro"}}};
+	return { CPDeviceIdentifier ("Novation Launchpad Pro", "Novation", "Launchpad Pro")};
 }
 
 static ControlProtocolDescriptor lppro_descriptor = {

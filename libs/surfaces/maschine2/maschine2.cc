@@ -113,8 +113,8 @@ Maschine2::available ()
 	return true;
 }
 
-Maschine2::Maschine2 (ARDOUR::Session& s)
-	: ControlProtocol (s, string (X_("NI Maschine2")))
+Maschine2::Maschine2 (ARDOUR::Session& s, ARDOUR::CPDeviceIdentifier const & cpdi)
+	: ControlProtocol (s, cpdi)
 	, AbstractUI<Maschine2Request> (name())
 	, _handle (0)
 	, _hw (0)

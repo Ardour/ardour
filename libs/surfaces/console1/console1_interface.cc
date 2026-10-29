@@ -25,12 +25,12 @@ using namespace ARDOUR;
 using namespace ArdourSurface;
 
 static ControlProtocol*
-new_console1 (Session* s, std::string const & config)
+new_console1 (Session* s, CPDeviceIdentifier const & cpdi)
 {
 	Console1* console1 = 0;
 
 	try {
-		console1 =  new Console1 (*s);
+		console1 =  new Console1 (*s, cpdi);
 	} catch (failed_constructor& err) {
 		delete console1;
 		console1 = 0;
@@ -46,10 +46,10 @@ delete_console1 (ControlProtocol* cp)
 	delete cp;
 }
 
-static std::map<std::string, std::vector<std::string>>
+static std::vector<CPDeviceIdentifier>
 enumerate_console1 ()
 {
-	return {{"Softube", {"Console1"}}};
+	return {CPDeviceIdentifier ("Softube Console1", "Softube", "Console1")};
 }
 
 static ControlProtocolDescriptor console1_descriptor = {

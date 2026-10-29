@@ -70,8 +70,8 @@ using namespace ArdourSurface;
 /* init global object */
 LaunchControlXL* lcxl = 0;
 
-LaunchControlXL::LaunchControlXL (ARDOUR::Session& s)
-	: ControlProtocol (s, string (X_("Novation Launch Control XL")))
+LaunchControlXL::LaunchControlXL (ARDOUR::Session& s, CPDeviceIdentifier const & cpdi)
+	: ControlProtocol (s, cpdi)
 	, AbstractUI<LaunchControlRequest> (name())
 	, in_use (false)
 	, _track_mode(TrackMute)

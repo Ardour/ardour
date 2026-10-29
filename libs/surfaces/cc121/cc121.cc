@@ -71,8 +71,8 @@ using namespace std;
 
 #include "pbd/abstract_ui.inc.cc" // instantiate template
 
-CC121::CC121 (Session& s)
-	: ControlProtocol (s, _("Steinberg CC121"))
+CC121::CC121 (Session& s, CPDeviceIdentifier const & cpdi)
+	: ControlProtocol (s, cpdi)
 	, AbstractUI<CC121Request> (name())
 	, gui (0)
 	, connection_state (ConnectionState (0))
