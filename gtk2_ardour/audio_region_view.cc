@@ -1692,6 +1692,14 @@ AudioRegionView::envelope_changed ()
 }
 
 void
+AudioRegionView::set_envelope_shifting (bool s)
+{
+	for (uint32_t n = 0; n < waves.size(); ++n) {
+		waves[n]->set_envelope_shifting (s);
+	}
+}
+
+void
 AudioRegionView::envelope_active_changed ()
 {
 	envelope_changed ();

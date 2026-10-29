@@ -106,8 +106,10 @@ public:
 	std::shared_ptr<RegionFxLine> fx_line() const { return _fx_line; }
 
 	void region_changed (const PBD::PropertyChange&);
+
 	void envelope_active_changed ();
 	void envelope_changed ();
+	void set_envelope_shifting (bool);
 
 	GhostRegion* add_ghost (TimeAxisView&);
 
