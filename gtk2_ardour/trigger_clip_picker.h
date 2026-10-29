@@ -48,6 +48,10 @@ public:
 	~TriggerClipPicker ();
 
 	void set_session (ARDOUR::Session*);
+	void stop_audition ();
+	void set_selection_mode (Gtk::SelectionMode mode);
+	std::optional<std::string> get_selected_file_path ();
+	sigc::signal<void> selectionChanged;
 
 	ARDOUR::PluginInfoPtr instrument_plugin () const {
 		return _auditioner_combo.selected_instrument ();
@@ -58,10 +62,12 @@ private:
 	void open_dir ();
 	void open_downloader ();
 	void edit_path ();
+	void clip_dir_selected (std::string const&);
 	bool refill_dropdown ();
 	void parameter_changed (std::string const&);
 	void clip_added (std::string const&, void*);
 	void row_selected ();
+	bool view_button_press (GdkEventButton*);
 	void cursor_changed ();
 	void row_activated (Gtk::TreeModel::Path const&, Gtk::TreeViewColumn*);
 	bool test_expand (Gtk::TreeModel::iterator const&, Gtk::TreeModel::Path const&);
@@ -81,7 +87,6 @@ private:
 	void audition_processor_idle ();
 	bool audition_processor_viz (bool);
 	void audition_show_plugin_ui ();
-	void stop_audition ();
 	void autoplay_toggled ();
 	void refresh_library ();
 	void open_library ();
@@ -137,9 +142,11 @@ private:
 	InstrumentSelector           _auditioner_combo;
 
 	std::string _current_path;
+	static std::string _last_clip_dir_selection;
 	std::string _clip_library_dir;
 	bool        _clip_library_listed;
 	bool        _ignore_list_dir;
+	bool        _autoplay_from_click;
 
 	std::set<std::string> _root_paths;
 
