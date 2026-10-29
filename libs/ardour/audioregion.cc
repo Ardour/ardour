@@ -616,20 +616,6 @@ AudioRegion::read_waveform_envelope (gain_t *buf, samplecnt_t npoints, samplecnt
 	/* convert offset from the start of region source to offset from the start of the region */
 	offset = offset - start_sample ();
 
-	if (trimming_front ()) {
-		/* If we are currently trimming the front of the region, we need to
-		 * update the envelope now to avoid the waveform's envelope from shifting
-		 */
-		offset += last_start().distance (start()).samples();
-
-	} else if (moving_start () && Config->get_automation_follows_content ()) {
-		/* If the envelope follows region content during RegionSlipContentsDrag
-		 * we need to shift it manually as the envelope's acctual update will
-		 * only occur when drag ends.
-		 */
-		offset += last_start().distance (start()).samples();
-	}
-
 	_waveform_envelope.curve().get_vector (timepos_t (offset), timepos_t (offset + cnt), buf, npoints);
 }
 

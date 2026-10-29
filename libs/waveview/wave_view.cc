@@ -936,8 +936,18 @@ WaveView::process_draw_request (std::shared_ptr<WaveViewDrawRequest> req)
 
 	std::unique_ptr<ARDOUR::gain_t[]> envelope (nullptr);
 	if (props.envelope_active) {
+
+		samplecnt_t offset = 0;
+		if (props.envelope_shifting) {
+			/* If we are currently trimming the front of the region, or if the
+			 * envelope follows region content during RegionSlipContentsDrag, we
+			 * need to update the envelope now to avoid the waveform's envelope from shifting
+			 */
+			offset += region->last_start().distance (region->start()).samples();
+		}
+
 		envelope = std::make_unique<ARDOUR::gain_t[]>(n_peaks);
-		region->read_waveform_envelope (envelope.get(), n_peaks, props.get_sample_start (),
+		region->read_waveform_envelope (envelope.get(), n_peaks, props.get_sample_start () + offset,
 		                                props.get_length_samples ());
 	}
 
@@ -1440,6 +1450,12 @@ WaveView::set_start_shift (double pixels)
 	begin_visual_change ();
 	//_start_shift = pixels;
 	end_visual_change ();
+}
+
+void
+WaveView::set_envelope_shifting (bool s)
+{
+	_props->envelope_shifting = s;
 }
 
 void

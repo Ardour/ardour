@@ -288,15 +288,11 @@ public:
 
 	Trimmable::CanTrim can_trim () const;
 
-	bool trimming_front () const { return _trimming_front; }
-	bool moving_start () const { return _moving_start; }
-
 	Temporal::TimeDomain position_time_domain () const;
 	void set_position_time_domain (Temporal::TimeDomain ps);
 	void recompute_position_from_time_domain ();
 
 	void suspend_property_changes ();
-	void resume_property_changes ();
 
 	bool covers (samplepos_t sample) const {
 		return first_sample() <= sample && sample <= last_sample();
@@ -655,9 +651,6 @@ private:
 
 	virtual void recompute_at_start () = 0;
 	virtual void recompute_at_end () = 0;
-
-	bool _trimming_front;
-	bool _moving_start;
 
 	PBD::Property<bool>        _muted;
 	PBD::Property<bool>        _opaque;

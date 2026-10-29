@@ -246,8 +246,6 @@ Region::register_properties ()
 	, _transient_analysis_start (0) \
 	, _transient_analysis_end (0) \
 	, _soloSelected (false) \
-	, _trimming_front (false) \
-	, _moving_start (false) \
 	, _muted (Properties::muted, false) \
 	, _opaque (Properties::opaque, true) \
 	, _locked (Properties::locked, false) \
@@ -281,8 +279,6 @@ Region::register_properties ()
 	, _transient_analysis_start (other->_transient_analysis_start) \
 	, _transient_analysis_end (other->_transient_analysis_end) \
 	, _soloSelected (false) \
-	, _trimming_front (false) \
-	, _moving_start (false) \
 	, _muted (Properties::muted, other->_muted) \
 	, _opaque (Properties::opaque, other->_opaque) \
 	, _locked (Properties::locked, other->_locked) \
@@ -1011,15 +1007,6 @@ Region::move_start (timecnt_t const & distance)
 	_whole_file = false;
 	first_edit ();
 
-	if (property_changes_suspended ()) {
-		/* AudioRegion::read_waveform_envelope needs to know about a potential
-		 * RegionSlipContentsDrag to correctly provide envelope data to WaveView.
-		 * property_changes_suspended () is the best fit at our disposal,
-		 * unless we want to make Region more GUI-aware.
-		 */
-		_moving_start = true;
-	}
-
 	send_change (Properties::start);
 }
 
@@ -1030,14 +1017,6 @@ Region::trim_front (timepos_t const & new_position)
 		return;
 	}
 	modify_front_unchecked (new_position, false);
-	if (property_changes_suspended ()) {
-		/* AudioRegion::read_waveform_envelope needs to know about a potential
-		 * TrimDrag to correctly provide envelope data to WaveView.
-		 * property_changes_suspended () is the best fit at our disposal,
-		 * unless we want to make Region more GUI-aware.
-		 */
-		_trimming_front = true;
-	}
 }
 
 void
@@ -1697,15 +1676,6 @@ Region::suspend_property_changes ()
 	_last_length = _length;
 	_last_start = _start;
 }
-
-void
-Region::resume_property_changes ()
-{
-	Stateful::resume_property_changes ();
-	_trimming_front = false;
-	_moving_start = false;
-}
-
 
 void
 Region::mid_thaw (const PropertyChange& what_changed)
