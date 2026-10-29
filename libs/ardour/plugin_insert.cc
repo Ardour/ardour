@@ -696,7 +696,7 @@ PluginInsert::automation_run (samplepos_t start, pframes_t nframes, bool only_ac
 				sampleoffset_t start_off = (start_pos - loop_start) % looplen;
 				start_pos = loop_start + start_off;
 			}
-			samplecnt_t move = std::min ((samplecnt_t)nframes, loop_end - start_pos);
+			samplecnt_t move = std::min (remain, loop_end - start_pos);
 
 			Automatable::automation_run (start_pos, move, only_active);
 			remain -= move;
