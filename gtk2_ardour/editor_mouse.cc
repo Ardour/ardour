@@ -875,9 +875,9 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 			case RegionItem:
 				if (dynamic_cast<AutomationRegionView*> (clicked_regionview)) {
-					/* click on an automation region view; do nothing here and let the ARV's signal handler
-					   sort it out.
-					*/
+					/* behave in automation region view like in automation track */
+					_drags->set (new RubberbandSelectDrag (*this, item, [&](GdkEvent* ev, timepos_t const & pos) { return this->rb_click (ev, pos); }), event);
+					return true;
 					break;
 				}
 
