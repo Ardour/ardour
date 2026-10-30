@@ -656,20 +656,19 @@ void _update_offscreen(GdkWindow *window) {
 
     CGFloat scale = 1.0;
     scale = [impl->toplevel backingScaleFactor];
-      int w = private->width * scale;
-      int stride = (w * 4 + 255) & ~255;
-      CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-      impl->offscreen = CGBitmapContextCreate(NULL,
-        w,
-        private->height * scale,
-        8,
-        stride,
-        colorSpace,
-        kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little);
-      CGContextScaleCTM(impl->offscreen, scale, scale);
-      CGColorSpaceRelease(colorSpace);
+    int w = private->width * scale;
+    int stride = (w * 4 + 255) & ~255;
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+    impl->offscreen = CGBitmapContextCreate(NULL,
+	w,
+	private->height * scale,
+	8,
+	stride,
+	colorSpace,
+	kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little);
+    CGContextScaleCTM(impl->offscreen, scale, scale);
+    CGColorSpaceRelease(colorSpace);
   }
-
 }
 
 void
