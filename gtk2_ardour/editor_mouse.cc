@@ -442,7 +442,7 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 			break;
 
 		case GainLineItem:
-			if (eff_mouse_mode != MouseRange) {
+			if (eff_mouse_mode != MouseRange && eff_mouse_mode != MouseDraw) {
 				EditorAutomationLine* argl = reinterpret_cast<EditorAutomationLine*> (item->get_data ("line"));
 
 				std::list<Selectable*> selectables;
