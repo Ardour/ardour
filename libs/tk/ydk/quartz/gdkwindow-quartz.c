@@ -656,7 +656,6 @@ void _update_offscreen(GdkWindow *window) {
 
     CGFloat scale = 1.0;
     scale = [impl->toplevel backingScaleFactor];
-    fprintf(stderr, "scale:%f\n", scale);
       int w = private->width * scale;
       int stride = (w * 4 + 255) & ~255;
       CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
