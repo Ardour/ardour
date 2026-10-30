@@ -575,12 +575,14 @@ public:
 		add_widgets_to_page (p, _label, _box, false);
 	}
 
-	void changed ()
+	virtual void changed ()
 	{
 		_set (static_cast<T> (_spin->get_value ()) * _scale);
 	}
 
 	Gtk::Widget& tip_widget() { return *_spin; }
+	Gtk::HBox& box () { return *_box; }
+	Gtk::SpinButton& spin () { return *_spin; }
 
 private:
 	sigc::slot<T> _get;

@@ -285,8 +285,8 @@ MidiStreamView::redisplay_track ()
 
 	// No notes, use default range
 	if (!_range_dirty) {
-		_data_note_min = 60;
-		_data_note_max = 71;
+		_data_note_min = UIConfiguration::instance().get_default_lower_midi_note();
+		_data_note_max = UIConfiguration::instance().get_default_upper_midi_note();
 	}
 
 	vector<RegionView::DisplaySuspender> vds;
