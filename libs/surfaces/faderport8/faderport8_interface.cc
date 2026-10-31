@@ -59,7 +59,7 @@ probe_faderport8_midi_protocol ()
 static std::vector<CPDeviceIdentifier>
 enumerate_faderport8_midi_protocol ()
 {
-	return {CPDeviceIdentifier ("PreSonus", "PreSonus", "FaderPort8")};
+	return {CPDeviceIdentifier ("PreSonus FaderPort8", "PreSonus", "FaderPort8")};
 }
 
 static ControlProtocolDescriptor faderport8_midi_descriptor = {
