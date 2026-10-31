@@ -56,13 +56,11 @@ ControlSurfacesTest::instantiateAndTeardownTest ()
 			continue;
 		}
 
-		std::cerr << "Working with protocol " << cpi->name << std::endl;
 		CPPUNIT_ASSERT (cpi->active_devices().empty());
 		std::vector<CPDeviceIdentifier> devices = cpi->descriptor->enumerate ();
 		CPPUNIT_ASSERT (!devices.empty());
 
 		CPDeviceIdentifier device (devices.front());
-		std::cerr << "\tWorking with device " << device.device_name << " using " << device.protocol_name << std::endl;
 
 		m.user_activate (device);
 		m.user_activate (device); // should be a NO-OP, prints a warning
