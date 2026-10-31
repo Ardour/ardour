@@ -143,15 +143,6 @@ public:
 	XMLNode& get_state () const;
 	int set_state (XMLNode const&, int version);
 
-	enum RequestedStatus {
-		Unrequested,
-		RequestedOff,
-		RequestedOn,
-	};
-
-	virtual void set_requested_status (RequestedStatus);
-	RequestedStatus requested_status() const { return _requested_status; }
-
 	static const std::string state_node_name;
 
 	static StripableNotificationList const& last_selected () { return _last_selected; }
@@ -166,8 +157,6 @@ protected:
 	GlibEventLoopCallback glib_event_callback;
 	virtual void event_loop_precall ();
 	void install_precall_handler (Glib::RefPtr<Glib::MainContext>);
-
-	RequestedStatus _requested_status;
 
 private:
 	LIBCONTROLCP_LOCAL ControlProtocol (const ControlProtocol&); /* noncopyable */

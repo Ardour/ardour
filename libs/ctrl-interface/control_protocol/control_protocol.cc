@@ -40,7 +40,9 @@
 #include "ardour/meter.h"
 #include "ardour/amp.h"
 #include "ardour/selection.h"
+
 #include "control_protocol/control_protocol.h"
+#include "control_protocol/types_convert.h"
 
 #include "pbd/i18n.h"
 
@@ -79,14 +81,32 @@ operator<< (std::ostream& ostr, CPDeviceIdentifier const & cpid)
 
 std::string
 CPDeviceIdentifier::to_string() const {
-	return protocol_name + '@' + manufacturer + '/' + device_name;
+	return device_name + " by " + manufacturer + " using " + protocol_name;
+}
+
+XMLNode&
+CPDeviceIdentifier::get_state () const
+{
+	XMLNode* root = new XMLNode ("CPDevice");
+	root->set_property (X_("protocol-name"), protocol_name);
+	root->set_property (X_("manufacturer"), manufacturer);
+	root->set_property (X_("device-name"), device_name);
+	return *root;
+}
+
+int
+CPDeviceIdentifier::set_state (XMLNode const &node, int /* version */)
+{
+	node.get_property (X_("protocol-name"), protocol_name);
+	node.get_property (X_("manufacturer"), manufacturer);
+	node.get_property (X_("device-name"), device_name);
+	return 0;
 }
 
 ControlProtocol::ControlProtocol (Session& s, CPDeviceIdentifier const & di)
 	: BasicUI (s)
 	, cpdi (di)
 	, glib_event_callback (std::bind (&ControlProtocol::event_loop_precall, this))
-	, _requested_status (Unrequested)
 	, _active (false)
 {
 	if (!selection_connected) {
@@ -116,19 +136,9 @@ ControlProtocol::install_precall_handler (Glib::RefPtr<Glib::MainContext> contex
 int
 ControlProtocol::set_active (bool yn)
 {
+	std::cerr << "CP " << cpdi << " set_active = " << yn << std::endl;
 	_active = yn;
 	return 0;
-}
-
-void
-ControlProtocol::set_requested_status (RequestedStatus rs)
-{
-	_requested_status = rs;
-	if (_requested_status == RequestedOn) {
-		set_active (true);
-	} else if (_requested_status == RequestedOff) {
-		set_active (false);
-	}
 }
 
 void

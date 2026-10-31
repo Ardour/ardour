@@ -23,6 +23,7 @@
 #pragma once
 
 #include <list>
+#include <map>
 #include <string>
 
 #include "pbd/rwlock.h"
@@ -131,8 +132,7 @@ class LIBARDOUR_API ControlProtocolManager : public PBD::Stateful, public ARDOUR
 	void                                                            stripable_selection_changed (ARDOUR::StripableNotificationListPtr);
 	static PBD::Signal<void (ARDOUR::StripableNotificationListPtr)> StripableSelectionChanged;
 
-	typedef std::list<CPDeviceIdentifier> SupportedDevices;
-	SupportedDevices const & devices() const { return _devices; }
+	std::list<CPDeviceIdentifier> devices() const;
 
 	ControlProtocolInfo*       cpi_by_name (std::string);
 
@@ -144,7 +144,16 @@ private:
 	std::list<ControlProtocolInfo*> _control_protocol_info;
 	XMLNode*                        pending_state;
 
-	std::list<CPDeviceIdentifier>  _devices;
+	struct CPDeviceStatus {
+		CPRequestedStatus requested_status;
+
+		CPDeviceStatus() : requested_status (Unrequested) {}
+	};
+
+	std::map<CPDeviceIdentifier,CPDeviceStatus>  _devices;
+
+	void set_requested_status (CPDeviceIdentifier const &, CPRequestedStatus);
+	CPRequestedStatus requested_status (CPDeviceIdentifier const &) const;
 
 	void session_going_away ();
 
