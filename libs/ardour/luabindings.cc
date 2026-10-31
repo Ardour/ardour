@@ -3129,7 +3129,6 @@ LuaBindings::common (lua_State* L)
 #if 0
 		.beginClass <ControlProtocolInfo> ("ControlProtocolInfo")
 		.addData ("name", &ControlProtocolInfo::name)
-		.addFunction ("active", &ControlProtocolInfo::active)
 		.endClass()
 
 		.beginConstStdList <ControlProtocolInfo*> ("ControlProtocolInfoList")
