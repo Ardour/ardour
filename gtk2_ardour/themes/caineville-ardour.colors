@@ -55,6 +55,8 @@
     <Color name="widget:green darker" value="7d7d7dff"/>  <!--midi track base,  gtk_midi_track,  midi automation track fill,  -->
     <Color name="widget:orange" value="904010ff"/>  <!--tempo marker,  processor postfader: fill active,  stereo panner mono fill-->
     <Color name="widget:ruddy" value="5c0707ff"/>  <!--control point outline,  gtk_processor_prefader,  stereo panner inverted fill-->
+    <Color name="comp:layer" value="2e9e5bff"/>  <!--comp layer-->
+    <Color name="comp:source" value="f0a020a0"/>  <!--comp selection on take layers-->
   </Colors>
   <ColorAliases>
     <ColorAlias name="active crossfade" alias="neutral:foreground"/>
@@ -486,6 +488,8 @@
     <ColorAlias name="zoom button: fill" alias="widget:bg"/>
     <ColorAlias name="zoom button: fill active" alias="alert:green"/>
     <ColorAlias name="zoom button: led active" alias="alert:green"/>
+    <ColorAlias name="comp layer" alias="comp:layer"/>
+    <ColorAlias name="comp selection" alias="comp:source"/>
   </ColorAliases>
   <Modifiers>
     <Modifier name="audio bus base" modifier="= alpha:0.3"/>

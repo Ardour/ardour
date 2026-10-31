@@ -605,6 +605,43 @@ private:
 	std::shared_ptr<ARDOUR::Region> _region;
 };
 
+/** Click or drag on a take region in Comping view to put (a part of) it on the comp layer */
+class CompingSelectDrag : public EditorDrag
+{
+public:
+	CompingSelectDrag (Editor&, ArdourCanvas::Item *, RegionView *);
+	~CompingSelectDrag ();
+
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
+	void aborted (bool);
+
+private:
+	RegionView* _region_view;
+	ArdourCanvas::Rectangle* _rect;
+};
+
+/** Drag an edge of a comp span shown on a take region, to lengthen or shorten that span */
+class CompingTrimDrag : public EditorDrag
+{
+public:
+	CompingTrimDrag (Editor&, ArdourCanvas::Item *, RegionView *, ARDOUR::samplepos_t span_start, ARDOUR::samplepos_t span_end, bool at_start);
+	~CompingTrimDrag ();
+
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
+	void aborted (bool);
+
+private:
+	ARDOUR::samplepos_t new_edge (GdkEvent*) const;
+
+	RegionView* _region_view;
+	ARDOUR::samplepos_t _span_start;
+	ARDOUR::samplepos_t _span_end;
+	bool _at_start;
+	ArdourCanvas::Rectangle* _rect;
+};
+
 /** Drags to resize MIDI notes */
 class NoteResizeDrag : public Drag
 {

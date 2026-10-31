@@ -78,6 +78,7 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<float>             shift;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<uint64_t>          layering_index;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<std::string>       tags;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<std::string>       comp_source_id;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<uint64_t>          reg_group;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              contents; // type doesn't matter here, used for signal only
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              region_fx; // type doesn't matter here, used for signal only
@@ -437,6 +438,9 @@ public:
 		return true;
 	}
 
+	std::string comp_source_id () const { return _comp_source_id; }
+	void set_comp_source_id (const std::string& id) { _comp_source_id = id; }
+
 	/* serialization */
 
 	XMLNode&         get_state () const;
@@ -667,6 +671,7 @@ private:
 	PBD::Property<float>       _shift;
 	PBD::Property<uint64_t>    _layering_index;
 	PBD::Property<std::string> _tags;
+	PBD::Property<std::string> _comp_source_id;
 	PBD::Property<uint64_t>    _reg_group;
 	PBD::Property<bool>        _contents; // type is irrelevant
 
@@ -697,4 +702,3 @@ private:
 };
 
 } /* namespace ARDOUR */
-

@@ -44,6 +44,17 @@ public:
 
 	timecnt_t read (Sample *dst, Sample *mixdown, float *gain_buffer, timepos_t const & start, timecnt_t const & cnt, uint32_t chan_n=0);
 
+	/** Fill the comping layer from the top takes. With a non-empty range only that range (where not already comped) is filled. */
+	bool initialize_comping_layer (samplepos_t range_start = 0, samplepos_t range_end = 0);
+	/** Add [start, end) of @p source to the comping layer, shortening overlapping comp fragments. */
+	bool add_to_comping_layer (std::shared_ptr<Region> source, samplepos_t start, samplepos_t end);
+	/** Turn the comp fragments (within the range, if given) into ordinary regions on the top layer. */
+	bool finish_comping_layer (samplepos_t range_start = 0, samplepos_t range_end = 0);
+	/** Delete the comp fragments (within the range, if given). */
+	bool discard_comping_layer (samplepos_t range_start = 0, samplepos_t range_end = 0);
+	/** Remove [start, end) of @p source from the comping layer, leaving a gap. */
+	bool remove_from_comping_layer (std::shared_ptr<Region> source, samplepos_t start, samplepos_t end);
+
 	bool destroy_region (std::shared_ptr<Region>);
 
 protected:
@@ -53,6 +64,8 @@ protected:
 	void pre_uncombine (std::vector<std::shared_ptr<Region> >&, std::shared_ptr<Region>);
 
 private:
+	void cut_comping_range (samplepos_t start, samplepos_t end, std::string const& only_source_id);
+	void add_comping_slice (std::shared_ptr<Region> from, samplepos_t s, samplepos_t e, std::string const& id);
 	int set_state (const XMLNode&, int version);
 	void dump () const;
 	bool region_changed (const PBD::PropertyChange&, std::shared_ptr<Region>);
@@ -61,4 +74,3 @@ private:
 };
 
 } /* namespace ARDOUR */
-
