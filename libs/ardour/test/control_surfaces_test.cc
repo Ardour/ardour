@@ -64,10 +64,10 @@ ControlSurfacesTest::instantiateAndTeardownTest ()
 		CPDeviceIdentifier device (devices.front());
 		std::cerr << "\tWorking with device " << device.device_name << " using " << device.protocol_name << std::endl;
 
-		m.auto_activate (device);
-		m.auto_activate (device); // should be a NO-OP, prints a warning
+		m.user_activate (device);
+		m.user_activate (device); // should be a NO-OP, prints a warning
 
-		m.auto_deactivate (device);
-		m.auto_deactivate (device); // should be a NO-OP
+		m.user_deactivate (device);
+		m.user_deactivate (device); // should be a NO-OP
 	}
 }
