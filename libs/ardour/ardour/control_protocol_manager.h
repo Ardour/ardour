@@ -23,6 +23,7 @@
 #pragma once
 
 #include <list>
+#include <map>
 #include <string>
 
 #include "pbd/rwlock.h"
@@ -147,7 +148,16 @@ private:
 	std::list<ControlProtocolInfo*> _control_protocol_info;
 	XMLNode*                        pending_state;
 
-	std::list<CPDeviceIdentifier>  _devices;
+	struct CPDeviceStatus {
+		CPRequestedStatus requested_status;
+
+		CPDeviceStatus() : requested_status (Unrequested) {}
+	};
+
+	std::map<CPDeviceIdentifier,CPDeviceStatus>  _devices;
+
+	void set_requested_status (CPDeviceIdentifier const &, CPRequestedStatus);
+	CPRequestedStatus requested_status (CPDeviceIdentifier const &) const;
 
 	void session_going_away ();
 

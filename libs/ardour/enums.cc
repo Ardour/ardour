@@ -50,6 +50,8 @@
 #include "ardour/triggerbox.h"
 #include "ardour/types.h"
 
+#include "control_protocol/types.h"
+
 using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
@@ -172,6 +174,7 @@ setup_enum_writer ()
 	KeyEnforcementPolicy _KeyEnforcementPolicy;
 	TuningSystem _TuningSystem;
 	MusicalModeType _MusicalModeType;
+	CPRequestedStatus _RequestedStatus;
 
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -959,6 +962,11 @@ setup_enum_writer ()
 	REGISTER_ENUM (RatioFromRoot);
 	REGISTER_ENUM (MidiNote);
 	REGISTER (_MusicalModeType);
+
+	REGISTER_ENUM (Unrequested);
+	REGISTER_ENUM (RequestedOn);
+	REGISTER_ENUM (RequestedOff);
+	REGISTER (_RequestedStatus);
 }
 
 

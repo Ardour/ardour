@@ -328,19 +328,19 @@ ControlProtocolInfo::remove_instance (CPDeviceIdentifier const & cpdi)
 	ControlProtocol* to_be_deleted = nullptr;
 
 	for (auto ii = instances.begin(); ii != instances.end(); ++ii) {
-		if ((*ii)->device_name() == cpdi.device_name) {
+		if ((*ii)->device_identifier() == cpdi) {
 			to_be_deleted = *ii;
 			instances.erase (ii);
 			break;
 		}
 	}
 
-	if (to_be_deleted) {
-		descriptor->destroy (to_be_deleted);
-		delete to_be_deleted;
+	if (!to_be_deleted) {
+		return false;
 	}
 
-	return (bool) to_be_deleted;
+	descriptor->destroy (to_be_deleted);
+	return true;
 }
 
 void
@@ -507,22 +507,52 @@ ControlProtocolManager::set_session (Session* s)
 #endif
 }
 
+CPRequestedStatus
+ControlProtocolManager::requested_status (CPDeviceIdentifier const & cpdi) const
+{
+	for (auto const & [cp,status] : _devices) {
+		if (cp == cpdi) {
+			return status.requested_status;
+		}
+	}
+
+	return Unrequested;
+}
+
+void
+ControlProtocolManager::set_requested_status (CPDeviceIdentifier const & cpdi, CPRequestedStatus status)
+{
+	for (auto iter = _devices.begin(); iter != _devices.end(); ++iter) {
+		if (iter->first == cpdi) {
+			iter->second.requested_status = status;
+			return;
+		}
+	}
+}
+
+std::list<CPDeviceIdentifier>
+ControlProtocolManager::devices() const
+{
+	std::list<CPDeviceIdentifier> devs;
+
+	for (auto const & [cpdi,status] : _devices) {
+		devs.push_back (cpdi);
+	}
+
+	return devs;
+}
+
 int
 ControlProtocolManager::activate (bool detected, CPDeviceIdentifier const & cpdi)
 {
 	assert (_session);
 
 	ControlProtocolInfo* cpi = cpi_by_name (cpdi.protocol_name);
-	if (!cpi) {
-		std::cerr << "CPI for " << cpdi.protocol_name << " not found\n";
-		PBD::stacktrace (std::cerr, 19);
-	}
 	assert (cpi);
 	ControlProtocol*  cp = nullptr;
 	bool was_active = false;
 
 	if ((cp = cpi->get_instance (cpdi)) == nullptr) {
-		std::cerr << cpi->name << " need to create instance for " << cpdi.device_name << std::endl;
 		if ((cp = cpi->add_instance (*_session, cpdi)) == nullptr) {
 			return -1;
 		}
@@ -530,21 +560,19 @@ ControlProtocolManager::activate (bool detected, CPDeviceIdentifier const & cpdi
 		was_active = cp->active();
 	}
 
-
-	std::cerr << cpi->name << " active ? " << cp->active () << std::endl;
-
-	if (detected) {
-		cp->set_active (true);
-	} else {
-		cp->set_requested_status (ControlProtocol::RequestedOn);
-	}
+	cpi->activate (cpdi);
 
 	if (!cp->active()) {
-		error << string_compose (_("Control protocol support for %1 (%2) failed to activate"), cpi->name, cpdi.device_name) << endmsg;
-		cpi->remove_instance (cpdi);
-	}
 
-	if (!was_active) {
+		cpi->remove_instance (cpdi);
+
+	} else if (!was_active) {
+
+		if (!detected) {
+			/* this was a user request, update our CPDeviceIdentifier record */
+			set_requested_status (cpdi, RequestedOn);
+		}
+
 		ProtocolStatusChange (cpdi, true);
 	}
 
@@ -555,30 +583,14 @@ int
 ControlProtocolManager::deactivate (bool detected, CPDeviceIdentifier const & cpdi)
 {
 	ControlProtocolInfo* cpi = cpi_by_name (cpdi.protocol_name);
-	assert (cpi);
 
-	ControlProtocol* cp = cpi->get_instance (cpdi);
-
-	if (!cp) {
-		return -1;
+	if (!detected) {
+		/* this was a user request, update our CPDeviceIdentifier record */
+		set_requested_status (cpdi, RequestedOff);
 	}
 
-	bool was_active = cp->active();
-
-	if (was_active) {
-		if (detected) {
-			cpi->deactivate (cpdi);
-		} else {
-			cp->set_requested_status (ControlProtocol::RequestedOff);
-		}
-
-		if (cp->active()) {
-			error << string_compose (_("Control protocol support for %1 (%2) failed to activate"), cpi->name, cpdi.device_name) << endmsg;
-			return -1;
-		}
-
-		ProtocolStatusChange (cpdi, false); /* EMIT SIGNAL */
-	}
+	cpi->remove_instance (cpdi);
+	ProtocolStatusChange (cpdi, false); /* EMIT SIGNAL */
 
 	return 0;
 }
@@ -686,7 +698,7 @@ ControlProtocolManager::discover_control_protocols ()
 
 				std::vector<CPDeviceIdentifier> supported = cpi->descriptor->enumerate ();
 				for (auto & device : supported) {
-					_devices.push_back (device);
+					_devices.insert (std::make_pair (device, CPDeviceStatus()));
 				}
 
 			} catch (...) {
@@ -704,13 +716,12 @@ ControlProtocolManager::cpi_by_name (string name)
 {
 	PBD::RWLock::ReaderLock lm (_protocols_lock);
 
-	std::cerr << "look for " << name << std::endl;
 	for (auto const& cpi : _control_protocol_info) {
-		std::cerr << "\tknown protocl: " << cpi->name << std::endl;
 		if (name == cpi->name) {
 			return cpi;
 		}
 	}
+
 	return nullptr;
 }
 
@@ -758,7 +769,6 @@ ControlProtocolManager::use_state ()
 			ControlProtocolInfo* cpi = cpi_by_name (name);
 
 			if (!cpi) {
-				std::cerr << "protocol " << name << " not found\n";
 				continue;
 			}
 
@@ -778,6 +788,16 @@ ControlProtocolManager::get_state () const
 	for (auto const & cpi : _control_protocol_info) {
 		root->add_child_nocopy (cpi->get_state ());
 	}
+
+	XMLNode* device_node = new XMLNode (X_("Devices"));
+
+	for (auto const & [cpdi,status] : _devices) {
+		XMLNode& devnode (cpdi.get_state());
+		// devnode->set_property (status);
+		device_node->add_child_nocopy (devnode);
+	}
+
+	root->add_child_nocopy (*device_node);
 
 	return *root;
 }
@@ -867,7 +887,7 @@ ControlProtocolManager::probe_midi_control_protocols ()
 
 			if ((cp = cpi->get_instance (cpdi))) {
 				/* Don't do this for instances that were not automatically activated. */
-				if (cp->requested_status() == ControlProtocol::Unrequested) {
+				if (requested_status (cpdi) == Unrequested) {
 					if (std::find (detected.begin(), detected.end(), cpdi) == detected.end()) {
 						auto_deactivate (cpdi);
 					}
@@ -876,8 +896,10 @@ ControlProtocolManager::probe_midi_control_protocols ()
 		}
 
 		for (auto & cpdi : detected) {
-			if (cpi->get_instance (cpdi) == nullptr) {
-				auto_activate (cpdi);
+			if (requested_status (cpdi) != RequestedOff) {
+				if (cpi->get_instance (cpdi) == nullptr) {
+					auto_activate (cpdi);
+				}
 			}
 		}
 

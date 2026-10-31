@@ -22,7 +22,11 @@
 #include <memory>
 #include <vector>
 
+#include "pbd/stateful.h"
+
 #include "control_protocol/visibility.h"
+
+class XMLNode;
 
 namespace ARDOUR {
 
@@ -34,17 +38,45 @@ class ControlProtocolManager;
 class LIBCONTROLCP_API CPDeviceIdentifier
 {
   public:
-  CPDeviceIdentifier (std::string const & p, std::string const & m, std::string const & d) : protocol_name (p), manufacturer (m), device_name (d) {}
 
-  const std::string protocol_name;
-  const std::string manufacturer;
-  const std::string device_name;
+  CPDeviceIdentifier (std::string const & p, std::string const & m, std::string const & d)
+  : protocol_name (p)
+  , manufacturer (m)
+  , device_name (d)
+  {}
+  virtual ~CPDeviceIdentifier() {}
 
-  bool operator< (CPDeviceIdentifier const & other) const { return protocol_name < other.protocol_name && manufacturer < other.manufacturer && device_name < other.device_name; }
+  std::string protocol_name;
+  std::string manufacturer;
+  std::string device_name;
+
+  bool operator< (CPDeviceIdentifier const & other) const {
+	  if (protocol_name < other.protocol_name) {
+		  return true;
+	  } else if (protocol_name > other.protocol_name) {
+		  return false;
+	  } else if (manufacturer < other.manufacturer) {
+		  return true;
+	  } else if (manufacturer > other.manufacturer) {
+		  return false;
+	  } else if (device_name < other.device_name) {
+		  return true;
+	  }
+	  return false;
+  }
   bool operator== (CPDeviceIdentifier const & other) const { return protocol_name == other.protocol_name && manufacturer == other.manufacturer && device_name == other.device_name; }
   bool operator!= (CPDeviceIdentifier const & other) const { return protocol_name != other.protocol_name && manufacturer != other.manufacturer && device_name != other.device_name; }
 
   std::string to_string() const;
+
+  XMLNode& get_state () const;
+  int set_state (XMLNode const &, int);
+};
+
+enum CPRequestedStatus {
+	Unrequested,
+	RequestedOff,
+	RequestedOn,
 };
 
 typedef std::vector<std::weak_ptr<ARDOUR::Route> >    RouteNotificationList;

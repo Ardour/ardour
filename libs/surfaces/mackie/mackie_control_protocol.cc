@@ -462,7 +462,7 @@ MackieControlProtocol::enumerate ()
 	std::vector<CPDeviceIdentifier> devices;
 
 	for (const auto& [manufacturer,device] : DeviceInfo::device_info) {
-		devices.push_back (CPDeviceIdentifier ("Mackie Control Protocol", manufacturer, device.name()));
+		devices.push_back (CPDeviceIdentifier ("Mackie Control Protocol", device.manufacturer(), device.name()));
 	}
 
 	return devices;

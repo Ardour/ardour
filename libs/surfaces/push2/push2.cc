@@ -425,7 +425,7 @@ Push2::vblank ()
 int
 Push2::set_active (bool yn)
 {
-	DEBUG_TRACE (DEBUG::Push2, string_compose("Push2Protocol::set_active init with yn: '%1'\n", yn));
+	DEBUG_TRACE (DEBUG::Push2, string_compose("Push2Protocol::set_active init with yn: %1 vs %2\n", yn, active()));
 
 	if (yn == active()) {
 		return 0;
