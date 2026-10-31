@@ -88,7 +88,7 @@ using namespace ArdourSurface::MACKIE_NAMESPACE;
   } while (0)
 #endif
 
-#define ui_context() MackieControlProtocol::instance() /* a UICallback-derived object that specifies the event loop for signal handling */
+#define ui_context() &_surface->mcp() /* a UICallback-derived object that specifies the event loop for signal handling */
 
 Strip::Strip (Surface& s, const std::string& name, int index, const map<MACKIE_NAMESPACE::Button::ID,StripButtonInfo>& strip_buttons)
 	: Group (name)

@@ -28,7 +28,6 @@
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
 #include "pbd/convert.h"
-#include "pbd/stl_delete.h"
 
 #include "ardour/debug.h"
 #include "ardour/filesystem_paths.h"
