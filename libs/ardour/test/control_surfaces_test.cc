@@ -36,6 +36,10 @@ ControlSurfacesTest::instantiateAndTeardownTest ()
 	_session->new_audio_track (1, 2, NULL, 1, "Test", PresentationInfo::max_order, Normal);
 
 	ControlProtocolManager& m = ControlProtocolManager::instance ();
+
+	/* may already be active because of user preferences */
+	m.drop_protocols ();
+
 	for (auto const& cpi : m.control_protocol_infos ()) {
 #if 1
 		/* Push2 needs libcanvas -- which needs pango, which needs a screen
@@ -52,16 +56,13 @@ ControlSurfacesTest::instantiateAndTeardownTest ()
 			continue;
 		}
 
-		std::cout << "ControlSurfacesTest: " << cpi->name << "\n";
-		if (cpi->active()) {
-			/* may already be active because of user preferences */
-			cpi->remove_all_instances ();
-		}
-
+		std::cerr << "Working with protocol " << cpi->name << std::endl;
+		CPPUNIT_ASSERT (cpi->active_devices().empty());
 		std::vector<CPDeviceIdentifier> devices = cpi->descriptor->enumerate ();
-		assert (!devices.empty());
+		CPPUNIT_ASSERT (!devices.empty());
 
 		CPDeviceIdentifier device (devices.front());
+		std::cerr << "\tWorking with device " << device.device_name << " using " << device.protocol_name << std::endl;
 
 		m.auto_activate (device);
 		m.auto_activate (device); // should be a NO-OP, prints a warning
