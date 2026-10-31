@@ -112,8 +112,6 @@ class MackieControlProtocol
 	MackieControlProtocol(ARDOUR::Session &, ARDOUR::CPDeviceIdentifier const & device);
 	virtual ~MackieControlProtocol();
 
-	static MackieControlProtocol* instance() { return _instance; }
-
 	void maybe_auto_connect ();
 
 	MACKIE_NAMESPACE::DeviceInfo& device_info() { return _device_info; }
@@ -297,12 +295,10 @@ class MackieControlProtocol
 
 	typedef std::map<MACKIE_NAMESPACE::Button::ID,ButtonHandlers> ButtonMap;
 
-	static MackieControlProtocol* _instance;
-
 	bool profile_exists (std::string const&) const;
 
-	MACKIE_NAMESPACE::DeviceInfo       _device_info;
-	MACKIE_NAMESPACE::DeviceProfile    _device_profile;
+	static MACKIE_NAMESPACE::DeviceInfo       _device_info;
+	static MACKIE_NAMESPACE::DeviceProfile    _device_profile;
 	sigc::connection          periodic_connection;
 	sigc::connection          redisplay_connection;
 	sigc::connection          hui_connection;

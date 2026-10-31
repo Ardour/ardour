@@ -28,8 +28,9 @@ class Fader : public Control
 {
   public:
 
-	Fader (int id, std::string name, Group & group)
+	Fader (Surface & s, int id, std::string name, Group & group)
 		: Control (id, name, group)
+		, _surface (&s)
 		, position (0.0)
 		, last_update_position (-1)
 	{
@@ -43,6 +44,7 @@ class Fader : public Control
 	static Control* factory (Surface&, int id, const char*, Group&);
 
   private:
+	Surface* _surface;
 	float position;
 	int   last_update_position;
 };

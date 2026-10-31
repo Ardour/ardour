@@ -81,7 +81,7 @@ using ARDOUR::ChanCount;
 using namespace ArdourSurface;
 using namespace ArdourSurface::MACKIE_NAMESPACE;
 
-#define ui_context() MackieControlProtocol::instance() /* a UICallback-derived object that specifies the event loop for signal handling */
+#define ui_context() &_mcp /* a UICallback-derived object that specifies the event loop for signal handling */
 
 // The MCU sysex header.4th byte Will be overwritten
 // when we get an incoming sysex that identifies

@@ -48,7 +48,8 @@ using namespace ArdourSurface;
 using namespace ArdourSurface::MACKIE_NAMESPACE;
 using namespace PBD;
 
-#define ui_context() MackieControlProtocol::instance() /* a UICallback-derived object that specifies the event loop for signal handling */
+#define ui_context() &mcp() /* a UICallback-derived object that specifies the event loop for signal handling */
+#define strip_ui_context() &strip->surface()->mcp() /* a UICallback-derived object that specifies the event loop for signal handling */
 
 SubviewFactory* SubviewFactory::_instance = 0;
 
@@ -1365,7 +1366,7 @@ void PluginEdit::setup_vpot(
 		return;
 	}
 
-	c->Changed.connect (_context.subview_connections(), MISSING_INVALIDATOR, std::bind (&PluginEdit::notify_parameter_change, this, strip, vpot, pending_display, global_strip_position), ui_context());
+	c->Changed.connect (_context.subview_connections(), MISSING_INVALIDATOR, std::bind (&PluginEdit::notify_parameter_change, this, strip, vpot, pending_display, global_strip_position), strip_ui_context());
 	vpot->set_control (c);
 	pending_display[0] = PluginSubviewState::shorten_display_text(c->desc().label, 6);
 	notify_parameter_change (strip, vpot, pending_display, global_strip_position);

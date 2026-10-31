@@ -119,7 +119,8 @@ const int MACKIE_NAMESPACE::MackieControlProtocol::MAIN_MODIFIER_MASK = (MackieC
 						       MackieControlProtocol::MODIFIER_SHIFT|
 						       MackieControlProtocol::MODIFIER_CMDALT);
 
-MACKIE_NAMESPACE::MackieControlProtocol* MACKIE_NAMESPACE::MackieControlProtocol::_instance = 0;
+MACKIE_NAMESPACE::DeviceInfo       MackieControlProtocol::_device_info;
+MACKIE_NAMESPACE::DeviceProfile    MackieControlProtocol::_device_profile;
 
 void
 MackieControlProtocol::init ()
@@ -167,8 +168,6 @@ MackieControlProtocol::MackieControlProtocol (Session& session, CPDeviceIdentifi
 
 	PresentationInfo::Change.connect (gui_connections, MISSING_INVALIDATOR, std::bind (&MackieControlProtocol::notify_presentation_info_changed, this, _1), this);
 
-	_instance = this;
-
 	build_button_map ();
 }
 
@@ -202,8 +201,6 @@ MackieControlProtocol::~MackieControlProtocol()
 	catch (...) {
 		cout << "~MackieControlProtocol caught unknown" << endl;
 	}
-
-	_instance = 0;
 
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::~MackieControlProtocol done\n");
 }

@@ -35,7 +35,7 @@ using namespace ArdourSurface::MACKIE_NAMESPACE;
 Control*
 Fader::factory (Surface& surface, int id, const char* name, Group& group)
 {
-	Fader* f = new Fader (id, name, group);
+	Fader* f = new Fader (surface, id, name, group);
 
 	surface.faders[id] = f;
 	surface.controls.push_back (f);
@@ -53,8 +53,8 @@ Fader::set_position (float normalized)
 MidiByteArray
 Fader::update_message ()
 {
-	MackieControlProtocol* mcp = MackieControlProtocol::instance ();
-	if (mcp && mcp->flip_mode() == MackieControlProtocol::Zero) {
+	MackieControlProtocol& mcp (_surface->mcp());
+	if (mcp.flip_mode() == MackieControlProtocol::Zero) {
 		/* do not send messages to move the faders when in this mode */
 		return MidiByteArray();
 	}
