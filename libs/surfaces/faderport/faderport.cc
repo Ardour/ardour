@@ -67,6 +67,7 @@ using namespace std;
 
 FaderPort::FaderPort (Session& s, CPDeviceIdentifier const & cpdi)
 	: MIDISurface (s, cpdi, false)
+	, gui (nullptr)
 	, fader_msb (0)
 	, fader_lsb (0)
 	, fader_is_touched (false)
