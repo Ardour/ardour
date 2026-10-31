@@ -52,20 +52,11 @@ class LIBARDOUR_API ControlProtocolInfo : public PBD::Stateful
 	ControlProtocolInfo (std::string const & path);
 	~ControlProtocolInfo ();
 
-	bool is_active (CPDeviceIdentifier const &);
-
-	bool active () const;
-	std::vector<CPDeviceIdentifier> active_devices () const;
-
-	ControlProtocolDescriptor*    get_descriptor();
 	ControlProtocol* get_instance (CPDeviceIdentifier const &);
-
 	ControlProtocol* add_instance (Session&, CPDeviceIdentifier const &);
 	bool remove_instance (CPDeviceIdentifier const &);
-	void remove_all_instances ();
-
-	int activate (CPDeviceIdentifier const &);
-	int deactivate (CPDeviceIdentifier const &);
+	std::vector<CPDeviceIdentifier> remove_all_instances ();
+	std::vector<CPDeviceIdentifier> active_devices() const;
 
 	int      set_state (const XMLNode&, int version);
 	XMLNode& get_state () const;
@@ -82,6 +73,7 @@ class LIBARDOUR_API ControlProtocolInfo : public PBD::Stateful
 	std::string                   path;
 
 	static ControlProtocolDescriptor* get_descriptor (std::string path);
+	ControlProtocolDescriptor*    get_descriptor();
 };
 
 class LIBARDOUR_API ControlProtocolManager : public PBD::Stateful, public ARDOUR::SessionHandlePtr

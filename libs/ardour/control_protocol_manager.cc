@@ -290,6 +290,19 @@ ControlProtocolInfo::set_state (XMLNode const & node, int)
 	return 0;
 }
 
+std::vector<CPDeviceIdentifier>
+ControlProtocolInfo::active_devices () const
+{
+	std::vector<CPDeviceIdentifier> devices;
+	PBD::RWLock::ReaderLock lm (instance_lock);
+
+	for (auto const & instance : instances) {
+		devices.push_back (instance->device_identifier());
+	}
+
+	return devices;
+}
+
 ControlProtocol*
 ControlProtocolInfo::get_instance (CPDeviceIdentifier const & cpdi)
 {
@@ -343,10 +356,11 @@ ControlProtocolInfo::remove_instance (CPDeviceIdentifier const & cpdi)
 	return true;
 }
 
-void
+std::vector<CPDeviceIdentifier>
 ControlProtocolInfo::remove_all_instances ()
 {
 	std::vector<ControlProtocol*> to_be_deleted;
+	std::vector<CPDeviceIdentifier> cpdis;
 
 	{
 		PBD::RWLock::ReaderLock lm (instance_lock);
@@ -355,65 +369,12 @@ ControlProtocolInfo::remove_all_instances ()
 	}
 
 	for (auto & inst : to_be_deleted) {
+		cpdis.push_back (inst->device_identifier());
 		descriptor->destroy (inst);
 		/* instance is deleted by descriptor interface */
 	}
-}
 
-std::vector<CPDeviceIdentifier>
-ControlProtocolInfo::active_devices () const
-{
-	std::vector<CPDeviceIdentifier> devices;
-	PBD::RWLock::ReaderLock lm (instance_lock);
-
-	for (auto const & instance : instances) {
-		devices.push_back (instance->device_identifier());
-	}
-
-	return devices;
-}
-
-int
-ControlProtocolInfo::activate (CPDeviceIdentifier const & cpdi)
-{
-	ControlProtocol* cp = get_instance (cpdi);
-
-	if (!cp) {
-		return -1;
-	}
-
-	return cp->set_active (true);
-}
-
-int
-ControlProtocolInfo::deactivate (CPDeviceIdentifier const & cpdi)
-{
-	ControlProtocol* cp = get_instance (cpdi);
-	if (!cp) {
-		return -1;
-	}
-
-	return cp->set_active (false);
-}
-
-bool
-ControlProtocolInfo::active () const
-{
-	PBD::RWLock::ReaderLock lm (instance_lock);
-	return !instances.empty();
-}
-
-bool
-ControlProtocolInfo::is_active (CPDeviceIdentifier const & cpdi)
-{
-	PBD::RWLock::ReaderLock lm (instance_lock);
-
-	for (auto const & inst : instances) {
-		if (inst->device_name() == cpdi.device_name && inst->active()) {
-			return true;
-		}
-	}
-	return false;
+	return cpdis;
 }
 
 void
@@ -560,7 +521,7 @@ ControlProtocolManager::activate (bool detected, CPDeviceIdentifier const & cpdi
 		was_active = cp->active();
 	}
 
-	cpi->activate (cpdi);
+	cp->set_active (true);
 
 	if (!cp->active()) {
 
@@ -589,6 +550,11 @@ ControlProtocolManager::deactivate (bool detected, CPDeviceIdentifier const & cp
 		set_requested_status (cpdi, RequestedOff);
 	}
 
+	/* Do not call ::set_active (false) ... for some reason this behavior
+	 * evolved over a long period, and many surfaces break if this is
+	 * done. Just destroy the instance.
+	 */
+
 	cpi->remove_instance (cpdi);
 	ProtocolStatusChange (cpdi, false); /* EMIT SIGNAL */
 
@@ -615,28 +581,23 @@ ControlProtocolManager::drop_protocols ()
 	PBD::RWLock::WriterLock lm (_protocols_lock);
 
 	for (auto const& cpi : _control_protocol_info) {
-		cpi->remove_all_instances ();
+		(void) cpi->remove_all_instances ();
 	}
+
+	/* Unlike ::remove_all_instances(), there's no ProtocolStatusChange
+	 * signal here
+	 */
 }
 
 void
 ControlProtocolManager::remove_all_instances (ControlProtocolInfo& cpi)
 {
-	std::vector<CPDeviceIdentifier> instances = cpi.active_devices();
-
-	cpi.remove_all_instances ();
+	std::vector<CPDeviceIdentifier> instances (cpi.remove_all_instances ());
 
 	for (auto const & cpid : instances) {
 		ProtocolStatusChange (cpid, false);
 	}
 }
-
-struct ControlProtocolOrderByName {
-	bool operator() (ControlProtocolInfo* const& a, ControlProtocolInfo* const& b) const
-	{
-		return a->name < b->name;
-	}
-};
 
 void
 ControlProtocolManager::discover_control_protocols ()
@@ -705,9 +666,6 @@ ControlProtocolManager::discover_control_protocols ()
 				continue;
 			}
 		}
-
-		ControlProtocolOrderByName cpn;
-		_control_protocol_info.sort (cpn);
 	}
 }
 
@@ -920,8 +878,6 @@ ControlProtocolManager::probe_usb_control_protocols (bool arrived, uint16_t vend
 			continue;
 		}
 
-		bool active = cpi->active();
-
 		/* This is necessarily for protocols that support a single device,
 		 * identifiable via a USB vendor/product duple.
 		 */
@@ -929,10 +885,11 @@ ControlProtocolManager::probe_usb_control_protocols (bool arrived, uint16_t vend
 		std::vector<CPDeviceIdentifier> devices = cpi->descriptor->enumerate();
 		assert (devices.empty());
 		CPDeviceIdentifier device (devices.front());
+		ControlProtocol* cp = cpi->get_instance (device);
 
-		if (!active && arrived) {
+		if ((!cp || !cp->active()) && arrived) {
 			auto_activate (device);
-		} else if (active && !arrived) {
+		} else if ((cp && cp->active()) && !arrived) {
 			auto_deactivate (device);
 		}
 	}
