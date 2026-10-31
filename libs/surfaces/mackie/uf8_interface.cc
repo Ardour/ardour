@@ -69,15 +69,17 @@ delete_uf8_protocol (ControlProtocol* cp)
 	}
 }
 
+static const char * const protocol_name = "SSL 360: UF8 UF1";
+
 static std::vector<CPDeviceIdentifier>
 enumerate_uf8_protocol ()
 {
-	return {CPDeviceIdentifier ("SSL 360", "SSL", "UF8/UF1")};
+	return {CPDeviceIdentifier (protocol_name, "SSL", "UF8/UF1")};
 }
 
 // Field names commented out by JE - 06-01-2010
 static ControlProtocolDescriptor uf8_descriptor = {
-	/* name       */ "SSL 360: UF8 UF1",
+	/* name       */ protocol_name,
 	/* id         */ "uri://ardour.org/surfaces/ssl_uf8:0",
 	/* module     */ 0,
 	/* available  */ 0,
