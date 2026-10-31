@@ -62,14 +62,16 @@ delete_us2400_protocol (ControlProtocol* cp)
 	}
 }
 
+static const char * const protocol_name = "Tascam US2400";
+
 static std::vector<CPDeviceIdentifier>
 enumerate_us2400_protocol ()
 {
-	return {CPDeviceIdentifier ("Tascam US2400", "Tascam", "US-2400")};
+	return {CPDeviceIdentifier (protocol_name, "Tascam", "US-2400")};
 }
 
 static ControlProtocolDescriptor us2400_descriptor = {
-	/* name       */ "Tascam US-2400",
+	/* name       */ protocol_name,
 	/* id         */ "uri://ardour.org/surfaces/us2400:0",
 	/* module     */ nullptr,
 	/* avilable   */ nullptr,
