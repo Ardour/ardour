@@ -259,7 +259,12 @@ Editor::update_time_selection_display ()
 		/* Clear regions, but not time or tracks, since that
 		 * would destroy the range selection rectangle, which we need to stick
 		 * around for AutomationRangeDrag. */
-		selection->clear_regions ();
+		if (selection->regions.size () != 1 || selection->midi_regions ().size () != 1) {
+			/* Don't clear regions if there's only 1 midi region selected as we
+			 * might be switching mouse modes while working on a midi region
+			 */
+			selection->clear_regions ();
+		}
 		selection->clear_playlists ();
 		/* .. unless there is no track selection (i.e. arrangement section
 		 * selection). In which case time is cleared too.
@@ -272,7 +277,12 @@ Editor::update_time_selection_display ()
 		/* This handles internal edit.
 		   Clear everything except points and notes.
 		*/
-		selection->clear_regions();
+		if (selection->regions.size () != 1 || selection->midi_regions ().size () != 1) {
+			/* Don't clear regions if there's only 1 midi region selected as we
+			 * might be switching mouse modes while working on a midi region
+			 */
+			selection->clear_regions ();
+		}
 		selection->clear_lines();
 		selection->clear_playlists ();
 
