@@ -2751,7 +2751,6 @@ MidiView::clear_note_selection ()
 {
 	clear_selection_internal ();
 	end_note_splitting ();
-	unselect_self ();
 }
 
 void
@@ -3158,10 +3157,6 @@ MidiView::remove_from_selection (NoteBase* ev)
 	ev->hide_velocity ();
 
 	ghost_sync_selection (ev);
-
-	if (_selection.empty()) {
-		unselect_self ();
-	}
 }
 
 void
