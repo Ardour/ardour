@@ -1947,7 +1947,16 @@ Editor::select_all_within (timepos_t const & start, timepos_t const & end, doubl
 	}
 
 	if (found.empty()) {
-		selection->clear_objects();
+		if (current_mouse_mode() != Editing::MouseContent || selection->regions.size () != 1 || selection->midi_regions ().size () != 1) {
+			/* keep single midi region selection */
+			selection->clear_points ();
+			selection->clear_lines ();
+			selection->clear_playlists ();
+			selection->clear_midi_notes ();
+			selection->clear_triggers ();
+		} else {
+			selection->clear_objects ();
+		}
 		selection->clear_time ();
 		return;
 	}
