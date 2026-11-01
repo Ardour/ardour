@@ -304,7 +304,10 @@ MidiStreamView::redisplay_track ()
 	layer_regions();
 
 	// Update note range (not regions which are correct) and draw note lines
-	apply_note_range (_data_note_min, _data_note_max, false);
+	// only if gui object state is not already set
+	if (static_cast<MidiTimeAxisView*> (&_trackview)->gui_property ("note-range-min").empty ()) {
+		apply_note_range (_data_note_min, _data_note_max, false);
+	}
 }
 
 void
