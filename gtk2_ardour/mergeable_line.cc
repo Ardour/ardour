@@ -105,7 +105,7 @@ MergeableLine::merge_drawn_line (EditingContext& e, Session& s, Evoral::ControlL
 
 	_line->end_draw_merge ();
 
-	_line->get_selectables (earliest, latest, 0.0, 1.0, results);
+	_line->get_selectables (_line->get_origin () + earliest, _line->get_origin () + latest, 0.0, 1.0, results);
 	e.get_selection ().set (results);
 
 	e.commit_reversible_command ();
