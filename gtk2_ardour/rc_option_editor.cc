@@ -1805,11 +1805,11 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 
 
 			ControlProtocolManager& m = ControlProtocolManager::instance ();
-			CPDeviceIdentifier row_cpdi (r[active_model.protocol_name], r[active_model.manufacturer], r[active_model.device_name]);
+			CPDeviceIdentifier row_cpdi (r[devices_model.protocol_name], r[devices_model.manufacturer], r[devices_model.device_name]);
 			ControlProtocolInfo* cpi = m.cpi_by_name (row_cpdi.protocol_name);
 			ControlProtocol* cp = cpi->get_instance (row_cpdi);
 
-			if (cp) {
+			if (!cp) {
 				if (m.user_activate (row_cpdi)) {
 					_ignore_view_change++;
 					r[devices_model.enabled] = false;
