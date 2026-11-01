@@ -739,6 +739,7 @@ static int showInvalidation = 0;
 
   if (!GDK_WINDOW_IS_MAPPED (gdk_window) && ((gdk_quartz_osx_version() >= GDK_OSX_LEOPARD) && [self wantsLayer]))
     {
+      fprintf (stderr, "Window is not mapped, blank with bg color.\n");
       /* If the window is not yet mapped, clip_region_with_children
        * will be empty causing the usual code below to draw nothing.
        * To not see garbage on the screen, we draw an aesthetic color
