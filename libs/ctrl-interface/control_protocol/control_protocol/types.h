@@ -44,6 +44,8 @@ class LIBCONTROLCP_API CPDeviceIdentifier
   , manufacturer (m)
   , device_name (d)
   {}
+  CPDeviceIdentifier (XMLNode const &);
+
   virtual ~CPDeviceIdentifier() {}
 
   std::string protocol_name;

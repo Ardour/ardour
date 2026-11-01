@@ -42,7 +42,7 @@ class ControlProtocolDescriptor;
 class ControlProtocolManager;
 class Session;
 
-class LIBARDOUR_API ControlProtocolInfo : public PBD::Stateful
+class LIBARDOUR_API ControlProtocolInfo
 {
   public:
 	std::string                   name;
@@ -58,9 +58,6 @@ class LIBARDOUR_API ControlProtocolInfo : public PBD::Stateful
 	bool remove_instance (CPDeviceIdentifier const &);
 	std::vector<CPDeviceIdentifier> remove_all_instances ();
 	std::vector<CPDeviceIdentifier> active_devices() const;
-
-	int      set_state (const XMLNode&, int version);
-	XMLNode& get_state () const;
 
 	void set_session (Session&);
 
@@ -130,7 +127,7 @@ class LIBARDOUR_API ControlProtocolManager : public PBD::Stateful, public ARDOUR
 	typedef std::list<CPDeviceIdentifier> SupportedDevices;
 	SupportedDevices const & devices() const { return _devices; }
 
-	ControlProtocolInfo*       cpi_by_name (std::string);
+	ControlProtocolInfo* cpi_by_name (std::string) const;
 
 private:
 	ControlProtocolManager ();

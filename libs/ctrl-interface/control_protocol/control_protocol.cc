@@ -103,6 +103,11 @@ CPDeviceIdentifier::set_state (XMLNode const &node, int /* version */)
 	return 0;
 }
 
+CPDeviceIdentifier::CPDeviceIdentifier (XMLNode const & node)
+{
+	set_state (node, 0);
+}
+
 ControlProtocol::ControlProtocol (Session& s, CPDeviceIdentifier const & di)
 	: BasicUI (s)
 	, surface_callback (nullptr)

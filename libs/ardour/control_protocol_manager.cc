@@ -50,6 +50,7 @@ static bool                           _hotplug_thread_run = false;
 #include "pbd/file_utils.h"
 
 #include "control_protocol/control_protocol.h"
+#include "control_protocol/types_convert.h"
 
 #include "ardour/control_protocol_manager.h"
 #include "ardour/debug.h"
@@ -242,52 +243,6 @@ ControlProtocolInfo::get_descriptor (string path)
 	}
 
 	return descriptor;
-}
-
-XMLNode&
-ControlProtocolInfo::get_state() const
-{
-	XMLNode* state (new XMLNode (X_("ControlProtocol")));
-
-	state->set_property (X_("name"), name);
-
-	PBD::RWLock::ReaderLock lm (instance_lock);
-
-	for (auto const & inst : instances) {
-		XMLNode& child_state (inst->get_state ());
-		state->add_child_nocopy (child_state);
-	}
-
-	return *state;
-}
-
-int
-ControlProtocolInfo::set_state (XMLNode const & node, int)
-{
-	if (node.name().empty()) {
-		return 0;
-	}
-
-	remove_all_instances ();
-
-#if 0
-
-	for (auto const & child : node.children()) {
-
-		std::string device_name;
-
-		if (!child->get_property ("device-name", device_name)) {
-			continue;
-		}
-
-		ControlProtocol* cp = add_instance (*session, );
-		/* not active at this point */
-		cp->set_state (*child, 0);
-		/* may be active now */
-	}
-#endif
-
-	return 0;
 }
 
 std::vector<CPDeviceIdentifier>
@@ -670,7 +625,7 @@ ControlProtocolManager::discover_control_protocols ()
 }
 
 ControlProtocolInfo*
-ControlProtocolManager::cpi_by_name (string name)
+ControlProtocolManager::cpi_by_name (string name) const
 {
 	PBD::RWLock::ReaderLock lm (_protocols_lock);
 
@@ -705,32 +660,73 @@ ControlProtocolManager::use_state ()
 	assert (_session);
 	assert (pending_state);
 
-	XMLNodeList          clist;
-	XMLNodeConstIterator citer;
+	for (auto const & child : pending_state->children()) {
 
-	drop_protocols ();
+		if (child->name() == X_("Devices")) {
 
-	clist = pending_state->children ();
+			/* Gather all the requested devices in the serialized
+			 * state
+			 */
 
-	for (citer = clist.begin (); citer != clist.end (); ++citer) {
+			std::map<CPDeviceIdentifier,CPRequestedStatus> private_status_map;
 
-		XMLNode const* child = *citer;
+			for (auto const & devnode : child->children()) {
 
-		if (child->name () == X_("Protocol")) {
-
-			std::string name;
-
-			if (!child->get_property (X_("name"), name)) {
-				continue;
+				CPDeviceIdentifier xml_cpdi (*devnode);
+				CPRequestedStatus rs;
+				devnode->get_property ("request-status", rs);
+				private_status_map.insert (std::make_pair (xml_cpdi, rs));
 			}
 
-			ControlProtocolInfo* cpi = cpi_by_name (name);
+			/* Now mark the requested status of all known devices
+			 * in our _devices map. This will prevent devices set
+			 * to RequestedOff from being auto-activated again as
+			 * port registration requests trigger automatic
+			 * detection. We could have used a flag, I suppose.
+			 */
 
-			if (!cpi) {
-				continue;
+			for (auto iter = _devices.begin(); iter != _devices.end(); ++iter) {
+				auto psmi = private_status_map.find (iter->first);
+				if (psmi != private_status_map.end()) {
+					iter->second.requested_status = psmi->second;
+				} else {
+					iter->second.requested_status = Unrequested;
+				}
 			}
 
-			cpi->set_state (*child, 0);
+			/* Drop any existing protocols (this will include
+			 * automatically detected ones.
+			 */
+
+			drop_protocols ();
+
+			/* And now recreate */
+
+			for (auto const & devnode : child->children()) {
+
+				CPDeviceIdentifier xml_cpdi (*devnode);
+
+				if (requested_status (xml_cpdi) != RequestedOn) {
+					continue;
+				}
+
+				ControlProtocolInfo* cpi = cpi_by_name (xml_cpdi.protocol_name);
+				if (!cpi) {
+					continue;
+				}
+
+				ControlProtocol* cp = cpi->get_instance (xml_cpdi);
+				assert (!cp);
+
+				cp = cpi->add_instance (*_session, xml_cpdi);
+
+				if (!cp) {
+					continue;
+				}
+
+				assert (!devnode->children().empty());
+				cp->set_state (*devnode->children().front(), 0);
+			}
 		}
 	}
 
@@ -743,15 +739,18 @@ ControlProtocolManager::get_state () const
 	XMLNode*                root = new XMLNode (state_node_name);
 	PBD::RWLock::ReaderLock lm (_protocols_lock);
 
-	for (auto const & cpi : _control_protocol_info) {
-		root->add_child_nocopy (cpi->get_state ());
-	}
-
 	XMLNode* device_node = new XMLNode (X_("Devices"));
 
 	for (auto const & [cpdi,status] : _devices) {
+
+		ControlProtocolInfo* cpi = cpi_by_name (cpdi.protocol_name);
+		assert (cpi);
 		XMLNode& devnode (cpdi.get_state());
-		// devnode->set_property (status);
+		devnode.set_property ("request-status", status.requested_status);
+		ControlProtocol* cp = cpi->get_instance (cpdi);
+		if (cp) {
+			devnode.add_child_nocopy (cp->get_state());
+		}
 		device_node->add_child_nocopy (devnode);
 	}
 
