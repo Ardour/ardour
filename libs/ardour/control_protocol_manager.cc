@@ -715,6 +715,7 @@ ControlProtocolManager::use_state ()
 					continue;
 				}
 
+
 				ControlProtocol* cp = cpi->get_instance (xml_cpdi);
 				assert (!cp);
 
@@ -726,6 +727,8 @@ ControlProtocolManager::use_state ()
 
 				assert (!devnode->children().empty());
 				cp->set_state (*devnode->children().front(), 0);
+				cp->set_active (true);
+				ProtocolStatusChange (xml_cpdi, true); /* EMIT SIGNAL */
 			}
 		}
 	}
@@ -743,14 +746,22 @@ ControlProtocolManager::get_state () const
 
 	for (auto const & [cpdi,status] : _devices) {
 
+		if (status.requested_status == Unrequested) {
+			/* Save only RequestedOn and RequestedOff */
+			continue;
+		}
+
 		ControlProtocolInfo* cpi = cpi_by_name (cpdi.protocol_name);
 		assert (cpi);
 		XMLNode& devnode (cpdi.get_state());
 		devnode.set_property ("request-status", status.requested_status);
+
 		ControlProtocol* cp = cpi->get_instance (cpdi);
+
 		if (cp) {
 			devnode.add_child_nocopy (cp->get_state());
 		}
+
 		device_node->add_child_nocopy (devnode);
 	}
 
