@@ -125,7 +125,7 @@ class LIBARDOUR_API ControlProtocolManager : public PBD::Stateful, public ARDOUR
 	void do_surface_callback (bool once_only, ARDOUR::SurfaceCallbackType type, void* arg = nullptr);
 
 	typedef std::list<CPDeviceIdentifier> SupportedDevices;
-	SupportedDevices const & devices() const { return _devices; }
+	std::list<CPDeviceIdentifier> devices() const;
 
 	ControlProtocolInfo* cpi_by_name (std::string) const;
 

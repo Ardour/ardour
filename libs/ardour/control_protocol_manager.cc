@@ -932,15 +932,27 @@ void
 ControlProtocolManager::do_surface_callback (bool only_once, SurfaceCallbackType type, void* arg)
 {
 	PBD::RWLock::ReaderLock lm (_protocols_lock);
-	for (auto const& p : _control_protocols) {
-		ControlProtocol::SurfaceCallback sc = p->surface_callback;
-		if (sc) {
-			lm.release ();
-			(p->*sc) (type, arg);
-			if (only_once) {
-				return;
+
+	for (auto const& p : _control_protocol_info) {
+
+		std::vector<CPDeviceIdentifier> active_devices (p->active_devices());
+
+		for (auto const & dev : active_devices) {
+			ControlProtocol* cp = p->get_instance (dev);
+
+			if (!cp) {
+				continue;
 			}
-			lm.acquire ();
+
+			ControlProtocol::SurfaceCallback sc = cp->surface_callback;
+			if (sc) {
+				lm.release ();
+				(cp->*sc) (type, arg);
+				if (only_once) {
+					return;
+				}
+				lm.acquire ();
+			}
 		}
 	}
 }
