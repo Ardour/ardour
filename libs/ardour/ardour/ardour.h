@@ -98,6 +98,8 @@ namespace ARDOUR {
 	LIBARDOUR_API int handle_old_configuration_files (std::function<bool (std::string const&, std::string const&, int)> ui_handler);
 
 	LIBARDOUR_API void reset_performance_meters (Session*);
+
+	LIBARDOUR_API void surface_callback (bool only_once, ARDOUR::SurfaceCallbackType, void * arg = nullptr);
 }
 
 

@@ -739,3 +739,20 @@ ControlProtocolManager::stripable_selection_changed (StripableNotificationListPt
 		}
 	}
 }
+
+void
+ControlProtocolManager::do_surface_callback (bool only_once, SurfaceCallbackType type, void* arg)
+{
+	PBD::RWLock::ReaderLock lm (_protocols_lock);
+	for (auto const& p : _control_protocols) {
+		ControlProtocol::SurfaceCallback sc = p->surface_callback;
+		if (sc) {
+			lm.release ();
+			(p->*sc) (type, arg);
+			if (only_once) {
+				return;
+			}
+			lm.acquire ();
+		}
+	}
+}

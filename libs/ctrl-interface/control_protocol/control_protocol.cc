@@ -71,6 +71,7 @@ const std::string ControlProtocol::state_node_name ("Protocol");
 
 ControlProtocol::ControlProtocol (Session& s, string str)
 	: BasicUI (s)
+	, surface_callback (nullptr)
 	, _name (str)
 	, glib_event_callback (std::bind (&ControlProtocol::event_loop_precall, this))
 	, _active (false)

@@ -1054,6 +1054,9 @@ enum TuningSystem {
 	TwelveTone,
 };
 
+enum SurfaceCallbackType {
+	CreateSession,
+};
 
 } // namespace ARDOUR
 

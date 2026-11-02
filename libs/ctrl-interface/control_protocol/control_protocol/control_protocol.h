@@ -61,6 +61,14 @@ public:
 
 	virtual void stripable_selection_changed () = 0;
 
+	/* This is not handled as a normal C++ virtual method because we want
+	 * to be able to determine if a given ControlProtocol actually
+	 * implements this (for cases where we should only call it once.
+	 */
+
+	typedef void (ControlProtocol::*SurfaceCallback) (ARDOUR::SurfaceCallbackType, void* arg);
+	SurfaceCallback surface_callback;
+
 	PBD::Signal<void()> ActiveChanged;
 
 	/* signals that a control protocol can emit and other (presumably graphical)
