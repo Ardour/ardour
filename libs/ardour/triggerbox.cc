@@ -1482,7 +1482,9 @@ AudioTrigger::AudioData::append (Sample const * src, samplecnt_t cnt, uint32_t c
 	}
 	samplecnt_t to_copy = std::min (cnt, (capacity - _length));
 	memcpy (at (chan) + _length, src, cnt * sizeof (Sample));
-	_length += cnt;
+	if (chan == 0) {
+		_length += cnt;
+	}
 	return to_copy;
 }
 
