@@ -235,7 +235,11 @@ InputPortMonitor::InputScope::InputScope (samplecnt_t rate, int l, int g, Orient
 	, _min_gauge (g)
 	, _orientation (o)
 {
-	_surface = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, l, g);
+	if (o == Horizontal) {
+		_surface = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, l, g);
+	} else {
+		_surface = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, g, l);
+	}
 	use_image_surface (false); /* we already use a surface */
 
 	parameter_changed ("waveform-clip-level");
@@ -334,7 +338,7 @@ InputPortMonitor::InputScope::update (CircularSampleBuffer& csb)
 		if (_orientation == Horizontal) {
 			cr->rectangle (_pos, 0, 1, g);
 		} else {
-			if (_pos-- == 0) {
+			if (_pos-- <= 0) {
 				_pos = l - 1;
 			}
 			cr->rectangle (0, _pos, g, 1);
@@ -426,6 +430,7 @@ InputPortMonitor::InputScope::render (Cairo::RefPtr<Cairo::Context> const& cr, c
 	Gtkmm2ext::set_source_rgb_a (cr, UIConfiguration::instance ().color ("zero line"), .7);
 	cr->stroke ();
 
+	cr->restore ();
 	/* black border - compare to FastMeter::horizontal_expose */
 	cr->set_line_width (2.0);
 	Gtkmm2ext::rounded_rectangle (cr, 0, 0, get_width (), get_height (), boxy_buttons () ? 0 : 2);
