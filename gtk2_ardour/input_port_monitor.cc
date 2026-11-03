@@ -285,17 +285,12 @@ InputPortMonitor::InputScope::on_size_allocate (Gtk::Allocation& a)
 {
 	CairoWidget::on_size_allocate (a);
 
-	int w, h;
-	if (_orientation == Horizontal) {
-		w = 2 + _surface->get_width ();
-		h = 2 + _surface->get_height ();
-	} else {
-		w = 2 + _surface->get_height ();
-		h = 2 + _surface->get_width ();
-	}
+	int w = 2 + _surface->get_width ();
+	int h = 2 + _surface->get_height ();
 
 	if (a.get_width () != w || a.get_height () != h) {
 		_surface = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, std::max (1, a.get_width () - 2), std::max (1, a.get_height () - 2));
+		clear ();
 	}
 }
 
