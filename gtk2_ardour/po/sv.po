@@ -11102,7 +11102,7 @@ msgstr "Importerad"
 
 #: plugin_eq_gui.cc:124 export_video_dialog.cc:159
 msgid "Range:"
-msgstr "Omfång:"
+msgstr "Intervall:"
 
 #: plugin_eq_gui.cc:131
 msgid "Off"
@@ -17025,35 +17025,35 @@ msgstr "Ställ in notlängden till en sextiofjärdedelsnot"
 
 #: step_entry.cc:175
 msgid "Set volume (velocity) to pianississimo"
-msgstr "Ställ in volymen (anslagsstyrkan) på pianississimo"
+msgstr "Ställ in volymen (anslagsstyrkan) till pianississimo"
 
 #: step_entry.cc:176
 msgid "Set volume (velocity) to pianissimo"
-msgstr "Ställ in volymen (anslagsstyrkan) på pianissimo"
+msgstr "Ställ in volymen (anslagsstyrkan) till pianissimo"
 
 #: step_entry.cc:177
 msgid "Set volume (velocity) to piano"
-msgstr "Ställ in volymen (anslagsstyrkan) på piano"
+msgstr "Ställ in volymen (anslagsstyrkan) till piano"
 
 #: step_entry.cc:178
 msgid "Set volume (velocity) to mezzo-piano"
-msgstr "Ställ in volymen (anslagsstyrkan) på mezzo piano"
+msgstr "Ställ in volymen (anslagsstyrkan) till mezzo piano"
 
 #: step_entry.cc:179
 msgid "Set volume (velocity) to mezzo-forte"
-msgstr "Ställ in volymen (anslagsstyrkan) på mezzo forte"
+msgstr "Ställ in volymen (anslagsstyrkan) till mezzo forte"
 
 #: step_entry.cc:180
 msgid "Set volume (velocity) to forte"
-msgstr "Ställ in volymen (anslagsstyrkan) på forte"
+msgstr "Ställ in volymen (anslagsstyrkan) till forte"
 
 #: step_entry.cc:181
 msgid "Set volume (velocity) to fortissimo"
-msgstr "Ställ in volymen (anslagsstyrkan) på fortissimo"
+msgstr "Ställ in volymen (anslagsstyrkan) till fortissimo"
 
 #: step_entry.cc:182
 msgid "Set volume (velocity) to fortississimo"
-msgstr "Ställ in volymen (anslagsstyrkan) på fortississimo"
+msgstr "Ställ in volymen (anslagsstyrkan) till fortississimo"
 
 #: step_entry.cc:246
 msgid "Stack inserted notes to form a chord"
