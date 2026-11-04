@@ -4166,57 +4166,200 @@ TempoMap::remove_time (timepos_t const & pos, timecnt_t const & duration)
 	superclock_t end ((pos + duration).superclocks());
 	superclock_t shift (duration.superclocks());
 
-	TempoPoint* last_tempo = 0;
-	MeterPoint* last_meter = 0;
-	TempoPoint* tempo_after = 0;
-	MeterPoint* meter_after = 0;
+	/* store last markers found within time range */
+	TempoPoint* last_tempo = nullptr;
+	MeterPoint* last_meter = nullptr;
+	MusicTimePoint* last_bbt_marker = nullptr;
+
+	/* pre-compute beat/bbt at range start in case we remove markers at this
+	 * position (we'll re-insert markers there afterwards)
+	 */
+	Beats start_beat = quarters_at_superclock (start);
+	BBT_Time start_bbt = bbt_at (start);
 
 	bool moved = false;
+	bool ignored;
 
-	for (Tempos::iterator t = _tempos.begin(); t != _tempos.end(); ) {
+	/* handle tempo ramps: add explicit tempo markers at range boundaries
+	 * if they intersect a tempo ramp.
+	 * NOTE: tempo_at() uses an exclusive-ended comparator,
+	 * we add 1 to trick it into returning the marker located at the end
+	 * of the range (instead of the one before it)
+	 *
+	 * XXX: there's still (at least) one case where this fails: when range starts
+	 * on a bbt marker and ends in a tempo ramp, something goes wrong, but what ?
+	 */
+	TempoPoint* tp_at_start = new TempoPoint (tempo_at (start + 1));
+	if (tp_at_start->sclock() != start && tp_at_start->ramped()) {
+		double bpm = (superclock_ticks_per_second() * 60.) / tp_at_start->superclocks_per_note_type_at (pos);
+		Tempo t(bpm, tp_at_start->end_note_types_per_minute(), tp_at_start->note_type());
+		*tp_at_start = t;
+		tp_at_start->set (start, quarters_at_superclock (start), bbt_at (start));
 
-		if (t->sclock() >= start && t->sclock() < end) {
+		core_add_tempo (tp_at_start, ignored);
+		core_add_point (tp_at_start);
 
-			last_tempo = &*t;
-			t = _tempos.erase (t);
-			moved = true;
+		TempoPoint * prev_t = const_cast<TempoPoint*> (previous_tempo (*tp_at_start	));
+		prev_t->set_end_npm (bpm);
+	}
+	TempoPoint* tp_at_end = new TempoPoint (tempo_at (end + 1));
+	if (tp_at_end->sclock() != end && tp_at_end->ramped()) {
+		double bpm = (superclock_ticks_per_second() * 60.) / tp_at_end->superclocks_per_note_type_at (pos + duration);
+		Tempo t(bpm, tp_at_end->end_note_types_per_minute(), tp_at_end->note_type());
+		*tp_at_end = t;
+		tp_at_end->set (end, quarters_at_superclock (end), bbt_at (end));
 
-		} else if (t->sclock() >= start) {
-			t->set (t->sclock() - shift, t->beats(), t->bbt());
-			moved = true;
-			if (t->sclock() == start) {
-				tempo_after = &*t;
+		core_add_tempo (tp_at_end, ignored);
+		core_add_point (tp_at_end);
+
+		TempoPoint * prev_t = const_cast<TempoPoint*> (previous_tempo (*tp_at_end));
+		prev_t->set_end_npm (bpm);
+	}
+
+	for (Points::iterator p = _points.begin(); p != _points.end(); ) {
+
+		MusicTimePoint* mtp = nullptr;
+		TempoPoint* tp = nullptr;
+		MeterPoint* mp = nullptr;
+
+		mtp = dynamic_cast<MusicTimePoint*> (&*p);
+		tp = dynamic_cast<TempoPoint*> (&*p);
+		mp = dynamic_cast<MeterPoint*> (&*p);
+
+		if (mtp) {
+			if (p->sclock() < start) {
+				/* ignore BBT markers before range */
+				++p;
+				continue;
+			} else if (p->sclock() > start) {
+				/* stop when reaching a BBT marker */
+				break;
 			}
-			++t;
 		}
-	}
 
-	for (Meters::iterator m = _meters.begin(); m != _meters.end(); ) {
+		if (p->sclock() < start) {
+			/* ignore markers before range start */
+			++p;
 
-		if (m->sclock() >= start && m->sclock() < end) {
-
-			last_meter = &*m;
-			m = _meters.erase (m);
-			moved = true;
-
-		} else if (m->sclock() >= start) {
-			m->set (m->sclock() - shift, m->beats(), m->bbt());
-			moved = true;
-			if (m->sclock() == start) {
-				meter_after = &*m;
+		} else if (start <= p->sclock() && p->sclock() <= end) {
+			/* remove markers in range and
+			 * keep a copy of the last ones
+			 */
+			p = _points.erase (p);
+			if (mtp) {
+				last_bbt_marker	= &*mtp;
+				core_remove_bartime (*mtp);
+			} else if (tp) {
+				last_tempo = &*tp;
+				/* remove tempo marker manually instead of calling core_remove_tempo (*tp)
+				 * because we want to preserve tempo ramp information of the previous marker
+				 */
+				Tempos::iterator t;
+				for (t = _tempos.begin(); t != _tempos.end() && t->sclock() < tp->sclock(); ++t);
+				_tempos.erase (t);
+			} else if (mp) {
+				last_meter = &*mp;
+				core_remove_meter (*mp);
 			}
-			++m;
+			moved = true;
+		} else if (p->sclock() > end) {
+			/* if there was a bbt marker at range start, re-insert it but using
+			 * the last tempo and meter found in range
+			 */
+			if (last_bbt_marker) {
+				if (!last_tempo) {
+					last_tempo = static_cast<TempoPoint*> (&*last_bbt_marker);
+				}
+				if (!last_meter) {
+					last_meter = static_cast<MeterPoint*> (&*last_bbt_marker);
+				}
+				MusicTimePoint* ntp = new MusicTimePoint (*this, start, start_beat, start_bbt, *last_tempo, *last_meter, last_bbt_marker->name());
+				core_add_bartime (ntp, ignored);
+				core_add_tempo (ntp, ignored);
+				core_add_meter (ntp, ignored);
+				core_add_point (ntp);
+				last_tempo = nullptr;
+				last_meter = nullptr;
+				last_bbt_marker = nullptr;
+ 			}
+
+			/* if there were tempo or meter markers in the range, re-insert the
+			 * last ones at range start unless there are other markers at range end
+			 * (because the latter will be moved to range start)
+			 *
+			 * NOTE: tempo_at() and meter_at() use an exclusive-ended comparator,
+			 * we add 1 to trick it into returning the marker located at the end
+			 * of the range (instead of the one before it)
+			 */
+			if (last_tempo) {
+				last_tempo->set (start, start_beat, start_bbt);
+				core_add_tempo (last_tempo, ignored);
+				core_add_point (last_tempo);
+				last_tempo = nullptr;
+			}
+
+			if (last_meter) {
+				last_meter->set (start, start_beat, start_bbt);
+				core_add_meter (last_meter, ignored);
+				core_add_point (last_meter);
+				last_meter = nullptr;
+			}
+
+			/* shift all markers found after range end */
+			superclock_t point_sc = p->sclock() - shift;
+			Beats point_beat = quarters_at_superclock (point_sc);
+			BBT_Time point_bbt = bbt_at (point_sc);
+			if (tp) {
+				for (Tempos::iterator t = _tempos.begin(); t != _tempos.end(); ++t) {
+					if (t->sclock() == p->sclock()) {
+						t->set (point_sc, point_beat, point_bbt);
+						break;
+					}
+				}
+			} else {
+				for (Meters::iterator m = _meters.begin(); m != _meters.end(); ++m) {
+					if (m->sclock() == p->sclock()) {
+						m->set (point_sc, point_beat, point_bbt);
+						break;
+					}
+				}
+			}
+			p->set (point_sc, point_beat, point_bbt);
+			moved = true;
+			++p;
 		}
+
 	}
 
-	if (last_tempo && !tempo_after) {
-		last_tempo->set (start, last_tempo->beats(), last_tempo->bbt());
-		moved = true;
+	/* if no marker was found after range end, re-insert the last marker found in range */
+
+	if (last_bbt_marker) {
+		if (!last_tempo) {
+			last_tempo = static_cast<TempoPoint*> (&*last_bbt_marker);
+		}
+		if (!last_meter) {
+			last_meter = static_cast<MeterPoint*> (&*last_bbt_marker);
+		}
+		MusicTimePoint* ntp = new MusicTimePoint (*this, start, start_beat, start_bbt, *last_tempo, *last_meter, last_bbt_marker->name());
+		core_add_bartime (ntp, ignored);
+		core_add_tempo (ntp, ignored);
+		core_add_meter (ntp, ignored);
+		core_add_point (ntp);
+		last_tempo = nullptr;
+		last_meter = nullptr;
+		last_bbt_marker = nullptr;
 	}
 
-	if (last_meter && !meter_after) {
-		last_meter->set (start, last_meter->beats(), last_meter->bbt());
-		moved = true;
+	if (last_tempo) {
+		last_tempo->set (start, start_beat, start_bbt);
+		core_add_tempo (last_tempo, ignored);
+		core_add_point (last_tempo);
+	}
+
+	if (last_meter) {
+		last_meter->set (start, start_beat, start_bbt);
+		core_add_meter (last_meter, ignored);
+		core_add_point (last_meter);
 	}
 
 	if (moved) {
