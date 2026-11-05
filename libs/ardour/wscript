@@ -92,6 +92,7 @@ libardour_sources = [
         'filter.cc',
         'find_session.cc',
         'fixed_delay.cc',
+        'folder.cc',
         'fluid_synth.cc',
         'gain_control.cc',
         'globals.cc',
