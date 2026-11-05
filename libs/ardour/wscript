@@ -223,6 +223,7 @@ libardour_sources = [
         'session_directory.cc',
         'session_events.cc',
         'session_export.cc',
+        'session_folders.cc',
         'session_handle.cc',
         'session_ltc.cc',
         'session_metadata.cc',

@@ -76,6 +76,7 @@ namespace ARDOUR {
 class Source;
 class AudioSource;
 class AudioTrack;
+class Folder;
 class GraphNode;
 class Route;
 class RouteGroup;
@@ -709,6 +710,7 @@ typedef std::list<std::shared_ptr<SlavableAutomationControl> > SlavableAutomatio
 typedef std::set <AutomationType> AutomationTypeSet;
 
 typedef std::list<std::shared_ptr<VCA> > VCAList;
+typedef std::list<std::shared_ptr<Folder> > FolderList;
 
 class Bundle;
 typedef std::vector<std::shared_ptr<Bundle> > BundleList;
