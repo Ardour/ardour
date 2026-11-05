@@ -280,6 +280,7 @@ libardour_sources = [
         'user_bundle.cc',
         'utils.cc',
         'vca.cc',
+        'vca_folder.cc',
         'vca_manager.cc',
         'velocity_control.cc',
         'video_tools_paths.cc',
