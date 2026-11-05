@@ -148,6 +148,7 @@ class Click;
 class CoreSelection;
 class ExportHandler;
 class ExportStatus;
+class Folder;
 class Graph;
 struct GraphChain;
 class IO;
@@ -337,6 +338,8 @@ public:
 	std::shared_ptr<RouteList const> get_routes() const {
 		return routes.reader ();
 	}
+
+	int load_folders (const XMLNode&, int);
 
 	std::shared_ptr<RTTaskList> rt_tasklist () { return _rt_tasklist; }
 	std::shared_ptr<IOTaskList> io_tasklist () { return _io_tasklist; }
@@ -837,6 +840,7 @@ public:
 	void remove_route (std::shared_ptr<Route>);
 
 	void add_routes (RouteList&, bool input_auto_connect, bool output_auto_connect, PresentationInfo::order_t);
+	void add_folders (StripableList&);
 
 	void resort_routes ();
 
@@ -2035,6 +2039,8 @@ private:
 	std::shared_ptr<Route> XMLRouteFactory (const XMLNode&, int);
 	std::shared_ptr<Route> XMLRouteFactory_2X (const XMLNode&, int);
 	std::shared_ptr<Route> XMLRouteFactory_3X (const XMLNode&, int);
+
+	std::shared_ptr<Folder> XMLFolderFactory (const XMLNode&, int);
 
 	void route_processors_changed (RouteProcessorChange);
 
