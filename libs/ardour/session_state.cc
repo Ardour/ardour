@@ -107,6 +107,7 @@
 #include "ardour/disk_reader.h"
 #include "ardour/filename_extensions.h"
 #include "ardour/filesystem_paths.h"
+#include "ardour/folder.h"
 #include "ardour/graph.h"
 #include "ardour/io_plug.h"
 #include "ardour/location.h"
@@ -147,6 +148,7 @@
 #include "ardour/types_convert.h"
 #include "ardour/user_bundle.h"
 #include "ardour/vca.h"
+#include "ardour/vca_folder.h"
 #include "ardour/vca_manager.h"
 #include "ardour/wrong_program.h"
 
@@ -2701,6 +2703,13 @@ Session::set_state (const XMLNode& node, int version)
 		goto out;
 	}
 
+	if ((child = find_named_node (node, "Folders")) != 0) {
+		if (load_folders (*child, version)) {
+			error << _("Session: failed to load folder state") << endmsg;
+			goto out;
+		}
+	}
+
 	/* Now that we Tracks have been loaded and playlists are assigned */
 	_playlists->update_tracking ();
 
@@ -2896,6 +2905,76 @@ errout:
 		r->drop_references ();
 	}
 	return -1;
+}
+
+
+int
+Session::load_folders (const XMLNode& node, int version)
+{
+	XMLNodeList nlist;
+	XMLNodeConstIterator niter;
+	StripableList new_folders;
+
+	nlist = node.children();
+
+	set_dirty();
+
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+
+		std::shared_ptr<Folder> folder;
+
+		try {
+			folder = XMLFolderFactory (**niter, version);
+		} catch (...) {
+			goto errout;
+		}
+
+		if (folder == 0) {
+			error << _("Session: cannot create folder from XML description.") << endmsg;
+			goto errout;
+		}
+
+		BootMessage (string_compose (_("Loaded folder %1"), folder->name()));
+
+		new_folders.push_back (folder);
+	}
+
+	BootMessage (_("Folders loaded;  Adding to Session"));
+
+	add_folders (new_folders);
+
+	BootMessage (_("Finished adding folders"));
+
+	return 0;
+
+errout:
+	for (auto const& f : new_folders) {
+		f->drop_references ();
+	}
+	return -1;
+}
+
+std::shared_ptr<Folder>
+Session::XMLFolderFactory (XMLNode const & node, int version)
+{
+	std::string type;
+	node.get_property ("type", type);
+	std::shared_ptr<Folder> f;
+
+	std::string name;
+	node.get_property ("name", name);
+
+	std::string master_name;
+	node.get_property ("master-name", master_name);
+
+	if (type == "vca") {
+		std::shared_ptr<VCA> vca = _vca_manager->vca_by_name (master_name);
+		if (vca) {
+			f.reset (new VCAFolder (vca, *this, name, PresentationInfo::Flag (0)));
+		}
+	}
+
+	return f;
 }
 
 std::shared_ptr<Route>

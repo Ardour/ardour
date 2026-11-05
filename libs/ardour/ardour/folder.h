@@ -41,11 +41,11 @@ class LIBARDOUR_API Folder : public Stripable, virtual public PBD::Stateful
 	void get_contents (std::vector<std::shared_ptr<Stripable>> &) const;
 	void get_content_tracks (std::vector<std::shared_ptr<Track>> &) const;
 
-	void add (std::shared_ptr<Stripable>);
-	void add (std::vector<std::shared_ptr<Stripable>>);
-	void remove (std::shared_ptr<Stripable>);
-	void remove (std::vector<std::shared_ptr<Stripable>>);
-	void clear ();
+	virtual void add (std::shared_ptr<Stripable>);
+	virtual void add (std::vector<std::shared_ptr<Stripable>>);
+	virtual void remove (std::shared_ptr<Stripable>);
+	virtual void remove (std::vector<std::shared_ptr<Stripable>>);
+	virtual void clear ();
 
   protected:
 	mutable PBD::RWLock contents_lock;
