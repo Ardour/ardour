@@ -980,10 +980,12 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 #endif
 #if 1
 				/* 3. VST3: set value at cycle-end */
-				val = c.list()->rt_safe_eval (timepos_t (end - 1), valid);
-				if (valid) {
-					for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
-						(*i)->set_parameter (clist->parameter().id(), val, end - 1 - start);
+				if (end - 1 > start) {
+					val = c.list()->rt_safe_eval (timepos_t (end - 1), valid);
+					if (valid) {
+						for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+							(*i)->set_parameter (clist->parameter().id(), val, end - 1 - start);
+						}
 					}
 				}
 #endif
