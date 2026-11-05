@@ -2913,7 +2913,7 @@ Session::load_folders (const XMLNode& node, int version)
 {
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
-	StripableList new_folders;
+	FolderList new_folders;
 
 	nlist = node.children();
 
