@@ -63,6 +63,14 @@ class LIBARDOUR_API VCAFolder : public Folder
 	bool muted_by_others_soloing () const { return _vca->muted_by_others_soloing (); }
 	std::shared_ptr<MonitorProcessor> monitor_control() const { return _vca->monitor_control(); }
 
+	/* Manipulate the VCA, not this folder */
+
+	void add (std::shared_ptr<Stripable>) {}
+	void add (std::vector<std::shared_ptr<Stripable>>) {}
+	void remove (std::shared_ptr<Stripable>) {}
+	void remove (std::vector<std::shared_ptr<Stripable>>) {}
+	void clear () {}
+
   protected:
 	std::shared_ptr<VCA> _vca;
 };
