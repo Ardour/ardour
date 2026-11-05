@@ -840,7 +840,7 @@ public:
 	void remove_route (std::shared_ptr<Route>);
 
 	void add_routes (RouteList&, bool input_auto_connect, bool output_auto_connect, PresentationInfo::order_t);
-	void add_folders (StripableList&);
+	void add_folders (FolderList&);
 
 	void resort_routes ();
 
@@ -1449,6 +1449,9 @@ public:
 	AnyTime global_quantization() const { return _global_quantization; }
 	void set_global_quantization (AnyTime const &);
 	PBD::Signal<void()> QuantizationChanged;
+
+	void folderize (std::shared_ptr<VCA>);
+	void unfolderize (std::shared_ptr<Folder>);
 
 protected:
 	friend class AudioEngine;
@@ -2441,6 +2444,9 @@ private:
 	std::string _template_state_dir;
 
 	VCAManager* _vca_manager;
+
+	PBD::RWLock _folder_lock;
+	FolderList _folders;
 
 	std::shared_ptr<Route> get_midi_nth_route_by_id (PresentationInfo::order_t n) const;
 

@@ -45,6 +45,8 @@ public:
 	virtual void show_existing_automation (bool apply_to_selection = false);
 	virtual void hide_all_automation (bool apply_to_selection = false);
 
+	virtual bool is_folder() const { return false; }
+
 protected:
 	void reset_samples_per_pixel ();
 	virtual void set_samples_per_pixel (double);
@@ -73,6 +75,8 @@ protected:
 	Gtk::CheckMenuItem* gain_automation_item;
 	Gtk::CheckMenuItem* trim_automation_item;
 	Gtk::CheckMenuItem* mute_automation_item;
+
+	ArdourWidgets::ArdourButton folder_button;
 
 	AutomationTracks _automation_tracks;
 
