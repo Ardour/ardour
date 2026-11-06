@@ -40,3 +40,45 @@ BusFolder::get_state () const
 	XMLNode* root = new XMLNode (X_("BusFolder"));
 	return *root;
 }
+
+void
+BusFolder::add (std::shared_ptr<Stripable> s)
+{
+	add ({s});
+}
+
+void
+BusFolder::add (std::vector<std::shared_ptr<Stripable>> sl)
+{
+	std::shared_ptr<Bundle> bundle = _bus->input()->bundle ();
+
+	{
+		PBD::RWLock::WriterLock wl (contents_lock);
+
+		for (auto & s : sl) {
+			std::shared_ptr<Route> r = std::dynamic_pointer_cast<Route> (s);
+			if (r) {
+				r->output()->disconnect ();
+				r->output()->connect_ports_to_bundle (bundle, false, true);
+			}
+			_contents.push_back (s);
+		}
+	}
+
+	Added (sl); /* EMIT SIGNAL */
+}
+
+void
+BusFolder::remove (std::shared_ptr<Stripable> s)
+{
+}
+
+void
+BusFolder::remove (std::vector<std::shared_ptr<Stripable>> s)
+{
+}
+
+void
+BusFolder::clear ()
+{
+}

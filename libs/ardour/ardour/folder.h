@@ -22,6 +22,7 @@
 #include <list>
 
 #include "pbd/rwlock.h"
+#include "pbd/signals.h"
 #include "pbd/stateful.h"
 
 #include "ardour/stripable.h"
@@ -46,6 +47,10 @@ class LIBARDOUR_API Folder : public Stripable, virtual public PBD::Stateful
 	virtual void remove (std::shared_ptr<Stripable>);
 	virtual void remove (std::vector<std::shared_ptr<Stripable>>);
 	virtual void clear ();
+
+	PBD::Signal<void(std::vector<std::shared_ptr<Stripable>>)> Added;
+	PBD::Signal<void(std::vector<std::shared_ptr<Stripable>>)> Removed;
+	PBD::Signal<void()> Cleared;
 
   protected:
 	mutable PBD::RWLock contents_lock;
