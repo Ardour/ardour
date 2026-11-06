@@ -17,12 +17,28 @@
  */
 
 #include "ardour/session.h"
+#include "ardour/vca_folder.h"
 
 using namespace ARDOUR;
 
 void
+Session::add_folders (FolderList& new_folders)
+{
+	{
+		PBD::RWLock::WriterLock wl (_folder_lock);
+		_folders.insert (_folders.end(), new_folders.begin(), new_folders.end());
+	}
+
+	FolderAdded (new_folders); /* EMIT SIGNAL */
+}
+
+void
 Session::folderize (std::shared_ptr<VCA> vca)
 {
+	assert (vca);
+	std::shared_ptr<VCAFolder> f (new VCAFolder (vca, *this, vca->name(), PresentationInfo::Flag (0)));
+	FolderList fl ({f});
+	add_folders (fl);
 }
 
 void
