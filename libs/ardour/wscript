@@ -42,6 +42,7 @@ libardour_sources = [
         'buffer_manager.cc',
         'buffer_set.cc',
         'bundle.cc',
+        'bus_folder.cc',
         'butler.cc',
         'capturing_processor.cc',
         'chan_count.cc',
