@@ -966,7 +966,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 					timepos_t end_time (end);
 					Evoral::ControlEvent next_event (end_time, 0.0f);
 					find_next_ac_event (*ci, now, end_time, next_event);
-					if (next_event.when.val() >= end_time.val() - 1) {
+					if (next_event.when.samples() >= end_time.samples() - 1) {
 						break;
 					}
 					now = next_event.when;
