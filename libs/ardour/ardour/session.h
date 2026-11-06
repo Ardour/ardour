@@ -468,6 +468,10 @@ public:
 	/** emitted when a locate has occurred */
 	PBD::Signal<void()> Located;
 
+	PBD::Signal<void(FolderList&)> FolderAdded;
+	/* This is emitted after one or more routes are added that are actually
+	   Tracks with an instrument plugin.
+	*/
 	PBD::Signal<void(RouteList&)> RouteAdded;
 	/* This is emitted after one or more routes are added that are actually
 	   Tracks with an instrument plugin.

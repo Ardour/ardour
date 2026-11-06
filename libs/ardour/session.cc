@@ -3646,13 +3646,6 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 }
 
 void
-Session::add_folders (FolderList& new_folders)
-{
-	PBD::RWLock::WriterLock wl (_folder_lock);
-	_folders.insert (_folders.end(), new_folders.begin(), new_folders.end());
-}
-
-void
 Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output_auto_connect, PresentationInfo::order_t order)
 {
 	try {
