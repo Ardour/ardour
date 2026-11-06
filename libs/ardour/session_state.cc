@@ -100,6 +100,7 @@
 #include "ardour/auditioner.h"
 #include "ardour/automation_control.h"
 #include "ardour/boost_debug.h"
+#include "ardour/bus_folder.h"
 #include "ardour/butler.h"
 #include "ardour/control_protocol_manager.h"
 #include "ardour/debug.h"
@@ -2971,6 +2972,11 @@ Session::XMLFolderFactory (XMLNode const & node, int version)
 		std::shared_ptr<VCA> vca = _vca_manager->vca_by_name (master_name);
 		if (vca) {
 			f.reset (new VCAFolder (vca, *this, name, PresentationInfo::Flag (0)));
+		}
+	} else if (type == "bus") {
+		std::shared_ptr<Route> bus = route_by_name (master_name);
+		if (bus) {
+			f.reset (new BusFolder (bus, *this, name, PresentationInfo::Flag (0)));
 		}
 	}
 
