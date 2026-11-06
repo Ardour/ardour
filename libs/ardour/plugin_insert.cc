@@ -966,7 +966,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 					timepos_t end_time (end);
 					Evoral::ControlEvent next_event (end_time, 0.0f);
 					find_next_ac_event (*ci, now, end_time, next_event);
-					if (next_event.when.samples() >= end_time.samples() - 1) {
+					if (next_event.when.samples() + 1 >= end_time.samples()) {
 						break;
 					}
 					now = next_event.when;
@@ -980,7 +980,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 #endif
 #if 1
 				/* 3. VST3: set value at cycle-end */
-				if (end - 1 > start) {
+				if (end > start + 1) {
 					val = c.list()->rt_safe_eval (timepos_t (end - 1), valid);
 					if (valid) {
 						for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
