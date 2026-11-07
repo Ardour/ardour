@@ -35,7 +35,8 @@ namespace ArdourCanvas {
 enum LayerDisplay {
 	Overlaid,
 	Stacked,
-	Expanded
+	Expanded,
+	Comping
 };
 
 struct SelectionRect {

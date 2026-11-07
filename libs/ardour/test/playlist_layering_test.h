@@ -22,8 +22,12 @@ class PlaylistLayeringTest : public AudioRegionTest
 {
 	CPPUNIT_TEST_SUITE (PlaylistLayeringTest);
 	CPPUNIT_TEST (basicsTest);
+	CPPUNIT_TEST (compingLayerTest);
+	CPPUNIT_TEST (compingRangeTest);
 	CPPUNIT_TEST_SUITE_END ();
 
 public:
 	void basicsTest ();
+	void compingLayerTest ();
+	void compingRangeTest ();
 };

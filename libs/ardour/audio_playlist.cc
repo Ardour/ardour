@@ -29,6 +29,7 @@
 #include "ardour/debug.h"
 #include "ardour/audioplaylist.h"
 #include "ardour/audioregion.h"
+#include "ardour/region_factory.h"
 #include "ardour/region_sorters.h"
 #include "ardour/session.h"
 
@@ -41,6 +42,272 @@ using namespace PBD;
 #include "ardour/audioengine.h"
 #define S2SC(s) Temporal::samples_to_superclock (s, TEMPORAL_SAMPLE_RATE)
 #define SC2S(s) Temporal::superclock_to_samples (s, TEMPORAL_SAMPLE_RATE)
+
+static std::shared_ptr<Region>
+top_take_at (std::shared_ptr<RegionList> const& regions, samplepos_t pos)
+{
+	std::shared_ptr<Region> top;
+	for (auto const& r : *regions) {
+		if (!r->comp_source_id().empty() || r->muted() || !r->covers (timepos_t (pos))) {
+			continue;
+		}
+		if (!top || r->layer() > top->layer()) {
+			top = r;
+		}
+	}
+	return top;
+}
+
+bool
+AudioPlaylist::initialize_comping_layer (samplepos_t range_start, samplepos_t range_end)
+{
+	std::shared_ptr<RegionList> existing = region_list ();
+	bool const ranged = range_start < range_end;
+	std::vector<samplepos_t> boundaries;
+	std::vector<std::pair<samplepos_t, samplepos_t> > covered;
+
+	for (auto const& region : *existing) {
+		samplepos_t const rs = region->position().samples();
+		samplepos_t const re = rs + region->length_samples();
+
+		if (!region->comp_source_id().empty()) {
+			if (!ranged) {
+				return false;
+			}
+			covered.push_back (std::make_pair (rs, re));
+			continue;
+		}
+
+		boundaries.push_back (rs);
+		boundaries.push_back (re);
+	}
+
+	if (boundaries.empty()) {
+		return false;
+	}
+
+	if (ranged) {
+		boundaries.push_back (range_start);
+		boundaries.push_back (range_end);
+		for (auto const& c : covered) {
+			boundaries.push_back (c.first);
+			boundaries.push_back (c.second);
+		}
+	}
+
+	std::sort (boundaries.begin(), boundaries.end());
+	boundaries.erase (std::unique (boundaries.begin(), boundaries.end()), boundaries.end());
+
+	struct CompSpan {
+		std::shared_ptr<Region> source;
+		samplepos_t start;
+		samplepos_t end;
+	};
+
+	std::vector<CompSpan> spans;
+
+	for (size_t i = 1; i < boundaries.size(); ++i) {
+		samplepos_t const start = boundaries[i - 1];
+		samplepos_t const end = boundaries[i];
+		if (start == end) {
+			continue;
+		}
+
+		if (ranged) {
+			if (start < range_start || end > range_end) {
+				continue;
+			}
+			bool already = false;
+			for (auto const& c : covered) {
+				if (start >= c.first && end <= c.second) {
+					already = true;
+					break;
+				}
+			}
+			if (already) {
+				continue;
+			}
+		}
+
+		std::shared_ptr<Region> source = top_take_at (existing, start);
+		if (!source) {
+			continue;
+		}
+
+		if (!spans.empty() && spans.back().source == source && spans.back().end == start) {
+			spans.back().end = end;
+		} else {
+			spans.push_back ({ source, start, end });
+		}
+	}
+
+	if (spans.empty()) {
+		return false;
+	}
+
+	freeze ();
+	for (auto const& span : spans) {
+		add_comping_slice (span.source, span.start, span.end, span.source->id().to_s());
+	}
+	thaw ();
+
+	return true;
+}
+
+void
+AudioPlaylist::cut_comping_range (samplepos_t start, samplepos_t end, std::string const& only_source_id)
+{
+	std::shared_ptr<RegionList> existing = region_list ();
+	for (auto const& comp : *existing) {
+		if (comp->comp_source_id().empty() || (!only_source_id.empty() && comp->comp_source_id() != only_source_id)) {
+			continue;
+		}
+
+		samplepos_t const cs = comp->position().samples();
+		samplepos_t const ce = cs + comp->length_samples();
+
+		if (ce <= start || cs >= end) {
+			continue;
+		}
+
+		if (cs < start && ce > end) {
+			add_comping_slice (comp, end, ce, comp->comp_source_id());
+			comp->set_length (timecnt_t (start - cs));
+		} else if (cs < start) {
+			comp->set_length (timecnt_t (start - cs));
+		} else if (ce > end) {
+			comp->trim_front (timepos_t (end));
+		} else {
+			remove_region (comp);
+		}
+	}
+}
+
+void
+AudioPlaylist::add_comping_slice (std::shared_ptr<Region> from, samplepos_t s, samplepos_t e, std::string const& id)
+{
+	timecnt_t const offset (from->position().distance (timepos_t (s)));
+	PropertyList properties (from->derive_properties());
+	properties.add (Properties::start, from->start() + offset);
+	properties.add (Properties::length, timecnt_t (e - s));
+	properties.add (Properties::opaque, true);
+	std::shared_ptr<Region> r = RegionFactory::create (from, offset, properties);
+	r->set_comp_source_id (id);
+	add_region (r, timepos_t (s));
+}
+
+bool
+AudioPlaylist::add_to_comping_layer (std::shared_ptr<Region> source, samplepos_t start, samplepos_t end)
+{
+	if (!source || !source->comp_source_id().empty()) {
+		return false;
+	}
+
+	start = std::max (start, source->position().samples());
+	end = std::min (end, source->position().samples() + source->length_samples());
+
+	if (start >= end) {
+		return false;
+	}
+
+	freeze ();
+	cut_comping_range (start, end, std::string());
+	add_comping_slice (source, start, end, source->id().to_s());
+	thaw ();
+	return true;
+}
+
+bool
+AudioPlaylist::finish_comping_layer (samplepos_t range_start, samplepos_t range_end)
+{
+	bool any = false;
+	bool const ranged = range_start < range_end;
+	std::shared_ptr<RegionList> existing = region_list ();
+
+	freeze ();
+	for (auto const& r : *existing) {
+		if (r->comp_source_id().empty()) {
+			continue;
+		}
+
+		samplepos_t const cs = r->position().samples();
+		samplepos_t const ce = cs + r->length_samples();
+
+		if (ranged && (ce <= range_start || cs >= range_end)) {
+			continue;
+		}
+
+		if (ranged) {
+			samplepos_t const inner_start = std::max (cs, range_start);
+			samplepos_t const inner_end = std::min (ce, range_end);
+			std::string const id = r->comp_source_id();
+
+			/* parts outside the range stay on the comping layer */
+			if (cs < range_start) {
+				add_comping_slice (r, cs, range_start, id);
+			}
+			if (ce > range_end) {
+				add_comping_slice (r, range_end, ce, id);
+			}
+			if (cs < inner_start) {
+				r->trim_front (timepos_t (inner_start));
+			}
+			if (ce > inner_end) {
+				r->set_length (timecnt_t (inner_end - inner_start));
+			}
+		}
+
+		r->set_comp_source_id (std::string());
+		any = true;
+	}
+	thaw ();
+	return any;
+}
+
+bool
+AudioPlaylist::discard_comping_layer (samplepos_t range_start, samplepos_t range_end)
+{
+	bool const ranged = range_start < range_end;
+	std::shared_ptr<RegionList> existing = region_list ();
+	bool any = false;
+
+	for (auto const& r : *existing) {
+		if (!r->comp_source_id().empty() && (!ranged || (r->position().samples() < range_end && r->position().samples() + r->length_samples() > range_start))) {
+			any = true;
+			break;
+		}
+	}
+
+	if (!any) {
+		return false;
+	}
+
+	freeze ();
+	if (ranged) {
+		cut_comping_range (range_start, range_end, std::string());
+	} else {
+		for (auto const& r : *existing) {
+			if (!r->comp_source_id().empty()) {
+				remove_region (r);
+			}
+		}
+	}
+	thaw ();
+	return true;
+}
+
+bool
+AudioPlaylist::remove_from_comping_layer (std::shared_ptr<Region> source, samplepos_t start, samplepos_t end)
+{
+	if (!source || start >= end) {
+		return false;
+	}
+
+	freeze ();
+	cut_comping_range (start, end, source->id().to_s());
+	thaw ();
+	return true;
+}
 
 AudioPlaylist::AudioPlaylist (Session& session, const XMLNode& node, bool hidden)
 	: Playlist (session, node, DataType::AUDIO, hidden)

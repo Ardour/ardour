@@ -144,6 +144,15 @@ public:
 	void show_xfades ();
 	void show_start_xfade ();
 	void show_end_xfade ();
+	/** colours used for the comping workflow, independent of the normal selection colours */
+	static uint32_t comping_layer_color ();
+	static uint32_t comping_source_color ();
+
+	/** @return true if @p pos is within @p slop samples of an outer edge of a comp span;
+	 *  @p span_start / @p span_end receive that span and @p at_start which edge it is. */
+	bool comping_edge_at (ARDOUR::samplepos_t pos, ARDOUR::samplecnt_t slop, ARDOUR::samplepos_t& span_start, ARDOUR::samplepos_t& span_end, bool& at_start) const;
+	void clear_comping_parts ();
+	void set_comping_parts (std::vector<CompingSelection> const&);
 
 	bool start_xfade_visible () const {
 		return _start_xfade_visible;
@@ -167,6 +176,8 @@ protected:
 		WaveformRectified = 0x8,
 		WaveformLogScaled = 0x10,
 	};
+
+	std::vector<ArdourCanvas::Rectangle *> selectedCompingParts;
 
 	std::vector<ArdourWaveView::WaveView *> waves;
 	std::vector<ArdourWaveView::WaveView *> tmp_waves; ///< see \ref create_waves()
@@ -222,6 +233,8 @@ protected:
 	void redisplay (bool) {}
 
 private:
+	void redraw_comping_parts ();
+
 	void setup_fade_handle_positions ();
 
 	void parameter_changed (std::string const &);
@@ -251,4 +264,3 @@ private:
 
 	PBD::ScopedConnection _region_fx_connection;
 };
-
