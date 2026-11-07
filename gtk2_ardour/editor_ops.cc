@@ -560,7 +560,8 @@ Editor::nudge_forward (bool next, bool force_playhead)
 		}
 	} else if (!force_playhead && !selection->points.empty()) {
 		bool in_command = false;
-		for (auto const& pt : selection->points) {
+		for (auto i = selection->points.rbegin(); i != selection->points.rend(); ++i) {
+			auto const& pt = *i;
 			std::shared_ptr<ARDOUR::AutomationList> alist = pt->line ().the_list ();
 			AutomationList::iterator m = pt->model ();
 			AutomationList::iterator n = m;
