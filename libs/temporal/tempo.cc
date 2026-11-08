@@ -4514,24 +4514,39 @@ TempoMap::set_ramped (TempoPoint & tp, bool yn)
 		return false;
 	}
 
-	std::cerr << "pre ramped to " << yn << std::endl;
-	dump (std::cerr);
+#ifndef NDEBUG
+	if (DEBUG_ENABLED (DEBUG::TemporalMap)) {
+		std::cerr << "pre ramped to " << yn << std::endl;
+		dump (std::cerr);
+	}
+#endif
 
 	if (yn) {
-		std::cerr << "set end of " << tp << " to match " << *nxt << std::endl;
+#ifndef NDEBUG
+		if (DEBUG_ENABLED (DEBUG::TemporalMap)) {
+			std::cerr << "set end of " << tp << " to match " << *nxt << std::endl;
+		}
+#endif
 		tp.set_end_npm (nxt->end_note_types_per_minute());
 	} else {
 		tp.set_end_npm (tp.note_types_per_minute());
 	}
 
-	std::cerr << "post ramped to " << yn << std::endl;
-	dump (std::cerr);
-
+#ifndef NDEBUG
+	if (DEBUG_ENABLED (DEBUG::TemporalMap)) {
+		std::cerr << "post ramped to " << yn << std::endl;
+		dump (std::cerr);
+	}
+#endif
 
 	reset_starting_at (tp.sclock());
 
-	std::cerr << "final post ramped to " << yn << std::endl;
-	dump (std::cerr);
+#ifndef NDEBUG
+	if (DEBUG_ENABLED (DEBUG::TemporalMap)) {
+		std::cerr << "final post ramped to " << yn << std::endl;
+		dump (std::cerr);
+	}
+#endif
 
 	return true;
 }
