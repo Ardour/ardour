@@ -27,7 +27,8 @@
 
 @implementation GdkQuartzView
 
-static int showInvalidation = 0;
+static int  showInvalidation = 0;
+static bool fullDrawNextTime = FALSE;
 
 -(id)initWithFrame: (NSRect)frameRect
 {
@@ -719,27 +720,10 @@ static int showInvalidation = 0;
     return;
 
 
-  /* Quartz/CoreGraphics/something on macOS causes occasional/periodic drawRect
-   * calls with a "dirty" rect that covers the entire NSView. As of 11/2024,
-   * this seems to be caused by how much of the NSView is redrawn in a given
-   * interval. The lower layers really do invalidate the contents of any
-   * backing store, so if we do not obey the drawRect call, portions of the
-   * window will remain undrawn.
-   */
-
-  if (NSContainsRect (rect, bo)) {
-	  full_draw = TRUE;
-#ifndef NDEBUG
-	  //printf ("full draw seen because %.0f x %.0f @ %.0f, %.0f contains %.0f x %.0f @ %.0f, %.0f\n", rect.size.width, rect.size.height, rect.origin.x, rect.origin.y,
-	  // bo.size.width, bo.size.height, bo.origin.x, bo.origin.y);
-#endif
-  } else {
-	  full_draw = FALSE;
-  }
-
   if (!GDK_WINDOW_IS_MAPPED (gdk_window) && ((gdk_quartz_osx_version() >= GDK_OSX_LEOPARD) && [self wantsLayer]))
     {
       fprintf (stderr, "Window is not mapped, blank with bg color.\n");
+      fullDrawNextTime = TRUE;
       /* If the window is not yet mapped, clip_region_with_children
        * will be empty causing the usual code below to draw nothing.
        * To not see garbage on the screen, we draw an aesthetic color
@@ -763,6 +747,26 @@ static int showInvalidation = 0;
 
       return;
     }
+
+  /* Quartz/CoreGraphics/something on macOS causes occasional/periodic drawRect
+   * calls with a "dirty" rect that covers the entire NSView. As of 11/2024,
+   * this seems to be caused by how much of the NSView is redrawn in a given
+   * interval. The lower layers really do invalidate the contents of any
+   * backing store, so if we do not obey the drawRect call, portions of the
+   * window will remain undrawn.
+   */
+
+  if (NSContainsRect (rect, bo) || fullDrawNextTime) {
+	  full_draw = TRUE;
+	  fullDrawNextTime = FALSE
+#ifndef NDEBUG
+	  //printf ("full draw seen because %.0f x %.0f @ %.0f, %.0f contains %.0f x %.0f @ %.0f, %.0f\n", rect.size.width, rect.size.height, rect.origin.x, rect.origin.y,
+	  // bo.size.width, bo.size.height, bo.origin.x, bo.origin.y);
+#endif
+  } else {
+	  full_draw = FALSE;
+  }
+
 
     if (full_draw) {
       GdkRectangle r = { bo.origin.x, bo.origin.y, bo.size.width, bo.size.height };
