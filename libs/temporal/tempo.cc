@@ -5503,6 +5503,85 @@ TempoMap::duration(TimeDomain td) const
 	return timepos_t::from_superclock (_points.back().sclock() + 1);
 }
 
+bool
+TempoMap::validate ()
+{
+	/* Sanitiy checks for the tempo map, returns true if all tests pass.
+	 * This should be checked before finishing an RCU operation, and
+	 * the operation should be aborted if the tempo map is not valid.
+	 */
+
+	bool valid = true;
+	std::ostringstream error;
+
+	for (Points::iterator p = _points.begin(); p != _points.end(); ++p) {
+		Points::iterator next = p;
+		next++;
+
+		/* markers must be ordered */
+		if (next != _points.end() && next->sclock() < p->sclock()) {
+			error << "- unordered markers: " << &p << " " << *p << "\n";
+			valid = false;
+		}
+	}
+
+	for (Tempos::iterator p = _tempos.begin(); p != _tempos.end(); ++p) {
+		Tempos::iterator next = p;
+		next++;
+
+		/* markers of the same type can't be at the same position */
+		if (next != _tempos.end() && next->sclock() == p->sclock()) {
+			error << "- two tempo markers at the same position: " << &p << " " << *p << " and " << &next << " " << *next << "\n";
+			valid = false;
+		}
+
+		/* tempo markers must be on beats */
+		BBT_Time pos_bbt = bbt_at (p->sclock());
+		if (pos_bbt.ticks != 0) {
+			error << "- tempo marker not on beat: " << &p << " " << *p << "\n";
+			valid = false;
+		}
+	}
+
+	for (Meters::iterator p = _meters.begin(); p != _meters.end(); ++p) {
+		Meters::iterator next = p;
+		next++;
+
+		/* markers of the same type can't be at the same position */
+		if (next != _meters.end() && next->sclock() == p->sclock()) {
+			error << "- two meter markers at the same position: " << &p << " " << *p << " and " << &next << " " << *next << "\n";
+			valid = false;
+		}
+
+		/* meter markers must be on first beats */
+		BBT_Time pos_bbt = bbt_at (p->sclock());
+		if (pos_bbt.ticks != 0 || pos_bbt.beats != 1) {
+			error << "- meter marker not on first beat: " << &p << " " << *p << "\n";
+			valid = false;
+		}
+	}
+
+	for (MusicTimes::iterator p = _bartimes.begin(); p != _bartimes.end(); ++p) {
+		MusicTimes::iterator next = p;
+		next++;
+
+		/* markers of the same type can't be at the same position */
+		if (next != _bartimes.end() && next->sclock() == p->sclock()) {
+			error << "- two bbt markers at the same position: " << &p << " " << *p << " and " << &next << " " << *next << "\n";
+			valid = false;
+		}
+
+	}
+
+	if (!valid) {
+		std::cerr << "\n\nINVALID TEMPO MAP REQUESTED:\n";
+		std::cerr << error.str();
+		dump (std::cerr);
+	}
+
+	return valid;
+}
+
 #if 0
 void
 TempoMap::fix_legacy_session ()

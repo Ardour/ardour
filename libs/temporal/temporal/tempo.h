@@ -870,6 +870,8 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	/* END OF MODIFYING METHODS */
 
+	LIBTEMPORAL_API bool validate ();
+
 	/* rather than giving direct access to the intrusive list members,
 	 * offer one that uses an STL container instead.
 	 */
