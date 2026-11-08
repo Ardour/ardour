@@ -758,7 +758,7 @@ static bool fullDrawNextTime = FALSE;
 
   if (NSContainsRect (rect, bo) || fullDrawNextTime) {
 	  full_draw = TRUE;
-	  fullDrawNextTime = FALSE
+	  fullDrawNextTime = FALSE;
 #ifndef NDEBUG
 	  //printf ("full draw seen because %.0f x %.0f @ %.0f, %.0f contains %.0f x %.0f @ %.0f, %.0f\n", rect.size.width, rect.size.height, rect.origin.x, rect.origin.y,
 	  // bo.size.width, bo.size.height, bo.origin.x, bo.origin.y);
