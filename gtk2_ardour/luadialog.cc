@@ -30,9 +30,8 @@
 #include "widgets/ardour_dropdown.h"
 #include "widgets/slider_controller.h"
 
-#include "stripable_colorpicker.h"
+#include "ardour_ui.h"
 #include "luadialog.h"
-#include "public_editor.h"
 #include "splash.h"
 #include "ui_config.h"
 #include "utils.h"
@@ -878,7 +877,7 @@ Dialog::run (lua_State *L)
 void
 Dialog::table_size_request (Gtk::Requisition* req)
 {
-	int h = Gtkmm2ext::physical_screen_height (PublicEditor::instance ().current_toplevel()->get_window());
+	int h = Gtkmm2ext::physical_screen_height (ARDOUR_UI::instance()->main_window().get_window());
 
 	int max_height = std::max (400., std::min (768.0 * UIConfiguration::instance().get_ui_scale(), h * .7));
 
