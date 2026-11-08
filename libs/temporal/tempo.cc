@@ -2065,12 +2065,12 @@ TempoMap::reset_starting_at (superclock_t sc, bool constant_bbt)
 		if ((mtp = dynamic_cast<MusicTimePoint*> (&*p)) != 0) {
 			metric = TempoMetric (*mtp, *mtp);
 			DEBUG_TRACE (DEBUG::MapReset, string_compose ("Bartime!, used tempo @ %1\n", (TempoPoint*) mtp));
-			need_initial_ramp_reset = false;
+			if (mtp->ramped()) {
+				need_initial_ramp_reset = true;
+			}
 		} else if ((tp = dynamic_cast<TempoPoint*> (&*p)) != 0) {
 			metric = TempoMetric (*tp, metric.meter());
 			if (tp->ramped()) {
-				need_initial_ramp_reset = true;
-			} else {
 				need_initial_ramp_reset = true;
 			}
 			DEBUG_TRACE (DEBUG::MapReset, string_compose ("Tempo! @ %1, metric's tempo is %2\n", tp, &metric.tempo()));
