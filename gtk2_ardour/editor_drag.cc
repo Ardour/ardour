@@ -3206,11 +3206,15 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 void
 MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 {
-	if (!movement_occurred) {
+	if (!movement_occurred || !map->validate ()) {
 		/* get reference before _marker is deleted via reset_meter_marks due to abort_tempo_map_edit */
 		Temporal::MeterPoint& section (const_cast<Temporal::MeterPoint&>(_marker->meter ()));
 		/* reset thread local tempo map to the original state */
 		_editor.abort_tempo_map_edit ();
+
+		if (movement_occurred) {
+			editing_context.abort_reversible_command ();
+		}
 
 		if (was_double_click ()) {
 			_editor.edit_meter_section (section);
@@ -3295,12 +3299,16 @@ TempoCurveDrag::motion (GdkEvent* event, bool first_move)
 void
 TempoCurveDrag::finished (GdkEvent* event, bool movement_occurred)
 {
-	if (!movement_occurred) {
+	if (!movement_occurred || !map->validate ()) {
 		/* reset the per-thread tempo map ptr back to the current
 		 * official version
 		 */
 
 		_editor.abort_tempo_map_edit ();
+
+		if (movement_occurred) {
+			editing_context.abort_reversible_command ();
+		}
 
 		if (was_double_click ()) {
 			// XXX would be nice to do this,
@@ -3402,11 +3410,15 @@ void
 TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 
-	if (!movement_occurred) {
+	if (!movement_occurred || !map->validate ()) {
 		/* get reference before _marker is deleted by reset_tempo_marks due to abort_tempo_map_edit */
 		Temporal::TempoPoint& section (const_cast<Temporal::TempoPoint&>(_marker->tempo ()));
 		/* reset thread local tempo map to the original state */
 		_editor.abort_tempo_map_edit ();
+
+		if (movement_occurred) {
+			editing_context.abort_reversible_command ();
+		}
 
 		if (was_double_click ()) {
 			_editor.edit_tempo_section (section);
@@ -3484,7 +3496,7 @@ BBTMarkerDrag::motion (GdkEvent* event, bool first_move)
 void
 BBTMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 {
-	if (!movement_occurred) {
+	if (!movement_occurred || !map->validate ()) {
 		/* reset thread local tempo map to the original state.
 		 *
 		 * Note: DO NOT call _editor.abort_tempo_map_edit ();
@@ -3495,6 +3507,10 @@ BBTMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		 * does not need to be called.
 		 */
 		TempoMap::abort_update ();
+
+		if (movement_occurred) {
+			editing_context.abort_reversible_command ();
+		}
 
 		if (was_double_click ()) {
 			_editor.edit_bbt (*_marker);
@@ -3613,7 +3629,7 @@ MappingEndDrag::motion (GdkEvent* event, bool first_move)
 void
 MappingEndDrag::finished (GdkEvent* event, bool movement_occurred)
 {
-	if (!_drag_valid) {
+	if (!_drag_valid || !map->validate ()) {
 		aborted (false);
 		return;
 	}
@@ -3723,7 +3739,7 @@ MappingTwistDrag::motion (GdkEvent* event, bool first_move)
 void
 MappingTwistDrag::finished (GdkEvent* event, bool movement_occurred)
 {
-	if (!_drag_valid) {
+	if (!_drag_valid || !map->validate ()) {
 		_editor.abort_tempo_mapping ();
 		editing_context.abort_reversible_command ();
 		return;
@@ -3815,7 +3831,7 @@ TempoTwistDrag::motion (GdkEvent* event, bool first_move)
 void
 TempoTwistDrag::finished (GdkEvent* event, bool movement_occurred)
 {
-	if (!movement_occurred || !_drag_valid) {
+	if (!movement_occurred || !_drag_valid || !map->validate ()) {
 		aborted (false);
 		return;
 	}
@@ -3928,8 +3944,11 @@ TempoEndDrag::motion (GdkEvent* event, bool first_move)
 void
 TempoEndDrag::finished (GdkEvent* event, bool movement_occurred)
 {
-	if (!movement_occurred || !_drag_valid) {
+	if (!movement_occurred || !_drag_valid || !map->validate ()) {
 		_editor.abort_tempo_map_edit ();
+		if (movement_occurred) {
+			editing_context.abort_reversible_command ();
+		}
 		return;
 	}
 

@@ -293,12 +293,16 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, timepos_t const & pos)
 			need_bbt_marker = true;
 		}
 		wmap->paste (*tmcb, pos, false, _("import"), need_bbt_marker);
-		TempoMap::update (wmap);
-		std::cerr << "final map\n";
-		TempoMap::use()->dump (std::cerr);
-		delete tmcb;
-		// XMLNode& tm_after (wmap->get_state());
-		// _session->add_command (new TempoCommand (_("cut tempo map"), &tm_before, &tm_after));
+		if (wmap->validate ()) {
+			TempoMap::update (wmap);
+			std::cerr << "final map\n";
+			TempoMap::use()->dump (std::cerr);
+			delete tmcb;
+			// XMLNode& tm_after (wmap->get_state());
+			// _session->add_command (new TempoCommand (_("cut tempo map"), &tm_before, &tm_after));
+		} else {
+			TempoMap::abort_update ();
+		}
 	} else {
 		// delete &tm_before;
 		TempoMap::abort_update ();

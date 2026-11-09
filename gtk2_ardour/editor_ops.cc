@@ -8220,17 +8220,25 @@ Editor::insert_time (timepos_t const & pos, timecnt_t const & samples, InsertTim
 	}
 
 	if (tempo_too) {
-		if (!in_command) {
-			begin_reversible_command (_("insert time"));
-			in_command = true;
-		}
+
 		TempoMap::WritableSharedPtr tmap (TempoMap::write_copy());
 		XMLNode& before (tmap->get_state());
 		tmap->shift (pos, samples);
-		XMLNode& after (tmap->get_state());
-		_session->add_command (new Temporal::TempoCommand (_("insert time"), &before, &after));
 
-		TempoMap::update (tmap);
+		if (tmap->validate ()) {
+			if (!in_command) {
+				begin_reversible_command (_("insert time"));
+				in_command = true;
+			}
+			XMLNode& after (tmap->get_state());
+			_session->add_command (new Temporal::TempoCommand (_("insert time"), &before, &after));
+
+			TempoMap::update (tmap);
+		} else {
+			TempoMap::abort_update ();
+		}
+
+
 	}
 
 	if (in_command) {
@@ -8401,14 +8409,19 @@ Editor::remove_time (timepos_t const & pos, timecnt_t const & duration, InsertTi
 		XMLNode& before (tmap->get_state());
 
 		if (tmap->remove_time (pos, duration)) {
-			if (!in_command) {
-				begin_reversible_command (_("remove time"));
-				in_command = true;
-			}
-			XMLNode& after (tmap->get_state());
-			_session->add_command (new Temporal::TempoCommand (_("remove time"), &before, &after));
 
-			TempoMap::update (tmap);
+			if (tmap->validate ()) {
+				if (!in_command) {
+					begin_reversible_command (_("remove time"));
+					in_command = true;
+				}
+				XMLNode& after (tmap->get_state());
+				_session->add_command (new Temporal::TempoCommand (_("remove time"), &before, &after));
+
+				TempoMap::update (tmap);
+			} else {
+				TempoMap::abort_update ();
+			}
 		}
 	}
 
