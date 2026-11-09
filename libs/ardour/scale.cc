@@ -531,10 +531,15 @@ MusicalKey::operator= (MusicalKey const & other)
 
 	_root = other._root;
 
-	if (other._midi_notes.empty()) {
-		_midi_notes.reserve (128);
-	} else {
-		_midi_notes = other._midi_notes;
+	{
+		PBD::Mutex::Lock lk1 (midi_notes_lock);
+		PBD::Mutex::Lock lk2 (other.midi_notes_lock);
+
+		if (other._midi_notes.empty()) {
+			_midi_notes.reserve (128);
+		} else {
+			_midi_notes = other._midi_notes;
+		}
 	}
 
 	return *this;
