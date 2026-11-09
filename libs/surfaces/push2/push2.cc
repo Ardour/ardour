@@ -1120,12 +1120,13 @@ mode_notes_bitset (const int               scale_root,
  * The returned vector has every possible MIDI note number (0 through 127
  * inclusive) that is in the mode in any octave.
  */
-static std::vector<int>
+static void
 mode_notes_vector (const int               scale_root,
                    const int               octave,
-                   std::string const &     mode)
+                   std::string const &     mode,
+                   std::vector<int>&       notes)
 {
-	return ARDOUR::MusicalMode (mode).as_midi (scale_root);
+	return ARDOUR::MusicalMode (mode).as_midi (scale_root, notes);
 }
 
 void
@@ -1135,7 +1136,8 @@ Push2::set_pad_scale_in_key (const int               scale_root,
                              const NoteGridOrigin    origin,
                              const int               ideal_vertical_semitones)
 {
-	const std::vector<int> notes = mode_notes_vector (scale_root, octave, name);
+	std::vector<int> notes;
+	mode_notes_vector (scale_root, octave, name, notes);
 
 	const int ideal_first_note = origin == Fixed ? 36 : scale_root + (12 * octave);
 

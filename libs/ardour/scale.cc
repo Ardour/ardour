@@ -352,32 +352,28 @@ MusicalMode::set_name (std::string const & str)
  * The returned vector has every possible MIDI note number (0 through 127
  * inclusive) that is in the mode in any octave.
  */
-std::vector<int>
-MusicalMode::as_midi (int scale_root) const
+void
+MusicalMode::as_midi (int scale_root, std::vector<int>& midi_notes) const
 {
 	switch (_type) {
 	case AbsolutePitch:
-		return absolute_pitch_as_midi (scale_root);
+		absolute_pitch_as_midi (scale_root, midi_notes);
 	case PitchClass:
-		return pitch_class_as_midi (scale_root);
+		pitch_class_as_midi (scale_root, midi_notes);
 	case RatioSteps:
-		return ratio_steps_as_midi (scale_root);
+		ratio_steps_as_midi (scale_root, midi_notes);
 	case RatioFromRoot:
-		return ratio_from_root_as_midi (scale_root);
+		ratio_from_root_as_midi (scale_root, midi_notes);
 	case MidiNote:
-		return midi_note_as_midi (scale_root);
+		midi_note_as_midi (scale_root, midi_notes);
 	}
 
 	/*NOTREACHED*/
-	return std::vector<int> ();
 }
 
-std::vector<int>
-MusicalMode::absolute_pitch_as_midi (int root) const
+void
+MusicalMode::absolute_pitch_as_midi (int rootm, std::vector<int>& midi_notes) const
 {
-	std::vector<int> midi_notes;
-	midi_notes.reserve (128);
-
 	/* You need MTS (MIDI Tuning Standard) to get MIDI to use absolute
 	 * pitch values, so this type of scale definition just returns the MIDI
 	 * note numbers 0-127. There is no other accurate answer that can be
@@ -387,28 +383,20 @@ MusicalMode::absolute_pitch_as_midi (int root) const
 	for (int n = 0; n < 128; ++n) {
 		midi_notes.push_back (n);
 	}
-	return midi_notes;
 }
 
 
-std::vector<int>
-MusicalMode::midi_note_as_midi (int root) const
+void
+MusicalMode::midi_note_as_midi (int root, std::vector<int>& midi_notes) const
 {
-	std::vector<int> midi_notes;
-	midi_notes.reserve (_elements.size());
-
 	for (auto e : _elements) {
 		midi_notes.push_back (floor (e));
 	}
-
-	return midi_notes;
 }
 
-std::vector<int>
-MusicalMode::pitch_class_as_midi (int scale_root) const
+void
+MusicalMode::pitch_class_as_midi (int scale_root, std::vector<int>& midi_notes) const
 {
-	std::vector<int> midi_notes;
-
 	int root = (scale_root % 12) - 12;
 
 	// Repeatedly loop through the intervals in an octave
@@ -436,15 +424,11 @@ MusicalMode::pitch_class_as_midi (int scale_root) const
 			++i;
 		}
 	}
-
-	return midi_notes;
 }
 
-std::vector<int>
-MusicalMode::wholetone_steps_as_midi (int scale_root) const
+void
+MusicalMode::wholetone_steps_as_midi (int scale_root, std::vector<int>& midi_notes) const
 {
-	std::vector<int> midi_notes;
-
 	int root = (scale_root % 12) - 12;
 
 	// Repeatedly loop through the intervals in an octave
@@ -472,22 +456,18 @@ MusicalMode::wholetone_steps_as_midi (int scale_root) const
 			++i;
 		}
 	}
-
-	return midi_notes;
 }
 
-std::vector<int>
-MusicalMode::ratio_steps_as_midi (int root) const
+void
+MusicalMode::ratio_steps_as_midi (int root, std::vector<int>& midi_notes) const
 {
-	std::vector<int> midi_notes;
-	return midi_notes;
+	/* Implement me? */
 }
 
-std::vector<int>
-MusicalMode::ratio_from_root_as_midi (int root) const
+void
+MusicalMode::ratio_from_root_as_midi (int root, std::vector<int>& midi_notes) const
 {
-	std::vector<int> midi_notes;
-	return midi_notes;
+	/* Implement me? */
 }
 
 
@@ -497,6 +477,8 @@ MusicalKey::MusicalKey (float root, MusicalMode const & sc)
 	: MusicalMode (sc)
 	, _root (root)
 {
+	_midi_notes.reserve (128);
+
 	/* Not sure this is conceptually correct. We haven't specified what the
 	   units of "root" are to the caller.
 	*/
@@ -511,6 +493,8 @@ MusicalKey::MusicalKey (float root, std::string const & mode_name)
 	: MusicalMode (mode_name)
 	, _root (root)
 {
+	_midi_notes.reserve (128);
+
 	/* Not sure this is conceptually correct. We haven't specified what the
 	   units of "root" are to the caller.
 	*/
@@ -525,11 +509,16 @@ MusicalKey::MusicalKey (MusicalKey const & other)
 	: MusicalMode (other)
 	, _root (other._root)
 {
+	if (_midi_notes.empty()) {
+		_midi_notes.reserve (128);
+	}
 }
 
 MusicalKey::MusicalKey (XMLNode const & node)
 	: MusicalMode (node)
 {
+	_midi_notes.reserve (128);
+
 	if (!node.get_property (X_("root"), _root)) {
 		throw failed_constructor ();
 	}
@@ -551,7 +540,7 @@ bool
 MusicalKey::in_key (int midi_note) const
 {
 	if (_midi_notes.empty()) {
-		_midi_notes = as_midi (_root);
+		as_midi (_root, _midi_notes);
 	}
 
 	return (std::find (_midi_notes.begin(), _midi_notes.end(), midi_note) != _midi_notes.end());
@@ -561,7 +550,7 @@ int
 MusicalKey::lower_midi_note (int midi_note) const
 {
 	if (_midi_notes.empty()) {
-		_midi_notes = as_midi (_root);
+		as_midi (_root, _midi_notes);
 	}
 
 	assert (!_midi_notes.empty());
@@ -590,7 +579,7 @@ int
 MusicalKey::higher_midi_note (int midi_note) const
 {
 	if (_midi_notes.empty()) {
-		_midi_notes = as_midi (_root);
+		as_midi (_root, _midi_notes);
 	}
 
 	assert (!_midi_notes.empty());
@@ -616,7 +605,7 @@ int
 MusicalKey::closest_midi_note (int midi_note) const
 {
 	if (_midi_notes.empty()) {
-		_midi_notes = as_midi (_root);
+		as_midi (_root, _midi_notes);
 	}
 
 	assert (!_midi_notes.empty());

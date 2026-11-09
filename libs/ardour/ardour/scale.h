@@ -102,7 +102,7 @@ class LIBARDOUR_API MusicalMode
 	std::vector<float> const & elements() const { return _elements; }
 	int ring_id () const;
 
-	std::vector<int> as_midi (int scale_root) const;
+	void as_midi (int scale_root, std::vector<int>&) const;
 	void set_name (std::string const & str);
 
 	PBD::Signal<void()> NameChanged;
@@ -128,12 +128,12 @@ class LIBARDOUR_API MusicalMode
 
 	static void init ();
 
-	std::vector<int> absolute_pitch_as_midi (int root) const;
-	std::vector<int> pitch_class_as_midi (int root) const;
-	std::vector<int> wholetone_steps_as_midi (int root) const;
-	std::vector<int> ratio_steps_as_midi (int root) const;
-	std::vector<int> ratio_from_root_as_midi (int root) const;
-	std::vector<int> midi_note_as_midi (int root) const;
+	void absolute_pitch_as_midi (int root, std::vector<int>&) const;
+	void pitch_class_as_midi (int root, std::vector<int>&) const;
+	void wholetone_steps_as_midi (int root, std::vector<int>&) const;
+	void ratio_steps_as_midi (int root, std::vector<int>&) const;
+	void ratio_from_root_as_midi (int root, std::vector<int>&) const;
+	void midi_note_as_midi (int root, std::vector<int>&) const;
 };
 
 
