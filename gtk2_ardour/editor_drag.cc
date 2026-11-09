@@ -3340,6 +3340,8 @@ TempoCurveDrag::aborted (bool moved)
 
 TempoMarkerDrag::TempoMarkerDrag (Editor& e, ArdourCanvas::Item* i)
 	: EditorDrag (e, i, Temporal::BeatTime, e.get_trackview_group())
+	, _old_grid_type (e.grid_type ())
+	, _old_snap_mode (e.snap_mode ())
 	, _before_state (nullptr)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New TempoMarkerDrag\n");
@@ -3379,6 +3381,11 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 		/* get current state */
 		_before_state = &map->get_state ();
 		editing_context.begin_reversible_command (_("move tempo mark"));
+
+		/* only snap to beats. */
+
+		editing_context.set_grid_type (GridTypeBeat);
+		editing_context.set_snap_mode (SnapMagnetic);
 	}
 
 	if (ArdourKeyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
@@ -3434,6 +3441,10 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	editing_context.session ()->add_command (new Temporal::TempoCommand (_("move tempo"), _before_state, &after));
 	editing_context.commit_reversible_command ();
+
+	/* reinstate old snap setting */
+	editing_context.set_grid_type (_old_grid_type);
+	editing_context.set_snap_mode (_old_snap_mode);
 }
 
 void
@@ -3442,6 +3453,12 @@ TempoMarkerDrag::aborted (bool moved)
 	/* reset the per-thread tempo map ptr back to the current
 	 * official version
 	 */
+
+	if (moved) {
+		/* reinstate old snap setting */
+		editing_context.set_grid_type (_old_grid_type);
+		editing_context.set_snap_mode (_old_snap_mode);
+	}
 
 	_editor.abort_tempo_map_edit ();
 }

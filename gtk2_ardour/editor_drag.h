@@ -932,6 +932,8 @@ private:
 	bool _movable;
 	double _grab_bpm;
 	Temporal::Beats _grab_qn;
+	Editing::GridType _old_grid_type;
+	Editing::SnapMode _old_snap_mode;
 	XMLNode* _before_state;
 };
 
