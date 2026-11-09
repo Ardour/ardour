@@ -358,14 +358,19 @@ MusicalMode::as_midi (int scale_root, std::vector<int>& midi_notes) const
 	switch (_type) {
 	case AbsolutePitch:
 		absolute_pitch_as_midi (scale_root, midi_notes);
+		break;
 	case PitchClass:
 		pitch_class_as_midi (scale_root, midi_notes);
+		break;
 	case RatioSteps:
 		ratio_steps_as_midi (scale_root, midi_notes);
+		break;
 	case RatioFromRoot:
 		ratio_from_root_as_midi (scale_root, midi_notes);
+		break;
 	case MidiNote:
 		midi_note_as_midi (scale_root, midi_notes);
+		break;
 	}
 
 	/*NOTREACHED*/
