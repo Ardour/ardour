@@ -371,20 +371,49 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 	}
 
 	Sorted sorted = get_sorted_stripables();
+
+	if (sorted.empty()) {
+		return 0;
+	}
+
 	uint32_t strip_cnt = n_strips (false); // do not include locked strips
 	bool exists = false;
 	Sorted::iterator first = sorted.end();
 
-	for (auto s = sorted.begin(); s != sorted.end(); ++s) {
-		/* the desired initial stripable may not be included in the
-		   results from ::get_sorted_stripables() (e.g. because it is
-		   hidden). So look for the first one after it, if necessary.
-		*/
-		if ((*s)->presentation_info().order() >= initial) {
-			first = s;
-			initial = (*s)->presentation_info().order();
-			exists = true;
-			break;
+	if (initial > _current_initial_bank) {
+
+		for (auto s = sorted.begin(); s != sorted.end(); ++s) {
+			/* the desired initial stripable may not be included in the
+			   results from ::get_sorted_stripables() (e.g. because it is
+			   hidden). So look for the first one after it, if necessary.
+			*/
+			if ((*s)->presentation_info().order() >= initial) {
+				first = s;
+				initial = (*s)->presentation_info().order();
+				exists = true;
+				break;
+			}
+		}
+	} else {
+		auto s = sorted.end();
+		--s;
+
+		while (true) {
+			/* the desired initial stripable may not be included in the
+			   results from ::get_sorted_stripables() (e.g. because it is
+			   hidden). So look for the first one before it, if necessary.
+			*/
+			if ((*s)->presentation_info().order() <= initial) {
+				first = s;
+				initial = (*s)->presentation_info().order();
+				exists = true;
+				break;
+			}
+			if (s == sorted.begin()) {
+				break;
+			}
+
+			--s;
 		}
 	}
 
