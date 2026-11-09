@@ -145,6 +145,8 @@ class LIBARDOUR_API MusicalKey : public MusicalMode
 	MusicalKey (XMLNode const &);
 	MusicalKey (MusicalKey const & other);
 
+	MusicalKey& operator= (MusicalKey const & other);
+
 	std::string name() const;
 	std::string mode_name() const;
 	float root() const { return _root; }
@@ -160,6 +162,7 @@ class LIBARDOUR_API MusicalKey : public MusicalMode
 
    private:
 	float _root;
+	mutable PBD::Mutex midi_notes_lock;
 	mutable std::vector<int> _midi_notes;
 };
 

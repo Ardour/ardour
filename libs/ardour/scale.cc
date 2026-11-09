@@ -524,6 +524,22 @@ MusicalKey::MusicalKey (XMLNode const & node)
 	}
 }
 
+MusicalKey&
+MusicalKey::operator= (MusicalKey const & other)
+{
+	MusicalMode::operator= (other);
+
+	_root = other._root;
+
+	if (other._midi_notes.empty()) {
+		_midi_notes.reserve (128);
+	} else {
+		_midi_notes = other._midi_notes;
+	}
+
+	return *this;
+}
+
 float
 MusicalKey::nth (unsigned n) const
 {
@@ -539,8 +555,11 @@ MusicalKey::nth (unsigned n) const
 bool
 MusicalKey::in_key (int midi_note) const
 {
-	if (_midi_notes.empty()) {
-		as_midi (_root, _midi_notes);
+	{
+		PBD::Mutex::Lock lk (midi_notes_lock);
+		if (_midi_notes.empty()) {
+			as_midi (_root, _midi_notes);
+		}
 	}
 
 	return (std::find (_midi_notes.begin(), _midi_notes.end(), midi_note) != _midi_notes.end());
@@ -549,8 +568,11 @@ MusicalKey::in_key (int midi_note) const
 int
 MusicalKey::lower_midi_note (int midi_note) const
 {
-	if (_midi_notes.empty()) {
-		as_midi (_root, _midi_notes);
+	{
+		PBD::Mutex::Lock lk (midi_notes_lock);
+		if (_midi_notes.empty()) {
+			as_midi (_root, _midi_notes);
+		}
 	}
 
 	assert (!_midi_notes.empty());
@@ -578,8 +600,11 @@ MusicalKey::lower_midi_note (int midi_note) const
 int
 MusicalKey::higher_midi_note (int midi_note) const
 {
-	if (_midi_notes.empty()) {
-		as_midi (_root, _midi_notes);
+	{
+		PBD::Mutex::Lock lk (midi_notes_lock);
+		if (_midi_notes.empty()) {
+			as_midi (_root, _midi_notes);
+		}
 	}
 
 	assert (!_midi_notes.empty());
@@ -604,8 +629,11 @@ MusicalKey::higher_midi_note (int midi_note) const
 int
 MusicalKey::closest_midi_note (int midi_note) const
 {
-	if (_midi_notes.empty()) {
-		as_midi (_root, _midi_notes);
+	{
+		PBD::Mutex::Lock lk (midi_notes_lock);
+		if (_midi_notes.empty()) {
+			as_midi (_root, _midi_notes);
+		}
 	}
 
 	assert (!_midi_notes.empty());
