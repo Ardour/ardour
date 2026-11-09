@@ -477,7 +477,7 @@ MusicalKey::MusicalKey (float root, MusicalMode const & sc)
 	: MusicalMode (sc)
 	, _root (root)
 {
-	_midi_notes.reserve (128);
+	as_midi (_root, _midi_notes);
 
 	/* Not sure this is conceptually correct. We haven't specified what the
 	   units of "root" are to the caller.
@@ -493,7 +493,7 @@ MusicalKey::MusicalKey (float root, std::string const & mode_name)
 	: MusicalMode (mode_name)
 	, _root (root)
 {
-	_midi_notes.reserve (128);
+	as_midi (_root, _midi_notes);
 
 	/* Not sure this is conceptually correct. We haven't specified what the
 	   units of "root" are to the caller.
@@ -509,40 +509,17 @@ MusicalKey::MusicalKey (MusicalKey const & other)
 	: MusicalMode (other)
 	, _root (other._root)
 {
-	if (_midi_notes.empty()) {
-		_midi_notes.reserve (128);
-	}
+	/* _midi_notes copied from other */
 }
 
 MusicalKey::MusicalKey (XMLNode const & node)
 	: MusicalMode (node)
 {
-	_midi_notes.reserve (128);
-
 	if (!node.get_property (X_("root"), _root)) {
 		throw failed_constructor ();
 	}
-}
 
-MusicalKey&
-MusicalKey::operator= (MusicalKey const & other)
-{
-	MusicalMode::operator= (other);
-
-	_root = other._root;
-
-	{
-		PBD::Mutex::Lock lk1 (midi_notes_lock);
-		PBD::Mutex::Lock lk2 (other.midi_notes_lock);
-
-		if (other._midi_notes.empty()) {
-			_midi_notes.reserve (128);
-		} else {
-			_midi_notes = other._midi_notes;
-		}
-	}
-
-	return *this;
+	as_midi (_root, _midi_notes);
 }
 
 float
@@ -560,26 +537,12 @@ MusicalKey::nth (unsigned n) const
 bool
 MusicalKey::in_key (int midi_note) const
 {
-	{
-		PBD::Mutex::Lock lk (midi_notes_lock);
-		if (_midi_notes.empty()) {
-			as_midi (_root, _midi_notes);
-		}
-	}
-
 	return (std::find (_midi_notes.begin(), _midi_notes.end(), midi_note) != _midi_notes.end());
 }
 
 int
 MusicalKey::lower_midi_note (int midi_note) const
 {
-	{
-		PBD::Mutex::Lock lk (midi_notes_lock);
-		if (_midi_notes.empty()) {
-			as_midi (_root, _midi_notes);
-		}
-	}
-
 	assert (!_midi_notes.empty());
 
 	if (midi_note < _midi_notes.front()) {
@@ -605,13 +568,6 @@ MusicalKey::lower_midi_note (int midi_note) const
 int
 MusicalKey::higher_midi_note (int midi_note) const
 {
-	{
-		PBD::Mutex::Lock lk (midi_notes_lock);
-		if (_midi_notes.empty()) {
-			as_midi (_root, _midi_notes);
-		}
-	}
-
 	assert (!_midi_notes.empty());
 
 	if (midi_note < _midi_notes.front()) {
@@ -634,13 +590,6 @@ MusicalKey::higher_midi_note (int midi_note) const
 int
 MusicalKey::closest_midi_note (int midi_note) const
 {
-	{
-		PBD::Mutex::Lock lk (midi_notes_lock);
-		if (_midi_notes.empty()) {
-			as_midi (_root, _midi_notes);
-		}
-	}
-
 	assert (!_midi_notes.empty());
 
 	if (midi_note < _midi_notes.front()) {
