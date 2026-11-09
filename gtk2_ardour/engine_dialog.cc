@@ -132,6 +132,12 @@ EngineControl::EngineControl ()
 	int            row;
 
 	if (!UIConfiguration::instance().get_allow_to_resize_init_dialog ()) {
+#ifndef __APPLE__
+		// For some reason this allow correct exposure of the dialog,
+		// noticed by adding debug prints.
+		// Note that also allowing resize, does not help. it's a mystery.
+		printf ("\n");
+#endif
 		set_resizable (false);
 	}
 	set_name (X_("AudioMIDISetup"));
