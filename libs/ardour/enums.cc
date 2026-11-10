@@ -948,6 +948,7 @@ setup_enum_writer ()
  	REGISTER_ENUM (ForceLower);
  	REGISTER_ENUM (ForceHigher);
  	REGISTER_ENUM (ForceNearest);
+ 	REGISTER_ENUM (ShowKey);
 	REGISTER_BITS (_KeyEnforcementPolicy);
 
 	REGISTER_ENUM (TwelveTone);
