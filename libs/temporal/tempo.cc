@@ -2379,6 +2379,12 @@ TempoMap::move_tempo (TempoPoint const & tp, timepos_t const & when, bool push)
 	TEMPO_MAP_ASSERT (!_tempos.empty());
 	TEMPO_MAP_ASSERT (!_meters.empty());
 
+	/* Store superclocks for requested position,
+	 * we will want to compute a beat position
+	 * using our modified tempo map later
+	 */
+	superclock_t when_sc = when.superclocks ();
+
 	Tempos::iterator t;
 	Tempos::iterator prev;
 	Tempos::iterator next;
@@ -2417,22 +2423,24 @@ TempoMap::move_tempo (TempoPoint const & tp, timepos_t const & when, bool push)
 	remove_point (*t);
 	reset_starting_at (prev->sclock());
 
-	/* Then, add the tempo marker back at requested position, rounded to beats.
-	 * We use RoundUpMaybe instead of RoundNearest to minimize flickering when
-	 * moving near the half of a beat.
+	/* Then, add the tempo marker back at requested position, snapped to beats.
 	 */
 
-	TempoMetric metric (metric_at (when));
+	TempoMetric metric (metric_at (when_sc));
 
-	Beats beats = when.beats ().round_to_subdivision (metric.note_value () / 4, RoundUpMaybe);
-	BBT_Time bbt = metric.bbt_at (beats);
-	superclock_t sc = metric.superclock_at (beats);
+	const Beats beats = quarters_at_superclock (when_sc).round_to_multiple (Beats::from_double (4.0 / metric.note_value()));
+	const BBT_Time bbt = metric.bbt_at (beats);
+	const superclock_t sc = metric.superclock_at (beats);
+	const Beats delta ((quarters_at_superclock (when_sc) - quarters_at_superclock(tp.sclock())).abs());
 
 	bool moved = sc != tp.sclock();
 	TempoPoint* moved_tp = const_cast<TempoPoint*> (&tp);
 
 	if (sc <= prev->sclock() || (next != _tempos.end() && sc >= next->sclock())) {
 		/* we might have moved passed a marker because of rounding */
+		moved = false;
+	} else if (delta < Beats::from_double (4.0 / metric.note_value())) {
+		/* only move passed a certain threshold (1 beat) to avoid flickering */
 		moved = false;
 	} else {
 		moved_tp->set (sc, beats, bbt);
