@@ -2888,6 +2888,23 @@ Editor::group_selected_regions ()
 		(*i)->region ()->set_region_group (Region::get_retained_group_id(), true);
 		_session->add_command (new StatefulDiffCommand ((*i)->region ()));
 	}
+
+	/* selected markers and ranges join the group, so that they move along with the regions */
+	if (!selection->markers.empty ()) {
+		uint64_t const group = rs.front ()->region ()->region_group ();
+		XMLNode& before (_session->locations()->get_state());
+
+		for (auto const& m : selection->markers) {
+			bool is_start;
+			Location* l = find_location_from_marker (m, is_start);
+			if (l && !l->is_session_range ()) {
+				l->set_group (group);
+			}
+		}
+
+		_session->add_command (new MementoCommand<Locations> (*_session->locations(), &before, &_session->locations()->get_state()));
+	}
+
 	commit_reversible_command ();
 }
 
@@ -2896,11 +2913,48 @@ Editor::ungroup_selected_regions ()
 {
 	RegionSelection rs = get_regions_from_selection_and_entered ();
 
-	if (rs.empty ()) {
+	if (rs.empty () && selection->markers.empty ()) {
 		return;
 	}
 
 	begin_reversible_command (_("ungroup regions"));
+
+	/* markers and ranges leave the group(s) of the selected regions, as well as any selected markers */
+	std::set<uint64_t>                  groups;
+	std::set<std::shared_ptr<Region> > regions;
+	for (RegionSelection::iterator i = rs.begin (); i != rs.end (); ++i) {
+		groups.insert ((*i)->region ()->region_group ());
+		regions.insert ((*i)->region ());
+	}
+	filter_complete_region_groups (groups, regions);
+
+	std::set<Location*> ungroup;
+	for (auto const& m : selection->markers) {
+		bool is_start;
+		Location* l = find_location_from_marker (m, is_start);
+		if (l) {
+			ungroup.insert (l);
+		}
+	}
+
+	Locations::LocationList ll (_session->locations()->list ());
+	for (auto const& l : ll) {
+		if (l->group () != 0 && groups.find (l->group ()) != groups.end ()) {
+			ungroup.insert (l);
+		}
+	}
+
+	if (!ungroup.empty ()) {
+		XMLNode& before (_session->locations()->get_state());
+		for (auto const& l : ungroup) {
+			l->set_group (0);
+		}
+		_session->add_command (new MementoCommand<Locations> (*_session->locations(), &before, &_session->locations()->get_state()));
+	} else if (rs.empty ()) {
+		abort_reversible_command ();
+		return;
+	}
+
 	for (RegionSelection::iterator i = rs.begin (); i != rs.end (); ++i) {
 		(*i)->region ()->clear_changes ();
 		(*i)->region ()->unset_region_group (true);
@@ -4368,6 +4422,7 @@ Editor::cut_copy (CutCopyOp op)
 
 	if (op != Delete) { //"Delete" doesn't change copy/paste buf
 		cut_buffer->clear ();
+		clear_cut_buffer_locations ();
 	}
 
 	if (entered_marker) {
@@ -4929,6 +4984,8 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 
 		if (!foo.empty()) {
 			cut_buffer->set (foo);
+			_cut_buffer_locations_owner = foo.front ();
+			cut_copy_grouped_locations (op, rs, first_position);
 		}
 
 		if (pmap.empty()) {
@@ -5159,6 +5216,10 @@ Editor::paste_internal (timepos_t const & pos, float times)
 		for (TrackViewList::iterator i = ts.begin(); i != ts.end(); ++i) {
 			commit |= (*i)->paste (position, *cut_buffer, ctx);
 		}
+
+		if (commit) {
+			paste_grouped_locations (position, paste_count, times);
+		}
 	}
 
 	++paste_count;
@@ -5168,6 +5229,131 @@ Editor::paste_internal (timepos_t const & pos, float times)
 	} else {
 		abort_reversible_command ();
 	}
+}
+
+/** Move a location (marker or range) to start at @p pos, keeping its length.
+ *  Marks must use set_start (), their _end is not necessarily equal to _start.
+ *  @return 0 on success, -1 if the location is locked
+ */
+static int
+move_location_to (Location* l, timepos_t const & pos)
+{
+	if (l->is_mark ()) {
+		return l->set_start (pos, false);
+	}
+	return l->move_to (pos);
+}
+
+/** Store copies of the markers and ranges grouped with the cut/copied regions.
+ *  Cut also removes them, as part of the current reversible command.
+ */
+void
+Editor::cut_copy_grouped_locations (CutCopyOp op, RegionSelection& rs, timepos_t const & first_position)
+{
+	if (op != Cut && op != Copy) {
+		return;
+	}
+
+	std::set<uint64_t>                  groups;
+	std::set<std::shared_ptr<Region> > regions;
+	timepos_t                           last_end (first_position);
+
+	for (auto const& rv : rs) {
+		std::shared_ptr<Region> r (rv->region ());
+		if (r->is_explicitly_grouped () && !r->is_explicitly_ungrouped ()) {
+			groups.insert (r->region_group ());
+		}
+		regions.insert (r);
+		last_end = max (last_end, r->end_position ());
+	}
+
+	_cut_buffer_locations_span = first_position.distance (last_end);
+	filter_complete_region_groups (groups, regions);
+
+	if (groups.empty ()) {
+		return;
+	}
+
+	XMLNode& before (_session->locations()->get_state());
+	bool     removed = false;
+
+	Locations::LocationList ll (_session->locations()->list ());
+	for (auto const& l : ll) {
+		if (l->group () == 0 || groups.find (l->group ()) == groups.end ()) {
+			continue;
+		}
+		if (l->is_session_range () || l->is_auto_loop () || l->is_auto_punch ()) {
+			continue;
+		}
+
+		_cut_buffer_locations.push_back (CutBufferLocation (new Location (*l, false), first_position.distance (l->start ())));
+
+		if (op == Cut && !l->locked ()) {
+			_session->locations()->remove (l);
+			removed = true;
+		}
+	}
+
+	if (removed) {
+		_session->add_command (new MementoCommand<Locations> (*_session->locations(), &before, &_session->locations()->get_state()));
+	} else {
+		delete &before;
+	}
+}
+
+/** Paste the markers and ranges stored by cut_copy_grouped_locations, as part of the current reversible command.
+ *  Must be called while the paste's Region::RegionGroupRetainer is in scope, so that the new
+ *  locations end up in the same new group as the pasted regions.
+ */
+bool
+Editor::paste_grouped_locations (timepos_t const & position, unsigned count, float times)
+{
+	if (_cut_buffer_locations.empty ()) {
+		return false;
+	}
+
+	std::shared_ptr<Playlist> owner (_cut_buffer_locations_owner.lock ());
+	if (!owner || find (cut_buffer->playlists.begin (), cut_buffer->playlists.end (), owner) == cut_buffer->playlists.end ()) {
+		/* the cut buffer has been replaced since */
+		return false;
+	}
+
+	int const itimes = (int) floor (fabs (times));
+	if (itimes < 1) {
+		return false;
+	}
+
+	XMLNode& before (_session->locations()->get_state());
+
+	/* same placement as Playlist::paste () */
+	timepos_t pos (position + get_paste_offset (position, count, _cut_buffer_locations_span));
+
+	for (int n = 0; n < itimes; ++n) {
+		for (auto const& c : _cut_buffer_locations) {
+			timepos_t start (pos + c.offset);
+			if (start.is_negative ()) {
+				start = timepos_t::zero (start.time_domain () == Temporal::BeatTime);
+			}
+			Location* nl = new Location (*c.location, false);
+			move_location_to (nl, start);
+			nl->set_group (Region::get_region_operation_group_id (c.location->group (), Paste));
+			_session->locations()->add (nl);
+		}
+		pos += _cut_buffer_locations_span;
+	}
+
+	_session->add_command (new MementoCommand<Locations> (*_session->locations(), &before, &_session->locations()->get_state()));
+	return true;
+}
+
+void
+Editor::clear_cut_buffer_locations ()
+{
+	for (auto const& c : _cut_buffer_locations) {
+		delete c.location;
+	}
+	_cut_buffer_locations.clear ();
+	_cut_buffer_locations_owner.reset ();
 }
 
 void
@@ -9421,6 +9607,124 @@ Editor::ripple_marks (std::shared_ptr<Playlist> target_playlist, timepos_t at, t
 	/* do not move locked markers, do notify */
 	_session->locations()->ripple (at, distance, false);
 	_session->add_command (new MementoCommand<Locations> (*_session->locations(), &before, &_session->locations()->get_state()));
+}
+
+void
+Editor::move_grouped_marks (std::set<uint64_t> const & groups, timecnt_t const & distance)
+{
+	if (groups.empty () || distance.is_zero ()) {
+		return;
+	}
+
+	XMLNode& before (_session->locations()->get_state());
+
+	if (shift_grouped_locations (groups, distance, std::set<Location*> ())) {
+		_session->add_command (new MementoCommand<Locations> (*_session->locations(), &before, &_session->locations()->get_state()));
+	} else {
+		delete &before;
+	}
+}
+
+/** Move all locations of the given region-groups, except @p exclude.
+ *  The caller is responsible for undo/redo.
+ *  @return true if any location was moved
+ */
+bool
+Editor::shift_grouped_locations (std::set<uint64_t> const & groups, timecnt_t const & distance, std::set<Location*> const & exclude)
+{
+	bool moved = false;
+
+	Locations::LocationList ll (_session->locations()->list ());
+	for (auto const& l : ll) {
+		if (l->group () == 0 || groups.find (l->group ()) == groups.end () || exclude.find (l) != exclude.end ()) {
+			continue;
+		}
+		timepos_t pos (l->start () + distance);
+		if (pos.is_negative ()) {
+			pos = timepos_t::zero (pos.time_domain () == Temporal::BeatTime);
+		}
+		/* locked locations are not moved */
+		if (move_location_to (l, pos) == 0) {
+			moved = true;
+		}
+	}
+
+	return moved;
+}
+
+void
+Editor::get_grouped_regions (std::set<uint64_t> const & groups, RegionList& regions) const
+{
+	std::set<std::shared_ptr<Playlist> > playlists;
+	std::shared_ptr<RouteList> rl (_session->get_tracks ());
+
+	for (auto const& r : *rl) {
+		std::shared_ptr<Track> t (std::dynamic_pointer_cast<Track> (r));
+		if (!t || !t->playlist () || !playlists.insert (t->playlist ()).second) {
+			continue;
+		}
+		std::shared_ptr<RegionList> prl (t->playlist ()->region_list ());
+		for (auto const& reg : *prl) {
+			if (reg->is_explicitly_grouped () && !reg->is_explicitly_ungrouped () && groups.find (reg->region_group ()) != groups.end ()) {
+				regions.push_back (reg);
+			}
+		}
+	}
+}
+
+/** Remove all groups from @p groups that are not completely contained in @p regions.
+ *  Markers follow their group only if all regions of the group take part in an operation,
+ *  not when single regions of the group are selected (e.g. using the toggle modifier).
+ */
+void
+Editor::filter_complete_region_groups (std::set<uint64_t>& groups, std::set<std::shared_ptr<Region> > const & regions) const
+{
+	for (std::set<uint64_t>::iterator g = groups.begin (); g != groups.end ();) {
+		std::set<uint64_t> one;
+		one.insert (*g);
+
+		RegionList rl;
+		get_grouped_regions (one, rl);
+
+		bool complete = true;
+		for (auto const& r : rl) {
+			if (regions.find (r) == regions.end ()) {
+				complete = false;
+				break;
+			}
+		}
+
+		if (complete) {
+			++g;
+		} else {
+			g = groups.erase (g);
+		}
+	}
+}
+
+/** Move all regions of the given region-groups, as part of the current reversible command */
+void
+Editor::move_grouped_regions (std::set<uint64_t> const & groups, timecnt_t const & distance)
+{
+	if (groups.empty () || distance.is_zero ()) {
+		return;
+	}
+
+	RegionList rl;
+	get_grouped_regions (groups, rl);
+
+	for (auto const& r : rl) {
+		if (!r->can_move ()) {
+			continue;
+		}
+		timepos_t pos (r->position () + distance);
+		if (pos.is_negative ()) {
+			pos = timepos_t::zero (pos.time_domain () == Temporal::BeatTime);
+		}
+		r->clear_changes ();
+		r->set_position (pos);
+		_session->add_command (new StatefulDiffCommand (r));
+	}
 }
 
 Editing::ZoomFocus

@@ -27,6 +27,8 @@
 #define __gtk2_ardour_editor_drag_h_
 
 #include <list>
+#include <map>
+#include <set>
 #include <vector>
 
 #include <ydk/gdk.h>
@@ -491,6 +493,7 @@ protected:
 	double compute_x_delta (GdkEvent const *, Temporal::timepos_t &);
 	virtual bool y_movement_allowed (int, double, int skip_invisible = 0) const;
 	void collect_ripple_views ();
+	void collect_group_markers ();
 
 	bool _ignore_video_lock;
 	Temporal::timepos_t _last_position; ///< last position of the thing being dragged
@@ -498,6 +501,8 @@ protected:
 	int _last_pointer_time_axis_view;
 	double _last_pointer_layer;
 	std::vector<ArdourMarker*> ripple_markers;
+	std::set<uint64_t> marker_groups; ///< region-groups whose markers move along with the dragged regions
+	std::vector<ArdourMarker*> group_markers;
 
 private:
 	uint32_t _ndropzone;
@@ -1210,6 +1215,7 @@ private:
 
 	ArdourMarker* _marker; ///< marker being dragged
 	bool _selection_changed;
+	bool _single; ///< move only the dragged marker, not the selection nor its region-group
 	struct CopiedLocationMarkerInfo {
 		ARDOUR::Location* location;
 		std::vector<ArdourMarker*> markers;
@@ -1222,6 +1228,28 @@ private:
 	typedef std::list<CopiedLocationMarkerInfo> CopiedLocationInfo;
 	CopiedLocationInfo _copied_locations;
 	ArdourCanvas::Points _points;
+
+	/* regions grouped with the dragged markers (see Editor::group_selected_regions) move along */
+	struct GroupedRegionView {
+		RegionView* view;
+		uint64_t    group;
+		double      x_offset; ///< current visual offset in pixels
+		GroupedRegionView (RegionView* v, uint64_t g) : view (v), group (g), x_offset (0) {}
+	};
+	std::vector<GroupedRegionView> _grouped_views;
+
+	/* markers of the same region-group(s) that are not dragged themselves */
+	struct GroupedMarker {
+		ArdourMarker* marker;
+		uint64_t      group;
+		double        x_offset; ///< current visual offset in pixels
+		GroupedMarker (ArdourMarker* m, uint64_t g) : marker (m), group (g), x_offset (0) {}
+	};
+	std::vector<GroupedMarker> _grouped_markers;
+
+	void collect_grouped_regionviews ();
+	void group_deltas (std::map<uint64_t, Temporal::timecnt_t>&) const;
+	void reset_grouped_regionviews ();
 };
 
 /** Control point drag */
