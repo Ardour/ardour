@@ -527,7 +527,7 @@ MidiViewBackground::build_key_enforcement_menu ()
 void
 MidiViewBackground::toggle_key_enforcement_policy (ARDOUR::KeyEnforcementPolicy kepb, Gtk::CheckMenuItem* item)
 {
-	ARDOUR::KeyEnforcementPolicy kep = midi_track()->key_enforcement_policy();
+	using namespace ARDOUR;
 
 	/* Some of the menu items that trigger this are radio menu items, and
 	   this method will be called when they go inactive. We want to ignore
@@ -538,11 +538,35 @@ MidiViewBackground::toggle_key_enforcement_policy (ARDOUR::KeyEnforcementPolicy 
 		return;
 	}
 
-	if (kep & kepb) {
-		midi_track()->set_key_enforcement_policy (ARDOUR::KeyEnforcementPolicy (kep & ~kepb));
-	} else {
-		midi_track()->set_key_enforcement_policy (ARDOUR::KeyEnforcementPolicy (kep | kepb));
+	KeyEnforcementPolicy kep = midi_track()->key_enforcement_policy();
+
+	std::vector<KeyEnforcementPolicy> kep_parts ({
+			KeyEnforcementPolicy (NoDraw|NoInsert|NoPlay),
+			KeyEnforcementPolicy (ForceLower|ForceHigher|ForceNearest),
+			KeyEnforcementPolicy (ShowKey)
+		});
+
+	KeyEnforcementPolicy new_policy (kep);
+
+	for (auto mask : kep_parts ) {
+		KeyEnforcementPolicy ek (KeyEnforcementPolicy (kep & mask));
+		KeyEnforcementPolicy nk (KeyEnforcementPolicy (kepb & mask));
+
+		if (!(nk & mask)) {
+			/* new value doesn't change the bits defined by mask */
+			continue;
+		}
+
+		if (ek & mask) {
+			/* was on, turn the relevant bits off */
+			new_policy = KeyEnforcementPolicy (new_policy & ~(nk & mask));
+		} else {
+			/* was off, turn relevant bits on */
+			new_policy = KeyEnforcementPolicy (new_policy | (nk& mask));
+		}
 	}
+
+	midi_track()->set_key_enforcement_policy (new_policy);
 }
 
 void
