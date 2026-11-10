@@ -2379,121 +2379,91 @@ TempoMap::move_tempo (TempoPoint const & tp, timepos_t const & when, bool push)
 	TEMPO_MAP_ASSERT (!_tempos.empty());
 	TEMPO_MAP_ASSERT (!_meters.empty());
 
+	Tempos::iterator t;
+	Tempos::iterator prev;
+	Tempos::iterator next;
+
+	for (t = _tempos.begin(); t != _tempos.end() && t->sclock() < tp.sclock(); ++t);
+
+	prev = t;
+	next = t;
+	prev--;
+	next++;
+
+	/* First, check that we can perform requested move */
+
+	if (t == _tempos.end() || t->sclock() != tp.sclock()) {
+		/* not found */
+		return false;
+	}
+
 	if (_tempos.size() < 2 || tp == _tempos.front()) {
 		/* not movable */
 		return false;
 	}
+	if (when.superclocks() <= prev->sclock() || (next != _tempos.end() && when.superclocks() >= next->sclock())) {
+		/* can't move passed nother tempo marker
+		 * while this could be achievable, it has too much potential side effects
+		 * for something that's actually very unlikely to be needed.
+		 */
+		return false;
+	}
 
-	superclock_t sc;
-	Beats beats;
-	BBT_Time bbt;
+	/* Then, remove the tempo marker so that we know where it can be moved:
+	 * we don't want to move it along its own beat grid, but rather on its
+	 * predecessor's.
+	 */
+	_tempos.erase (t);
+	remove_point (*t);
+	reset_starting_at (prev->sclock());
 
-	/* tempo changes must be on beat */
-
-	beats = when.beats();
-
-	/* XXX need to TEMPO_MAP_ASSERT that meter note value is >= 4 */
-
-	MeterPoint const & mm (meter_at (beats));
-
-	beats.round_to_subdivision (mm.note_value() / 4, RoundNearest);
-
-	/* Do not allow moving a tempo marker to the same position as
-	 * an existing one.
+	/* Then, add the tempo marker back at requested position, rounded to beats.
+	 * We use RoundUpMaybe instead of RoundNearest to minimize flickering when
+	 * moving near the half of a beat.
 	 */
 
-	Tempos::iterator t, prev_t;
-	Meters::iterator m, prev_m;
+	TempoMetric metric (metric_at (when));
 
-	/* find tempo & meter in effect at the new target location */
+	Beats beats = when.beats ().round_to_subdivision (metric.note_value () / 4, RoundUpMaybe);
+	BBT_Time bbt = metric.bbt_at (beats);
+	superclock_t sc = metric.superclock_at (beats);
 
-	for (t = _tempos.begin(), prev_t = _tempos.end(); t != _tempos.end() && t->beats() <= beats && *t != tp; ++t) { prev_t = t; }
-	for (m = _meters.begin(), prev_m = _meters.end(); m != _meters.end() && m->beats() <= beats; ++m) { prev_m = m; }
+	bool moved = sc != tp.sclock();
+	TempoPoint* moved_tp = const_cast<TempoPoint*> (&tp);
 
-	if (prev_t == _tempos.end()) {
-		/* moved earlier than first, no movement */
-		return false;
+	if (sc <= prev->sclock() || (next != _tempos.end() && sc >= next->sclock())) {
+		/* we might have moved passed a marker because of rounding */
+		moved = false;
+	} else {
+		moved_tp->set (sc, beats, bbt);
 	}
 
-	if (prev_m == _meters.end()) {
-		/* moved earlier than first, no movement */
-		return false;
-	}
+	bool ignored;
+	core_add_tempo (moved_tp, ignored);
+	core_add_point (moved_tp);
 
 	/* If the previous tempo is ramped, we need to recompute its omega
 	 * constant to cover the (new) duration of the ramp.
 	 */
-
-	if (prev_t->actually_ramped()) {
-		prev_t->compute_omega_from_distance_and_next_tempo (beats - prev_t->beats(), tp);
+	if (prev->actually_ramped()) {
+		prev->compute_omega_from_distance_and_next_tempo (beats - prev->beats(), tp);
 	}
 
-	TempoMetric metric (*prev_t, *prev_m);
-
-	const Beats delta ((beats - tp.beats()).abs());
-
-	if (delta < Beats::ticks (metric.meter().ticks_per_grid())) {
-		return false;
+	/* If moved tempo is ramped, we need to recompute its omega
+	 * constant to cover the (new) duration of the ramp.
+	 */
+	if (moved_tp->actually_ramped()) {
+		/* compute next beats from superclocks as the next marker might
+		 * be a bbt marker (with beats == 0)
+		 */
+		TempoMetric metric_at_tp (metric_at (beats));
+		Beats next_beats = metric.quarters_at_superclock(next->sclock());
+		moved_tp->compute_omega_from_distance_and_next_tempo (next_beats - beats, *next);
 	}
 
-	sc = metric.superclock_at (beats);
-	bbt = metric.bbt_at (beats);
+	reset_starting_at (prev->sclock());
 
-	if (tp.sclock() == sc && tp.beats() == beats && tp.bbt() == bbt) {
-		return false;
-	}
-
-	const superclock_t old_sc = tp.sclock();
-	/* reset position of this tempo */
-	const_cast<TempoPoint*> (&tp)->set (sc, beats, bbt);
-
-	/* move to correct position in tempo list */
-
-	{
-		Tempos::iterator current = _tempos.end();
-		Tempos::iterator insert_before = _tempos.end();
-
-		for (Tempos::iterator t = _tempos.begin(); t != _tempos.end(); ++t) {
-			if (*t == tp) {
-				current = t;
-			}
-			if (insert_before == _tempos.end() && (t->sclock() > sc)) {
-				insert_before = t;
-			}
-		}
-
-		/* existing tempo must have been found */
-		TEMPO_MAP_ASSERT (current != _tempos.end());
-		/* reposition in list */
-		_tempos.splice (insert_before, _tempos, current);
-	}
-
-	/* move to correct position in points list */
-
-	{
-		Points::iterator current = _points.end();
-		Points::iterator insert_before = _points.end();
-
-		for (Points::iterator t = _points.begin(); t != _points.end(); ++t) {
-			if (*t == tp) {
-				current = t;
-			}
-			if (insert_before == _points.end() && (t->sclock() > sc)) {
-				insert_before = t;
-			}
-		}
-
-		/* existing tempo must have been found */
-		TEMPO_MAP_ASSERT (current != _points.end());
-
-		/* reposition in list */
-		_points.splice (insert_before, _points, current);
-	}
-
-	/* recompute 3 domain positions for everything after this */
-	reset_starting_at (std::min (sc, old_sc));
-
-	return true;
+	return moved;
 }
 
 MeterPoint &
