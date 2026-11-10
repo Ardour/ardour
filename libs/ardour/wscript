@@ -423,7 +423,7 @@ def build(bld):
     elif bld.env['build_target'] == 'mingw':
         obj.cxxflags += ['-Og']
     else: # MSVC
-        obj.defines +=  ['NOMINMAX', '_WINSOCKAPI_']
+        obj.defines +=  ['NOMINMAX']
         obj.lib      =  ['OLE32']
 
     if bld.is_defined('USE_EXTERNAL_LIBS'):

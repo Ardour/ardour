@@ -31,6 +31,9 @@
 #include <stdlib.h>
 
 #include <windows.h>
+#if defined __MINGW64__ && defined WIN32_LEAN_AND_MEAN
+#include <shellapi.h> /* ExtractIconEx, DragQueryFile, DragQueryFileW, DragFinish, DragAcceptFiles */
+#endif
 
 #include "gdk.h"
 #include "gdkwindowimpl.h"

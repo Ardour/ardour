@@ -26,6 +26,8 @@
 
 #else
 
+#include <winioctl.h> /* FILE_DEVICE_KEYBOARD, METHOD_OUT_DIRECT, FILE_ANY_ACCESS */
+
 /* This part of the header mimics hidclass.h,
     but only what is used by HIDAPI */
 

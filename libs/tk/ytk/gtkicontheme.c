@@ -38,6 +38,10 @@
 #include "ydk/gdkwin32.h"
 #endif /* G_OS_WIN32 */
 
+#if defined __MINGW64__ && defined WIN32_LEAN_AND_MEAN
+#include <shellapi.h> /* ExtractIconExW */
+#endif
+
 #include "gtkicontheme.h"
 #include "gtkiconfactory.h"
 #include "gtkiconcache.h"

@@ -24,10 +24,6 @@
 #ifdef HAVE_USB
 #include "pbd/pthread_utils.h"
 
-#ifdef COMPILER_MSVC
-#define _WINSOCKAPI_
-#endif
-
 #include <libusb.h>
 /* ControlProtocolManager is a singleton, so we can use static
  * here. This has the advantage that libusb.h does not need

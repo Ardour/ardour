@@ -47,10 +47,6 @@
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
-
-#ifndef _WINSOCKAPI_
-#define _WINSOCKAPI_
-#endif
 #endif
 
 #include "temporal/bbt_time.h"

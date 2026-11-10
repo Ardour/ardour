@@ -200,7 +200,7 @@ typedef enum customTagSTGTY {
 
 	STGTY_INVALID = 0,
 
-#ifndef _WIN32
+#if !defined _WIN32 || defined WIN32_LEAN_AND_MEAN
 	/**
 	 * The node is a storage object, that is a "directory" node.
 	 *

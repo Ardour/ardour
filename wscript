@@ -1226,11 +1226,24 @@ int main () { int x = SFC_RF64_AUTO_DOWNGRADE; return 0; }
         conf.env.append_value('CXXFLAGS', "-DHAVE_RF64_RIFF")
         conf.env.append_value('CFLAGS', "-DHAVE_RF64_RIFF")
 
+    if Options.options.dist_target in ('msvc', 'mingw'):
+        conf.env.append_value('CFLAGS', '-DPLATFORM_WINDOWS')
+        conf.env.append_value('CXXFLAGS', '-DPLATFORM_WINDOWS')
+        conf.env.append_value('CFLAGS', '-DWIN32_LEAN_AND_MEAN')
+        conf.env.append_value('CXXFLAGS', '-DWIN32_LEAN_AND_MEAN')
+        conf.define ('WINDOWS', 1)
+        conf.env.append_value('LIB', 'ws2_32')
+        conf.env.append_value('LIB', 'winmm')
+        # TODO this should only be necessary for a debug build
+        conf.env.append_value('LIB', 'dbghelp')
+        # work around GdkDrawable BitBlt performance issue on windows
+        # see http://gareus.org/wiki/ardour_windows_gdk_and_cairo
+        conf.env.append_value('CFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
+        conf.env.append_value('CXXFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
+
     if Options.options.dist_target == 'mingw':
         Options.options.no_fpu_optimization = False
-        conf.env.append_value('CFLAGS', '-DPLATFORM_WINDOWS')
         conf.env.append_value('CFLAGS', '-DCOMPILER_MINGW')
-        conf.env.append_value('CXXFLAGS', '-DPLATFORM_WINDOWS')
         conf.env.append_value('CXXFLAGS', '-DCOMPILER_MINGW')
         if conf.options.cxx17:
             conf.env.append_value('CFLAGS', '-D_USE_MATH_DEFINES')
@@ -1240,21 +1253,12 @@ int main () { int x = SFC_RF64_AUTO_DOWNGRADE; return 0; }
         conf.env.append_value('LIB', 'pthread')
         # needed for at least libsmf
         conf.check_cc(function_name='htonl', header_name='winsock2.h', lib='ws2_32')
-        conf.env.append_value('LIB', 'ws2_32')
-        conf.env.append_value('LIB', 'winmm')
         if Options.options.program_name.lower().startswith('mixbus'):
             conf.env.append_value('LIB', 'ole32')
             conf.env.append_value('LIB', 'uuid')
         # needed for mingw64 packages, not harmful on normal mingw build
         conf.env.append_value('LIB', 'intl')
-        # TODO this should only be necessary for a debug build
-        conf.env.append_value('LIB', 'dbghelp')
 
-        # work around GdkDrawable BitBlt performance issue on windows
-        # see http://gareus.org/wiki/ardour_windows_gdk_and_cairo
-        conf.env.append_value('CFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
-        conf.env.append_value('CXXFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
-        conf.define ('WINDOWS', 1)
 
         have_ptw_semaphore = conf.check_cc(fragment = '''
 #include <pthread.h>
@@ -1283,29 +1287,18 @@ int main () { return 0; }
             conf.env.append_value('CXXFLAGS', '-DMINGW_NATIVE_TLS')
 
     if Options.options.dist_target == 'msvc':
-        conf.env.append_value('CFLAGS', '-DPLATFORM_WINDOWS')
         conf.env.append_value('CFLAGS', '-DCOMPILER_MSVC')
-        conf.env.append_value('CXXFLAGS', '-DPLATFORM_WINDOWS')
         conf.env.append_value('CXXFLAGS', '-DCOMPILER_MSVC')
         conf.env.append_value('CFLAGS', '-D_USE_MATH_DEFINES')
         conf.env.append_value('CXXFLAGS', '-D_USE_MATH_DEFINES')
-        # work around GdkDrawable BitBlt performance issue on windows
-        # see http://gareus.org/wiki/ardour_windows_gdk_and_cairo
-        conf.env.append_value('CFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
-        conf.env.append_value('CXXFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
         if conf.env['DEBUG']:
             conf.env.append_value('LIB', 'pthreadVC3d')
         else:
             conf.env.append_value('LIB', 'pthreadVC3')
-        conf.env.append_value('LIB', 'Ws2_32')
         conf.env.append_value('LIB', 'Advapi32')
         conf.env.append_value('LIB', 'Shell32')
-        conf.env.append_value('LIB', 'Winmm')
-        conf.env.append_value('LIB', 'Dbghelp')
         conf.env.append_value('LIB', 'User32')
         conf.env.append_value('LIB', 'Kernel32')
-        # MORE STUFF PROBABLY NEEDED HERE
-        conf.define ('WINDOWS', 1)
 
     have_int128_support = conf.check_cc(fragment = '''
 int main () { __int128 x = 0; return 0; }

@@ -33,6 +33,7 @@
 #include <winsock2.h>
 #else
 #include <windows.h>
+#include <winsock2.h>
 #endif
 #endif // PLATFORM_WINDOWS
 

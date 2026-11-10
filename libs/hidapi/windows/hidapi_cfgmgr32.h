@@ -35,6 +35,7 @@
 #include <initguid.h>
 #include <devpropdef.h>
 #include <propkeydef.h>
+#include <wtypes.h> /* PROPERTYKEY, for lines 70-72 */
 
 typedef DWORD RETURN_TYPE;
 typedef RETURN_TYPE CONFIGRET;

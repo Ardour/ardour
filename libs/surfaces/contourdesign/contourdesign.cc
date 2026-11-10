@@ -19,10 +19,6 @@
 
 #include <iostream>
 
-#ifdef COMPILER_MSVC
-#define _WINSOCKAPI_
-#endif
-
 #include <libusb.h>
 
 #include <glibmm.h>

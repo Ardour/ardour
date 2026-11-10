@@ -85,6 +85,9 @@
 
 #include <shlobj.h>
 #include <shlguid.h>
+#if defined __MINGW64__ && defined WIN32_LEAN_AND_MEAN
+#include <shellapi.h> /* DragQueryPoint, DragQueryFile, DragQueryFileW, DragFinish, DragAcceptFiles */
+#endif
 
 #include <ydk/gdk.h>
 #include <glib/gstdio.h>

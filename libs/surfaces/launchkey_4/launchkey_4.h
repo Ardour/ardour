@@ -26,10 +26,6 @@
 #include <set>
 #include <vector>
 
-#ifdef COMPILER_MSVC
-#define _WINSOCKAPI_
-#endif
-
 #include <libusb.h>
 
 #define ABSTRACT_UI_EXPORTS
