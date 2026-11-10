@@ -558,7 +558,7 @@ Session::process_with_events (pframes_t nframes)
 
 		samplepos_t stop_limit = compute_stop_limit ();
 
-		if (maybe_stop (stop_limit)) {
+		if (maybe_stop (stop_limit, nframes)) {
 			if (!_exporting && !timecode_transmission_suspended()) {
 				send_midi_time_code_for_cycle (_transport_sample, end_sample, nframes);
 			}
@@ -616,7 +616,7 @@ Session::process_with_events (pframes_t nframes)
 					DEBUG_TRACE (DEBUG::Transport, "no transport motion\n");
 				}
 
-				maybe_stop (stop_limit);
+				maybe_stop (stop_limit, nframes);
 			}
 
 			if (nframes > 0) {
@@ -705,7 +705,7 @@ Session::process_without_events (pframes_t nframes)
 
 	samplepos_t const stop_limit = compute_stop_limit ();
 
-	if (maybe_stop (stop_limit)) {
+	if (maybe_stop (stop_limit, nframes)) {
 		no_roll (nframes);
 		return;
 	}
@@ -738,7 +738,7 @@ Session::process_without_events (pframes_t nframes)
 		DEBUG_TRACE (DEBUG::Transport, "no transport motion\n");
 	}
 
-	maybe_stop (stop_limit);
+	maybe_stop (stop_limit, nframes);
 
 	if (session_needs_butler) {
 		DEBUG_TRACE (DEBUG::Butler, "p-without-events: session needs butler, call it\n");

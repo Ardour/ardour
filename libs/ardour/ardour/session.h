@@ -1642,7 +1642,7 @@ private:
 	    -1 if there is a pending declick fade-out,
 	    0 if there is no pending declick.
 	*/
-	bool maybe_stop (samplepos_t limit);
+	bool maybe_stop (samplepos_t limit, pframes_t n_samples);
 	bool maybe_sync_start (pframes_t &);
 
 	PBD::UUID               _uuid;
