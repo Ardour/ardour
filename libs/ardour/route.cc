@@ -2686,11 +2686,6 @@ Route::state (bool save_template) const
 		node->add_child_nocopy (_pannable->get_state ());
 	}
 
-	MusicalKey const * key = this->key();
-	if (key) {
-		node->add_child_nocopy (key->get_state());
-	}
-
 	{
 		PBD::RWLock::ReaderLock lm (_processor_lock);
 		for (auto const & p : _processors) {
@@ -2736,6 +2731,7 @@ Route::state (bool save_template) const
 	}
 
 	node->add_child_copy (Slavable::get_state());
+	node->add_child_nocopy (ScaleProvider::get_state());
 
 	return *node;
 }
@@ -2827,12 +2823,11 @@ Route::set_state (const XMLNode& node, int version)
 			}
 		} else if (child->name() == Slavable::xml_node_name) {
 			Slavable::set_state (*child, version);
-		} else if (child->name() == MusicalMode::xml_node_name) {
+		} else if (child->name() == ScaleProvider::xml_node_name) {
 			try {
-				MusicalKey* key = new MusicalKey (*child);
-				set_key (key);
+				ScaleProvider::set_state (*child, version);
 			} catch (...) {
-				std::cerr << "failed to create musical key from XML\n";
+				std::cerr << name() << ": failed to set scale provider state from XML\n";
 			}
 		}
 	}

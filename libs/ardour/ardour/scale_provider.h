@@ -60,6 +60,8 @@ class LIBARDOUR_API ScaleProvider : public virtual PBD::Stateful {
 	ScaleProvider const * scale_provider_origin() const;
 	bool own_scale() const { return scale_provider_origin() == this; }
 
+	static std::string xml_node_name;
+
   private:
 	ScaleProvider* _parent;
 	MusicalKey const * _key;

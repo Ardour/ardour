@@ -31,6 +31,8 @@ namespace ARDOUR {
 
 using namespace ARDOUR;
 
+std::string ScaleProvider::xml_node_name = X_("ScaleProvider");
+
 void
 ScaleProvider::make_property_quarks ()
 {
@@ -98,10 +100,10 @@ ScaleProvider::scale_provider_origin () const
 XMLNode&
 ScaleProvider::get_state () const
 {
-	XMLNode* node = new XMLNode (X_("ScaleProvider"));
+	XMLNode* node = new XMLNode (xml_node_name);
 
 	if (_key) {
-		node->set_property (X_("Key"), _key->name());
+		node->set_property (X_("key"), _key->name());
 	}
 
 	node->set_property (X_("key-enforcement"), _key_enforcement_policy);
@@ -114,11 +116,12 @@ ScaleProvider::set_state (const XMLNode& node, int /*version*/)
 {
 	XMLProperty const * keyname;
 
-	if ((keyname = node.property (X_("Key"))) != 0) {
+	if ((keyname = node.property (X_("key"))) != 0) {
 		_key = new MusicalKey (keyname->value());
 	}
 
-	node.get_property (X_("Key-enforcement"), _key_enforcement_policy);
+	node.get_property (X_("key-enforcement"), _key_enforcement_policy);
+	std::cerr << "SProv @ " << this << " kep " << enum_2_string (_key_enforcement_policy);
 
 	return 0;
 }
