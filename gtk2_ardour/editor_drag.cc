@@ -3534,14 +3534,7 @@ BBTMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	/* push the current state of our writable map copy */
 
-	BBT_Time bbt (_point->bbt ());
-	string   name (_point->name ());
-
-	map->remove_bartime (*_point, false);
-
-	/* bartime must be set using audio time */
-
-	map->set_bartime (bbt, timepos_t (_marker->position ().samples ()), name);
+	map->move_bartime (*_point, timepos_t (_marker->position ().samples ()));
 
 	if (map->validate ()) {
 		_editor.commit_tempo_map_edit (map, true);
