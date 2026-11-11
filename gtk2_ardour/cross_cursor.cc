@@ -26,15 +26,23 @@ CrossCursor::CrossCursor (Item* parent)
 	: _line_width (1)
 	, _width (2)
 	, _height (2)
-	, _vline1 (parent)
-	, _vline2 (parent)
-	, _hline1 (parent)
-	, _hline2 (parent)
+	, _vline1 (new Line (parent))
+	, _vline2 (new Line (parent))
+	, _hline1 (new Line (parent))
+	, _hline2 (new Line (parent))
 {
-	_vline1.set_ignore_events (true);
-	_vline2.set_ignore_events (true);
-	_hline1.set_ignore_events (true);
-	_hline2.set_ignore_events (true);
+	_vline1->set_ignore_events (true);
+	_vline2->set_ignore_events (true);
+	_hline1->set_ignore_events (true);
+	_hline2->set_ignore_events (true);
+}
+
+CrossCursor::~CrossCursor ()
+{
+	delete _vline1;
+	delete _vline2;
+	delete _hline1;
+	delete _hline2;
 }
 
 void
@@ -43,28 +51,28 @@ CrossCursor::set_extents (double w, double h)
 	_width = w;
 	_height = h;
 
-	_vline1.set_y1 (_vline1.y0() + _height);
-	_vline2.set_y1 (_vline2.y0() + _height);
-	_hline1.set_x1 (_hline1.x0() + _width);
-	_hline2.set_x1 (_hline2.x0() + _width);
+	_vline1->set_y1 (_vline1->y0() + _height);
+	_vline2->set_y1 (_vline2->y0() + _height);
+	_hline1->set_x1 (_hline1->x0() + _width);
+	_hline2->set_x1 (_hline2->x0() + _width);
 }
 
 void
 CrossCursor::set_position (Duple const & pos)
 {
-	_vline1.set (Duple (pos.x, 0), Duple (pos.x, _height));
-	_vline2.set (Duple (pos.x + _line_width, 0), Duple (pos.x + _line_width, _height));
-	_hline1.set (Duple (0, pos.y), Duple (_width, pos.y));
-	_hline2.set (Duple (0, pos.y + _line_width), Duple (_width, pos.y + _line_width));
+	_vline1->set (Duple (pos.x, 0), Duple (pos.x, _height));
+	_vline2->set (Duple (pos.x + _line_width, 0), Duple (pos.x + _line_width, _height));
+	_hline1->set (Duple (0, pos.y), Duple (_width, pos.y));
+	_hline2->set (Duple (0, pos.y + _line_width), Duple (_width, pos.y + _line_width));
 }
 
 void
 CrossCursor::set_outline_color (Gtkmm2ext::Color col)
 {
-	_vline1.set_outline_color (col);
-	_vline2.set_outline_color (col);
-	_hline1.set_outline_color (col);
-	_hline2.set_outline_color (col);
+	_vline1->set_outline_color (col);
+	_vline2->set_outline_color (col);
+	_hline1->set_outline_color (col);
+	_hline2->set_outline_color (col);
 }
 
 void
@@ -76,17 +84,17 @@ CrossCursor::set_line_width (double w)
 void
 CrossCursor::show ()
 {
-	_vline1.show ();
-	_vline2.show ();
-	_hline1.show ();
-	_hline2.show ();
+	_vline1->show ();
+	_vline2->show ();
+	_hline1->show ();
+	_hline2->show ();
 }
 
 void
 CrossCursor::hide ()
 {
-	_vline1.hide ();
-	_vline2.hide ();
-	_hline1.hide ();
-	_hline2.hide ();
+	_vline1->hide ();
+	_vline2->hide ();
+	_hline1->hide ();
+	_hline2->hide ();
 }

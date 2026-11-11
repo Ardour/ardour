@@ -33,6 +33,7 @@ class CrossCursor
 {
   public:
 	CrossCursor (ArdourCanvas::Item*);
+	~CrossCursor ();
 
 	void set_extents (double w, double h);
 
@@ -47,8 +48,8 @@ class CrossCursor
 	double _line_width;
 	double _width;
 	double _height;
-	ArdourCanvas::Line _vline1;
-	ArdourCanvas::Line _vline2;
-	ArdourCanvas::Line _hline1;
-	ArdourCanvas::Line _hline2;
+	ArdourCanvas::Line* _vline1;
+	ArdourCanvas::Line* _vline2;
+	ArdourCanvas::Line* _hline1;
+	ArdourCanvas::Line* _hline2;
 };
