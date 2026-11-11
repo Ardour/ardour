@@ -962,36 +962,61 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 				/* 2. VST3: events between now and end. */
 				timepos_t start_time (start);
 				timepos_t now (start_time);
-				while (true) {
-					timepos_t end_time (end);
-					Evoral::ControlEvent next_event (end_time, 0.0f);
-					find_next_ac_event (*ci, now, end_time, next_event);
-					if (next_event.when.samples() + 1 >= end_time.samples()) {
-						break;
+				if (start <= end) {
+					while (true) {
+						timepos_t end_time (end);
+						Evoral::ControlEvent next_event (end_time, 0.0f);
+						find_next_ac_event (*ci, now, end_time, next_event);
+						if (next_event.when.samples() + 1 >= end_time.samples()) {
+							break;
+						}
+						now = next_event.when;
+						const float val = c.list()->rt_safe_eval (now, valid);
+						if (valid) {
+							for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+								(*i)->set_parameter (clist->parameter().id(), val, now.samples() - start);
+							}
+						}
 					}
-					now = next_event.when;
-					const float val = c.list()->rt_safe_eval (now, valid);
-					if (valid) {
-						for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
-							(*i)->set_parameter (clist->parameter().id(), val, now.samples() - start);
+					/* 3. VST3: set value at cycle-end */
+					if (end > start + 1) {
+						val = c.list()->rt_safe_eval (timepos_t (end - 1), valid);
+						if (valid) {
+							for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+								(*i)->set_parameter (clist->parameter().id(), val, end - 1 - start);
+							}
+						}
+					}
+				} else {
+					while (true) {
+						timepos_t end_time (end);
+						Evoral::ControlEvent next_event (end_time, 0.0f);
+						find_prev_ac_event (*ci, now, end_time, next_event);
+						if (next_event.when.samples() <= end_time.samples() + 1) {
+							break;
+						}
+						now = next_event.when;
+						const float val = c.list()->rt_safe_eval (now, valid);
+						if (valid) {
+							for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+								(*i)->set_parameter (clist->parameter().id(), val, start - now.samples());
+							}
+						}
+					}
+					/* 3. VST3: set value at cycle-end */
+					if (start > end + 1) {
+						val = c.list()->rt_safe_eval (timepos_t (end + 1), valid);
+						if (valid) {
+							for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+								(*i)->set_parameter (clist->parameter().id(), val, start - 1 - end);
+							}
 						}
 					}
 				}
-#endif
-#if 1
-				/* 3. VST3: set value at cycle-end */
-				if (end > start + 1) {
-					val = c.list()->rt_safe_eval (timepos_t (end - 1), valid);
-					if (valid) {
-						for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
-							(*i)->set_parameter (clist->parameter().id(), val, end - 1 - start);
-						}
-					}
-				}
-#endif
 			}
 		}
 	}
+#endif
 
 	if (_signal_analysis_collect_nsamples_max > 0) {
 		if (_signal_analysis_collect_nsamples < _signal_analysis_collect_nsamples_max) {
