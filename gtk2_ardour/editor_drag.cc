@@ -3513,7 +3513,7 @@ BBTMarkerDrag::motion (GdkEvent* event, bool first_move)
 void
 BBTMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 {
-	if (!movement_occurred || !map->validate ()) {
+	if (!movement_occurred) {
 		/* reset thread local tempo map to the original state.
 		 *
 		 * Note: DO NOT call _editor.abort_tempo_map_edit ();
@@ -3524,10 +3524,6 @@ BBTMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		 * does not need to be called.
 		 */
 		TempoMap::abort_update ();
-
-		if (movement_occurred) {
-			editing_context.abort_reversible_command ();
-		}
 
 		if (was_double_click ()) {
 			_editor.edit_bbt (*_marker);
@@ -3547,17 +3543,23 @@ BBTMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	map->set_bartime (bbt, timepos_t (_marker->position ().samples ()), name);
 
-	_editor.commit_tempo_map_edit (map, true);
-	XMLNode& after = map->get_state ();
+	if (map->validate ()) {
+		_editor.commit_tempo_map_edit (map, true);
+		XMLNode& after = map->get_state ();
 
-	editing_context.session ()->add_command (new Temporal::TempoCommand (_("move BBT point"), _before_state, &after));
-	editing_context.commit_reversible_command ();
+		editing_context.session ()->add_command (new Temporal::TempoCommand (_("move BBT point"), _before_state, &after));
+		editing_context.commit_reversible_command ();
+	} else {
+		_editor.abort_tempo_map_edit ();
+		editing_context.abort_reversible_command ();
+	}
 }
 
 void
 BBTMarkerDrag::aborted (bool moved)
 {
 	_editor.abort_tempo_map_edit ();
+	editing_context.abort_reversible_command ();
 	/* above call results in Editor::tempo_map_changed.
 	 * This recreates BBT markers via Editor::reset_bbt_marks.
 	 * This re-creates the marker, so we don't have to move
