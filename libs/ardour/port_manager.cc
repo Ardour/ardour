@@ -1503,18 +1503,30 @@ PortManager::port_is_control_only (std::string const& name)
 	/* This is a list of substrings that identify ports related
 	 * to physical MIDI devices that we do not want to expose as
 	 * normal physical ports.
+	 *
+	 * They should match `probe port` of each surface.
+	 *
+	 * Note that these are physical ports, not the corresponding
+	 * Ports that Ardour creates, which are reserved_io_names.
 	 */
 
 	static const char* const control_only_ports[] = {
-		X_("Ableton Push"),
-		X_("FaderPort "),
-		X_("FaderPort8 "),
-		X_("FaderPort16 "),
-		X_("FaderPort2 "),
+		X_("Ableton Push 2"),
+		X_("Launchpad Mini"),
+		X_("Launchpad X"),
+		X_("Launchkey Mini MK4"),
+		X_("Launchkey MK4"),
+		X_("Launchpad Pro MK3"),
+		X_("PreSonus FP16 Port 1"),
+		X_("PreSonus FP8 Port 1"),
+		X_("PreSonus FP2"),
+#if 1 // FIXME - These are unverified to be hardware ports
+		X_("FaderPort"),
 		X_("US-2400 "),
 		X_("Mackie "),
 		X_("MIDI Control "),
 		X_("Console1 "),
+#endif
 	};
 
 	for (size_t n = 0; n < sizeof (control_only_ports) / sizeof (control_only_ports[0]); ++n) {
@@ -1868,8 +1880,9 @@ PortManager::fill_midi_port_info_locked ()
 		}
 
 		MidiPortFlags flags (MidiPortFlags (0));
+		string pn = AudioEngine::instance()->get_hardware_port_name_by_name (*p);
 
-		if (port_is_control_only (*p)) {
+		if (port_is_control_only (pn.empty() ? *p : pn)) {
 			flags = MidiPortControl;
 		} else if (port_is_virtual_piano (*p)) {
 			flags = MidiPortFlags (MidiPortSelection | MidiPortMusic);
@@ -1900,7 +1913,8 @@ PortManager::fill_midi_port_info_locked ()
 
 		MidiPortFlags flags (MidiPortFlags (0));
 
-		if (port_is_control_only (*p)) {
+		string pn = AudioEngine::instance()->get_hardware_port_name_by_name (*p);
+		if (port_is_control_only (pn.empty () ? *p : pn)) {
 			flags = MidiPortControl;
 		}
 
