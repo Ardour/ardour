@@ -856,6 +856,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	/* these are a convenience method that just wrap some odd semantics */
 	LIBTEMPORAL_API bool move_tempo (TempoPoint const & point, timepos_t const & destination, bool push = false);
 	LIBTEMPORAL_API bool move_meter (MeterPoint const & point, timepos_t const & destination, bool push = false);
+	LIBTEMPORAL_API bool move_bartime (MusicTimePoint const & point, timepos_t const & destination);
 
 	LIBTEMPORAL_API int set_state (XMLNode const&, int version);
 

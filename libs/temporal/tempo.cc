@@ -2474,6 +2474,27 @@ TempoMap::move_tempo (TempoPoint const & tp, timepos_t const & when, bool push)
 	return moved;
 }
 
+bool
+TempoMap::move_bartime (MusicTimePoint const & mtp, timepos_t const & when)
+{
+	TEMPO_MAP_ASSERT (!_tempos.empty());
+	TEMPO_MAP_ASSERT (!_meters.empty());
+
+	superclock_t sc (mtp.sclock());
+	BBT_Time     bbt (mtp.bbt());
+	std::string  name (mtp.name());
+
+	remove_bartime (mtp);
+
+	set_bartime (bbt, when, name);
+
+	if (when.superclocks() > sc) {
+		reset_starting_at (sc);
+	}
+
+	return true;
+}
+
 MeterPoint &
 TempoMap::set_meter (Meter const & m, timepos_t const & time)
 {
