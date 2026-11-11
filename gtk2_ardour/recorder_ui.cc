@@ -605,8 +605,8 @@ RecorderUI::start_updating ()
 
 	/* MIDI */
 	for (PortManager::MIDIInputPorts::const_iterator i = mip.begin (); i != mip.end (); ++i) {
-		string pn = AudioEngine::instance()->get_pretty_name_by_name (i->first);
-		if (PortManager::port_is_control_only (pn)) {
+		string pn = AudioEngine::instance()->get_hardware_port_name_by_name (i->first);
+		if (PortManager::port_is_control_only (pn.empty () ? i->first : pn)) {
 			continue;
 		}
 		_input_ports[i->first] = std::shared_ptr<RecorderUI::InputPort> (new InputPort (i->first, DataType::MIDI, this, _vertical));
