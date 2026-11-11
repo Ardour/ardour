@@ -62,7 +62,6 @@ public:
 	int    get_note_type ();
 	bool   get_bbt_time (Temporal::BBT_Time&);
 	Temporal::Tempo::Type get_tempo_type ();
-	Temporal::TimeDomain get_lock_style ();
 
 	void on_show ();
 
@@ -75,7 +74,6 @@ private:
 	bool entry_key_release (GdkEventKey* );
 	void pulse_change ();
 	void tempo_type_change ();
-	void lock_style_change ();
 	bool tap_tempo_key_press (GdkEventKey*);
 	bool tap_tempo_button_press (GdkEventButton*);
 	bool tap_tempo_focus_out (GdkEventFocus* );
@@ -90,9 +88,6 @@ private:
 
 	typedef std::map<std::string, Temporal::Tempo::Type> TempoTypes;
 	TempoTypes tempo_types;
-
-	typedef std::map<std::string, Temporal::TimeDomain> LockStyles;
-	LockStyles lock_styles;
 
 	bool tapped;      // whether the tap-tempo button has been clicked
 	double sum_x, sum_xx, sum_xy, sum_y;
@@ -117,7 +112,6 @@ private:
 	Gtk::Label   _tap_source_label;
 	Gtk::Button  tap_tempo_button;
 	Gtk::ComboBoxText tempo_type;
-	Gtk::ComboBoxText lock_style;
 	Gtk::ComboBox _midi_port_combo;
 
 	class MidiPortCols : public Gtk::TreeModelColumnRecord
@@ -152,7 +146,6 @@ public:
 
 	double get_bpb ();
 	int    get_note_type ();
-	Temporal::TimeDomain get_lock_style ();
 	bool   get_bbt_time (Temporal::BBT_Time&);
 
 private:
@@ -161,20 +154,14 @@ private:
 	bool entry_key_press (GdkEventKey* );
 	bool entry_key_release (GdkEventKey* );
 	void note_type_change ();
-	void lock_style_change ();
 
 	typedef std::map<std::string,float> NoteTypes;
 	NoteTypes note_types;
 
-	typedef std::map<std::string, Temporal::TimeDomain> LockStyles;
-	LockStyles lock_styles;
-
 	Gtk::Entry   bpb_entry;
 	Gtk::ComboBoxText note_type;
-	Gtk::ComboBoxText lock_style;
 	std::vector<std::string> strings;
 	Gtk::Button  ok_button;
 	Gtk::Button  cancel_button;
 	Gtk::Entry   when_bar_entry;
 };
-
