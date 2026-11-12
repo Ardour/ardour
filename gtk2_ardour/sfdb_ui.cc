@@ -1831,19 +1831,18 @@ SoundFileOmega::check_link_status (const Session* s, const vector<string>& paths
 
 	for (vector<string>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
 
-		char tmpc[PATH_MAX+1];
-		snprintf (tmpc, sizeof(tmpc), "%s/%s", tmpdir.c_str(), Glib::path_get_basename (*i).c_str());
+		std::string dst(Glib::build_filename (tmpdir, Glib::path_get_basename (*i)));
 
 		/* can we link ? */
-		if (PBD::hard_link (/*existing file*/(*i).c_str(), tmpc)) {
-			::g_unlink (tmpc);
+		if (PBD::hard_link (/*existing file*/(*i), dst)) {
+			::g_unlink (dst.c_str());
 		} else {
-			PBD::remove_directory (tmpdir.c_str());
+			PBD::remove_directory (tmpdir);
 			return false;
 		}
 	}
 
-	PBD::remove_directory (tmpdir.c_str());
+	PBD::remove_directory (tmpdir);
 
 	return true;
 }
