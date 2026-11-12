@@ -51,6 +51,57 @@ using namespace Temporal;
 
 #include "pbd/i18n.h"
 
+namespace {
+
+class ReplaceRegionSourceCommand : public PBD::Command
+{
+public:
+	ReplaceRegionSourceCommand (std::shared_ptr<ARDOUR::Playlist> playlist,
+	                           std::shared_ptr<ARDOUR::Region> original,
+	                           std::shared_ptr<ARDOUR::Region> replacement,
+	                           timepos_t const& position)
+		: _playlist (playlist)
+		, _original (original)
+		, _replacement (replacement)
+		, _position (position)
+	{
+		set_name (_("replace source clip"));
+	}
+
+	void operator() () override
+	{
+		if (_playlist && _original && _replacement) {
+			_playlist->replace_region (_original, _replacement, _position);
+		}
+	}
+
+	void undo () override
+	{
+		if (_playlist && _original && _replacement) {
+			_playlist->replace_region (_replacement, _original, _position);
+		}
+	}
+
+	XMLNode& get_state () const override
+	{
+		XMLNode* node = new XMLNode (X_("ReplaceRegionSourceCommand"));
+		node->set_property (X_("name"), name());
+		node->set_property (X_("position"), _position.samples());
+		node->set_property (X_("playlist-id"), _playlist->id());
+		node->set_property (X_("original-id"), _original->id());
+		node->set_property (X_("replacement-id"), _replacement->id());
+		return *node;
+	}
+
+private:
+	std::shared_ptr<ARDOUR::Playlist> _playlist;
+	std::shared_ptr<ARDOUR::Region> _original;
+	std::shared_ptr<ARDOUR::Region> _replacement;
+	timepos_t _position;
+};
+
+}
+
 void Session::register_with_memento_command_factory(PBD::ID id, PBD::StatefulDestructible *ptr)
 {
     registry[id] = ptr;
@@ -186,4 +237,41 @@ Session::stateful_diff_command_factory (XMLNode* n)
 	      << endmsg;
 
 	return 0;
+}
+
+PBD::Command *
+Session::replace_region_source_command_factory (XMLNode* n)
+{
+	PBD::ID playlist_id;
+	PBD::ID original_id;
+	PBD::ID replacement_id;
+	int64_t position_val = 0;
+
+	if (!n->get_property (X_("playlist-id"), playlist_id) ||
+	    !n->get_property (X_("original-id"), original_id) ||
+	    !n->get_property (X_("replacement-id"), replacement_id) ||
+	    !n->get_property (X_("position"), position_val)) {
+		info << _("Could not reconstitute ReplaceRegionSourceCommand: missing serialized properties") << endmsg;
+		return 0;
+	}
+
+	std::shared_ptr<Playlist> playlist = _playlists->by_id (playlist_id);
+	std::shared_ptr<Region> original = RegionFactory::region_by_id (original_id);
+	std::shared_ptr<Region> replacement = RegionFactory::region_by_id (replacement_id);
+
+	if (!playlist || !original || !replacement) {
+		info << string_compose (_("Could not reconstitute ReplaceRegionSourceCommand. playlist=%1 original=%2 replacement=%3"),
+		                       playlist_id.to_s(), original_id.to_s(), replacement_id.to_s())
+		     << endmsg;
+		return 0;
+	}
+
+	ReplaceRegionSourceCommand* cmd = new ReplaceRegionSourceCommand (playlist, original, replacement, timepos_t (position_val));
+
+	std::string command_name;
+	if (n->get_property (X_("name"), command_name) && !command_name.empty()) {
+		cmd->set_name (command_name);
+	}
+
+	return cmd;
 }
