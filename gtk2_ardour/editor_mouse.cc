@@ -1252,6 +1252,10 @@ Editor::button_press_handler_2 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			return true;
 			break;
 
+		case VelocityItem:
+			_drags->set (new LollipopDrag (*this, item), event);
+			return true;
+			
 		default:
 			break;
 		}
