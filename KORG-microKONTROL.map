@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.0.0" name="Korg microKONTROL">
+
+<!-- Created in 2024 by Raphaël Bastide
+◻◻◻◻
+◻◻◻◻
+◻◻◻◻  <— microKONTROL pads
+◻◻◻◻
+ -->
+
+<!-- Go to start of session
+◻◻◻◻
+◻◻◻◻
+◻◻◻◻
+◼◻◻◻
+-->
+<Binding channel="1" note="38" function="transport-stop"/>
+<!-- Play
+◻◻◻◻
+◻◻◻◻
+◻◻◻◻
+◻◼◻◻
+ -->
+<Binding channel="1" note="37" function="transport-start"/>
+<!-- Stop 
+◻◻◻◻
+◻◻◻◻
+◻◻◻◻
+◻◻◼◻
+-->
+<Binding channel="1" note="37" function="transport-roll"/>
+<!-- Rec
+◻◻◻◻
+◻◻◻◻
+◻◻◻◻
+◻◻◻◼
+-->
+<Binding channel="1" note="36" function="toggle-rec-enable"/>
+
+</ArdourMIDIBindings>
+<!-- Loop
+◻◻◻◻
+◻◻◻◻
+◻◼◻◻
+◻◻◻◻
+-->
+<Binding channel="1" note="41" function="loop-toggle"/>
