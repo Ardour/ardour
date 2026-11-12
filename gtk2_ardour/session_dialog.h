@@ -176,6 +176,7 @@ private:
 	int redisplay_recent_sessions ();
 	void recent_session_row_selected ();
 	void recent_session_sort_changed ();
+	int name_sorter (Gtk::TreeModel::iterator a, Gtk::TreeModel::iterator b) const;
 	void recent_row_activated (const Gtk::TreePath& path, Gtk::TreeViewColumn* col);
 	bool recent_button_press (GdkEventButton*);
 	void recent_context_mennu (GdkEventButton*);
