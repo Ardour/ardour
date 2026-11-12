@@ -1236,11 +1236,6 @@ Editor::button_press_handler_2 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			return true;
 			break;
 
-		default:
-			break;
-		}
-
-		switch (item_type) {
 		case RegionViewNameHighlight:
 			_drags->set (new TrimDrag (*this, item, clicked_regionview, selection->regions.by_layer(), drag_time_domain (clicked_regionview->region())), event);
 			return true;
