@@ -2793,7 +2793,6 @@ fetch_net_wm_check_window (GdkScreen *screen)
   gulong bytes_after;
   guchar *data;
   Window *xwindow;
-  GTimeVal tv;
   gint error;
 
   screen_x11 = GDK_SCREEN_X11 (screen);
@@ -2801,12 +2800,12 @@ fetch_net_wm_check_window (GdkScreen *screen)
 
   g_return_if_fail (GDK_DISPLAY_X11 (display)->trusted_client);
   
-  g_get_current_time (&tv);
+	gint64 now = g_get_real_time() / G_USEC_PER_SEC;
 
-  if (ABS  (tv.tv_sec - screen_x11->last_wmspec_check_time) < 15)
+	if (ABS  (now - screen_x11->last_wmspec_check_time) < 15)
     return; /* we've checked recently */
 
-  screen_x11->last_wmspec_check_time = tv.tv_sec;
+  screen_x11->last_wmspec_check_time = now;
 
   data = NULL;
   XGetWindowProperty (screen_x11->xdisplay, screen_x11->xroot_window,

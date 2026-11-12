@@ -57,7 +57,7 @@ struct _GdkScreenX11
   GdkWindow *root_window;
 
   /* Window manager */
-  long last_wmspec_check_time;
+  gint64 last_wmspec_check_time;
   Window wmspec_check_window;
   char *window_manager_name;
   /* TRUE if wmspec_check_window has changed since last
