@@ -356,13 +356,12 @@ MackieControlProtocol::n_strips (bool with_locked_strips) const
 int
 MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 {
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("switch banking to start at %1 force ? %2 current = %3\n", initial, force, _current_initial_bank));
+	/* The semantics of "initial" are: the nth-Stripable of whatever list
+	   ::get_sorted_stripahles() returns for us, given the current view
+	   mode.
+	*/
 
-#ifndef MIXBUS
-	initial = std::max (1U, initial);
-#else
-	initial = std::max (0U, initial);
-#endif
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("switch banking to start at %1 force ? %2 current = %3\n", initial, force, _current_initial_bank));
 
 	if (initial == _current_initial_bank && !force) {
 		/* everything is as it should be */
@@ -371,63 +370,27 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 
 	Sorted sorted = get_sorted_stripables();
 
-	if (sorted.empty()) {
-		return 0;
-	}
-
-	uint32_t strip_cnt = n_strips (false); // do not include locked strips
-	bool exists = false;
-	Sorted::iterator first = sorted.end();
-
-	if (initial > _current_initial_bank) {
-
-		for (auto s = sorted.begin(); s != sorted.end(); ++s) {
-			/* the desired initial stripable may not be included in the
-			   results from ::get_sorted_stripables() (e.g. because it is
-			   hidden). So look for the first one after it, if necessary.
-			*/
-			if ((*s)->presentation_info().order() >= initial) {
-				first = s;
-				initial = (*s)->presentation_info().order();
-				exists = true;
-				break;
-			}
-		}
-	} else {
-		auto s = sorted.end();
-		--s;
-
-		while (true) {
-			/* the desired initial stripable may not be included in the
-			   results from ::get_sorted_stripables() (e.g. because it is
-			   hidden). So look for the first one before it, if necessary.
-			*/
-			if ((*s)->presentation_info().order() <= initial) {
-				first = s;
-				initial = (*s)->presentation_info().order();
-				exists = true;
-				break;
-			}
-			if (s == sorted.begin()) {
-				break;
-			}
-
-			--s;
-		}
-	}
-
-	if (!exists) {
-		DEBUG_TRACE (DEBUG::MackieControl, "initial stripable does not exist!\n");
+	if (initial >=  sorted.size()) {
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("cannot bank to %1 since we only have %2\n", initial, sorted.size()));
 		return -1;
 	}
 
-	if (sorted.size() <= strip_cnt && _current_initial_bank == 0 && !force) {
+	uint32_t strip_cnt = n_strips (false); // do not include locked strips
+
+	if ((sorted.size() <= strip_cnt) && (_current_initial_bank == 0) && !force) {
 		/* no banking - not enough stripables to fill all strips and we're
 		 * not at the first one.
 		 */
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("less routes (%1) than strips (%2) and we're at the end already (%3)\n",
 		                                                   sorted.size(), strip_cnt, _current_initial_bank));
 		return -1;
+	}
+
+	Sorted::iterator first = sorted.begin();
+	uint32_t n = initial;
+	while (n) {
+		first++;
+		--n;
 	}
 
 	_current_initial_bank = initial;
