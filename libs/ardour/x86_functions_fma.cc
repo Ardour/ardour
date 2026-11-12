@@ -66,7 +66,10 @@ x86_fma_mix_buffers_with_gain(
 		__m256 g0 = _mm256_set1_ps(gain);
 
 		while (nframes >= 16) {
-#if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
+#if defined(COMPILER_MSVC)
+			_mm_prefetch(((char *)dst + (16 * sizeof(float))),  _MM_HINT_NTA);
+			_mm_prefetch(((char *)src + (16 * sizeof(float))),  _MM_HINT_NTA);
+#elif defined(COMPILER_MINGW)
 			_mm_prefetch(((char *)dst + (16 * sizeof(float))), _mm_hint(0));
 			_mm_prefetch(((char *)src + (16 * sizeof(float))), _mm_hint(0));
 #else

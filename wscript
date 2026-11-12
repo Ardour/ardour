@@ -121,7 +121,10 @@ compiler_flags_dictionaries= {
         'strict' : '',
         'c99': '/TP',
         'attasm': '',
-        'avx': '',
+        'avx': '/arch:AVX2',
+        'avx512f': '/arch:AVX512',
+        # this is implied by AVX2 in MSVC
+        'fma': '/arch:AVX2',
         'neon': '',
         'pic': '',
         'c-anonymous-union': '',
@@ -550,7 +553,7 @@ int main() { return 0; }''',
             if re.search ('x86_64-w64', str(conf.env['CC'])) is not None:
                 conf.define ('FPU_AVX_FMA_SUPPORT', 1)
                 conf.define ('FPU_AVX512F_SUPPORT', 1)
-        elif conf.env['build_target'] == 'i386' or conf.env['build_target'] == 'i686' or conf.env['build_target'] == 'x86_64':
+        elif conf.env['build_target'] == 'i386' or conf.env['build_target'] == 'i686' or conf.env['build_target'] == 'x86_64' or conf.env['build_target'] == 'msvc':
             conf.check_cxx(fragment = "#include <immintrin.h>\nint main(void) { __m512 a; _mm512_abs_ps(a); _mm512_fmadd_ps(a, a, a); (void) _mm512_reduce_min_ps(a); (void)_mm512_reduce_max_ps(a); return 0; }\n",
                            features  = ['cxx'],
                            cxxflags  = [ conf.env['compiler_flags_dict']['avx512f'], conf.env['compiler_flags_dict']['fma'], conf.env['compiler_flags_dict']['avx'] ],
@@ -606,7 +609,6 @@ int main() { return 0; }''',
         # the compile-time presence of the macro _LP64 is used to
         # distinguish 32 and 64 bit assembler
         #
-
         if not (opt.arm64 or conf.env['build_target'] == 'armhf' and conf.env['build_target'] == 'aarch64'):
             compiler_flags.append ("-DARCH_X86")
 
@@ -650,6 +652,12 @@ int main() { return 0; }''',
                 compiler_flags.append(flags_dict['xsaveintrin'])
                 compiler_flags.append('-fno-inline-functions')
 
+        if (conf.env['build_target'] == 'msvc'):
+            if (re.search ("(x86_64|AMD64)", cpu) is not None):
+                # on Windows sse is supported by 64 bit platforms only
+                build_host_supports_sse = True
+
+
     # end of processor-specific section
 
     # optimization section
@@ -657,7 +665,7 @@ int main() { return 0; }''',
         if sys.platform == 'darwin':
             compiler_flags.append("-DBUILD_VECLIB_OPTIMIZATIONS")
             conf.env.append_value('LINKFLAGS_OSX', ['-framework', 'Accelerate'])
-        elif conf.env['build_target'] == 'i686' or conf.env['build_target'] == 'x86_64':
+        elif conf.env['build_target'] == 'i686' or conf.env['build_target'] == 'x86_64' or conf.env['build_target'] == 'msvc':
             compiler_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
         elif conf.env['build_target'] == 'mingw':
             # usability of the 64 bit windows assembler depends on the compiler target,

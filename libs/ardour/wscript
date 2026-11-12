@@ -293,7 +293,7 @@ def options(opt):
 
 def configure(conf):
     if conf.env['build_target'] == 'msvc':
-        conf.find_program('ml64', var='AS')
+        conf.find_program('clang', var='AS')
 
     conf.load('gas')
     # we don't use hard-coded micro versions with ardour, so hard code it to zero
@@ -521,6 +521,12 @@ def build(bld):
                 avx_sources = [ 'sse_functions_avx.cc' ]
                 fma_sources = [ 'x86_functions_fma.cc' ]
                 avx512f_sources = [ 'x86_functions_avx512f.cc' ]
+        elif bld.env['build_target'] == 'msvc':
+            obj.source += [ 'sse_functions_xmm.cc' ]
+            obj.source += [ 'sse_functions_64bit_win.s',  'sse_avx_functions_64bit_win.s' ]
+            avx_sources = [ 'sse_functions_avx.cc' ]
+            fma_sources = [ 'x86_functions_fma.cc' ]
+            avx512f_sources = [ 'x86_functions_avx512f.cc' ]
         elif bld.env['build_target'] == 'aarch64':
             obj.source += ['aarch64_neon_functions.cc']
             obj.defines += [ 'ARM_NEON_SUPPORT' ]

@@ -46,7 +46,9 @@ x86_sse_avx_find_peaks(const float* buf, uint32_t nframes, float *min, float *ma
         // use 64 byte prefetch for quadruple quads:
 		// load each 64 bytes into cash before processing
         while (nframes >= 16) {
-#if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
+#if defined(COMPILER_MSVC)
+				_mm_prefetch(((char*)buf+64), _MM_HINT_NTA );
+#elif defined(COMPILER_MINGW)
 				_mm_prefetch(((char*)buf+64), _mm_hint(0) );
 #else
                 __builtin_prefetch(buf+64,0,0);
@@ -98,7 +100,11 @@ x86_sse_avx_find_peaks(const float* buf, uint32_t nframes, float *min, float *ma
 	work =        _mm256_permute2f128_ps( current_min, current_min, 1);
 	current_min = _mm256_min_ps (work, current_min);
 
+#if defined(COMPILER_MSVC)
+	*min = _mm256_cvtss_f32(current_min);
+#else
 	*min = current_min[0];
+#endif
 
 	work = current_max;
 	work =        _mm256_shuffle_ps(current_max, current_max, _MM_SHUFFLE(2, 3, 0, 1));
@@ -108,7 +114,11 @@ x86_sse_avx_find_peaks(const float* buf, uint32_t nframes, float *min, float *ma
 	work =        _mm256_permute2f128_ps( current_max, current_max, 1);
 	current_max = _mm256_max_ps (work, current_max);
 
+#if defined(COMPILER_MSVC)
+	*max = _mm256_cvtss_f32(current_max);
+#else
 	*max = current_max[0];
+#endif
 
 	// zero upper 128 bit of 256 bit ymm register to avoid penalties using non-AVX instructions
 	_mm256_zeroupper ();
