@@ -395,7 +395,17 @@ hard_link (const std::string& existing_file, const std::string& new_path)
 	return false;
 # else
 	/* see also ntfs_link -- msvc only pbd extension */
-	return CreateHardLinkA (new_path.c_str(), existing_file.c_str(), NULL);
+	bool result = false;
+	wchar_t* w_existing_file = (wchar_t*)g_utf8_to_utf16(existing_file.c_str(), -1, NULL, NULL, NULL);
+	wchar_t* w_new_path = (wchar_t*)g_utf8_to_utf16(new_path.c_str(), -1, NULL, NULL, NULL);
+	if (w_existing_file != NULL && w_new_path != NULL) {
+		result = CreateHardLinkW(w_new_path, w_existing_file, NULL);
+	}
+
+	g_free (w_existing_file);
+	g_free (w_new_path);
+
+	return result;
 # endif
 #else
 	return 0 == link (existing_file.c_str(), new_path.c_str());
