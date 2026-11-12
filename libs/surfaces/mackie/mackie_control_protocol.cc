@@ -1892,6 +1892,7 @@ MackieControlProtocol::set_view_mode (ViewMode m)
 void
 MackieControlProtocol::display_view_mode ()
 {
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("display view mode for %1\n", view_mode()));
 	{
 		PBD::Mutex::Lock lm (surfaces_lock);
 
