@@ -164,7 +164,8 @@ bool PixbufAnimationIter::on_currently_loading_frame() const
 
 bool PixbufAnimationIter::advance(const Glib::TimeVal& current_time)
 {
-  return gdk_pixbuf_animation_iter_advance(gobj(), static_cast<const GTimeVal*>(&current_time));
+  gint64 t = ((gint64)current_time.tv_sec * G_USEC_PER_SEC) + current_time.tv_usec;
+  return gdk_pixbuf_animation_iter_advance(gobj(), &t);
 }
 
 

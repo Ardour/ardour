@@ -95,13 +95,13 @@ gboolean            gdk_pixbuf_animation_is_static_image  (GdkPixbufAnimation *a
 GdkPixbuf          *gdk_pixbuf_animation_get_static_image (GdkPixbufAnimation *animation);
 
 GdkPixbufAnimationIter *gdk_pixbuf_animation_get_iter                        (GdkPixbufAnimation     *animation,
-                                                                              const GTimeVal         *start_time);
+                                                                              const gint64           *start_time);
 GType                   gdk_pixbuf_animation_iter_get_type                   (void) G_GNUC_CONST;
 int                     gdk_pixbuf_animation_iter_get_delay_time             (GdkPixbufAnimationIter *iter);
 GdkPixbuf              *gdk_pixbuf_animation_iter_get_pixbuf                 (GdkPixbufAnimationIter *iter);
 gboolean                gdk_pixbuf_animation_iter_on_currently_loading_frame (GdkPixbufAnimationIter *iter);
 gboolean                gdk_pixbuf_animation_iter_advance                    (GdkPixbufAnimationIter *iter,
-                                                                              const GTimeVal         *current_time);
+                                                                              const gint64           *current_time);
 
 
 #ifdef GDK_PIXBUF_ENABLE_BACKEND
@@ -146,7 +146,7 @@ struct _GdkPixbufAnimationClass {
                                              int                 *height);
         
         GdkPixbufAnimationIter* (*get_iter) (GdkPixbufAnimation *anim,
-                                             const GTimeVal     *start_time);
+                                             const gint64       *start_time);
 
 };
 
@@ -190,7 +190,7 @@ struct _GdkPixbufAnimationIterClass {
         gboolean   (*on_currently_loading_frame) (GdkPixbufAnimationIter *iter);
 
         gboolean   (*advance)          (GdkPixbufAnimationIter *iter,
-                                        const GTimeVal         *current_time);
+                                        const gint64           *current_time);
 };
       
 

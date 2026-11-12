@@ -174,7 +174,7 @@ get_size (GdkPixbufAnimation *anim,
 
 static GdkPixbufAnimationIter *
 get_iter (GdkPixbufAnimation *anim,
-          const GTimeVal     *start_time)
+          const gint64       *start_time)
 {
 	GdkPixbufScaledAnim *scaled = (GdkPixbufScaledAnim *)anim;
 	GdkPixbufScaledAnimIter *iter;
@@ -244,7 +244,7 @@ on_currently_loading_frame (GdkPixbufAnimationIter *iter)
 
 static gboolean
 advance (GdkPixbufAnimationIter *iter,
-	 const GTimeVal         *current_time)
+	 const gint64           *current_time)
 {
 	GdkPixbufScaledAnimIter *scaled = (GdkPixbufScaledAnimIter *)iter;
 

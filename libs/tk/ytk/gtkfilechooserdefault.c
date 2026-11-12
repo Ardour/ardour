@@ -6824,16 +6824,15 @@ file_system_model_set (GtkFileSystemModel *model,
     case MODEL_COL_MTIME:
     case MODEL_COL_MTIME_TEXT:
       {
-        GTimeVal tv;
         if (info == NULL)
           break;
-        g_file_info_get_modification_time (info, &tv);
+        guint64 mtime_sec = g_file_info_get_attribute_uint64(info, G_FILE_ATTRIBUTE_TIME_MODIFIED);
         if (column == MODEL_COL_MTIME)
-          g_value_set_long (value, tv.tv_sec);
-        else if (tv.tv_sec == 0)
+          g_value_set_long (value, (long) mtime_sec);
+        else if (mtime_sec == 0)
           g_value_set_static_string (value, _("Unknown"));
         else
-          g_value_take_string (value, my_g_format_time_for_display (tv.tv_sec));
+          g_value_take_string (value, my_g_format_time_for_display ((glong) mtime_sec));
         break;
       }
     case MODEL_COL_ELLIPSIZE:

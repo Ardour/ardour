@@ -80,8 +80,8 @@ struct _GdkPixbufSimpleAnimIter
         
         GdkPixbufSimpleAnim *simple_anim;
         
-        GTimeVal start_time;
-        GTimeVal current_time;
+        gint64 start_time;
+        gint64 current_time;
         
         gint position;
         
@@ -105,7 +105,7 @@ static void       get_size         (GdkPixbufAnimation *anim,
                                     gint               *width, 
                                     gint               *height);
 static GdkPixbufAnimationIter *get_iter (GdkPixbufAnimation *anim,
-                                         const GTimeVal     *start_time);
+                                         const gint64       *start_time);
 
 
 static void gdk_pixbuf_simple_anim_set_property (GObject        *object,
@@ -239,7 +239,7 @@ iter_restart (GdkPixbufSimpleAnimIter *iter)
 
 static GdkPixbufAnimationIter *
 get_iter (GdkPixbufAnimation *anim,
-          const GTimeVal    *start_time)
+          const gint64     *start_time)
 {
         GdkPixbufSimpleAnimIter *iter;
         
@@ -263,7 +263,7 @@ static gint       get_delay_time             (GdkPixbufAnimationIter *iter);
 static GdkPixbuf *get_pixbuf                 (GdkPixbufAnimationIter *iter);
 static gboolean   on_currently_loading_frame (GdkPixbufAnimationIter *iter);
 static gboolean   advance                    (GdkPixbufAnimationIter *iter,
-                                              const GTimeVal         *current_time);
+                                              const gint64           *current_time);
 
 G_DEFINE_TYPE (GdkPixbufSimpleAnimIter, gdk_pixbuf_simple_anim_iter, GDK_TYPE_PIXBUF_ANIMATION_ITER)
 
@@ -304,7 +304,7 @@ gdk_pixbuf_simple_anim_iter_finalize (GObject *object)
 
 static gboolean
 advance (GdkPixbufAnimationIter *anim_iter,
-         const GTimeVal         *current_time)
+         const gint64           *current_time)
 {
         GdkPixbufSimpleAnimIter *iter;
         gint elapsed;
@@ -317,8 +317,7 @@ advance (GdkPixbufAnimationIter *anim_iter,
         iter->current_time = *current_time;
         
         /* We use milliseconds for all times */
-        elapsed = (((iter->current_time.tv_sec - iter->start_time.tv_sec) * G_USEC_PER_SEC +
-                    iter->current_time.tv_usec - iter->start_time.tv_usec)) / 1000;
+        elapsed = (iter->current_time - iter->start_time) / 1000;
         
         if (elapsed < 0) {
                 /* Try to compensate; probably the system clock

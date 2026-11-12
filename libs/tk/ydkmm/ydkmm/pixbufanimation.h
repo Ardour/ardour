@@ -121,7 +121,7 @@ public:
   
   Glib::RefPtr<Pixbuf> get_static_image();
   
-  Glib::RefPtr<PixbufAnimationIter> get_iter(const GTimeVal* start_time);
+  Glib::RefPtr<PixbufAnimationIter> get_iter(const gint64* start_time);
 
 
 public:
