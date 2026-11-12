@@ -22,29 +22,21 @@
 
 #include "pixops.h"
 
-static GTimeVal start_time;
+static gint64 start_time;
 
 static void 
 start_timing (void)
 {
-  g_get_current_time (&start_time);
+	start_time = g_get_real_time ();
 }
 
 static double
 stop_timing (const char *test, int iterations, int bytes)
 {
-  GTimeVal stop_time;
   double msecs;
+  gint64 stop_time = g_get_real_time ();
   
-  g_get_current_time (&stop_time);
-  if (stop_time.tv_usec < start_time.tv_usec)
-    {
-      stop_time.tv_usec += 1000000;
-      stop_time.tv_sec -= 1;
-    }
-
-  msecs = (stop_time.tv_sec - start_time.tv_sec) * 1000. +
-          (stop_time.tv_usec - start_time.tv_usec) / 1000.;
+  msecs = (stop_time - start_time) / 1000.;
 
   printf("%s%d\t%.1f\t\t%.2f\t\t%.2f\n",
 	 test, iterations, msecs, msecs / iterations, ((double)bytes * iterations) / (1000*msecs));
