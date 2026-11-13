@@ -46,6 +46,8 @@
     <Color name="widget:green darker" value="3d4044ff"/>  <!--gtk_midi_track,  midi automation track fill-->
     <Color name="widget:orange" value="af2f36ff"/>  <!--gtk_mute,  mute button: fill active-->
     <Color name="widget:ruddy" value="cacacaff"/>  <!--processor prefader,  gtk_track_header_selected-->
+    <Color name="comp:layer" value="2e9e5bff"/>  <!--comp layer-->
+    <Color name="comp:source" value="f0a020a0"/>  <!--comp selection on take layers-->
   </Colors>
     <Color name="pianoroll: velocity" value="ff9408ff"/>
     <Color name="pianoroll: insensitive bender line" value="96b2df84"/>
@@ -485,6 +487,8 @@
     <ColorAlias name="zoom button: fill" alias="widget:bg"/>
     <ColorAlias name="zoom button: fill active" alias="alert:blue"/>
     <ColorAlias name="zoom button: led active" alias="alert:blue"/>
+    <ColorAlias name="comp layer" alias="comp:layer"/>
+    <ColorAlias name="comp selection" alias="comp:source"/>
   </ColorAliases>
   <Modifiers>
     <Modifier name="audio bus base" modifier="= alpha:0.3"/>
