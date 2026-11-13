@@ -1156,6 +1156,27 @@ RegionMotionDrag::collect_ripple_views ()
 }
 
 void
+RegionMotionDrag::collect_group_markers ()
+{
+	std::set<std::shared_ptr<Region> > regions;
+
+	for (list<DraggingView>::const_iterator i = _views.begin (); i != _views.end (); ++i) {
+		std::shared_ptr<Region> r (i->view->region ());
+		if (r->is_explicitly_grouped () && !r->is_explicitly_ungrouped ()) {
+			marker_groups.insert (r->region_group ());
+		}
+		regions.insert (r);
+	}
+
+	/* only move the markers of a group if the whole group is dragged */
+	_editor.filter_complete_region_groups (marker_groups, regions);
+
+	if (!marker_groups.empty ()) {
+		_editor.get_grouped_markers (marker_groups, group_markers);
+	}
+}
+
+void
 RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 {
 	double delta_layer                    = 0;
@@ -1377,6 +1398,9 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 
 	if (x_delta) {
 		for (vector<ArdourMarker*>::iterator m = ripple_markers.begin (); m != ripple_markers.end (); ++m) {
+			(*m)->the_item ().move (Duple (x_delta, 0.));
+		}
+		for (vector<ArdourMarker*>::iterator m = group_markers.begin (); m != group_markers.end (); ++m) {
 			(*m)->the_item ().move (Duple (x_delta, 0.));
 		}
 	}
@@ -1618,6 +1642,11 @@ RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 {
 	if (first_move && _editor.should_ripple () && !_copy) {
 		collect_ripple_views ();
+	}
+
+	/* RippleAll moves all later markers anyway, do not move grouped markers twice */
+	if (first_move && !_copy && !_editor.should_ripple_all ()) {
+		collect_group_markers ();
 	}
 
 	if (_copy && first_move) {
@@ -2141,6 +2170,10 @@ RegionMoveDrag::finished_no_copy (
 		_editor.ripple_marks (_primary->region ()->playlist (), extent_min, -drag_delta);
 	}
 
+	if (changed_position) {
+		_editor.move_grouped_marks (marker_groups, -drag_delta);
+	}
+
 	/* If we've created new regions either by copying or moving
 	   to a new track, we want to replace the old selection with the new ones
 	*/
@@ -2280,6 +2313,10 @@ RegionMotionDrag::aborted (bool)
 	}
 
 	for (vector<ArdourMarker*>::iterator m = ripple_markers.begin (); m != ripple_markers.end (); ++m) {
+		(*m)->the_item ().move (Duple (-_total_x_delta, 0.));
+	}
+
+	for (vector<ArdourMarker*>::iterator m = group_markers.begin (); m != group_markers.end (); ++m) {
 		(*m)->the_item ().move (Duple (-_total_x_delta, 0.));
 	}
 }
@@ -4412,6 +4449,7 @@ FadeOutDrag::aborted (bool)
 MarkerDrag::MarkerDrag (Editor& e, ArdourCanvas::Item* i)
 	: EditorDrag (e, i, e.time_domain (), e.get_trackview_group())
 	, _selection_changed (false)
+	, _single (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New MarkerDrag\n");
 	Gtk::Window* toplevel = _editor.current_toplevel ();
@@ -4510,10 +4548,18 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 		break;
 	}
 
-	/* Set up copies for us to manipulate during the drag
+	/* Set up copies for us to manipulate during the drag.
+	 * With the toggle modifier only the dragged marker itself is moved,
+	 * not the other selected markers nor its region-group.
 	 */
 
-	for (MarkerSelection::iterator i = editing_context.get_selection().markers.begin (); i != editing_context.get_selection().markers.end (); ++i) {
+	_single = (op == SelectionToggle);
+
+	MarkerSelection single;
+	single.push_back (_marker);
+	MarkerSelection const& to_drag (_single ? single : editing_context.get_selection().markers);
+
+	for (MarkerSelection::const_iterator i = to_drag.begin (); i != to_drag.end (); ++i) {
 		Location* l = _editor.find_location_from_marker (*i, is_start);
 
 		if (!l) {
@@ -4540,6 +4586,104 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 				(*x).move_both = true;
 			}
 		}
+	}
+
+	if (!_single) {
+		collect_grouped_regionviews ();
+	}
+}
+
+void
+MarkerDrag::collect_grouped_regionviews ()
+{
+	std::set<uint64_t> groups;
+	for (CopiedLocationInfo::const_iterator x = _copied_locations.begin (); x != _copied_locations.end (); ++x) {
+		if (x->location->group () != 0) {
+			groups.insert (x->location->group ());
+		}
+	}
+
+	if (groups.empty ()) {
+		return;
+	}
+
+	RegionList rl;
+	_editor.get_grouped_regions (groups, rl);
+
+	for (auto const& r : rl) {
+		if (!r->can_move ()) {
+			continue;
+		}
+		RegionSelection rs;
+		_editor.get_regionviews_by_id (r->id (), rs);
+		for (auto const& rv : rs) {
+			_grouped_views.push_back (GroupedRegionView (rv, r->region_group ()));
+		}
+	}
+
+	/* other markers of the group(s), that are not dragged themselves */
+	std::set<Location*> dragged;
+	for (CopiedLocationInfo::const_iterator x = _copied_locations.begin (); x != _copied_locations.end (); ++x) {
+		bool      is_start;
+		Location* l = _editor.find_location_from_marker (x->markers.front (), is_start);
+		if (l) {
+			dragged.insert (l);
+		}
+	}
+
+	for (auto const& g : groups) {
+		std::set<uint64_t> one;
+		one.insert (g);
+		std::vector<ArdourMarker*> markers;
+		_editor.get_grouped_markers (one, markers);
+		for (auto const& m : markers) {
+			bool      is_start;
+			Location* l = _editor.find_location_from_marker (m, is_start);
+			if (l && dragged.find (l) == dragged.end ()) {
+				_grouped_markers.push_back (GroupedMarker (m, g));
+			}
+		}
+	}
+}
+
+/** Compute the distance each region-group is moved by the drag.
+ *  Only locations that are moved as a whole (not range resizes) move their group.
+ */
+void
+MarkerDrag::group_deltas (std::map<uint64_t, timecnt_t>& deltas) const
+{
+	for (CopiedLocationInfo::const_iterator x = _copied_locations.begin (); x != _copied_locations.end (); ++x) {
+		Location* copy = x->location;
+		bool      is_start;
+		Location* real = _editor.find_location_from_marker (x->markers.front (), is_start);
+
+		if (!real || real->locked () || copy->group () == 0 || deltas.find (copy->group ()) != deltas.end ()) {
+			continue;
+		}
+
+		timecnt_t const delta (real->start ().distance (copy->start ()));
+
+		if (delta.is_zero ()) {
+			continue;
+		}
+		if (!copy->is_mark () && real->end ().distance (copy->end ()) != delta) {
+			continue;
+		}
+
+		deltas.insert (std::make_pair (copy->group (), delta));
+	}
+}
+
+void
+MarkerDrag::reset_grouped_regionviews ()
+{
+	for (auto& g : _grouped_views) {
+		g.view->move (-g.x_offset, 0);
+		g.x_offset = 0;
+	}
+	for (auto& g : _grouped_markers) {
+		g.marker->the_item ().move (ArdourCanvas::Duple (-g.x_offset, 0));
+		g.x_offset = 0;
 	}
 }
 
@@ -4714,6 +4858,23 @@ MarkerDrag::motion (GdkEvent* event, bool)
 
 	assert (!_copied_locations.empty ());
 
+	if (!_grouped_views.empty () || !_grouped_markers.empty ()) {
+		std::map<uint64_t, timecnt_t> deltas;
+		group_deltas (deltas);
+		for (auto& g : _grouped_views) {
+			std::map<uint64_t, timecnt_t>::const_iterator d = deltas.find (g.group);
+			double const x = (d == deltas.end ()) ? 0 : editing_context.duration_to_pixels_unrounded (d->second);
+			g.view->move (x - g.x_offset, 0);
+			g.x_offset = x;
+		}
+		for (auto& g : _grouped_markers) {
+			std::map<uint64_t, timecnt_t>::const_iterator d = deltas.find (g.group);
+			double const x = (d == deltas.end ()) ? 0 : editing_context.duration_to_pixels_unrounded (d->second);
+			g.marker->the_item ().move (ArdourCanvas::Duple (x - g.x_offset, 0));
+			g.x_offset = x;
+		}
+	}
+
 	show_verbose_cursor_time (newpos);
 	show_view_preview (newpos + _video_offset);
 	_editor.set_snapped_cursor_position (newpos);
@@ -4782,19 +4943,25 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		return;
 	}
 
+	/* the model is updated below, region views follow it */
+	reset_grouped_regionviews ();
+
+	std::map<uint64_t, timecnt_t> deltas;
+	if (!_single) {
+		group_deltas (deltas);
+	}
+
 	XMLNode& before     = editing_context.session ()->locations ()->get_state ();
 	bool     in_command = false;
 
-	MarkerSelection::iterator    i;
-	CopiedLocationInfo::iterator x;
 	bool                         is_start;
+	std::set<Location*>          dragged;
 
-	for (i = editing_context.get_selection().markers.begin (), x = _copied_locations.begin ();
-	     x != _copied_locations.end () && i != editing_context.get_selection().markers.end ();
-	     ++i, ++x) {
-		Location* location = _editor.find_location_from_marker (*i, is_start);
+	for (CopiedLocationInfo::iterator x = _copied_locations.begin (); x != _copied_locations.end (); ++x) {
+		Location* location = _editor.find_location_from_marker (x->markers.front (), is_start);
 
 		if (location) {
+			dragged.insert (location);
 			if (location->locked ()) {
 				continue;
 			}
@@ -4815,9 +4982,19 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	}
 
 	if (in_command) {
+		/* move the rest of each group: regions and markers that were not dragged */
+		for (auto const& d : deltas) {
+			std::set<uint64_t> g;
+			g.insert (d.first);
+			_editor.shift_grouped_locations (g, d.second, dragged);
+			_editor.move_grouped_regions (g, d.second);
+		}
+
 		XMLNode& after = editing_context.session ()->locations ()->get_state ();
 		editing_context.session ()->add_command (new MementoCommand<Locations> (*(editing_context.session ()->locations ()), &before, &after));
 		editing_context.commit_reversible_command ();
+	} else {
+		delete &before;
 	}
 }
 
@@ -4827,6 +5004,8 @@ MarkerDrag::aborted (bool movement_occurred)
 	if (!movement_occurred) {
 		return;
 	}
+
+	reset_grouped_regionviews ();
 
 	for (CopiedLocationInfo::iterator x = _copied_locations.begin (); x != _copied_locations.end (); ++x) {
 		/* move all markers to their original location */

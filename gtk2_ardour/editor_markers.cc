@@ -36,7 +36,9 @@
 #include "ardour/location.h"
 #include "ardour/midi_scene_change.h"
 #include "ardour/profile.h"
+#include "ardour/region.h"
 #include "pbd/memento_command.h"
+#include "pbd/stateful_diff_command.h"
 
 #include "canvas/canvas.h"
 #include "canvas/item.h"
@@ -597,6 +599,23 @@ Editor::get_markers_to_ripple (std::shared_ptr<Playlist> target_playlist, timepo
 			markers.push_back (i->second->start);
 		}
 		if (i->first->end() >= ripple_start && i->second->end) {
+			markers.push_back (i->second->end);
+		}
+	}
+}
+
+void
+Editor::get_grouped_markers (std::set<uint64_t> const & groups, std::vector<ArdourMarker*>& markers)
+{
+	for (LocationMarkerMap::const_iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
+		Location* l = i->first;
+		if (l->group () == 0 || l->locked () || groups.find (l->group ()) == groups.end ()) {
+			continue;
+		}
+		if (i->second->start) {
+			markers.push_back (i->second->start);
+		}
+		if (i->second->end) {
 			markers.push_back (i->second->end);
 		}
 	}
@@ -1176,7 +1195,103 @@ Editor::build_marker_menu (Location* loc)
 		items.push_back (SeparatorElem());
 	}
 
+	if (!loc->is_xrun ()) {
+		add_marker_group_items (items, loc);
+		items.push_back (SeparatorElem());
+	}
+
 	items.push_back (MenuElem (_("Remove"), sigc::mem_fun(*this, &Editor::marker_menu_remove)));
+}
+
+/** show the key-binding of @p act as accelerator hint of @p item */
+static void
+show_action_accel (Gtk::MenuItem& item, Glib::RefPtr<Gtk::Action> act)
+{
+	if (!act) {
+		return;
+	}
+	GtkWidget* child   = gtk_bin_get_child (GTK_BIN (item.gobj ()));
+	GClosure*  closure = gtk_action_get_accel_closure (act->gobj ());
+	if (child && GTK_IS_ACCEL_LABEL (child) && closure) {
+		gtk_accel_label_set_accel_closure (GTK_ACCEL_LABEL (child), closure);
+	}
+}
+
+void
+Editor::add_marker_group_items (Gtk::Menu_Helpers::MenuList& items, Location* loc)
+{
+	using namespace Menu_Helpers;
+
+	items.push_back (MenuElem (_("Group Marker to Selected Regions"), sigc::mem_fun (*this, &Editor::marker_menu_group_to_selected_regions)));
+	items.back ().set_sensitive (!selection->regions.empty ());
+	show_action_accel (items.back (), editor_actions->get_action (X_("group-selected-regions")));
+
+	items.push_back (MenuElem (_("Ungroup Marker from Regions"), sigc::mem_fun (*this, &Editor::marker_menu_ungroup)));
+	items.back ().set_sensitive (loc->group () != 0);
+	show_action_accel (items.back (), editor_actions->get_action (X_("ungroup-selected-regions")));
+}
+
+/** add the context-menu's marker to the group of the selected regions.
+ *  If the selected regions do not share a group yet, they are grouped first.
+ */
+void
+Editor::marker_menu_group_to_selected_regions ()
+{
+	ArdourMarker* marker = reinterpret_cast<ArdourMarker*> (marker_menu_item->get_data ("marker"));
+	bool          is_start;
+	Location*     loc = marker ? find_location_from_marker (marker, is_start) : 0;
+
+	if (!loc || selection->regions.empty ()) {
+		return;
+	}
+
+	RegionSelection rs (selection->regions);
+
+	uint64_t group  = rs.front ()->region ()->region_group ();
+	bool     shared = rs.front ()->region ()->is_explicitly_grouped () && !rs.front ()->region ()->is_explicitly_ungrouped ();
+
+	for (auto const& rv : rs) {
+		if (rv->region ()->region_group () != group) {
+			shared = false;
+			break;
+		}
+	}
+
+	Region::RegionGroupRetainer rgr;
+	begin_reversible_command (_("group marker to regions"));
+
+	if (!shared) {
+		for (auto const& rv : rs) {
+			rv->region ()->clear_changes ();
+			rv->region ()->set_region_group (Region::get_retained_group_id (), true);
+			_session->add_command (new StatefulDiffCommand (rv->region ()));
+		}
+		group = rs.front ()->region ()->region_group ();
+	}
+
+	XMLNode& before (_session->locations ()->get_state ());
+	loc->set_group (group);
+	_session->add_command (new MementoCommand<Locations> (*_session->locations (), &before, &_session->locations ()->get_state ()));
+
+	commit_reversible_command ();
+}
+
+void
+Editor::marker_menu_ungroup ()
+{
+	ArdourMarker* marker = reinterpret_cast<ArdourMarker*> (marker_menu_item->get_data ("marker"));
+	bool          is_start;
+	Location*     loc = marker ? find_location_from_marker (marker, is_start) : 0;
+
+	if (!loc || loc->group () == 0) {
+		return;
+	}
+
+	begin_reversible_command (_("ungroup marker"));
+	XMLNode& before (_session->locations ()->get_state ());
+	loc->set_group (0);
+	_session->add_command (new MementoCommand<Locations> (*_session->locations (), &before, &_session->locations ()->get_state ()));
+	commit_reversible_command ();
 }
 
 void
@@ -1218,6 +1333,11 @@ Editor::build_range_marker_menu (Location* loc, bool loop_or_punch, bool session
 	}
 
 	if (!loop_or_punch_or_session || !session) {
+		items.push_back (SeparatorElem());
+	}
+
+	if (!loop_or_punch_or_session) {
+		add_marker_group_items (items, loc);
 		items.push_back (SeparatorElem());
 	}
 
@@ -2112,6 +2232,38 @@ Editor::marker_selection_changed ()
 
 	for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
 		(*x)->set_selected (true);
+	}
+
+	if (!_session) {
+		return;
+	}
+
+	/* also select the regions grouped with the selected markers (see group_selected_regions) */
+	std::set<uint64_t> groups;
+	for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
+		bool      is_start;
+		Location* l = find_location_from_marker (*x, is_start);
+		if (l && l->group () != 0) {
+			groups.insert (l->group ());
+		}
+	}
+
+	if (groups.empty ()) {
+		return;
+	}
+
+	RegionList            rl;
+	vector<RegionView*>   views;
+	get_grouped_regions (groups, rl);
+
+	for (auto const& r : rl) {
+		RegionSelection rs;
+		get_regionviews_by_id (r->id (), rs);
+		views.insert (views.end (), rs.begin (), rs.end ());
+	}
+
+	if (!views.empty ()) {
+		selection->add (views);
 	}
 }
 
