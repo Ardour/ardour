@@ -3197,7 +3197,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 
 	if (map->move_meter (_marker->meter (), pos, false)) {
 		/* it was moved */
-		_editor.mid_tempo_change (Editor::MeterChanged);
+		_editor.mid_tempo_change (Editor::MappingChanged);
 		show_verbose_cursor_time (timepos_t (_marker->meter ().beats ()));
 		editing_context.set_snapped_cursor_position (timepos_t (_marker->meter ().sample_is_dangerous (editing_context.session ()->sample_rate ())));
 	}
