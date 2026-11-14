@@ -39,6 +39,8 @@ public:
 
 	void run (float const** data, uint32_t n_samples);
 	void reset ();
+	void integrate (bool);
+	bool integrating () const;
 
 	float integrated_loudness () const;
 	float momentary () const;
@@ -117,6 +119,7 @@ private:
 
 	std::atomic<bool> _rst_dbtp;
 	std::atomic<bool> _rst_lufs;
+	std::atomic<bool> _integrate;
 
 #if defined(_MSC_VER)
 	typedef std::map<int, uint32_t> History;
