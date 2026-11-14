@@ -100,6 +100,7 @@ libardour_sources = [
         'graph.cc',
         'graphnode.cc',
         'graph_edges.cc',
+        'group_folder.cc',
         'iec1ppmdsp.cc',
         'iec2ppmdsp.cc',
         'import.cc',
