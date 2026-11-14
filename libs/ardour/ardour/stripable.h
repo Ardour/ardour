@@ -29,6 +29,7 @@
 
 #include "ardour/automatable.h"
 #include "ardour/presentation_info.h"
+#include "ardour/route_group_member.h"
 #include "ardour/session_object.h"
 #include "ardour/libardour_visibility.h"
 
@@ -49,6 +50,8 @@ class MonitorControl;
 class MonitorProcessor;
 class RecordEnableControl;
 class RecordSafeControl;
+class SurroundReturn;
+class SurroundSend;
 
 enum WellKnownCtrl : int;
 enum WellKnownData : int;
@@ -61,6 +64,7 @@ enum WellKnownData : int;
 
 class LIBARDOUR_API Stripable : public SessionObject,
                                 public Automatable,
+                                public RouteGroupMember,
                                 public std::enable_shared_from_this<Stripable>
 {
   public:
@@ -132,8 +136,6 @@ class LIBARDOUR_API Stripable : public SessionObject,
 	virtual std::shared_ptr<PhaseControl> phase_control() const = 0;
 	virtual std::shared_ptr<GainControl> trim_control() const = 0;
 
-	virtual std::shared_ptr<MonitorControl> monitoring_control() const = 0;
-
 	virtual std::shared_ptr<AutomationControl> rec_enable_control() const { return std::shared_ptr<AutomationControl>(); }
 	virtual std::shared_ptr<AutomationControl> rec_safe_control() const { return std::shared_ptr<AutomationControl>(); }
 
@@ -189,6 +191,13 @@ class LIBARDOUR_API Stripable : public SessionObject,
 	virtual bool muted_by_others_soloing () const = 0;
 
 	virtual std::shared_ptr<MonitorProcessor> monitor_control() const = 0;
+
+	std::shared_ptr<MonitorControl> monitoring_control() const { return nullptr; }
+	std::shared_ptr<SurroundSend> surround_send() const { return nullptr; }
+	std::shared_ptr<SurroundReturn> surround_return() const { return nullptr; }
+
+	virtual MonitorState monitoring_state () const = 0;
+	virtual MonitorState get_input_monitoring_state (bool recording, bool talkback) const { return MonitoringSilence; }
 
 	StripableColorDialog* active_color_picker() const { return _active_color_picker; }
 	void set_active_color_picker (StripableColorDialog* d) { _active_color_picker = d; }

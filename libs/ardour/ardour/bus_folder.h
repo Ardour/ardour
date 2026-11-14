@@ -63,6 +63,8 @@ class LIBARDOUR_API BusFolder : public Folder
 	bool muted_by_others_soloing () const { return _bus->muted_by_others_soloing (); }
 	std::shared_ptr<MonitorProcessor> monitor_control() const { return _bus->monitor_control(); }
 
+	MonitorState monitoring_state () const { return _bus->monitoring_state(); }
+
 	void add (std::shared_ptr<Stripable>);
 	void add (std::vector<std::shared_ptr<Stripable>>);
 	void remove (std::shared_ptr<Stripable>);

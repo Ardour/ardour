@@ -91,8 +91,8 @@ class LIBARDOUR_API RouteGroup : public SessionObject, public std::enable_shared
 	int32_t group_master_number() const { return _group_master_number.val(); }
 	std::weak_ptr<Route> subgroup_bus() const { return _subgroup_bus; }
 
-	bool empty() const {return routes->empty();}
-	size_t size() const { return routes->size();}
+	bool empty() const {return stripables->empty();}
+	size_t size() const { return stripables->size();}
 
 	gain_t get_max_factor(gain_t factor);
 	gain_t get_min_factor(gain_t factor);
@@ -113,11 +113,9 @@ class LIBARDOUR_API RouteGroup : public SessionObject, public std::enable_shared
 
 	bool enabled_property (PBD::PropertyID);
 
-	int add (std::shared_ptr<Route>);
-	int remove (std::shared_ptr<Route>);
+	int add (std::shared_ptr<Stripable>);
+	int remove (std::shared_ptr<Stripable>);
 	void clear ();
-
-	template<typename Function> void foreach_route (Function f) { for (auto & r : *routes) {f (r); } }
 
 	/* to use these, #include "ardour/route_group_specialized.h" */
 
@@ -132,7 +130,9 @@ class LIBARDOUR_API RouteGroup : public SessionObject, public std::enable_shared
 	void make_subgroup (bool, Placement);
 	void destroy_subgroup ();
 
-	std::shared_ptr<RouteList> route_list() { return routes; }
+	std::shared_ptr<RouteList> route_list();
+
+	template<typename Function> void foreach_route (Function f) { for (auto & r : *route_list()) {f (r); } }
 
 	/** Emitted when a route has been added to this group */
 	PBD::Signal<void(std::shared_ptr<RouteGroup>, std::weak_ptr<ARDOUR::Route> )> RouteAdded;
@@ -162,7 +162,7 @@ class LIBARDOUR_API RouteGroup : public SessionObject, public std::enable_shared
 	RouteGroup (Session& s, const std::string &n);
 
   private:
-	std::shared_ptr<RouteList> routes;
+	std::shared_ptr<StripableList> stripables;
 	std::shared_ptr<Route> _subgroup_bus;
 	std::weak_ptr<VCA> group_master;
 
@@ -188,7 +188,7 @@ class LIBARDOUR_API RouteGroup : public SessionObject, public std::enable_shared
 	std::shared_ptr<ControlGroup> _monitoring_group;
 
 	bool check_subgroup (bool, Placement, DataType&, uint32_t&) const;
-	void remove_when_going_away (std::weak_ptr<Route>);
+	void remove_when_going_away (std::weak_ptr<Stripable>);
 	void update_surround_sends ();
 	void unset_subgroup_bus ();
 	int set_state_2X (const XMLNode&, int);

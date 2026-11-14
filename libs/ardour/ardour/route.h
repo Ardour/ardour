@@ -55,7 +55,6 @@
 #include "ardour/muteable.h"
 #include "ardour/mute_master.h"
 #include "ardour/mute_control.h"
-#include "ardour/route_group_member.h"
 #include "ardour/stripable.h"
 #include "ardour/graphnode.h"
 #include "ardour/automatable.h"
@@ -99,15 +98,12 @@ class SoloIsolateControl;
 class PhaseControl;
 class MonitorControl;
 class TriggerBox;
-class SurroundReturn;
-class SurroundSend;
 
 class LIBARDOUR_API Route : public Stripable,
                             public GraphNode,
                             public Soloable,
                             public Muteable,
                             public Monitorable,
-                            public RouteGroupMember,
                             public ScaleProvider
 {
 public:
@@ -155,7 +151,6 @@ public:
 	std::shared_ptr<SurroundReturn> surround_return() const { return _surround_return; }
 
 	MonitorState monitoring_state () const;
-	virtual MonitorState get_input_monitoring_state (bool recording, bool talkback) const { return MonitoringSilence; }
 
 	/* these are the core of the API of a Route. see the protected sections as well */
 
