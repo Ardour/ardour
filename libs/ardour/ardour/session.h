@@ -1455,6 +1455,8 @@ public:
 	PBD::Signal<void()> QuantizationChanged;
 
 	void folderize (std::shared_ptr<VCA>);
+	void folderize (std::shared_ptr<Route>);
+	void folderize (std::shared_ptr<RouteGroup>);
 	void unfolderize (std::shared_ptr<Folder>);
 
 protected:
