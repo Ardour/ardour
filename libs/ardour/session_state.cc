@@ -110,6 +110,7 @@
 #include "ardour/filesystem_paths.h"
 #include "ardour/folder.h"
 #include "ardour/graph.h"
+#include "ardour/group_folder.h"
 #include "ardour/io_plug.h"
 #include "ardour/location.h"
 #include "ardour/lv2_plugin.h"
@@ -2977,6 +2978,11 @@ Session::XMLFolderFactory (XMLNode const & node, int version)
 		std::shared_ptr<Route> bus = route_by_name (master_name);
 		if (bus) {
 			f.reset (new BusFolder (bus, *this, name, PresentationInfo::Flag (0)));
+		}
+	} else if (type == "group") {
+		std::shared_ptr<RouteGroup> grp = route_group_by_name (master_name);
+		if (grp) {
+			f.reset (new GroupFolder (grp, *this, name, PresentationInfo::Flag (0)));
 		}
 	}
 
