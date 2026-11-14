@@ -17,6 +17,8 @@
  */
 
 #include "ardour/session.h"
+#include "ardour/bus_folder.h"
+#include "ardour/group_folder.h"
 #include "ardour/vca_folder.h"
 
 using namespace ARDOUR;
@@ -37,6 +39,24 @@ Session::folderize (std::shared_ptr<VCA> vca)
 {
 	assert (vca);
 	std::shared_ptr<VCAFolder> f (new VCAFolder (vca, *this, vca->name(), PresentationInfo::Flag (0)));
+	FolderList fl ({f});
+	add_folders (fl);
+}
+
+void
+Session::folderize (std::shared_ptr<Route> bus)
+{
+	assert (bus);
+	std::shared_ptr<BusFolder> f (new BusFolder (bus, *this, bus->name(), PresentationInfo::Flag (0)));
+	FolderList fl ({f});
+	add_folders (fl);
+}
+
+void
+Session::folderize (std::shared_ptr<RouteGroup> grp)
+{
+	assert (grp);
+	std::shared_ptr<GroupFolder> f (new GroupFolder (grp, *this, grp->name(), PresentationInfo::Flag (0)));
 	FolderList fl ({f});
 	add_folders (fl);
 }
