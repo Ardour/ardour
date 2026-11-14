@@ -1041,7 +1041,8 @@ Bindings::save_as_html (ostream& ostr, bool categorize) const
 					key_name.append("-");
 
 				ostr << "<span>" << key_name;
-				ostr << "<i>" << action->get_label() << "</i></span><br/>\n";
+				Glib::ustring label = action->get_label();
+				ostr << "<i>" << label.c_str() << "</i></span><br/>\n";
 			}
 			ostr << "\n\n";
 
