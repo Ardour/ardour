@@ -38,5 +38,10 @@ XMLNode&
 VCAFolder::get_state () const
 {
 	XMLNode* root = new XMLNode (X_("VCAFolder"));
+
+	root->set_property (X_("type"), X_("vca"));
+	root->set_property (X_("master-name"), _vca->name());
+	root->set_property (X_("name"), name());
+
 	return *root;
 }

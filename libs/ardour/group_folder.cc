@@ -38,6 +38,9 @@ XMLNode&
 GroupFolder::get_state () const
 {
 	XMLNode* root = new XMLNode (X_("GroupFolder"));
+	root->set_property (X_("type"), X_("group"));
+	root->set_property (X_("master-name"), _group->name());
+	root->set_property (X_("name"), name());
 	return *root;
 }
 

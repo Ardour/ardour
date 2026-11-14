@@ -38,6 +38,9 @@ XMLNode&
 BusFolder::get_state () const
 {
 	XMLNode* root = new XMLNode (X_("BusFolder"));
+	root->set_property (X_("type"), X_("bus"));
+	root->set_property (X_("master-name"), _bus->name());
+	root->set_property (X_("name"), name());
 	return *root;
 }
 
