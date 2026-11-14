@@ -131,6 +131,7 @@ class LIBARDOUR_API RouteGroup : public SessionObject, public std::enable_shared
 	void destroy_subgroup ();
 
 	std::shared_ptr<RouteList> route_list();
+	std::shared_ptr<StripableList> stripable_list() { return stripables; }
 
 	template<typename Function> void foreach_route (Function f) { for (auto & r : *route_list()) {f (r); } }
 
