@@ -28,10 +28,10 @@ namespace ARDOUR {
 template<class T> void
 RouteGroup::apply (void (Track::*func)(T, PBD::Controllable::GroupControlDisposition), T val, PBD::Controllable::GroupControlDisposition group_override)
 {
-	for (RouteList::iterator i = routes->begin(); i != routes->end(); i++) {
+	for (auto & r : *stripables) {
 		std::shared_ptr<Track> at;
 
-		if ((at = std::dynamic_pointer_cast<Track>(*i)) != 0) {
+		if ((at = std::dynamic_pointer_cast<Track>(r)) != 0) {
 			(at.get()->*func)(val, group_override);
 		}
 	}

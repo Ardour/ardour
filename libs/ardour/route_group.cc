@@ -112,7 +112,7 @@ RouteGroup::make_property_quarks ()
 
 RouteGroup::RouteGroup (Session& s, const string &n)
 	: SessionObject (s, n)
-	, routes (new RouteList)
+	, stripables (new StripableList)
 	, ROUTE_GROUP_DEFAULT_PROPERTIES
 	, _solo_group (new ControlGroup (SoloAutomation))
 	, _mute_group (new ControlGroup (MuteAutomation))
@@ -153,11 +153,11 @@ RouteGroup::~RouteGroup ()
 
 	std::shared_ptr<VCA> vca (group_master.lock());
 
-	for (RouteList::iterator i = routes->begin(); i != routes->end();) {
-		RouteList::iterator tmp = i;
+	for (StripableList::iterator i = stripables->begin(); i != stripables->end();) {
+		StripableList::iterator tmp = i;
 		++tmp;
 
-		(*i)->set_route_group (0);
+		(*i)->set_route_group (nullptr);
 
 		if (vca) {
 			(*i)->unassign (vca);
@@ -171,13 +171,13 @@ RouteGroup::~RouteGroup ()
  *  @param r Route to add.
  */
 int
-RouteGroup::add (std::shared_ptr<Route> r)
+RouteGroup::add (std::shared_ptr<Stripable> r)
 {
 	if (r->is_master()) {
 		return 0;
 	}
 
-	if (find (routes->begin(), routes->end(), r) != routes->end()) {
+	if (find (stripables->begin(), stripables->end(), r) != stripables->end()) {
 		return 0;
 	}
 
@@ -185,7 +185,7 @@ RouteGroup::add (std::shared_ptr<Route> r)
 		r->route_group()->remove (r);
 	}
 
-	routes->push_back (r);
+	stripables->push_back (r);
 
 	_solo_group->add_control (r->solo_control());
 	_mute_group->add_control (r->mute_control());
@@ -201,7 +201,7 @@ RouteGroup::add (std::shared_ptr<Route> r)
 	}
 
 	r->set_route_group (shared_from_this());
-	r->DropReferences.connect_same_thread (*this, std::bind (&RouteGroup::remove_when_going_away, this, std::weak_ptr<Route> (r)));
+	r->DropReferences.connect_same_thread (*this, std::bind (&RouteGroup::remove_when_going_away, this, std::weak_ptr<Stripable> (r)));
 
 	std::shared_ptr<VCA> vca (group_master.lock());
 
@@ -210,24 +210,27 @@ RouteGroup::add (std::shared_ptr<Route> r)
 	}
 
 	_session.set_dirty ();
-	RouteAdded (shared_from_this(), std::weak_ptr<Route> (r)); /* EMIT SIGNAL */
+	std::shared_ptr<Route> rr (std::dynamic_pointer_cast<Route> (r));
+	if (rr) {
+		RouteAdded (shared_from_this(), std::weak_ptr<Route> (rr)); /* EMIT SIGNAL */
+	}
 	return 0;
 }
 
 void
-RouteGroup::remove_when_going_away (std::weak_ptr<Route> wr)
+RouteGroup::remove_when_going_away (std::weak_ptr<Stripable> ws)
 {
-	std::shared_ptr<Route> r (wr.lock());
+	std::shared_ptr<Stripable> s (ws.lock());
 
-	if (r) {
-		remove (r);
+	if (s) {
+		remove (s);
 	}
 }
 
 void
 RouteGroup::update_surround_sends ()
 {
-	for (auto const& r : *routes) {
+	for (auto const& r : *stripables) {
 		if (r->surround_send ()) {
 			_sursend_enable_group->add_control (r->surround_send ()->send_enable_control ());
 		}
@@ -247,7 +250,7 @@ RouteGroup::unset_subgroup_bus ()
 void
 RouteGroup::clear ()
 {
-	RouteList copy (*routes);
+	StripableList copy (*stripables);
 
 	for (auto & r : copy) {
 		remove (r);
@@ -257,11 +260,11 @@ RouteGroup::clear ()
 }
 
 int
-RouteGroup::remove (std::shared_ptr<Route> r)
+RouteGroup::remove (std::shared_ptr<Stripable> r)
 {
-	RouteList::iterator i;
+	StripableList::iterator i;
 
-	if ((i = find (routes->begin(), routes->end(), r)) != routes->end()) {
+	if ((i = find (stripables->begin(), stripables->end(), r)) != stripables->end()) {
 		r->set_route_group (0);
 
 		std::shared_ptr<VCA> vca = group_master.lock();
@@ -281,14 +284,17 @@ RouteGroup::remove (std::shared_ptr<Route> r)
 		if (r->surround_send ()) {
 			_sursend_enable_group->remove_control (r->surround_send ()->send_enable_control ());
 		}
-		routes->erase (i);
-		if (routes->empty()) {
+		stripables->erase (i);
+		if (stripables->empty()) {
 			_subgroup_bus.reset ();
 			group_master.reset ();
 			_group_master_number = -1;
 		}
 		_session.set_dirty ();
-		RouteRemoved (shared_from_this(), std::weak_ptr<Route> (r)); /* EMIT SIGNAL */
+		std::shared_ptr<Route> rr (std::dynamic_pointer_cast<Route> (r));
+		if (rr) {
+			RouteRemoved (shared_from_this(), std::weak_ptr<Route> (rr)); /* EMIT SIGNAL */
+		}
 		return 0;
 	}
 
@@ -307,7 +313,7 @@ RouteGroup::set_rgba (uint32_t color) {
 		return;
 	}
 
-	for (RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
+	for (StripableList::const_iterator i = stripables->begin(); i != stripables->end(); ++i) {
 		(*i)->presentation_info().PropertyChanged (Properties::color);
 	}
 }
@@ -326,14 +332,14 @@ RouteGroup::get_state () const
 
 	add_properties (*node);
 
-	if (!routes->empty()) {
+	if (!stripables->empty()) {
 		stringstream str;
 
-		for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
+		for (StripableList::iterator i = stripables->begin(); i != stripables->end(); ++i) {
 			str << (*i)->id () << ' ';
 		}
 
-		node->set_property ("routes", str.str());
+		node->set_property ("members", str.str());
 	}
 
 	return *node;
@@ -351,9 +357,9 @@ RouteGroup::set_state (const XMLNode& node, int version)
 	node.get_property ("rgba", _rgba);
 	node.get_property ("used-to-share-gain", _used_to_share_gain);
 
-	std::string routes;
-	if (node.get_property ("routes", routes)) {
-		stringstream str (routes);
+	std::string stripables;
+	if (node.get_property ("members", stripables) || node.get_property ("routes", stripables)) {
+		stringstream str (stripables);
 		vector<string> ids;
 		split (str.str(), ids, ' ');
 
@@ -381,7 +387,7 @@ RouteGroup::set_state (const XMLNode& node, int version)
 		if (vca) {
 			/* no need to do the assignment because slaves will
 			   handle that themselves. But we can set group_master
-			   to use with future assignments of newly added routes.
+			   to use with future assignments of newly added stripables
 			*/
 			group_master = vca;
 		}
@@ -509,10 +515,10 @@ RouteGroup::set_color (bool yn)
 
 	/* This is a bit of a hack, but this might change
 	   our route's effective color, so emit gui_changed
-	   for our routes.
+	   for our stripahles.
 	*/
 
-	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
+	for (StripableList::iterator i = stripables->begin(); i != stripables->end(); ++i) {
 		(*i)->gui_changed (X_("color"), this);
 	}
 }
@@ -589,7 +595,7 @@ RouteGroup::set_hidden (bool yn, void* /*src*/)
 void
 RouteGroup::audio_track_group (set<std::shared_ptr<AudioTrack> >& ats)
 {
-	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
+	for (StripableList::iterator i = stripables->begin(); i != stripables->end(); ++i) {
 		std::shared_ptr<AudioTrack> at = std::dynamic_pointer_cast<AudioTrack>(*i);
 		if (at) {
 			ats.insert (at);
@@ -600,7 +606,7 @@ RouteGroup::audio_track_group (set<std::shared_ptr<AudioTrack> >& ats)
 bool
 RouteGroup::check_subgroup (bool aux, Placement placement, DataType& dt, uint32_t& nin) const
 {
-	assert (routes->size () > 0);
+	assert (stripables->size () > 0);
 
 	if (has_subgroup ()) {
 		return false;
@@ -611,7 +617,14 @@ RouteGroup::check_subgroup (bool aux, Placement placement, DataType& dt, uint32_
 	bool have_midi  = false; // at least 1 MIDI port
 	bool have_audio = false; // at least 1 Audio port
 
-	for (auto const& r : *routes) {
+	for (auto const& s : *stripables) {
+		std::shared_ptr<Route> r (std::dynamic_pointer_cast<Route> (s));
+
+		if (!r) {
+			/* RECURSE ??? */
+			continue;
+		}
+
 #ifdef MIXBUS
 		if (r->mixbus ()) {
 			return false;
@@ -652,7 +665,14 @@ RouteGroup::check_subgroup (bool aux, Placement placement, DataType& dt, uint32_
 
 	bool have_one = false;
 
-	for (auto const& r : *routes) {
+	for (auto const& s : *stripables) {
+		std::shared_ptr<Route> r (std::dynamic_pointer_cast<Route> (s));
+
+		if (!r) {
+			/* RECURSE ??? */
+			continue;
+		}
+
 		ChanCount cc (r->output()->n_ports());
 		if (aux) {
 			std::shared_ptr<Processor> proc = (placement == PreFader) ? std::dynamic_pointer_cast <Processor> (r->amp ()) : std::dynamic_pointer_cast <Processor> (r->main_outs ());
@@ -668,6 +688,22 @@ RouteGroup::check_subgroup (bool aux, Placement placement, DataType& dt, uint32_
 	}
 
 	return have_one && nin > 0;
+}
+
+std::shared_ptr<RouteList>
+RouteGroup::route_list()
+{
+	std::shared_ptr<RouteList> rl (new RouteList);
+
+	for (auto & s : *stripables) {
+		std::shared_ptr<Route> r (std::dynamic_pointer_cast<Route> (s));
+		if (r) {
+			rl->push_back (r);
+		}
+	}
+
+	return rl;
+
 }
 
 bool
@@ -713,16 +749,21 @@ RouteGroup::make_subgroup (bool aux, Placement placement)
 	_subgroup_bus->DropReferences.connect_same_thread (*this, std::bind (&RouteGroup::unset_subgroup_bus, this));
 
 	if (aux) {
-
-		_session.add_internal_sends (_subgroup_bus, placement, routes);
+		_session.add_internal_sends (_subgroup_bus, placement, route_list());
 
 	} else {
 
 		std::shared_ptr<Bundle> bundle = _subgroup_bus->input()->bundle ();
 
-		for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-			(*i)->output()->disconnect ();
-			(*i)->output()->connect_ports_to_bundle (bundle, false, true);
+		for (auto & s : *stripables) {
+			std::shared_ptr<Route> r (std::dynamic_pointer_cast<Route> (s));
+			if (!r) {
+				/* RECURSE ??? */
+				continue;
+			}
+
+			r->output()->disconnect ();
+			r->output()->connect_ports_to_bundle (bundle, false, true);
 		}
 	}
 }
@@ -734,8 +775,14 @@ RouteGroup::destroy_subgroup ()
 		return;
 	}
 
-	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-		(*i)->output()->disconnect ();
+	for (auto & s : *stripables) {
+		std::shared_ptr<Route> r (std::dynamic_pointer_cast<Route> (s));
+		if (!r) {
+			/* RECURSE ??? */
+			continue;
+		}
+
+		r->output()->disconnect ();
 		/* XXX find a new bundle to connect to */
 	}
 
@@ -795,18 +842,18 @@ RouteGroup::push_to_groups ()
 void
 RouteGroup::assign_master (std::shared_ptr<VCA> master)
 {
-	if (!routes || routes->empty()) {
+	if (!stripables || stripables->empty()) {
 		return;
 	}
 
-	std::shared_ptr<Route> front = routes->front ();
+	std::shared_ptr<Stripable> front = stripables->front ();
 
 	if (front->slaved_to (master)) {
 		return;
 	}
 
-	for (RouteList::iterator r = routes->begin(); r != routes->end(); ++r) {
-		(*r)->assign (master);
+	for (auto & s : *stripables) {
+		s->assign (master);
 	}
 
 	group_master = master;
@@ -819,17 +866,17 @@ RouteGroup::assign_master (std::shared_ptr<VCA> master)
 void
 RouteGroup::unassign_master (std::shared_ptr<VCA> master)
 {
-	if (!routes || routes->empty()) {
+	if (!stripables || stripables->empty()) {
 		return;
 	}
 
-	std::shared_ptr<Route> front = routes->front ();
+	std::shared_ptr<Stripable> front = stripables->front ();
 
 	if (!front->slaved_to (master)) {
 		return;
 	}
 
-	for (RouteList::iterator r = routes->begin(); r != routes->end(); ++r) {
+	for (StripableList::iterator r = stripables->begin(); r != stripables->end(); ++r) {
 		(*r)->unassign (master);
 	}
 
@@ -842,11 +889,11 @@ RouteGroup::unassign_master (std::shared_ptr<VCA> master)
 bool
 RouteGroup::slaved () const
 {
-	if (!routes || routes->empty()) {
+	if (!stripables || stripables->empty()) {
 		return false;
 	}
 
-	return routes->front()->slaved ();
+	return stripables->front()->slaved ();
 }
 
 bool
