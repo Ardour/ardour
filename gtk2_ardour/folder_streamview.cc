@@ -37,6 +37,8 @@ FolderStreamView::refill_region_map ()
 
 	_folder->get_content_tracks (tracks);
 
+	std::cerr << "FSV refilling from " << tracks.size() << std::endl;
+
 	region_map.clear ();
 
 	for (auto const & t : tracks) {
@@ -45,6 +47,8 @@ FolderStreamView::refill_region_map ()
 		PositionList positions;
 
 		std::shared_ptr<RegionList> rl (pl->region_list());
+
+		std::cerr << " For " << t->name() << " got rl of " << rl->size() << std::endl;
 
 		for (auto const & r : *rl) {
 			RegionDuration rd (r->position(), r->end_position());
@@ -68,6 +72,8 @@ FolderStreamView::compute_bounding_box () const
 void
 FolderStreamView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
+	std::cerr << "FSV render with height  " << _height << std::endl;
+
 	Container::render (area, context);
 
 	uint32_t ntracks = region_map.size();
@@ -90,9 +96,12 @@ FolderStreamView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> conte
 			Duple p0 (pos.first.samples() / spp, ypos);
 			Duple p1 (pos.second.samples() / spp, ypos + height_per_track);
 
+			p0 = item_to_window (p0);
+			p1 = item_to_window (p1);
+
 			/* draw rectangle with p0, p1 */
-			context->rectangle (p0.x, p0.y, p1.x, p1.y);
-			context->fill ();
+			context->rectangle (p0.x, p0.y, p1.x - p0.x, p1.y - p0.y);
+			context->fill_preserve ();
 			context->stroke ();
 		}
 

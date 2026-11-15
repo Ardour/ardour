@@ -31,6 +31,7 @@
 #include "gtkmm2ext/utils.h"
 #include "widgets/tooltips.h"
 
+#include "folder_streamview.h"
 #include "gui_thread.h"
 #include "public_editor.h"
 #include "mixer_ui.h"
@@ -49,9 +50,9 @@ FolderTimeAxisView::FolderTimeAxisView (PublicEditor& ed, Session* s, ArdourCanv
 	: SessionHandlePtr (s)
 	, StripableTimeAxisView (ed, s, canvas)
 	, gain_meter (s, true, 75, 14) // XXX stupid magic numbers, match sizes in RouteTimeAxisView
-	, automation_action_menu (0)
+	, _streamview (nullptr)
+	, automation_action_menu (nullptr)
 {
-
 	controls_base_selected_name = X_("ControlMasterBaseSelected");
 	controls_base_unselected_name = X_("ControlMasterBaseUnselected");
 
@@ -122,6 +123,7 @@ FolderTimeAxisView::FolderTimeAxisView (PublicEditor& ed, Session* s, ArdourCanv
 
 FolderTimeAxisView::~FolderTimeAxisView ()
 {
+	delete _streamview;
 	delete automation_action_menu;
 	CatchDeletion (this);
 }
@@ -169,6 +171,9 @@ FolderTimeAxisView::set_folder (std::shared_ptr<Folder> f)
 {
 	StripableTimeAxisView::set_stripable (f);
 	_folder = f;
+
+	delete _streamview;
+	_streamview = new FolderStreamView (_editor, _canvas_display, _folder);
 
 	gain_meter.set_controls (f,
 	                         std::shared_ptr<PeakMeter>(),
@@ -367,6 +372,12 @@ FolderTimeAxisView::set_height (uint32_t h, TrackHeightMode m, bool from_idle)
 		drop_button.hide ();
 		automation_button.hide ();
 		gain_meter.get_gain_slider().hide ();
+	}
+
+	std::cerr << "FTAV, sv = " << _streamview << std::endl;
+
+	if (_streamview) {
+		_streamview->set_height (h);
 	}
 
 	set_gui_property ("height", h);
