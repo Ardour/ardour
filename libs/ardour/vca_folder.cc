@@ -16,6 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "ardour/session.h"
 #include "ardour/vca_folder.h"
 
 #include "pbd/i18n.h"
@@ -26,6 +27,13 @@ VCAFolder::VCAFolder (std::shared_ptr<VCA> vca, Session & s, std::string const &
 	: Folder (s, name, pi)
 	, _vca (vca)
 {
+	StripableList sl = _session.get_stripables ();
+
+	for (auto & s : sl) {
+		if (s->slaved_to (_vca)) {
+			_contents.push_back (s);
+		}
+	}
 }
 
 int
