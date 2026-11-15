@@ -761,6 +761,7 @@ private:
 	void initial_display ();
 	void add_stripables (ARDOUR::StripableList&);
 	void add_routes (ARDOUR::RouteList&);
+	void add_folders (ARDOUR::FolderList&);
 	void add_instrument_routes (ARDOUR::RouteList&);
 	void timeaxisview_deleted (TimeAxisView*);
 	void add_vcas (ARDOUR::VCAList&);

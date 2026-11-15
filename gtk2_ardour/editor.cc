@@ -76,6 +76,7 @@
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
 #include "ardour/audioregion.h"
+#include "ardour/folder.h"
 #include "ardour/lmath.h"
 #include "ardour/location.h"
 #include "ardour/midi_track.h"
@@ -129,6 +130,7 @@
 #include "editor_vsummary.h"
 #include "enums_convert.h"
 #include "export_report.h"
+#include "folder_time_axis.h"
 #include "global_port_matrix.h"
 #include "gui_object.h"
 #include "gui_thread.h"
@@ -1369,6 +1371,7 @@ Editor::set_session (Session *t)
 	_session->PositionChanged.connect (_session_connections, invalidator (*this), std::bind (&Editor::map_position_change, this, _1), gui_context());
 	_session->vca_manager().VCAAdded.connect (_session_connections, invalidator (*this), std::bind (&Editor::add_vcas, this, _1), gui_context());
 	_session->RouteAdded.connect (_session_connections, invalidator (*this), std::bind (&Editor::add_routes, this, _1), gui_context());
+	_session->FolderAdded.connect (_session_connections, invalidator (*this), std::bind (&Editor::add_folders, this, _1), gui_context());
 	_session->InstrumentRouteAdded.connect (_session_connections, invalidator (*this), std::bind (&Editor::add_instrument_routes, this, _1), gui_context());
 	_session->DirtyChanged.connect (_session_connections, invalidator (*this), std::bind (&Editor::update_title, this), gui_context());
 	_session->Located.connect (_session_connections, invalidator (*this), std::bind (&Editor::located, this), gui_context());
@@ -4738,12 +4741,24 @@ Editor::add_vcas (VCAList& vlist)
 }
 
 void
-Editor::add_routes (RouteList& rlist)
+Editor::add_routes (RouteList& routes)
 {
 	StripableList sl;
 
-	for (RouteList::iterator r = rlist.begin(); r != rlist.end(); ++r) {
-		sl.push_back (*r);
+	for (auto & r : routes) {
+		sl.push_back (r);
+	}
+
+	add_stripables (sl);
+}
+
+void
+Editor::add_folders (FolderList& folders)
+{
+	StripableList sl;
+
+	for (auto & f : folders) {
+		sl.push_back (f);
 	}
 
 	add_stripables (sl);
@@ -4754,6 +4769,7 @@ Editor::add_stripables (StripableList& sl)
 {
 	std::shared_ptr<VCA> v;
 	std::shared_ptr<Route> r;
+	std::shared_ptr<Folder> f;
 	TrackViewList new_selection;
 	bool changed = false;
 	int32_t real_routes = 0;
@@ -4798,6 +4814,15 @@ Editor::add_stripables (StripableList& sl)
 			track_views.push_back (vtv);
 
 			s->gui_changed.connect (*this, invalidator (*this), std::bind (&Editor::handle_gui_changes, this, _1, _2), gui_context());
+			changed = true;
+
+		} else if ((f = std::dynamic_pointer_cast<Folder> (s)) != 0) {
+
+			FolderTimeAxisView* ftv = new FolderTimeAxisView (*this, _session, *_track_canvas);
+			ftv->set_folder (f);
+			track_views.push_back (ftv);
+
+			f->gui_changed.connect (*this, invalidator (*this), std::bind (&Editor::handle_gui_changes, this, _1, _2), gui_context());
 			changed = true;
 
 		} else if ((r = std::dynamic_pointer_cast<Route> (s)) != 0) {

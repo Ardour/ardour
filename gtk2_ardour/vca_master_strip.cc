@@ -496,6 +496,7 @@ VCAMasterStrip::build_context_menu ()
 	items.push_back (MenuElem (_("Drop All Slaves"), sigc::mem_fun (*this, &VCAMasterStrip::drop_all_slaves)));
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Remove"), sigc::mem_fun (*this, &VCAMasterStrip::remove)));
+	items.push_back (MenuElem (_("Folderize"), sigc::mem_fun (*this, &VCAMasterStrip::folderize)));
 }
 
 void
@@ -518,6 +519,12 @@ VCAMasterStrip::spill_change (std::shared_ptr<Stripable> vca)
 		vertical_button.set_active_state (Gtkmm2ext::ExplicitActive);
 		set_tooltip (vertical_button, _("Click to show normal mixer"));
 	}
+}
+
+void
+VCAMasterStrip::folderize ()
+{
+	_session->folderize (_vca);
 }
 
 void
