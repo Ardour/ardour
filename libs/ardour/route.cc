@@ -397,10 +397,9 @@ Route::process_output_buffers (BufferSet& bufs,
 
 	PBD::RWLock::ReaderLock lm (_processor_lock, PBD::RWLock::TryLock);
 	if (!lm.locked()) {
-		// can this actually happen?
+		// This happens rarely on moving tracks.
 		// Places that need a WriterLock on (_processor_lock) must also take the process-lock.
 		bufs.silence (nframes, 0);
-		assert (0); // ...one way to find out.
 		return;
 	}
 
