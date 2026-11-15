@@ -104,6 +104,7 @@ private:
 	void hide_confirmation (int);
 	void self_delete ();
 	void remove ();
+	void folderize ();
 	void drop_all_slaves ();
 	void assign_all_selected ();
 	void unassign_all_selected ();
