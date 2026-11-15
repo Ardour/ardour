@@ -52,6 +52,7 @@ FolderStreamView::refill_region_map ()
 
 		std::shared_ptr<Playlist> pl (t->playlist());
 
+		t->PlaylistChanged.connect (listening, invalidator(*this), std::bind (&FolderStreamView::change_happened, this), gui_context());
 		pl->ContentsChanged.connect (listening, invalidator(*this), std::bind (&FolderStreamView::change_happened, this), gui_context());
 
 		PositionList positions;
