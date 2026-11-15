@@ -6,6 +6,7 @@
 #include "gtkmm2ext/colors.h"
 
 #include "editing_context.h"
+#include "gui_thread.h"
 #include "folder_streamview.h"
 
 using namespace ArdourCanvas;
@@ -30,6 +31,13 @@ FolderStreamView::set_height (int h)
 }
 
 void
+FolderStreamView::change_happened ()
+{
+	refill_region_map ();
+	redraw ();
+}
+
+void
 FolderStreamView::refill_region_map ()
 {
 	std::vector<std::shared_ptr<Track>> tracks;
@@ -37,13 +45,15 @@ FolderStreamView::refill_region_map ()
 
 	_folder->get_content_tracks (tracks);
 
-	std::cerr << "FSV refilling from " << tracks.size() << std::endl;
-
 	region_map.clear ();
+	listening.drop_connections ();
 
 	for (auto const & t : tracks) {
 
 		std::shared_ptr<Playlist> pl (t->playlist());
+
+		pl->ContentsChanged.connect (listening, invalidator(*this), std::bind (&FolderStreamView::change_happened, this), gui_context());
+
 		PositionList positions;
 
 		std::shared_ptr<RegionList> rl (pl->region_list());
