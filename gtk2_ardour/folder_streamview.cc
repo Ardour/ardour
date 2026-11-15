@@ -48,8 +48,6 @@ FolderStreamView::refill_region_map ()
 
 		std::shared_ptr<RegionList> rl (pl->region_list());
 
-		std::cerr << " For " << t->name() << " got rl of " << rl->size() << std::endl;
-
 		for (auto const & r : *rl) {
 			RegionDuration rd (r->position(), r->end_position());
 			max_time = std::max (max_time, r->end_position());
@@ -89,19 +87,22 @@ FolderStreamView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> conte
 
 	for (auto & [track,positions] : region_map) {
 
-		set_source_rgba (context, track->presentation_info().color ());
+		Gtkmm2ext::Color fill_color (track->presentation_info().color ());
+		Gtkmm2ext::Color stroke_color (Gtkmm2ext::HSV (fill_color).darker(1.1).color());
 
 		for (auto & pos : positions) {
 
-			Duple p0 (pos.first.samples() / spp, ypos);
-			Duple p1 (pos.second.samples() / spp, ypos + height_per_track);
+			Duple p0 (pos.first.samples() / spp, ypos + 1);
+			Duple p1 (pos.second.samples() / spp, ypos + height_per_track - 2);
 
 			p0 = item_to_window (p0);
 			p1 = item_to_window (p1);
 
 			/* draw rectangle with p0, p1 */
 			context->rectangle (p0.x, p0.y, p1.x - p0.x, p1.y - p0.y);
+			set_source_rgba (context, fill_color);
 			context->fill_preserve ();
+			set_source_rgba (context, stroke_color);
 			context->stroke ();
 		}
 
