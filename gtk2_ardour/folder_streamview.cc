@@ -81,8 +81,6 @@ FolderStreamView::compute_bounding_box () const
 void
 FolderStreamView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
-	std::cerr << "FSV render with height  " << _height << std::endl;
-
 	Container::render (area, context);
 
 	uint32_t ntracks = region_map.size();

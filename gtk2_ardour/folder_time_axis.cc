@@ -50,6 +50,7 @@ FolderTimeAxisView::FolderTimeAxisView (PublicEditor& ed, Session* s, ArdourCanv
 	: SessionHandlePtr (s)
 	, StripableTimeAxisView (ed, s, canvas)
 	, gain_meter (s, true, 75, 14) // XXX stupid magic numbers, match sizes in RouteTimeAxisView
+	, _expanded (true) /* will be reset in ::set_folder() */
 	, _streamview (nullptr)
 	, automation_action_menu (nullptr)
 {
@@ -84,26 +85,22 @@ FolderTimeAxisView::FolderTimeAxisView (PublicEditor& ed, Session* s, ArdourCanv
 	drop_button.set_tweaks(ArdourButton::TrackHeader);
 	automation_button.set_tweaks(ArdourButton::TrackHeader);
 
-	if (ARDOUR::Profile->get_mixbus()) {
-		controls_button_size_group->add_widget(mute_button);
+	expander.set_name ("route button");
+	expander.set_icon (ArdourIcon::ArrowRight);
+	set_tooltip (expander, _("Show/Hide Folder Contents"));
+	expander.set_can_focus (false);
+	expander.signal_button_press_event().connect (sigc::mem_fun (*this, &FolderTimeAxisView::expand_collapse), false);
+	expander.set_tweaks (ArdourButton::TrackHeader);
 
-		Gtk::Fixed *blank = manage(new Gtk::Fixed());
-		controls_button_size_group->add_widget(*blank);
-		controls_table.attach (*blank, 0, 1, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
-		blank->show();
+	controls_button_size_group->add_widget (expander);
+	controls_table.attach (expander, 0, 1, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+	expander.show();
 
-		controls_table.attach (mute_button, 1, 2, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
-		controls_table.attach (solo_button, 2, 3, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
-		controls_table.attach (automation_button, 1, 2, 2, 3, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
-		controls_table.attach (drop_button, 2, 3, 2, 3, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
-		controls_table.attach (gain_meter.get_gain_slider(), 3, 5, 2, 3, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 1, 0);
-	} else {
-		controls_table.attach (mute_button, 2, 3, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
-		controls_table.attach (solo_button, 3, 4, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
-		controls_table.attach (automation_button, 2, 3, 1, 2, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
-		controls_table.attach (drop_button, 3, 4, 1, 2, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
-		controls_table.attach (gain_meter.get_gain_slider(), 0, 2, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 1, 0);
-	}
+	controls_table.attach (mute_button, 2, 3, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+	controls_table.attach (solo_button, 3, 4, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+	controls_table.attach (automation_button, 2, 3, 1, 2, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+	controls_table.attach (drop_button, 3, 4, 1, 2, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+	controls_table.attach (gain_meter.get_gain_slider(), 0, 2, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 1, 0);
 
 	mute_button.show ();
 	solo_button.show ();
@@ -126,6 +123,31 @@ FolderTimeAxisView::~FolderTimeAxisView ()
 	delete _streamview;
 	delete automation_action_menu;
 	CatchDeletion (this);
+}
+
+bool
+FolderTimeAxisView::expand_collapse (GdkEventButton*)
+{
+	std::vector<TimeAxisView*> tavs;
+	std::vector<std::shared_ptr<Track>> tracks;
+
+	_folder->get_content_tracks (tracks);
+
+	for (auto const & t : tracks) {
+		TimeAxisView* stav = _editor.time_axis_view_from_stripable (t);
+		if (stav) {
+			tavs.push_back (stav);
+		}
+	}
+
+	for (auto & tav : tavs) {
+		tav->set_marked_for_display (_expanded ? false : true);
+	}
+
+	_expanded = !_expanded;
+	expander.set_icon (_expanded ? ArdourIcon::ArrowLeft : ArdourIcon::ArrowRight);
+
+	return true;
 }
 
 void
@@ -208,6 +230,8 @@ FolderTimeAxisView::set_folder (std::shared_ptr<Folder> f)
 	update_solo_display ();
 	update_mute_display ();
 	update_track_number_visibility ();
+
+	expand_collapse (nullptr);
 }
 
 void

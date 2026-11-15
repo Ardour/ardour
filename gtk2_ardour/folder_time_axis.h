@@ -67,9 +67,10 @@ protected:
 	ArdourWidgets::ArdourButton    automation_button;
 	ArdourWidgets::ArdourButton    drop_button;
 	ArdourWidgets::ArdourButton    number_label;
+	ArdourWidgets::ArdourButton    expander;
 	GainMeterBase                  gain_meter;
 	PBD::ScopedConnectionList      folder_connections;
-
+	bool                           _expanded;
 	FolderStreamView*              _streamview;
 
 	void create_gain_automation_child (const Evoral::Parameter &, bool);
@@ -98,5 +99,7 @@ protected:
 
 	void drop_all_slaves ();
 	void choose_color ();
+
+	bool expand_collapse (GdkEventButton*);
 };
 
