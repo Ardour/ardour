@@ -413,7 +413,7 @@ LIB_ERROR="F"
 LD_PATH=`pwd`/${BUNDLE_DIR}/lib
 
 # check the main App(s)
-LDD_RESULT=$(LANG=C LD_LIBRARY_PATH=${LD_PATH} ldd ${BUNDLE_DIR}/*/${PGM_NAME_LOWER}-* 2>&1 | grep "not found/")
+LDD_RESULT=$(LANG=C LD_LIBRARY_PATH=${LD_PATH} ldd ${BUNDLE_DIR}/*/${PGM_NAME_LOWER}-* 2>&1 | grep "not found")
 
 if [ -n "$LDD_RESULT" ];
 then
