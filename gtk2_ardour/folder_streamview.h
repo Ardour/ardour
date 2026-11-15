@@ -12,7 +12,7 @@ namespace ARDOUR {
 
 class EditingContext;
 
-class FolderStreamView : public ArdourCanvas::Container
+class FolderStreamView : public ArdourCanvas::Container, public sigc::trackable
 {
    public:
 	FolderStreamView (EditingContext& ec, ArdourCanvas::Item* parent, std::shared_ptr<ARDOUR::Folder> folder);
@@ -32,5 +32,8 @@ class FolderStreamView : public ArdourCanvas::Container
 	double _height;
 	double max_x_extent;
 
+	PBD::ScopedConnectionList listening;
+
 	void refill_region_map ();
+	void change_happened ();
 };
