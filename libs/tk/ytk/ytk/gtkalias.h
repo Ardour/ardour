@@ -11935,9 +11935,6 @@ extern __typeof (gtk_type_flags_find_value) IA__gtk_type_flags_find_value __attr
 extern __typeof (gtk_type_flags_get_values) IA__gtk_type_flags_get_values __attribute((visibility("hidden")));
 #define gtk_type_flags_get_values IA__gtk_type_flags_get_values
 
-extern __typeof (gtk_type_init) IA__gtk_type_init __attribute((visibility("hidden")));
-#define gtk_type_init IA__gtk_type_init
-
 extern __typeof (gtk_type_new) IA__gtk_type_new __attribute((visibility("hidden")));
 #define gtk_type_new IA__gtk_type_new
 

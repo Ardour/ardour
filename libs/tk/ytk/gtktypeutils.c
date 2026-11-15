@@ -118,27 +118,6 @@ gtk_type_new (GtkType type)
   return object;
 }
 
-void
-gtk_type_init (GTypeDebugFlags debug_flags)
-{
-  static gboolean initialized = FALSE;
-  
-  if (!initialized)
-    {
-      GType unused;
-
-      initialized = TRUE;
-
-      /* initialize GLib type system
-       */
-      g_type_init_with_debug_flags (debug_flags);
-      
-      /* GTK_TYPE_OBJECT
-       */
-      unused = gtk_object_get_type ();
-    }
-}
-
 GType
 gtk_identifier_get_type (void)
 {

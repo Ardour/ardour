@@ -710,9 +710,6 @@ do_post_parse_initialization (int    *argc,
       g_warning ("Whoever translated default:LTR did so wrongly.\n");
   }
 
-  /* do what the call to gtk_type_init() used to do */
-  g_type_init ();
-
   _gtk_accel_map_init ();
   _gtk_rc_init ();
 

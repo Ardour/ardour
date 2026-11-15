@@ -11938,9 +11938,6 @@ extern __typeof (gtk_type_flags_find_value) gtk_type_flags_find_value __attribut
 #undef gtk_type_flags_get_values 
 extern __typeof (gtk_type_flags_get_values) gtk_type_flags_get_values __attribute((alias("IA__gtk_type_flags_get_values"), visibility("default")));
 
-#undef gtk_type_init 
-extern __typeof (gtk_type_init) gtk_type_init __attribute((alias("IA__gtk_type_init"), visibility("default")));
-
 #undef gtk_type_new 
 extern __typeof (gtk_type_new) gtk_type_new __attribute((alias("IA__gtk_type_new"), visibility("default")));
 
