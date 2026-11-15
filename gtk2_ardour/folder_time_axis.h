@@ -33,6 +33,8 @@ namespace ARDOUR {
 	class Folder;
 }
 
+class FolderStreamView;
+
 class FolderTimeAxisView : public StripableTimeAxisView
 {
 public:
@@ -67,6 +69,8 @@ protected:
 	ArdourWidgets::ArdourButton    number_label;
 	GainMeterBase                  gain_meter;
 	PBD::ScopedConnectionList      folder_connections;
+
+	FolderStreamView*              _streamview;
 
 	void create_gain_automation_child (const Evoral::Parameter &, bool);
 	void create_trim_automation_child (const Evoral::Parameter &, bool) {}
