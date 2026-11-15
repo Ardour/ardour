@@ -110,10 +110,7 @@ public:
 	bool is_midi_track () const;
 	bool has_audio_outputs () const;
 
-	std::shared_ptr<ARDOUR::Route> route () const
-	{
-		return _route;
-	}
+	std::shared_ptr<ARDOUR::Route> route () const  { return _route; }
 	std::shared_ptr<ARDOUR::RouteGroup> route_group () const;
 
 	std::shared_ptr<ARDOUR::Track>      track () const;
