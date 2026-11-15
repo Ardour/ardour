@@ -626,7 +626,7 @@ then
 			else
 				# Not a member of an audio group. Try to fix it.
 				
-				if ${NORM_USER} "${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/bin/sanityCheck -hasgroup audio > /dev/null && find /etc/security -type f -name "*.conf" | xargs grep -q "^@audio.*rtprio" ";
+				if ${NORM_USER} "${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/bin/sanityCheck -hasgroup audio > /dev/null && find /etc/security -type f -name '*.conf' | xargs grep -q '^@audio.*rtprio'";
 				then
 					# add user to audio group
 					echo ""
@@ -647,7 +647,7 @@ then
 						read -p "Press ENTER to continue:" BLAH
 					fi
 
-				elif ${NORM_USER} "${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/bin/sanityCheck -hasgroup jackuser > /dev/null && find /etc/security -type f -name "*.conf" | xargs grep -q "^@jackuser.*rtprio" ";
+				elif ${NORM_USER} "${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/bin/sanityCheck -hasgroup jackuser > /dev/null && find /etc/security -type f -name '*.conf' | xargs grep -q '^@jackuser.*rtprio'";
 				then
 					# add user to jackuser group
 					echo ""
