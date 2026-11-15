@@ -1672,10 +1672,13 @@ VST3PI::restartComponent (int32 flags)
 		/* Note: If this is initiated by the AudioProcessor, we should also notify
 		 * and restart the EditController.
 		 */
-		Stripable* s = dynamic_cast<Stripable*> (_owner);
-		if (s) {
-			s->session ().butler ()->delegate ([this]() { deactivate(); activate (); } );
-		}
+		g_idle_add_full (G_PRIORITY_HIGH_IDLE, [](gpointer arg) -> gboolean {
+				VST3PI* self = (VST3PI*)arg;
+				self->deactivate ();
+				self->activate ();
+				return false;
+				},
+			this, NULL);
 	}
 	if (flags & Vst::kIoTitlesChanged) {
 		/* Input and/or Output bus titles have changed
