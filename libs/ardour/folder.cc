@@ -19,6 +19,8 @@
 #include "ardour/folder.h"
 #include "ardour/track.h"
 
+#include "pbd/i18n.h"
+
 using namespace ARDOUR;
 
 Folder::Folder (Session & s, std::string const & name, PresentationInfo const & pi)
@@ -30,6 +32,13 @@ int
 Folder::set_state (XMLNode const&, int)
 {
 	return 0;
+}
+
+XMLNode&
+Folder::get_state () const
+{
+	XMLNode* root = new XMLNode (X_("Folder"));
+	return *root;
 }
 
 void
