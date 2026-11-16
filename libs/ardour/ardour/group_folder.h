@@ -28,6 +28,8 @@ class LIBARDOUR_API GroupFolder : public Folder
   public:
 	GroupFolder (std::shared_ptr<RouteGroup>, Session &, std::string const &, PresentationInfo const &);
 
+	std::shared_ptr<Stripable> get_master_stripable() const;
+
 	int set_state (XMLNode const&, int);
 	XMLNode& get_state() const;
 

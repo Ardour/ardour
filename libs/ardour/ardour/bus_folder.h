@@ -28,6 +28,8 @@ class LIBARDOUR_API BusFolder : public Folder
   public:
 	BusFolder (std::shared_ptr<Route>, Session &, std::string const &, PresentationInfo const &);
 
+	std::shared_ptr<Stripable> get_master_stripable() const { return _bus; }
+
 	int set_state (XMLNode const&, int);
 	XMLNode& get_state() const;
 

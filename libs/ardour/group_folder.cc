@@ -17,6 +17,7 @@
  */
 
 #include "ardour/group_folder.h"
+#include "ardour/session.h"
 
 #include "pbd/i18n.h"
 
@@ -26,6 +27,26 @@ GroupFolder::GroupFolder (std::shared_ptr<RouteGroup> grp, Session & s, std::str
 	: Folder (s, name, pi)
 	, _group (grp)
 {
+	/* Having the enabled at present will cause a crash when we hide members */
+	_group->set_select (false);
+
+	StripableList sl = _session.get_stripables ();
+
+	for (auto & s : sl) {
+		if (s->route_group() == _group) {
+			_contents.push_back (s);
+		}
+	}
+}
+
+std::shared_ptr<Stripable>
+GroupFolder::get_master_stripable() const
+{
+	std::shared_ptr<Route> bus (_group->subgroup_bus().lock());
+	if (bus) {
+		return bus;
+	}
+	return nullptr;
 }
 
 int
