@@ -27,7 +27,7 @@ GroupFolder::GroupFolder (std::shared_ptr<RouteGroup> grp, Session & s, std::str
 	: Folder (s, name, pi)
 	, _group (grp)
 {
-	/* Having the enabled at present will cause a crash when we hide members */
+	/* Having this enabled at present will cause a crash when we hide members */
 	_group->set_select (false);
 
 	StripableList sl = _session.get_stripables ();
