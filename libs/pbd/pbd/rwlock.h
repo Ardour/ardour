@@ -18,7 +18,9 @@
 
 #pragma once
 
+#include <map>
 #include <shared_mutex>
+#include <thread>
 
 #include "pbd/libpbd_visibility.h"
 
@@ -67,10 +69,53 @@ public:
 	}
 
 private:
+	class shared_recursive_mutex : public std::shared_mutex
+	{
+	public:
+		void lock_shared ()
+		{
+			std::thread::id id = std::this_thread::get_id ();
+			if (_count[id] > 0) {
+				++_count[id];
+			} else {
+				std::shared_mutex::lock_shared ();
+				_count[id] = 1;
+			}
+		}
+
+		bool try_lock_shared ()
+		{
+			std::thread::id id = std::this_thread::get_id ();
+			if (_count[id] > 0) {
+				++_count[id];
+				return true;
+			} else if (std::shared_mutex::try_lock_shared ()) {
+				_count[id] = 1;
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		void unlock_shared ()
+		{
+			std::thread::id id = std::this_thread::get_id ();
+			if (_count[id] > 1) {
+				--_count[id];
+			} else {
+				_count[id] = 0;
+				std::shared_mutex::unlock_shared ();
+			}
+		}
+
+	private:
+		std::map<std::thread::id, unsigned int> _count;
+	};
+
 	RWLock (const RWLock&)            = delete;
 	RWLock& operator= (const RWLock&) = delete;
 
-	std::shared_mutex _rw_lock;
+	shared_recursive_mutex _rw_lock;
 };
 
 class LIBPBD_API RWLock::ReaderLock

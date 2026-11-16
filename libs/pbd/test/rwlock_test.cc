@@ -30,6 +30,20 @@ RWLockTest::single_thread_test ()
 	/* leaving the scope releases ReaderLock */
 }
 
+void
+RWLockTest::thread_local_test ()
+{
+	PBD::RWLock  rwlock1;
+	PBD::RWLock  rwlock2;
+	{
+		RWLock::ReaderLock r1 (rwlock1);
+		RWLock::ReaderLock r2 (rwlock2);
+
+		CPPUNIT_ASSERT (r1.locked());
+		CPPUNIT_ASSERT (r2.locked());
+	}
+}
+
 /* ****************************************************************************/
 
 #define N_WORKERS 3
@@ -58,7 +72,7 @@ RWLockTest::run_thread_test ()
 	}
 
 	sched_yield ();
-	g_usleep (100);
+	g_usleep (100000);
 
 	/* worker thread(s) should hold read-lock by now */
 	RWLock::WriterLock wl (_rwlock, RWLock::NotLock);
