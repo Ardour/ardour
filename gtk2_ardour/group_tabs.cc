@@ -488,6 +488,7 @@ GroupTabs::get_menu (std::shared_ptr<RouteGroup> g, bool in_tab_area)
 		}
 
 		items.push_back (SeparatorElem());
+		items.push_back (MenuElem (_("Folderize"), SAFE_BIND (folderize, wg)));
 	}
 
 	add_menu_items (_menu, g);
@@ -782,6 +783,12 @@ void
 GroupTabs::subgroup (std::shared_ptr<RouteGroup> g, bool aux, Placement placement)
 {
 	g->make_subgroup (aux, placement);
+}
+
+void
+GroupTabs::folderize (std::shared_ptr<RouteGroup> g)
+{
+	_session->folderize (g);
 }
 
 void

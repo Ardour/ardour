@@ -133,6 +133,7 @@ private:
 	void edit_group (std::shared_ptr<ARDOUR::RouteGroup>);
 	void subgroup (std::shared_ptr<ARDOUR::RouteGroup>, bool, ARDOUR::Placement);
 	void un_subgroup (std::shared_ptr<ARDOUR::RouteGroup>);
+	void folderize (std::shared_ptr<ARDOUR::RouteGroup>);
 	void activate_all ();
 	void disable_all ();
 	void remove_group (std::shared_ptr<ARDOUR::RouteGroup>);
