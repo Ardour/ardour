@@ -28,6 +28,8 @@ class LIBARDOUR_API VCAFolder : public Folder
   public:
 	VCAFolder (std::shared_ptr<VCA>, Session &, std::string const &, PresentationInfo const &);
 
+	std::shared_ptr<Stripable> get_master_stripable() const { return _vca; }
+
 	int set_state (XMLNode const&, int);
 	XMLNode& get_state() const;
 
