@@ -41,6 +41,7 @@ class LIBARDOUR_API Folder : public Stripable, virtual public PBD::Stateful
 
 	void get_contents (std::vector<std::shared_ptr<Stripable>> &) const;
 	void get_content_tracks (std::vector<std::shared_ptr<Track>> &) const;
+	virtual std::shared_ptr<Stripable> get_master_stripable() const { return nullptr; }
 
 	virtual void add (std::shared_ptr<Stripable>);
 	virtual void add (std::vector<std::shared_ptr<Stripable>>);
