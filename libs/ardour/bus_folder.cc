@@ -17,6 +17,8 @@
  */
 
 #include "ardour/bus_folder.h"
+#include "ardour/route.h"
+#include "ardour/session.h"
 
 #include "pbd/i18n.h"
 
@@ -26,6 +28,14 @@ BusFolder::BusFolder (std::shared_ptr<Route> bus, Session & s, std::string const
 	: Folder (s, name, pi)
 	, _bus (bus)
 {
+	StripableList sl = _session.get_stripables ();
+
+	for (auto & s : sl) {
+		std::shared_ptr<Route> r (std::dynamic_pointer_cast<Route> (s));
+		if (r && r->feeds (_bus)) {
+			_contents.push_back (s);
+		}
+	}
 }
 
 int
