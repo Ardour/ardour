@@ -144,6 +144,12 @@ FolderTimeAxisView::expand_collapse (GdkEventButton*)
 		tav->set_marked_for_display (_expanded ? false : true);
 	}
 
+	std::shared_ptr<Stripable> master (_folder->get_master_stripable());
+	TimeAxisView* mtav = _editor.time_axis_view_from_stripable (master);
+	if (mtav) {
+		mtav->set_marked_for_display (_expanded ? false : true);
+	}
+
 	_expanded = !_expanded;
 	expander.set_icon (_expanded ? ArdourIcon::ArrowLeft : ArdourIcon::ArrowRight);
 
