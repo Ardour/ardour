@@ -1087,7 +1087,7 @@ VST3PluginInfo::load (Session& session)
 		plugin.reset (new VST3Plugin (session.engine (), session, plug));
 		plugin->set_info (PluginInfoPtr (shared_from_this ()));
 		return plugin;
-	} catch (failed_constructor& err) {
+	} catch (...) {
 		;
 	}
 
