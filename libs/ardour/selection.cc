@@ -641,7 +641,8 @@ CoreSelection::get_stripables_for_op (StripableList& sl, std::shared_ptr<Stripab
 			std::shared_ptr<RouteGroup> rg = r->route_group();
 
 			if (rg && rg->is_active() && ((rg.get())->*group_predicate)()) {
-				for (auto & r : *rg->route_list()) {
+				std::shared_ptr<RouteList> rl (rg->route_list());
+				for (auto & r : *rl) {
 					sl.push_back (r);
 				}
 			} else {
@@ -678,7 +679,8 @@ CoreSelection::get_stripables_for_op (StripableList& sl, std::shared_ptr<Stripab
 				std::shared_ptr<RouteGroup> rg = r->route_group();
 
 				if (rg && rg->is_active() && ((rg.get())->*group_predicate)()) {
-					for (auto & r : *rg->route_list()) {
+					std::shared_ptr<RouteList> rl (rg->route_list());
+					for (auto & r : *rl) {
 						sl.push_back (r);
 					}
 				} else {
