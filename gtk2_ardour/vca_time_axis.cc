@@ -31,6 +31,7 @@
 #include "gtkmm2ext/utils.h"
 #include "widgets/tooltips.h"
 
+#include "ardour_message.h"
 #include "gui_thread.h"
 #include "public_editor.h"
 #include "mixer_ui.h"
@@ -330,6 +331,15 @@ VCATimeAxisView::automation_click (GdkEventButton* ev)
 bool
 VCATimeAxisView::drop_release (GdkEventButton*)
 {
+
+	ArdourMessageDialog md (_("Are you sure you want to\ndisassociate this VCA?"), false, MESSAGE_QUESTION, BUTTONS_YES_NO);
+	md.set_title (_("Drop VCA Assignment"));
+	md.set_secondary_text (_("Removing the VCA assignment will apply any VCA fader and mute automation to the currently assigned tracks and busses."));
+
+	if (md.run () != RESPONSE_YES) {
+		return true;
+	}
+
 	_vca->Drop (); /* EMIT SIGNAL */
 
 	return true;
