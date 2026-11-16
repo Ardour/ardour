@@ -2777,6 +2777,18 @@ RCOptionEditor::RCOptionEditor ()
 	Gtkmm2ext::UI::instance()->set_tip (strobe->tip_widget(), _("If enabled, disables meters in editor &amp; mixer, running clock updates and most blinking."));
 	add_option (_("Appearance"), strobe);
 
+	ComboOption<Gtk::WindowPosition>* winpos = new ComboOption<Gtk::WindowPosition> (
+		     "default-window-position",
+		     _("Default location of new windows"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_default_window_position),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_default_window_position)
+		     );
+	winpos->add (Gtk::WIN_POS_CENTER, _("Center of screen"));
+	winpos->add (Gtk::WIN_POS_MOUSE, _("Mouse position"));
+	winpos->add (Gtk::WIN_POS_CENTER_ALWAYS, _("Center of screen, really"));
+	winpos->add (Gtk::WIN_POS_CENTER_ON_PARENT, _("Center of parent window"));
+	add_option (_("Appearance"), winpos);
+
 	add_option (_("Appearance/Recorder"), new OptionEditorHeading (_("Input Meter Layout")));
 
 	ComboOption<InputMeterLayout>* iml = new ComboOption<InputMeterLayout> (
@@ -3270,6 +3282,10 @@ These settings will only take effect after %1 is restarted.\n\
 	add_option (_("Appearance/Quirks"), bo);
 #endif
 
+#if (!defined USE_CAIRO_IMAGE_SURFACE || defined CAIRO_SUPPORTS_FORCE_BUGGY_GRADIENTS_ENVIRONMENT_VARIABLE || defined __APPLE__)
+	add_option (_("Appearance/Quirks"), new OptionEditorHeading (_("Graphics Acceleration")));
+#endif
+
 #ifdef __APPLE__
 	BoolOption* bco = new BoolOption (
 		"use-cocoa-invalidation",
@@ -3283,9 +3299,6 @@ These settings will only take effect after %1 is restarted.\n\
 #endif
 
 	add_option (_("Appearance/Quirks"), new OptionEditorBlank ());
-#if (!defined USE_CAIRO_IMAGE_SURFACE || defined CAIRO_SUPPORTS_FORCE_BUGGY_GRADIENTS_ENVIRONMENT_VARIABLE || defined __APPLE__)
-	add_option (_("Appearance"), new OptionEditorHeading (_("Graphics Acceleration")));
-#endif
 
 #ifndef USE_CAIRO_IMAGE_SURFACE
 	_cairo_image_surface = new BoolOption (
@@ -3297,7 +3310,7 @@ These settings will only take effect after %1 is restarted.\n\
 
 	Gtkmm2ext::UI::instance()->set_tip (_cairo_image_surface->tip_widget(), string_compose (
 				_("Render large parts of the application user-interface in software, instead of using 2D-graphics acceleration.\nThis requires restarting %1 before having an effect"), PROGRAM_NAME));
-	add_option (_("Appearance"), _cairo_image_surface);
+	add_option (_("Appearance/Quirks"), _cairo_image_surface);
 #endif
 
 #ifdef CAIRO_SUPPORTS_FORCE_BUGGY_GRADIENTS_ENVIRONMENT_VARIABLE
@@ -3309,20 +3322,8 @@ These settings will only take effect after %1 is restarted.\n\
 		);
 
 	Gtkmm2ext::UI::instance()->set_tip (bgo->tip_widget(), string_compose (_("Disables hardware gradient rendering on buggy video drivers (\"buggy gradients patch\").\nThis requires restarting %1 before having an effect"), PROGRAM_NAME));
-	add_option (_("Appearance"), bgo);
+	add_option (_("Appearance/Quirks"), bgo);
 #endif
-
-	ComboOption<Gtk::WindowPosition>* winpos = new ComboOption<Gtk::WindowPosition> (
-		     "default-window-position",
-		     _("Default location of new windows"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_default_window_position),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_default_window_position)
-		     );
-	winpos->add (Gtk::WIN_POS_CENTER, _("Center of screen"));
-	winpos->add (Gtk::WIN_POS_MOUSE, _("Mouse position"));
-	winpos->add (Gtk::WIN_POS_CENTER_ALWAYS, _("Center of screen, really"));
-	winpos->add (Gtk::WIN_POS_CENTER_ON_PARENT, _("Center of parent window"));
-	add_option (_("Appearance"), winpos);
 
 #if ENABLE_NLS
 
