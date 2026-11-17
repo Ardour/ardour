@@ -177,20 +177,14 @@ FolderTimeAxisView::parameter_changed (std::string const & p)
 bool
 FolderTimeAxisView::solo_release (GdkEventButton*)
 {
-	/* We use NoGroup because Folder controls are never part of a group. This
-	   is redundant, but clear.
-	*/
-	_folder->solo_control()->set_value (_folder->solo_control()->self_soloed() ? 0.0 : 1.0, Controllable::NoGroup);
+	_folder->solo_control()->set_value (_folder->solo_control()->self_soloed() ? 0.0 : 1.0, Controllable::UseGroup);
 	return true;
 }
 
 bool
 FolderTimeAxisView::mute_release (GdkEventButton*)
 {
-	/* We use NoGroup because Folder controls are never part of a group. This
-	   is redundant, but clear.
-	*/
-	_folder->mute_control()->set_value (_folder->mute_control()->muted_by_self() ? 0.0 : 1.0, Controllable::NoGroup);
+	_folder->mute_control()->set_value (_folder->mute_control()->muted_by_self() ? 0.0 : 1.0, Controllable::UseGroup);
 	return true;
 }
 
