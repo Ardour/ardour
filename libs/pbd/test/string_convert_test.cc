@@ -25,9 +25,11 @@ public:
 	// previous setting when going out of scope
 	LocaleGuard (const std::string& locale)
 	{
-		m_previous_locale = setlocale (LC_ALL, NULL);
+		const char* previous_locale = setlocale (LC_ALL, NULL);
 
-		CPPUNIT_ASSERT (m_previous_locale != NULL);
+		CPPUNIT_ASSERT (previous_locale != NULL);
+
+		m_previous_locale = previous_locale;
 
 		const char* new_locale = setlocale (LC_ALL, locale.c_str ());
 
@@ -40,11 +42,11 @@ public:
 
 	~LocaleGuard ()
 	{
-		CPPUNIT_ASSERT (setlocale (LC_ALL, m_previous_locale) != NULL);
+		CPPUNIT_ASSERT (setlocale (LC_ALL, m_previous_locale.c_str()) != NULL);
 	}
 
 private:
-	const char* m_previous_locale;
+	std::string m_previous_locale;
 };
 
 static
@@ -97,6 +99,8 @@ static std::vector<std::string> get_supported_locales ()
 
 	std::cerr << std::endl << "Original locale: " << m_orig_locale << std::endl;
 
+	std::string orig_locale (m_orig_locale);
+
 	for (std::vector<std::string>::const_iterator it = locales.begin(); it != locales.end(); ++it) {
 
 		const char* locale = it->c_str();
@@ -122,8 +126,8 @@ static std::vector<std::string> get_supported_locales ()
 		supported_locales.push_back (*it);
 	}
 
-	if (setlocale (LC_ALL, m_orig_locale) == NULL) {
-		std::cerr << "ERROR: Unable to restore original locale " << m_orig_locale
+	if (setlocale (LC_ALL, orig_locale.c_str()) == NULL) {
+		std::cerr << "ERROR: Unable to restore original locale " << orig_locale
 		          << ", further tests may be invalid." << std::endl;
 	}
 
