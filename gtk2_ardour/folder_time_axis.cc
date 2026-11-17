@@ -398,8 +398,6 @@ FolderTimeAxisView::set_height (uint32_t h, TrackHeightMode m, bool from_idle)
 		gain_meter.get_gain_slider().hide ();
 	}
 
-	std::cerr << "FTAV, sv = " << _streamview << std::endl;
-
 	if (_streamview) {
 		_streamview->set_height (h);
 	}
