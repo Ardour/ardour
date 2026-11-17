@@ -567,6 +567,10 @@ MidiRegionView::get_fill_color() const
 		c = fill_color;
 	}
 
+	if (_region->transient ()) {
+		c = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("neutral:foreground"), 0x60);
+	}
+
 	string mod_name = get_modifier_name();
 
 	if (mod_name.empty ()) {

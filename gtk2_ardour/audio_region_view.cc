@@ -403,6 +403,10 @@ AudioRegionView::get_fill_color () const
 		c = fill_color;
 	}
 
+	if (_region->transient ()) {
+		c = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("neutral:foreground"), 0x60);
+	}
+
 	if (opaque && ( !_dragging && !_region->muted () )) {
 		return c;
 	} else if (_dragging) {
@@ -1781,6 +1785,10 @@ AudioRegionView::set_some_waveform_colors (vector<ArdourWaveView::WaveView*>& wa
 	} else if (!_region->opaque() && trackview.layer_display () != Stacked) {
 		outline = UINT_RGBA_CHANGE_A(outline, 0x80);
 		fill = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("waveform fill"), 0x80);
+	}
+
+	if (_region->transient ()) {
+		fill = UINT_RGBA_CHANGE_A(fill, 0x40);
 	}
 
 	/* recorded region, override to red */
