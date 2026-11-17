@@ -42,6 +42,8 @@
 #include "time_fx_dialog.h"
 #include "timers.h"
 
+#include "temporal/tempo.h"
+
 #include <rubberband/RubberBandStretcher.h>
 using namespace RubberBand;
 
@@ -73,8 +75,14 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch, timecnt_t const & oldlen, tim
 	, duration_ratio (ratio)
 	, duration_adjustment (100.0, -1000.0, 1000.0, 1.0, 10.0)
 	, duration_clock (0)
+	, bpm_source_adjustment (0.0, 0.1, 1000.0, 0.1, 10.0)
+	, bpm_target_adjustment (0.0, 0.1, 1000.0, 0.1, 10.0)
+	, bpm_source_spinner (bpm_source_adjustment, 0.1, 1)
+	, bpm_target_spinner (bpm_target_adjustment, 0.1, 1)
 	, ignore_adjustment_change (false)
 	, ignore_clock_change (false)
+	, ignore_bpm_change (false)
+	, bpm_changed (false)
 	, progress (0.0f)
 {
 	set_modal (true);
@@ -168,6 +176,21 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch, timecnt_t const & oldlen, tim
 		table->attach (*spinner, 1, 2, row, row+1, Gtk::FILL, Gtk::FILL, 0, 0);
 		row++;
 
+		Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use ());
+		double session_bpm = tmap->quarters_per_minute_at (position);
+		bpm_source_adjustment.set_value (session_bpm);
+		bpm_target_adjustment.set_value (session_bpm / duration_ratio.to_double ());
+
+		l = manage (new Gtk::Label (_("Source BPM:")));
+		table->attach (*l, 0, 1, row, row+1, Gtk::FILL, Gtk::FILL, 0, 0);
+		table->attach (bpm_source_spinner, 1, 2, row, row+1, Gtk::FILL, Gtk::FILL, 0, 0);
+		row++;
+
+		l = manage (new Gtk::Label (_("Target BPM:")));
+		table->attach (*l, 0, 1, row, row+1, Gtk::FILL, Gtk::FILL, 0, 0);
+		table->attach (bpm_target_spinner, 1, 2, row, row+1, Gtk::FILL, Gtk::FILL, 0, 0);
+		row++;
+
 		table->attach (stretch_opts_label, 0, 1, row, row+1, Gtk::FILL, Gtk::EXPAND, 0, 0);
 
 		set_popdown_strings (stretch_opts_selector, editor.timefx_opt_strings);
@@ -181,6 +204,8 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch, timecnt_t const & oldlen, tim
 
 		duration_clock->ValueChanged.connect (sigc::mem_fun (*this, &TimeFXDialog::duration_clock_changed));
 		duration_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &TimeFXDialog::duration_adjustment_changed));
+		bpm_source_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &TimeFXDialog::bpm_spinners_changed));
+		bpm_target_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &TimeFXDialog::bpm_spinners_changed));
 
 		/* SoundTouch */
 		quick_button.set_name (N_("TimeFXButton"));
@@ -267,7 +292,10 @@ TimeFXDialog::get_time_fraction () const
 		return Temporal::ratio_t (1, 1);
 	}
 
-	if (duration_ratio != Temporal::ratio_t (1, 1)) {
+	/* if a ratio was preset at construction (e.g. by dragging a region
+	   edge) and the user has not since edited the BPM spinners, honor
+	   the exact preset ratio */
+	if (duration_ratio != Temporal::ratio_t (1, 1) && !bpm_changed) {
 		return duration_ratio;
 	}
 
@@ -312,6 +340,11 @@ TimeFXDialog::duration_adjustment_changed ()
 	timecnt_t dur = original_length.scale (Temporal::ratio_t (duration_adjustment.get_value() * 1000.0, 100000.0));
 
 	duration_clock->set_duration (dur);
+
+	/* keep the target BPM in sync with the new ratio (source BPM stays
+	   put); a ratio > 1 means the material will play at a higher tempo */
+	PBD::Unwinder<bool> uw2 (ignore_bpm_change, true);
+	bpm_target_adjustment.set_value (bpm_source_adjustment.get_value() * 100.0 / duration_adjustment.get_value());
 }
 
 void
@@ -324,6 +357,34 @@ TimeFXDialog::duration_clock_changed ()
 	PBD::Unwinder<bool> uw (ignore_adjustment_change, true);
 
 	duration_adjustment.set_value (100.0 * (duration_clock->current_duration() / original_length).to_double());
+
+	/* the adjustment's value-changed handler is suppressed above, so
+	   sync the target BPM here */
+	PBD::Unwinder<bool> uw2 (ignore_bpm_change, true);
+	bpm_target_adjustment.set_value (bpm_source_adjustment.get_value() * 100.0 / duration_adjustment.get_value());
+}
+
+void
+TimeFXDialog::bpm_spinners_changed ()
+{
+	if (ignore_bpm_change) {
+		return;
+	}
+
+	double src = bpm_source_adjustment.get_value ();
+	double dst = bpm_target_adjustment.get_value ();
+
+	if (dst <= 0.0) {
+		return;
+	}
+
+	bpm_changed = true;
+
+	/* the percent is new-length/old-length; material recorded at the
+	   source BPM must be stretched by source/target to play in time at
+	   the target BPM (lower target tempo => longer duration) */
+	PBD::Unwinder<bool> uw (ignore_bpm_change, true);
+	duration_adjustment.set_value (100.0 * src / dst);
 }
 
 void
