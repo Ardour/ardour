@@ -97,14 +97,21 @@ private:
 	Temporal::ratio_t   duration_ratio;
 	Gtk::Adjustment     duration_adjustment;
 	AudioClock*         duration_clock;
+	Gtk::Adjustment     bpm_source_adjustment;
+	Gtk::Adjustment     bpm_target_adjustment;
+	Gtk::SpinButton     bpm_source_spinner;
+	Gtk::SpinButton     bpm_target_spinner;
 	bool                ignore_adjustment_change;
 	bool                ignore_clock_change;
+	bool                ignore_bpm_change;
+	bool                bpm_changed;
 	sigc::connection    update_connection;
 	float               progress;
 
 	void update_progress_gui (float);
 	void duration_clock_changed ();
 	void duration_adjustment_changed ();
+	void bpm_spinners_changed ();
 	void timer_update ();
 	void options_changed ();
 };
