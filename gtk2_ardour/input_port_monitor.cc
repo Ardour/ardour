@@ -429,7 +429,7 @@ InputPortMonitor::InputScope::render (Cairo::RefPtr<Cairo::Context> const& cr, c
 	/* black border - compare to FastMeter::horizontal_expose */
 	cr->set_line_width (2.0);
 	Gtkmm2ext::rounded_rectangle (cr, 0, 0, get_width (), get_height (), boxy_buttons () ? 0 : 2);
-	cr->set_source_rgb (0, 0, 0); // black
+	Gtkmm2ext::set_source_rgba (cr, UIConfiguration::instance ().color ("meter outline"));
 	cr->stroke ();
 }
 
