@@ -313,10 +313,9 @@ public:
 	Gtk::ComboBoxText channel_combo;
 	Gtk::ComboBoxText src_combo;
 	Gtk::ComboBoxText midi_track_name_combo;
+	Gtk::ComboBoxText file_reference_combo;
 	InstrumentSelector instrument_combo;
 
-	Gtk::CheckButton transient_btn;
-	Gtk::CheckButton copy_files_btn;
 	Gtk::CheckButton smf_tempo_btn;
 	Gtk::CheckButton smf_marker_btn;
 
