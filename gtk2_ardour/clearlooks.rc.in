@@ -858,6 +858,19 @@ style "midi_track_base" = "default"
 	bg[SELECTED] = @background
 }
 
+style "transient_track_base" = "default"
+{
+	font_name = " 8"
+	fg[NORMAL] = @foreground
+	fg[ACTIVE] = darker(@foreground)
+
+	bg[NORMAL] = @darkest
+	bg[ACTIVE] = @background
+	bg[PRELIGHT] = @background
+	bg[INSENSITIVE] = @background
+	bg[SELECTED] = @background
+}
+
 style "audio_track_fader" = "gain_fader"
 {
 	bg[PRELIGHT] = @audio_track
@@ -1210,6 +1223,9 @@ widget "*TimeAxisViewControlsBaseUnselected" style:highest "audio_track_base"
 widget "*AudioTrackControlsBaseUnselected" style:highest "audio_track_base"
 widget "*MidiTrackControlsBaseUnselected" style:highest "midi_track_base"
 widget "*ControlMasterBaseUnselected" style:highest "control_master_base"
+
+widget "*TansientTrackBaseSelected" style:highest "track_header_selected"
+widget "*TansientTrackBaseUnselected" style:highest "transient_track_base"
 
 widget "*SendUIFader" style:highest "plugin_slider"
 widget "*ReturnUIFader" style:highest "plugin_slider"

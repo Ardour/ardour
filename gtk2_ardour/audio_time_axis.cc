@@ -96,14 +96,6 @@ AudioTimeAxisView::set_route (std::shared_ptr<Route> rt)
 	// Make sure things are sane...
 	assert(!is_track() || is_audio_track());
 
-	if (is_audio_track()) {
-		controls_ebox.set_name ("AudioTrackControlsBaseUnselected");
-		time_axis_frame.set_name ("AudioTrackControlsBaseUnselected");
-	} else { // bus
-		controls_ebox.set_name ("AudioBusControlsBaseUnselected");
-		time_axis_frame.set_name ("AudioBusControlsBaseUnselected");
-	}
-
 	/* if set_state above didn't create a gain automation child, we need to make one */
 	if (automation_child (GainAutomation) == 0) {
 		create_automation_child (GainAutomation, false);
@@ -131,6 +123,7 @@ AudioTimeAxisView::set_route (std::shared_ptr<Route> rt)
 	update_control_names ();
 
 	if (is_audio_track()) {
+		_route->presentation_info().PropertyChanged.connect (*this, invalidator (*this), std::bind (&AudioTimeAxisView::route_property_changed, this, _1), gui_context ());
 
 		/* ask for notifications of any new RegionViews */
 		_view->RegionViewAdded.connect (sigc::mem_fun(*this, &AudioTimeAxisView::region_view_added));
@@ -300,7 +293,10 @@ void
 AudioTimeAxisView::update_control_names ()
 {
 	if (is_audio_track()) {
-		if (_route->active()) {
+		if (_route->is_transient() && _route->active()) {
+			controls_base_selected_name = "TansientTrackBaseSelected";
+			controls_base_unselected_name = "TansientTrackBaseUnselected";
+		} else if (_route->active()) {
 			controls_base_selected_name = "AudioTrackControlsBaseSelected";
 			controls_base_unselected_name = "AudioTrackControlsBaseUnselected";
 		} else {
@@ -323,6 +319,14 @@ AudioTimeAxisView::update_control_names ()
 	} else {
 		controls_ebox.set_name (controls_base_unselected_name);
 		time_axis_frame.set_name (controls_base_unselected_name);
+	}
+}
+
+void
+AudioTimeAxisView::route_property_changed (PBD::PropertyChange const& what_changed)
+{
+	if (what_changed.contains (Properties::transient)) {
+		update_control_names ();
 	}
 }
 

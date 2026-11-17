@@ -94,6 +94,7 @@ private:
 	void build_automation_action_menu (bool);
 
 	void update_control_names ();
+	void route_property_changed (PBD::PropertyChange const&);
 };
 
 

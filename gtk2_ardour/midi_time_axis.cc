@@ -1441,7 +1441,10 @@ void
 MidiTimeAxisView::update_control_names ()
 {
 	if (is_track()) {
-		if (_route->active()) {
+		if (_route->is_transient() && _route->active()) {
+			controls_base_selected_name = "TansientTrackBaseSelected";
+			controls_base_unselected_name = "TansientTrackBaseUnselected";
+		} else if (_route->active()) {
 			controls_base_selected_name = "MidiTrackControlsBaseSelected";
 			controls_base_unselected_name = "MidiTrackControlsBaseUnselected";
 		} else {
