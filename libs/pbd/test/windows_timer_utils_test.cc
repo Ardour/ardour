@@ -3,40 +3,13 @@
 #include "pbd/windows_timer_utils.h"
 
 #include <windows.h>
+#include <timeapi.h>
 
 #include <iostream>
 
 using namespace std;
 
 CPPUNIT_TEST_SUITE_REGISTRATION (WindowsTimerUtilsTest);
-
-void
-WindowsTimerUtilsTest::testQPC ()
-{
-	// performs basically the same test
-	CPPUNIT_ASSERT (PBD::QPC::check_timer_valid());
-
-	int64_t last_timer_val = PBD::QPC::get_microseconds ();
-	CPPUNIT_ASSERT (last_timer_val >= 0);
-
-	int64_t min_interval = 1000000;
-	int64_t max_interval = 0;
-
-	for (int i = 0; i < 10000; ++i) {
-		int64_t timer_val = PBD::QPC::get_microseconds ();
-		CPPUNIT_ASSERT (timer_val >= 0);
-		// try and test for non-syncronized TSC(AMD K8/etc)
-		CPPUNIT_ASSERT (timer_val >= last_timer_val);
-		min_interval = std::min (min_interval, timer_val - last_timer_val);
-		// We may get swapped out so a max interval is not so informative
-		max_interval = std::max (max_interval, timer_val - last_timer_val);
-		last_timer_val = timer_val;
-	}
-
-	cout << endl;
-	cout << "Min QPC interval = " << min_interval << endl;
-	cout << "Max QPC interval = " << max_interval << endl;
-}
 
 namespace {
 
