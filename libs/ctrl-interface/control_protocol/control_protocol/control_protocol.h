@@ -68,6 +68,7 @@ public:
 
 	typedef void (ControlProtocol::*SurfaceCallback) (ARDOUR::SurfaceCallbackType, void* arg);
 	SurfaceCallback surface_callback;
+	virtual std::vector<ARDOUR::SurfaceCallbackType> supported_surface_callbacks() const { return std::vector<ARDOUR::SurfaceCallbackType>(); }
 
 	PBD::Signal<void()> ActiveChanged;
 
