@@ -1673,6 +1673,7 @@ VST3PI::restartComponent (int32 flags)
 		update_shadow_data ();
 	}
 	if (flags & Vst::kLatencyChanged) {
+#if 0
 		/* Note: If this is initiated by the AudioProcessor, we should also notify
 		 * and restart the EditController.
 		 */
@@ -1683,6 +1684,9 @@ VST3PI::restartComponent (int32 flags)
 				return false;
 				},
 			this, NULL);
+#else
+		_plugin_latency.reset ();
+#endif
 	}
 	if (flags & Vst::kIoTitlesChanged) {
 		/* Input and/or Output bus titles have changed
