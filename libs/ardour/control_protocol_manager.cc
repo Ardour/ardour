@@ -361,6 +361,18 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi, bool lock_required)
 	cpi.state = new XMLNode (cpi.protocol->get_state ());
 	cpi.state->set_property (X_("active"), false);
 
+	if (cpi.protocol->surface_callback) {
+		std::vector<SurfaceCallbackType> stcs = cpi.protocol->supported_surface_callbacks ();
+		if (!stcs.empty()) {
+			for (auto stc : stcs) {
+				if (_supported_surface_callbacks[stc]) {
+					_supported_surface_callbacks[stc]--;
+				}
+			}
+			SupportedSurfaceCallbackChange (); /* EMIT SIGNAL */
+		}
+	}
+
 	cpi.descriptor->destroy (cpi.protocol);
 
 	PBD::RWLock::WriterLock lm (_protocols_lock, PBD::RWLock::NotLock);
@@ -371,20 +383,6 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi, bool lock_required)
 
 	list<ControlProtocol*>::iterator p = find (_control_protocols.begin (), _control_protocols.end (), cpi.protocol);
 	if (p != _control_protocols.end ()) {
-
-		if ((*p)->surface_callback) {
-			std::vector<SurfaceCallbackType> stcs = (*p)->supported_surface_callbacks ();
-			if (!stcs.empty()) {
-				for (auto stc : stcs) {
-					if (_supported_surface_callbacks[stc]) {
-						_supported_surface_callbacks[stc]--;
-					}
-				}
-				SupportedSurfaceCallbackChange (); /* EMIT SIGNAL */
-			}
-		}
-
-
 		_control_protocols.erase (p);
 	} else {
 		cerr << "Programming error: ControlProtocolManager::teardown() called for " << cpi.name << ", but it was not found in control_protocols" << endl;
