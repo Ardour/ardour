@@ -785,7 +785,7 @@ ControlProtocolManager::do_surface_callback (bool only_once, SurfaceCallbackType
 		ControlProtocol::SurfaceCallback sc = p->surface_callback;
 		if (sc) {
 			lm.release ();
-			(p->*sc) (type, arg);
+			sc (type, arg);
 			if (only_once) {
 				return;
 			}
