@@ -2455,16 +2455,28 @@ MackieControlProtocol::stripable_selection_changed ()
 		std::shared_ptr<Stripable> ss = ControlProtocol::first_selected_stripable ();
 		if (ss) {
 			if (!is_mapped (ss)) {
-#ifdef MIXBUS
-				switch_banks (ss->presentation_info().order(), false);
-#else
-				/* In Ardour, sane order values start at 1, due
-				   to master etc. not really being ordered in
-				   any particular way (so zero is a kind of
-				   sentinel value).
-				*/
-				switch_banks (ss->presentation_info().order() - 1, false);
-#endif
+
+				Sorted sorted = get_sorted_stripables();
+				int32_t n = 0;
+				bool found = false;
+
+				/* find the ordinal for the first selected
+				 * stripable among the currently visible
+				 * stripables. Note: it may not be visible due
+				 * to a subview modes.
+				 */
+
+				for (auto const & s : sorted) {
+					if (s == ss) {
+						found = true;
+						break;
+					}
+					++n;
+				}
+
+				if (found) {
+					switch_banks (n, false);
+				}
 			}
 		}
 	}
