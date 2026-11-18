@@ -241,25 +241,6 @@ MackieControlProtocol::stripable_is_locked_to_strip (std::shared_ptr<Stripable> 
 	return false;
 }
 
-// predicate for sort call in get_sorted_stripables
-struct StripableByPresentationOrder
-{
-	bool operator () (const std::shared_ptr<Stripable> & a, const std::shared_ptr<Stripable> & b) const
-	{
-		return a->presentation_info().order() < b->presentation_info().order();
-	}
-
-	bool operator () (const Stripable & a, const Stripable & b) const
-	{
-		return a.presentation_info().order() < b.presentation_info().order();
-	}
-
-	bool operator () (const Stripable * a, const Stripable * b) const
-	{
-		return a->presentation_info().order() < b->presentation_info().order();
-	}
-};
-
 struct mcpStripableSorter
 {
 	bool operator () (const std::shared_ptr<Stripable> & a, const std::shared_ptr<Stripable> & b) const
