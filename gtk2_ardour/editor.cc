@@ -76,7 +76,6 @@
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
 #include "ardour/audioregion.h"
-#include "ardour/control_protocol_manager.h"
 #include "ardour/lmath.h"
 #include "ardour/location.h"
 #include "ardour/midi_track.h"
@@ -219,8 +218,6 @@ static const gchar *_timefx_opt_strings[] = {
 #endif
 	0
 };
-
-PBD::ScopedConnection ssc_connection;
 
 Editor::Editor ()
 	: PublicEditor ()
@@ -796,11 +793,6 @@ Editor::Editor ()
 	/* grab current parameter state */
 	std::function<void (string)> pc (std::bind (&Editor::ui_parameter_changed, this, _1));
 	UIConfiguration::instance().map_parameters (pc);
-
-	ControlProtocolManager::instance().SupportedSurfaceCallbackChange.connect (ssc_connection, invalidator (*this), []() {
-		auto stc = ControlProtocolManager::instance().supported_surface_callbacks ();
-		std::cerr << "there are now " << stc.size() << " STCs\n";
-	}, gui_context());
 
 	setup_fade_images ();
 }
