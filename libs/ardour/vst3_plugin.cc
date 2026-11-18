@@ -41,7 +41,6 @@
 
 #include "ardour/audio_buffer.h"
 #include "ardour/audioengine.h"
-#include "ardour/butler.h"
 #include "ardour/debug.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/selection.h"
@@ -1642,10 +1641,15 @@ tresult
 VST3PI::restartComponent (int32 flags)
 {
 	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::restartComponent 0x%1%2\n", std::hex, flags));
+	if (_is_loading_state) {
+		flags &= Vst::kReloadComponent;
+		flags &= Vst::kLatencyChanged;
+		flags &= Vst::kParamValuesChanged;
+	}
 
 	if (flags & Vst::kReloadComponent) {
 		PBD::Mutex::Lock pl (_process_lock, PBD::Mutex::NotLock);
-		if (!AudioEngine::instance ()->in_process_thread () && !_is_loading_state && !_restart_component_is_synced && !_process_offline) {
+		if (!AudioEngine::instance ()->in_process_thread () && !_restart_component_is_synced && !_process_offline) {
 			pl.acquire ();
 		} else {
 			assert (0); // a plugin should not call this while processing
@@ -1663,7 +1667,7 @@ VST3PI::restartComponent (int32 flags)
 	}
 	if (flags & Vst::kParamValuesChanged) {
 		PBD::Mutex::Lock pl (_process_lock, PBD::Mutex::NotLock);
-		if (!AudioEngine::instance ()->in_process_thread () && !_is_loading_state && !_restart_component_is_synced && !_process_offline) {
+		if (!AudioEngine::instance ()->in_process_thread () && !_restart_component_is_synced && !_process_offline) {
 			pl.acquire ();
 		}
 		update_shadow_data ();
