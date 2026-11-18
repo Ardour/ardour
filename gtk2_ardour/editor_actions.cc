@@ -1466,9 +1466,9 @@ Editor::register_region_actions ()
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions), "set-selection-from-region", _("Set Range Selection"), sigc::mem_fun (*this, &Editor::set_selection_from_region));
 
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "nudge-forward", _("Nudge Later"), sigc::bind (sigc::mem_fun (*this, &Editor::nudge_forward), false, false));
-	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "alternate-nudge-forward", _("Nudge Later"), sigc::bind (sigc::mem_fun (*this, &Editor::nudge_forward), false, false));
+	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "alternate-nudge-forward", _("Nudge Later (alternate)"), sigc::bind (sigc::mem_fun (*this, &Editor::nudge_forward), false, false));
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "nudge-backward", _("Nudge Earlier"), sigc::bind (sigc::mem_fun (*this, &Editor::nudge_backward), false, false));
-	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "alternate-nudge-backward", _("Nudge Earlier"), sigc::bind (sigc::mem_fun (*this, &Editor::nudge_backward), false, false));
+	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "alternate-nudge-backward", _("Nudge Earlier (alternate)"), sigc::bind (sigc::mem_fun (*this, &Editor::nudge_backward), false, false));
 
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "sequence-regions", _("Sequence Regions"), sigc::mem_fun (*this, &Editor::sequence_regions));
 
