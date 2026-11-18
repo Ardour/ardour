@@ -66,7 +66,7 @@ public:
 	 * implements this (for cases where we should only call it once.
 	 */
 
-	typedef void (ControlProtocol::*SurfaceCallback) (ARDOUR::SurfaceCallbackType, void* arg);
+	typedef void (*SurfaceCallback) (ARDOUR::SurfaceCallbackType, void* arg);
 	SurfaceCallback surface_callback;
 	virtual std::vector<ARDOUR::SurfaceCallbackType> supported_surface_callbacks() const { return std::vector<ARDOUR::SurfaceCallbackType>(); }
 
