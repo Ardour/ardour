@@ -566,9 +566,14 @@ EngineControl::build_full_control_notebook ()
 	vector<string> strings;
 	AttachOptions  xopt = AttachOptions (FILL | EXPAND);
 	int            row  = 1; // row zero == backend combo
-	int            btn  = 0;
+	int            btn  = 0; // right-side buttons
 
 	settings_table.attach (try_autostart_button, 3, 4, btn, btn + 1, xopt, xopt);
+	++btn;
+
+	/* separator below Audio system */
+	settings_table.attach (*manage (new ArdourHSpacer(1.0)),   0, 4, row, row + 1, xopt, SHRINK, 4, 12);
+	++row;
 	++btn;
 
 	/* Interface */
@@ -588,9 +593,6 @@ EngineControl::build_full_control_notebook ()
 		settings_table.attach (update_devices_button, 3, 4, btn, btn + ht, xopt, xopt);
 	}
 
-	settings_table.attach (*manage (new ArdourHSpacer(1.0)),   0, 4, row, row + 1, xopt, SHRINK, 4, 12);
-	row++;
-
 	if (backend->requires_driver_selection ()) {
 		settings_table.attach (lbl_driver,   0, 1, row, row + 1, xopt, SHRINK);
 		settings_table.attach (driver_combo, 1, 2, row, row + 1, xopt, SHRINK);
@@ -606,7 +608,6 @@ EngineControl::build_full_control_notebook ()
 		/* reset so it isn't used in state comparisons */
 		device_combo.set_active_text ("");
 		++row;
-		btn += 2;
 	} else {
 		settings_table.attach (lbl_device,   0, 1, row, row + 1, xopt, SHRINK);
 		settings_table.attach (device_combo, 1, 2, row, row + 1, xopt, SHRINK);
@@ -614,7 +615,6 @@ EngineControl::build_full_control_notebook ()
 		input_device_combo.set_active_text ("");
 		output_device_combo.set_active_text ("");
 		++row;
-		++btn;
 	}
 
 	/* HW settings */
