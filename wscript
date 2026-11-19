@@ -1291,8 +1291,7 @@ int main () { return 0; }
         have_native_tls = '--enable-tls' in gcc_config
 
         if have_native_tls:
-            conf.env.append_value('CFLAGS', '-DMINGW_NATIVE_TLS')
-            conf.env.append_value('CXXFLAGS', '-DMINGW_NATIVE_TLS')
+            conf.define('MINGW_NATIVE_TLS')
 
     if Options.options.dist_target == 'msvc':
         conf.env.append_value('CFLAGS', '-DCOMPILER_MSVC')
@@ -1567,6 +1566,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('LV2 extensions',        conf.is_defined('LV2_EXTENDED'))
     write_config_text('LXVST support',         conf.is_defined('LXVST_SUPPORT'))
     write_config_text('Mac VST support',       conf.is_defined('MACVST_SUPPORT'))
+    write_config_text('MinGW Native TLS',      conf.is_defined('MINGW_NATIVE_TLS'))
     write_config_text('NI-Maschine',           opts.maschine)
     write_config_text('OGG',                   conf.is_defined('HAVE_OGG'))
     write_config_text('Phone home',            conf.is_defined('PHONE_HOME'))
