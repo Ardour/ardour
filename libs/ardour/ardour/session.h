@@ -644,7 +644,7 @@ public:
 	int save_state_full (std::string snapshot_name = "", SessionSaveDisposition sd = SaveSnapshot);
 
 	int archive_session (const std::string&, const std::string&,
-	                     ArchiveEncode compress_audio = FLAC_16BIT,
+	                     ArchiveEncode compress_audio = FLAC_24BIT,
 	                     PBD::FileArchive::CompressionLevel compression_level = PBD::FileArchive::CompressGood,
 	                     bool only_used_sources = false,
 	                     PBD::Progress* p = 0);
