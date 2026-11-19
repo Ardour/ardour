@@ -157,6 +157,7 @@ gtk2_ardour_sources = [
         'location_ui.cc',
         'loudness_dialog.cc',
         'loudness_settings.cc',
+        'lua_proc_handlers.cc',
         'lua_script_manager.cc',
         'luadialog.cc',
         'luainstance.cc',
