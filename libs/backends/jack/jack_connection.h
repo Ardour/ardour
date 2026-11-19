@@ -10,7 +10,7 @@ namespace ARDOUR {
 
 class JackConnection {
   public:
-    JackConnection (const std::string& client_name, const std::string& session_uuid);
+    JackConnection (const std::string& client_name, const std::string& session_id);
     ~JackConnection ();
 
     const std::string& client_name() const { return _client_name; }
@@ -35,7 +35,7 @@ class JackConnection {
   private:
     jack_client_t* volatile _jack;
     std::string _client_name;
-    std::string session_uuid;
+    std::string _session_id;
     static bool _in_control;
     uint32_t _probed_buffer_size; // when not in control
     uint32_t _probed_sample_rate; // when not in control
