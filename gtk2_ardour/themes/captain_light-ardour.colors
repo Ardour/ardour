@@ -55,6 +55,8 @@
     <Color name="widget:green darker" value="264542ff"/>
     <Color name="widget:orange" value="904010ff"/>
     <Color name="widget:ruddy" value="3650bfff"/>    
+    <Color name="comp:layer" value="2e9e5bff"/>  <!--comp layer-->
+    <Color name="comp:source" value="f0a020a0"/>  <!--comp selection on take layers-->
   </Colors>
   <ColorAliases>
     <ColorAlias name="active crossfade" alias="neutral:foreground"/>
@@ -488,6 +490,8 @@
     <ColorAlias name="zoom button: fill" alias="widget:bg"/>
     <ColorAlias name="zoom button: fill active" alias="alert:green"/>
     <ColorAlias name="zoom button: led active" alias="alert:green"/>
+    <ColorAlias name="comp layer" alias="comp:layer"/>
+    <ColorAlias name="comp selection" alias="comp:source"/>
   </ColorAliases>
   <Modifiers>
     <Modifier name="audio bus base" modifier="= alpha:0.29999999999999999"/>

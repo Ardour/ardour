@@ -551,6 +551,7 @@
       <menu name='LayerDisplay' action = 'LayerDisplay'>
         <menuitem action='layer-display-stacked'/>
         <menuitem action='layer-display-overlaid'/>
+        <menuitem action='layer-display-comping'/>
       </menu>
 
       <menu action="AutomationMenu">

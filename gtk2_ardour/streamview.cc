@@ -25,6 +25,7 @@
  */
 
 #include <cmath>
+#include <algorithm>
 
 #include <ytkmm/ytkmm.h>
 
@@ -58,6 +59,27 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Editing;
+
+static layer_t
+layer_count (std::shared_ptr<Playlist> const& playlist, bool comping)
+{
+	if (!playlist) {
+		return 0;
+	}
+
+	if (!comping) {
+		return playlist->top_layer() + 1;
+	}
+
+	layer_t count = 0;
+	std::shared_ptr<RegionList> regions = playlist->region_list();
+	for (auto const& region : *regions) {
+		if (region->comp_source_id().empty()) {
+			count = std::max (count, region->layer() + 1);
+		}
+	}
+	return count;
+}
 
 StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Container* canvas_group)
 	: _trackview (tv)
@@ -308,10 +330,10 @@ StreamView::playlist_layered (std::weak_ptr<Track> wtr)
 
 	/* update layers count and the y positions and heights of our regions */
 	if (tr->playlist()) {
-		_layers = tr->playlist()->top_layer() + 1;
+		_layers = layer_count (tr->playlist(), _layer_display == Comping);
 	}
 
-	if (_layer_display == Stacked) {
+	if (_layer_display == Stacked || _layer_display == Comping) {
 		update_contents_height ();
 		/* tricky. playlist_changed() does this as well, and its really inefficient. */
 		update_coverage_frame ();
@@ -340,7 +362,7 @@ StreamView::playlist_switched (std::weak_ptr<Track> wtr)
 	redisplay_track ();
 	tr->playlist()->thaw();
 	/* update layers count and the y positions and heights of our regions */
-	_layers = tr->playlist()->top_layer() + 1;
+	_layers = layer_count (tr->playlist(), _layer_display == Comping);
 	update_contents_height ();
 	update_coverage_frame ();
 
@@ -667,6 +689,8 @@ StreamView::child_height () const
 		return _height;
 	case Stacked:
 		return _height / _layers;
+	case Comping:
+		return _height / (_layers + 1);
 	case Expanded:
 		return _height / (_layers * 2 + 1);
 	}
@@ -688,6 +712,9 @@ StreamView::update_contents_height ()
 		case Stacked:
 			(*i)->set_y (_height - ((*i)->region()->layer() + 1) * h);
 			break;
+		case Comping:
+			(*i)->set_y (_height - ((*i)->region()->layer() + 1) * h);
+			break;
 		case Expanded:
 			(*i)->set_y (_height - ((*i)->region()->layer() + 1) * 2 * h);
 			break;
@@ -702,6 +729,7 @@ StreamView::update_contents_height ()
 			i->rectangle->set_y1 (_height);
 			break;
 		case Stacked:
+		case Comping:
 		case Expanded:
 			/* In stacked displays, the recregion is always at the top */
 			i->rectangle->set_y0 (0);
@@ -717,6 +745,10 @@ void
 StreamView::set_layer_display (LayerDisplay d)
 {
 	_layer_display = d;
+
+	if (_trackview.track() && _trackview.track()->playlist()) {
+		_layers = layer_count (_trackview.track()->playlist(), _layer_display == Comping);
+	}
 
 	if (_layer_display == Overlaid) {
 		layer_regions ();

@@ -167,9 +167,69 @@ void
 AudioStreamView::set_layer_display (LayerDisplay d)
 {
 	StreamView::set_layer_display (d);
+	connect_comping_updates ();
 
 	for (auto& rv : region_views) {
 		rv->set_frame_color ();
+	}
+
+	refresh_comping_selection ();
+}
+
+void
+AudioStreamView::connect_comping_updates ()
+{
+	comping_contents_changed_connection.disconnect ();
+	if (layer_display() == Comping && _trackview.track() && _trackview.track()->playlist()) {
+		_trackview.track()->playlist()->ContentsChanged.connect (
+			comping_contents_changed_connection,
+			invalidator (*this),
+			std::bind (&AudioStreamView::refresh_comping_selection, this),
+			gui_context());
+	}
+}
+
+void
+AudioStreamView::refresh_comping_selection ()
+{
+	for (auto& rv : region_views) {
+		AudioRegionView* arv = dynamic_cast<AudioRegionView*> (rv);
+		if (arv) {
+			arv->clear_comping_parts ();
+		}
+	}
+
+	if (layer_display() != Comping || !_trackview.track()) {
+		return;
+	}
+
+	std::shared_ptr<Playlist> playlist = _trackview.track()->playlist();
+	if (!playlist) {
+		return;
+	}
+
+	std::shared_ptr<RegionList> regions = playlist->region_list();
+	std::map<std::string, std::shared_ptr<Region> > source_regions;
+	std::map<std::string, std::vector<CompingSelection> > selected_parts;
+
+	for (auto const& region : *regions) {
+		source_regions[region->id().to_s()] = region;
+		if (!region->comp_source_id().empty()) {
+			selected_parts[region->comp_source_id()].push_back (
+				CompingSelection (region->position_sample(), region->length_samples()));
+		}
+	}
+
+	for (auto const& source_parts : selected_parts) {
+		auto source = source_regions.find (source_parts.first);
+		if (source == source_regions.end()) {
+			continue;
+		}
+
+		AudioRegionView* arv = dynamic_cast<AudioRegionView*> (find_view (source->second));
+		if (arv) {
+			arv->set_comping_parts (source_parts.second);
+		}
 	}
 }
 
@@ -190,6 +250,8 @@ AudioStreamView::redisplay_track ()
 
 	// Stack regions by layer, and remove invalid regions
 	layer_regions();
+	connect_comping_updates ();
+	refresh_comping_selection ();
 }
 
 void

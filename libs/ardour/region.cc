@@ -80,6 +80,7 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<float> shift;
 		PBD::PropertyDescriptor<uint64_t> layering_index;
 		PBD::PropertyDescriptor<std::string> tags;
+		PBD::PropertyDescriptor<std::string> comp_source_id;
 		PBD::PropertyDescriptor<uint64_t> reg_group;
 		PBD::PropertyDescriptor<bool> contents;
 		PBD::PropertyDescriptor<bool> region_fx;
@@ -186,6 +187,8 @@ Region::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for layering_index = %1\n",	Properties::layering_index.property_id));
 	Properties::tags.property_id = g_quark_from_static_string (X_("tags"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for tags = %1\n",	Properties::tags.property_id));
+	Properties::comp_source_id.property_id = g_quark_from_static_string (X_("comp-source-id"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for comp-source-id = %1\n", Properties::comp_source_id.property_id));
 	Properties::contents.property_id = g_quark_from_static_string (X_("contents"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for contents = %1\n",	Properties::contents.property_id));
 	Properties::region_fx.property_id = g_quark_from_static_string (X_("region-fx"));
@@ -230,6 +233,7 @@ Region::register_properties ()
 	add_property (_shift);
 	add_property (_layering_index);
 	add_property (_tags);
+	add_property (_comp_source_id);
 	add_property (_reg_group);
 	add_property (_contents);
 }
@@ -262,6 +266,7 @@ Region::register_properties ()
 	, _shift (Properties::shift, 1.0) \
 	, _layering_index (Properties::layering_index, 0) \
 	, _tags (Properties::tags, "") \
+	, _comp_source_id (Properties::comp_source_id, "") \
 	, _reg_group (Properties::reg_group, 0) \
 	, _contents (Properties::contents, false)
 
@@ -295,6 +300,7 @@ Region::register_properties ()
 	, _shift (Properties::shift, other->_shift) \
 	, _layering_index (Properties::layering_index, other->_layering_index) \
 	, _tags (Properties::tags, other->_tags) \
+	, _comp_source_id (Properties::comp_source_id, other->_comp_source_id) \
 	, _reg_group (Properties::reg_group, other->_reg_group) \
 	, _contents (Properties::contents, other->_contents)
 

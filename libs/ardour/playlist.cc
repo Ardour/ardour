@@ -1735,6 +1735,12 @@ Playlist::region_changed (const PropertyChange& what_changed, std::shared_ptr<Re
 		save = true;
 	}
 
+	if (what_changed.contains (Properties::comp_source_id)) {
+		/* regions entered or left the comping layer */
+		relayer ();
+		save = true;
+	}
+
 	if (send_contents || save) {
 		notify_contents_changed ();
 	}
@@ -2675,6 +2681,16 @@ Playlist::relayer ()
 			break;
 	}
 
+	RegionList comp_regions;
+	for (RegionList::iterator i = copy.begin(); i != copy.end(); ) {
+		if (!(*i)->comp_source_id().empty()) {
+			comp_regions.push_back (*i);
+			i = copy.erase (i);
+		} else {
+			++i;
+		}
+	}
+
 	DEBUG_TRACE (DEBUG::Layering, "relayer() using:\n");
 #ifndef NDEBUG
 	for (auto const & r : copy) {
@@ -2745,6 +2761,32 @@ Playlist::relayer ()
 		r->set_layer (j);
 	}
 
+	if (!comp_regions.empty()) {
+		/* Comp fragments occupy a dedicated top layer, even where fewer take
+		 * layers overlap them.
+		 */
+		layer_t const comp_layer = copy.empty() ? 0 : layers.size();
+		if (comp_layer >= layers.size()) {
+			layers.push_back (vector<RegionList> (divisions));
+		}
+
+		for (auto const & r : comp_regions) {
+			r->set_layer (comp_layer);
+			int start_division = 0;
+			int end_division = 0;
+			if (division_size > 0) {
+				start_division = start.distance (r->position()).samples() / division_size;
+				end_division = start.distance (r->position() + r->length()).samples() / division_size;
+				if (end_division == divisions) {
+					end_division--;
+				}
+			}
+			for (int k = start_division; k <= end_division; ++k) {
+				layers[comp_layer][k].push_back (r);
+			}
+		}
+	}
+
 	/* It's a little tricky to know when we could avoid calling this; e.g. if we are
 	 * relayering because we just removed the only region on the top layer, nothing will
 	 * appear to have changed, but the StreamView must still sort itself out.  We could
@@ -2757,6 +2799,7 @@ Playlist::relayer ()
 	 * case we need to setup layering indices to account for the one that has just
 	 * gone away.
 	 */
+	copy.insert (copy.end (), comp_regions.begin (), comp_regions.end ());
 	setup_layering_indices (copy);
 }
 

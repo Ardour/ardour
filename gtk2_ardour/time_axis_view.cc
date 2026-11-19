@@ -1315,6 +1315,16 @@ TimeAxisView::covers_y_position (double y) const
 				}
 			}
 			break;
+		case Comping:
+			if (view ()) {
+				/* compute layer */
+				l = layer_t ((_y_position + height - y) / (view()->child_height ()));
+				/* The extra row at the top is the comp layer. */
+				if (l > view()->layers ()) {
+					l = view()->layers ();
+				}
+			}
+			break;
 		case Expanded:
 			if (view ()) {
 				int const n = floor ((_y_position + height - y) / (view()->child_height ()));

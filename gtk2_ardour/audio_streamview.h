@@ -82,6 +82,8 @@ private:
 	void remove_audio_region_view (std::shared_ptr<ARDOUR::AudioRegion> );
 
 	void redisplay_track ();
+	void connect_comping_updates ();
+	void refresh_comping_selection ();
 
 	void color_handler ();
 
@@ -90,7 +92,7 @@ private:
 	std::map<std::shared_ptr<ARDOUR::Source>, bool> rec_data_ready_map;
 
 	ArdourCanvas::Container* _region_group;
+	PBD::ScopedConnection comping_contents_changed_connection;
 
 	bool outline_region;
 };
-

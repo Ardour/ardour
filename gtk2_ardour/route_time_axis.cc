@@ -717,6 +717,13 @@ RouteTimeAxisView::build_display_menu ()
 		i->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::layer_display_menu_change), i));
 		stacked_menu_item = i;
 
+		if (UIConfiguration::instance().get_enable_comping ()) {
+			layers_items.push_back (RadioMenuElem (layers_group, _("Comping")));
+			i = dynamic_cast<RadioMenuItem*> (&layers_items.back ());
+			i->set_active (layer_display() == Comping);
+			i->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::layer_display_menu_change), i));
+		}
+
 		_ignore_set_layer_display = false;
 
 		items.push_back (MenuElem (_("Layers"), *layers_menu));
@@ -964,8 +971,10 @@ RouteTimeAxisView::layer_display_menu_change (Gtk::MenuItem* item)
 	if (dynamic_cast<RadioMenuItem*>(item)->get_active()) {
 		if (item == stacked_menu_item) {
 			set_layer_display (Stacked);
-		} else {
+		} else if (item == overlaid_menu_item) {
 			set_layer_display (Overlaid);
+		} else {
+			_editor.layer_display_comping_for_track (*this);
 		}
 	}
 }
@@ -2351,6 +2360,10 @@ RouteTimeAxisView::set_layer_display (LayerDisplay d)
 {
 	if (_ignore_set_layer_display) {
 		return;
+	}
+
+	if (d == Comping && !UIConfiguration::instance().get_enable_comping ()) {
+		d = Stacked;
 	}
 
 	if (_view) {

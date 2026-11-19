@@ -1892,8 +1892,17 @@ Editor::add_region_context_items (Menu_Helpers::MenuList& edit_items, std::share
 
 	const timepos_t position = get_preferred_edit_position (EDIT_IGNORE_NONE, true);
 
+	bool const comping = clicked_routeview && clicked_routeview->layer_display() == Comping;
+
+	if (comping && !rs.empty() && !rs.front()->region()->comp_source_id().empty()) {
+		edit_items.push_back (MenuElem (_("Finish Comping (keep comp as normal layer)"), sigc::bind (sigc::mem_fun (*this, &Editor::finish_comping), sigc::ref (*clicked_routeview), false)));
+		edit_items.push_back (MenuElem (_("Discard Comping Layer"), sigc::bind (sigc::mem_fun (*this, &Editor::finish_comping), sigc::ref (*clicked_routeview), true)));
+		edit_items.push_back (SeparatorElem());
+	}
+
 	edit_items.push_back (*_popup_region_menu_item);
-	if (Config->get_layer_model() == Manual && track->playlist()->count_regions_at (position) > 1 && (layering_order_editor == 0 || !layering_order_editor->get_visible ())) {
+	/* layer order is meaningless in Comping view: only the comp layer is heard */
+	if (!comping && Config->get_layer_model() == Manual && track->playlist()->count_regions_at (position) > 1 && (layering_order_editor == 0 || !layering_order_editor->get_visible ())) {
 		edit_items.push_back (*manage (_region_actions->get_action ("choose-top-region-context-menu")->create_menu_item ()));
 	}
 	edit_items.push_back (SeparatorElem());
@@ -5659,7 +5668,21 @@ Editor::ui_parameter_changed (string parameter)
 {
 	EditingContext::ui_parameter_changed (parameter);
 
-	if (parameter == "icon-set") {
+	if (parameter == "enable-comping") {
+		bool const on = UIConfiguration::instance().get_enable_comping ();
+		Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (X_("Editor"), X_("layer-display-comping"));
+		if (act) {
+			act->set_sensitive (on);
+		}
+		if (!on) {
+			track_views.foreach_route_time_axis ([] (RouteTimeAxisView* route) {
+				if (route && route->layer_display () == Comping) {
+					route->set_layer_display (Stacked);
+				}
+			});
+		}
+
+	} else if (parameter == "icon-set") {
 		_cursors->set_cursor_set (UIConfiguration::instance().get_icon_set());
 		content_right_pane.set_drag_cursor (*PublicEditor::instance().cursors()->expand_left_right);
 		editor_summary_pane.set_drag_cursor (*_cursors->expand_up_down);
