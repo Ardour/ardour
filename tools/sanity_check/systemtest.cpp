@@ -97,7 +97,7 @@ static int read_int(char* filename, int* value) {
 
 /**
  * This function determines whether any CPU core uses a variable clock speed if frequency
- * scaling is available. If the governor for all cores is either "powersave" or
+ * scaling is available. If the governor for all cores is
  * "performance", the CPU frequency can be assumed to be static. This is also the case
  * if scaling_min_freq and scaling_max_freq are set to the same value.
  *
@@ -110,9 +110,8 @@ int system_uses_frequencyscaling() {
   while (!done) {
           (void) snprintf(filename, 256, "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_governor", cpu);
           if (0<read_string(filename, buf, 256)) {
-                  if ((0!=strncmp("performance", buf, 11)) &&
-                      (0!=strncmp("powersafe", buf, 9))) {
-                          // So it's neither the "performance" nor the "powersafe" governor
+                  if (0!=strncmp("performance", buf, 11)) {
+                          // Not the "performance" governor
                           (void) snprintf(filename, 256, "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_min_freq", cpu);
                           if (read_int(filename, &min)) {
                                   (void) snprintf(filename, 256, "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_max_freq", cpu);

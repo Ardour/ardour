@@ -36,7 +36,7 @@ HAS_XDG="T"
 # Function Definitions
 ########################
 
-VaildateYesNoQuestion ()
+ValidateYesNoQuestion ()
 {
 	# $1 = Question Text
 	
@@ -62,7 +62,7 @@ VaildateYesNoQuestion ()
 	
 }
 
-VaildateYesNoEnterQuestion ()
+ValidateYesNoEnterQuestion ()
 {
 	# $1 = Question Text
 	# $2 = default y/n
@@ -413,7 +413,7 @@ LIB_ERROR="F"
 LD_PATH=`pwd`/${BUNDLE_DIR}/lib
 
 # check the main App(s)
-LDD_RESULT=$(LANG=C LD_LIBRARY_PATH=${LD_PATH} ldd ${BUNDLE_DIR}/*/${PGM_NAME_LOWER}-* 2>&1 | grep "not found/")
+LDD_RESULT=$(LANG=C LD_LIBRARY_PATH=${LD_PATH} ldd ${BUNDLE_DIR}/*/${PGM_NAME_LOWER}-* 2>&1 | grep "not found")
 
 if [ -n "$LDD_RESULT" ];
 then
@@ -480,7 +480,7 @@ then
 		echo ""
 		echo "Found existing ${PGM_NAME} installation."
 		
-		ANSWER=$(VaildateYesNoQuestion "Do you want to run the uninstaller ${i} ?")
+		ANSWER=$(ValidateYesNoQuestion "Do you want to run the uninstaller ${i} ?")
 
 		if test "y" = $ANSWER;
 		then
@@ -583,7 +583,7 @@ fi
 ############################################
 
 if test "${PGM_VENDOR}" = "Ardour" -a -d "${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/lib/LV2/Harrison.lv2"; then
-	ANSWER=$(VaildateYesNoEnterQuestion "Install Harrison XT plugins and ACE plugin GUIs?" "y")
+	ANSWER=$(ValidateYesNoEnterQuestion "Install Harrison XT plugins and ACE plugin GUIs?" "y")
 
 	if test "n" = $ANSWER; then
 		${SUPER} rm -rf "${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/lib/LV2/Harrison.lv2"
@@ -626,7 +626,7 @@ then
 			else
 				# Not a member of an audio group. Try to fix it.
 				
-				if ${NORM_USER} "${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/bin/sanityCheck -hasgroup audio > /dev/null && find /etc/security -type f -name "*.conf" | xargs grep -q "^@audio.*rtprio" ";
+				if ${NORM_USER} "${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/bin/sanityCheck -hasgroup audio > /dev/null && find /etc/security -type f -name '*.conf' | xargs grep -q '^@audio.*rtprio'";
 				then
 					# add user to audio group
 					echo ""
@@ -647,7 +647,7 @@ then
 						read -p "Press ENTER to continue:" BLAH
 					fi
 
-				elif ${NORM_USER} "${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/bin/sanityCheck -hasgroup jackuser > /dev/null && find /etc/security -type f -name "*.conf" | xargs grep -q "^@jackuser.*rtprio" ";
+				elif ${NORM_USER} "${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/bin/sanityCheck -hasgroup jackuser > /dev/null && find /etc/security -type f -name '*.conf' | xargs grep -q '^@jackuser.*rtprio'";
 				then
 					# add user to jackuser group
 					echo ""
