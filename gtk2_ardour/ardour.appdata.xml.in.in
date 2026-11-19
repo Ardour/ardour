@@ -18,6 +18,12 @@
       composers.
     </p>
   </description>
+  <content_rating type="oars-1.1" />
+  <launchable type="desktop-id">ardour9.desktop</launchable>
+  <developer id="org.ardour">
+    <name>Ardour Developers</name>
+  </developer>
+  <url type="vcs-browser">https://github.com/Ardour/ardour/</url>
   <url type="bugtracker">https://tracker.ardour.org/</url>
   <url type="contribute">https://ardour.org/development</url>
   <url type="homepage">https://ardour.org</url>
