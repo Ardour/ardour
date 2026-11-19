@@ -119,19 +119,19 @@ short_version (string orig, string::size_type target_length)
 		orig.replace (pos, 1, "");
 	}
 
-	/* remove upper-case vowels, starting at end */
+	/* remove lower-case consonants, starting at end */
 
 	while (orig.length() > target_length) {
-		if ((pos = orig.find_last_of (_("AEIOU"))) == string::npos) {
+		if ((pos = orig.find_last_of (_("bcdfghjklmnpqrtvwxyz"))) == string::npos) {
 			break;
 		}
 		orig.replace (pos, 1, "");
 	}
 
-	/* remove lower-case consonants, starting at end */
+	/* remove upper-case vowels, starting at end */
 
 	while (orig.length() > target_length) {
-		if ((pos = orig.find_last_of (_("bcdfghjklmnpqrtvwxyz"))) == string::npos) {
+		if ((pos = orig.find_last_of (_("AEIOU"))) == string::npos) {
 			break;
 		}
 		orig.replace (pos, 1, "");
