@@ -15,6 +15,26 @@ TimelineTest::createTest()
 	using namespace Temporal;
 	using namespace std;
 
+#ifdef PLATFORM_WINDOWS
+	srand (time (0));
+
+	vector<timepos_t> times;
+
+	for (int n = 0; n < 32767; ++n) {
+		times.push_back (timepos_t (rand() % 32120321));
+	}
+
+	uint32_t lessthan = 0;
+	uint32_t greaterthan = 0;
+
+	for (vector<timepos_t>::iterator t = times.begin(); t != times.end(); ++t) {
+		if ((*t) + timepos_t (rand() % 20207) < timepos_t (2299307)) {
+			lessthan++;
+		} else {
+			greaterthan++;
+		}
+	}
+#else
 	srandom (time (0));
 
 	vector<timepos_t> times;
@@ -33,7 +53,7 @@ TimelineTest::createTest()
 			greaterthan++;
 		}
 	}
-
+#endif
 	std::cerr << "LT " << lessthan << " GT " << greaterthan << std::endl;
 
 }
