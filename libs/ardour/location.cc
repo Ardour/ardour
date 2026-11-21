@@ -70,6 +70,7 @@ Location::Location (Session& s)
 	, _locked (false)
 	, _timestamp (time (0))
 	, _cue (0)
+	, _group (0)
 	, _signals_suspended (0)
 {
 }
@@ -83,6 +84,7 @@ Location::Location (Session& s, timepos_t const & start, timepos_t const & end, 
 	, _locked (false)
 	, _timestamp (time (0))
 	, _cue (cue_id)
+	, _group (0)
 	, _signals_suspended (0)
 {
 	/* Locations follow the global Session time domain */
@@ -98,6 +100,7 @@ Location::Location (const Location& other, bool no_emit)
 	, _flags (other._flags)
 	, _timestamp (time (0))
 	, _cue (other._cue)
+	, _group (other._group)
 	, _signals_suspended (0)
 {
 	if (no_emit) {
@@ -117,6 +120,7 @@ Location::Location (Session& s, const XMLNode& node)
 	: SessionHandleRef (s)
 	, _flags (Flags (0))
 	, _timestamp (time (0))
+	, _group (0)
 	, _signals_suspended (0)
 {
 	//_start.set_time_domain (AudioTime);
@@ -154,6 +158,7 @@ Location::operator= (const Location& other)
 	_start = other._start;
 	_end = other._end;
 	_flags = other._flags;
+	_group = other._group;
 
 	assert (other._signals_suspended == 0);
 
@@ -685,6 +690,9 @@ Location::get_state () const
 	node->set_property ("locked", _locked);
 	node->set_property ("timestamp", _timestamp);
 	node->set_property ("cue", _cue);
+	if (_group) {
+		node->set_property ("group", _group);
+	}
 	if (_scene_change) {
 		node->add_child_nocopy (_scene_change->get_state());
 	}
@@ -738,6 +746,10 @@ Location::set_state (const XMLNode& node, int version)
 
 	node.get_property ("timestamp", _timestamp);
 	node.get_property ("cue", _cue);
+
+	if (!node.get_property ("group", _group)) {
+		_group = 0;
+	}
 
 	Flags old_flags (_flags);
 

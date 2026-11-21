@@ -140,6 +140,12 @@ public:
 	int32_t cue_id() const { assert (is_cue_marker()); return _cue; }
 	void set_cue_id (int32_t);
 
+	/* region-group this location belongs to (see Region::region_group), 0: none.
+	 * Grouped locations are moved along with the regions of the group.
+	 */
+	uint64_t group () const { return _group; }
+	void set_group (uint64_t g) { _group = g; }
+
 	/* these are static signals for objects that want to listen to all
 	 * locations at once.
 	 */
@@ -236,6 +242,7 @@ private:
 	bool        _locked;
 	int64_t     _timestamp;
 	int32_t     _cue;
+	uint64_t    _group;
 
 	uint32_t         _signals_suspended;
 	std::set<Signal> _postponed_signals;

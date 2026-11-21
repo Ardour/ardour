@@ -483,6 +483,14 @@ public:
 	void get_markers_to_ripple (std::shared_ptr<ARDOUR::Playlist> target_playlist, Temporal::timepos_t const & pos, std::vector<ArdourMarker*>& markers);
 	Temporal::timepos_t effective_ripple_mark_start (std::shared_ptr<ARDOUR::Playlist> target_playlist, Temporal::timepos_t pos);
 
+	/* markers and ranges grouped with regions (see group_selected_regions) */
+	void get_grouped_markers (std::set<uint64_t> const & groups, std::vector<ArdourMarker*>& markers);
+	void move_grouped_marks (std::set<uint64_t> const & groups, Temporal::timecnt_t const & distance);
+	bool shift_grouped_locations (std::set<uint64_t> const & groups, Temporal::timecnt_t const & distance, std::set<ARDOUR::Location*> const & exclude);
+	void get_grouped_regions (std::set<uint64_t> const & groups, ARDOUR::RegionList& regions) const;
+	void filter_complete_region_groups (std::set<uint64_t>& groups, std::set<std::shared_ptr<ARDOUR::Region> > const & regions) const;
+	void move_grouped_regions (std::set<uint64_t> const & groups, Temporal::timecnt_t const & distance);
+
 	void add_region_marker ();
 	void clear_region_markers ();
 	void remove_region_marker (ARDOUR::CueMarker&);
@@ -1119,9 +1127,22 @@ private:
 	void cut_copy_regions (Editing::CutCopyOp, RegionSelection&);
 	void cut_copy_ranges (Editing::CutCopyOp);
 	void cut_copy_midi (Editing::CutCopyOp);
+	void cut_copy_grouped_locations (Editing::CutCopyOp, RegionSelection&, Temporal::timepos_t const & first_position);
 
 	void mouse_paste ();
 	void paste_internal (Temporal::timepos_t const & position, float times);
+	bool paste_grouped_locations (Temporal::timepos_t const & position, unsigned count, float times);
+
+	/* markers and ranges grouped with cut/copied regions, pasted along with them */
+	struct CutBufferLocation {
+		ARDOUR::Location*   location; ///< private copy
+		Temporal::timecnt_t offset;   ///< relative to the start of the copied regions
+		CutBufferLocation (ARDOUR::Location* l, Temporal::timecnt_t const & o) : location (l), offset (o) {}
+	};
+	std::vector<CutBufferLocation>  _cut_buffer_locations;
+	Temporal::timecnt_t             _cut_buffer_locations_span;
+	std::weak_ptr<ARDOUR::Playlist> _cut_buffer_locations_owner; ///< only paste markers along with the regions they were copied with
+	void clear_cut_buffer_locations ();
 
 	/* EDITING OPERATIONS */
 
@@ -1658,6 +1679,9 @@ private:
 	void marker_menu_edit ();
 	void marker_menu_remove ();
 	void marker_menu_rename ();
+	void marker_menu_group_to_selected_regions ();
+	void marker_menu_ungroup ();
+	void add_marker_group_items (Gtk::Menu_Helpers::MenuList&, ARDOUR::Location*);
 	void edit_marker (ArdourMarker* marker, bool with_scene);
 	bool edit_location (ARDOUR::Location& loc, bool with_scene, bool with_command);
 	void toggle_tempo_continues ();
