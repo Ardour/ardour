@@ -839,6 +839,8 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (PresentationInfo, VBMProgram);
 	REGISTER_CLASS_ENUM (PresentationInfo, VBMMixMinus);
 #endif
+	REGISTER_CLASS_ENUM (PresentationInfo, Transient); /* Should never appear in XML but ... */
+	REGISTER_CLASS_ENUM (PresentationInfo, Folder);
 	REGISTER_BITS (_PresentationInfo_Flag);
 
 	REGISTER_CLASS_ENUM (TransportFSM, ButlerDone);

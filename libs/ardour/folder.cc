@@ -26,6 +26,7 @@ using namespace ARDOUR;
 Folder::Folder (Session & s, std::string const & name, PresentationInfo const & pi)
 	: Stripable (s, name, pi)
 {
+	_presentation_info.set_flags (PresentationInfo::Flag (_presentation_info.flags() | PresentationInfo::Folder));
 }
 
 int

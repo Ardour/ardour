@@ -150,6 +150,8 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 
 		Transient   = 0x60000,
 
+		Folder      = 0xc0000,
+
 		/* special mask to detect out "state" bits */
 		StatusMask = (Hidden | MixbusEditorHidden | TriggerTrack),
 
