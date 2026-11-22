@@ -2451,7 +2451,7 @@ private:
 
 	VCAManager* _vca_manager;
 
-	PBD::RWLock _folder_lock;
+	mutable PBD::RWLock _folder_lock;
 	FolderList _folders;
 
 	std::shared_ptr<Route> get_midi_nth_route_by_id (PresentationInfo::order_t n) const;

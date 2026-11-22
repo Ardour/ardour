@@ -81,6 +81,7 @@
 #include "ardour/disk_reader.h"
 #include "ardour/directory_names.h"
 #include "ardour/filename_extensions.h"
+#include "ardour/folder.h"
 #include "ardour/gain_control.h"
 #include "ardour/graph.h"
 #include "ardour/io_plug.h"
@@ -4487,6 +4488,11 @@ Session::get_stripables (StripableList& sl, PresentationInfo::Flag fl) const
 	if (fl & PresentationInfo::VCA) {
 		VCAList v = _vca_manager->vcas ();
 		sl.insert (sl.end(), v.begin(), v.end());
+	}
+
+	{
+		PBD::RWLock::ReaderLock wl (_folder_lock);
+		sl.insert (sl.end(), _folders.begin(), _folders.end());
 	}
 }
 
