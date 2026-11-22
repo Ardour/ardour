@@ -2453,6 +2453,7 @@ private:
 
 	mutable PBD::RWLock _folder_lock;
 	FolderList _folders;
+	void build_folders (uint32_t&, std::shared_ptr<Folder>, StripableList& stripables);
 
 	std::shared_ptr<Route> get_midi_nth_route_by_id (PresentationInfo::order_t n) const;
 

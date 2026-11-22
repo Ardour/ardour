@@ -31,7 +31,68 @@ Session::add_folders (FolderList& new_folders)
 		_folders.insert (_folders.end(), new_folders.begin(), new_folders.end());
 	}
 
+	uint32_t initial_order = 0;
+	StripableList sl (get_stripables());
+
+	build_folders (initial_order, nullptr, sl);
+
 	FolderAdded (new_folders); /* EMIT SIGNAL */
+}
+
+void
+Session::build_folders (uint32_t& order, std::shared_ptr<Folder> f, StripableList& stripables)
+{
+	if (f) {
+		/* process folder contents */
+
+		std::vector<std::shared_ptr<Stripable>> folder_contents;
+
+		f->get_contents (folder_contents);
+		f->set_presentation_order (order);
+		order++;
+
+		for (auto & fc : folder_contents) {
+
+			/* We're going to order the folder content "under" this
+			 * folder no matter what, so remove it from stripables
+			 * (no subsequent consideration.
+			 */
+
+			stripables.remove (fc);
+
+			/* Check to see if it is a nested folder */
+
+			std::shared_ptr<Folder> ff = std::dynamic_pointer_cast<Folder> (fc);
+
+			if (ff) {
+				/* recurse */
+				build_folders (order, ff, stripables);
+			} else {
+				/* Assign this stripable a position "under" the folder */
+				fc->set_presentation_order (order);
+				++order;
+			}
+		}
+
+	} else {
+
+		/* work on whatever remains in stripables */
+
+		while (!stripables.empty()) {
+
+			auto s (stripables.front());
+			stripables.pop_front ();
+
+			std::shared_ptr<Folder> f = std::dynamic_pointer_cast<Folder> (s);
+			if (f) {
+				build_folders (order, f, stripables);
+			} else {
+				(s)->set_presentation_order (order);
+				++order;
+			}
+		}
+
+	}
 }
 
 void
