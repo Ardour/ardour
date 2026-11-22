@@ -2376,7 +2376,7 @@ VST3PI::request_bus_layout (uint32_t in, uint32_t aux_in, uint32_t out)
 		int32_t const n_chn = _bus_channel_cnt_in[bn];
 
 		Vst::SpeakerArrangement s = sa;
-		if (n_chn > 0) {
+		if (n_chn > 0 && sa != Vst::SpeakerArr::kMono) {
 			s &= ((uint64_t)1 << n_chn) - 1;
 		}
 
@@ -2405,7 +2405,7 @@ VST3PI::request_bus_layout (uint32_t in, uint32_t aux_in, uint32_t out)
 
 		Vst::SpeakerArrangement s = sa;
 
-		if (n_chn > 0) {
+		if (n_chn > 0 && sa != Vst::SpeakerArr::kMono) {
 			s &= ((uint64_t)1 << n_chn) - 1;
 		}
 
