@@ -392,6 +392,34 @@ ARDOUR_UI::apply_window_settings (bool with_size)
 		if (w > 0 && h > 0) {
 			_main_window.set_default_size (w, h);
 		}
+
+		if((prop = mnode->property (X_("state"))) != 0) {
+			guint window_state = 0;
+			std::string state = prop->value();
+			GFlagsClass* ec = (GFlagsClass*)g_type_class_ref(gdk_window_state_get_type());
+			std::string::size_type begin_index = 0;
+			while(begin_index < state.size()) {
+				auto sep_index = state.find(X_(";"), begin_index);
+				if(sep_index == std::string::npos) {
+					sep_index = state.size();
+				}
+				std::string s(state, begin_index, sep_index - begin_index);
+				if(GFlagsValue* flag = g_flags_get_value_by_nick(ec, s.c_str())) {
+					window_state |= flag->value;
+				}
+				begin_index = sep_index + 1;
+			}
+			if(window_state & GDK_WINDOW_STATE_MAXIMIZED) {
+				_main_window.maximize();
+			}
+			if(window_state & GDK_WINDOW_STATE_FULLSCREEN) {
+				_main_window.fullscreen();
+			}
+			if(window_state & GDK_WINDOW_STATE_ICONIFIED) {
+				_main_window.iconify();
+			}
+			g_type_class_unref(ec);
+		}
 	}
 
 	std::string current_tab;

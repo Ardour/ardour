@@ -1003,6 +1003,30 @@ ARDOUR_UI::save_ardour_state ()
 	main_window_node.set_property (X_("y"), my);
 	main_window_node.set_property (X_("w"), mw);
 	main_window_node.set_property (X_("h"), mh);
+	if(auto window = _main_window.get_window(); window.get())
+	{
+		guint s = gdk_window_get_state (window->gobj());
+		GFlagsClass* ec = (GFlagsClass*)g_type_class_ref(gdk_window_state_get_type());
+		Glib::ustring string;
+		do
+		{
+			if(GFlagsValue* ev = g_flags_get_first_value(ec, s))
+			{
+				if(!string.empty())
+				{
+					string.append(X_(";"));
+				}
+				string.append(ev->value_nick);
+				s &= ~ev->value;
+			}
+			else
+			{
+				break;
+			}
+		} while(true);
+		g_type_class_unref(ec);
+		main_window_node.set_property (X_("state"), string);
+	}
 
 	string current_tab;
 	int current_page_number = _tabs.get_current_page ();
