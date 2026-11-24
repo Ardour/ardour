@@ -24,6 +24,9 @@
 	</array>
 	<key>CFBundleExecutable</key>
 	<string>@EXECUTABLE@</string>
+	<key>CFBundleLocalizations</key>
+	<array>@LOCALIZATIONS@
+	</array>
 	<key>CFBundleGetInfoString</key>
 	<string>@INFOSTRING@</string>
 	<key>CFBundleIconFile</key>
