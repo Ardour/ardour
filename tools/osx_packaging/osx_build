@@ -217,6 +217,20 @@ env="$env<key>DYLIB_FALLBACK_LIBRARY_PATH</key><string>/usr/local/lib:/opt/lib</
 env="<key>LSEnvironment</key><dict>$env<key>ARDOUR_BUNDLED</key><string>true</string></dict>"
 
 
+# generate the list of localizations for the plist
+LOCALIZATIONS=""
+if test x$WITH_NLS != x ; then
+echo "Generating localization list ..."
+for lang_mo in ../../gtk2_ardour/po/*.mo ; do
+    echo "$lang_mo"
+	lang=$(basename $lang_mo)
+	lang=${lang%.mo}
+	LOCALIZATIONS="$LOCALIZATIONS\n		<string>$lang</string>"
+done
+echo $LOCALIZATIONS
+else
+	LOCALIZATIONS="\n		<string>en</string>"
+fi
 # edit plist
 sed -e "s?@ENV@?$env?g" \
     -e "s?@VERSION@?$release_version?g" \
@@ -224,7 +238,8 @@ sed -e "s?@ENV@?$env?g" \
     -e "s?@IDBASE@?$BUNDLE_ID_BASE?g" \
     -e "s?@IDSUFFIX@?$EXECUTABLE?g" \
     -e "s?@BUNDLENAME@?$BUNDLENAME?g" \
-    -e "s?@EXECUTABLE@?$EXECUTABLE?g" < Info.plist.in > Info.plist
+    -e "s?@EXECUTABLE@?$EXECUTABLE?g" \
+	-e "s?@LOCALIZATIONS@?$LOCALIZATIONS?g" < Info.plist.in > Info.plist
 # and plist strings
 sed -e "s?@APPNAME@?$appname?" \
     -e "s?@ENV@?$env?g" \
