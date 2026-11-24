@@ -83,6 +83,7 @@
 
 #include <gtkmm2ext/application.h>
 
+#include "ardour/control_protocol_manager.h"
 #include "ardour/session.h"
 #include "ardour/profile.h"
 #include "ardour/audioengine.h"
@@ -158,6 +159,10 @@ ARDOUR_UI::install_actions ()
 	Glib::RefPtr<ActionGroup> main_actions = ActionManager::create_action_group (global_bindings, X_("Main"));
 	Glib::RefPtr<ActionGroup> main_menu_actions = ActionManager::create_action_group (global_bindings, X_("Main Menu"));
 	Glib::RefPtr<Action> act;
+
+	ActionManager::register_action (main_actions, X_("surface-callback-create-session"), _("Setup Session from Control Surface"), []() {
+		ControlProtocolManager::instance().do_surface_callback (true, CreateSession);
+	});
 
 	ActionManager::register_action (main_actions, X_("Escape"), _("Escape (deselect all)"), sigc::mem_fun (*this, &ARDOUR_UI::escape));
 	/* This is hard-wired into the Keyboard code as "Primary-w". Maybe it
