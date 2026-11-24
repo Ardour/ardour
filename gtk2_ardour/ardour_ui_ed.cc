@@ -64,6 +64,7 @@
 #include "editor.h"
 #include "editing.h"
 #include "enums_convert.h"
+#include "gui_thread.h"
 #include "actions.h"
 #include "meter_patterns.h"
 #include "meterbridge.h"
@@ -154,6 +155,20 @@ ARDOUR_UI::close_current_dialog ()
 }
 
 void
+ARDOUR_UI::update_ssc_status ()
+{
+	auto stc = ControlProtocolManager::instance().supported_surface_callbacks ();
+	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action ("Main", "surface-callback-create-session");
+	if (act) {
+		if (find (stc.begin(), stc.end(), CreateSession) != stc.end()) {
+			act->set_sensitive (true);
+		} else {
+			act->set_sensitive (false);
+		}
+	}
+}
+
+void
 ARDOUR_UI::install_actions ()
 {
 	Glib::RefPtr<ActionGroup> main_actions = ActionManager::create_action_group (global_bindings, X_("Main"));
@@ -163,6 +178,9 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_action (main_actions, X_("surface-callback-create-session"), _("Setup Session from Control Surface"), []() {
 		ControlProtocolManager::instance().do_surface_callback (true, CreateSession);
 	});
+
+	ControlProtocolManager::instance().SupportedSurfaceCallbackChange.connect (ssc_connection, MISSING_INVALIDATOR, sigc::mem_fun (*this, &ARDOUR_UI::update_ssc_status), gui_context());
+	update_ssc_status ();
 
 	ActionManager::register_action (main_actions, X_("Escape"), _("Escape (deselect all)"), sigc::mem_fun (*this, &ARDOUR_UI::escape));
 	/* This is hard-wired into the Keyboard code as "Primary-w". Maybe it

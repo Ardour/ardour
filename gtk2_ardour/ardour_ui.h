@@ -872,5 +872,8 @@ private:
 	bool _loading_session;
 
 	PBD::ScopedConnectionList clock_state_connection;
+
+	PBD::ScopedConnection ssc_connection;
+	void update_ssc_status ();
 };
 
