@@ -44,7 +44,7 @@ int Stateful::loading_state_version = 0;
 
 thread_local bool Stateful::_regenerate_xml_or_string_ids (false);
 
-#if defined (MINGW_NATIVE_TLS) || defined (COMPILER_MSVC)
+#if defined (COMPILER_MINGW) || defined (COMPILER_MSVC)
 bool& Stateful::_regenerate_xml_or_string_ids_ref ()
 {
 	return _regenerate_xml_or_string_ids;

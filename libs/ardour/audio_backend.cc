@@ -36,7 +36,11 @@ AudioBackend::get_error_string (ErrorCode error_code)
 	case BackendReinitializationError:
 		return _("Failed to reinitialize audio backend");
 	case AudioDeviceOpenError:
+#ifdef __linux__
+		return _("Failed to open audio device\n\nThis may be caused by:\n\n\t1. unsupported hardware parameter settings\n\t2. If you use Pipewire, it was slow to release the device.\n\t3. Some devices take seconds to switch sample rate.\n\nIt is almost always worth trying again once or twice.");
+#else
 		return _("Failed to open audio device\n(Typically caused by hardware parameter settings)");
+#endif
 	case AudioDeviceCloseError:
 		return _("Failed to close audio device");
 	case AudioDeviceInvalidError:

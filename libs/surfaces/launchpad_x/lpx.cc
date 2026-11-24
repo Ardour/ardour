@@ -769,7 +769,7 @@ LaunchPadX::connect_daw_ports ()
          */
 
 #ifdef LAUNCHPAD_MINI
-        std::regex rx (X_("Launchpad Mini.*(DAW|MIDI 1|DA$)"), std::regex::extended);
+        std::regex rx (X_("Launchpad Mini.*(DAW|MIDI 1|DA )"), std::regex::extended);
 #else
         std::regex rx (X_("Launchpad X.*(DAW|MIDI 1|DA$)"), std::regex::extended);
 #endif

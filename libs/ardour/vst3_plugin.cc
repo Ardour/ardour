@@ -41,7 +41,6 @@
 
 #include "ardour/audio_buffer.h"
 #include "ardour/audioengine.h"
-#include "ardour/butler.h"
 #include "ardour/debug.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/selection.h"
@@ -1642,10 +1641,15 @@ tresult
 VST3PI::restartComponent (int32 flags)
 {
 	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::restartComponent 0x%1%2\n", std::hex, flags));
+	if (_is_loading_state) {
+		flags &= Vst::kReloadComponent;
+		flags &= Vst::kLatencyChanged;
+		flags &= Vst::kParamValuesChanged;
+	}
 
 	if (flags & Vst::kReloadComponent) {
 		PBD::Mutex::Lock pl (_process_lock, PBD::Mutex::NotLock);
-		if (!AudioEngine::instance ()->in_process_thread () && !_is_loading_state && !_restart_component_is_synced && !_process_offline) {
+		if (!AudioEngine::instance ()->in_process_thread () && !_restart_component_is_synced && !_process_offline) {
 			pl.acquire ();
 		} else {
 			assert (0); // a plugin should not call this while processing
@@ -1663,12 +1667,13 @@ VST3PI::restartComponent (int32 flags)
 	}
 	if (flags & Vst::kParamValuesChanged) {
 		PBD::Mutex::Lock pl (_process_lock, PBD::Mutex::NotLock);
-		if (!AudioEngine::instance ()->in_process_thread () && !_is_loading_state && !_restart_component_is_synced && !_process_offline) {
+		if (!AudioEngine::instance ()->in_process_thread () && !_restart_component_is_synced && !_process_offline) {
 			pl.acquire ();
 		}
 		update_shadow_data ();
 	}
 	if (flags & Vst::kLatencyChanged) {
+#if 0
 		/* Note: If this is initiated by the AudioProcessor, we should also notify
 		 * and restart the EditController.
 		 */
@@ -1679,6 +1684,9 @@ VST3PI::restartComponent (int32 flags)
 				return false;
 				},
 			this, NULL);
+#else
+		_plugin_latency.reset ();
+#endif
 	}
 	if (flags & Vst::kIoTitlesChanged) {
 		/* Input and/or Output bus titles have changed
@@ -2368,7 +2376,7 @@ VST3PI::request_bus_layout (uint32_t in, uint32_t aux_in, uint32_t out)
 		int32_t const n_chn = _bus_channel_cnt_in[bn];
 
 		Vst::SpeakerArrangement s = sa;
-		if (n_chn > 0) {
+		if (n_chn > 0 && sa != Vst::SpeakerArr::kMono) {
 			s &= ((uint64_t)1 << n_chn) - 1;
 		}
 
@@ -2397,7 +2405,7 @@ VST3PI::request_bus_layout (uint32_t in, uint32_t aux_in, uint32_t out)
 
 		Vst::SpeakerArrangement s = sa;
 
-		if (n_chn > 0) {
+		if (n_chn > 0 && sa != Vst::SpeakerArr::kMono) {
 			s &= ((uint64_t)1 << n_chn) - 1;
 		}
 

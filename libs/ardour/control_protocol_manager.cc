@@ -277,12 +277,26 @@ ControlProtocolManager::drop_protocols ()
 	 * before the process cycle stops and ports vanish.
 	 */
 
+	std::cerr << "Drop protoocls\n";
+
 	PBD::RWLock::WriterLock lm (_protocols_lock);
+	bool ssc_change = false;
 
 	for (auto const& p : _control_protocol_info) {
 		// mark existing protocols as requested
 		// otherwise the ControlProtocol instances are not recreated in set_session
 		if (p->protocol) {
+
+			std::vector<SurfaceCallbackType> stcs = p->protocol->supported_surface_callbacks ();
+			if (!stcs.empty()) {
+				for (auto stc : stcs) {
+					if (_supported_surface_callbacks[stc]) {
+						_supported_surface_callbacks[stc]--;
+						ssc_change = true;
+					}
+				}
+			}
+
 			p->requested = true;
 			p->protocol  = 0;
 			ProtocolStatusChange (p); /* EMIT SIGNAL */
@@ -294,6 +308,10 @@ ControlProtocolManager::drop_protocols ()
 	}
 
 	_control_protocols.clear ();
+
+	if (ssc_change) {
+		SupportedSurfaceCallbackChange (); /* EMIT SIGNAL */
+	}
 }
 
 ControlProtocol*
