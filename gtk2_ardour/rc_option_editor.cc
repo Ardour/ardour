@@ -2494,6 +2494,7 @@ private:
 	Gtk::Label* _note_name;
 };
 
+/* *************** RCOptionEditor::RCOptionEditor ******************************/
 RCOptionEditor::RCOptionEditor ()
 	: OptionEditorContainer (Config)
 	  /* pack self-as-vbox into tabbable */
@@ -3138,9 +3139,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	/* size and scale */
 
-#if (!defined __APPLE__ || defined MIXBUS)
 	add_option (_("Appearance/Size and Scale"), new OptionEditorHeading (_("User Interface Size and Scale")));
-#endif
 
 #ifndef __APPLE__
 	/* font scaling does nothing with GDK/Quartz */
@@ -3968,7 +3967,6 @@ These settings will only take effect after %1 is restarted.\n\
 	psc->add (2.0, _("2.0 seconds"));
 	add_option (_("Transport"), psc);
 
-
 	bo = new BoolOption ("mark-at-pgm-change",
 	                     _("Create a marker when a MIDI program change is received (and RECORDING)"),
 	                     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mark_at_pgm_change),
@@ -4013,7 +4011,6 @@ These settings will only take effect after %1 is restarted.\n\
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 					    (_("<b>When enabled</b> the loop button does not start playback but forces playback to always play the loop\n\n"
 					       "<b>When disabled</b> the loop button starts playing the loop, but stop then cancels loop playback")));
-
 
 	add_option (_("Transport"), bo);
 
@@ -4923,6 +4920,7 @@ These settings will only take effect after %1 is restarted.\n\
 
 	/* CONTROL SURFACES *********************************************************/
 
+	add_option (_("Control Surfaces"), new OptionEditorHeading (_("Control Surfaces")));
 	add_option (_("Control Surfaces"), new ControlSurfacesOptions ());
 
 
@@ -5109,7 +5107,6 @@ These settings will only take effect after %1 is restarted.\n\
 	rta->add ( 0, _("No Limit"));
 
 	add_option (S_("Preferences|Metering"), rta);
-
 
 	/* PERFORMANCE **************************************************************/
 
@@ -5373,10 +5370,6 @@ These settings will only take effect after %1 is restarted.\n\
 	parameter_changed ("sync-source");
 	parameter_changed ("open-gui-after-adding-plugin");
 	parameter_changed ("use-monitor-bus");
-
-#ifdef __APPLE__
-	parameter_changed ("use-opengl-view");
-#endif
 
 	XMLNode* node = ARDOUR_UI::instance()->preferences_settings();
 	if (node) {
