@@ -43,6 +43,7 @@
 #include "pbd/whitespace.h"
 #include "pbd/stl_delete.h"
 #include "pbd/openuri.h"
+#include "pbd/natsort.h"
 
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/keyboard.h"
@@ -1314,6 +1315,7 @@ SessionDialog::redisplay_recent_sessions ()
 		sort = 1 + recent_session_columns.visible_name.index();
 	}
 	recent_session_model->set_sort_column (abs (sort) -1, sort < 0 ? Gtk::SORT_DESCENDING : Gtk::SORT_ASCENDING);
+	recent_session_model->set_sort_func (abs (sort) -1, sigc::mem_fun(*this, &SessionDialog::name_sorter));
 
 	//auto-select the first item in the list
 	Gtk::TreeModel::Row first = recent_session_model->children()[0];
@@ -1335,6 +1337,15 @@ SessionDialog::recent_session_sort_changed ()
 			UIConfiguration::instance().set_recent_session_sort(sort);
 		}
 	}
+}
+
+int
+SessionDialog::name_sorter (Gtk::TreeModel::iterator a, Gtk::TreeModel::iterator b) const
+{
+	std::string const& n1 = (*a)[recent_session_columns.visible_name];
+	std::string const& n2 = (*b)[recent_session_columns.visible_name];
+
+	return PBD::natcmp (n1.c_str(), n2.c_str());
 }
 
 void
