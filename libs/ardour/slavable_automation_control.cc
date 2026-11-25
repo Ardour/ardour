@@ -372,7 +372,6 @@ SlavableAutomationControl::remove_master (std::shared_ptr<AutomationControl> m)
 			XMLNode* before = &alist ()->get_state ();
 			if (master->automation_playback () && master->list()) {
 				_list->list_merge (*master->list().get(), std::bind (&SlavableAutomationControl::scale_automation_callback, this, _1, _2));
-				printf ("y-t %s  %f\n", name().c_str(), list_ratio);
 				_list->y_transform (std::bind (&SlavableAutomationControl::scale_automation_callback, this, _1, list_ratio));
 			} else {
 				// do we need to freeze/thaw the list? probably no: iterators & positions don't change
