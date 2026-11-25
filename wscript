@@ -1291,7 +1291,7 @@ int main () { return 0; }
         have_native_tls = '--enable-tls' in gcc_config
 
         if have_native_tls:
-            conf.define('MINGW_NATIVE_TLS')
+            conf.define('MINGW_NATIVE_TLS', 1)
 
     if Options.options.dist_target == 'msvc':
         conf.env.append_value('CFLAGS', '-DCOMPILER_MSVC')
