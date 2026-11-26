@@ -2938,6 +2938,13 @@ PluginInsert::set_owner (SessionObject* o)
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 		(*i)->set_owner (o);
 	}
+	Route* r = dynamic_cast<Route*> (_owner);
+	PBD::Mutex::Lock lm (_control_lock);
+	if (r && r->is_monitor ()) {
+		for (auto const& i : _controls) {
+			std::dynamic_pointer_cast<AutomationControl>(i.second)->set_flag (Controllable::MonitorControl);
+		}
+	}
 }
 
 void
