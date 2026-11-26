@@ -2957,6 +2957,11 @@ Route::set_state (const XMLNode& node, int version)
 		}
 	}
 
+	if (is_monitor()) {
+		_gain_control->set_flag (Controllable::MonitorControl);
+		_trim_control->set_flag (Controllable::MonitorControl);
+	}
+
 	if (_delayline) {
 		_delayline->set_name (name ());
 	}
