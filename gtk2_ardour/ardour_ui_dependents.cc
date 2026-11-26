@@ -415,9 +415,6 @@ ARDOUR_UI::apply_window_settings (bool with_size)
 			if(window_state & GDK_WINDOW_STATE_FULLSCREEN) {
 				_main_window.fullscreen();
 			}
-			if(window_state & GDK_WINDOW_STATE_ICONIFIED) {
-				_main_window.iconify();
-			}
 			g_type_class_unref(ec);
 		}
 	}
