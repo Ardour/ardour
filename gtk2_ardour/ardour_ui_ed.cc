@@ -992,40 +992,75 @@ ARDOUR_UI::save_ardour_state ()
 	XMLNode* window_node = new XMLNode (X_("UI"));
 	window_node->set_property (_status_bar_visibility.get_state_name().c_str(), _status_bar_visibility.get_state_value ());
 
-	/* main window */
-
-	gint mx, my, mw, mh;
-	_main_window.get_position (mx, my);
-	_main_window.get_size (mw, mh);
-
+	/* main window
+	   Ardour remembers window geometry on saving/quitting and tries to restore
+	   it at next startup, but it do not remember the current window state (e.g.
+	   maximized or full screen). This implementation causes some minor problems
+	   on some platforms (see #10009). To fix this, I'd like to remember the
+	   window geometry in normal state, as well as its current state. I made
+	   this decision by observing the behavior of Windows Explorer which does
+	   the same thing I want to do here. This shoudl be pretty easy to implement
+	   this on Windows since there is `GetWindowPlacement/SetWindowPlacement`.
+	   And for macOS, there's `NSWindowRestoration`.
+	   I'm not familiar with the X11 windowing API, don't know if there's any
+	   mechanism to achieve this, so I came up with a workaround:
+	     - retrieve the window state
+	     - normalize the window if it is maximized/full screen/iconified (*)
+	     - retrieve the normal size of the window-
+	     - restore the window to its previous state if needed.
+	   The problem is that the process (*) is visible so you might see artifacts
+	   on saving the session.
+	*/
 	XMLNode main_window_node (X_("Main"));
-	main_window_node.set_property (X_("x"), mx);
-	main_window_node.set_property (X_("y"), my);
-	main_window_node.set_property (X_("w"), mw);
-	main_window_node.set_property (X_("h"), mh);
-	if(auto window = _main_window.get_window(); window.get())
+	guint s = 0;
+	Glib::RefPtr<Gdk::Window> window = _main_window.get_window();
+	if(window.get())
 	{
-		guint s = gdk_window_get_state (window->gobj());
+		s = gdk_window_get_state (window->gobj());
+		if(s & GDK_WINDOW_STATE_ICONIFIED) {
+			window->deiconify();
+		}
+		if(s & GDK_WINDOW_STATE_FULLSCREEN) {
+			window->unfullscreen();
+		}
+		if(s & GDK_WINDOW_STATE_MAXIMIZED)
+		{
+			window->unmaximize();
+		}
 		GFlagsClass* ec = (GFlagsClass*)g_type_class_ref(gdk_window_state_get_type());
 		Glib::ustring string;
-		do
-		{
-			if(GFlagsValue* ev = g_flags_get_first_value(ec, s))
-			{
-				if(!string.empty())
-				{
+		guint s2 = s;
+		do {
+			if(GFlagsValue* ev = g_flags_get_first_value(ec, s2)) {
+				if(!string.empty()) {
 					string.append(X_(";"));
 				}
 				string.append(ev->value_nick);
-				s &= ~ev->value;
-			}
-			else
-			{
+				s2 &= ~ev->value;
+			} else {
 				break;
 			}
 		} while(true);
 		g_type_class_unref(ec);
 		main_window_node.set_property (X_("state"), string);
+	}
+	gint mx, my, mw, mh;
+	_main_window.get_position (mx, my);
+	_main_window.get_size (mw, mh);
+	main_window_node.set_property (X_("x"), mx);
+	main_window_node.set_property (X_("y"), my);
+	main_window_node.set_property (X_("w"), mw);
+	main_window_node.set_property (X_("h"), mh);
+	if(window.get()) {
+		if(s & GDK_WINDOW_STATE_MAXIMIZED) {
+			window->maximize();
+		}
+		if(s & GDK_WINDOW_STATE_FULLSCREEN) {
+			window->fullscreen();
+		}
+		if(s & GDK_WINDOW_STATE_ICONIFIED) {
+			window->iconify();
+		}
 	}
 
 	string current_tab;
