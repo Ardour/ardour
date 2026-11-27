@@ -506,20 +506,21 @@ ${SUPER} cp -Rf	${BUNDLE_DIR}/* ${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/
 
 # write the desktop/menu file
 echo "[Desktop Entry]" > /tmp/${MENU_FILE}
-echo "Encoding=UTF-8" >> /tmp/${MENU_FILE}
-echo "Version=1.0" >> /tmp/${MENU_FILE}
+echo "Version=1.5" >> /tmp/${MENU_FILE}
 echo "Type=Application" >> /tmp/${MENU_FILE}
 echo "Terminal=false" >> /tmp/${MENU_FILE}
 echo "Exec=${PGM_EXEC_PATH}" >> /tmp/${MENU_FILE}
 if [ -z ${PGM_BUILDTYPE} ];
 then
 	echo "Name=${PGM_NAME}-${PGM_VERSION}" >> /tmp/${MENU_FILE}
+	echo "StartupWMClass==${PGM_NAME}-${PGM_VERSION}" >> /tmp/${MENU_FILE}
 else
 	echo "Name=${PGM_NAME}-${PGM_VERSION}-${PGM_BUILDTYPE}" >> /tmp/${MENU_FILE}
+	echo "StartupWMClass==${PGM_NAME}-${PGM_VERSION}-${PGM_BUILDTYPE}" >> /tmp/${MENU_FILE}
 fi
 echo "Icon=${ICON_NAME}" >> /tmp/${MENU_FILE}
 echo "Comment=Digital Audio Workstation" >> /tmp/${MENU_FILE}
-echo "Categories=AudioVideo;AudioEditing;Audio;Recorder;" >> /tmp/${MENU_FILE}
+echo "Categories=AudioVideo;Audio;Recorder;Midi;Sequencer;Player;Music;Mixer;" >> /tmp/${MENU_FILE}
 
 chmod ugo+rx /tmp/${MENU_FILE}
 ${SUPER} mv /tmp/${MENU_FILE} ${MENU_FILE_PATH}/.
