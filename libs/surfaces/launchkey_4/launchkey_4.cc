@@ -1765,7 +1765,7 @@ LaunchKey4::encoder_pan (int which, int step)
 	session->set_control (ac, ac->interface_to_internal (val - (step/127.0)), Controllable::NoGroup);
 
 	char buf[64];
-	snprintf (buf, sizeof (buf), _("L:%3d R:%3d"), (int) rint (100.0 * (1.0 - val)), (int) rint (100.0 * val));
+	snprintf (buf, sizeof (buf), _("L:%3d R:%3d"), (int) rint (100.0 * val), (int) rint (100.0 * (1.0 - val)));
 	set_display_target (DisplayTarget (0x15 + which), 2, buf, true);
 }
 
