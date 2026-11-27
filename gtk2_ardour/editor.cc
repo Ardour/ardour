@@ -5492,6 +5492,7 @@ Editor::session_going_away ()
 
 	selection->clear ();
 	cut_buffer->clear ();
+	clear_cut_buffer_locations ();
 
 	clicked_regionview = 0;
 	clicked_axisview = 0;
