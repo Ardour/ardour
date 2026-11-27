@@ -1372,6 +1372,9 @@ Editor::register_region_actions ()
 	/* Open the pitch shift dialogue for any selected audio regions */
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "pitch-shift-region", _("Pitch Shift..."), sigc::mem_fun (*this, &Editor::pitch_shift_region));
 
+	/* Replace source clip for selected audio regions */
+	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "replace-region-source", _("Replace Source Clip"), sigc::mem_fun (*this, &Editor::replace_source_for_selected_regions));
+
 	/* Open the transpose dialogue for any selected MIDI regions */
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "transpose-region", _("Transpose..."), sigc::mem_fun (*this, &Editor::transpose_region));
 

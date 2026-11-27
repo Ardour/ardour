@@ -64,6 +64,8 @@ using namespace ARDOUR;
 
 #define PX_SCALE(px) std::max((float)px, rintf((float)px * UIConfiguration::instance().get_ui_scale()))
 
+std::string TriggerClipPicker::_last_clip_dir_selection;
+
 TriggerClipPicker::TriggerClipPicker ()
 	: _fcd (_("Select clip folder"), FILE_CHOOSER_ACTION_SELECT_FOLDER)
 	, _seek_slider (0, 1000, 1)
@@ -71,6 +73,7 @@ TriggerClipPicker::TriggerClipPicker ()
 	, _auditioner_combo (InstrumentSelector::ForAuditioner)
 	, _clip_library_listed (false)
 	, _ignore_list_dir (false)
+	, _autoplay_from_click (false)
 	, _seeking (false)
 	, _audition_plugnui (0)
 {
@@ -202,6 +205,7 @@ TriggerClipPicker::TriggerClipPicker ()
 	dnd.push_back (TargetEntry ("text/uri-list"));
 	_view.drag_source_set (dnd, Gdk::MODIFIER_MASK, Gdk::ACTION_COPY);
 	_view.get_selection ()->signal_changed ().connect (sigc::mem_fun (*this, &TriggerClipPicker::row_selected));
+	_view.signal_button_press_event ().connect (sigc::mem_fun (*this, &TriggerClipPicker::view_button_press), false);
 	_view.signal_row_activated ().connect (sigc::mem_fun (*this, &TriggerClipPicker::row_activated));
 	_view.signal_test_expand_row ().connect (sigc::mem_fun (*this, &TriggerClipPicker::test_expand));
 	_view.signal_row_collapsed ().connect (sigc::mem_fun (*this, &TriggerClipPicker::row_collapsed));
@@ -229,11 +233,16 @@ TriggerClipPicker::TriggerClipPicker ()
 	/* show off */
 	_scroller.show ();
 	_view.show ();
+	dir_table->show ();
 	_clip_dir_menu.show ();
 	_auditable.show ();
 
 	/* fill treeview with data */
-	_clip_dir_menu.items ().front ().activate ();
+	if (!_last_clip_dir_selection.empty () && Glib::file_test (_last_clip_dir_selection, Glib::FILE_TEST_IS_DIR | Glib::FILE_TEST_EXISTS)) {
+		clip_dir_selected (_last_clip_dir_selection);
+	} else {
+		_clip_dir_menu.items ().front ().activate ();
+	}
 }
 
 TriggerClipPicker::~TriggerClipPicker ()
@@ -337,6 +346,13 @@ TriggerClipPicker::refill_dropdown ()
 	return false;
 }
 
+void
+TriggerClipPicker::clip_dir_selected (std::string const& path)
+{
+	_last_clip_dir_selection = path;
+	list_dir (path);
+}
+
 static bool
 is_subfolder (std::string const& parent, std::string dir)
 {
@@ -407,7 +423,7 @@ TriggerClipPicker::maybe_add_dir (std::string const& dir)
 		return false;
 	}
 
-	_clip_dir_menu.add_menu_elem (Gtkmm2ext::MenuElemNoMnemonic (display_name (dir), sigc::bind (sigc::mem_fun (*this, &TriggerClipPicker::list_dir), dir, (Gtk::TreeNodeChildren*)0)));
+	_clip_dir_menu.add_menu_elem (Gtkmm2ext::MenuElemNoMnemonic (display_name (dir), sigc::bind (sigc::mem_fun (*this, &TriggerClipPicker::clip_dir_selected), dir)));
 
 	/* check if a parent path of the given dir already exists,
 	 * or if this new path is parent to any existing ones.
@@ -464,9 +480,11 @@ TriggerClipPicker::drag_end (Glib::RefPtr<Gdk::DragContext> const&)
 void
 TriggerClipPicker::cursor_changed ()
 {
-	if (!_session || !_autoplay_btn.get_active ()) {
+	if (!_session || !_autoplay_btn.get_active () || !_autoplay_from_click) {
 		return;
 	}
+
+	_autoplay_from_click = false;
 
 	_session->cancel_audition ();
 
@@ -483,9 +501,39 @@ TriggerClipPicker::cursor_changed ()
 	}
 }
 
+bool
+TriggerClipPicker::view_button_press (GdkEventButton*)
+{
+	_autoplay_from_click = true;
+	return false;
+}
+
+void
+TriggerClipPicker::set_selection_mode (Gtk::SelectionMode mode)
+{
+	_view.get_selection ()->set_mode (mode);
+}
+
+std::optional<std::string>
+TriggerClipPicker::get_selected_file_path ()
+{
+	if (_view.get_selection ()->count_selected_rows () != 1) {
+		return std::nullopt;
+	}
+
+	TreeView::Selection::ListHandle_Path rows = _view.get_selection ()->get_selected_rows ();
+	TreeIter i = _model->get_iter (*rows.begin ());
+	if (!i || !(*i)[_columns.file]) {
+		return std::nullopt;
+	}
+
+	return (*i)[_columns.path];
+}
+
 void
 TriggerClipPicker::row_selected ()
 {
+	selectionChanged.emit ();
 	if (!_session) {
 		return;
 	}
