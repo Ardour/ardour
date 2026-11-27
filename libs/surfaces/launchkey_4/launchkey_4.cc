@@ -2138,13 +2138,13 @@ LaunchKey4::set_display_target (DisplayTarget dt, int field, std::string const &
 void
 LaunchKey4::configure_display (DisplayTarget target, int config)
 {
-	MidiByteArray msg (9, 0xf0, 0x00, 0x29, 0xff, 0xff, 0x04, 0xff, 0xff, 0xf7);
+	MidiByteArray msg (10, 0xf0, 0x00, 0x20, 0x29, 0xff, 0xff, 0x04, 0xff, 0xff, 0xf7);
 
-	msg[3] = (device_pid >> 8) & 0x7f;
-	msg[4] = device_pid & 0x7f;
+	msg[4] = (device_pid >> 8) & 0x7f;
+	msg[5] = device_pid & 0x7f;
 
-	msg[6] = target;
-	msg[7] = config & 0x7f;
+	msg[7] = target;
+	msg[8] = config & 0x7f;
 
 	daw_write (msg);
 }
