@@ -1734,6 +1734,48 @@ LaunchKey4::encoder_plugin (int which, int step)
 }
 
 void
+LaunchKey4::send_gain (int which) {
+	if (!stripable[which]) {
+		set_display_target(DisplayTarget(0x15 + which), 2, "");
+		return;
+	}
+
+	std::shared_ptr<GainControl> ac = stripable[which]->gain_control();
+
+	if (!ac) {
+		set_display_target(DisplayTarget(0x15 + which), 2, "");
+		return;
+	}
+
+	char buf[16];
+	gain_t gain = ac->get_value();
+	snprintf(buf, sizeof(buf), "%.1f dB", accurate_coefficient_to_dB(gain));
+
+	set_display_target(DisplayTarget(0x15 + which), 2, buf);
+}
+
+void
+LaunchKey4::send_pan (int which) {
+	if (!stripable[which]) {
+		set_display_target(DisplayTarget(0x15 + which), 2, "");
+		return;
+	}
+
+	std::shared_ptr<AutomationControl> ac (stripable[which]->pan_azimuth_control());
+
+	if (!ac) {
+		set_display_target(DisplayTarget(0x15 + which), 2, "");
+		return;
+	}
+
+	char buf[64];
+	double val = ac->internal_to_interface (ac->get_value());
+	snprintf (buf, sizeof (buf), _("L:%3d R:%3d"), (int) rint (100.0 * val), (int) rint (100.0 * (1.0 - val)));
+
+	set_display_target(DisplayTarget(0x15 + which), 2, buf);
+}
+
+void
 LaunchKey4::encoder_mixer (int which, int step)
 {
 	switch (encoder_bank) {
@@ -1783,16 +1825,10 @@ LaunchKey4::encoder_level (int which, int step)
 		return;
 	}
 
-	gain_t gain;
-
-	if (shift_pressed) {
-		gain = gc->get_value();
-	} else {
-		double pos = ARDOUR::gain_to_slider_position_with_max (gc->get_value(), ARDOUR::Config->get_max_gain());
-		pos += (step/127.0);
-		gain = ARDOUR::slider_position_to_gain_with_max (pos, ARDOUR::Config->get_max_gain());
-		session->set_control (gc, gain, Controllable::NoGroup);
-	}
+	double pos = ARDOUR::gain_to_slider_position_with_max (gc->get_value(), ARDOUR::Config->get_max_gain());
+	pos += (step/127.0);
+	gain_t gain = ARDOUR::slider_position_to_gain_with_max (pos, ARDOUR::Config->get_max_gain());
+	session->set_control (gc, gain, Controllable::NoGroup);
 
 	char buf[16];
 	snprintf (buf, sizeof (buf), "%.1f dB", accurate_coefficient_to_dB (gain));
@@ -2220,6 +2256,22 @@ LaunchKey4::rec_enable_changed (uint32_t n)
 }
 
 void
+LaunchKey4::gain_changed (uint32_t n)
+{
+	if (encoder_mode == EncoderMixer && encoder_bank == 0) {
+		send_gain (n);
+	}
+}
+
+void
+LaunchKey4::pan_changed(uint32_t n)
+{
+	if (encoder_mode == EncoderMixer && encoder_bank == 1) {
+		send_pan (n);
+	}
+}
+
+void
 LaunchKey4::switch_bank (uint32_t base)
 {
 	stripable_connections.drop_connections ();
@@ -2254,9 +2306,19 @@ LaunchKey4::switch_bank (uint32_t base)
 			stripable[n]->DropReferences.connect (stripable_connections, invalidator (*this), std::bind (&LaunchKey4::switch_bank, this, bank_start), this);
 			stripable[n]->presentation_info().PropertyChanged.connect (stripable_connections, invalidator (*this), std::bind (&LaunchKey4::stripable_property_change, this, _1, n), this);
 			stripable[n]->mute_control()->Changed.connect (stripable_connections, invalidator (*this), std::bind (&LaunchKey4::mute_changed, this, n), this);
-			std::shared_ptr<AutomationControl> ac = stripable[n]->rec_enable_control();
-			if (ac) {
-				ac->Changed.connect (stripable_connections, invalidator (*this), std::bind (&LaunchKey4::rec_enable_changed, this, n), this);
+			std::shared_ptr<AutomationControl> rec_ac = stripable[n]->rec_enable_control();
+			if (rec_ac) {
+				rec_ac->Changed.connect (stripable_connections, invalidator (*this), std::bind (&LaunchKey4::rec_enable_changed, this, n), this);
+			}
+			
+			std::shared_ptr<AutomationControl> gain_ac = stripable[n]->gain_control();
+			if (gain_ac) {
+				gain_ac->Changed.connect (stripable_connections, invalidator(*this), std::bind (&LaunchKey4::gain_changed, this, n), this);
+			}
+
+			std::shared_ptr<AutomationControl> pan_ac = stripable[n]->pan_azimuth_control();
+			if (pan_ac) {
+				pan_ac->Changed.connect (stripable_connections, invalidator(*this), std::bind (&LaunchKey4::pan_changed, this, n), this);
 			}
 		}
 
@@ -2296,6 +2358,22 @@ LaunchKey4::switch_bank (uint32_t base)
 
 	if (encoder_mode != EncoderTransport) {
 		set_encoder_titles_to_route_names (true);
+		if (encoder_mode == EncoderMixer) {
+			switch (encoder_bank) {
+				case 0:
+				 	for (uint32_t n = 0; n < 8; n++) {
+						send_gain (n);
+					}
+					break;
+				case 1:
+					for (uint32_t n = 0; n < 8; n++) {
+						send_pan (n);
+					}
+					break;
+				default:
+					break;
+			}
+		}
 	}
 }
 
@@ -2638,19 +2716,23 @@ LaunchKey4::label_encoders (bool display)
 	std::shared_ptr<Plugin> plugin (current_plugin.lock());
 
 	switch (encoder_mode) {
-	case EncoderMixer:
 	case EncoderSendA:
+		set_encoder_titles_to_route_names (false);
+		break;
+	case EncoderMixer:
 		set_encoder_titles_to_route_names (false);
 		switch (encoder_bank) {
 		case 0:
 			for (int n = 0; n < 8; ++n) {
 				set_display_target (DisplayTarget (0x15 + n), 1, "Level");
+				send_gain (n);
 			}
 			set_display_target (GlobalTemporaryDisplay, 0, "Levels", display);
 			break;
 		case 1:
 			for (int n = 0; n < 8; ++n) {
 				set_display_target (DisplayTarget (0x15 + n), 1, "Pan");
+				send_pan (n);
 			}
 			set_display_target (GlobalTemporaryDisplay, 0, "Panning", display);
 			break;

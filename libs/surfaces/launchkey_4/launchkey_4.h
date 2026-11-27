@@ -332,6 +332,8 @@ class LaunchKey4 : public MIDISurface
 	void solo_changed ();
 	void mute_changed (uint32_t which);
 	void rec_enable_changed (uint32_t which);
+	void gain_changed (uint32_t which);
+	void pan_changed (uint32_t which);
 
 	enum LightingMode {
 		Off,
@@ -371,6 +373,9 @@ class LaunchKey4 : public MIDISurface
 	void setup_screen_for_encoder_plugins (bool display);
 	void label_encoders (bool display);
 	void show_encoder_value (int which, std::shared_ptr<ARDOUR::Plugin> plugin, int control, std::shared_ptr<ARDOUR::AutomationControl> ac, bool display);
+
+	void send_gain (int which);
+	void send_pan (int which);
 
 	void encoder_plugin (int which, int step);
 	void encoder_mixer (int which, int step);
