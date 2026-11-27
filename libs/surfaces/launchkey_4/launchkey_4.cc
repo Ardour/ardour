@@ -2666,16 +2666,16 @@ LaunchKey4::set_encoder_bank (int n, bool display)
 
 		switch (encoder_bank) {
 		case 0:
+			light_up_arrow = false;
 			light_down_arrow = true;
 			break;
 		case 1:
-			light_down_arrow = true;
 			light_up_arrow = true;
-			break;
-		case 2:
-			light_up_arrow = true;
+			light_down_arrow = false;
 			break;
 		default:
+			/* mixer encoders only have two pages */
+			encoder_bank = 1;
 			return;
 		}
 	}
