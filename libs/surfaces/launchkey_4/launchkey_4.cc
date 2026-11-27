@@ -584,7 +584,7 @@ LaunchKey4::use_encoders (bool onoff)
 	display_config[9] = 0xf7;
 
 	for (int encoder = 0; encoder < 8; ++encoder) {
-		/* 2 line display for all encoders */
+		/* 3 line display for all encoders */
 		display_config[7] = 0x15 + encoder;
 		daw_write (display_config, 10);
 	}
