@@ -411,7 +411,6 @@ LaunchKey4::finish_begin_using_device ()
 	set_display_target (StationaryDisplay, 0, "ardour", true);
 	set_display_target (StationaryDisplay, 1, string(), true);
 
-	configure_display (DAWPadFunctionDisplay, 0x1);
 	configure_display (GlobalTemporaryDisplay, 0x1);
 
 	/* In this DAW, mixer mode controls pan */
@@ -2082,7 +2081,6 @@ LaunchKey4::set_pad_function (PadFunction f)
 	msg[1] = 0x68; /* scene */
 	daw_write (msg, 3);
 
-	configure_display (DAWPadFunctionDisplay, 0x1);
 	set_display_target (DAWPadFunctionDisplay, 0, str, true);
 }
 
