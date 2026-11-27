@@ -709,7 +709,7 @@ LaunchKey4::handle_midi_controller_message (MIDI::Parser& parser, MIDI::EventTwo
 
 	/* Encoder Mode button */
 
-	if (ev->controller_number == 0x41) {
+	if (ev->controller_number == 0x1e) {
 		switch (ev->value) {
 		case 2:
 			set_encoder_mode (EncoderPlugins);
