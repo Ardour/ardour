@@ -384,7 +384,7 @@ LaunchKey4::finish_begin_using_device ()
 	switch_bank (0);
 	toggle_button_mode ();
 	use_encoders (true);
-	set_encoder_bank (0);
+	set_encoder_bank (0, false);
 
 	/* Set configuration for fader displays, which is never altered */
 
@@ -734,7 +734,7 @@ LaunchKey4::handle_midi_controller_message (MIDI::Parser& parser, MIDI::EventTwo
 	if (ev->controller_number == 0x33) {
 		/* up'; use press only  */
 		if (ev->value && encoder_bank >  0) {
-			set_encoder_bank (encoder_bank - 1);
+			set_encoder_bank (encoder_bank - 1, true);
 		}
 		return;
 	}
@@ -742,7 +742,7 @@ LaunchKey4::handle_midi_controller_message (MIDI::Parser& parser, MIDI::EventTwo
 	if (ev->controller_number == 0x34) {
 		/* down; use press only */
 		if (ev->value && encoder_bank < 2) {
-			set_encoder_bank (encoder_bank + 1);
+			set_encoder_bank (encoder_bank + 1, true);
 		}
 		return;
 	}
@@ -1642,9 +1642,9 @@ LaunchKey4::plugin_selected (std::weak_ptr<PluginInsert> wpi)
 	}
 
 	if (encoder_mode == EncoderPlugins) {
-		label_encoders ();
+		label_encoders (true);
 		/* light up/down arrows appropriately */
-		set_encoder_bank (encoder_bank);
+		set_encoder_bank (encoder_bank, false);
 	}
 }
 
@@ -1663,11 +1663,11 @@ LaunchKey4::show_encoder_value (int n, std::shared_ptr<Plugin> plugin, int contr
 		return;
 	}
 
-	set_display_target (DisplayTarget (0x15 + n), 2, str, true);
+	set_display_target (DisplayTarget (0x15 + n), 2, str, display);
 }
 
 void
-LaunchKey4::setup_screen_for_encoder_plugins ()
+LaunchKey4::setup_screen_for_encoder_plugins (bool display)
 {
 	uint32_t n = 0;
 
@@ -1693,19 +1693,22 @@ LaunchKey4::setup_screen_for_encoder_plugins ()
 
 			std::string label = plugin->parameter_label (p);
 
-			set_display_target (DisplayTarget (0x15+n), 0, name, (n == 0));
-			set_display_target (DisplayTarget (0x15+n), 1, label,(n == 0));
-			show_encoder_value (n, plugin, ctrl, ac, (n == 0));
+			set_display_target (DisplayTarget (0x15+n), 0, name);
+			set_display_target (DisplayTarget (0x15+n), 1, label);
+			show_encoder_value (n, plugin, ctrl, ac, false);
 			++n;
 		}
 	}
 
 	while (n < 8) {
-		set_display_target (DisplayTarget (0x15+n), 0, name, (n == 0));
-		set_display_target (DisplayTarget (0x15+n), 1, "--", (n == 0));
-		set_display_target (DisplayTarget (0x15+n), 2, string(), (n == 0));
+		set_display_target (DisplayTarget (0x15+n), 0, name);
+		set_display_target (DisplayTarget (0x15+n), 1, "--");
+		set_display_target (DisplayTarget (0x15+n), 2, string());
 		++n;
 	}
+
+	/* indicate selected plugin on screen */
+	set_display_target(GlobalTemporaryDisplay, 0, name, display);
 }
 
 void
@@ -2292,7 +2295,7 @@ LaunchKey4::switch_bank (uint32_t base)
 	}
 
 	if (encoder_mode != EncoderTransport) {
-		set_encoder_titles_to_route_names ();
+		set_encoder_titles_to_route_names (true);
 	}
 }
 
@@ -2544,7 +2547,7 @@ LaunchKey4::unlight_pad (int pad_id)
 }
 
 void
-LaunchKey4::set_encoder_bank (int n)
+LaunchKey4::set_encoder_bank (int n, bool display)
 {
 	bool light_up_arrow = false;
 	bool light_down_arrow = false;
@@ -2626,51 +2629,51 @@ LaunchKey4::set_encoder_bank (int n)
 	daw_write (msg, 3);
 	daw_write (&msg[3], 3);
 
-	label_encoders ();
+	label_encoders (display);
 }
 
 void
-LaunchKey4::label_encoders ()
+LaunchKey4::label_encoders (bool display)
 {
 	std::shared_ptr<Plugin> plugin (current_plugin.lock());
 
 	switch (encoder_mode) {
 	case EncoderMixer:
 	case EncoderSendA:
-		set_encoder_titles_to_route_names ();
+		set_encoder_titles_to_route_names (false);
 		switch (encoder_bank) {
 		case 0:
 			for (int n = 0; n < 8; ++n) {
-				set_display_target (DisplayTarget (0x15 + n), 1, "Level", false);
+				set_display_target (DisplayTarget (0x15 + n), 1, "Level");
 			}
-			set_display_target (GlobalTemporaryDisplay, 0, "Levels", true);
+			set_display_target (GlobalTemporaryDisplay, 0, "Levels", display);
 			break;
 		case 1:
 			for (int n = 0; n < 8; ++n) {
-				set_display_target (DisplayTarget (0x15 + n), 1, "Pan", false);
+				set_display_target (DisplayTarget (0x15 + n), 1, "Pan");
 			}
-			set_display_target (GlobalTemporaryDisplay, 0, "Panning", true);
+			set_display_target (GlobalTemporaryDisplay, 0, "Panning", display);
 			break;
 		default:
 			break;
 		}
 		break;
 	case EncoderPlugins:
-		setup_screen_for_encoder_plugins ();
+		setup_screen_for_encoder_plugins (display);
 		break;
 	case EncoderTransport:
-		set_display_target (DisplayTarget (0x15), 1, "Shuttle", true);
-		set_display_target (DisplayTarget (0x16), 1, "Zoom", true);
-		set_display_target (DisplayTarget (0x17), 1, "Loop Start", true);
-		set_display_target (DisplayTarget (0x18), 1, "Loop End", true);
-		set_display_target (DisplayTarget (0x19), 1, "Jump to Marker", true);
-		set_display_target (DisplayTarget (0x1a), 1, string(), true);
-		set_display_target (DisplayTarget (0x1b), 1, string(), true);
-		set_display_target (DisplayTarget (0x1c), 1, string(), true);
+		set_display_target (DisplayTarget (0x15), 1, "Shuttle");
+		set_display_target (DisplayTarget (0x16), 1, "Zoom");
+		set_display_target (DisplayTarget (0x17), 1, "Loop Start");
+		set_display_target (DisplayTarget (0x18), 1, "Loop End");
+		set_display_target (DisplayTarget (0x19), 1, "Jump to Marker");
+		set_display_target (DisplayTarget (0x1a), 1, string());
+		set_display_target (DisplayTarget (0x1b), 1, string());
+		set_display_target (DisplayTarget (0x1c), 1, string());
 		for (int n = 0; n < 8; ++n) {
-			set_display_target (DisplayTarget (0x15 + n), 0, "Transport", true);
+			set_display_target (DisplayTarget (0x15 + n), 0, "Transport");
+			set_display_target (DisplayTarget (0x15 + n), 2, string());
 		}
-		set_display_target (GlobalTemporaryDisplay, 0, "Transport", true);
 		break;
 	}
 }
@@ -2679,28 +2682,32 @@ void
 LaunchKey4::set_encoder_mode (EncoderMode m)
 {
 	encoder_mode = m;
-	set_encoder_bank (0);
+
+    /* device shows encoder mode by itself when switching,
+     * do not display */
+	set_encoder_bank (0, false);
 
 	/* device firmware reset to continuous controller mode, so switch back
 	 * if (ev->controller_to encoders
 	 */
 
 	use_encoders (true);
-	label_encoders ();
+
+	label_encoders (false);
 }
 
 void
-LaunchKey4::set_encoder_titles_to_route_names ()
+LaunchKey4::set_encoder_titles_to_route_names (bool display)
 {
 	/* Set encoder "title" fields to show current bank */
 	bool first = true;
 
 	for (int n = 0; n < 8; ++n) {
 		if (stripable[n]) {
-			set_display_target (DisplayTarget (0x15 + n), 0, stripable[n]->name(), first);
+			set_display_target (DisplayTarget (0x15 + n), 0, stripable[n]->name(), display && first);
 			first = false;
 		} else {
-			set_display_target (DisplayTarget (0x15 + n), 0, string(), true);
+			set_display_target (DisplayTarget (0x15 + n), 0, string(), display);
 		}
 	}
 }

@@ -365,11 +365,11 @@ class LaunchKey4 : public MIDISurface
 
 	EncoderMode encoder_mode;
 	int encoder_bank;
-	void set_encoder_bank (int);
+	void set_encoder_bank (int n, bool display);
 	void set_encoder_mode (EncoderMode);
-	void set_encoder_titles_to_route_names ();
-	void setup_screen_for_encoder_plugins ();
-	void label_encoders ();
+	void set_encoder_titles_to_route_names (bool display);
+	void setup_screen_for_encoder_plugins (bool display);
+	void label_encoders (bool display);
 	void show_encoder_value (int which, std::shared_ptr<ARDOUR::Plugin> plugin, int control, std::shared_ptr<ARDOUR::AutomationControl> ac, bool display);
 
 	void encoder_plugin (int which, int step);
