@@ -177,7 +177,7 @@ LaunchKey4::LaunchKey4 (ARDOUR::Session& s)
 	, layer_pressed (false)
 	, bank_start (0)
 	, button_mode (ButtonsRecEnable) // reset via toggle later
-	, encoder_mode (EncoderMixer)
+	, encoder_mode (EncoderPlugins)
 	, num_plugin_controls (0)
 {
 	run_event_loop ();
