@@ -412,6 +412,7 @@ LaunchKey4::finish_begin_using_device ()
 	set_display_target (StationaryDisplay, 1, string(), true);
 
 	configure_display (DAWPadFunctionDisplay, 0x1);
+	configure_display (GlobalTemporaryDisplay, 0x1);
 
 	/* In this DAW, mixer mode controls pan */
 	set_display_target (MixerPotMode, 1, "Level", false);
