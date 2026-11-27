@@ -1672,8 +1672,11 @@ LaunchKey4::setup_screen_for_encoder_plugins ()
 	uint32_t n = 0;
 
 	std::shared_ptr<ARDOUR::Plugin> plugin = current_plugin.lock();
+	const char *name = "";
 
 	if (plugin) {
+		name = plugin->name();
+
 		while (n < 8) {
 			uint32_t ctrl = (encoder_bank * 8) + n;
 
@@ -1690,7 +1693,7 @@ LaunchKey4::setup_screen_for_encoder_plugins ()
 
 			std::string label = plugin->parameter_label (p);
 
-			set_display_target (DisplayTarget (0x15+n), 0, plugin->name(), (n == 0));
+			set_display_target (DisplayTarget (0x15+n), 0, name, (n == 0));
 			set_display_target (DisplayTarget (0x15+n), 1, label,(n == 0));
 			show_encoder_value (n, plugin, ctrl, ac, (n == 0));
 			++n;
@@ -1698,7 +1701,7 @@ LaunchKey4::setup_screen_for_encoder_plugins ()
 	}
 
 	while (n < 8) {
-		set_display_target (DisplayTarget (0x15+n), 0, plugin->name(), (n == 0));
+		set_display_target (DisplayTarget (0x15+n), 0, name, (n == 0));
 		set_display_target (DisplayTarget (0x15+n), 1, "--", (n == 0));
 		set_display_target (DisplayTarget (0x15+n), 2, string(), (n == 0));
 		++n;
