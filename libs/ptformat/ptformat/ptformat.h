@@ -242,7 +242,8 @@ private:
 	uint8_t        _version;
 	uint8_t*       _product;
 	int64_t        _targetrate;
-	float          _ratefactor;
+	/* double: positions past 2^24 samples do not fit a float's mantissa. */
+	double         _ratefactor;
 	bool           is_bigendian;
 
 	struct block_t {

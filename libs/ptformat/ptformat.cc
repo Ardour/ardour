@@ -512,9 +512,9 @@ PTFFormat::gen_xor_delta(uint8_t xor_value, uint8_t mul, bool negative) {
 
 void
 PTFFormat::setrates(void) {
-	_ratefactor = 1.f;
+	_ratefactor = 1.0;
 	if (_sessionrate != 0) {
-		_ratefactor = (float)_targetrate / _sessionrate;
+		_ratefactor = (double)_targetrate / _sessionrate;
 	}
 }
 
@@ -549,7 +549,9 @@ PTFFormat::parse_block_at(uint32_t pos, struct block_t *block, struct block_t *p
 	block->offset = b.offset;
 	block->child.clear();
 
-	for (i = 1; (i < block->block_size) && (pos + i + childjump < max); i += childjump ? childjump : 1) {
+	/* Skip block header and possibly a 4 byte count */
+	i = (block->content_type == 0x1004) ? 13 : 1;
+	for (; (i < block->block_size) && (pos + i + childjump < max); i += childjump ? childjump : 1) {
 		int p = pos + i;
 		struct block_t bchild;
 		childjump = 0;
@@ -702,7 +704,11 @@ PTFFormat::parseaudio(void) {
 							if (!(foundin(wavtype, std::string("WAVE")) ||
 									foundin(wavtype, std::string("EVAW")) ||
 									foundin(wavtype, std::string("AIFF")) ||
-									foundin(wavtype, std::string("FFIA"))) ) {
+									foundin(wavtype, std::string("FFIA")) ||
+									foundin(wavtype, std::string("fFXM")) ||
+									foundin(wavtype, std::string("MXFf")) ||
+									foundin(wavtype, std::string("Sd2f")) ||
+									foundin(wavtype, std::string("f2dS"))) ) {
 								continue;
 							}
 						} else {
@@ -710,11 +716,14 @@ PTFFormat::parseaudio(void) {
 								if (!(foundin(wavtype, std::string("WAVE")) ||
 										foundin(wavtype, std::string("EVAW")) ||
 										foundin(wavtype, std::string("AIFF")) ||
-										foundin(wavtype, std::string("FFIA"))) ) {
+										foundin(wavtype, std::string("FFIA")) ||
+										foundin(wavtype, std::string("fFXM")) ||
+										foundin(wavtype, std::string("MXFf"))) ) {
 									continue;
 								}
-							} else if (!(foundin(wavname, std::string(".wav")) || 
-									foundin(wavname, std::string(".aif"))) ) {
+							} else if (!(foundin(wavname, std::string(".wav")) ||
+									foundin(wavname, std::string(".aif")) ||
+									foundin(wavname, std::string(".mxf"))) ) {
 								continue;
 							}
 						}
@@ -1033,7 +1042,10 @@ PTFFormat::parserest(void) {
 									j = e->offset + 4;
 									rawindex = u_endian_read4(&_ptfunxored[j], is_bigendian);
 									j += 4 + 1;
-									start = u_endian_read4(&_ptfunxored[j], is_bigendian);
+									start = u_endian_read5(&_ptfunxored[j], is_bigendian);
+									if (start >= ZERO_TICKS) {
+										start = start - ZERO_TICKS;
+									}
 									tindex = count;
 									track_t ti;
 									if (!find_track(tindex, ti)) {
