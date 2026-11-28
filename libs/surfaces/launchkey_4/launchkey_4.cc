@@ -177,7 +177,7 @@ LaunchKey4::LaunchKey4 (ARDOUR::Session& s)
 	, layer_pressed (false)
 	, bank_start (0)
 	, button_mode (ButtonsRecEnable) // reset via toggle later
-	, encoder_mode (EncoderMixer)
+	, encoder_mode (EncoderPlugins)
 	, num_plugin_controls (0)
 {
 	run_event_loop ();
@@ -384,7 +384,7 @@ LaunchKey4::finish_begin_using_device ()
 	switch_bank (0);
 	toggle_button_mode ();
 	use_encoders (true);
-	set_encoder_bank (0);
+	set_encoder_bank (0, false);
 
 	/* Set configuration for fader displays, which is never altered */
 
@@ -411,7 +411,7 @@ LaunchKey4::finish_begin_using_device ()
 	set_display_target (StationaryDisplay, 0, "ardour", true);
 	set_display_target (StationaryDisplay, 1, string(), true);
 
-	configure_display (DAWPadFunctionDisplay, 0x1);
+	configure_display (GlobalTemporaryDisplay, 0x1);
 
 	/* In this DAW, mixer mode controls pan */
 	set_display_target (MixerPotMode, 1, "Level", false);
@@ -584,7 +584,7 @@ LaunchKey4::use_encoders (bool onoff)
 	display_config[9] = 0xf7;
 
 	for (int encoder = 0; encoder < 8; ++encoder) {
-		/* 2 line display for all encoders */
+		/* 3 line display for all encoders */
 		display_config[7] = 0x15 + encoder;
 		daw_write (display_config, 10);
 	}
@@ -709,7 +709,7 @@ LaunchKey4::handle_midi_controller_message (MIDI::Parser& parser, MIDI::EventTwo
 
 	/* Encoder Mode button */
 
-	if (ev->controller_number == 0x41) {
+	if (ev->controller_number == 0x1e) {
 		switch (ev->value) {
 		case 2:
 			set_encoder_mode (EncoderPlugins);
@@ -734,7 +734,7 @@ LaunchKey4::handle_midi_controller_message (MIDI::Parser& parser, MIDI::EventTwo
 	if (ev->controller_number == 0x33) {
 		/* up'; use press only  */
 		if (ev->value && encoder_bank >  0) {
-			set_encoder_bank (encoder_bank - 1);
+			set_encoder_bank (encoder_bank - 1, true);
 		}
 		return;
 	}
@@ -742,7 +742,7 @@ LaunchKey4::handle_midi_controller_message (MIDI::Parser& parser, MIDI::EventTwo
 	if (ev->controller_number == 0x34) {
 		/* down; use press only */
 		if (ev->value && encoder_bank < 2) {
-			set_encoder_bank (encoder_bank + 1);
+			set_encoder_bank (encoder_bank + 1, true);
 		}
 		return;
 	}
@@ -1642,9 +1642,9 @@ LaunchKey4::plugin_selected (std::weak_ptr<PluginInsert> wpi)
 	}
 
 	if (encoder_mode == EncoderPlugins) {
-		label_encoders ();
+		label_encoders (true);
 		/* light up/down arrows appropriately */
-		set_encoder_bank (encoder_bank);
+		set_encoder_bank (encoder_bank, false);
 	}
 }
 
@@ -1663,17 +1663,20 @@ LaunchKey4::show_encoder_value (int n, std::shared_ptr<Plugin> plugin, int contr
 		return;
 	}
 
-	set_display_target (DisplayTarget (0x15 + n), 2, str, true);
+	set_display_target (DisplayTarget (0x15 + n), 2, str, display);
 }
 
 void
-LaunchKey4::setup_screen_for_encoder_plugins ()
+LaunchKey4::setup_screen_for_encoder_plugins (bool display)
 {
 	uint32_t n = 0;
 
 	std::shared_ptr<ARDOUR::Plugin> plugin = current_plugin.lock();
+	const char *name = "";
 
 	if (plugin) {
+		name = plugin->name();
+
 		while (n < 8) {
 			uint32_t ctrl = (encoder_bank * 8) + n;
 
@@ -1690,19 +1693,22 @@ LaunchKey4::setup_screen_for_encoder_plugins ()
 
 			std::string label = plugin->parameter_label (p);
 
-			set_display_target (DisplayTarget (0x15+n), 0, plugin->name(), (n == 0));
-			set_display_target (DisplayTarget (0x15+n), 1, label,(n == 0));
-			show_encoder_value (n, plugin, ctrl, ac, (n == 0));
+			set_display_target (DisplayTarget (0x15+n), 0, name);
+			set_display_target (DisplayTarget (0x15+n), 1, label);
+			show_encoder_value (n, plugin, ctrl, ac, false);
 			++n;
 		}
 	}
 
 	while (n < 8) {
-		set_display_target (DisplayTarget (0x15+n), 0, plugin->name(), (n == 0));
-		set_display_target (DisplayTarget (0x15+n), 1, "--", (n == 0));
-		set_display_target (DisplayTarget (0x15+n), 2, string(), (n == 0));
+		set_display_target (DisplayTarget (0x15+n), 0, name);
+		set_display_target (DisplayTarget (0x15+n), 1, "--");
+		set_display_target (DisplayTarget (0x15+n), 2, string());
 		++n;
 	}
+
+	/* indicate selected plugin on screen */
+	set_display_target(GlobalTemporaryDisplay, 0, name, display);
 }
 
 void
@@ -1725,6 +1731,48 @@ LaunchKey4::encoder_plugin (int which, int step)
 	ac->set_value (ac->interface_to_internal (val), PBD::Controllable::NoGroup);
 
 	show_encoder_value (which, plugin, control, ac, true);
+}
+
+void
+LaunchKey4::send_gain (int which) {
+	if (!stripable[which]) {
+		set_display_target(DisplayTarget(0x15 + which), 2, "");
+		return;
+	}
+
+	std::shared_ptr<GainControl> ac = stripable[which]->gain_control();
+
+	if (!ac) {
+		set_display_target(DisplayTarget(0x15 + which), 2, "");
+		return;
+	}
+
+	char buf[16];
+	gain_t gain = ac->get_value();
+	snprintf(buf, sizeof(buf), "%.1f dB", accurate_coefficient_to_dB(gain));
+
+	set_display_target(DisplayTarget(0x15 + which), 2, buf);
+}
+
+void
+LaunchKey4::send_pan (int which) {
+	if (!stripable[which]) {
+		set_display_target(DisplayTarget(0x15 + which), 2, "");
+		return;
+	}
+
+	std::shared_ptr<AutomationControl> ac (stripable[which]->pan_azimuth_control());
+
+	if (!ac) {
+		set_display_target(DisplayTarget(0x15 + which), 2, "");
+		return;
+	}
+
+	char buf[64];
+	double val = ac->internal_to_interface (ac->get_value());
+	snprintf (buf, sizeof (buf), _("L:%3d R:%3d"), (int) rint (100.0 * val), (int) rint (100.0 * (1.0 - val)));
+
+	set_display_target(DisplayTarget(0x15 + which), 2, buf);
 }
 
 void
@@ -1759,7 +1807,7 @@ LaunchKey4::encoder_pan (int which, int step)
 	session->set_control (ac, ac->interface_to_internal (val - (step/127.0)), Controllable::NoGroup);
 
 	char buf[64];
-	snprintf (buf, sizeof (buf), _("L:%3d R:%3d"), (int) rint (100.0 * (1.0 - val)), (int) rint (100.0 * val));
+	snprintf (buf, sizeof (buf), _("L:%3d R:%3d"), (int) rint (100.0 * val), (int) rint (100.0 * (1.0 - val)));
 	set_display_target (DisplayTarget (0x15 + which), 2, buf, true);
 }
 
@@ -1777,16 +1825,10 @@ LaunchKey4::encoder_level (int which, int step)
 		return;
 	}
 
-	gain_t gain;
-
-	if (shift_pressed) {
-		gain = gc->get_value();
-	} else {
-		double pos = ARDOUR::gain_to_slider_position_with_max (gc->get_value(), ARDOUR::Config->get_max_gain());
-		pos += (step/127.0);
-		gain = ARDOUR::slider_position_to_gain_with_max (pos, ARDOUR::Config->get_max_gain());
-		session->set_control (gc, gain, Controllable::NoGroup);
-	}
+	double pos = ARDOUR::gain_to_slider_position_with_max (gc->get_value(), ARDOUR::Config->get_max_gain());
+	pos += (step/127.0);
+	gain_t gain = ARDOUR::slider_position_to_gain_with_max (pos, ARDOUR::Config->get_max_gain());
+	session->set_control (gc, gain, Controllable::NoGroup);
 
 	char buf[16];
 	snprintf (buf, sizeof (buf), "%.1f dB", accurate_coefficient_to_dB (gain));
@@ -2078,7 +2120,6 @@ LaunchKey4::set_pad_function (PadFunction f)
 	msg[1] = 0x68; /* scene */
 	daw_write (msg, 3);
 
-	configure_display (DAWPadFunctionDisplay, 0x1);
 	set_display_target (DAWPadFunctionDisplay, 0, str, true);
 }
 
@@ -2135,13 +2176,13 @@ LaunchKey4::set_display_target (DisplayTarget dt, int field, std::string const &
 void
 LaunchKey4::configure_display (DisplayTarget target, int config)
 {
-	MidiByteArray msg (9, 0xf0, 0x00, 0x29, 0xff, 0xff, 0x04, 0xff, 0xff, 0xf7);
+	MidiByteArray msg (10, 0xf0, 0x00, 0x20, 0x29, 0xff, 0xff, 0x04, 0xff, 0xff, 0xf7);
 
-	msg[3] = (device_pid >> 8) & 0x7f;
-	msg[4] = device_pid & 0x7f;
+	msg[4] = (device_pid >> 8) & 0x7f;
+	msg[5] = device_pid & 0x7f;
 
-	msg[6] = target;
-	msg[7] = config & 0x7f;
+	msg[7] = target;
+	msg[8] = config & 0x7f;
 
 	daw_write (msg);
 }
@@ -2215,6 +2256,22 @@ LaunchKey4::rec_enable_changed (uint32_t n)
 }
 
 void
+LaunchKey4::gain_changed (uint32_t n)
+{
+	if (encoder_mode == EncoderMixer && encoder_bank == 0) {
+		send_gain (n);
+	}
+}
+
+void
+LaunchKey4::pan_changed(uint32_t n)
+{
+	if (encoder_mode == EncoderMixer && encoder_bank == 1) {
+		send_pan (n);
+	}
+}
+
+void
 LaunchKey4::switch_bank (uint32_t base)
 {
 	stripable_connections.drop_connections ();
@@ -2249,9 +2306,19 @@ LaunchKey4::switch_bank (uint32_t base)
 			stripable[n]->DropReferences.connect (stripable_connections, invalidator (*this), std::bind (&LaunchKey4::switch_bank, this, bank_start), this);
 			stripable[n]->presentation_info().PropertyChanged.connect (stripable_connections, invalidator (*this), std::bind (&LaunchKey4::stripable_property_change, this, _1, n), this);
 			stripable[n]->mute_control()->Changed.connect (stripable_connections, invalidator (*this), std::bind (&LaunchKey4::mute_changed, this, n), this);
-			std::shared_ptr<AutomationControl> ac = stripable[n]->rec_enable_control();
-			if (ac) {
-				ac->Changed.connect (stripable_connections, invalidator (*this), std::bind (&LaunchKey4::rec_enable_changed, this, n), this);
+			std::shared_ptr<AutomationControl> rec_ac = stripable[n]->rec_enable_control();
+			if (rec_ac) {
+				rec_ac->Changed.connect (stripable_connections, invalidator (*this), std::bind (&LaunchKey4::rec_enable_changed, this, n), this);
+			}
+			
+			std::shared_ptr<AutomationControl> gain_ac = stripable[n]->gain_control();
+			if (gain_ac) {
+				gain_ac->Changed.connect (stripable_connections, invalidator(*this), std::bind (&LaunchKey4::gain_changed, this, n), this);
+			}
+
+			std::shared_ptr<AutomationControl> pan_ac = stripable[n]->pan_azimuth_control();
+			if (pan_ac) {
+				pan_ac->Changed.connect (stripable_connections, invalidator(*this), std::bind (&LaunchKey4::pan_changed, this, n), this);
 			}
 		}
 
@@ -2290,7 +2357,23 @@ LaunchKey4::switch_bank (uint32_t base)
 	}
 
 	if (encoder_mode != EncoderTransport) {
-		set_encoder_titles_to_route_names ();
+		set_encoder_titles_to_route_names (true);
+		if (encoder_mode == EncoderMixer) {
+			switch (encoder_bank) {
+				case 0:
+				 	for (uint32_t n = 0; n < 8; n++) {
+						send_gain (n);
+					}
+					break;
+				case 1:
+					for (uint32_t n = 0; n < 8; n++) {
+						send_pan (n);
+					}
+					break;
+				default:
+					break;
+			}
+		}
 	}
 }
 
@@ -2542,7 +2625,7 @@ LaunchKey4::unlight_pad (int pad_id)
 }
 
 void
-LaunchKey4::set_encoder_bank (int n)
+LaunchKey4::set_encoder_bank (int n, bool display)
 {
 	bool light_up_arrow = false;
 	bool light_down_arrow = false;
@@ -2583,16 +2666,16 @@ LaunchKey4::set_encoder_bank (int n)
 
 		switch (encoder_bank) {
 		case 0:
+			light_up_arrow = false;
 			light_down_arrow = true;
 			break;
 		case 1:
-			light_down_arrow = true;
 			light_up_arrow = true;
-			break;
-		case 2:
-			light_up_arrow = true;
+			light_down_arrow = false;
 			break;
 		default:
+			/* mixer encoders only have two pages */
+			encoder_bank = 1;
 			return;
 		}
 	}
@@ -2624,51 +2707,55 @@ LaunchKey4::set_encoder_bank (int n)
 	daw_write (msg, 3);
 	daw_write (&msg[3], 3);
 
-	label_encoders ();
+	label_encoders (display);
 }
 
 void
-LaunchKey4::label_encoders ()
+LaunchKey4::label_encoders (bool display)
 {
 	std::shared_ptr<Plugin> plugin (current_plugin.lock());
 
 	switch (encoder_mode) {
-	case EncoderMixer:
 	case EncoderSendA:
-		set_encoder_titles_to_route_names ();
+		set_encoder_titles_to_route_names (false);
+		break;
+	case EncoderMixer:
+		set_encoder_titles_to_route_names (false);
 		switch (encoder_bank) {
 		case 0:
 			for (int n = 0; n < 8; ++n) {
-				set_display_target (DisplayTarget (0x15 + n), 1, "Level", false);
+				set_display_target (DisplayTarget (0x15 + n), 1, "Level");
+				send_gain (n);
 			}
-			set_display_target (GlobalTemporaryDisplay, 0, "Levels", true);
+			set_display_target (GlobalTemporaryDisplay, 0, "Levels", display);
 			break;
 		case 1:
 			for (int n = 0; n < 8; ++n) {
-				set_display_target (DisplayTarget (0x15 + n), 1, "Pan", false);
+				set_display_target (DisplayTarget (0x15 + n), 1, "Pan");
+				send_pan (n);
 			}
-			set_display_target (GlobalTemporaryDisplay, 0, "Panning", true);
+			set_display_target (GlobalTemporaryDisplay, 0, "Panning", display);
 			break;
 		default:
 			break;
 		}
 		break;
 	case EncoderPlugins:
-		setup_screen_for_encoder_plugins ();
+		setup_screen_for_encoder_plugins (display);
 		break;
 	case EncoderTransport:
-		set_display_target (DisplayTarget (0x15), 1, "Shuttle", true);
-		set_display_target (DisplayTarget (0x16), 1, "Zoom", true);
-		set_display_target (DisplayTarget (0x17), 1, "Loop Start", true);
-		set_display_target (DisplayTarget (0x18), 1, "Loop End", true);
-		set_display_target (DisplayTarget (0x19), 1, "Jump to Marker", true);
-		set_display_target (DisplayTarget (0x1a), 1, string(), true);
-		set_display_target (DisplayTarget (0x1b), 1, string(), true);
-		set_display_target (DisplayTarget (0x1c), 1, string(), true);
+		set_display_target (DisplayTarget (0x15), 1, "Shuttle");
+		set_display_target (DisplayTarget (0x16), 1, "Zoom");
+		set_display_target (DisplayTarget (0x17), 1, "Loop Start");
+		set_display_target (DisplayTarget (0x18), 1, "Loop End");
+		set_display_target (DisplayTarget (0x19), 1, "Jump to Marker");
+		set_display_target (DisplayTarget (0x1a), 1, string());
+		set_display_target (DisplayTarget (0x1b), 1, string());
+		set_display_target (DisplayTarget (0x1c), 1, string());
 		for (int n = 0; n < 8; ++n) {
-			set_display_target (DisplayTarget (0x15 + n), 0, "Transport", true);
+			set_display_target (DisplayTarget (0x15 + n), 0, "Transport");
+			set_display_target (DisplayTarget (0x15 + n), 2, string());
 		}
-		set_display_target (GlobalTemporaryDisplay, 0, "Transport", true);
 		break;
 	}
 }
@@ -2677,28 +2764,32 @@ void
 LaunchKey4::set_encoder_mode (EncoderMode m)
 {
 	encoder_mode = m;
-	set_encoder_bank (0);
+
+    /* device shows encoder mode by itself when switching,
+     * do not display */
+	set_encoder_bank (0, false);
 
 	/* device firmware reset to continuous controller mode, so switch back
 	 * if (ev->controller_to encoders
 	 */
 
 	use_encoders (true);
-	label_encoders ();
+
+	label_encoders (false);
 }
 
 void
-LaunchKey4::set_encoder_titles_to_route_names ()
+LaunchKey4::set_encoder_titles_to_route_names (bool display)
 {
 	/* Set encoder "title" fields to show current bank */
 	bool first = true;
 
 	for (int n = 0; n < 8; ++n) {
 		if (stripable[n]) {
-			set_display_target (DisplayTarget (0x15 + n), 0, stripable[n]->name(), first);
+			set_display_target (DisplayTarget (0x15 + n), 0, stripable[n]->name(), display && first);
 			first = false;
 		} else {
-			set_display_target (DisplayTarget (0x15 + n), 0, string(), true);
+			set_display_target (DisplayTarget (0x15 + n), 0, string(), display);
 		}
 	}
 }
