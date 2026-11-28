@@ -1101,7 +1101,7 @@ ARDOUR_UI::save_ardour_state ()
 			vkstate.add_child_nocopy (virtual_keyboard_window.get_state ());
 			_session->add_instant_xml (vkstate);
 		}
-		_session->add_instant_xml (RTAManager::instance()->get_state());
+		_session->add_instant_xml (RTAManager::instance()->get_state(), false);
 	}
 
 	/* save current Window settings and sizes for new sessions */
@@ -1125,7 +1125,6 @@ ARDOUR_UI::save_ardour_state ()
 			vkstate.add_child_nocopy (virtual_keyboard_window.get_state ());
 			Config->add_instant_xml (vkstate);
 		}
-		Config->add_instant_xml (RTAManager::instance()->get_state());
 	}
 
 	delete &enode;
